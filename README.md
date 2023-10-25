@@ -30,7 +30,7 @@ This list will likely contain minor bugs which may or may not be fixed.
 
 ### MGS2 
 
-- Some screen effects are scaled incorrectly.
+- Some text is not scaled correctly.
 - HUD is not scaled to 16:9.
 
 ## Screenshots
