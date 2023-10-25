@@ -10,12 +10,12 @@ This is a work-in-progress fix that aims to add ultrawide support to Metal Gear 
 
 ## Features
 - Custom resolution support.
-- Corrects gameplay aspect ratio.
+- Corrects gameplay/cutscene aspect ratio.
 - Scales HUD to 16:9.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
-- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS3**" for Steam).
+- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS2**" or "**steamapps\common\MGS3**" for Steam).
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
@@ -28,7 +28,7 @@ This list will likely contain minor bugs which may or may not be fixed.
 - Screen effects (motion blur, fades etc) are scaled along with the HUD.
 
 ### MGS2 
-
+- Some text is not scaled correctly.
 - HUD is not scaled to 16:9.
 
 ## Screenshots
