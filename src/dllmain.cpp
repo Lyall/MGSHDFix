@@ -123,6 +123,15 @@ void ReadConfig()
     inipp::get_value(ini.sections["Fix FMVs"], "Enabled", bMovieFix);
     iMovieFix = (int)bMovieFix;
 
+    // Log config parse
+    LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
+    LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
+    LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
+    LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
+    LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
+    LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
+    LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
+
     // Custom resolution
     if (iCustomResX > 0 && iCustomResY > 0)
     {
@@ -143,15 +152,12 @@ void ReadConfig()
     }
 
     fAspectMultiplier = (float)fNewAspect / fNativeAspect;
-
-    // Log config parse
-    LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
-    LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
-    LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
-    LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
-    LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
-    LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
-    LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
+    fHUDWidth = (float)fNewY * fNativeAspect;
+    fHUDOffset = (float)(fNewX - fHUDWidth) / 2;
+    LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
+    LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
+    LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
+    LOG_F(INFO, "Custom Resolution: fHUDOffset: %.4f", fHUDOffset);
 }
 
 void DetectGame()
@@ -185,17 +191,17 @@ void CustomResolution()
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            LOG_F(INFO, "MGS 3 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
+            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0xE), iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x15), iCustomResY);
-            LOG_F(INFO, "MGS2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
+            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
         }
         else if (!MGS2_MGS3_ResolutionScanResult)
         {
-            LOG_F(INFO, "MGS 2| MGS 3: Custom Resolution: Pattern scan failed.");
+            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
     }
 }
@@ -244,12 +250,33 @@ void AspectFOVFix()
     }
 }
 
+void Letterboxing()
+{
+    if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix || sExeName == "METAL GEAR SOLID3.exe" && bAspectFix)
+    {
+        // MGS 2 | MGS 3: Letterboxing
+        uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
+        if (MGS2_MGS3_LetterboxingScanResult)
+        {
+            DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_LetterboxingAddress);
+
+            Memory::Write(MGS2_MGS3_LetterboxingAddress, (int)0);
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
+        }
+        else if (!MGS2_MGS3_LetterboxingScanResult)
+        {
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
+        }
+    }
+}
+
 void HUDFix()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-        // TODO: Sig is bad, need better way of getting here.
         // MGS 2: Scale fades to span screen
+        // TODO: Sig is bad, need better way of getting here.
         uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
         if (MGS2_FadesScanResult)
         {
@@ -264,21 +291,6 @@ void HUDFix()
         else if (!MGS2_FadesScanResult)
         {
             LOG_F(INFO, "MGS 2: Fades: Pattern scan failed.");
-        }
-
-        // MGS 2: Letterboxing
-        uint8_t* MGS2_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ??");
-        if (MGS2_LetterboxingScanResult)
-        {
-            DWORD64 MGS2_LetterboxingAddress = (uintptr_t)MGS2_LetterboxingScanResult + 0x6;
-            LOG_F(INFO, "MGS 2: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_LetterboxingAddress);
-
-            Memory::Write(MGS2_LetterboxingAddress, (int)0);
-            LOG_F(INFO, "MGS2 : Letterboxing: Disabled letterboxing.");
-        }
-        else if (!MGS2_LetterboxingScanResult)
-        {
-            LOG_F(INFO, "MGS 2: Letterboxing: Pattern scan failed.");
         }
     }
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
@@ -315,6 +327,7 @@ DWORD __stdcall Main(void*)
     CustomResolution();
     Sleep(iInjectionDelay);
     AspectFOVFix();
+    Letterboxing();
     HUDFix();
     MovieFix();
     return true; // end thread
