@@ -35,6 +35,20 @@ string sExePath;
 string sGameVersion;
 string sFixVer = "0.8";
 
+// MGS 2: Aspect Ratio Hook
+DWORD64 MGS2_GameplayAspectReturnJMP;
+void __declspec(naked) MGS2_GameplayAspect_CC()
+{
+    __asm
+    {
+        xorps xmm1, xmm1
+        cmove rax, rcx
+        movss xmm0, [rax + 0x14]
+        divss xmm0, [fAspectMultiplier]
+        ret
+    }
+}
+
 // MGS 3: Aspect Ratio Hook
 DWORD64 MGS3_GameplayAspectReturnJMP;
 DWORD64 MGS3_GameplayAspectCallAddress;
@@ -150,24 +164,24 @@ void DetectGame()
 
 void CustomResolution()
 {
-    if (sExeName == "METAL GEAR SOLID3.exe" && bCustomResolution)
+    if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution || sExeName == "METAL GEAR SOLID3.exe" && bCustomResolution)
     {
         // MGS 3: Custom Resolution
-        uint8_t* MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
-        if (MGS3_ResolutionScanResult)
+        uint8_t* MGS2_MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
+        if (MGS2_MGS3_ResolutionScanResult)
         {
-            DWORD64 MGS3_ResolutionAddress = (uintptr_t)MGS3_ResolutionScanResult + 0x3;
-            LOG_F(INFO, "MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS3_ResolutionAddress);
+            DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
+            LOG_F(INFO, "MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
 
-            Memory::Write(MGS3_ResolutionAddress, iCustomResX);
-            Memory::Write((MGS3_ResolutionAddress + 0x7), iCustomResY);
-            Memory::Write((MGS3_ResolutionAddress + 0xE), iCustomResX);
-            Memory::Write((MGS3_ResolutionAddress + 0x15), iCustomResY);
-            LOG_F(INFO, "MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
+            Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
+            Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
+            Memory::Write((MGS2_MGS3_ResolutionAddress + 0xE), iCustomResX);
+            Memory::Write((MGS2_MGS3_ResolutionAddress + 0x15), iCustomResY);
+            LOG_F(INFO, "MGS2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
         }
-        else if (!MGS3_ResolutionScanResult)
+        else if (!MGS2_MGS3_ResolutionScanResult)
         {
-            LOG_F(INFO, "MGS 3: Custom Resolution: Pattern scan failed.");
+            LOG_F(INFO, "MGS 2| MGS 3: Custom Resolution: Pattern scan failed.");
         }
     }
 }
@@ -177,6 +191,7 @@ void AspectFOVFix()
     if (sExeName == "METAL GEAR SOLID3.exe" && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
+        // TODO: Signature is not unique (2 results)
         uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? EB ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? E8 ?? ?? ?? ?? 0F ?? ?? 0F ?? ?? 0F ?? ?? F3 ?? ?? ?? ??");
         if (MGS3_GameplayAspectScanResult)
         {
@@ -196,6 +211,26 @@ void AspectFOVFix()
             LOG_F(INFO, "MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
+    else if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix)
+    {
+        // MGS 2: Fix gameplay aspect ratio
+        // TODO: Signature is not unique (2 results)
+        uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? 75 ?? F3 0F ?? ?? ?? ?? ?? ?? C3");
+        if (MGS2_GameplayAspectScanResult)
+        {
+            DWORD64 MGS2_GameplayAspectAddress = (uintptr_t)MGS2_GameplayAspectScanResult;
+            int MGS2_GameplayAspectHookLength = Memory::GetHookLength((char*)MGS2_GameplayAspectAddress, 13);
+            MGS2_GameplayAspectReturnJMP = MGS2_GameplayAspectAddress + MGS2_GameplayAspectHookLength;
+            Memory::DetourFunction64((void*)MGS2_GameplayAspectAddress, MGS2_GameplayAspect_CC, MGS2_GameplayAspectHookLength);
+
+            LOG_F(INFO, "MGS 2: Aspect Ratio: Hook length is %d bytes", MGS2_GameplayAspectHookLength);
+            LOG_F(INFO, "MGS 2: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_GameplayAspectAddress);
+        }
+        else if (!MGS2_GameplayAspectScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Aspect Ratio: Pattern scan failed.");
+        }
+    }
 }
 
 void HUDFix()
