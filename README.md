@@ -1,8 +1,8 @@
-# Metal Gear Solid HD Collection Fix
+# Metal Gear Solid Master Collection Fix
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total.svg)](https://github.com/Lyall/MGSHDFix/releases)
 
-This is a work-in-progress fix that aims to add ultrawide support to Metal Gear Solid HD Collection.<br />
+This is a work-in-progress fix that aims to add custom resolutions and ultrawide support to Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
 - Metal Gear Solid 2
@@ -25,7 +25,7 @@ Please report any issues you see.
 This list will likely contain minor bugs which may or may not be fixed.
 
 ### MGS 3
-- Screen effects (accumulation blur, fades etc) are scaled along with the HUD.
+- Screen effects (accumulation blur, fades etc) are scaled incorrectly with HUD Fix enabled.
 
 ### MGS2 
 - Some text is not scaled correctly.
@@ -33,11 +33,11 @@ This list will likely contain minor bugs which may or may not be fixed.
 
 ## Screenshots
 
-|  ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/5f309e8e-ff4e-49e6-90d1-46ce35ff9d0c) |
+| ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/f9facd34-1f3a-44d2-ae93-53c60ef22f63) |
 |:--:|
 | Metal Gear Solid 3 |
 
-|  ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/c249afed-10d2-486e-98cd-90a8e0ac2e1c) |
+| ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/0791d5f1-75b9-45b2-87d5-e3231456defe) |
 |:--:|
 | Metal Gear Solid 2 |
 
