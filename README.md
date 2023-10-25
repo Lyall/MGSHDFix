@@ -4,6 +4,9 @@
 
 This is a work-in-progress fix that aims to add ultrawide support to Metal Gear Solid HD Collection.<br />
 
+## Game Support
+- Metal Gear Solid 3
+
 ## Features
 - Custom resolution support.
 - Corrects gameplay aspect ratio.
