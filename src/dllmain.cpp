@@ -230,6 +230,24 @@ void AspectFOVFix()
     }  
     else if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix)
     {
+        // MGS 2: Scale fades to span screen
+        // TODO: Sig is bad, need better way of getting here.
+        uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
+        if (MGS2_FadesScanResult)
+        {
+            DWORD64 MGS2_FadesAddress = (uintptr_t)MGS2_FadesScanResult + 0x5;
+            int MGS2_FadesHookLength = Memory::GetHookLength((char*)MGS2_FadesAddress, 13);
+            MGS2_FadesReturnJMP = MGS2_FadesAddress + MGS2_FadesHookLength;
+            Memory::DetourFunction64((void*)MGS2_FadesAddress, MGS2_Fades_CC, MGS2_FadesHookLength);
+
+            LOG_F(INFO, "MGS 2: Fades: Hook length is %d bytes", MGS2_FadesHookLength);
+            LOG_F(INFO, "MGS 2: Fades: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FadesAddress);
+        }
+        else if (!MGS2_FadesScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Fades: Pattern scan failed.");
+        }
+
         // MGS 2: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
         uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? 75 ?? F3 0F ?? ?? ?? ?? ?? ?? C3");
@@ -275,23 +293,7 @@ void HUDFix()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-        // MGS 2: Scale fades to span screen
-        // TODO: Sig is bad, need better way of getting here.
-        uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
-        if (MGS2_FadesScanResult)
-        {
-            DWORD64 MGS2_FadesAddress = (uintptr_t)MGS2_FadesScanResult + 0x5;
-            int MGS2_FadesHookLength = Memory::GetHookLength((char*)MGS2_FadesAddress, 13);
-            MGS2_FadesReturnJMP = MGS2_FadesAddress + MGS2_FadesHookLength;
-            Memory::DetourFunction64((void*)MGS2_FadesAddress, MGS2_Fades_CC, MGS2_FadesHookLength);
-
-            LOG_F(INFO, "MGS 2: Fades: Hook length is %d bytes", MGS2_FadesHookLength);
-            LOG_F(INFO, "MGS 2: Fades: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FadesAddress);
-        }
-        else if (!MGS2_FadesScanResult)
-        {
-            LOG_F(INFO, "MGS 2: Fades: Pattern scan failed.");
-        }
+        // TODO
     }
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
