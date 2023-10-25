@@ -11,7 +11,6 @@ This is a work-in-progress fix that aims to add custom resolutions and ultrawide
 ## Features
 - Custom resolution support.
 - Corrects gameplay/cutscene aspect ratio.
-- Scales HUD to 16:9.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -25,17 +24,12 @@ Please report any issues you see.
 This list will likely contain minor bugs which may or may not be fixed.
 
 ### MGS 3
-- Screen effects (accumulation blur, fades etc) are scaled incorrectly with HUD Fix enabled.
+- 
 
 ### MGS2 
 - Some text is not scaled correctly.
-- HUD is not scaled to 16:9.
 
 ## Screenshots
-
-| ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/f9facd34-1f3a-44d2-ae93-53c60ef22f63) |
-|:--:|
-| Metal Gear Solid 3 |
 
 | ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/0791d5f1-75b9-45b2-87d5-e3231456defe) |
 |:--:|
