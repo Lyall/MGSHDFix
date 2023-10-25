@@ -37,6 +37,10 @@ This list will likely contain minor bugs which may or may not be fixed.
 |:--:|
 | Metal Gear Solid 3 |
 
+|  ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/c249afed-10d2-486e-98cd-90a8e0ac2e1c) |
+|:--:|
+| Metal Gear Solid 2 |
+
 ## Credits
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
