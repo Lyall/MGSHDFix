@@ -33,7 +33,7 @@ string sExeName;
 string sGameName;
 string sExePath;
 string sGameVersion;
-string sFixVer = "0.8";
+string sFixVer = "0.4";
 
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
@@ -185,7 +185,7 @@ void CustomResolution()
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            LOG_F(INFO, "MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
+            LOG_F(INFO, "MGS 3 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
@@ -249,7 +249,7 @@ void HUDFix()
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
         // TODO: Sig is bad, need better way of getting here.
-        // MGS2: Scale fades to span screen
+        // MGS 2: Scale fades to span screen
         uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
         if (MGS2_FadesScanResult)
         {
@@ -283,7 +283,7 @@ void HUDFix()
     }
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
-        // MGS3: HUD width
+        // MGS 3: HUD width
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ??");
         if (MGS3_HUDWidthScanResult)
         {
