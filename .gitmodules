@@ -1,0 +1,9 @@
+[submodule "src/external/length-disassembler"]
+	path = src/external/length-disassembler
+	url = https://github.com/Nomade040/length-disassembler
+[submodule "src/external/loguru"]
+	path = src/external/loguru
+	url = https://github.com/emilk/loguru
+[submodule "src/external/inipp"]
+	path = src/external/inipp
+	url = https://github.com/mcmtroffaes/inipp
