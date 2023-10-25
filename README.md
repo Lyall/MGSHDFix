@@ -16,7 +16,7 @@ This is a work-in-progress fix that aims to add ultrawide support to Metal Gear 
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
-- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS3**" for Steam).
+- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS2**" or "**steamapps\common\MGS3**" for Steam).
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
