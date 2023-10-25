@@ -33,11 +33,11 @@ This list will likely contain minor bugs which may or may not be fixed.
 
 ## Screenshots
 
-|  ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/0791d5f1-75b9-45b2-87d5-e3231456defe) |
+| ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/f9facd34-1f3a-44d2-ae93-53c60ef22f63) |
 |:--:|
 | Metal Gear Solid 3 |
 
-|  ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/f9facd34-1f3a-44d2-ae93-53c60ef22f63) |
+| ![ezgif-2-1f0661e7c6](https://github.com/Lyall/MGSHDFix/assets/695941/0791d5f1-75b9-45b2-87d5-e3231456defe) |
 |:--:|
 | Metal Gear Solid 2 |
 
