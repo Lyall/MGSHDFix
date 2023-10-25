@@ -4,7 +4,7 @@
 
 This is a work-in-progress fix that aims to add ultrawide support to Metal Gear Solid HD Collection.<br />
 
-## Game Support (25/10/23)
+## Games Supported
 - Metal Gear Solid 2
 - Metal Gear Solid 3
 
@@ -25,7 +25,7 @@ Please report any issues you see.
 This list will likely contain minor bugs which may or may not be fixed.
 
 ### MGS 3
-- Screen effects (motion blur, fades etc) are scaled along with the HUD.
+- Screen effects (accumulation blur, fades etc) are scaled along with the HUD.
 
 ### MGS2 
 - Some text is not scaled correctly.
