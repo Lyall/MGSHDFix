@@ -78,6 +78,19 @@ void __declspec(naked) MGS3_HUDWidth_CC()
     }
 }
 
+// MGS 2: Fades
+DWORD64 MGS2_FadesReturnJMP;
+void __declspec(naked) MGS2_Fades_CC()
+{
+    __asm
+    {
+        movss xmm0, [fNewY]
+        xorps xmm2, xmm2
+        movss xmm3, [fNewX]
+        jmp[MGS2_FadesReturnJMP]
+    }
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -233,7 +246,42 @@ void AspectFOVFix()
 
 void HUDFix()
 {
-    if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
+    if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
+    {
+        // TODO: Sig is bad, need better way of getting here.
+        // MGS2: Scale fades to span screen
+        uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
+        if (MGS2_FadesScanResult)
+        {
+            DWORD64 MGS2_FadesAddress = (uintptr_t)MGS2_FadesScanResult + 0x5;
+            int MGS2_FadesHookLength = Memory::GetHookLength((char*)MGS2_FadesAddress, 13);
+            MGS2_FadesReturnJMP = MGS2_FadesAddress + MGS2_FadesHookLength;
+            Memory::DetourFunction64((void*)MGS2_FadesAddress, MGS2_Fades_CC, MGS2_FadesHookLength);
+
+            LOG_F(INFO, "MGS 2: Fades: Hook length is %d bytes", MGS2_FadesHookLength);
+            LOG_F(INFO, "MGS 2: Fades: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FadesAddress);
+        }
+        else if (!MGS2_FadesScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Fades: Pattern scan failed.");
+        }
+
+        // MGS 2: Letterboxing
+        uint8_t* MGS2_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ??");
+        if (MGS2_LetterboxingScanResult)
+        {
+            DWORD64 MGS2_LetterboxingAddress = (uintptr_t)MGS2_LetterboxingScanResult + 0x6;
+            LOG_F(INFO, "MGS 2: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_LetterboxingAddress);
+
+            Memory::Write(MGS2_LetterboxingAddress, (int)0);
+            LOG_F(INFO, "MGS2 : Letterboxing: Disabled letterboxing.");
+        }
+        else if (!MGS2_LetterboxingScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Letterboxing: Pattern scan failed.");
+        }
+    }
+    else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
         // MGS3: HUD width
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ??");
@@ -256,7 +304,7 @@ void HUDFix()
 
 void MovieFix()
 {
-    
+    // Currently the HUD modification affects FMVs too.
 }
 
 DWORD __stdcall Main(void*)
