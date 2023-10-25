@@ -12,7 +12,7 @@ This is a work-in-progress fix that aims to add ultrawide support to Metal Gear 
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
-- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\GameFolder**" for Steam).
+- Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS3**" for Steam).
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
@@ -27,9 +27,9 @@ This list will likely contain minor bugs which may or may not be fixed.
 
 ## Screenshots
 
-| ![ezgif-4-72aa490107](https://github.com/Lyall/MGSHDFix/assets/695941/49c1e545-ccfb-4f27-95c7-801a0739040f) |
+|  ![ezgif-4-ca3c03ba91](https://github.com/Lyall/MGSHDFix/assets/695941/5f309e8e-ff4e-49e6-90d1-46ce35ff9d0c) |
 |:--:|
-| DMC 3 |
+| Metal Gear Solid 3 |
 
 ## Credits
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
