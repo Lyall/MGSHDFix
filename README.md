@@ -4,7 +4,7 @@
 
 This is a work-in-progress fix that aims to add ultrawide support to Metal Gear Solid HD Collection.<br />
 
-## Game Support (As of 25/10/23)
+## Game Support (25/10/23)
 - Metal Gear Solid 3
 
 ## Features
