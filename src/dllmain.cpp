@@ -51,15 +51,16 @@ void __declspec(naked) MGS2_GameplayAspect_CC()
 
 // MGS 3: Aspect Ratio Hook
 DWORD64 MGS3_GameplayAspectReturnJMP;
-DWORD64 MGS3_GameplayAspectCallAddress;
 void __declspec(naked) MGS3_GameplayAspect_CC()
 {
     __asm
     {
-        movss xmm1, [fAspectMultiplier]
-        movaps xmm0, xmm2
-        call MGS3_GameplayAspectCallAddress
-        jmp[MGS3_GameplayAspectReturnJMP]
+        xorps xmm0, xmm0
+        cmove rax, rcx
+        movss xmm1, [rax + 0x14]
+        divss xmm1, [fAspectMultiplier]
+        movaps xmm0,xmm1
+        ret
     }
 }
 
@@ -192,13 +193,10 @@ void AspectFOVFix()
     {
         // MGS 3: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
-        uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? EB ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? E8 ?? ?? ?? ?? 0F ?? ?? 0F ?? ?? 0F ?? ?? F3 ?? ?? ?? ??");
+        uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? 7A ?? 75 ?? F3 0F ?? ?? ?? ?? ?? ?? C3");
         if (MGS3_GameplayAspectScanResult)
         {
-            MGS3_GameplayAspectCallAddress = Memory::GetAbsolute((uintptr_t)MGS3_GameplayAspectScanResult + 0x11);
-            LOG_F(INFO, "MGS 3: Aspect Ratio: Call address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectCallAddress);
-
-            DWORD64 MGS3_GameplayAspectAddress = (uintptr_t)MGS3_GameplayAspectScanResult + 0x5;
+            DWORD64 MGS3_GameplayAspectAddress = (uintptr_t)MGS3_GameplayAspectScanResult;
             int MGS3_GameplayAspectHookLength = Memory::GetHookLength((char*)MGS3_GameplayAspectAddress, 13);
             MGS3_GameplayAspectReturnJMP = MGS3_GameplayAspectAddress + MGS3_GameplayAspectHookLength;
             Memory::DetourFunction64((void*)MGS3_GameplayAspectAddress, MGS3_GameplayAspect_CC, MGS3_GameplayAspectHookLength);
