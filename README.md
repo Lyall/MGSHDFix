@@ -25,7 +25,7 @@ Please report any issues you see.
 This list will likely contain minor bugs which may or may not be fixed.
 
 ### MGS 3
-- Screen effects (motion blur, fades etc) are scaled along with the HUD.
+- Screen effects (accumulation blur, fades etc) are scaled along with the HUD.
 
 ### MGS2 
 - Some text is not scaled correctly.
