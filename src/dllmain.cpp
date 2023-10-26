@@ -132,6 +132,23 @@ void __declspec(naked) MGS2_Movie_CC()
     }
 }
 
+// MGS 3: Movie Hook
+DWORD64 MGS3_MovieReturnJMP;
+float MGS3_fMovieOffset;
+float MGS3_fMovieWidth;
+void __declspec(naked) MGS3_Movie_CC()
+{
+    __asm
+    {
+        xorps xmm2, xmm2
+        xorps xmm1, xmm1
+        movss xmm3, [MGS3_fMovieWidth]
+        movss xmm1, [MGS3_fMovieOffset]
+        addss xmm3, [MGS3_fMovieOffset]
+        jmp[MGS3_MovieReturnJMP]
+    }
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -395,6 +412,28 @@ void MovieFix()
         else if (!MGS2_MovieScanResult)
         {
             LOG_F(INFO, "MGS 2: Movie: Pattern scan failed.");
+        }
+    }
+    else if (sExeName == "METAL GEAR SOLID3.exe" && bMovieFix)
+    {
+        // MGS 3: Movie fix
+        uint8_t* MGS3_MovieScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E8 ?? ?? ?? ?? 41 8B ?? ?? 48 8D ??");
+        if (MGS3_MovieScanResult)
+        {
+            MGS3_fMovieOffset = -((fHUDOffset) / 2);
+            MGS3_fMovieWidth = (float)720 * fNewAspect;
+
+            DWORD64 MGS3_MovieAddress = (Memory::GetAbsolute((uintptr_t)MGS3_MovieScanResult + 0x4) + 0x44); // This is bad but it gives us a more unique sig otherwise it's >100 bytes.
+            int MGS3_MovieHookLength = Memory::GetHookLength((char*)MGS3_MovieAddress, 13);
+            MGS3_MovieReturnJMP = MGS3_MovieAddress + MGS3_MovieHookLength;
+            Memory::DetourFunction64((void*)MGS3_MovieAddress, MGS3_Movie_CC, MGS3_MovieHookLength);
+
+            LOG_F(INFO, "MGS 3: Movie: Hook length is %d bytes", MGS3_MovieHookLength);
+            LOG_F(INFO, "MGS 3: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MovieAddress);
+        }
+        else if (!MGS3_MovieScanResult)
+        {
+            LOG_F(INFO, "MGS 3: Movie: Pattern scan failed.");
         }
     }
 }
