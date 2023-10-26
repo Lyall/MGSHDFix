@@ -33,7 +33,7 @@ string sExeName;
 string sGameName;
 string sExePath;
 string sGameVersion;
-string sFixVer = "0.4";
+string sFixVer = "0.5";
 
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
@@ -112,6 +112,23 @@ void __declspec(naked) MGS2_Fades_CC()
         xorps xmm2, xmm2
         movss xmm3, [fNewX]
         jmp[MGS2_FadesReturnJMP]
+    }
+}
+
+// MGS 2: Movie Hook
+DWORD64 MGS2_MovieReturnJMP;
+float MGS2_fMovieOffset;
+void __declspec(naked) MGS2_Movie_CC()
+{
+    __asm
+    {
+        movss xmm1, [MGS2_fMovieOffset]
+        mulss xmm3, [fAspectMultiplier]
+        addss xmm3, [MGS2_fMovieOffset]
+        mov rcx, rdi
+        movss[rsp + 0x20], xmm0
+        mov rbx, rax
+        jmp[MGS2_MovieReturnJMP]
     }
 }
 
@@ -325,7 +342,7 @@ void HUDFix()
             DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult;
             int MGS2_HUDWidthHookLength = Memory::GetHookLength((char*)MGS2_HUDWidthAddress, 13);
             MGS2_HUDWidthReturnJMP = MGS2_HUDWidthAddress + MGS2_HUDWidthHookLength;
-            //Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
+            Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
 
             LOG_F(INFO, "MGS 2: HUD Width: Hook length is %d bytes", MGS2_HUDWidthHookLength);
             LOG_F(INFO, "MGS 2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDWidthAddress);
@@ -345,7 +362,7 @@ void HUDFix()
             DWORD64 MGS3_HUDWidthAddress = (uintptr_t)MGS3_HUDWidthScanResult + 0x8;
             int MGS3_HUDWidthHookLength = Memory::GetHookLength((char*)MGS3_HUDWidthAddress, 13);
             MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
-            //Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
+            Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
 
             LOG_F(INFO, "MGS 3: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
             LOG_F(INFO, "MGS 3: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
@@ -359,7 +376,27 @@ void HUDFix()
 
 void MovieFix()
 {
-    // Currently the HUD modification affects FMVs too.
+    if (sExeName == "METAL GEAR SOLID2.exe" && bMovieFix)
+    {
+        // MGS 2: Movie fix
+        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 48 ?? ?? F3 0F ?? ?? ?? ?? 48 ?? ?? 0F ?? ?? E8 ?? ?? ?? ??");
+        if (MGS2_MovieScanResult)
+        {
+            MGS2_fMovieOffset = -((fHUDOffset) / 2);
+
+            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult + 0x8;
+            int MGS2_MovieHookLength = Memory::GetHookLength((char*)MGS2_MovieAddress, 13);
+            MGS2_MovieReturnJMP = MGS2_MovieAddress + MGS2_MovieHookLength;
+            Memory::DetourFunction64((void*)MGS2_MovieAddress, MGS2_Movie_CC, MGS2_MovieHookLength);
+
+            LOG_F(INFO, "MGS 2: Movie: Hook length is %d bytes", MGS2_MovieHookLength);
+            LOG_F(INFO, "MGS 2: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
+        }
+        else if (!MGS2_MovieScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Movie: Pattern scan failed.");
+        }
+    }
 }
 
 DWORD __stdcall Main(void*)
@@ -371,7 +408,7 @@ DWORD __stdcall Main(void*)
     Sleep(iInjectionDelay);
     AspectFOVFix();
     Letterboxing();
-    HUDFix();
+    //HUDFix();
     MovieFix();
     return true; // end thread
 }
