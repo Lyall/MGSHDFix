@@ -9,7 +9,7 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 - Metal Gear Solid 3
 
 ## Features
-- Custom resolution support.
+- Custom resolution/ultrawide support.
 - Corrects gameplay/cutscene aspect ratio.
 
 ## Installation
