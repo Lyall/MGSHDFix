@@ -11,6 +11,7 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 ## Features
 - Custom resolution/ultrawide support.
 - Corrects gameplay/cutscene aspect ratio.
+- Scales FMVs correctly.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
