@@ -32,6 +32,8 @@ float fAspectDivisional;
 float fAspectMultiplier;
 float fHUDWidth;
 float fHUDOffset;
+float fMGS2_DefaultHUDX = (float)1280;
+float fMGS2_DefaultHUDY = (float)720;
 string sExeName;
 string sGameName;
 string sExePath;
@@ -106,16 +108,32 @@ void __declspec(naked) MGS2_HUDWidth_CC()
     }
 }*/
 
-// MGS 2: Fades Hook
-DWORD64 MGS2_FadesReturnJMP;
-void __declspec(naked) MGS2_Fades_CC()
+// MGS 2: Effects Scale X Hook
+DWORD64 MGS2_EffectsScaleXReturnJMP;
+void __declspec(naked) MGS2_EffectsScaleX_CC()
 {
     __asm
     {
-        movss xmm0, [fNewY]
-        xorps xmm2, xmm2
-        movss xmm3, [fNewX]
-        jmp[MGS2_FadesReturnJMP]
+        mov rcx, [rbp - 0x60]
+        movd xmm0, eax
+        cvtdq2ps xmm0, xmm0
+        movss xmm0, [fMGS2_DefaultHUDX]
+        divss xmm1, xmm0
+        jmp[MGS2_EffectsScaleXReturnJMP]
+    }
+}
+
+// MGS 2: Effects Scale Y Hook
+DWORD64 MGS2_EffectsScaleYReturnJMP;
+void __declspec(naked) MGS2_EffectsScaleY_CC()
+{
+    __asm
+    {
+        movaps [rsp + 0x00000490], xmm6
+        cvtdq2ps xmm0, xmm0
+        movss xmm0, [fMGS2_DefaultHUDY]
+        movaps [rsp + 0x00000470], xmm8
+        jmp[MGS2_EffectsScaleYReturnJMP]
     }
 }
 
@@ -407,22 +425,29 @@ void ScaleEffects()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution)
     {
-        // MGS 2: Scale fades to span screen
-        // TODO: Sig is bad, need better way of getting here.
-        uint8_t* MGS2_FadesScanResult = Memory::PatternScan(baseModule, "E8 BF ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 89 ?? ?? ?? 48 ?? ??");
-        if (MGS2_FadesScanResult)
+        // MGS 2: Scale effects correctly. (text, overlays, fades etc)
+        uint8_t* MGS2_EffectsScaleXScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
+        if (MGS2_EffectsScaleXScanResult)
         {
-            DWORD64 MGS2_FadesAddress = (uintptr_t)MGS2_FadesScanResult + 0x5;
-            int MGS2_FadesHookLength = Memory::GetHookLength((char*)MGS2_FadesAddress, 13);
-            MGS2_FadesReturnJMP = MGS2_FadesAddress + MGS2_FadesHookLength;
-            Memory::DetourFunction64((void*)MGS2_FadesAddress, MGS2_Fades_CC, MGS2_FadesHookLength);
+            DWORD64 MGS2_EffectsScaleXAddress = (uintptr_t)MGS2_EffectsScaleXScanResult;
+            int MGS2_EffectsScaleXHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleXAddress, 13);
+            MGS2_EffectsScaleXReturnJMP = MGS2_EffectsScaleXAddress + MGS2_EffectsScaleXHookLength;
+            Memory::DetourFunction64((void*)MGS2_EffectsScaleXAddress, MGS2_EffectsScaleX_CC, MGS2_EffectsScaleXHookLength);
 
-            LOG_F(INFO, "MGS 2: Fades: Hook length is %d bytes", MGS2_FadesHookLength);
-            LOG_F(INFO, "MGS 2: Fades: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FadesAddress);
+            LOG_F(INFO, "MGS 2: Scale Effects: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
+            LOG_F(INFO, "MGS 2: Scale Effects: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
+
+            DWORD64 MGS2_EffectsScaleYAddress = (uintptr_t)MGS2_EffectsScaleXScanResult + 0x54; // Long gap, maybe do two different sigs?
+            int MGS2_EffectsScaleYHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleYAddress, 13);
+            MGS2_EffectsScaleYReturnJMP = MGS2_EffectsScaleYAddress + MGS2_EffectsScaleYHookLength;
+            Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
+
+            LOG_F(INFO, "MGS 2: Scale Effects: Hook length is %d bytes", MGS2_EffectsScaleYHookLength);
+            LOG_F(INFO, "MGS 2: Scale Effects: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
         }
-        else if (!MGS2_FadesScanResult)
+        else if (!MGS2_EffectsScaleXScanResult)
         {
-            LOG_F(INFO, "MGS 2: Fades: Pattern scan failed.");
+            LOG_F(INFO, "MGS 2: Scale Effects: Pattern scan failed.");
         }
     }
 }
@@ -467,27 +492,6 @@ void AspectFOVFix()
         else if (!MGS2_GameplayAspectScanResult)
         {
             LOG_F(INFO, "MGS 2: Aspect Ratio: Pattern scan failed.");
-        }
-    }
-}
-
-void Letterboxing()
-{
-    if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix || sExeName == "METAL GEAR SOLID3.exe" && bAspectFix)
-    {
-        // MGS 2 | MGS 3: Letterboxing
-        uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
-        if (MGS2_MGS3_LetterboxingScanResult)
-        {
-            DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_LetterboxingAddress);
-
-            Memory::Write(MGS2_MGS3_LetterboxingAddress, (int)0);
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
-        }
-        else if (!MGS2_MGS3_LetterboxingScanResult)
-        {
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
         }
     }
 }
@@ -594,7 +598,6 @@ DWORD __stdcall Main(void*)
     Sleep(iInjectionDelay);
     ScaleEffects();
     AspectFOVFix();
-    Letterboxing();
     //HUDFix();
     MovieFix();
     return true; // end thread
