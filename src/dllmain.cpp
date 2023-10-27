@@ -12,6 +12,8 @@ bool bAspectFix;
 bool bHUDFix;
 bool bMovieFix;
 bool bCustomResolution;
+bool bWindowedMode;
+bool bDisableCursor;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
@@ -33,7 +35,7 @@ string sExeName;
 string sGameName;
 string sExePath;
 string sGameVersion;
-string sFixVer = "0.5";
+string sFixVer = "0.6";
 
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
@@ -64,6 +66,7 @@ void __declspec(naked) MGS3_GameplayAspect_CC()
     }
 }
 
+/*
 // MGS 3: HUD Width
 DWORD64 MGS3_HUDWidthReturnJMP;
 void __declspec(naked) MGS3_HUDWidth_CC()
@@ -100,7 +103,7 @@ void __declspec(naked) MGS2_HUDWidth_CC()
             movss[rcx + 0x14], xmm0
             jmp[MGS2_HUDWidthReturnJMP]
     }
-}
+}*/
 
 // MGS 2: Fades
 DWORD64 MGS2_FadesReturnJMP;
@@ -174,6 +177,8 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Enabled", bCustomResolution);
     inipp::get_value(ini.sections["Custom Resolution"], "Width", iCustomResX);
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
+    inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
+    inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
@@ -184,6 +189,7 @@ void ReadConfig()
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
     LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
+    LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
@@ -244,7 +250,7 @@ void CustomResolution()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution || sExeName == "METAL GEAR SOLID3.exe" && bCustomResolution)
     {
-        // MGS 3: Custom Resolution
+        // MGS 2 | MGS 3: Custom Resolution
         uint8_t* MGS2_MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
         if (MGS2_MGS3_ResolutionScanResult)
         {
@@ -261,7 +267,65 @@ void CustomResolution()
         {
             LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
+
+        // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
+        // Thanks emoose!
+        for (int i = 1; i <= 2; ++i) // Two results to change, unsure if first result is actually used but we NOP it anyway.
+        {
+            uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
+            if (MGS2_MGS3_FramebufferFixScanResult)
+            {
+                DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x7;
+                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
+
+                Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90", 2);
+                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
+            }
+            else if (!MGS2_MGS3_FramebufferFixScanResult)
+            {
+                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+            }
+        }
+
+        // MGS 2 | MGS 3: Windowed mode
+        // Thanks emoose!
+        if (bWindowedMode)
+        {
+            uint8_t* MGS2_MGS3_WindowModeScanResult = Memory::PatternScan(baseModule, "0F 84 ?? ?? ?? ?? ?? 01 48 ?? ?? E8 ?? ?? ?? ??");
+            if (MGS2_MGS3_WindowModeScanResult)
+            {
+                DWORD64 MGS2_MGS3_WindowModeAddress = (uintptr_t)MGS2_MGS3_WindowModeScanResult + 0x7;
+                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
+
+                Memory::PatchBytes(MGS2_MGS3_WindowModeAddress, "\x00", 1);
+                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Patched instruction.");
+            }
+            else if (!MGS2_MGS3_WindowModeScanResult)
+            {
+                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
+            }
+        }        
     }
+
+    if (sExeName == "METAL GEAR SOLID2.exe" && bDisableCursor || sExeName == "METAL GEAR SOLID3.exe" && bDisableCursor)
+    {
+        // MGS 2 | MGS 3: Disable mouse cursor
+        // Thanks again emoose!
+        uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
+        if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+        {
+            DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
+
+            Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+        }
+        else if (!MGS2_MGS3_MouseCursorScanResult)
+        {
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+        }
+    }
+    
 }
 
 void ScaleEffects()
@@ -355,8 +419,9 @@ void Letterboxing()
 
 void HUDFix()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
+    /*if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
+    
         // TODO: FIX THIS
         // MGS 2: HUD width
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? ?? ?? 16");
@@ -395,6 +460,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
         }
     }
+    */
 }
 
 void MovieFix()
