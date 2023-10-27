@@ -26,10 +26,12 @@ This list will contain bugs which may or may not be fixed.
 
 ### MGS 3
 - Strength of post-processing (DOF etc) is vastly reduced at higher resolutions.
+- FMV fix is broken at the moment.
 
 ### MGS2
 - Many assets are not scaled correctly (captions, some screen effects etc).
 - Strength of post-processing (bloom etc) is vastly reduced at higher resolutions.
+- FMV fix is broken at the moment.
 
 ## Screenshots
 
