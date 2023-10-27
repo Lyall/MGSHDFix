@@ -13,6 +13,7 @@ bool bHUDFix;
 bool bMovieFix;
 bool bCustomResolution;
 bool bWindowedMode;
+bool bBorderlessMode;
 bool bDisableCursor;
 int iCustomResX;
 int iCustomResY;
@@ -67,7 +68,7 @@ void __declspec(naked) MGS3_GameplayAspect_CC()
 }
 
 /*
-// MGS 3: HUD Width
+// MGS 3: HUD Width Hook
 DWORD64 MGS3_HUDWidthReturnJMP;
 void __declspec(naked) MGS3_HUDWidth_CC()
 {
@@ -81,7 +82,7 @@ void __declspec(naked) MGS3_HUDWidth_CC()
     }
 }
 
-// MGS 2: HUD Width
+// MGS 2: HUD Width Hook
 DWORD64 MGS2_HUDWidthReturnJMP;
 void __declspec(naked) MGS2_HUDWidth_CC()
 {
@@ -105,7 +106,7 @@ void __declspec(naked) MGS2_HUDWidth_CC()
     }
 }*/
 
-// MGS 2: Fades
+// MGS 2: Fades Hook
 DWORD64 MGS2_FadesReturnJMP;
 void __declspec(naked) MGS2_Fades_CC()
 {
@@ -115,6 +116,34 @@ void __declspec(naked) MGS2_Fades_CC()
         xorps xmm2, xmm2
         movss xmm3, [fNewX]
         jmp[MGS2_FadesReturnJMP]
+    }
+}
+
+// MGS 2: Borderless Hook
+DWORD64 MGS2_CreateWindowExAReturnJMP;
+void __declspec(naked) MGS2_CreateWindowExA_CC()
+{
+    __asm
+    {
+        mov ecx, [r13 + 0x08]
+        mov rax, [rbp - 0x68]
+        mov r9d, [rbp + 0x000000B0]
+        mov r9d, 0x90000000                 // WS_VISIBLE + WS_POPUP
+        jmp[MGS2_CreateWindowExAReturnJMP]
+    }
+}
+
+// MGS 3: Borderless Hook
+DWORD64 MGS3_CreateWindowExAReturnJMP;
+void __declspec(naked) MGS3_CreateWindowExA_CC()
+{
+    __asm
+    {
+        mov rax, [rbp + 0x000000C8]
+        mov [rsp + 0x48], r12
+        mov [rsp + 0x40], rax
+        mov r9d, 0x90000000                 // WS_VISIBLE + WS_POPUP
+        jmp[MGS3_CreateWindowExAReturnJMP]
     }
 }
 
@@ -178,6 +207,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Width", iCustomResX);
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
     inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
+    inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
@@ -189,12 +219,19 @@ void ReadConfig()
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
     LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
-    LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
+    LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
+    LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
+
+    // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
+    if (bBorderlessMode)
+    {
+        bWindowedMode = true;
+    }
 
     // Custom resolution
     if (iCustomResX > 0 && iCustomResY > 0)
@@ -275,10 +312,10 @@ void CustomResolution()
             uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
             if (MGS2_MGS3_FramebufferFixScanResult)
             {
-                DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x7;
+                DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
                 LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
 
-                Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90", 2);
+                Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
                 LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
             }
             else if (!MGS2_MGS3_FramebufferFixScanResult)
@@ -304,7 +341,7 @@ void CustomResolution()
             {
                 LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
             }
-        }        
+        }
     }
 
     if (sExeName == "METAL GEAR SOLID2.exe" && bDisableCursor || sExeName == "METAL GEAR SOLID3.exe" && bDisableCursor)
@@ -323,6 +360,44 @@ void CustomResolution()
         else if (!MGS2_MGS3_MouseCursorScanResult)
         {
             LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+        }
+    }
+
+    // MGS 2: Borderless mode
+    if (sExeName == "METAL GEAR SOLID2.exe" && bBorderlessMode)
+    {
+        uint8_t* MGS2_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "41 ?? ?? ?? 48 ?? ?? ?? 44 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 4C ?? ?? ?? ??");
+        if (MGS2_CreateWindowExAScanResult)
+        {
+            DWORD64 MGS2_CreateWindowExAAddress = (uintptr_t)MGS2_CreateWindowExAScanResult + 0x5;
+            int MGS2_CreateWindowExAHookLength = Memory::GetHookLength((char*)MGS2_CreateWindowExAAddress, 13);
+            MGS2_CreateWindowExAReturnJMP = MGS2_CreateWindowExAAddress + MGS2_CreateWindowExAHookLength;
+            Memory::DetourFunction64((void*)MGS2_CreateWindowExAAddress, MGS2_CreateWindowExA_CC, MGS2_CreateWindowExAHookLength);
+
+            LOG_F(INFO, "MGS 2: Borderless: Hook length is %d bytes", MGS2_CreateWindowExAHookLength);
+            LOG_F(INFO, "MGS 2: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CreateWindowExAAddress);
+        }
+        else if (!MGS2_CreateWindowExAScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Borderless: Pattern scan failed.");
+        }
+    }
+    else if (sExeName == "METAL GEAR SOLID3.exe" && bBorderlessMode)
+    {
+        uint8_t* MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "48 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 44 ?? ?? ?? ??");
+        if (MGS3_CreateWindowExAScanResult)
+        {
+            DWORD64 MGS3_CreateWindowExAAddress = (uintptr_t)MGS3_CreateWindowExAScanResult;
+            int MGS3_CreateWindowExAHookLength = Memory::GetHookLength((char*)MGS3_CreateWindowExAAddress, 13);
+            MGS3_CreateWindowExAReturnJMP = MGS3_CreateWindowExAAddress + MGS3_CreateWindowExAHookLength;
+            Memory::DetourFunction64((void*)MGS3_CreateWindowExAAddress, MGS3_CreateWindowExA_CC, MGS3_CreateWindowExAHookLength);
+
+            LOG_F(INFO, "MGS 3: Borderless: Hook length is %d bytes", MGS3_CreateWindowExAHookLength);
+            LOG_F(INFO, "MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
+        }
+        else if (!MGS3_CreateWindowExAScanResult)
+        {
+            LOG_F(INFO, "MGS 3: Borderless: Pattern scan failed.");
         }
     }
     
