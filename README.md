@@ -10,6 +10,8 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 
 ## Features
 - Custom resolution/ultrawide support.
+- Borderless/windowed mode.
+- Mouse cursor toggle.
 - Corrects gameplay/cutscene aspect ratio.
 
 ## Installation
