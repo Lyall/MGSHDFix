@@ -26,7 +26,7 @@ This list will contain bugs which may or may not be fixed.
 ### MGS 3
 - Strength of post-processing is reduced at higher resolutions.
 
-### MGS2
+### MGS 2
 - Codec call portraits are not scaled correctly.
 - Strength of post-processing is reduced at higher resolutions.
 
