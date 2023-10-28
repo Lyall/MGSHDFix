@@ -12,6 +12,7 @@ bool bAspectFix;
 bool bHUDFix;
 bool bMovieFix;
 bool bCustomResolution;
+bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
 bool bDisableCursor;
@@ -258,6 +259,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Multiplier", fMouseSensitivity);
+    inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
@@ -272,6 +274,7 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
     LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
+    LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
     LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
     LOG_F(INFO, "Config Parse: fMouseSensitivity: %.2f", fMouseSensitivity);
@@ -443,6 +446,28 @@ void CustomResolution()
         }
     }
     
+}
+
+void IntroSkip()
+{
+    if (!bSkipIntroLogos)
+        return;
+    if (sExeName != "METAL GEAR SOLID2.exe" && sExeName != "METAL GEAR SOLID3.exe")
+        return;
+
+    uint8_t* MGS2_MGS3_InitialIntroStateScanResult = Memory::PatternScan(baseModule, "75 ? C7 05 ? ? ? ? 01 00 00 00 C3");
+    if (!MGS2_MGS3_InitialIntroStateScanResult)
+    {
+        LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Pattern scan failed.");
+        return;
+    }
+
+    uint32_t* MGS2_MGS3_InitialIntroStatePtr = (uint32_t*)(MGS2_MGS3_InitialIntroStateScanResult + 8);
+    LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Initial state: %x", *MGS2_MGS3_InitialIntroStatePtr);
+
+    uint32_t NewState = 3;
+    Memory::PatchBytes((uintptr_t)MGS2_MGS3_InitialIntroStatePtr, (const char*)&NewState, sizeof(NewState));
+    LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Patched state: %x", *MGS2_MGS3_InitialIntroStatePtr);
 }
 
 void ScaleEffects()
@@ -666,6 +691,7 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     DetectGame();
     CustomResolution();
+    IntroSkip();
     Sleep(iInjectionDelay);
     ScaleEffects();
     AspectFOVFix();
