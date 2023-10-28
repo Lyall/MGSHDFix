@@ -264,14 +264,6 @@ void ReadConfig()
         LOG_F(INFO, "Config Parse: Borderless mode enabled.");
     }
 
-    // Disable ultrawide fixes at 16:9
-    if (fNewAspect == fNativeAspect)
-    {
-        bAspectFix = false;
-        bMovieFix = false;
-        LOG_F(INFO, "Config Parse: Aspect ratio is same as native, disabling ultrawide fixes.");
-    }
-
     // Custom resolution
     if (iCustomResX > 0 && iCustomResY > 0)
     {
@@ -298,6 +290,14 @@ void ReadConfig()
     LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
     LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
     LOG_F(INFO, "Custom Resolution: fHUDOffset: %.4f", fHUDOffset);
+
+    // Disable ultrawide fixes at 16:9
+    if (fNewAspect == fNativeAspect)
+    {
+        bAspectFix = false;
+        bMovieFix = false;
+        LOG_F(INFO, "Config Parse: Aspect ratio is native, disabling ultrawide fixes.");
+    }
 }
 
 void DetectGame()
