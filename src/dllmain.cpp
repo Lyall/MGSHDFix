@@ -15,6 +15,8 @@ bool bCustomResolution;
 bool bWindowedMode;
 bool bBorderlessMode;
 bool bDisableCursor;
+bool bMouseSensitivity;
+float fMouseSensitivity;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
@@ -211,6 +213,21 @@ void __declspec(naked) MGS3_Movie_CC()
 }
 */
 
+// MGS 3: Mouse Sensitivity Hook
+DWORD64 MGS3_MouseSensitivityReturnJMP;
+void __declspec(naked) MGS3_MouseSensitivity_CC()
+{
+    __asm
+    {
+        movd xmm0, [rbx + 0x1C]
+        cvtdq2ps xmm0, xmm0
+        mulss xmm0, [fMouseSensitivity]
+        divss xmm0, [rbx + 0x04]
+        movss [rbx + 0x28], xmm0
+        jmp[MGS3_MouseSensitivityReturnJMP]
+    }
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -239,6 +256,8 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
+    inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
+    inipp::get_value(ini.sections["Mouse Sensitivity"], "Multiplier", fMouseSensitivity);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
@@ -253,6 +272,9 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
     LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
+    LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
+    LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
+    LOG_F(INFO, "Config Parse: fMouseSensitivity: %.2f", fMouseSensitivity);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
@@ -380,25 +402,6 @@ void CustomResolution()
             {
                 LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
             }
-        }
-    }
-
-    if (sExeName == "METAL GEAR SOLID2.exe" && bDisableCursor || sExeName == "METAL GEAR SOLID3.exe" && bDisableCursor)
-    {
-        // MGS 2 | MGS 3: Disable mouse cursor
-        // Thanks again emoose!
-        uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
-        if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
-        {
-            DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
-
-            Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
-        }
-        else if (!MGS2_MGS3_MouseCursorScanResult)
-        {
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
         }
     }
 
@@ -614,6 +617,49 @@ void MovieFix()
     */
 }
 
+void Miscellaneous()
+{
+
+    if (sExeName == "METAL GEAR SOLID2.exe" && bDisableCursor || sExeName == "METAL GEAR SOLID3.exe" && bDisableCursor)
+    {
+        // MGS 2 | MGS 3: Disable mouse cursor
+        // Thanks again emoose!
+        uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
+        if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+        {
+            DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
+
+            Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+        }
+        else if (!MGS2_MGS3_MouseCursorScanResult)
+        {
+            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+        }
+    }
+
+    if (sExeName == "METAL GEAR SOLID3.exe" && bMouseSensitivity)
+    {
+        // MGS 3: Mouse sensitivity
+        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "66 ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? 48 ?? ?? ?? ?? 48 ?? ?? E8 ?? ?? ?? ??");
+        if (MGS3_MouseSensitivityScanResult)
+        {
+            DWORD64 MGS3_MouseSensitivityAddress = (uintptr_t)MGS3_MouseSensitivityScanResult;
+            int MGS3_MouseSensitivityHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityAddress, 15);
+            MGS3_MouseSensitivityReturnJMP = MGS3_MouseSensitivityAddress + MGS3_MouseSensitivityHookLength;
+            Memory::DetourFunction64((void*)MGS3_MouseSensitivityAddress, MGS3_MouseSensitivity_CC, MGS3_MouseSensitivityHookLength);
+
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Hook length is %d bytes", MGS3_MouseSensitivityHookLength);
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityAddress);
+        }
+        else if (!MGS3_MouseSensitivityScanResult)
+        {
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Pattern scan failed.");
+        }
+    }  
+}
+
 DWORD __stdcall Main(void*)
 {
     Logging();
@@ -625,6 +671,7 @@ DWORD __stdcall Main(void*)
     AspectFOVFix();
     HUDFix();
     MovieFix();
+    Miscellaneous();
     return true; // end thread
 }
 
