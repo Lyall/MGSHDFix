@@ -84,29 +84,38 @@ void __declspec(naked) MGS3_HUDWidth_CC()
     }
 }
 
+
 // MGS 2: HUD Width Hook
 DWORD64 MGS2_HUDWidthReturnJMP;
+float fMGS2_DefaultHUDWidth = (float)512;
 void __declspec(naked) MGS2_HUDWidth_CC()
 {
     __asm
     {
         movss xmm0, [rsp + 0x28]
         lea rax, [rcx + 0x18]
-        movss xmm15, [fNewX]
-        comiss xmm15, xmm3
-        jne scaleHUD
+        movss xmm15, [fMGS2_DefaultHUDWidth]
+        comiss xmm3, xmm15
+        je scaleHUD
+        xorps xmm15, xmm15
+        xorps xmm14, xmm14
         movss[rcx + 0x14], xmm0
         jmp[MGS2_HUDWidthReturnJMP]
 
         scaleHUD:
             movss xmm15, xmm3
-            divss xmm15, xmm0
-            //divss xmm15, [fNewAspect]
-            mulss xmm3, xmm15
+            movss xmm14, xmm3
+            divss xmm14, xmm0
+            mulss xmm3, xmm14
+            subss xmm15, xmm3
+            movss xmm1, xmm15
+            xorps xmm15, xmm15
+            xorps xmm14, xmm14
             movss[rcx + 0x14], xmm0
             jmp[MGS2_HUDWidthReturnJMP]
     }
-}*/
+}
+*/
 
 // MGS 2: Effects Scale X Hook
 DWORD64 MGS2_EffectsScaleXReturnJMP;
@@ -165,16 +174,18 @@ void __declspec(naked) MGS3_CreateWindowExA_CC()
     }
 }
 
+/*
 // MGS 2: Movie Hook
 DWORD64 MGS2_MovieReturnJMP;
 float MGS2_fMovieOffset;
+float MGS2_fMovieWidth;
 void __declspec(naked) MGS2_Movie_CC()
 {
     __asm
     {
         movss xmm1, [MGS2_fMovieOffset]
-        mulss xmm3, [fAspectMultiplier]
-        addss xmm3, [MGS2_fMovieOffset]
+        movss xmm3, [MGS2_fMovieWidth]
+        addss xmm3, xmm1
         mov rcx, rdi
         movss[rsp + 0x20], xmm0
         mov rbx, rax
@@ -198,6 +209,7 @@ void __declspec(naked) MGS3_Movie_CC()
         jmp[MGS3_MovieReturnJMP]
     }
 }
+*/
 
 void Logging()
 {
@@ -243,12 +255,21 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
-    LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
+    //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
     if (bBorderlessMode)
     {
         bWindowedMode = true;
+        LOG_F(INFO, "Config Parse: Borderless mode enabled.");
+    }
+
+    // Disable ultrawide fixes at 16:9
+    if (fNewAspect == fNativeAspect)
+    {
+        bAspectFix = false;
+        bMovieFix = false;
+        LOG_F(INFO, "Config Parse: Aspect ratio is same as native, disabling ultrawide fixes.");
     }
 
     // Custom resolution
@@ -498,9 +519,11 @@ void AspectFOVFix()
 
 void HUDFix()
 {
-    /*if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
+    /*
+    bHUDFix = true;
+    if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-    
+   
         // TODO: FIX THIS
         // MGS 2: HUD width
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? ?? ?? 16");
@@ -544,21 +567,22 @@ void HUDFix()
 
 void MovieFix()
 {
+    /*
     if (sExeName == "METAL GEAR SOLID2.exe" && bMovieFix)
     {
         // MGS 2: Movie fix
-        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 48 ?? ?? F3 0F ?? ?? ?? ?? 48 ?? ?? 0F ?? ?? E8 ?? ?? ?? ??");
+        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "C7 ?? 00 00 00 00 48 ?? ?? ?? ?? C7 ?? 00 00 A0 44 48 ?? ?? ?? ?? C7 ?? 00 00 00 00");
         if (MGS2_MovieScanResult)
         {
-            MGS2_fMovieOffset = -((fHUDOffset) / 2);
+            float bob = fNewX / fNativeAspect;
+            MGS2_fMovieOffset = (float)bob - (1280 * fAspectMultiplier);
+            MGS2_fMovieWidth = (float)1280 - MGS2_fMovieOffset;
 
-            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult + 0x8;
-            int MGS2_MovieHookLength = Memory::GetHookLength((char*)MGS2_MovieAddress, 13);
-            MGS2_MovieReturnJMP = MGS2_MovieAddress + MGS2_MovieHookLength;
-            Memory::DetourFunction64((void*)MGS2_MovieAddress, MGS2_Movie_CC, MGS2_MovieHookLength);
+            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult + 0x2;
+            Memory::Write(MGS2_MovieAddress, MGS2_fMovieOffset);
+            Memory::Write(MGS2_MovieAddress + 0xB, MGS2_fMovieWidth);
 
-            LOG_F(INFO, "MGS 2: Movie: Hook length is %d bytes", MGS2_MovieHookLength);
-            LOG_F(INFO, "MGS 2: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
+            LOG_F(INFO, "MGS 2: Movie: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
         }
         else if (!MGS2_MovieScanResult)
         {
@@ -587,6 +611,7 @@ void MovieFix()
             LOG_F(INFO, "MGS 3: Movie: Pattern scan failed.");
         }
     }
+    */
 }
 
 DWORD __stdcall Main(void*)
@@ -598,7 +623,7 @@ DWORD __stdcall Main(void*)
     Sleep(iInjectionDelay);
     ScaleEffects();
     AspectFOVFix();
-    //HUDFix();
+    HUDFix();
     MovieFix();
     return true; // end thread
 }
