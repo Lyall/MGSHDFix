@@ -10,8 +10,9 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 
 ## Features
 - Custom resolution/ultrawide support.
+- Borderless/windowed mode.
+- Mouse cursor toggle.
 - Corrects gameplay/cutscene aspect ratio.
-- Scales FMVs correctly.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -25,13 +26,11 @@ Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
 
 ### MGS 3
-- Strength of post-processing (DOF etc) is vastly reduced at higher resolutions.
-- FMV fix is broken at the moment.
+- Strength of post-processing is reduced at higher resolutions.
 
-### MGS2
-- Many assets are not scaled correctly (captions, some screen effects etc).
-- Strength of post-processing (bloom etc) is vastly reduced at higher resolutions.
-- FMV fix is broken at the moment.
+### MGS 2
+- Codec call portraits are not scaled correctly.
+- Strength of post-processing is reduced at higher resolutions.
 
 ## Screenshots
 
