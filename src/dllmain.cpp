@@ -358,28 +358,32 @@ void DetectGame()
     {
         LOG_F(INFO, "Detected game is: Metal Gear Solid 3 HD");
     }
+    else if (sExeName == "METAL GEAR.exe")
+    {
+        LOG_F(INFO, "Detected game is: Metal Gear / Metal Gear 2 (MSX)");
+    }
 }
 
 void CustomResolution()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution || sExeName == "METAL GEAR SOLID3.exe" && bCustomResolution)
+    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bCustomResolution)
     {
         // MGS 2 | MGS 3: Custom Resolution
         uint8_t* MGS2_MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0xE), iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x15), iCustomResY);
-            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
         }
         else if (!MGS2_MGS3_ResolutionScanResult)
         {
-            LOG_F(INFO, "MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
 
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
@@ -390,14 +394,14 @@ void CustomResolution()
             if (MGS2_MGS3_FramebufferFixScanResult)
             {
                 DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
-                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
 
                 Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
-                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
             }
             else if (!MGS2_MGS3_FramebufferFixScanResult)
             {
-                LOG_F(INFO, "MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
             }
         }
 
@@ -409,14 +413,14 @@ void CustomResolution()
             if (MGS2_MGS3_WindowModeScanResult)
             {
                 DWORD64 MGS2_MGS3_WindowModeAddress = (uintptr_t)MGS2_MGS3_WindowModeScanResult + 0x7;
-                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
 
                 Memory::PatchBytes(MGS2_MGS3_WindowModeAddress, "\x00", 1);
-                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Patched instruction.");
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Patched instruction.");
             }
             else if (!MGS2_MGS3_WindowModeScanResult)
             {
-                LOG_F(INFO, "MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
             }
         }
     }
@@ -440,7 +444,7 @@ void CustomResolution()
             LOG_F(INFO, "MGS 2: Borderless: Pattern scan failed.");
         }
     }
-    else if (sExeName == "METAL GEAR SOLID3.exe" && bBorderlessMode)
+    else if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bBorderlessMode)
     {
         uint8_t* MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "48 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 44 ?? ?? ?? ??");
         if (MGS3_CreateWindowExAScanResult)
@@ -450,12 +454,12 @@ void CustomResolution()
             MGS3_CreateWindowExAReturnJMP = MGS3_CreateWindowExAAddress + MGS3_CreateWindowExAHookLength;
             Memory::DetourFunction64((void*)MGS3_CreateWindowExAAddress, MGS3_CreateWindowExA_CC, MGS3_CreateWindowExAHookLength);
 
-            LOG_F(INFO, "MGS 3: Borderless: Hook length is %d bytes", MGS3_CreateWindowExAHookLength);
-            LOG_F(INFO, "MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
+            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Hook length is %d bytes", MGS3_CreateWindowExAHookLength);
+            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
         }
         else if (!MGS3_CreateWindowExAScanResult)
         {
-            LOG_F(INFO, "MGS 3: Borderless: Pattern scan failed.");
+            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Pattern scan failed.");
         }
     }
     
@@ -533,7 +537,7 @@ void ScaleEffects()
 
 void AspectFOVFix()
 {
-    if (sExeName == "METAL GEAR SOLID3.exe" && bAspectFix)
+    if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
@@ -545,12 +549,12 @@ void AspectFOVFix()
             MGS3_GameplayAspectReturnJMP = MGS3_GameplayAspectAddress + MGS3_GameplayAspectHookLength;
             Memory::DetourFunction64((void*)MGS3_GameplayAspectAddress, MGS3_GameplayAspect_CC, MGS3_GameplayAspectHookLength);
 
-            LOG_F(INFO, "MGS 3: Aspect Ratio: Hook length is %d bytes", MGS3_GameplayAspectHookLength);
-            LOG_F(INFO, "MGS 3: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectAddress);
+            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Hook length is %d bytes", MGS3_GameplayAspectHookLength);
+            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectAddress);
         }
         else if (!MGS3_GameplayAspectScanResult)
         {
-            LOG_F(INFO, "MGS 3: Aspect Ratio: Pattern scan failed.");
+            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
     else if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix)
@@ -675,7 +679,7 @@ void MovieFix()
 void Miscellaneous()
 {
 
-    if (sExeName == "METAL GEAR SOLID2.exe" && bDisableCursor || sExeName == "METAL GEAR SOLID3.exe" && bDisableCursor)
+    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bDisableCursor)
     {
         // MGS 2 | MGS 3: Disable mouse cursor
         // Thanks again emoose!
@@ -683,14 +687,14 @@ void Miscellaneous()
         if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
         {
             DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
 
             Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
         }
         else if (!MGS2_MGS3_MouseCursorScanResult)
         {
-            LOG_F(INFO, "MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
         }
     }
 
