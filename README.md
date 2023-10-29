@@ -31,10 +31,10 @@ This list will contain bugs which may or may not be fixed.
 ### MG1/MG2
 - Game window is stretched at non 16:9 resolutions.
 
-### MGS 3
+### MGS 2
 - Strength of post-processing is reduced at higher resolutions.
 
-### MGS 2
+### MGS 3
 - Strength of post-processing is reduced at higher resolutions.
 
 ## Screenshots
