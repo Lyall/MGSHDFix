@@ -17,7 +17,7 @@ bool bWindowedMode;
 bool bBorderlessMode;
 bool bDisableCursor;
 bool bMouseSensitivity;
-float fMouseSensitivity;
+float fMouseSensitivityMultiplier;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
@@ -122,29 +122,44 @@ void __declspec(naked) MGS2_HUDWidth_CC()
 
 // MGS 2: Effects Scale X Hook
 DWORD64 MGS2_EffectsScaleXReturnJMP;
+float fMGS2_EffectScaleX;
 void __declspec(naked) MGS2_EffectsScaleX_CC()
 {
     __asm
     {
+        movss xmm1, [fMGS2_EffectScaleX]
         mov rcx, [rbp - 0x60]
         movd xmm0, eax
         cvtdq2ps xmm0, xmm0
-        movss xmm0, [fMGS2_DefaultHUDX]
         divss xmm1, xmm0
         jmp[MGS2_EffectsScaleXReturnJMP]
     }
 }
 
+// MGS 2: Effects Scale X 2 Hook
+DWORD64 MGS2_EffectsScaleX2ReturnJMP;
+void __declspec(naked) MGS2_EffectsScaleX2_CC()
+{
+    __asm
+    {
+        movss xmm1, [fMGS2_EffectScaleX]
+        cvtdq2ps xmm0, xmm0
+        divss xmm1, xmm0
+        movd xmm0, [rbp - 0x04]
+        addss xmm1, xmm1
+        jmp[MGS2_EffectsScaleX2ReturnJMP]
+    }
+}
+
 // MGS 2: Effects Scale Y Hook
 DWORD64 MGS2_EffectsScaleYReturnJMP;
+float fMGS2_EffectScaleY;
 void __declspec(naked) MGS2_EffectsScaleY_CC()
 {
     __asm
     {
-        movaps [rsp + 0x00000490], xmm6
-        cvtdq2ps xmm0, xmm0
-        movss xmm0, [fMGS2_DefaultHUDY]
-        movaps [rsp + 0x00000470], xmm8
+        movss xmm1, [fMGS2_EffectScaleY]
+        mov [rsp + 0x000004F8], rbx
         jmp[MGS2_EffectsScaleYReturnJMP]
     }
 }
@@ -180,18 +195,16 @@ void __declspec(naked) MGS3_CreateWindowExA_CC()
 /*
 // MGS 2: Movie Hook
 DWORD64 MGS2_MovieReturnJMP;
-float MGS2_fMovieOffset;
+float MGS2_fMovieScaleX;
 float MGS2_fMovieWidth;
 void __declspec(naked) MGS2_Movie_CC()
 {
     __asm
     {
-        movss xmm1, [MGS2_fMovieOffset]
-        movss xmm3, [MGS2_fMovieWidth]
-        addss xmm3, xmm1
+        movss xmm3, [fMGS2_DefaultHUDX]
+        movss xmm1,[MGS2_fMovieWidth]
+        subss xmm3, xmm1
         mov rcx, rdi
-        movss[rsp + 0x20], xmm0
-        mov rbx, rax
         jmp[MGS2_MovieReturnJMP]
     }
 }
@@ -222,7 +235,7 @@ void __declspec(naked) MGS3_MouseSensitivity_CC()
     {
         movd xmm0, [rbx + 0x1C]
         cvtdq2ps xmm0, xmm0
-        mulss xmm0, [fMouseSensitivity]
+        mulss xmm0, [fMouseSensitivityMultiplier]
         divss xmm0, [rbx + 0x04]
         movss [rbx + 0x28], xmm0
         jmp[MGS3_MouseSensitivityReturnJMP]
@@ -258,7 +271,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
-    inipp::get_value(ini.sections["Mouse Sensitivity"], "Multiplier", fMouseSensitivity);
+    inipp::get_value(ini.sections["Mouse Sensitivity"], "Multiplier", fMouseSensitivityMultiplier);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
@@ -277,7 +290,7 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
     LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
-    LOG_F(INFO, "Config Parse: fMouseSensitivity: %.2f", fMouseSensitivity);
+    LOG_F(INFO, "Config Parse: fMouseSensitivityMultiplier: %.2f", fMouseSensitivityMultiplier);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
@@ -475,26 +488,43 @@ void ScaleEffects()
     if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution)
     {
         // MGS 2: Scale effects correctly. (text, overlays, fades etc)
-        uint8_t* MGS2_EffectsScaleXScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
-        if (MGS2_EffectsScaleXScanResult)
+        uint8_t* MGS2_EffectsScaleScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
+        if (MGS2_EffectsScaleScanResult)
         {
-            DWORD64 MGS2_EffectsScaleXAddress = (uintptr_t)MGS2_EffectsScaleXScanResult;
+            // X scale
+            DWORD64 MGS2_EffectsScaleXAddress = (uintptr_t)MGS2_EffectsScaleScanResult;
             int MGS2_EffectsScaleXHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleXAddress, 13);
             MGS2_EffectsScaleXReturnJMP = MGS2_EffectsScaleXAddress + MGS2_EffectsScaleXHookLength;
             Memory::DetourFunction64((void*)MGS2_EffectsScaleXAddress, MGS2_EffectsScaleX_CC, MGS2_EffectsScaleXHookLength);
 
-            LOG_F(INFO, "MGS 2: Scale Effects: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
-            LOG_F(INFO, "MGS 2: Scale Effects: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
+            float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleXAddress - 0x4));
+            fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fNewX);
 
-            DWORD64 MGS2_EffectsScaleYAddress = (uintptr_t)MGS2_EffectsScaleXScanResult + 0x54; // Long gap, maybe do two different sigs?
+            LOG_F(INFO, "MGS 2: Scale Effects X: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
+            LOG_F(INFO, "MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
+
+            DWORD64 MGS2_EffectsScaleX2Address = (uintptr_t)MGS2_EffectsScaleScanResult - 0x2B;
+            int MGS2_EffectsScaleX2HookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleX2Address, 13);
+            MGS2_EffectsScaleX2ReturnJMP = MGS2_EffectsScaleX2Address + MGS2_EffectsScaleX2HookLength;
+            Memory::DetourFunction64((void*)MGS2_EffectsScaleX2Address, MGS2_EffectsScaleX2_CC, MGS2_EffectsScaleX2HookLength);
+
+            LOG_F(INFO, "MGS 2: Scale Effects X 2: Hook length is %d bytes", MGS2_EffectsScaleX2HookLength);
+            LOG_F(INFO, "MGS 2: Scale Effects X 2: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleX2Address);
+
+            // Y scale
+            DWORD64 MGS2_EffectsScaleYAddress = (uintptr_t)MGS2_EffectsScaleScanResult + 0x24;
             int MGS2_EffectsScaleYHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleYAddress, 13);
             MGS2_EffectsScaleYReturnJMP = MGS2_EffectsScaleYAddress + MGS2_EffectsScaleYHookLength;
+
+            float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleYAddress + 0x4));
+            fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fNewY);
+
             Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
 
-            LOG_F(INFO, "MGS 2: Scale Effects: Hook length is %d bytes", MGS2_EffectsScaleYHookLength);
-            LOG_F(INFO, "MGS 2: Scale Effects: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
+            LOG_F(INFO, "MGS 2: Scale Effects Y: Hook length is %d bytes", MGS2_EffectsScaleYHookLength);
+            LOG_F(INFO, "MGS 2: Scale Effects Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
         }
-        else if (!MGS2_EffectsScaleXScanResult)
+        else if (!MGS2_EffectsScaleScanResult)
         {
             LOG_F(INFO, "MGS 2: Scale Effects: Pattern scan failed.");
         }
@@ -599,18 +629,18 @@ void MovieFix()
     if (sExeName == "METAL GEAR SOLID2.exe" && bMovieFix)
     {
         // MGS 2: Movie fix
-        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "C7 ?? 00 00 00 00 48 ?? ?? ?? ?? C7 ?? 00 00 A0 44 48 ?? ?? ?? ?? C7 ?? 00 00 00 00");
+        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 48 ?? ?? F3 0F ?? ?? ?? ?? 48 ?? ?? 0F ?? ??");
         if (MGS2_MovieScanResult)
         {
-            float bob = fNewX / fNativeAspect;
-            MGS2_fMovieOffset = (float)bob - (1280 * fAspectMultiplier);
-            MGS2_fMovieWidth = (float)1280 - MGS2_fMovieOffset;
+            MGS2_fMovieWidth = (float)-((fNewX / fMGS2_EffectScaleX) - (fNewY / fMGS2_EffectScaleY));
 
-            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult + 0x2;
-            Memory::Write(MGS2_MovieAddress, MGS2_fMovieOffset);
-            Memory::Write(MGS2_MovieAddress + 0xB, MGS2_fMovieWidth);
+            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult;
+            int MGS2_MovieHookLength = Memory::GetHookLength((char*)MGS2_MovieAddress, 13);
+            MGS2_MovieReturnJMP = MGS2_MovieAddress + MGS2_MovieHookLength;
+            Memory::DetourFunction64((void*)MGS2_MovieAddress, MGS2_Movie_CC, MGS2_MovieHookLength);
 
-            LOG_F(INFO, "MGS 2: Movie: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
+            LOG_F(INFO, "MGS 2: Movie: Hook length is %d bytes", MGS2_MovieHookLength);
+            LOG_F(INFO, "MGS 2: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
         }
         else if (!MGS2_MovieScanResult)
         {
@@ -629,7 +659,7 @@ void MovieFix()
             DWORD64 MGS3_MovieAddress = (Memory::GetAbsolute((uintptr_t)MGS3_MovieScanResult + 0x4) + 0x44); // This is bad but it gives us a more unique sig otherwise it's >100 bytes.
             int MGS3_MovieHookLength = Memory::GetHookLength((char*)MGS3_MovieAddress, 13);
             MGS3_MovieReturnJMP = MGS3_MovieAddress + MGS3_MovieHookLength;
-            Memory::DetourFunction64((void*)MGS3_MovieAddress, MGS3_Movie_CC, MGS3_MovieHookLength);
+            //Memory::DetourFunction64((void*)MGS3_MovieAddress, MGS3_Movie_CC, MGS3_MovieHookLength);
 
             LOG_F(INFO, "MGS 3: Movie: Hook length is %d bytes", MGS3_MovieHookLength);
             LOG_F(INFO, "MGS 3: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MovieAddress);
