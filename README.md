@@ -5,6 +5,7 @@
 This is a **work-in-progress** fix that aims to add custom resolutions and ultrawide support to Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
+- Metal Gear 1/2
 - Metal Gear Solid 2
 - Metal Gear Solid 3
 
@@ -12,7 +13,9 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 - Custom resolution/ultrawide support.
 - Borderless/windowed mode.
 - Mouse cursor toggle.
-- Corrects gameplay/cutscene aspect ratio.
+- Mouse sensitivty adjustment (MGS3).
+- Correct gameplay/cutscene aspect ratio (MGS2/MGS3).
+- Skip intro logos (MGS2/MGS3.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -25,11 +28,13 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
 
+### MG1/MG2
+- Game window is stretched at non 16:9 resolutions.
+
 ### MGS 3
 - Strength of post-processing is reduced at higher resolutions.
 
 ### MGS 2
-- Codec call portraits are not scaled correctly.
 - Strength of post-processing is reduced at higher resolutions.
 
 ## Screenshots
