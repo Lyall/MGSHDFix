@@ -17,7 +17,8 @@ bool bWindowedMode;
 bool bBorderlessMode;
 bool bDisableCursor;
 bool bMouseSensitivity;
-float fMouseSensitivityMultiplier;
+float fMouseSensitivityXMulti;
+float fMouseSensitivityYMulti;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
@@ -227,18 +228,33 @@ void __declspec(naked) MGS3_Movie_CC()
 }
 */
 
-// MGS 3: Mouse Sensitivity Hook
-DWORD64 MGS3_MouseSensitivityReturnJMP;
-void __declspec(naked) MGS3_MouseSensitivity_CC()
+// MGS 3: Mouse Sensitivity X Hook
+DWORD64 MGS3_MouseSensitivityXReturnJMP;
+void __declspec(naked) MGS3_MouseSensitivityX_CC()
 {
     __asm
     {
-        movd xmm0, [rbx + 0x1C]
-        cvtdq2ps xmm0, xmm0
-        mulss xmm0, [fMouseSensitivityMultiplier]
-        divss xmm0, [rbx + 0x04]
-        movss [rbx + 0x28], xmm0
-        jmp[MGS3_MouseSensitivityReturnJMP]
+        //mulss xmm0, [rbx + 0x28]
+        mulss xmm0, [fMouseSensitivityXMulti]
+        cvttss2si eax, xmm0
+        movd xmm0, ecx
+        mov ecx, [rbx + 0x24]
+        jmp[MGS3_MouseSensitivityXReturnJMP]
+    }
+}
+
+// MGS 3: Mouse Sensitivity Y Hook
+DWORD64 MGS3_MouseSensitivityYReturnJMP;
+void __declspec(naked) MGS3_MouseSensitivityY_CC()
+{
+    __asm
+    {
+        //mulss xmm0, [rbx + 0x28]
+        mulss xmm0, [fMouseSensitivityYMulti]
+        mov [rbx + 0x50], edx
+        cvttss2si eax, xmm0
+        movd xmm0, ecx
+        jmp[MGS3_MouseSensitivityYReturnJMP]
     }
 }
 
@@ -271,7 +287,8 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
-    inipp::get_value(ini.sections["Mouse Sensitivity"], "Multiplier", fMouseSensitivityMultiplier);
+    inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
+    inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     iAspectFix = (int)bAspectFix;
@@ -290,7 +307,8 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
     LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
-    LOG_F(INFO, "Config Parse: fMouseSensitivityMultiplier: %.2f", fMouseSensitivityMultiplier);
+    LOG_F(INFO, "Config Parse: fMouseSensitivityXMulti: %.2f", fMouseSensitivityXMulti);
+    LOG_F(INFO, "Config Parse: fMouseSensitivityYMulti: %.2f", fMouseSensitivityYMulti);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
@@ -701,16 +719,24 @@ void Miscellaneous()
     if (sExeName == "METAL GEAR SOLID3.exe" && bMouseSensitivity)
     {
         // MGS 3: Mouse sensitivity
-        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "66 ?? ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? 48 ?? ?? ?? ?? 48 ?? ?? E8 ?? ?? ?? ??");
+        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
         if (MGS3_MouseSensitivityScanResult)
         {
-            DWORD64 MGS3_MouseSensitivityAddress = (uintptr_t)MGS3_MouseSensitivityScanResult;
-            int MGS3_MouseSensitivityHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityAddress, 15);
-            MGS3_MouseSensitivityReturnJMP = MGS3_MouseSensitivityAddress + MGS3_MouseSensitivityHookLength;
-            Memory::DetourFunction64((void*)MGS3_MouseSensitivityAddress, MGS3_MouseSensitivity_CC, MGS3_MouseSensitivityHookLength);
+            DWORD64 MGS3_MouseSensitivityXAddress = (uintptr_t)MGS3_MouseSensitivityScanResult;
+            int MGS3_MouseSensitivityXHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityXAddress, 13);
+            MGS3_MouseSensitivityXReturnJMP = MGS3_MouseSensitivityXAddress + MGS3_MouseSensitivityXHookLength;
+            Memory::DetourFunction64((void*)MGS3_MouseSensitivityXAddress, MGS3_MouseSensitivityX_CC, MGS3_MouseSensitivityXHookLength);
 
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Hook length is %d bytes", MGS3_MouseSensitivityHookLength);
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityAddress);
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity X: Hook length is %d bytes", MGS3_MouseSensitivityXHookLength);
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityXAddress);
+
+            DWORD64 MGS3_MouseSensitivityYAddress = (uintptr_t)MGS3_MouseSensitivityScanResult + 0x33;
+            int MGS3_MouseSensitivityYHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityYAddress, 13);
+            MGS3_MouseSensitivityYReturnJMP = MGS3_MouseSensitivityYAddress + MGS3_MouseSensitivityYHookLength;
+            Memory::DetourFunction64((void*)MGS3_MouseSensitivityYAddress, MGS3_MouseSensitivityY_CC, MGS3_MouseSensitivityYHookLength);
+
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity Y: Hook length is %d bytes", MGS3_MouseSensitivityYHookLength);
+            LOG_F(INFO, "MGS 3: Mouse Sensitivity Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityYAddress);
         }
         else if (!MGS3_MouseSensitivityScanResult)
         {
