@@ -110,6 +110,7 @@ void __declspec(naked) MGS2_HUDWidth_CC()
 {
     __asm
     {
+        movss xmm15, [rdi+10]
         divss xmm2, xmm0
         movaps xmm0, xmm2
         movaps xmm1, xmm2
@@ -654,7 +655,7 @@ void HUDFix()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-        // MGS 2: HUD Width
+        // MGS 2: HUD
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 41");
         if (MGS2_HUDWidthScanResult)
         {
@@ -680,7 +681,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 2: HUD Fix: Pattern scan failed.");
         }
 
-        // MGS 2: Radar Width
+        // MGS 2: Radar
         uint8_t* MGS2_RadarWidthScanResult = Memory::PatternScan(baseModule, "44 ?? ?? 8B ?? 0F ?? ?? ?? 41 ?? ?? 0F ?? ?? ?? 44 ?? ?? ?? ?? ?? ?? 0F ?? ?? ?? 99");
         if (MGS2_RadarWidthScanResult)
         {
@@ -704,7 +705,41 @@ void HUDFix()
         {
             LOG_F(INFO, "MGS 2: Radar Fix: Pattern scan failed.");
         }
+
+        // MGS 2: Disable motion blur. 
+        uint8_t* MGS2_MGS3_MotionBlurScanResult = Memory::PatternScan(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
+        if (MGS2_MGS3_MotionBlurScanResult && bWindowedMode)
+        {
+            DWORD64 MGS2_MGS3_MotionBlurAddress = (uintptr_t)MGS2_MGS3_MotionBlurScanResult;
+            LOG_F(INFO, "MGS 2: Motion Blur: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MotionBlurAddress);
+
+            Memory::PatchBytes(MGS2_MGS3_MotionBlurAddress, "\x48\x31\xDB\x90\x90\x90", 6);
+            LOG_F(INFO, "MGS 2: Motion Blur: Patched instruction.");
+        }
+        else if (!MGS2_MGS3_MotionBlurScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
+        }
     }
+
+    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe") && bHUDFix)
+    {
+        // MGS 2 | MGS 3: Letterboxing
+        uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
+        if (MGS2_MGS3_LetterboxingScanResult)
+        {
+            DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_LetterboxingAddress);
+
+            Memory::Write(MGS2_MGS3_LetterboxingAddress, (int)0);
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
+        }
+        else if (!MGS2_MGS3_LetterboxingScanResult)
+        {
+            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
+        }
+    }
+
     /*
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
