@@ -22,9 +22,6 @@ float fMouseSensitivityYMulti;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
-int iAspectFix;
-int iHUDFix;
-int iMovieFix;
 
 // Variables
 float fNewX;
@@ -36,13 +33,15 @@ float fAspectDivisional;
 float fAspectMultiplier;
 float fHUDWidth;
 float fHUDOffset;
+int iHUDWidth;
+int iHUDOffset;
 float fMGS2_DefaultHUDX = (float)1280;
 float fMGS2_DefaultHUDY = (float)720;
 string sExeName;
 string sGameName;
 string sExePath;
 string sGameVersion;
-string sFixVer = "0.7";
+string sFixVer = "0.8";
 
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
@@ -87,53 +86,97 @@ void __declspec(naked) MGS3_HUDWidth_CC()
         jmp[MGS3_HUDWidthReturnJMP]
     }
 }
+*/
 
+// MGS 2: HUD Offset Hook
+DWORD64 MGS2_HUDOffsetReturnJMP;
+float fMGS2_HUDScaleOffset;
+void __declspec(naked) MGS2_HUDOffset_CC()
+{
+    __asm
+    {
+        mulss xmm1, [rdi + 0x08]
+        divss xmm0, xmm3
+        xorps xmm1, xmm8
+        subss xmm1, xmm2
+        movss xmm1, [fMGS2_HUDScaleOffset]
+        jmp[MGS2_HUDOffsetReturnJMP]
+    }
+}
 
 // MGS 2: HUD Width Hook
 DWORD64 MGS2_HUDWidthReturnJMP;
-float fMGS2_DefaultHUDWidth = (float)512;
 void __declspec(naked) MGS2_HUDWidth_CC()
 {
     __asm
     {
-        movss xmm0, [rsp + 0x28]
-        lea rax, [rcx + 0x18]
-        movss xmm15, [fMGS2_DefaultHUDWidth]
-        comiss xmm3, xmm15
-        je scaleHUD
-        xorps xmm15, xmm15
-        xorps xmm14, xmm14
-        movss[rcx + 0x14], xmm0
+        divss xmm2, xmm0
+        movaps xmm0, xmm2
+        movaps xmm1, xmm2
+        addss xmm0, xmm2
+        divss xmm0, [fAspectMultiplier]
         jmp[MGS2_HUDWidthReturnJMP]
-
-        scaleHUD:
-            movss xmm15, xmm3
-            movss xmm14, xmm3
-            divss xmm14, xmm0
-            mulss xmm3, xmm14
-            subss xmm15, xmm3
-            movss xmm1, xmm15
-            xorps xmm15, xmm15
-            xorps xmm14, xmm14
-            movss[rcx + 0x14], xmm0
-            jmp[MGS2_HUDWidthReturnJMP]
     }
 }
-*/
+
+// MGS 2: Radar Width Hook
+DWORD64 MGS2_RadarWidthReturnJMP;
+void __declspec(naked) MGS2_RadarWidth_CC()
+{
+    __asm
+    {
+        mov ebx, [iHUDWidth]
+        mov r8d, eax
+        mov eax, ebx
+        imul eax, [rsi + 0x0C]
+        mov ecx, r8d
+        imul ecx, [rsi + 0x10]
+        jmp[MGS2_RadarWidthReturnJMP]
+    }
+}
+
+// MGS 2: Radar Offset Hook
+DWORD64 MGS2_RadarOffsetReturnJMP;
+void __declspec(naked) MGS2_RadarOffset_CC()
+{
+    __asm
+    {
+        sar r9d, 8
+        add eax, edx
+        mov ecx, r9d
+        sar eax, 9
+        shr ecx, 31
+        add r9d, ecx
+        mov ecx, [iHUDOffset]
+        add eax, ecx
+        jmp[MGS2_RadarOffsetReturnJMP]
+    }
+}
 
 // MGS 2: Effects Scale X Hook
 DWORD64 MGS2_EffectsScaleXReturnJMP;
 float fMGS2_EffectScaleX;
+float fMGS2_EffectScaleXScaled;
 void __declspec(naked) MGS2_EffectsScaleX_CC()
 {
     __asm
     {
+        cmp bHUDFix, 1
+        je HUDScaleX
         movss xmm1, [fMGS2_EffectScaleX]
         mov rcx, [rbp - 0x60]
         movd xmm0, eax
         cvtdq2ps xmm0, xmm0
         divss xmm1, xmm0
         jmp[MGS2_EffectsScaleXReturnJMP]
+
+        HUDScaleX:
+            movss xmm1, [fMGS2_EffectScaleXScaled]
+            mov rcx, [rbp - 0x60]
+            movd xmm0, eax
+            cvtdq2ps xmm0, xmm0
+            divss xmm1, xmm0
+            jmp[MGS2_EffectsScaleXReturnJMP]
     }
 }
 
@@ -143,12 +186,22 @@ void __declspec(naked) MGS2_EffectsScaleX2_CC()
 {
     __asm
     {
+        cmp bHUDFix, 1
+        je HUDScaleX
         movss xmm1, [fMGS2_EffectScaleX]
         cvtdq2ps xmm0, xmm0
         divss xmm1, xmm0
         movd xmm0, [rbp - 0x04]
         addss xmm1, xmm1
         jmp[MGS2_EffectsScaleX2ReturnJMP]
+
+        HUDScaleX:
+            movss xmm1, [fMGS2_EffectScaleXScaled]
+            cvtdq2ps xmm0, xmm0
+            divss xmm1, xmm0
+            movd xmm0, [rbp - 0x04]
+            addss xmm1, xmm1
+            jmp[MGS2_EffectsScaleX2ReturnJMP]
     }
 }
 
@@ -291,11 +344,8 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
-    iAspectFix = (int)bAspectFix;
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
-    iHUDFix = (int)bHUDFix;
     inipp::get_value(ini.sections["Fix FMVs"], "Enabled", bMovieFix);
-    iMovieFix = (int)bMovieFix;
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -310,7 +360,7 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: fMouseSensitivityXMulti: %.2f", fMouseSensitivityXMulti);
     LOG_F(INFO, "Config Parse: fMouseSensitivityYMulti: %.2f", fMouseSensitivityYMulti);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
-    //LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
+    LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
@@ -341,7 +391,9 @@ void ReadConfig()
 
     fAspectMultiplier = (float)fNewAspect / fNativeAspect;
     fHUDWidth = (float)fNewY * fNativeAspect;
+    iHUDWidth = (int)fHUDWidth;
     fHUDOffset = (float)(fNewX - fHUDWidth) / 2;
+    iHUDOffset = (int)fHUDOffset;
     LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
     LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
     LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
@@ -521,6 +573,7 @@ void ScaleEffects()
 
             float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleXAddress - 0x4));
             fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fNewX);
+            fMGS2_EffectScaleXScaled = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fHUDWidth);
 
             LOG_F(INFO, "MGS 2: Scale Effects X: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
             LOG_F(INFO, "MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
@@ -599,29 +652,60 @@ void AspectFOVFix()
 
 void HUDFix()
 {
-    /*
-    bHUDFix = true;
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-   
-        // TODO: FIX THIS
-        // MGS 2: HUD width
-        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? ?? ?? 16");
+        // MGS 2: HUD Width
+        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 41");
         if (MGS2_HUDWidthScanResult)
         {
-            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult;
+            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult - 0xE;
             int MGS2_HUDWidthHookLength = Memory::GetHookLength((char*)MGS2_HUDWidthAddress, 13);
             MGS2_HUDWidthReturnJMP = MGS2_HUDWidthAddress + MGS2_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
 
             LOG_F(INFO, "MGS 2: HUD Width: Hook length is %d bytes", MGS2_HUDWidthHookLength);
             LOG_F(INFO, "MGS 2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDWidthAddress);
+
+            fMGS2_HUDScaleOffset = (float)-1 / fAspectMultiplier;
+            DWORD64 MGS2_HUDOffsetAddress = (uintptr_t)MGS2_HUDWidthScanResult + 0x2B;
+            int MGS2_HUDOffsetHookLength = Memory::GetHookLength((char*)MGS2_HUDOffsetAddress, 13);
+            MGS2_HUDOffsetReturnJMP = MGS2_HUDOffsetAddress + MGS2_HUDOffsetHookLength;
+            Memory::DetourFunction64((void*)MGS2_HUDOffsetAddress, MGS2_HUDOffset_CC, MGS2_HUDOffsetHookLength);
+
+            LOG_F(INFO, "MGS 2: HUD Offset: Hook length is %d bytes", MGS2_HUDOffsetHookLength);
+            LOG_F(INFO, "MGS 2: HUD Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDOffsetAddress);
         }
         else if (!MGS2_HUDWidthScanResult)
         {
-            LOG_F(INFO, "MGS 2: HUD Width: Pattern scan failed.");
+            LOG_F(INFO, "MGS 2: HUD Fix: Pattern scan failed.");
+        }
+
+        // MGS 2: Radar Width
+        uint8_t* MGS2_RadarWidthScanResult = Memory::PatternScan(baseModule, "44 ?? ?? 8B ?? 0F ?? ?? ?? 41 ?? ?? 0F ?? ?? ?? 44 ?? ?? ?? ?? ?? ?? 0F ?? ?? ?? 99");
+        if (MGS2_RadarWidthScanResult)
+        {
+            DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
+            int MGS2_RadarWidthHookLength = Memory::GetHookLength((char*)MGS2_RadarWidthAddress, 13);
+            MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
+            Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
+
+            LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
+            LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
+
+            DWORD64 MGS2_RadarOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x42;
+            int MGS2_RadarOffsetHookLength = 18; // length disassembler causes crashes for some reason?
+            MGS2_RadarOffsetReturnJMP = MGS2_RadarOffsetAddress + MGS2_RadarOffsetHookLength;
+            Memory::DetourFunction64((void*)MGS2_RadarOffsetAddress, MGS2_RadarOffset_CC, MGS2_RadarOffsetHookLength);
+
+            LOG_F(INFO, "MGS 2: Radar Offset: Hook length is %d bytes", MGS2_RadarOffsetHookLength);
+            LOG_F(INFO, "MGS 2: Radar Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarOffsetAddress);
+        }
+        else if (!MGS2_RadarWidthScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Radar Fix: Pattern scan failed.");
         }
     }
+    /*
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
         // TODO: FIX THIS
