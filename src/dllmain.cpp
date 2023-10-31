@@ -29,6 +29,7 @@ float fNewY;
 float fNativeAspect = (float)16/9;
 float fPi = 3.14159265358979323846f;
 float fNewAspect;
+bool bNarrowAspect = false;
 float fAspectDivisional;
 float fAspectMultiplier;
 float fHUDWidth;
@@ -37,6 +38,11 @@ int iHUDWidth;
 int iHUDOffset;
 float fMGS2_DefaultHUDX = (float)1280;
 float fMGS2_DefaultHUDY = (float)720;
+float fMGS3_DefaultHUDWidth = (float)2;
+float fMGS3_DefaultHUDHeight = (float)-2;
+float fMGS2_DefaultHUDWidth = (float)1;
+float fMGS2_DefaultHUDHeight = (float)-2;
+float fMGS2_DefaultHUDHeight2 = (float)-1;
 string sExeName;
 string sGameName;
 string sExePath;
@@ -72,50 +78,35 @@ void __declspec(naked) MGS3_GameplayAspect_CC()
     }
 }
 
-/*
 // MGS 3: HUD Width Hook
 DWORD64 MGS3_HUDWidthReturnJMP;
+float fMGS3_NewHUDWidth;
+float fMGS3_NewHUDHeight;
 void __declspec(naked) MGS3_HUDWidth_CC()
 {
     __asm
     {
-        movss xmm0, [rdi + 0x0C]
-        mulss xmm0, [fAspectMultiplier]
-        movaps xmm1, xmm14
-        subss xmm0, [rdi + 0x04]
+        movss xmm14, [fMGS3_NewHUDWidth]
+        movss xmm15, [fMGS3_NewHUDHeight]
+        mov r12d, 0x00000200
         jmp[MGS3_HUDWidthReturnJMP]
-    }
-}
-*/
-
-// MGS 2: HUD Offset Hook
-DWORD64 MGS2_HUDOffsetReturnJMP;
-float fMGS2_HUDScaleOffset;
-void __declspec(naked) MGS2_HUDOffset_CC()
-{
-    __asm
-    {
-        mulss xmm1, [rdi + 0x08]
-        divss xmm0, xmm3
-        xorps xmm1, xmm8
-        subss xmm1, xmm2
-        movss xmm1, [fMGS2_HUDScaleOffset]
-        jmp[MGS2_HUDOffsetReturnJMP]
     }
 }
 
 // MGS 2: HUD Width Hook
 DWORD64 MGS2_HUDWidthReturnJMP;
+float fMGS2_NewHUDWidth;
+float fMGS2_NewHUDHeight;
+float fMGS2_NewHUDHeight2;
 void __declspec(naked) MGS2_HUDWidth_CC()
 {
     __asm
     {
-        movss xmm15, [rdi+10]
-        divss xmm2, xmm0
-        movaps xmm0, xmm2
-        movaps xmm1, xmm2
-        addss xmm0, xmm2
-        divss xmm0, [fAspectMultiplier]
+        movss xmm7, [fMGS2_NewHUDWidth]
+        movss xmm9, [fMGS2_NewHUDHeight]
+        movss xmm10, [fMGS2_NewHUDHeight2]
+        mov r13, 0x0000002000000000
+        //nop dword ptr[rax + 0x00000000]
         jmp[MGS2_HUDWidthReturnJMP]
     }
 }
@@ -407,6 +398,12 @@ void ReadConfig()
         bMovieFix = false;
         LOG_F(INFO, "Config Parse: Aspect ratio is native, disabling ultrawide fixes.");
     }
+
+    // Check if <16:9
+    if (fNewAspect < fNativeAspect)
+    {
+        bNarrowAspect = true;
+    }
 }
 
 void DetectGame()
@@ -655,26 +652,28 @@ void HUDFix()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-        // MGS 2: HUD
-        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 41");
+        // MGS 2: HUD size
+        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 01 00 00 00 F3 44 ?? ?? ?? ?? ?? ?? ?? 49");
         if (MGS2_HUDWidthScanResult)
         {
-            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult - 0xE;
+            fMGS2_NewHUDWidth = fMGS2_DefaultHUDWidth / fAspectMultiplier;
+            fMGS2_NewHUDHeight = fMGS2_DefaultHUDHeight;
+            fMGS2_NewHUDHeight2 = fMGS2_DefaultHUDHeight2;
+
+            if (bNarrowAspect)
+            {
+                fMGS2_NewHUDWidth = fMGS2_DefaultHUDWidth;
+                fMGS2_NewHUDHeight = fMGS2_DefaultHUDHeight * fAspectMultiplier;
+                fMGS2_NewHUDHeight2 = fMGS2_DefaultHUDHeight2 * fAspectMultiplier;
+            }
+
+            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult + 0x18;
             int MGS2_HUDWidthHookLength = Memory::GetHookLength((char*)MGS2_HUDWidthAddress, 13);
             MGS2_HUDWidthReturnJMP = MGS2_HUDWidthAddress + MGS2_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
 
             LOG_F(INFO, "MGS 2: HUD Width: Hook length is %d bytes", MGS2_HUDWidthHookLength);
             LOG_F(INFO, "MGS 2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDWidthAddress);
-
-            fMGS2_HUDScaleOffset = (float)-1 / fAspectMultiplier;
-            DWORD64 MGS2_HUDOffsetAddress = (uintptr_t)MGS2_HUDWidthScanResult + 0x2B;
-            int MGS2_HUDOffsetHookLength = Memory::GetHookLength((char*)MGS2_HUDOffsetAddress, 13);
-            MGS2_HUDOffsetReturnJMP = MGS2_HUDOffsetAddress + MGS2_HUDOffsetHookLength;
-            Memory::DetourFunction64((void*)MGS2_HUDOffsetAddress, MGS2_HUDOffset_CC, MGS2_HUDOffsetHookLength);
-
-            LOG_F(INFO, "MGS 2: HUD Offset: Hook length is %d bytes", MGS2_HUDOffsetHookLength);
-            LOG_F(INFO, "MGS 2: HUD Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDOffsetAddress);
         }
         else if (!MGS2_HUDWidthScanResult)
         {
@@ -721,6 +720,34 @@ void HUDFix()
             LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
         }
     }
+    else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
+    {
+        // MGS 3: HUD size
+        uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
+        if (MGS3_HUDWidthScanResult)
+        {
+            fMGS3_NewHUDWidth = fMGS3_DefaultHUDWidth / fAspectMultiplier;
+            fMGS3_NewHUDHeight = fMGS3_DefaultHUDHeight;
+
+            if (bNarrowAspect)
+            {
+                fMGS3_NewHUDWidth = fMGS3_DefaultHUDWidth;
+                fMGS3_NewHUDHeight = fMGS3_DefaultHUDHeight * fAspectMultiplier;
+            }
+
+            DWORD64 MGS3_HUDWidthAddress = (uintptr_t)MGS3_HUDWidthScanResult + 0x16;
+            int MGS3_HUDWidthHookLength = Memory::GetHookLength((char*)MGS3_HUDWidthAddress, 13);
+            MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
+            Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
+
+            LOG_F(INFO, "MGS 3: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
+            LOG_F(INFO, "MGS 3: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
+        }
+        else if (!MGS3_HUDWidthScanResult)
+        {
+            LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
+        }
+    }
 
     if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe") && bHUDFix)
     {
@@ -739,29 +766,6 @@ void HUDFix()
             LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
         }
     }
-
-    /*
-    else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
-    {
-        // TODO: FIX THIS
-        // MGS 3: HUD width
-        uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ?? F3 0F ?? ?? ?? 41 ?? ?? ??");
-        if (MGS3_HUDWidthScanResult)
-        {
-            DWORD64 MGS3_HUDWidthAddress = (uintptr_t)MGS3_HUDWidthScanResult + 0x8;
-            int MGS3_HUDWidthHookLength = Memory::GetHookLength((char*)MGS3_HUDWidthAddress, 13);
-            MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
-            Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
-
-            LOG_F(INFO, "MGS 3: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
-            LOG_F(INFO, "MGS 3: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
-        }
-        else if (!MGS3_HUDWidthScanResult)
-        {
-            LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
-        }
-    }
-    */
 }
 
 void MovieFix()
