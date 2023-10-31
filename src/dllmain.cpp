@@ -33,6 +33,7 @@ bool bNarrowAspect = false;
 float fAspectDivisional;
 float fAspectMultiplier;
 float fHUDWidth;
+float fHUDHeight;
 float fHUDOffset;
 int iHUDWidth;
 int iHUDOffset;
@@ -102,11 +103,13 @@ void __declspec(naked) MGS2_HUDWidth_CC()
 {
     __asm
     {
-        movss xmm7, [fMGS2_NewHUDWidth]
+        movss xmm0, [rdi + 0x10]
+        movaps xmm2, xmm7
+        movss xmm2, [fMGS2_NewHUDWidth]
+        subss xmm0, [rdi + 0x08]
+        divss xmm2, xmm0
         movss xmm9, [fMGS2_NewHUDHeight]
         movss xmm10, [fMGS2_NewHUDHeight2]
-        mov r13, 0x0000002000000000
-        //nop dword ptr[rax + 0x00000000]
         jmp[MGS2_HUDWidthReturnJMP]
     }
 }
@@ -153,22 +156,12 @@ void __declspec(naked) MGS2_EffectsScaleX_CC()
 {
     __asm
     {
-        cmp bHUDFix, 1
-        je HUDScaleX
         movss xmm1, [fMGS2_EffectScaleX]
         mov rcx, [rbp - 0x60]
         movd xmm0, eax
         cvtdq2ps xmm0, xmm0
         divss xmm1, xmm0
         jmp[MGS2_EffectsScaleXReturnJMP]
-
-        HUDScaleX:
-            movss xmm1, [fMGS2_EffectScaleXScaled]
-            mov rcx, [rbp - 0x60]
-            movd xmm0, eax
-            cvtdq2ps xmm0, xmm0
-            divss xmm1, xmm0
-            jmp[MGS2_EffectsScaleXReturnJMP]
     }
 }
 
@@ -178,28 +171,19 @@ void __declspec(naked) MGS2_EffectsScaleX2_CC()
 {
     __asm
     {
-        cmp bHUDFix, 1
-        je HUDScaleX
         movss xmm1, [fMGS2_EffectScaleX]
         cvtdq2ps xmm0, xmm0
         divss xmm1, xmm0
         movd xmm0, [rbp - 0x04]
         addss xmm1, xmm1
         jmp[MGS2_EffectsScaleX2ReturnJMP]
-
-        HUDScaleX:
-            movss xmm1, [fMGS2_EffectScaleXScaled]
-            cvtdq2ps xmm0, xmm0
-            divss xmm1, xmm0
-            movd xmm0, [rbp - 0x04]
-            addss xmm1, xmm1
-            jmp[MGS2_EffectsScaleX2ReturnJMP]
     }
 }
 
 // MGS 2: Effects Scale Y Hook
 DWORD64 MGS2_EffectsScaleYReturnJMP;
 float fMGS2_EffectScaleY;
+float fMGS2_EffectScaleYScaled;
 void __declspec(naked) MGS2_EffectsScaleY_CC()
 {
     __asm
@@ -384,11 +368,13 @@ void ReadConfig()
     fAspectMultiplier = (float)fNewAspect / fNativeAspect;
     fHUDWidth = (float)fNewY * fNativeAspect;
     iHUDWidth = (int)fHUDWidth;
+    fHUDHeight = (float)fNewX / fNativeAspect;
     fHUDOffset = (float)(fNewX - fHUDWidth) / 2;
     iHUDOffset = (int)fHUDOffset;
     LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
     LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
     LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
+    LOG_F(INFO, "Custom Resolution: fHUDHeight: %.4f", fHUDHeight);
     LOG_F(INFO, "Custom Resolution: fHUDOffset: %.4f", fHUDOffset);
 
     // Disable ultrawide fixes at 16:9
@@ -591,6 +577,7 @@ void ScaleEffects()
 
             float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleYAddress + 0x4));
             fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fNewY);
+            fMGS2_EffectScaleYScaled = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fHUDHeight);
 
             Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
 
@@ -652,8 +639,8 @@ void HUDFix()
 {
     if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
     {
-        // MGS 2: HUD size
-        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 01 00 00 00 F3 44 ?? ?? ?? ?? ?? ?? ?? 49");
+        // MGS 2: HUD
+        uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ??");
         if (MGS2_HUDWidthScanResult)
         {
             fMGS2_NewHUDWidth = fMGS2_DefaultHUDWidth / fAspectMultiplier;
@@ -667,8 +654,8 @@ void HUDFix()
                 fMGS2_NewHUDHeight2 = fMGS2_DefaultHUDHeight2 * fAspectMultiplier;
             }
 
-            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult + 0x18;
-            int MGS2_HUDWidthHookLength = Memory::GetHookLength((char*)MGS2_HUDWidthAddress, 13);
+            DWORD64 MGS2_HUDWidthAddress = (uintptr_t)MGS2_HUDWidthScanResult + 0x5;
+            int MGS2_HUDWidthHookLength = 17;
             MGS2_HUDWidthReturnJMP = MGS2_HUDWidthAddress + MGS2_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
 
@@ -722,7 +709,7 @@ void HUDFix()
     }
     else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
     {
-        // MGS 3: HUD size
+        // MGS 3: HUD
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
         if (MGS3_HUDWidthScanResult)
         {
