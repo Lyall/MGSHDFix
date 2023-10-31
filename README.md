@@ -13,9 +13,9 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 - Custom resolution/ultrawide support.
 - Borderless/windowed mode.
 - Mouse cursor toggle.
-- Mouse sensitivty adjustment (MGS3).
+- Mouse sensitivity adjustment (MGS3).
 - Correct gameplay/cutscene aspect ratio (MGS2/MGS3).
-- Skip intro logos (MGS2/MGS3.
+- Skip intro logos (MGS2/MGS3).
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
