@@ -35,9 +35,12 @@ float fAspectDivisional;
 float fAspectMultiplier;
 float fHUDWidth;
 float fHUDHeight;
-float fHUDOffset;
+float fHUDWidthOffset;
+float fHUDHeightOffset;
 int iHUDWidth;
-int iHUDOffset;
+int iHUDHeight;
+int iHUDWidthOffset;
+int iHUDHeightOffset;
 float fMGS2_DefaultHUDX = (float)1280;
 float fMGS2_DefaultHUDY = (float)720;
 float fMGS3_DefaultHUDWidth = (float)2;
@@ -143,7 +146,7 @@ void __declspec(naked) MGS2_RadarOffset_CC()
         sar eax, 9
         shr ecx, 31
         add r9d, ecx
-        mov ecx, [iHUDOffset]
+        mov ecx, [iHUDWidthOffset]
         add eax, ecx
         jmp[MGS2_RadarOffsetReturnJMP]
     }
@@ -152,7 +155,6 @@ void __declspec(naked) MGS2_RadarOffset_CC()
 // MGS 2: Effects Scale X Hook
 DWORD64 MGS2_EffectsScaleXReturnJMP;
 float fMGS2_EffectScaleX;
-float fMGS2_EffectScaleXScaled;
 void __declspec(naked) MGS2_EffectsScaleX_CC()
 {
     __asm
@@ -184,7 +186,6 @@ void __declspec(naked) MGS2_EffectsScaleX2_CC()
 // MGS 2: Effects Scale Y Hook
 DWORD64 MGS2_EffectsScaleYReturnJMP;
 float fMGS2_EffectScaleY;
-float fMGS2_EffectScaleYScaled;
 void __declspec(naked) MGS2_EffectsScaleY_CC()
 {
     __asm
@@ -366,17 +367,11 @@ void ReadConfig()
         fNewAspect = (float)desktop.right / (float)desktop.bottom;
     }
 
-    fAspectMultiplier = (float)fNewAspect / fNativeAspect;
-    fHUDWidth = (float)fNewY * fNativeAspect;
-    iHUDWidth = (int)fHUDWidth;
-    fHUDHeight = (float)fNewX / fNativeAspect;
-    fHUDOffset = (float)(fNewX - fHUDWidth) / 2;
-    iHUDOffset = (int)fHUDOffset;
-    LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
-    LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
-    LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
-    LOG_F(INFO, "Custom Resolution: fHUDHeight: %.4f", fHUDHeight);
-    LOG_F(INFO, "Custom Resolution: fHUDOffset: %.4f", fHUDOffset);
+    // Check if <16:9
+    if (fNewAspect < fNativeAspect)
+    {
+        bNarrowAspect = true;
+    }
 
     // Disable ultrawide fixes at 16:9
     if (fNewAspect == fNativeAspect)
@@ -386,11 +381,32 @@ void ReadConfig()
         LOG_F(INFO, "Config Parse: Aspect ratio is native, disabling ultrawide fixes.");
     }
 
-    // Check if <16:9
-    if (fNewAspect < fNativeAspect)
-    {
-        bNarrowAspect = true;
+    // HUD variables
+    fAspectMultiplier = (float)fNewAspect / fNativeAspect;
+    fHUDWidth = (float)fNewY * fNativeAspect;
+    fHUDHeight = (float)fNewY;
+    fHUDWidthOffset = (float)(fNewX - fHUDWidth) / 2;
+    fHUDHeightOffset = 0;
+    if (bNarrowAspect) 
+    { 
+        fHUDWidth = fNewX; 
+        fHUDHeight = (float)fNewX / fNativeAspect;
+
+        fHUDWidthOffset = 0;
+        fHUDHeightOffset = (float)(fNewY - fHUDHeight) / 2;
+
     }
+    iHUDWidth = (int)fHUDWidth;
+    iHUDHeight = (int)fHUDHeight;
+    iHUDWidthOffset = (int)fHUDWidthOffset;
+    iHUDHeightOffset = (int)fHUDHeightOffset;
+
+    LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
+    LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
+    LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
+    LOG_F(INFO, "Custom Resolution: fHUDHeight: %.4f", fHUDHeight);
+    LOG_F(INFO, "Custom Resolution: fHUDWidthOffset: %.4f", fHUDWidthOffset);
+    LOG_F(INFO, "Custom Resolution: fHUDHeightOffset: %.4f", fHUDHeightOffset);
 }
 
 void DetectGame()
@@ -559,8 +575,11 @@ void ScaleEffects()
             Memory::DetourFunction64((void*)MGS2_EffectsScaleXAddress, MGS2_EffectsScaleX_CC, MGS2_EffectsScaleXHookLength);
 
             float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleXAddress - 0x4));
-            fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fNewX);
-            fMGS2_EffectScaleXScaled = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fHUDWidth);
+            fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fNewX);       
+            if (bHUDFix)
+            {
+                fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fHUDWidth);
+            }
 
             LOG_F(INFO, "MGS 2: Scale Effects X: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
             LOG_F(INFO, "MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
@@ -580,7 +599,10 @@ void ScaleEffects()
 
             float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleYAddress + 0x4));
             fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fNewY);
-            fMGS2_EffectScaleYScaled = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fHUDHeight);
+            if (bHUDFix && bNarrowAspect)
+            {
+                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDX / fHUDHeight);
+            }
 
             Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
 
@@ -674,18 +696,22 @@ void HUDFix()
         uint8_t* MGS2_RadarWidthScanResult = Memory::PatternScan(baseModule, "44 ?? ?? 8B ?? 0F ?? ?? ?? 41 ?? ?? 0F ?? ?? ?? 44 ?? ?? ?? ?? ?? ?? 0F ?? ?? ?? 99");
         if (MGS2_RadarWidthScanResult)
         {
-            DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
-            int MGS2_RadarWidthHookLength = Memory::GetHookLength((char*)MGS2_RadarWidthAddress, 13);
-            MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
-            Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
+            // Dont scale width if <16:9
+            if (!bNarrowAspect)
+            {
+                DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
+                int MGS2_RadarWidthHookLength = Memory::GetHookLength((char*)MGS2_RadarWidthAddress, 13);
+                MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
+                Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
 
-            LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
-            LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
+                LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
+                LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
+            }
 
             DWORD64 MGS2_RadarOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x42;
             int MGS2_RadarOffsetHookLength = 18; // length disassembler causes crashes for some reason?
             MGS2_RadarOffsetReturnJMP = MGS2_RadarOffsetAddress + MGS2_RadarOffsetHookLength;
-            Memory::DetourFunction64((void*)MGS2_RadarOffsetAddress, MGS2_RadarOffset_CC, MGS2_RadarOffsetHookLength);
+            //Memory::DetourFunction64((void*)MGS2_RadarOffsetAddress, MGS2_RadarOffset_CC, MGS2_RadarOffsetHookLength);
 
             LOG_F(INFO, "MGS 2: Radar Offset: Hook length is %d bytes", MGS2_RadarOffsetHookLength);
             LOG_F(INFO, "MGS 2: Radar Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarOffsetAddress);
@@ -788,7 +814,7 @@ void MovieFix()
         uint8_t* MGS3_MovieScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E8 ?? ?? ?? ?? 41 8B ?? ?? 48 8D ??");
         if (MGS3_MovieScanResult)
         {
-            MGS3_fMovieOffset = -((fHUDOffset) / 2);
+            MGS3_fMovieOffset = -((fHUDWidthOffset) / 2);
             MGS3_fMovieWidth = (float)720 * fNewAspect;
 
             DWORD64 MGS3_MovieAddress = (Memory::GetAbsolute((uintptr_t)MGS3_MovieScanResult + 0x4) + 0x44); // This is bad but it gives us a more unique sig otherwise it's >100 bytes.
