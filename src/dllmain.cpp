@@ -356,7 +356,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
     inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
-    inipp::get_value(ini.sections["Custom Resolution"], "Anisotropic Filtering", iAnisotropicFiltering);
+    inipp::get_value(ini.sections["Anisotropic Filtering"], "Samples", iAnisotropicFiltering);
     inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
