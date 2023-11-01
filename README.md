@@ -2,7 +2,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total.svg)](https://github.com/Lyall/MGSHDFix/releases)
 
-This is a **work-in-progress** fix that aims to add custom resolutions, ultrawide support and more to Metal Gear Solid Master Collection.<br />
+This is a **work-in-progress** fix that aims to add custom resolutions, ultrawide support and more to the Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
 - Metal Gear 1/2
