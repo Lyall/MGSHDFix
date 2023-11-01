@@ -2,7 +2,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total.svg)](https://github.com/Lyall/MGSHDFix/releases)
 
-This is a **work-in-progress** fix that aims to add custom resolutions and ultrawide support to Metal Gear Solid Master Collection.<br />
+This is a **work-in-progress** fix that aims to add custom resolutions, ultrawide support and more to Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
 - Metal Gear 1/2
@@ -11,11 +11,13 @@ This is a **work-in-progress** fix that aims to add custom resolutions and ultra
 
 ## Features
 - Custom resolution/ultrawide support.
+- Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
 - Borderless/windowed mode.
 - Mouse cursor toggle.
 - Mouse sensitivity adjustment (MGS3).
 - Correct gameplay/cutscene aspect ratio (MGS2/MGS3).
 - Skip intro logos (MGS2/MGS3).
+- Adjustable anisotropic filtering (MGS2/MGS3).
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -32,9 +34,6 @@ Steam Deck users can also enjoy a native 800p (16:10) experience by installing t
 ## Known Issues
 Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
-
-### MG1/MG2
-- Game window is stretched at non 16:9 resolutions.
 
 ### MGS 2
 - Strength of post-processing is reduced at higher resolutions.
