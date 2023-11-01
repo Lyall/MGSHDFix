@@ -36,10 +36,10 @@ Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
 
 ### MGS 2
-- Strength of post-processing is reduced at higher resolutions.
+- Strength of post-processing may be reduced at higher resolutions. ([#31](https://github.com/Lyall/MGSHDFix/issues/35))
 
 ### MGS 3
-- Strength of post-processing is reduced at higher resolutions.
+- Strength of post-processing may be reduced at higher resolutions. ([#31](https://github.com/Lyall/MGSHDFix/issues/35))
 
 ## Screenshots
 
