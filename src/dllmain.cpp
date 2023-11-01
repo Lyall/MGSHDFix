@@ -358,6 +358,11 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
     LOG_F(INFO, "Config Parse: iAnisotropicFiltering: %d", iAnisotropicFiltering);
+    if (iAnisotropicFiltering < 0 || iAnisotropicFiltering > 16)
+    {
+        iAnisotropicFiltering = std::clamp(iAnisotropicFiltering, 0, 16);
+        LOG_F(INFO, "Config Parse: iAnisotropicFiltering value invalid, clamped to %d", iAnisotropicFiltering);
+    }
     LOG_F(INFO, "Config Parse: bFramebufferFix: %d", bFramebufferFix);
     LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
