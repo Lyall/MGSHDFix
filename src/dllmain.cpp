@@ -15,6 +15,7 @@ bool bCustomResolution;
 bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
+bool bFramebufferFix;
 bool bDisableCursor;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
@@ -263,7 +264,6 @@ void __declspec(naked) MGS3_MouseSensitivityX_CC()
 {
     __asm
     {
-        //mulss xmm0, [rbx + 0x28]
         mulss xmm0, [fMouseSensitivityXMulti]
         cvttss2si eax, xmm0
         movd xmm0, ecx
@@ -278,7 +278,6 @@ void __declspec(naked) MGS3_MouseSensitivityY_CC()
 {
     __asm
     {
-        //mulss xmm0, [rbx + 0x28]
         mulss xmm0, [fMouseSensitivityYMulti]
         mov [rbx + 0x50], edx
         cvttss2si eax, xmm0
@@ -314,14 +313,15 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
     inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
+    inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
+    inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
-    inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
-    inipp::get_value(ini.sections["Fix FMVs"], "Enabled", bMovieFix);
+    //inipp::get_value(ini.sections["Fix FMVs"], "Enabled", bMovieFix);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -330,6 +330,7 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
     LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
+    LOG_F(INFO, "Config Parse: bFramebufferFix: %d", bFramebufferFix);
     LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
     LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
@@ -442,20 +443,23 @@ void CustomResolution()
 
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
         // Thanks emoose!
-        for (int i = 1; i <= 2; ++i) // Two results to change, unsure if first result is actually used but we NOP it anyway.
+        if (bFramebufferFix)
         {
-            uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
-            if (MGS2_MGS3_FramebufferFixScanResult)
+            for (int i = 1; i <= 2; ++i) // Two results to change, unsure if first result is actually used but we NOP it anyway.
             {
-                DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
+                uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
+                if (MGS2_MGS3_FramebufferFixScanResult)
+                {
+                    DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
 
-                Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
-            }
-            else if (!MGS2_MGS3_FramebufferFixScanResult)
-            {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+                    Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
+                }
+                else if (!MGS2_MGS3_FramebufferFixScanResult)
+                {
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+                }
             }
         }
 
@@ -515,8 +519,7 @@ void CustomResolution()
         {
             LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Pattern scan failed.");
         }
-    }
-    
+    }   
 }
 
 void IntroSkip()
