@@ -801,6 +801,34 @@ void HUDFix()
             LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
         }
     }
+    else if ((sExeName == "METAL GEAR.exe" && fNewAspect > fNativeAspect) || (sExeName == "METAL GEAR.exe" && fNewAspect < fNativeAspect))
+    {
+        // MG1/MG2: HUD
+        uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
+        if (MGS3_HUDWidthScanResult)
+        {
+            fMGS3_NewHUDWidth = fMGS3_DefaultHUDWidth / fAspectMultiplier;
+            fMGS3_NewHUDHeight = fMGS3_DefaultHUDHeight;
+
+            if (bNarrowAspect)
+            {
+                fMGS3_NewHUDWidth = fMGS3_DefaultHUDWidth;
+                fMGS3_NewHUDHeight = fMGS3_DefaultHUDHeight * fAspectMultiplier;
+            }
+
+            DWORD64 MGS3_HUDWidthAddress = (uintptr_t)MGS3_HUDWidthScanResult + 0x16;
+            int MGS3_HUDWidthHookLength = 15;
+            MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
+            Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
+
+            LOG_F(INFO, "MG1/MG2: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
+            LOG_F(INFO, "MG1/MG2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
+        }
+        else if (!MGS3_HUDWidthScanResult)
+        {
+            LOG_F(INFO, "MG1/MG2: HUD Width: Pattern scan failed.");
+        }
+    }
 
     if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe") && bHUDFix)
     {
