@@ -125,6 +125,11 @@ void __declspec(naked) MGS2_RadarWidth_CC()
     __asm
     {
         mov ebx, [iHUDWidth]
+        cmp bNarrowAspect, 1
+        // ->
+        jne $+0x8
+        mov eax, [iHUDHeight]
+        // <-
         mov r8d, eax
         mov eax, ebx
         imul eax, [rsi + 0x0C]
@@ -134,9 +139,9 @@ void __declspec(naked) MGS2_RadarWidth_CC()
     }
 }
 
-// MGS 2: Radar Offset Hook
-DWORD64 MGS2_RadarOffsetReturnJMP;
-void __declspec(naked) MGS2_RadarOffset_CC()
+// MGS 2: Radar Width Offset Hook
+DWORD64 MGS2_RadarWidthOffsetReturnJMP;
+void __declspec(naked) MGS2_RadarWidthOffset_CC()
 {
     __asm
     {
@@ -148,7 +153,53 @@ void __declspec(naked) MGS2_RadarOffset_CC()
         add r9d, ecx
         mov ecx, [iHUDWidthOffset]
         add eax, ecx
-        jmp[MGS2_RadarOffsetReturnJMP]
+        jmp[MGS2_RadarWidthOffsetReturnJMP]
+    }
+}
+
+// MGS 2: Radar Width Offset Hook
+DWORD64 MGS2_RadarHeightOffsetReturnJMP;
+DWORD64 MGS2_RadarHeightOffsetValueAddress = 0;
+void __declspec(naked) MGS2_RadarHeightOffset_CC()
+{
+    __asm
+    {
+        sar edx, 0x08
+        mov eax, edx
+        shr eax, 0x1F
+        add edx, eax
+        mov eax, [iHUDHeightOffset]
+        add edx, eax
+        mov rax, [MGS2_RadarHeightOffsetValueAddress]
+        mov dword ptr[rax], edx
+        xor eax, eax
+        jmp[MGS2_RadarHeightOffsetReturnJMP]
+    }
+}
+
+// MGS 2: Codec Portraits Hook
+DWORD64 MGS2_CodecPortraitsReturnJMP;
+void __declspec(naked) MGS2_CodecPortraits_CC()
+{
+    __asm
+    {
+        cmp bNarrowAspect, 1
+        jne resizeHor
+        divss xmm5, [fAspectMultiplier]
+        addss xmm0, [rax + 0x60]
+        cvttss2si eax, xmm4
+        movss xmm4, [rbx + 0x64]
+        jmp[MGS2_CodecPortraitsReturnJMP]
+
+        resizeHor:
+            divss xmm0, [fAspectMultiplier]
+            movss xmm15, xmm4
+            divss xmm15, [fAspectMultiplier]
+            addss xmm0, xmm15
+            xorps xmm15, xmm15
+            cvttss2si eax, xmm4
+            movss xmm4, [rbx + 0x64]
+            jmp[MGS2_CodecPortraitsReturnJMP]
     }
 }
 
@@ -565,7 +616,7 @@ void ScaleEffects()
             fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fNewY);
             if (bHUDFix && bNarrowAspect)
             {
-                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDX / fHUDHeight);
+                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDX / fNewX);
             }
 
             Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
@@ -660,42 +711,64 @@ void HUDFix()
         uint8_t* MGS2_RadarWidthScanResult = Memory::PatternScan(baseModule, "44 ?? ?? 8B ?? 0F ?? ?? ?? 41 ?? ?? 0F ?? ?? ?? 44 ?? ?? ?? ?? ?? ?? 0F ?? ?? ?? 99");
         if (MGS2_RadarWidthScanResult)
         {
-            // Dont scale width if <16:9
-            if (!bNarrowAspect)
-            {
-                DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
-                int MGS2_RadarWidthHookLength = Memory::GetHookLength((char*)MGS2_RadarWidthAddress, 13);
-                MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
-                Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
+            DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
+            int MGS2_RadarWidthHookLength = Memory::GetHookLength((char*)MGS2_RadarWidthAddress, 13);
+            MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
+            Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
 
-                LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
-                LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
-            }
+            LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
+            LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
 
-            DWORD64 MGS2_RadarOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x42;
-            int MGS2_RadarOffsetHookLength = 18; // length disassembler causes crashes for some reason?
-            MGS2_RadarOffsetReturnJMP = MGS2_RadarOffsetAddress + MGS2_RadarOffsetHookLength;
-            //Memory::DetourFunction64((void*)MGS2_RadarOffsetAddress, MGS2_RadarOffset_CC, MGS2_RadarOffsetHookLength);
+            DWORD64 MGS2_RadarWidthOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x42;
+            int MGS2_RadarWidthOffsetHookLength = 18; // length disassembler causes crashes for some reason?
+            MGS2_RadarWidthOffsetReturnJMP = MGS2_RadarWidthOffsetAddress + MGS2_RadarWidthOffsetHookLength;
+            Memory::DetourFunction64((void*)MGS2_RadarWidthOffsetAddress, MGS2_RadarWidthOffset_CC, MGS2_RadarWidthOffsetHookLength);
 
-            LOG_F(INFO, "MGS 2: Radar Offset: Hook length is %d bytes", MGS2_RadarOffsetHookLength);
-            LOG_F(INFO, "MGS 2: Radar Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarOffsetAddress);
+            LOG_F(INFO, "MGS 2: Radar Width Offset: Hook length is %d bytes", MGS2_RadarWidthOffsetHookLength);
+            LOG_F(INFO, "MGS 2: Radar Width Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthOffsetAddress);
+
+            DWORD64 MGS2_RadarHeightOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x88;
+            int MGS2_RadarHeightOffsetHookLength = 16;
+            MGS2_RadarHeightOffsetReturnJMP = MGS2_RadarHeightOffsetAddress + MGS2_RadarHeightOffsetHookLength;
+            MGS2_RadarHeightOffsetValueAddress = *(int*)(MGS2_RadarHeightOffsetAddress + 0xC) + (MGS2_RadarHeightOffsetAddress + 0xC) + 0x4;
+            Memory::DetourFunction64((void*)MGS2_RadarHeightOffsetAddress, MGS2_RadarHeightOffset_CC, MGS2_RadarHeightOffsetHookLength);
+
+            LOG_F(INFO, "MGS 2: Radar Height Offset: Hook length is %d bytes", MGS2_RadarHeightOffsetHookLength);
+            LOG_F(INFO, "MGS 2: Radar Height Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarHeightOffsetAddress);
         }
         else if (!MGS2_RadarWidthScanResult)
         {
             LOG_F(INFO, "MGS 2: Radar Fix: Pattern scan failed.");
         }
 
-        // MGS 2: Disable motion blur. 
-        uint8_t* MGS2_MGS3_MotionBlurScanResult = Memory::PatternScan(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
-        if (MGS2_MGS3_MotionBlurScanResult && bWindowedMode)
+         // MGS 2: Codec Portraits
+        uint8_t* MGS2_CodecPortraitsScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??");
+        if (MGS2_CodecPortraitsScanResult)
         {
-            DWORD64 MGS2_MGS3_MotionBlurAddress = (uintptr_t)MGS2_MGS3_MotionBlurScanResult;
-            LOG_F(INFO, "MGS 2: Motion Blur: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MotionBlurAddress);
+            DWORD64 MGS2_CodecPortraitsAddress = (uintptr_t)MGS2_CodecPortraitsScanResult;
+            int MGS2_CodecPortraitsHookLength = Memory::GetHookLength((char*)MGS2_CodecPortraitsAddress, 13);
+            MGS2_CodecPortraitsReturnJMP = MGS2_CodecPortraitsAddress + MGS2_CodecPortraitsHookLength;
+            Memory::DetourFunction64((void*)MGS2_CodecPortraitsAddress, MGS2_CodecPortraits_CC, MGS2_CodecPortraitsHookLength);
 
-            Memory::PatchBytes(MGS2_MGS3_MotionBlurAddress, "\x48\x31\xDB\x90\x90\x90", 6);
+            LOG_F(INFO, "MGS 2: Codec Portraits: Hook length is %d bytes", MGS2_CodecPortraitsHookLength);
+            LOG_F(INFO, "MGS 2: Codec Portraits: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CodecPortraitsAddress);
+        }
+        else if (!MGS2_CodecPortraitsScanResult)
+        {
+            LOG_F(INFO, "MGS 2: Codec Portraits: Pattern scan failed.");
+        }
+
+        // MGS 2: Disable motion blur. 
+        uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScan(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
+        if (MGS2_MotionBlurScanResult && bWindowedMode)
+        {
+            DWORD64 MGS2_MotionBlurAddress = (uintptr_t)MGS2_MotionBlurScanResult;
+            LOG_F(INFO, "MGS 2: Motion Blur: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MotionBlurAddress);
+
+            Memory::PatchBytes(MGS2_MotionBlurAddress, "\x48\x31\xDB\x90\x90\x90", 6);
             LOG_F(INFO, "MGS 2: Motion Blur: Patched instruction.");
         }
-        else if (!MGS2_MGS3_MotionBlurScanResult)
+        else if (!MGS2_MotionBlurScanResult)
         {
             LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
         }
