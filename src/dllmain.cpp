@@ -14,6 +14,7 @@ bool bCustomResolution;
 bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
+int iAnisotropicFiltering;
 bool bFramebufferFix;
 bool bDisableBackgroundInput;
 bool bDisableCursor;
@@ -303,6 +304,31 @@ void __declspec(naked) MGS3_MouseSensitivityY_CC()
     }
 }
 
+#define D3D11_FILTER_ANISOTROPIC 0x55
+
+// MGS 2 / MGS 3: Forced anisotropy via CD3DCachedDevice::SetSamplerState hook
+DWORD64 MGS2_MGS3_SetSamplerStateAnisoReturnJMP;
+DWORD64 gpRenderBackend = 0;
+void __declspec(naked) MGS2_MGS3_SetSamplerStateAniso_CC()
+{
+    __asm
+    {
+        mov rax, [gpRenderBackend]
+        mov rax, [rax]
+
+        mov r9d, [iAnisotropicFiltering]
+
+        // [rcx+rax+0x438] = D3D11_SAMPLER_DESC, +0x14 = MaxAnisotropy
+        mov [rcx+rax+0x438 + 0x14], r9d
+
+        // Override filter mode in r9d with aniso value and run compare from orig game code
+        // Game code will then copy in r9d & update D3D etc when r9d is different to existing value
+        mov r9d, D3D11_FILTER_ANISOTROPIC
+        cmp [rcx+rax+0x438], r9d
+        jmp [MGS2_MGS3_SetSamplerStateAnisoReturnJMP]
+    }
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -330,6 +356,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
     inipp::get_value(ini.sections["Custom Resolution"], "Windowed", bWindowedMode);
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
+    inipp::get_value(ini.sections["Custom Resolution"], "Anisotropic Filtering", iAnisotropicFiltering);
     inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
@@ -347,6 +374,12 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
     LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
     LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
+    LOG_F(INFO, "Config Parse: iAnisotropicFiltering: %d", iAnisotropicFiltering);
+    if (iAnisotropicFiltering < 0 || iAnisotropicFiltering > 16)
+    {
+        iAnisotropicFiltering = std::clamp(iAnisotropicFiltering, 0, 16);
+        LOG_F(INFO, "Config Parse: iAnisotropicFiltering value invalid, clamped to %d", iAnisotropicFiltering);
+    }
     LOG_F(INFO, "Config Parse: bFramebufferFix: %d", bFramebufferFix);
     LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
     LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
@@ -901,6 +934,31 @@ void Miscellaneous()
             {
                 LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
             }
+        }
+    }
+
+    if (iAnisotropicFiltering > 0 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR SOLID2.exe"))
+    {
+        uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
+        if (MGS2_MGS3_SetSamplerStateInsnResult)
+        {
+            DWORD64 MGS2_MGS3_SetSamplerStateInsnAddress = (uintptr_t)MGS2_MGS3_SetSamplerStateInsnResult;
+            DWORD64 gpRenderBackendPtrAddr = MGS2_MGS3_SetSamplerStateInsnAddress + 3;
+
+            gpRenderBackend = *(int*)gpRenderBackendPtrAddr + gpRenderBackendPtrAddr + 4;
+            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: gpRenderBackend = 0x%" PRIxPTR, (uintptr_t)gpRenderBackend);
+
+            int MGS2_MGS3_SetSamplerStateInsnHookLength = Memory::GetHookLength((char*)MGS2_MGS3_SetSamplerStateInsnAddress, 14);
+
+            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Hook length is %d bytes", MGS2_MGS3_SetSamplerStateInsnHookLength);
+            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_SetSamplerStateInsnAddress);
+
+            MGS2_MGS3_SetSamplerStateAnisoReturnJMP = MGS2_MGS3_SetSamplerStateInsnAddress + MGS2_MGS3_SetSamplerStateInsnHookLength;
+            Memory::DetourFunction64((void*)MGS2_MGS3_SetSamplerStateInsnAddress, MGS2_MGS3_SetSamplerStateAniso_CC, MGS2_MGS3_SetSamplerStateInsnHookLength);
+        }
+        else
+        {
+            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Sampler state pattern scan failed.");
         }
     }
 
