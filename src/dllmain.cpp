@@ -10,7 +10,6 @@ inipp::Ini<char> ini;
 // INI Variables
 bool bAspectFix;
 bool bHUDFix;
-bool bMovieFix;
 bool bCustomResolution;
 bool bSkipIntroLogos;
 bool bWindowedMode;
@@ -224,41 +223,6 @@ void __declspec(naked) MGS3_CreateWindowExA_CC()
     }
 }
 
-/*
-// MGS 2: Movie Hook
-DWORD64 MGS2_MovieReturnJMP;
-float MGS2_fMovieScaleX;
-float MGS2_fMovieWidth;
-void __declspec(naked) MGS2_Movie_CC()
-{
-    __asm
-    {
-        movss xmm3, [fMGS2_DefaultHUDX]
-        movss xmm1,[MGS2_fMovieWidth]
-        subss xmm3, xmm1
-        mov rcx, rdi
-        jmp[MGS2_MovieReturnJMP]
-    }
-}
-
-// MGS 3: Movie Hook
-DWORD64 MGS3_MovieReturnJMP;
-float MGS3_fMovieOffset;
-float MGS3_fMovieWidth;
-void __declspec(naked) MGS3_Movie_CC()
-{
-    __asm
-    {
-        xorps xmm2, xmm2
-        xorps xmm1, xmm1
-        movss xmm3, [MGS3_fMovieWidth]
-        movss xmm1, [MGS3_fMovieOffset]
-        addss xmm3, [MGS3_fMovieOffset]
-        jmp[MGS3_MovieReturnJMP]
-    }
-}
-*/
-
 // MGS 3: Mouse Sensitivity X Hook
 DWORD64 MGS3_MouseSensitivityXReturnJMP;
 void __declspec(naked) MGS3_MouseSensitivityX_CC()
@@ -322,7 +286,6 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
-    //inipp::get_value(ini.sections["Fix FMVs"], "Enabled", bMovieFix);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -339,7 +302,6 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: fMouseSensitivityYMulti: %.2f", fMouseSensitivityYMulti);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
-    //LOG_F(INFO, "Config Parse: bMovieFix: %d", bMovieFix);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
     if (bBorderlessMode)
@@ -377,7 +339,7 @@ void ReadConfig()
     if (fNewAspect == fNativeAspect)
     {
         bAspectFix = false;
-        bMovieFix = false;
+        bHUDFix = false;
         LOG_F(INFO, "Config Parse: Aspect ratio is native, disabling ultrawide fixes.");
     }
 
@@ -784,55 +746,6 @@ void HUDFix()
     }
 }
 
-void MovieFix()
-{
-    /*
-    if (sExeName == "METAL GEAR SOLID2.exe" && bMovieFix)
-    {
-        // MGS 2: Movie fix
-        uint8_t* MGS2_MovieScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 48 ?? ?? F3 0F ?? ?? ?? ?? 48 ?? ?? 0F ?? ??");
-        if (MGS2_MovieScanResult)
-        {
-            MGS2_fMovieWidth = (float)-((fNewX / fMGS2_EffectScaleX) - (fNewY / fMGS2_EffectScaleY));
-
-            DWORD64 MGS2_MovieAddress = (uintptr_t)MGS2_MovieScanResult;
-            int MGS2_MovieHookLength = Memory::GetHookLength((char*)MGS2_MovieAddress, 13);
-            MGS2_MovieReturnJMP = MGS2_MovieAddress + MGS2_MovieHookLength;
-            Memory::DetourFunction64((void*)MGS2_MovieAddress, MGS2_Movie_CC, MGS2_MovieHookLength);
-
-            LOG_F(INFO, "MGS 2: Movie: Hook length is %d bytes", MGS2_MovieHookLength);
-            LOG_F(INFO, "MGS 2: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MovieAddress);
-        }
-        else if (!MGS2_MovieScanResult)
-        {
-            LOG_F(INFO, "MGS 2: Movie: Pattern scan failed.");
-        }
-    }
-    else if (sExeName == "METAL GEAR SOLID3.exe" && bMovieFix)
-    {
-        // MGS 3: Movie fix
-        uint8_t* MGS3_MovieScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E8 ?? ?? ?? ?? 41 8B ?? ?? 48 8D ??");
-        if (MGS3_MovieScanResult)
-        {
-            MGS3_fMovieOffset = -((fHUDWidthOffset) / 2);
-            MGS3_fMovieWidth = (float)720 * fNewAspect;
-
-            DWORD64 MGS3_MovieAddress = (Memory::GetAbsolute((uintptr_t)MGS3_MovieScanResult + 0x4) + 0x44); // This is bad but it gives us a more unique sig otherwise it's >100 bytes.
-            int MGS3_MovieHookLength = Memory::GetHookLength((char*)MGS3_MovieAddress, 13);
-            MGS3_MovieReturnJMP = MGS3_MovieAddress + MGS3_MovieHookLength;
-            //Memory::DetourFunction64((void*)MGS3_MovieAddress, MGS3_Movie_CC, MGS3_MovieHookLength);
-
-            LOG_F(INFO, "MGS 3: Movie: Hook length is %d bytes", MGS3_MovieHookLength);
-            LOG_F(INFO, "MGS 3: Movie: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MovieAddress);
-        }
-        else if (!MGS3_MovieScanResult)
-        {
-            LOG_F(INFO, "MGS 3: Movie: Pattern scan failed.");
-        }
-    }
-    */
-}
-
 void Miscellaneous()
 {
 
@@ -895,7 +808,6 @@ DWORD __stdcall Main(void*)
     ScaleEffects();
     AspectFOVFix();
     HUDFix();
-    MovieFix();
     Miscellaneous();
     return true; // end thread
 }
