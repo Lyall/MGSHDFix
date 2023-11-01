@@ -15,6 +15,7 @@ bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
 bool bFramebufferFix;
+bool bDisableBackgroundInput;
 bool bDisableCursor;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
@@ -280,6 +281,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Custom Resolution"], "Borderless", bBorderlessMode);
     inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
+    inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
@@ -748,23 +750,56 @@ void HUDFix()
 
 void Miscellaneous()
 {
-
-    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bDisableCursor)
+    if (sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe")
     {
-        // MGS 2 | MGS 3: Disable mouse cursor
-        // Thanks again emoose!
-        uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
-        if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+        if (bDisableCursor)
         {
-            DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
+            // MGS 2 | MGS 3: Disable mouse cursor
+            // Thanks again emoose!
+            uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
+            if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+            {
+                DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
 
-            Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+            }
+            else if (!MGS2_MGS3_MouseCursorScanResult)
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+            }
         }
-        else if (!MGS2_MGS3_MouseCursorScanResult)
+
+        if (bWindowedMode && bDisableBackgroundInput)
         {
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+            // MG/MG2 | MGS 2 | MGS 3: Disable Background Input
+            uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "83 BF 80 02 00 00 00 0F");
+            uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "8B D5 FF 15 ?? ?? ?? ?? 48 8B 8F B0 02 00 00");
+            uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "39 AF 48 09 00 00");
+            if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_IsWindowedCheck);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_ShowWindowCall);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_SetFullscreenEnd);
+
+                // Patch out the jnz after the windowed check
+                Memory::PatchBytes((uintptr_t)(MGS_WndProc_IsWindowedCheck + 7), "\x90\x90\x90\x90\x90\x90", 6);
+
+                // We included 2 more bytes in MGS_WndProc_ShowWindowCall sig to reduce matches, but we want to keep those
+                MGS_WndProc_ShowWindowCall += 2;
+
+                // Skip the ShowWindow & SetFullscreenState block by figuring out how many bytes to skip over
+                uint8_t jmper[] = { 0xEB, 0x00 };
+                jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
+
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
+                Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
+            }
         }
     }
 
