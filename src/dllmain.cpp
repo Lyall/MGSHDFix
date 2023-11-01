@@ -865,7 +865,7 @@ void Miscellaneous()
     if (iAnisotropicFiltering > 0 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR SOLID2.exe"))
     {
         uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
-        if (!MGS2_MGS3_SetSamplerStateInsnResult)
+        if (MGS2_MGS3_SetSamplerStateInsnResult)
         {
             DWORD64 MGS2_MGS3_SetSamplerStateInsnAddress = (uintptr_t)MGS2_MGS3_SetSamplerStateInsnResult;
             DWORD64 gpRenderBackendPtrAddr = MGS2_MGS3_SetSamplerStateInsnAddress + 3;
