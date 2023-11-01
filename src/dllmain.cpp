@@ -50,23 +50,6 @@ string sExePath;
 string sGameVersion;
 string sFixVer = "0.8";
 
-// MG/MG2 | MGS 2 | MGS 3: Framebuffer Hook
-DWORD64 FramebufferFixReturnJMP;
-int iFB_DesktopWidth;
-int iFB_DesktopHeight;
-void __declspec(naked) FramebufferFix_CC()
-{
-    __asm
-    {
-        movd xmm4, [iFB_DesktopWidth]
-        movd xmm3, [iFB_DesktopHeight]
-        mov r10d, 0x0000004C
-        cmove eax, r10d
-        mov edx, 0x0000006C
-        jmp [FramebufferFixReturnJMP]
-    }
-}
-
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
 void __declspec(naked) MGS2_GameplayAspect_CC()
@@ -459,26 +442,21 @@ void CustomResolution()
 
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
         // Thanks emoose!
-        uint8_t* FramebufferFixScanResult = Memory::PatternScan(baseModule, "41 ?? ?? ?? 00 00 41 ?? ?? ?? BA ?? ?? 00 00 0F ?? ??");
-        if (FramebufferFixScanResult)
+        for (int i = 1; i <= 2; ++i) // Two results to change, unsure if first result is actually used but we NOP it anyway.
         {
-            // Grab desktop resolution
-            RECT desktop;
-            GetWindowRect(GetDesktopWindow(), &desktop);
-            iFB_DesktopWidth = (int)desktop.right;
-            iFB_DesktopHeight = (int)desktop.bottom;
+            uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
+            if (MGS2_MGS3_FramebufferFixScanResult)
+            {
+                DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
 
-            DWORD64 FramebufferFixAddress = (uintptr_t)FramebufferFixScanResult;
-            int FramebufferFixHookLength = Memory::GetHookLength((char*)FramebufferFixAddress, 13);
-            FramebufferFixReturnJMP = FramebufferFixAddress + FramebufferFixHookLength;
-            Memory::DetourFunction64((void*)FramebufferFixAddress, FramebufferFix_CC, FramebufferFixHookLength);
-
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer: Hook length is %d bytes", FramebufferFixHookLength);
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer: Hook address is 0x%" PRIxPTR, (uintptr_t)FramebufferFixAddress);
-        }
-        else if (!FramebufferFixScanResult)
-        {
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer: Pattern scan failed.");
+                Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
+            }
+            else if (!MGS2_MGS3_FramebufferFixScanResult)
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+            }
         }
 
         // MGS 2 | MGS 3: Windowed mode
