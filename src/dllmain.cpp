@@ -16,6 +16,7 @@ bool bWindowedMode;
 bool bBorderlessMode;
 int iAnisotropicFiltering;
 bool bFramebufferFix;
+int iTextureBufferSizeMB;
 bool bDisableBackgroundInput;
 bool bDisableCursor;
 bool bMouseSensitivity;
@@ -366,6 +367,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
+    inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", iTextureBufferSizeMB);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -988,7 +990,52 @@ void Miscellaneous()
         {
             LOG_F(INFO, "MGS 3: Mouse Sensitivity: Pattern scan failed.");
         }
-    }  
+    }
+
+    if (iTextureBufferSizeMB > 16 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe"))
+    {
+        // MG/MG2 | MGS3: texture buffer size extension
+        uint32_t NewSize = iTextureBufferSizeMB * 1024 * 1024;
+
+        // Scan for the 9 mallocs which set buffer inside CTextureBuffer::sInstance
+        bool failure = false;
+        for(int i = 0; i < 9; i++)
+        {
+            uint8_t* MGS3_CTextureBufferMallocResult = Memory::PatternScan(baseModule, "75 ?? B9 00 00 00 01 FF");
+            if(MGS3_CTextureBufferMallocResult)
+            {
+                uint32_t* bufferAmount = (uint32_t*)(MGS3_CTextureBufferMallocResult + 3);
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") old buffer size: %d", i, MGS3_CTextureBufferMallocResult, *bufferAmount);
+                Memory::Write((uintptr_t)bufferAmount, NewSize);
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") new buffer size: %d", i, MGS3_CTextureBufferMallocResult, *bufferAmount);
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d: Pattern scan failed.", i);
+                failure = true;
+                break;
+            }
+        }
+
+        if (!failure)
+        {
+            // CBaseTexture::Create seems to contain code that mallocs buffers based on 16MiB shifted by index of the mip being loaded
+            // (ie: size = 16MiB >> mipIndex)
+            // We'll make sure to increase the base 16MiB size it uses too
+            uint8_t* MGS3_CBaseTextureMallocResult = Memory::PatternScan(baseModule, "75 ?? B8 00 00 00 01");
+            if (MGS3_CBaseTextureMallocResult)
+            {
+                uint32_t* bufferAmount = (uint32_t*)(MGS3_CBaseTextureMallocResult + 3);
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") old buffer size: %d", 9, MGS3_CBaseTextureMallocResult, *bufferAmount);
+                Memory::Write((uintptr_t)bufferAmount, NewSize);
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") new buffer size: %d", 9, MGS3_CBaseTextureMallocResult, *bufferAmount);
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d: Pattern scan failed.", 9);
+            }
+        }
+    }
 }
 
 DWORD __stdcall Main(void*)
