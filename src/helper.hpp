@@ -120,6 +120,13 @@ namespace Memory
         return len ? (HMODULE)info.AllocationBase : NULL;
     }
 
+    uint32_t ModuleTimestamp(void* module)
+    {
+        auto dosHeader = (PIMAGE_DOS_HEADER)module;
+        auto ntHeaders = (PIMAGE_NT_HEADERS)((std::uint8_t*)module + dosHeader->e_lfanew);
+        return ntHeaders->FileHeader.TimeDateStamp;
+    }
+
     // CSGOSimple's pattern scan
     // https://github.com/OneshotGH/CSGOSimple-master/blob/master/CSGOSimple/helpers/utils.cpp
     std::uint8_t* PatternScan(void* module, const char* signature)

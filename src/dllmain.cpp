@@ -470,6 +470,7 @@ void DetectGame()
 
     LOG_F(INFO, "Game Name: %s", sExeName.c_str());
     LOG_F(INFO, "Game Path: %s", sExePath.c_str());
+    LOG_F(INFO, "Game Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
     if (sExeName == "METAL GEAR SOLID2.exe")
     {
