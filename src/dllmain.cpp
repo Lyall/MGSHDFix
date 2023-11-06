@@ -10,6 +10,7 @@ inipp::Ini<char> ini;
 // INI Variables
 bool bAspectFix;
 bool bHUDFix;
+bool bFOVFix;
 bool bCustomResolution;
 bool bSkipIntroLogos;
 bool bWindowedMode;
@@ -82,6 +83,19 @@ void __declspec(naked) MGS3_GameplayAspect_CC()
         divss xmm1, [fAspectMultiplier]
         movaps xmm0,xmm1
         ret
+    }
+}
+
+// MGS 3: FOV Hook
+DWORD64 MGS3_FOVReturnJMP;
+void __declspec(naked) MGS3_FOV_CC()
+{
+    __asm
+    {
+        mulss xmm2, [fAspectMultiplier]
+        movss[rcx + 0x00000338], xmm2
+        movaps[rsp + 0x50], xmm15
+        jmp [MGS3_FOVReturnJMP]
     }
 }
 
@@ -365,9 +379,10 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
+    inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", iTextureBufferSizeMB);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
-    inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", iTextureBufferSizeMB);
+    inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFOVFix);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -388,8 +403,10 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
     LOG_F(INFO, "Config Parse: fMouseSensitivityXMulti: %.2f", fMouseSensitivityXMulti);
     LOG_F(INFO, "Config Parse: fMouseSensitivityYMulti: %.2f", fMouseSensitivityYMulti);
+    LOG_F(INFO, "Config Parse: iTextureBufferSizeMB: %d", iTextureBufferSizeMB);
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
+    LOG_F(INFO, "Config Parse: bFOVFix: %d", bFOVFix);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
     if (bBorderlessMode)
@@ -474,11 +491,11 @@ void DetectGame()
 
     if (sExeName == "METAL GEAR SOLID2.exe")
     {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 2 HD");
+        LOG_F(INFO, "Detected game is: Metal Gear Solid 2");
     }
     else if (sExeName == "METAL GEAR SOLID3.exe")
     {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 3 HD");
+        LOG_F(INFO, "Detected game is: Metal Gear Solid 3");
     }
     else if (sExeName == "METAL GEAR.exe")
     {
@@ -707,6 +724,27 @@ void AspectFOVFix()
         else if (!MGS2_GameplayAspectScanResult)
         {
             LOG_F(INFO, "MGS 2: Aspect Ratio: Pattern scan failed.");
+        }
+    }
+    
+    // Convert FOV to VERT+ to match 16:9 horizontal field of view
+    if (sExeName == "METAL GEAR SOLID3.exe" && bNarrowAspect && bFOVFix)
+    {
+        // MGS 3: FOV
+        uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? ?? ?? ?? E8 ?? ?? ?? ??");
+        if (MGS3_FOVScanResult)
+        {
+            DWORD64 MGS3_FOVAddress = (uintptr_t)MGS3_FOVScanResult;
+            int MGS3_FOVHookLength = Memory::GetHookLength((char*)MGS3_FOVAddress, 13);
+            MGS3_FOVReturnJMP = MGS3_FOVAddress + MGS3_FOVHookLength;
+            Memory::DetourFunction64((void*)MGS3_FOVAddress, MGS3_FOV_CC, MGS3_FOVHookLength);
+
+            LOG_F(INFO, "MGS 3: FOV: Hook length is %d bytes", MGS3_FOVHookLength);
+            LOG_F(INFO, "MGS 3: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_FOVAddress);
+        }
+        else if (!MGS3_FOVScanResult)
+        {
+            LOG_F(INFO, "MGS 3: FOV: Pattern scan failed.");
         }
     }
 }
