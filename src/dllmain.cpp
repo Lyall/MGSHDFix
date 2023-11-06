@@ -741,7 +741,7 @@ void AspectFOVFix()
         }
     }
     
-    // Convert FOV to VERT+ to match 16:9 horizontal field of view
+    // Convert FOV to vert- to match 16:9 horizontal field of view
     if (sExeName == "METAL GEAR SOLID3.exe" && bNarrowAspect && bFOVFix)
     {
         // MGS 3: FOV
