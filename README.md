@@ -2,7 +2,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total.svg)](https://github.com/Lyall/MGSHDFix/releases)
 
-This is a **work-in-progress** fix that aims to add custom resolutions, ultrawide support and more to the Metal Gear Solid Master Collection.<br />
+This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
 - Metal Gear 1/2
@@ -18,6 +18,7 @@ This is a **work-in-progress** fix that aims to add custom resolutions, ultrawid
 - Correct gameplay/cutscene aspect ratio (MGS2/MGS3).
 - Skip intro logos (MGS2/MGS3).
 - Adjustable anisotropic filtering (MGS2/MGS3).
+- Increased texture size limits. (MG1/MG2/MGS3)
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -36,10 +37,12 @@ Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
 
 ### MGS 2
-- Strength of post-processing may be reduced at higher resolutions. ([#31](https://github.com/Lyall/MGSHDFix/issues/35))
+- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
+- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
 
 ### MGS 3
-- Strength of post-processing may be reduced at higher resolutions. ([#31](https://github.com/Lyall/MGSHDFix/issues/35))
+- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
+- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
 
 ## Screenshots
 
