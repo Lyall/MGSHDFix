@@ -71,6 +71,20 @@ void __declspec(naked) MGS2_GameplayAspect_CC()
     }
 }
 
+// MGS 2: FOV Hook
+DWORD64 MGS2_FOVReturnJMP;
+void __declspec(naked) MGS2_FOV_CC()
+{
+    __asm
+    {
+        mulss xmm2, [fAspectMultiplier]
+        movaps[rax - 0x68], xmm11
+        movss[rcx + 0x00000300], xmm2
+        movaps[rax - 0x78], xmm12
+        jmp[MGS2_FOVReturnJMP]
+    }
+}
+
 // MGS 3: Aspect Ratio Hook
 DWORD64 MGS3_GameplayAspectReturnJMP;
 void __declspec(naked) MGS3_GameplayAspect_CC()
@@ -745,6 +759,25 @@ void AspectFOVFix()
         else if (!MGS3_FOVScanResult)
         {
             LOG_F(INFO, "MGS 3: FOV: Pattern scan failed.");
+        }
+    }
+    else if (sExeName == "METAL GEAR SOLID2.exe" && bNarrowAspect && bFOVFix)
+    {
+        // MGS 2: FOV
+        uint8_t* MGS2_FOVScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? ?? 00 00");
+        if (MGS2_FOVScanResult)
+        {
+            DWORD64 MGS2_FOVAddress = (uintptr_t)MGS2_FOVScanResult;
+            int MGS2_FOVHookLength = 18;
+            MGS2_FOVReturnJMP = MGS2_FOVAddress + MGS2_FOVHookLength;
+            Memory::DetourFunction64((void*)MGS2_FOVAddress, MGS2_FOV_CC, MGS2_FOVHookLength);
+
+            LOG_F(INFO, "MGS 2: FOV: Hook length is %d bytes", MGS2_FOVHookLength);
+            LOG_F(INFO, "MGS 2: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FOVAddress);
+        }
+        else if (!MGS2_FOVScanResult)
+        {
+            LOG_F(INFO, "MGS 2: FOV: Pattern scan failed.");
         }
     }
 }
