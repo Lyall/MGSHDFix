@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <inttypes.h>
+#include <mutex>
 
 #include "external/loguru/loguru.hpp"
 #include "external/inipp/inipp/inipp.h"

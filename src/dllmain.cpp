@@ -1110,7 +1110,7 @@ void Miscellaneous()
     }
 }
 
-DWORD __stdcall Main(void*)
+void Main()
 {
     Logging();
     ReadConfig();
@@ -1122,7 +1122,27 @@ DWORD __stdcall Main(void*)
     AspectFOVFix();
     HUDFix();
     Miscellaneous();
-    return true; // end thread
+}
+
+std::mutex memsetHookMutex;
+bool memsetHookCalled = false;
+void* (__cdecl* memset_Fn)(void* Dst, int Val, size_t Size);
+void* __cdecl memset_Hook(void* Dst, int Val, size_t Size)
+{
+    // memset is one of the first imports called by game (not the very first though, since ASI loader still has those hooked during our DllMain...)
+    std::lock_guard lock(memsetHookMutex);
+    if(!memsetHookCalled)
+    {
+        memsetHookCalled = true;
+
+        // First we'll unhook the IAT for this function as early as we can
+        Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Hook, memset_Fn);
+
+    	// Apply our fixes before game has a chance to run
+    	Main();
+    }
+
+    return memset_Fn(Dst, Val, Size);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -1134,11 +1154,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        HANDLE mainHandle = CreateThread(NULL, 0, Main, 0, NULL, 0);
-
-        if (mainHandle)
+        // Hook IAT of one of the imports game calls early on, so we can run our code in the same thread as the game before it has a chance to do anything
+        // This will only hook the main game modules usage of memset, other modules calling it won't be affected
+        HMODULE vcruntime140 = GetModuleHandleA("VCRUNTIME140.dll");
+        if (vcruntime140)
         {
-            CloseHandle(mainHandle);
+            memset_Fn = decltype(memset_Fn)(GetProcAddress(vcruntime140, "memset"));
+            Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Fn, memset_Hook);
         }
     }
     case DLL_THREAD_ATTACH:
