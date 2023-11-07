@@ -1110,7 +1110,11 @@ void Miscellaneous()
     }
 }
 
-void Main()
+std::mutex mainThreadFinishedMutex;
+std::condition_variable mainThreadFinishedVar;
+bool mainThreadFinished = false;
+
+DWORD __stdcall Main(void*)
 {
     Logging();
     ReadConfig();
@@ -1122,6 +1126,15 @@ void Main()
     AspectFOVFix();
     HUDFix();
     Miscellaneous();
+
+    // Signal any threads which might be waiting for us before continuing
+    {
+        std::lock_guard lock(mainThreadFinishedMutex);
+        mainThreadFinished = true;
+        mainThreadFinishedVar.notify_all();
+    }
+
+    return true;
 }
 
 std::mutex memsetHookMutex;
@@ -1131,15 +1144,19 @@ void* __cdecl memset_Hook(void* Dst, int Val, size_t Size)
 {
     // memset is one of the first imports called by game (not the very first though, since ASI loader still has those hooked during our DllMain...)
     std::lock_guard lock(memsetHookMutex);
-    if(!memsetHookCalled)
+    if (!memsetHookCalled)
     {
         memsetHookCalled = true;
 
         // First we'll unhook the IAT for this function as early as we can
         Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Hook, memset_Fn);
 
-    	// Apply our fixes before game has a chance to run
-    	Main();
+    	// Wait for our main thread to finish before we return to the game
+        if (!mainThreadFinished)
+        {
+            std::unique_lock lock(mainThreadFinishedMutex);
+            mainThreadFinishedVar.wait(lock, [] { return mainThreadFinished; });
+        }
     }
 
     return memset_Fn(Dst, Val, Size);
@@ -1154,13 +1171,20 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        // Hook IAT of one of the imports game calls early on, so we can run our code in the same thread as the game before it has a chance to do anything
+        // Try hooking IAT of one of the imports game calls early on, so we can make it wait for our Main thread to complete before returning back to game
         // This will only hook the main game modules usage of memset, other modules calling it won't be affected
         HMODULE vcruntime140 = GetModuleHandleA("VCRUNTIME140.dll");
         if (vcruntime140)
         {
             memset_Fn = decltype(memset_Fn)(GetProcAddress(vcruntime140, "memset"));
             Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Fn, memset_Hook);
+        }
+
+        HANDLE mainHandle = CreateThread(NULL, 0, Main, 0, NULL, 0);
+        if (mainHandle)
+        {
+            SetThreadPriority(mainHandle, THREAD_PRIORITY_HIGHEST); // set our Main thread priority higher than the games thread
+            CloseHandle(mainHandle);
         }
     }
     case DLL_THREAD_ATTACH:
