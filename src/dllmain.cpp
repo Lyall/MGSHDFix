@@ -5,6 +5,7 @@ using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
+string sFixVer = "0.9";
 inipp::Ini<char> ini;
 
 // INI Variables
@@ -26,6 +27,10 @@ float fMouseSensitivityYMulti;
 int iCustomResX;
 int iCustomResY;
 int iInjectionDelay;
+bool bLauncherConfigSkipLauncher = false;
+int iLauncherConfigCtrlType = 5;
+int iLauncherConfigRegion = 0;
+int iLauncherConfigLanguage = 0;
 
 // Variables
 float fNewX;
@@ -51,11 +56,9 @@ float fMGS3_DefaultHUDHeight = (float)-2;
 float fMGS2_DefaultHUDWidth = (float)1;
 float fMGS2_DefaultHUDHeight = (float)-2;
 float fMGS2_DefaultHUDHeight2 = (float)-1;
-string sExeName;
-string sGameName;
-string sExePath;
-string sGameVersion;
-string sFixVer = "0.9";
+
+std::filesystem::path sExePath;
+std::string sExeName;
 
 struct GameInfo
 {
@@ -67,7 +70,7 @@ struct GameInfo
 enum class MgsGame
 {
     Unknown,
-	MGS2,
+    MGS2,
     MGS3,
     MG,
     Launcher
@@ -422,6 +425,10 @@ void ReadConfig()
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFOVFix);
+    inipp::get_value(ini.sections["Launcher Config"], "SkipLauncher", bLauncherConfigSkipLauncher);
+    inipp::get_value(ini.sections["Launcher Config"], "CtrlType", iLauncherConfigCtrlType);
+    inipp::get_value(ini.sections["Launcher Config"], "Region", iLauncherConfigRegion);
+    inipp::get_value(ini.sections["Launcher Config"], "Language", iLauncherConfigLanguage);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
@@ -446,6 +453,10 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     LOG_F(INFO, "Config Parse: bFOVFix: %d", bFOVFix);
+    LOG_F(INFO, "Config Parse: bLauncherConfigSkipLauncher: %d", bLauncherConfigSkipLauncher);
+    LOG_F(INFO, "Config Parse: iLauncherConfigCtrlType: %d", iLauncherConfigCtrlType);
+    LOG_F(INFO, "Config Parse: iLauncherConfigRegion: %d", iLauncherConfigRegion);
+    LOG_F(INFO, "Config Parse: iLauncherConfigLanguage: %d", iLauncherConfigLanguage);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
     if (bBorderlessMode)
@@ -520,23 +531,42 @@ bool DetectGame()
     // Get game name and exe path
     LPWSTR exePath = new WCHAR[_MAX_PATH];
     GetModuleFileName(baseModule, exePath, MAX_PATH);
-    wstring exePathWString(exePath);
-    sExePath = string(exePathWString.begin(), exePathWString.end());
-    sExeName = sExePath.substr(sExePath.find_last_of("/\\") + 1);
+    sExePath = exePath;
+    sExeName = sExePath.filename().string();
 
-    LOG_F(INFO, "Game Name: %s", sExeName.c_str());
-    LOG_F(INFO, "Game Path: %s", sExePath.c_str());
-    LOG_F(INFO, "Game Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
+    LOG_F(INFO, "Module Name: %s", sExeName.c_str());
+    LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
+    LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
+
+    // Special handling for launcher.exe
+    if (sExeName == "launcher.exe")
+    {
+        eGameType = MgsGame::Launcher;
+
+        for (const auto& [type, info] : kGames)
+        {
+            auto gamePath = sExePath.parent_path() / info.ExeName;
+            if (std::filesystem::exists(gamePath))
+            {
+                LOG_F(INFO, "Detected launcher for game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+                game = &info;
+                return true;
+            }
+        }
+
+        LOG_F(INFO, "Failed to detect supported game, unknown launcher");
+        return false;
+    }
 
     for(const auto& [type, info] : kGames)
     {
-	    if(info.ExeName == sExeName)
-	    {
-            LOG_F(INFO, "Detected game is: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+        if(info.ExeName == sExeName)
+        {
+            LOG_F(INFO, "Detected game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
             eGameType = type;
             game = &info;
             return true;
-	    }
+        }
     }
 
     LOG_F(INFO, "Failed to detect supported game, %s isn't supported by MGSHDFix", sExeName.c_str());
@@ -1136,6 +1166,177 @@ void Miscellaneous()
     }
 }
 
+
+
+using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
+NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
+void NHT_COsContext_SetControllerID_Hook(int controllerType)
+{
+    LOG_F(INFO, "NHT_COsContext_SetControllerID_Hook: controltype %d -> %d", controllerType, iLauncherConfigCtrlType);
+    NHT_COsContext_SetControllerID(iLauncherConfigCtrlType);
+}
+
+using MGS3_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, int);
+MGS3_COsContext__InitializeSKUandLang_Fn MGS3_COsContext__InitializeSKUandLang = nullptr;
+void __fastcall MGS3_COsContext__InitializeSKUandLang_Hook(void* thisptr, int sku, int lang)
+{
+    LOG_F(INFO, "MGS3_COsContext__InitializeSKUandLang: sku %d -> %d, lang %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
+    MGS3_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigRegion, iLauncherConfigLanguage);
+}
+
+using MGS2_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
+MGS2_COsContext__InitializeSKUandLang_Fn MGS2_COsContext__InitializeSKUandLang = nullptr;
+void __fastcall MGS2_COsContext__InitializeSKUandLang_Hook(void* thisptr, int lang)
+{
+    LOG_F(INFO, "MGS2_COsContext__InitializeSKUandLang: lang %d -> %d", lang, iLauncherConfigLanguage);
+    MGS2_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigLanguage);
+}
+
+void LauncherConfigOverride()
+{
+    // If we know games steam appid, try creating steam_appid.txt file, so that game EXE can be launched directly in future runs
+    if (game)
+    {
+        const std::filesystem::path steamAppidPath = sExePath.parent_path() / "steam_appid.txt";
+
+        try
+        {
+            if (!std::filesystem::exists(steamAppidPath))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Creating steam_appid.txt to allow direct EXE launches.");
+                std::ofstream steamAppidOut(steamAppidPath);
+                if (steamAppidOut.is_open())
+                {
+                    steamAppidOut << game->SteamAppId;
+                    steamAppidOut.close();
+                }
+                if (std::filesystem::exists(steamAppidPath))
+                {
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt created successfully.");
+                }
+                else
+                {
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt creation failed.");
+                }
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
+        }
+    }
+
+    // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
+    if (eGameType == MgsGame::Launcher)
+    {
+        if (bLauncherConfigSkipLauncher)
+        {
+            auto gameExePath = sExePath.parent_path() / game->ExeName;
+
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, launching into %s", gameExePath.string().c_str());
+
+            PROCESS_INFORMATION processInfo = {};
+            STARTUPINFO startupInfo = {};
+            startupInfo.cb = sizeof(STARTUPINFO);
+
+            // Call CreateProcess to start the game process
+            if (CreateProcess(nullptr, (LPWSTR)gameExePath.wstring().c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+            {
+                // Successfully started the process
+                CloseHandle(processInfo.hProcess);
+                CloseHandle(processInfo.hThread);
+
+                // Force launcher to exit
+                ExitProcess(0);
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+            }
+        }
+        return;
+    }
+
+    // Certain config such as language/button style is normally passed from launcher to game via arguments
+    // When game EXE gets ran directly this config is left at default (english game, xbox buttons)
+    // If launcher argument isn't detected we'll allow defaults to be changed by hooking the engine functions responsible for them
+    HMODULE engineModule = GetModuleHandleA("Engine.dll");
+    if (!engineModule)
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
+        return;
+    }
+
+    LPWSTR commandLine = GetCommandLineW();
+
+    bool hasCtrltype = wcsstr(commandLine, L"-ctrltype") != nullptr;
+    bool hasRegion = wcsstr(commandLine, L"-region") != nullptr;
+    bool hasLang = wcsstr(commandLine, L"-lan") != nullptr;
+
+    if (!hasRegion && !hasLang)
+    {
+        MGS3_COsContext__InitializeSKUandLang = decltype(MGS3_COsContext__InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
+        if (MGS3_COsContext__InitializeSKUandLang)
+        {
+            if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext__InitializeSKUandLang, MGS3_COsContext__InitializeSKUandLang_Hook))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Region/Language settings from INI");
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+            }
+        }
+        else
+        {
+            MGS2_COsContext__InitializeSKUandLang = decltype(MGS2_COsContext__InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXH@Z"));
+            if (MGS2_COsContext__InitializeSKUandLang)
+            {
+                if (Memory::HookIAT(baseModule, "Engine.dll", MGS2_COsContext__InitializeSKUandLang, MGS2_COsContext__InitializeSKUandLang_Hook))
+                {
+                    LOG_F(INFO, "MGS 2: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Language setting from INI");
+                }
+                else
+                {
+                    LOG_F(INFO, "MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                }
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
+            }
+        }
+    }
+    else
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
+    }
+
+    if (!hasCtrltype)
+    {
+        NHT_COsContext_SetControllerID = decltype(NHT_COsContext_SetControllerID)(GetProcAddress(engineModule, "NHT_COsContext_SetControllerID"));
+        if (NHT_COsContext_SetControllerID)
+        {
+            if (Memory::HookIAT(baseModule, "Engine.dll", NHT_COsContext_SetControllerID, NHT_COsContext_SetControllerID_Hook))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Hooked NHT_COsContext_SetControllerID, overriding with CtrlType setting from INI");
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
+        }
+    }
+    else
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -ctrltype specified on command-line, skipping INI override");
+    }
+}
+
 std::mutex mainThreadFinishedMutex;
 std::condition_variable mainThreadFinishedVar;
 bool mainThreadFinished = false;
@@ -1146,6 +1347,7 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     if (DetectGame())
     {
+        LauncherConfigOverride();
         CustomResolution();
         IntroSkip();
         Sleep(iInjectionDelay);
@@ -1179,7 +1381,7 @@ void* __cdecl memset_Hook(void* Dst, int Val, size_t Size)
         // First we'll unhook the IAT for this function as early as we can
         Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Hook, memset_Fn);
 
-    	// Wait for our main thread to finish before we return to the game
+        // Wait for our main thread to finish before we return to the game
         if (!mainThreadFinished)
         {
             std::unique_lock lock(mainThreadFinishedMutex);
