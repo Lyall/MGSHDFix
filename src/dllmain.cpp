@@ -26,7 +26,6 @@ float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
 int iCustomResX;
 int iCustomResY;
-int iInjectionDelay;
 bool bLauncherConfigSkipLauncher = false;
 int iLauncherConfigCtrlType = 5;
 int iLauncherConfigRegion = 0;
@@ -407,7 +406,6 @@ void ReadConfig()
         ini.parse(iniFile);
     }
 
-    inipp::get_value(ini.sections["MGSHDFix Parameters"], "InjectionDelay", iInjectionDelay);
     inipp::get_value(ini.sections["Custom Resolution"], "Enabled", bCustomResolution);
     inipp::get_value(ini.sections["Custom Resolution"], "Width", iCustomResX);
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
@@ -431,7 +429,6 @@ void ReadConfig()
     inipp::get_value(ini.sections["Launcher Config"], "Language", iLauncherConfigLanguage);
 
     // Log config parse
-    LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
     LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
     LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
@@ -1350,7 +1347,6 @@ DWORD __stdcall Main(void*)
         LauncherConfigOverride();
         CustomResolution();
         IntroSkip();
-        Sleep(iInjectionDelay);
         ScaleEffects();
         AspectFOVFix();
         HUDFix();
