@@ -59,6 +59,33 @@ float fMGS2_DefaultHUDHeight2 = (float)-1;
 std::filesystem::path sExePath;
 std::string sExeName;
 
+const std::vector<std::string> kLauncherConfigCtrlTypes = {
+    "ps5",
+    "ps4",
+    "xbox",
+    "nx",
+    "stmd",
+    "kbd"
+};
+
+const std::vector<std::string> kLauncherConfigLanguages = {
+    "en",
+    "jp",
+    "fr",
+    "gr",
+    "it",
+    "pr",
+    "sp",
+    "du",
+    "ru"
+};
+
+const std::vector<std::string> kLauncherConfigRegions = {
+    "us",
+    "jp",
+    "eu"
+};
+
 struct GameInfo
 {
     std::string GameTitle;
@@ -424,9 +451,27 @@ void ReadConfig()
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFOVFix);
     inipp::get_value(ini.sections["Launcher Config"], "SkipLauncher", bLauncherConfigSkipLauncher);
-    inipp::get_value(ini.sections["Launcher Config"], "CtrlType", iLauncherConfigCtrlType);
-    inipp::get_value(ini.sections["Launcher Config"], "Region", iLauncherConfigRegion);
-    inipp::get_value(ini.sections["Launcher Config"], "Language", iLauncherConfigLanguage);
+
+    std::string sLauncherConfigCtrlType = "kbd";
+    std::string sLauncherConfigRegion = "us";
+    std::string sLauncherConfigLanguage = "en";
+    inipp::get_value(ini.sections["Launcher Config"], "CtrlType", sLauncherConfigCtrlType);
+    inipp::get_value(ini.sections["Launcher Config"], "Region", sLauncherConfigRegion);
+    inipp::get_value(ini.sections["Launcher Config"], "Language", sLauncherConfigLanguage);
+
+    auto findStringInVector = [](std::string& str, const std::vector<std::string>& search) -> int {
+        std::transform(str.begin(), str.end(), str.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+
+        auto it = std::find(search.begin(), search.end(), str);
+        if (it != search.end())
+            return std::distance(search.begin(), it);
+        return 0;
+    };
+
+    iLauncherConfigCtrlType = findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
+    iLauncherConfigRegion = findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
+    iLauncherConfigLanguage = findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
 
     // Log config parse
     LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
@@ -535,10 +580,10 @@ bool DetectGame()
     LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
     LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
+    eGameType = MgsGame::Unknown;
     // Special handling for launcher.exe
     if (sExeName == "launcher.exe")
     {
-        eGameType = MgsGame::Launcher;
 
         for (const auto& [type, info] : kGames)
         {
@@ -546,6 +591,7 @@ bool DetectGame()
             if (std::filesystem::exists(gamePath))
             {
                 LOG_F(INFO, "Detected launcher for game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+                eGameType = MgsGame::Launcher;
                 game = &info;
                 return true;
             }
@@ -1163,8 +1209,6 @@ void Miscellaneous()
     }
 }
 
-
-
 using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
 NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
 void NHT_COsContext_SetControllerID_Hook(int controllerType)
@@ -1175,10 +1219,10 @@ void NHT_COsContext_SetControllerID_Hook(int controllerType)
 
 using MGS3_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, int);
 MGS3_COsContext__InitializeSKUandLang_Fn MGS3_COsContext__InitializeSKUandLang = nullptr;
-void __fastcall MGS3_COsContext__InitializeSKUandLang_Hook(void* thisptr, int sku, int lang)
+void __fastcall MGS3_COsContext__InitializeSKUandLang_Hook(void* thisptr, int lang, int sku)
 {
-    LOG_F(INFO, "MGS3_COsContext__InitializeSKUandLang: sku %d -> %d, lang %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
-    MGS3_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigRegion, iLauncherConfigLanguage);
+    LOG_F(INFO, "MGS3_COsContext__InitializeSKUandLang: lang %d -> %d, sku %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
+    MGS3_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigLanguage, iLauncherConfigRegion);
 }
 
 using MGS2_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
