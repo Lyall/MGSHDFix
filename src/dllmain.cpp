@@ -59,7 +59,7 @@ float fMGS2_DefaultHUDHeight2 = (float)-1;
 std::filesystem::path sExePath;
 std::string sExeName;
 
-const std::vector<std::string> kLauncherConfigCtrlTypes = {
+const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
     "ps5",
     "ps4",
     "xbox",
@@ -68,7 +68,7 @@ const std::vector<std::string> kLauncherConfigCtrlTypes = {
     "kbd"
 };
 
-const std::vector<std::string> kLauncherConfigLanguages = {
+const std::initializer_list<std::string> kLauncherConfigLanguages = {
     "en",
     "jp",
     "fr",
@@ -80,7 +80,7 @@ const std::vector<std::string> kLauncherConfigLanguages = {
     "ru"
 };
 
-const std::vector<std::string> kLauncherConfigRegions = {
+const std::initializer_list<std::string> kLauncherConfigRegions = {
     "us",
     "jp",
     "eu"
@@ -459,7 +459,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Launcher Config"], "Region", sLauncherConfigRegion);
     inipp::get_value(ini.sections["Launcher Config"], "Language", sLauncherConfigLanguage);
 
-    auto findStringInVector = [](std::string& str, const std::vector<std::string>& search) -> int {
+    auto findStringInVector = [](std::string& str, const std::initializer_list<std::string>& search) -> int {
         std::transform(str.begin(), str.end(), str.begin(),
             [](unsigned char c) { return std::tolower(c); });
 
@@ -571,7 +571,7 @@ void ReadConfig()
 bool DetectGame()
 {
     // Get game name and exe path
-    LPWSTR exePath = new WCHAR[_MAX_PATH];
+    WCHAR exePath[_MAX_PATH] = { 0 };
     GetModuleFileName(baseModule, exePath, MAX_PATH);
     sExePath = exePath;
     sExeName = sExePath.filename().string();
@@ -584,7 +584,6 @@ bool DetectGame()
     // Special handling for launcher.exe
     if (sExeName == "launcher.exe")
     {
-
         for (const auto& [type, info] : kGames)
         {
             auto gamePath = sExePath.parent_path() / info.ExeName;
@@ -1217,20 +1216,20 @@ void NHT_COsContext_SetControllerID_Hook(int controllerType)
     NHT_COsContext_SetControllerID(iLauncherConfigCtrlType);
 }
 
-using MGS3_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, int);
-MGS3_COsContext__InitializeSKUandLang_Fn MGS3_COsContext__InitializeSKUandLang = nullptr;
-void __fastcall MGS3_COsContext__InitializeSKUandLang_Hook(void* thisptr, int lang, int sku)
+using MGS3_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, int);
+MGS3_COsContext_InitializeSKUandLang_Fn MGS3_COsContext_InitializeSKUandLang = nullptr;
+void __fastcall MGS3_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang, int sku)
 {
-    LOG_F(INFO, "MGS3_COsContext__InitializeSKUandLang: lang %d -> %d, sku %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
-    MGS3_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigLanguage, iLauncherConfigRegion);
+    LOG_F(INFO, "MGS3_COsContext_InitializeSKUandLang: lang %d -> %d, sku %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
+    MGS3_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage, iLauncherConfigRegion);
 }
 
-using MGS2_COsContext__InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
-MGS2_COsContext__InitializeSKUandLang_Fn MGS2_COsContext__InitializeSKUandLang = nullptr;
-void __fastcall MGS2_COsContext__InitializeSKUandLang_Hook(void* thisptr, int lang)
+using MGS2_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
+MGS2_COsContext_InitializeSKUandLang_Fn MGS2_COsContext_InitializeSKUandLang = nullptr;
+void __fastcall MGS2_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang)
 {
-    LOG_F(INFO, "MGS2_COsContext__InitializeSKUandLang: lang %d -> %d", lang, iLauncherConfigLanguage);
-    MGS2_COsContext__InitializeSKUandLang(thisptr, iLauncherConfigLanguage);
+    LOG_F(INFO, "MGS2_COsContext_InitializeSKUandLang: lang %d -> %d", lang, iLauncherConfigLanguage);
+    MGS2_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage);
 }
 
 void LauncherConfigOverride()
@@ -1316,10 +1315,10 @@ void LauncherConfigOverride()
 
     if (!hasRegion && !hasLang)
     {
-        MGS3_COsContext__InitializeSKUandLang = decltype(MGS3_COsContext__InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
-        if (MGS3_COsContext__InitializeSKUandLang)
+        MGS3_COsContext_InitializeSKUandLang = decltype(MGS3_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
+        if (MGS3_COsContext_InitializeSKUandLang)
         {
-            if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext__InitializeSKUandLang, MGS3_COsContext__InitializeSKUandLang_Hook))
+            if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext_InitializeSKUandLang, MGS3_COsContext_InitializeSKUandLang_Hook))
             {
                 LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Region/Language settings from INI");
             }
@@ -1330,10 +1329,10 @@ void LauncherConfigOverride()
         }
         else
         {
-            MGS2_COsContext__InitializeSKUandLang = decltype(MGS2_COsContext__InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXH@Z"));
-            if (MGS2_COsContext__InitializeSKUandLang)
+            MGS2_COsContext_InitializeSKUandLang = decltype(MGS2_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXH@Z"));
+            if (MGS2_COsContext_InitializeSKUandLang)
             {
-                if (Memory::HookIAT(baseModule, "Engine.dll", MGS2_COsContext__InitializeSKUandLang, MGS2_COsContext__InitializeSKUandLang_Hook))
+                if (Memory::HookIAT(baseModule, "Engine.dll", MGS2_COsContext_InitializeSKUandLang, MGS2_COsContext_InitializeSKUandLang_Hook))
                 {
                     LOG_F(INFO, "MGS 2: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Language setting from INI");
                 }
@@ -1424,8 +1423,8 @@ void* __cdecl memset_Hook(void* Dst, int Val, size_t Size)
         // Wait for our main thread to finish before we return to the game
         if (!mainThreadFinished)
         {
-            std::unique_lock lock(mainThreadFinishedMutex);
-            mainThreadFinishedVar.wait(lock, [] { return mainThreadFinished; });
+            std::unique_lock finishedLock(mainThreadFinishedMutex);
+            mainThreadFinishedVar.wait(finishedLock, [] { return mainThreadFinished; });
         }
     }
 
