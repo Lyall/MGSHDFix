@@ -57,6 +57,31 @@ string sExePath;
 string sGameVersion;
 string sFixVer = "0.9";
 
+struct GameInfo
+{
+    std::string GameTitle;
+    std::string ExeName;
+    int SteamAppId;
+};
+
+enum class MgsGame
+{
+    Unknown,
+	MGS2,
+    MGS3,
+    MG,
+    Launcher
+};
+
+const std::map<MgsGame, GameInfo> kGames = {
+    {MgsGame::MGS2, {"Metal Gear Solid 2 HD", "METAL GEAR SOLID2.exe", 2131640}},
+    {MgsGame::MGS3, {"Metal Gear Solid 3 HD", "METAL GEAR SOLID3.exe", 2131650}},
+    {MgsGame::MG, {"Metal Gear / Metal Gear 2 (MSX)", "METAL GEAR.exe", 2131680}},
+};
+
+const GameInfo* game = nullptr;
+MgsGame eGameType = MgsGame::Unknown;
+
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
 void __declspec(naked) MGS2_GameplayAspect_CC()
@@ -490,7 +515,7 @@ void ReadConfig()
     LOG_F(INFO, "Custom Resolution: fHUDHeightOffset: %.4f", fHUDHeightOffset);
 }
 
-void DetectGame()
+bool DetectGame()
 {
     // Get game name and exe path
     LPWSTR exePath = new WCHAR[_MAX_PATH];
@@ -503,23 +528,24 @@ void DetectGame()
     LOG_F(INFO, "Game Path: %s", sExePath.c_str());
     LOG_F(INFO, "Game Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
-    if (sExeName == "METAL GEAR SOLID2.exe")
+    for(const auto& [type, info] : kGames)
     {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 2");
+	    if(info.ExeName == sExeName)
+	    {
+            LOG_F(INFO, "Detected game is: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+            eGameType = type;
+            game = &info;
+            return true;
+	    }
     }
-    else if (sExeName == "METAL GEAR SOLID3.exe")
-    {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 3");
-    }
-    else if (sExeName == "METAL GEAR.exe")
-    {
-        LOG_F(INFO, "Detected game is: Metal Gear / Metal Gear 2 (MSX)");
-    }
+
+    LOG_F(INFO, "Failed to detect supported game, %s isn't supported by MGSHDFix", sExeName.c_str());
+    return false;
 }
 
 void CustomResolution()
 {
-    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bCustomResolution)
+    if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bCustomResolution)
     {
         // MGS 2 | MGS 3: Custom Resolution
         uint8_t* MGS2_MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
@@ -582,7 +608,7 @@ void CustomResolution()
     }
 
     // MGS 2: Borderless mode
-    if (sExeName == "METAL GEAR SOLID2.exe" && bBorderlessMode)
+    if (eGameType == MgsGame::MGS2 && bBorderlessMode)
     {
         uint8_t* MGS2_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "41 ?? ?? ?? 48 ?? ?? ?? 44 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 4C ?? ?? ?? ??");
         if (MGS2_CreateWindowExAScanResult)
@@ -600,7 +626,7 @@ void CustomResolution()
             LOG_F(INFO, "MGS 2: Borderless: Pattern scan failed.");
         }
     }
-    else if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bBorderlessMode)
+    else if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bBorderlessMode)
     {
         uint8_t* MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "48 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 44 ?? ?? ?? ??");
         if (MGS3_CreateWindowExAScanResult)
@@ -624,7 +650,7 @@ void IntroSkip()
 {
     if (!bSkipIntroLogos)
         return;
-    if (sExeName != "METAL GEAR SOLID2.exe" && sExeName != "METAL GEAR SOLID3.exe")
+    if (eGameType != MgsGame::MGS2 && eGameType != MgsGame::MGS3)
         return;
 
     uint8_t* MGS2_MGS3_InitialIntroStateScanResult = Memory::PatternScan(baseModule, "75 ? C7 05 ? ? ? ? 01 00 00 00 C3");
@@ -644,7 +670,7 @@ void IntroSkip()
 
 void ScaleEffects()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution)
+    if (eGameType == MgsGame::MGS2 && bCustomResolution)
     {
         // MGS 2: Scale effects correctly. (text, overlays, fades etc)
         uint8_t* MGS2_EffectsScaleScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
@@ -700,7 +726,7 @@ void ScaleEffects()
 
 void AspectFOVFix()
 {
-    if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bAspectFix)
+    if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
@@ -720,7 +746,7 @@ void AspectFOVFix()
             LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
-    else if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix)
+    else if (eGameType == MgsGame::MGS2 && bAspectFix)
     {
         // MGS 2: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
@@ -742,7 +768,7 @@ void AspectFOVFix()
     }
     
     // Convert FOV to vert- to match 16:9 horizontal field of view
-    if (sExeName == "METAL GEAR SOLID3.exe" && bNarrowAspect && bFOVFix)
+    if (eGameType == MgsGame::MGS3 && bNarrowAspect && bFOVFix)
     {
         // MGS 3: FOV
         uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? ?? ?? ?? E8 ?? ?? ?? ??");
@@ -761,7 +787,7 @@ void AspectFOVFix()
             LOG_F(INFO, "MGS 3: FOV: Pattern scan failed.");
         }
     }
-    else if (sExeName == "METAL GEAR SOLID2.exe" && bNarrowAspect && bFOVFix)
+    else if (eGameType == MgsGame::MGS2 && bNarrowAspect && bFOVFix)
     {
         // MGS 2: FOV
         uint8_t* MGS2_FOVScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? ?? 00 00");
@@ -784,7 +810,7 @@ void AspectFOVFix()
 
 void HUDFix()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
+    if (eGameType == MgsGame::MGS2 && bHUDFix)
     {
         // MGS 2: HUD
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ??");
@@ -880,7 +906,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
         }
     }
-    else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
+    else if (eGameType == MgsGame::MGS3 && bHUDFix)
     {
         // MGS 3: HUD
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
@@ -908,7 +934,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
         }
     }
-    else if ((sExeName == "METAL GEAR.exe" && fNewAspect > fNativeAspect) || (sExeName == "METAL GEAR.exe" && fNewAspect < fNativeAspect))
+    else if ((eGameType == MgsGame::MG && fNewAspect > fNativeAspect) || (eGameType == MgsGame::MG && fNewAspect < fNativeAspect))
     {
         // MG1/MG2: HUD
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
@@ -937,7 +963,7 @@ void HUDFix()
         }
     }
 
-    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe") && bHUDFix)
+    if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3) && bHUDFix)
     {
         // MGS 2 | MGS 3: Letterboxing
         uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
@@ -958,7 +984,7 @@ void HUDFix()
 
 void Miscellaneous()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe")
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
     {
         if (bDisableCursor)
         {
@@ -1011,7 +1037,7 @@ void Miscellaneous()
         }
     }
 
-    if (iAnisotropicFiltering > 0 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR SOLID2.exe"))
+    if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
         uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
         if (MGS2_MGS3_SetSamplerStateInsnResult)
@@ -1036,7 +1062,7 @@ void Miscellaneous()
         }
     }
 
-    if (sExeName == "METAL GEAR SOLID3.exe" && bMouseSensitivity)
+    if (eGameType == MgsGame::MGS3 && bMouseSensitivity)
     {
         // MGS 3: Mouse sensitivity
         uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
@@ -1064,7 +1090,7 @@ void Miscellaneous()
         }
     }
 
-    if (iTextureBufferSizeMB > 16 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe"))
+    if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
         // MG/MG2 | MGS3: texture buffer size extension
         uint32_t NewSize = iTextureBufferSizeMB * 1024 * 1024;
@@ -1118,14 +1144,16 @@ DWORD __stdcall Main(void*)
 {
     Logging();
     ReadConfig();
-    DetectGame();
-    CustomResolution();
-    IntroSkip();
-    Sleep(iInjectionDelay);
-    ScaleEffects();
-    AspectFOVFix();
-    HUDFix();
-    Miscellaneous();
+    if (DetectGame())
+    {
+        CustomResolution();
+        IntroSkip();
+        Sleep(iInjectionDelay);
+        ScaleEffects();
+        AspectFOVFix();
+        HUDFix();
+        Miscellaneous();
+    }
 
     // Signal any threads which might be waiting for us before continuing
     {
