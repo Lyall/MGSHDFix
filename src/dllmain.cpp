@@ -5,6 +5,7 @@ using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
+string sFixVer = "0.9";
 inipp::Ini<char> ini;
 
 // INI Variables
@@ -25,7 +26,10 @@ float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
 int iCustomResX;
 int iCustomResY;
-int iInjectionDelay;
+bool bLauncherConfigSkipLauncher = false;
+int iLauncherConfigCtrlType = 5;
+int iLauncherConfigRegion = 0;
+int iLauncherConfigLanguage = 0;
 
 // Variables
 float fNewX;
@@ -51,11 +55,61 @@ float fMGS3_DefaultHUDHeight = (float)-2;
 float fMGS2_DefaultHUDWidth = (float)1;
 float fMGS2_DefaultHUDHeight = (float)-2;
 float fMGS2_DefaultHUDHeight2 = (float)-1;
-string sExeName;
-string sGameName;
-string sExePath;
-string sGameVersion;
-string sFixVer = "0.9";
+
+std::filesystem::path sExePath;
+std::string sExeName;
+
+const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
+    "ps5",
+    "ps4",
+    "xbox",
+    "nx",
+    "stmd",
+    "kbd"
+};
+
+const std::initializer_list<std::string> kLauncherConfigLanguages = {
+    "en",
+    "jp",
+    "fr",
+    "gr",
+    "it",
+    "pr",
+    "sp",
+    "du",
+    "ru"
+};
+
+const std::initializer_list<std::string> kLauncherConfigRegions = {
+    "us",
+    "jp",
+    "eu"
+};
+
+struct GameInfo
+{
+    std::string GameTitle;
+    std::string ExeName;
+    int SteamAppId;
+};
+
+enum class MgsGame
+{
+    Unknown,
+    MGS2,
+    MGS3,
+    MG,
+    Launcher
+};
+
+const std::map<MgsGame, GameInfo> kGames = {
+    {MgsGame::MGS2, {"Metal Gear Solid 2 HD", "METAL GEAR SOLID2.exe", 2131640}},
+    {MgsGame::MGS3, {"Metal Gear Solid 3 HD", "METAL GEAR SOLID3.exe", 2131650}},
+    {MgsGame::MG, {"Metal Gear / Metal Gear 2 (MSX)", "METAL GEAR.exe", 2131680}},
+};
+
+const GameInfo* game = nullptr;
+MgsGame eGameType = MgsGame::Unknown;
 
 // MGS 2: Aspect Ratio Hook
 DWORD64 MGS2_GameplayAspectReturnJMP;
@@ -379,7 +433,6 @@ void ReadConfig()
         ini.parse(iniFile);
     }
 
-    inipp::get_value(ini.sections["MGSHDFix Parameters"], "InjectionDelay", iInjectionDelay);
     inipp::get_value(ini.sections["Custom Resolution"], "Enabled", bCustomResolution);
     inipp::get_value(ini.sections["Custom Resolution"], "Width", iCustomResX);
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
@@ -397,9 +450,30 @@ void ReadConfig()
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFOVFix);
+    inipp::get_value(ini.sections["Launcher Config"], "SkipLauncher", bLauncherConfigSkipLauncher);
+
+    std::string sLauncherConfigCtrlType = "kbd";
+    std::string sLauncherConfigRegion = "us";
+    std::string sLauncherConfigLanguage = "en";
+    inipp::get_value(ini.sections["Launcher Config"], "CtrlType", sLauncherConfigCtrlType);
+    inipp::get_value(ini.sections["Launcher Config"], "Region", sLauncherConfigRegion);
+    inipp::get_value(ini.sections["Launcher Config"], "Language", sLauncherConfigLanguage);
+
+    auto findStringInVector = [](std::string& str, const std::initializer_list<std::string>& search) -> int {
+        std::transform(str.begin(), str.end(), str.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+
+        auto it = std::find(search.begin(), search.end(), str);
+        if (it != search.end())
+            return std::distance(search.begin(), it);
+        return 0;
+    };
+
+    iLauncherConfigCtrlType = findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
+    iLauncherConfigRegion = findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
+    iLauncherConfigLanguage = findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
 
     // Log config parse
-    LOG_F(INFO, "Config Parse: iInjectionDelay: %dms", iInjectionDelay);
     LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
     LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
     LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
@@ -421,6 +495,10 @@ void ReadConfig()
     LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
     LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
     LOG_F(INFO, "Config Parse: bFOVFix: %d", bFOVFix);
+    LOG_F(INFO, "Config Parse: bLauncherConfigSkipLauncher: %d", bLauncherConfigSkipLauncher);
+    LOG_F(INFO, "Config Parse: iLauncherConfigCtrlType: %d", iLauncherConfigCtrlType);
+    LOG_F(INFO, "Config Parse: iLauncherConfigRegion: %d", iLauncherConfigRegion);
+    LOG_F(INFO, "Config Parse: iLauncherConfigLanguage: %d", iLauncherConfigLanguage);
 
     // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
     if (bBorderlessMode)
@@ -490,36 +568,56 @@ void ReadConfig()
     LOG_F(INFO, "Custom Resolution: fHUDHeightOffset: %.4f", fHUDHeightOffset);
 }
 
-void DetectGame()
+bool DetectGame()
 {
     // Get game name and exe path
-    LPWSTR exePath = new WCHAR[_MAX_PATH];
+    WCHAR exePath[_MAX_PATH] = { 0 };
     GetModuleFileName(baseModule, exePath, MAX_PATH);
-    wstring exePathWString(exePath);
-    sExePath = string(exePathWString.begin(), exePathWString.end());
-    sExeName = sExePath.substr(sExePath.find_last_of("/\\") + 1);
+    sExePath = exePath;
+    sExeName = sExePath.filename().string();
 
-    LOG_F(INFO, "Game Name: %s", sExeName.c_str());
-    LOG_F(INFO, "Game Path: %s", sExePath.c_str());
-    LOG_F(INFO, "Game Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
+    LOG_F(INFO, "Module Name: %s", sExeName.c_str());
+    LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
+    LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
-    if (sExeName == "METAL GEAR SOLID2.exe")
+    eGameType = MgsGame::Unknown;
+    // Special handling for launcher.exe
+    if (sExeName == "launcher.exe")
     {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 2");
+        for (const auto& [type, info] : kGames)
+        {
+            auto gamePath = sExePath.parent_path() / info.ExeName;
+            if (std::filesystem::exists(gamePath))
+            {
+                LOG_F(INFO, "Detected launcher for game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+                eGameType = MgsGame::Launcher;
+                game = &info;
+                return true;
+            }
+        }
+
+        LOG_F(INFO, "Failed to detect supported game, unknown launcher");
+        return false;
     }
-    else if (sExeName == "METAL GEAR SOLID3.exe")
+
+    for(const auto& [type, info] : kGames)
     {
-        LOG_F(INFO, "Detected game is: Metal Gear Solid 3");
+        if(info.ExeName == sExeName)
+        {
+            LOG_F(INFO, "Detected game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+            eGameType = type;
+            game = &info;
+            return true;
+        }
     }
-    else if (sExeName == "METAL GEAR.exe")
-    {
-        LOG_F(INFO, "Detected game is: Metal Gear / Metal Gear 2 (MSX)");
-    }
+
+    LOG_F(INFO, "Failed to detect supported game, %s isn't supported by MGSHDFix", sExeName.c_str());
+    return false;
 }
 
 void CustomResolution()
 {
-    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bCustomResolution)
+    if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bCustomResolution)
     {
         // MGS 2 | MGS 3: Custom Resolution
         uint8_t* MGS2_MGS3_ResolutionScanResult = Memory::PatternScan(baseModule, "C7 45 ?? 00 05 00 00 C7 ?? ?? D0 02 00 00 C7 ?? ?? 00 05 00 00 C7 ?? ?? D0 02 00 00");
@@ -582,7 +680,7 @@ void CustomResolution()
     }
 
     // MGS 2: Borderless mode
-    if (sExeName == "METAL GEAR SOLID2.exe" && bBorderlessMode)
+    if (eGameType == MgsGame::MGS2 && bBorderlessMode)
     {
         uint8_t* MGS2_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "41 ?? ?? ?? 48 ?? ?? ?? 44 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 4C ?? ?? ?? ??");
         if (MGS2_CreateWindowExAScanResult)
@@ -600,7 +698,7 @@ void CustomResolution()
             LOG_F(INFO, "MGS 2: Borderless: Pattern scan failed.");
         }
     }
-    else if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bBorderlessMode)
+    else if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bBorderlessMode)
     {
         uint8_t* MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "48 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 44 ?? ?? ?? ??");
         if (MGS3_CreateWindowExAScanResult)
@@ -624,7 +722,7 @@ void IntroSkip()
 {
     if (!bSkipIntroLogos)
         return;
-    if (sExeName != "METAL GEAR SOLID2.exe" && sExeName != "METAL GEAR SOLID3.exe")
+    if (eGameType != MgsGame::MGS2 && eGameType != MgsGame::MGS3)
         return;
 
     uint8_t* MGS2_MGS3_InitialIntroStateScanResult = Memory::PatternScan(baseModule, "75 ? C7 05 ? ? ? ? 01 00 00 00 C3");
@@ -644,7 +742,7 @@ void IntroSkip()
 
 void ScaleEffects()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bCustomResolution)
+    if (eGameType == MgsGame::MGS2 && bCustomResolution)
     {
         // MGS 2: Scale effects correctly. (text, overlays, fades etc)
         uint8_t* MGS2_EffectsScaleScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
@@ -700,7 +798,7 @@ void ScaleEffects()
 
 void AspectFOVFix()
 {
-    if ((sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe") && bAspectFix)
+    if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
@@ -720,7 +818,7 @@ void AspectFOVFix()
             LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
-    else if (sExeName == "METAL GEAR SOLID2.exe" && bAspectFix)
+    else if (eGameType == MgsGame::MGS2 && bAspectFix)
     {
         // MGS 2: Fix gameplay aspect ratio
         // TODO: Signature is not unique (2 results)
@@ -742,7 +840,7 @@ void AspectFOVFix()
     }
     
     // Convert FOV to vert- to match 16:9 horizontal field of view
-    if (sExeName == "METAL GEAR SOLID3.exe" && bNarrowAspect && bFOVFix)
+    if (eGameType == MgsGame::MGS3 && bNarrowAspect && bFOVFix)
     {
         // MGS 3: FOV
         uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? ?? ?? ?? E8 ?? ?? ?? ??");
@@ -761,7 +859,7 @@ void AspectFOVFix()
             LOG_F(INFO, "MGS 3: FOV: Pattern scan failed.");
         }
     }
-    else if (sExeName == "METAL GEAR SOLID2.exe" && bNarrowAspect && bFOVFix)
+    else if (eGameType == MgsGame::MGS2 && bNarrowAspect && bFOVFix)
     {
         // MGS 2: FOV
         uint8_t* MGS2_FOVScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? ?? 00 00");
@@ -784,7 +882,7 @@ void AspectFOVFix()
 
 void HUDFix()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" && bHUDFix)
+    if (eGameType == MgsGame::MGS2 && bHUDFix)
     {
         // MGS 2: HUD
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScan(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ??");
@@ -880,7 +978,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
         }
     }
-    else if (sExeName == "METAL GEAR SOLID3.exe" && bHUDFix)
+    else if (eGameType == MgsGame::MGS3 && bHUDFix)
     {
         // MGS 3: HUD
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
@@ -908,7 +1006,7 @@ void HUDFix()
             LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
         }
     }
-    else if ((sExeName == "METAL GEAR.exe" && fNewAspect > fNativeAspect) || (sExeName == "METAL GEAR.exe" && fNewAspect < fNativeAspect))
+    else if ((eGameType == MgsGame::MG && fNewAspect > fNativeAspect) || (eGameType == MgsGame::MG && fNewAspect < fNativeAspect))
     {
         // MG1/MG2: HUD
         uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScan(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
@@ -937,7 +1035,7 @@ void HUDFix()
         }
     }
 
-    if ((sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe") && bHUDFix)
+    if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3) && bHUDFix)
     {
         // MGS 2 | MGS 3: Letterboxing
         uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScan(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
@@ -958,7 +1056,7 @@ void HUDFix()
 
 void Miscellaneous()
 {
-    if (sExeName == "METAL GEAR SOLID2.exe" || sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe")
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
     {
         if (bDisableCursor)
         {
@@ -1011,7 +1109,7 @@ void Miscellaneous()
         }
     }
 
-    if (iAnisotropicFiltering > 0 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR SOLID2.exe"))
+    if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
         uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
         if (MGS2_MGS3_SetSamplerStateInsnResult)
@@ -1036,7 +1134,7 @@ void Miscellaneous()
         }
     }
 
-    if (sExeName == "METAL GEAR SOLID3.exe" && bMouseSensitivity)
+    if (eGameType == MgsGame::MGS3 && bMouseSensitivity)
     {
         // MGS 3: Mouse sensitivity
         uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
@@ -1064,7 +1162,7 @@ void Miscellaneous()
         }
     }
 
-    if (iTextureBufferSizeMB > 16 && (sExeName == "METAL GEAR SOLID3.exe" || sExeName == "METAL GEAR.exe"))
+    if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
         // MG/MG2 | MGS3: texture buffer size extension
         uint32_t NewSize = iTextureBufferSizeMB * 1024 * 1024;
@@ -1110,19 +1208,227 @@ void Miscellaneous()
     }
 }
 
+using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
+NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
+void NHT_COsContext_SetControllerID_Hook(int controllerType)
+{
+    LOG_F(INFO, "NHT_COsContext_SetControllerID_Hook: controltype %d -> %d", controllerType, iLauncherConfigCtrlType);
+    NHT_COsContext_SetControllerID(iLauncherConfigCtrlType);
+}
+
+using MGS3_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, int);
+MGS3_COsContext_InitializeSKUandLang_Fn MGS3_COsContext_InitializeSKUandLang = nullptr;
+void __fastcall MGS3_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang, int sku)
+{
+    LOG_F(INFO, "MGS3_COsContext_InitializeSKUandLang: lang %d -> %d, sku %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
+    MGS3_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage, iLauncherConfigRegion);
+}
+
+using MGS2_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
+MGS2_COsContext_InitializeSKUandLang_Fn MGS2_COsContext_InitializeSKUandLang = nullptr;
+void __fastcall MGS2_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang)
+{
+    LOG_F(INFO, "MGS2_COsContext_InitializeSKUandLang: lang %d -> %d", lang, iLauncherConfigLanguage);
+    MGS2_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage);
+}
+
+void LauncherConfigOverride()
+{
+    // If we know games steam appid, try creating steam_appid.txt file, so that game EXE can be launched directly in future runs
+    if (game)
+    {
+        const std::filesystem::path steamAppidPath = sExePath.parent_path() / "steam_appid.txt";
+
+        try
+        {
+            if (!std::filesystem::exists(steamAppidPath))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Creating steam_appid.txt to allow direct EXE launches.");
+                std::ofstream steamAppidOut(steamAppidPath);
+                if (steamAppidOut.is_open())
+                {
+                    steamAppidOut << game->SteamAppId;
+                    steamAppidOut.close();
+                }
+                if (std::filesystem::exists(steamAppidPath))
+                {
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt created successfully.");
+                }
+                else
+                {
+                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt creation failed.");
+                }
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
+        }
+    }
+
+    // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
+    if (eGameType == MgsGame::Launcher)
+    {
+        if (bLauncherConfigSkipLauncher)
+        {
+            auto gameExePath = sExePath.parent_path() / game->ExeName;
+
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, launching into %s", gameExePath.string().c_str());
+
+            PROCESS_INFORMATION processInfo = {};
+            STARTUPINFO startupInfo = {};
+            startupInfo.cb = sizeof(STARTUPINFO);
+
+            // Call CreateProcess to start the game process
+            if (CreateProcess(nullptr, (LPWSTR)gameExePath.wstring().c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+            {
+                // Successfully started the process
+                CloseHandle(processInfo.hProcess);
+                CloseHandle(processInfo.hThread);
+
+                // Force launcher to exit
+                ExitProcess(0);
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+            }
+        }
+        return;
+    }
+
+    // Certain config such as language/button style is normally passed from launcher to game via arguments
+    // When game EXE gets ran directly this config is left at default (english game, xbox buttons)
+    // If launcher argument isn't detected we'll allow defaults to be changed by hooking the engine functions responsible for them
+    HMODULE engineModule = GetModuleHandleA("Engine.dll");
+    if (!engineModule)
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
+        return;
+    }
+
+    LPWSTR commandLine = GetCommandLineW();
+
+    bool hasCtrltype = wcsstr(commandLine, L"-ctrltype") != nullptr;
+    bool hasRegion = wcsstr(commandLine, L"-region") != nullptr;
+    bool hasLang = wcsstr(commandLine, L"-lan") != nullptr;
+
+    if (!hasRegion && !hasLang)
+    {
+        MGS3_COsContext_InitializeSKUandLang = decltype(MGS3_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
+        if (MGS3_COsContext_InitializeSKUandLang)
+        {
+            if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext_InitializeSKUandLang, MGS3_COsContext_InitializeSKUandLang_Hook))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Region/Language settings from INI");
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+            }
+        }
+        else
+        {
+            MGS2_COsContext_InitializeSKUandLang = decltype(MGS2_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXH@Z"));
+            if (MGS2_COsContext_InitializeSKUandLang)
+            {
+                if (Memory::HookIAT(baseModule, "Engine.dll", MGS2_COsContext_InitializeSKUandLang, MGS2_COsContext_InitializeSKUandLang_Hook))
+                {
+                    LOG_F(INFO, "MGS 2: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Language setting from INI");
+                }
+                else
+                {
+                    LOG_F(INFO, "MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                }
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
+            }
+        }
+    }
+    else
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
+    }
+
+    if (!hasCtrltype)
+    {
+        NHT_COsContext_SetControllerID = decltype(NHT_COsContext_SetControllerID)(GetProcAddress(engineModule, "NHT_COsContext_SetControllerID"));
+        if (NHT_COsContext_SetControllerID)
+        {
+            if (Memory::HookIAT(baseModule, "Engine.dll", NHT_COsContext_SetControllerID, NHT_COsContext_SetControllerID_Hook))
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Hooked NHT_COsContext_SetControllerID, overriding with CtrlType setting from INI");
+            }
+            else
+            {
+                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
+        }
+    }
+    else
+    {
+        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -ctrltype specified on command-line, skipping INI override");
+    }
+}
+
+std::mutex mainThreadFinishedMutex;
+std::condition_variable mainThreadFinishedVar;
+bool mainThreadFinished = false;
+
 DWORD __stdcall Main(void*)
 {
     Logging();
     ReadConfig();
-    DetectGame();
-    CustomResolution();
-    IntroSkip();
-    Sleep(iInjectionDelay);
-    ScaleEffects();
-    AspectFOVFix();
-    HUDFix();
-    Miscellaneous();
-    return true; // end thread
+    if (DetectGame())
+    {
+        LauncherConfigOverride();
+        CustomResolution();
+        IntroSkip();
+        ScaleEffects();
+        AspectFOVFix();
+        HUDFix();
+        Miscellaneous();
+    }
+
+    // Signal any threads which might be waiting for us before continuing
+    {
+        std::lock_guard lock(mainThreadFinishedMutex);
+        mainThreadFinished = true;
+        mainThreadFinishedVar.notify_all();
+    }
+
+    return true;
+}
+
+std::mutex memsetHookMutex;
+bool memsetHookCalled = false;
+void* (__cdecl* memset_Fn)(void* Dst, int Val, size_t Size);
+void* __cdecl memset_Hook(void* Dst, int Val, size_t Size)
+{
+    // memset is one of the first imports called by game (not the very first though, since ASI loader still has those hooked during our DllMain...)
+    std::lock_guard lock(memsetHookMutex);
+    if (!memsetHookCalled)
+    {
+        memsetHookCalled = true;
+
+        // First we'll unhook the IAT for this function as early as we can
+        Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Hook, memset_Fn);
+
+        // Wait for our main thread to finish before we return to the game
+        if (!mainThreadFinished)
+        {
+            std::unique_lock finishedLock(mainThreadFinishedMutex);
+            mainThreadFinishedVar.wait(finishedLock, [] { return mainThreadFinished; });
+        }
+    }
+
+    return memset_Fn(Dst, Val, Size);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -1134,10 +1440,19 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        HANDLE mainHandle = CreateThread(NULL, 0, Main, 0, NULL, 0);
+        // Try hooking IAT of one of the imports game calls early on, so we can make it wait for our Main thread to complete before returning back to game
+        // This will only hook the main game modules usage of memset, other modules calling it won't be affected
+        HMODULE vcruntime140 = GetModuleHandleA("VCRUNTIME140.dll");
+        if (vcruntime140)
+        {
+            memset_Fn = decltype(memset_Fn)(GetProcAddress(vcruntime140, "memset"));
+            Memory::HookIAT(baseModule, "VCRUNTIME140.dll", memset_Fn, memset_Hook);
+        }
 
+        HANDLE mainHandle = CreateThread(NULL, 0, Main, 0, NULL, 0);
         if (mainHandle)
         {
+            SetThreadPriority(mainHandle, THREAD_PRIORITY_HIGHEST); // set our Main thread priority higher than the games thread
             CloseHandle(mainHandle);
         }
     }

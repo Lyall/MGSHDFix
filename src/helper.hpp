@@ -179,4 +179,41 @@ namespace Memory
     {
         return (address + 4 + *reinterpret_cast<std::int32_t*>(address));
     }
+
+    BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction)
+    {
+        auto* base = (uint8_t*)callerModule;
+        const auto* dos_header = (IMAGE_DOS_HEADER*)base;
+        const auto nt_headers = (IMAGE_NT_HEADERS*)(base + dos_header->e_lfanew);
+        const auto* imports = (IMAGE_IMPORT_DESCRIPTOR*)(base + nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+
+        for (int i = 0; imports[i].Characteristics; i++)
+        {
+            const char* name = (const char*)(base + imports[i].Name);
+            if (lstrcmpiA(name, targetModule) != 0)
+                continue;
+
+            void** thunk = (void**)(base + imports[i].FirstThunk);
+
+            for (; *thunk; thunk++)
+            {
+                const void* import = *thunk;
+
+                if (import != targetFunction)
+                    continue;
+
+                DWORD oldState;
+                if (!VirtualProtect(thunk, sizeof(void*), PAGE_READWRITE, &oldState))
+                    return FALSE;
+
+                *thunk = detourFunction;
+
+                VirtualProtect(thunk, sizeof(void*), oldState, &oldState);
+
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
 }
