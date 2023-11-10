@@ -5,7 +5,7 @@ using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
-string sFixVer = "0.9";
+string sFixVer = "1.0";
 inipp::Ini<char> ini;
 
 // INI Variables
