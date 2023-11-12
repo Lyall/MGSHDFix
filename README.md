@@ -4,13 +4,13 @@
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
-## Metal Gear Solid 1 (Unsupported)
-- For Metal Gear Solid 1, using [MGSM2Fix](https://github.com/nuggslet/MGSM2Fix) is recommended.
-
 ## Games Supported
 - Metal Gear 1/2
 - Metal Gear Solid 2
 - Metal Gear Solid 3
+
+## Metal Gear Solid 1 (Unsupported)
+- For Metal Gear Solid 1, using [MGSM2Fix](https://github.com/nuggslet/MGSM2Fix) is recommended.
 
 ## Features
 - Custom resolution/ultrawide support.
