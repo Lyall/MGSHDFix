@@ -4,6 +4,9 @@
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
+## Metal Gear Solid 1 (Unsupported)
+- For Metal Gear Solid 1, using [MGSM2Fix](https://github.com/nuggslet/MGSM2Fix) is recommended.
+
 ## Games Supported
 - Metal Gear 1/2
 - Metal Gear Solid 2
@@ -16,6 +19,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Mouse cursor toggle.
 - Mouse sensitivity adjustment (MGS3).
 - Correct gameplay/cutscene aspect ratio (MGS2/MGS3).
+- Launcher skip (see ini to configure).
 - Skip intro logos (MGS2/MGS3).
 - Adjustable anisotropic filtering (MGS2/MGS3).
 - Increased texture size limits. (MG1/MG2/MGS3)
