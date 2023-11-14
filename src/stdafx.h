@@ -13,6 +13,7 @@
 #include <inttypes.h>
 #include <mutex>
 #include <filesystem>
+#include <codecvt>
 
 #include "external/loguru/loguru.hpp"
 #include "external/inipp/inipp/inipp.h"

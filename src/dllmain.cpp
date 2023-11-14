@@ -30,6 +30,9 @@ bool bLauncherConfigSkipLauncher = false;
 int iLauncherConfigCtrlType = 5;
 int iLauncherConfigRegion = 0;
 int iLauncherConfigLanguage = 0;
+std::string sLauncherConfigMSXGame = "mg1";
+int iLauncherConfigMSXWallType = 0;
+std::string sLauncherConfigMSXWallAlign = "C";
 
 // Variables
 float fNewX;
@@ -458,6 +461,9 @@ void ReadConfig()
     inipp::get_value(ini.sections["Launcher Config"], "CtrlType", sLauncherConfigCtrlType);
     inipp::get_value(ini.sections["Launcher Config"], "Region", sLauncherConfigRegion);
     inipp::get_value(ini.sections["Launcher Config"], "Language", sLauncherConfigLanguage);
+    inipp::get_value(ini.sections["Launcher Config"], "MSXGame", sLauncherConfigMSXGame);
+    inipp::get_value(ini.sections["Launcher Config"], "MSXWallType", iLauncherConfigMSXWallType);
+    inipp::get_value(ini.sections["Launcher Config"], "MSXWallAlign", sLauncherConfigMSXWallAlign);
 
     auto findStringInVector = [](std::string& str, const std::initializer_list<std::string>& search) -> int {
         std::transform(str.begin(), str.end(), str.begin(),
@@ -1273,14 +1279,39 @@ void LauncherConfigOverride()
         {
             auto gameExePath = sExePath.parent_path() / game->ExeName;
 
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, launching into %s", gameExePath.string().c_str());
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, attempting game launch");
 
             PROCESS_INFORMATION processInfo = {};
             STARTUPINFO startupInfo = {};
             startupInfo.cb = sizeof(STARTUPINFO);
 
+            std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
+
+            if (game->ExeName == "METAL GEAR.exe")
+            {
+                // Add launch parameters for MG MSX
+                auto transformString = [](const std::string& input, int (*transformation)(int)) -> std::wstring {
+                    // Apply the transformation function to each character
+                    std::string transformedString = input;
+                    std::transform(transformedString.begin(), transformedString.end(), transformedString.begin(), transformation);
+
+                    // Convert the transformed string to std::wstring
+#pragma warning (disable : 1786 ) // SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+                    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+                    std::wstring wideString = converter.from_bytes(transformedString);
+
+                    return wideString;
+                    };
+
+                commandLine += L" -mgst " + transformString(sLauncherConfigMSXGame, ::tolower); // -mgst must be lowercase
+                commandLine += L" -walltype " + std::to_wstring(iLauncherConfigMSXWallType);
+                commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign, ::toupper); // -wallalign must be uppercase
+            }
+
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: %ls", commandLine.c_str());
+
             // Call CreateProcess to start the game process
-            if (CreateProcess(nullptr, (LPWSTR)gameExePath.wstring().c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+            if (CreateProcess(nullptr, (LPWSTR)commandLine.c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
             {
                 // Successfully started the process
                 CloseHandle(processInfo.hProcess);
