@@ -603,6 +603,7 @@ bool DetectGame()
 
     LOG_F(INFO, "Module Name: %s", sExeName.c_str());
     LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
+    LOG_F(INFO, "Module Address: %p", baseModule);
     LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
     eGameType = MgsGame::Unknown;
@@ -1238,36 +1239,45 @@ void ViewportFix()
     if (eGameType == MgsGame::MGS3)
     {
         MH_STATUS status;
-        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScan(baseModule, "48 8B C4 48 89 58 10 55 48 8D 68 A1 48 81 EC 00");
 
-        if (MGS3_RenderWaterSurfaceScanResult)
+        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScan(baseModule, "0F 57 ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B ?? ?? ?? 48 89 ?? ?? ?? ?? ??");
+        uintptr_t MGS3_RenderWaterSurfaceScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_RenderWaterSurfaceScanResult + 0x10);
+        if (MGS3_RenderWaterSurfaceScanResult && MGS3_RenderWaterSurfaceScanAddress)
         {
-            status = Memory::HookFunction(MGS3_RenderWaterSurfaceScanResult, MGS3_RenderWaterSurface_Hook, (LPVOID*)&MGS3_RenderWaterSurface);
+            status = Memory::HookFunction((uint8_t*)MGS3_RenderWaterSurfaceScanAddress, MGS3_RenderWaterSurface_Hook, (LPVOID*)&MGS3_RenderWaterSurface);
 
             if (status != MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Render water surface hook failed.");
+                LOG_F(INFO, "MGS 3: Render Water Surface: Hook failed.");
+            }
+            else if (status == MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Render Water Surface: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_RenderWaterSurfaceScanAddress);
             }
         }
         else
         {
-            LOG_F(INFO, "MGS 3: Render water surface pattern scan failed.");
+            LOG_F(INFO, "MGS 3:  Render Water Surface: Pattern scan failed.");
         }
 
-        uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "01 48 0F 44 C1 F3 0F 10 40 10 C3") - 0x2B;
-
-        if (MGS3_GetViewportCameraOffsetYScanResult)
+        uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? F3 44 ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? 00 00");
+        uintptr_t MGS3_GetViewportCameraOffsetYScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_GetViewportCameraOffsetYScanResult + 0xB);
+        if (MGS3_GetViewportCameraOffsetYScanResult && MGS3_GetViewportCameraOffsetYScanAddress)
         {
-            status = Memory::HookFunction(MGS3_GetViewportCameraOffsetYScanResult, MGS3_GetViewportCameraOffsetY_Hook, (LPVOID*)&MGS3_GetViewportCameraOffsetY);
+            status = Memory::HookFunction((uint8_t*)MGS3_GetViewportCameraOffsetYScanAddress, MGS3_GetViewportCameraOffsetY_Hook, (LPVOID*)&MGS3_GetViewportCameraOffsetY);
 
             if (status != MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Get viewport camera offset hook failed.");
+                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook failed.");
+            }
+            else if (status == MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_GetViewportCameraOffsetYScanAddress);
             }
         }
         else
         {
-            LOG_F(INFO, "MGS 3: Get viewport camera offset pattern scan failed.");
+            LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
         }
     }
 }
