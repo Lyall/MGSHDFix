@@ -417,7 +417,7 @@ void __declspec(naked) MGS2_MGS3_SetSamplerStateAniso_CC()
 
 bool MGS3_UseAdjustedOffsetY = true;
 
-typedef int64_t MGS3_RenderWaterSurface_Fn(int64_t a1);
+typedef int64_t MGS3_RenderWaterSurface_Fn(int64_t work);
 MGS3_RenderWaterSurface_Fn* MGS3_RenderWaterSurface = nullptr;
 int64_t __fastcall MGS3_RenderWaterSurface_Hook(int64_t work)
 {

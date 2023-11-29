@@ -221,7 +221,7 @@ namespace Memory
     MH_STATUS HookFunction(LPVOID target, LPVOID detour, LPVOID* ppOriginal)
     {
         MH_STATUS status = MH_CreateHook(target, detour, ppOriginal);
-        if (status == 0)
+        if (status == MH_OK)
             MH_EnableHook(target);
         return status;
     }
