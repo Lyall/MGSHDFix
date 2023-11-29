@@ -1418,6 +1418,11 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     if (DetectGame())
     {
+        auto mhStatus = MH_Initialize();
+
+        if (mhStatus != MH_OK)
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: MinHook: Failed to initialize with error %d", mhStatus);
+
         LauncherConfigOverride();
         CustomResolution();
         IntroSkip();

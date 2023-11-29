@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <stdio.h>
+#include "external/minhook/MinHook.h"
 
 using namespace std;
 
@@ -215,5 +216,13 @@ namespace Memory
         }
 
         return FALSE;
+    }
+
+    MH_STATUS HookFunction(LPVOID target, LPVOID detour, LPVOID* ppOriginal)
+    {
+        MH_STATUS status = MH_CreateHook(target, detour, ppOriginal);
+        if (status == 0)
+            MH_EnableHook(target);
+        return status;
     }
 }
