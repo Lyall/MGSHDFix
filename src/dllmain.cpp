@@ -415,6 +415,25 @@ void __declspec(naked) MGS2_MGS3_SetSamplerStateAniso_CC()
     }
 }
 
+bool MGS3_UseAdjustedOffsetY = true;
+
+typedef int64_t MGS3_RenderWaterSurface_Fn(int64_t a1);
+MGS3_RenderWaterSurface_Fn* MGS3_RenderWaterSurface = nullptr;
+int64_t __fastcall MGS3_RenderWaterSurface_Hook(int64_t work)
+{
+    MGS3_UseAdjustedOffsetY = false;
+    auto result = MGS3_RenderWaterSurface(work);
+    MGS3_UseAdjustedOffsetY = true;
+    return result;
+}
+
+typedef float MGS3_GetViewportCameraOffsetY_Fn(void);
+MGS3_GetViewportCameraOffsetY_Fn* MGS3_GetViewportCameraOffsetY = nullptr;
+float MGS3_GetViewportCameraOffsetY_Hook()
+{
+    return MGS3_UseAdjustedOffsetY ? MGS3_GetViewportCameraOffsetY() : 0.00f;
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -1214,6 +1233,45 @@ void Miscellaneous()
     }
 }
 
+void ViewportFix()
+{
+    if (eGameType == MgsGame::MGS3)
+    {
+        MH_STATUS status;
+        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScan(baseModule, "48 8B C4 48 89 58 10 55 48 8D 68 A1 48 81 EC 00");
+
+        if (MGS3_RenderWaterSurfaceScanResult)
+        {
+            status = Memory::HookFunction(MGS3_RenderWaterSurfaceScanResult, MGS3_RenderWaterSurface_Hook, (LPVOID*)&MGS3_RenderWaterSurface);
+
+            if (status != MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Render water surface hook failed.");
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MGS 3: Render water surface pattern scan failed.");
+        }
+
+        uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "01 48 0F 44 C1 F3 0F 10 40 10 C3") - 0x2B;
+
+        if (MGS3_GetViewportCameraOffsetYScanResult)
+        {
+            status = Memory::HookFunction(MGS3_GetViewportCameraOffsetYScanResult, MGS3_GetViewportCameraOffsetY_Hook, (LPVOID*)&MGS3_GetViewportCameraOffsetY);
+
+            if (status != MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Get viewport camera offset hook failed.");
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MGS 3: Get viewport camera offset pattern scan failed.");
+        }
+    }
+}
+
 using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
 NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
 void NHT_COsContext_SetControllerID_Hook(int controllerType)
@@ -1430,6 +1488,7 @@ DWORD __stdcall Main(void*)
         AspectFOVFix();
         HUDFix();
         Miscellaneous();
+        ViewportFix();
     }
 
     // Signal any threads which might be waiting for us before continuing
