@@ -30,7 +30,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS2**" or "**steamapps\common\MGS3**" for Steam).
 
 ### Reshade/DXVK
-- For use with DXVK or Reshade try renaming the asi loader DLL (`d3d11.dll`) to `wininet.dll`.
+- For use with DXVK or Reshade try renaming the ASI loader DLL (`d3d11.dll`) to `wininet.dll`.
 
 ### Steam Deck/Linux additional instructions
 Steam Deck users can also enjoy a native 800p (16:10) experience by installing this mod.
