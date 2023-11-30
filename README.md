@@ -5,12 +5,12 @@
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
 ## Games Supported
-- Metal Gear 1/2
+- Metal Gear 1/2 (MSX)
 - Metal Gear Solid 2
 - Metal Gear Solid 3
 
-## Metal Gear Solid 1 (Unsupported)
-- For Metal Gear Solid 1, using [MGSM2Fix](https://github.com/nuggslet/MGSM2Fix) is recommended.
+## Metal Gear Solid 1 / Metal Gear 1/2 (NES)
+- For Metal Gear Solid 1 and the Vol 1. Bonus Content (MG1/2 NES), using [MGSM2Fix](https://github.com/nuggslet/MGSM2Fix) is recommended.
 
 ## Features
 - Custom resolution/ultrawide support.
@@ -22,7 +22,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Launcher skip (see ini to configure).
 - Skip intro logos (MGS2/MGS3).
 - Adjustable anisotropic filtering (MGS2/MGS3).
-- Increased texture size limits. (MG1/MG2/MGS3)
+- Increased texture size limits (MG1/MG2/MGS3).
+- Fixed water surface rendering (MGS3). See [PR #71](https://github.com/Lyall/MGSHDFix/pull/71) for a breakdown of the issue.
 
 ## Installation
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -30,7 +31,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ### Steam Deck/Linux additional instructions
 Steam Deck users can also enjoy a native 800p (16:10) experience by installing this mod.
-- Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="d3d11=n,b" %command%` in the launch options.
+- Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="wininet=n,b" %command%` in the launch options.
 - If you're using the missing audio workaround put `WINEDLLOVERRIDES="xaudio2_9=n;d3d11=n,b" %command%` instead.
 
 ## Configuration
@@ -64,3 +65,4 @@ This list will contain bugs which may or may not be fixed.
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [Loguru](https://github.com/emilk/loguru) for logging. <br />
 [length-disassembler](https://github.com/Nomade040/length-disassembler) for length disassembly.
+[minhook](https://github.com/TsudaKageyu/minhook) for hooking.
