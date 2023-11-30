@@ -415,6 +415,25 @@ void __declspec(naked) MGS2_MGS3_SetSamplerStateAniso_CC()
     }
 }
 
+bool MGS3_UseAdjustedOffsetY = true;
+
+typedef int64_t MGS3_RenderWaterSurface_Fn(int64_t work);
+MGS3_RenderWaterSurface_Fn* MGS3_RenderWaterSurface = nullptr;
+int64_t __fastcall MGS3_RenderWaterSurface_Hook(int64_t work)
+{
+    MGS3_UseAdjustedOffsetY = false;
+    auto result = MGS3_RenderWaterSurface(work);
+    MGS3_UseAdjustedOffsetY = true;
+    return result;
+}
+
+typedef float MGS3_GetViewportCameraOffsetY_Fn(void);
+MGS3_GetViewportCameraOffsetY_Fn* MGS3_GetViewportCameraOffsetY = nullptr;
+float MGS3_GetViewportCameraOffsetY_Hook()
+{
+    return MGS3_UseAdjustedOffsetY ? MGS3_GetViewportCameraOffsetY() : 0.00f;
+}
+
 void Logging()
 {
     loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
@@ -584,6 +603,7 @@ bool DetectGame()
 
     LOG_F(INFO, "Module Name: %s", sExeName.c_str());
     LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
+    LOG_F(INFO, "Module Address: %p", baseModule);
     LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
 
     eGameType = MgsGame::Unknown;
@@ -1214,6 +1234,54 @@ void Miscellaneous()
     }
 }
 
+void ViewportFix()
+{
+    if (eGameType == MgsGame::MGS3)
+    {
+        MH_STATUS status;
+
+        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScan(baseModule, "0F 57 ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B ?? ?? ?? 48 89 ?? ?? ?? ?? ??");
+        uintptr_t MGS3_RenderWaterSurfaceScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_RenderWaterSurfaceScanResult + 0x10);
+        if (MGS3_RenderWaterSurfaceScanResult && MGS3_RenderWaterSurfaceScanAddress)
+        {
+            status = Memory::HookFunction((uint8_t*)MGS3_RenderWaterSurfaceScanAddress, MGS3_RenderWaterSurface_Hook, (LPVOID*)&MGS3_RenderWaterSurface);
+
+            if (status != MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Render Water Surface: Hook failed.");
+            }
+            else if (status == MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Render Water Surface: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_RenderWaterSurfaceScanAddress);
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MGS 3:  Render Water Surface: Pattern scan failed.");
+        }
+
+        uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? F3 44 ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? 00 00");
+        uintptr_t MGS3_GetViewportCameraOffsetYScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_GetViewportCameraOffsetYScanResult + 0xB);
+        if (MGS3_GetViewportCameraOffsetYScanResult && MGS3_GetViewportCameraOffsetYScanAddress)
+        {
+            status = Memory::HookFunction((uint8_t*)MGS3_GetViewportCameraOffsetYScanAddress, MGS3_GetViewportCameraOffsetY_Hook, (LPVOID*)&MGS3_GetViewportCameraOffsetY);
+
+            if (status != MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook failed.");
+            }
+            else if (status == MH_OK)
+            {
+                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_GetViewportCameraOffsetYScanAddress);
+            }
+        }
+        else
+        {
+            LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
+        }
+    }
+}
+
 using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
 NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
 void NHT_COsContext_SetControllerID_Hook(int controllerType)
@@ -1418,6 +1486,11 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     if (DetectGame())
     {
+        auto mhStatus = MH_Initialize();
+
+        if (mhStatus != MH_OK)
+            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: MinHook: Failed to initialize with error %d", mhStatus);
+
         LauncherConfigOverride();
         CustomResolution();
         IntroSkip();
@@ -1425,6 +1498,7 @@ DWORD __stdcall Main(void*)
         AspectFOVFix();
         HUDFix();
         Miscellaneous();
+        ViewportFix();
     }
 
     // Signal any threads which might be waiting for us before continuing
