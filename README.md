@@ -32,7 +32,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 ### Steam Deck/Linux additional instructions
 Steam Deck users can also enjoy a native 800p (16:10) experience by installing this mod.
 - Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="wininet=n,b" %command%` in the launch options.
-- If you're using the missing audio workaround put `WINEDLLOVERRIDES="xaudio2_9=n;d3d11=n,b" %command%` instead.
+- If you're using the missing audio workaround put `WINEDLLOVERRIDES="xaudio2_9=n;wininet=n,b" %command%` instead.
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
