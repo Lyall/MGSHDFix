@@ -1,3 +1,0 @@
-dist: focal
-language: cpp
-script: cmake . && make && make test
