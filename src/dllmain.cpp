@@ -1,18 +1,30 @@
 #include "stdafx.h"
 #include "helper.hpp"
+#include <inipp/inipp.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <safetyhook.hpp>
 
 using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
-string sFixVer = "1.0.2";
+// Logger and config setup
 inipp::Ini<char> ini;
+string sFixName = "MGSHDFix";
+string sFixVer = "2.0";
+string sLogFile = "MGSHDFix.log";
+string sConfigFile = "MGSHDFix.ini";
+string sExeName;
+filesystem::path sExePath;
 
-// INI Variables
+// Ini Variables
 bool bAspectFix;
 bool bHUDFix;
 bool bFOVFix;
 bool bCustomResolution;
+int iCustomResX;
+int iCustomResY;
 bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
@@ -24,8 +36,8 @@ bool bDisableCursor;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
-int iCustomResX;
-int iCustomResY;
+
+// Launcher ini variables
 bool bLauncherConfigSkipLauncher = false;
 int iLauncherConfigCtrlType = 5;
 int iLauncherConfigRegion = 0;
@@ -34,33 +46,16 @@ std::string sLauncherConfigMSXGame = "mg1";
 int iLauncherConfigMSXWallType = 0;
 std::string sLauncherConfigMSXWallAlign = "C";
 
-// Variables
-float fNewX;
-float fNewY;
-float fNativeAspect = (float)16/9;
-float fPi = 3.14159265358979323846f;
-float fNewAspect;
-bool bNarrowAspect = false;
-float fAspectDivisional;
+// Aspect ratio + HUD stuff
+float fNativeAspect = (float)16 / 9;
+float fAspectRatio;
 float fAspectMultiplier;
 float fHUDWidth;
 float fHUDHeight;
+float fDefaultHUDWidth = (float)1920;
+float fDefaultHUDHeight = (float)1080;
 float fHUDWidthOffset;
 float fHUDHeightOffset;
-int iHUDWidth;
-int iHUDHeight;
-int iHUDWidthOffset;
-int iHUDHeightOffset;
-float fMGS2_DefaultHUDX = (float)1280;
-float fMGS2_DefaultHUDY = (float)720;
-float fMGS3_DefaultHUDWidth = (float)2;
-float fMGS3_DefaultHUDHeight = (float)-2;
-float fMGS2_DefaultHUDWidth = (float)1;
-float fMGS2_DefaultHUDHeight = (float)-2;
-float fMGS2_DefaultHUDHeight2 = (float)-1;
-
-std::filesystem::path sExePath;
-std::string sExeName;
 
 const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
     "ps5",
@@ -114,347 +109,59 @@ const std::map<MgsGame, GameInfo> kGames = {
 const GameInfo* game = nullptr;
 MgsGame eGameType = MgsGame::Unknown;
 
-// MGS 2: Aspect Ratio Hook
-DWORD64 MGS2_GameplayAspectReturnJMP;
-void __declspec(naked) MGS2_GameplayAspect_CC()
-{
-    __asm
-    {
-        xorps xmm1, xmm1
-        cmove rax, rcx
-        movss xmm0, [rax + 0x14]
-        divss xmm0, [fAspectMultiplier]
-        ret
-    }
-}
-
-// MGS 2: FOV Hook
-DWORD64 MGS2_FOVReturnJMP;
-void __declspec(naked) MGS2_FOV_CC()
-{
-    __asm
-    {
-        mulss xmm2, [fAspectMultiplier]
-        movaps[rax - 0x68], xmm11
-        movss[rcx + 0x00000300], xmm2
-        movaps[rax - 0x78], xmm12
-        jmp[MGS2_FOVReturnJMP]
-    }
-}
-
-// MGS 3: Aspect Ratio Hook
-DWORD64 MGS3_GameplayAspectReturnJMP;
-void __declspec(naked) MGS3_GameplayAspect_CC()
-{
-    __asm
-    {
-        xorps xmm0, xmm0
-        cmove rax, rcx
-        movss xmm1, [rax + 0x14]
-        divss xmm1, [fAspectMultiplier]
-        movaps xmm0,xmm1
-        ret
-    }
-}
-
-// MGS 3: FOV Hook
-DWORD64 MGS3_FOVReturnJMP;
-void __declspec(naked) MGS3_FOV_CC()
-{
-    __asm
-    {
-        mulss xmm2, [fAspectMultiplier]
-        movss[rcx + 0x00000338], xmm2
-        movaps[rsp + 0x50], xmm15
-        jmp [MGS3_FOVReturnJMP]
-    }
-}
-
-// MGS 3: HUD Width Hook
-DWORD64 MGS3_HUDWidthReturnJMP;
-float fMGS3_NewHUDWidth;
-float fMGS3_NewHUDHeight;
-void __declspec(naked) MGS3_HUDWidth_CC()
-{
-    __asm
-    {
-        movss xmm14, [fMGS3_NewHUDWidth]
-        movss xmm15, [fMGS3_NewHUDHeight]
-        mov r12d, 0x00000200
-        jmp[MGS3_HUDWidthReturnJMP]
-    }
-}
-
-// MGS 2: HUD Width Hook
-DWORD64 MGS2_HUDWidthReturnJMP;
-float fMGS2_NewHUDWidth;
-float fMGS2_NewHUDHeight;
-float fMGS2_NewHUDHeight2;
-void __declspec(naked) MGS2_HUDWidth_CC()
-{
-    __asm
-    {
-        movss xmm0, [rdi + 0x10]
-        movaps xmm2, xmm7
-        movss xmm2, [fMGS2_NewHUDWidth]
-        subss xmm0, [rdi + 0x08]
-        divss xmm2, xmm0
-        movss xmm9, [fMGS2_NewHUDHeight]
-        movss xmm10, [fMGS2_NewHUDHeight2]
-        jmp[MGS2_HUDWidthReturnJMP]
-    }
-}
-
-// MGS 2: Radar Width Hook
-DWORD64 MGS2_RadarWidthReturnJMP;
-void __declspec(naked) MGS2_RadarWidth_CC()
-{
-    __asm
-    {
-        mov ebx, [iHUDWidth]
-        cmp bNarrowAspect, 1
-        // ->
-        jne $+0x8
-        mov eax, [iHUDHeight]
-        // <-
-        mov r8d, eax
-        mov eax, ebx
-        imul eax, [rsi + 0x0C]
-        mov ecx, r8d
-        imul ecx, [rsi + 0x10]
-        jmp[MGS2_RadarWidthReturnJMP]
-    }
-}
-
-// MGS 2: Radar Width Offset Hook
-DWORD64 MGS2_RadarWidthOffsetReturnJMP;
-void __declspec(naked) MGS2_RadarWidthOffset_CC()
-{
-    __asm
-    {
-        sar r9d, 8
-        add eax, edx
-        mov ecx, r9d
-        sar eax, 9
-        shr ecx, 31
-        add r9d, ecx
-        mov ecx, [iHUDWidthOffset]
-        add eax, ecx
-        jmp[MGS2_RadarWidthOffsetReturnJMP]
-    }
-}
-
-// MGS 2: Radar Width Offset Hook
-DWORD64 MGS2_RadarHeightOffsetReturnJMP;
-DWORD64 MGS2_RadarHeightOffsetValueAddress = 0;
-void __declspec(naked) MGS2_RadarHeightOffset_CC()
-{
-    __asm
-    {
-        sar edx, 0x08
-        mov eax, edx
-        shr eax, 0x1F
-        add edx, eax
-        mov eax, [iHUDHeightOffset]
-        add edx, eax
-        mov rax, [MGS2_RadarHeightOffsetValueAddress]
-        mov dword ptr[rax], edx
-        xor eax, eax
-        jmp[MGS2_RadarHeightOffsetReturnJMP]
-    }
-}
-
-// MGS 2: Codec Portraits Hook
-DWORD64 MGS2_CodecPortraitsReturnJMP;
-void __declspec(naked) MGS2_CodecPortraits_CC()
-{
-    __asm
-    {
-        cmp bNarrowAspect, 1
-        jne resizeHor
-        divss xmm5, [fAspectMultiplier]
-        addss xmm0, [rax + 0x60]
-        cvttss2si eax, xmm4
-        movss xmm4, [rbx + 0x64]
-        jmp[MGS2_CodecPortraitsReturnJMP]
-
-        resizeHor:
-            divss xmm0, [fAspectMultiplier]
-            movss xmm15, xmm4
-            divss xmm15, [fAspectMultiplier]
-            addss xmm0, xmm15
-            xorps xmm15, xmm15
-            cvttss2si eax, xmm4
-            movss xmm4, [rbx + 0x64]
-            jmp[MGS2_CodecPortraitsReturnJMP]
-    }
-}
-
-// MGS 2: Effects Scale X Hook
-DWORD64 MGS2_EffectsScaleXReturnJMP;
-float fMGS2_EffectScaleX;
-void __declspec(naked) MGS2_EffectsScaleX_CC()
-{
-    __asm
-    {
-        movss xmm1, [fMGS2_EffectScaleX]
-        mov rcx, [rbp - 0x60]
-        movd xmm0, eax
-        cvtdq2ps xmm0, xmm0
-        divss xmm1, xmm0
-        jmp[MGS2_EffectsScaleXReturnJMP]
-    }
-}
-
-// MGS 2: Effects Scale X 2 Hook
-DWORD64 MGS2_EffectsScaleX2ReturnJMP;
-void __declspec(naked) MGS2_EffectsScaleX2_CC()
-{
-    __asm
-    {
-        movss xmm1, [fMGS2_EffectScaleX]
-        cvtdq2ps xmm0, xmm0
-        divss xmm1, xmm0
-        movd xmm0, [rbp - 0x04]
-        addss xmm1, xmm1
-        jmp[MGS2_EffectsScaleX2ReturnJMP]
-    }
-}
-
-// MGS 2: Effects Scale Y Hook
-DWORD64 MGS2_EffectsScaleYReturnJMP;
-float fMGS2_EffectScaleY;
-void __declspec(naked) MGS2_EffectsScaleY_CC()
-{
-    __asm
-    {
-        movss xmm1, [fMGS2_EffectScaleY]
-        mov [rsp + 0x000004F8], rbx
-        jmp[MGS2_EffectsScaleYReturnJMP]
-    }
-}
-
-// MGS 2: Borderless Hook
-DWORD64 MGS2_CreateWindowExAReturnJMP;
-void __declspec(naked) MGS2_CreateWindowExA_CC()
-{
-    __asm
-    {
-        mov ecx, [r13 + 0x08]
-        mov rax, [rbp - 0x68]
-        mov r9d, [rbp + 0x000000B0]
-        mov r9d, 0x90000000                 // WS_VISIBLE + WS_POPUP
-        jmp[MGS2_CreateWindowExAReturnJMP]
-    }
-}
-
-// MGS 3: Borderless Hook
-DWORD64 MGS3_CreateWindowExAReturnJMP;
-void __declspec(naked) MGS3_CreateWindowExA_CC()
-{
-    __asm
-    {
-        mov rax, [rbp + 0x000000C8]
-        mov [rsp + 0x48], r12
-        mov [rsp + 0x40], rax
-        mov r9d, 0x90000000                 // WS_VISIBLE + WS_POPUP
-        jmp[MGS3_CreateWindowExAReturnJMP]
-    }
-}
-
-// MGS 3: Mouse Sensitivity X Hook
-DWORD64 MGS3_MouseSensitivityXReturnJMP;
-void __declspec(naked) MGS3_MouseSensitivityX_CC()
-{
-    __asm
-    {
-        mulss xmm0, [fMouseSensitivityXMulti]
-        cvttss2si eax, xmm0
-        movd xmm0, ecx
-        mov ecx, [rbx + 0x24]
-        jmp[MGS3_MouseSensitivityXReturnJMP]
-    }
-}
-
-// MGS 3: Mouse Sensitivity Y Hook
-DWORD64 MGS3_MouseSensitivityYReturnJMP;
-void __declspec(naked) MGS3_MouseSensitivityY_CC()
-{
-    __asm
-    {
-        mulss xmm0, [fMouseSensitivityYMulti]
-        mov [rbx + 0x50], edx
-        cvttss2si eax, xmm0
-        movd xmm0, ecx
-        jmp[MGS3_MouseSensitivityYReturnJMP]
-    }
-}
-
-#define D3D11_FILTER_ANISOTROPIC 0x55
-
-// MGS 2 / MGS 3: Forced anisotropy via CD3DCachedDevice::SetSamplerState hook
-DWORD64 MGS2_MGS3_SetSamplerStateAnisoReturnJMP;
-DWORD64 gpRenderBackend = 0;
-void __declspec(naked) MGS2_MGS3_SetSamplerStateAniso_CC()
-{
-    __asm
-    {
-        mov rax, [gpRenderBackend]
-        mov rax, [rax]
-
-        mov r9d, [iAnisotropicFiltering]
-
-        // [rcx+rax+0x438] = D3D11_SAMPLER_DESC, +0x14 = MaxAnisotropy
-        mov [rcx+rax+0x438 + 0x14], r9d
-
-        // Override filter mode in r9d with aniso value and run compare from orig game code
-        // Game code will then copy in r9d & update D3D etc when r9d is different to existing value
-        mov r9d, D3D11_FILTER_ANISOTROPIC
-        cmp [rcx+rax+0x438], r9d
-        jmp [MGS2_MGS3_SetSamplerStateAnisoReturnJMP]
-    }
-}
-
-bool MGS3_UseAdjustedOffsetY = true;
-
-typedef int64_t MGS3_RenderWaterSurface_Fn(int64_t work);
-MGS3_RenderWaterSurface_Fn* MGS3_RenderWaterSurface = nullptr;
-int64_t __fastcall MGS3_RenderWaterSurface_Hook(int64_t work)
-{
-    MGS3_UseAdjustedOffsetY = false;
-    auto result = MGS3_RenderWaterSurface(work);
-    MGS3_UseAdjustedOffsetY = true;
-    return result;
-}
-
-typedef float MGS3_GetViewportCameraOffsetY_Fn(void);
-MGS3_GetViewportCameraOffsetY_Fn* MGS3_GetViewportCameraOffsetY = nullptr;
-float MGS3_GetViewportCameraOffsetY_Hook()
-{
-    return MGS3_UseAdjustedOffsetY ? MGS3_GetViewportCameraOffsetY() : 0.00f;
-}
-
 void Logging()
 {
-    loguru::add_file("MGSHDFix.log", loguru::Truncate, loguru::Verbosity_MAX);
-    loguru::set_thread_name("Main");
+    // spdlog initialisation
+    {
+        try
+        {
+            auto logger = spdlog::basic_logger_mt(sFixName.c_str(), sLogFile, true);
+            spdlog::set_default_logger(logger);
 
-    LOG_F(INFO, "MGSHDFix v%s loaded", sFixVer.c_str());
+        }
+        catch (const spdlog::spdlog_ex& ex)
+        {
+            AllocConsole();
+            FILE* dummy;
+            freopen_s(&dummy, "CONOUT$", "w", stdout);
+            std::cout << "Log initialisation failed: " << ex.what() << std::endl;
+        }
+    }
+
+    spdlog::flush_on(spdlog::level::debug);
+    spdlog::info("{} v{} loaded.", sFixName.c_str(), sFixVer.c_str());
+    spdlog::info("----------");
+
+    // Get game name and exe path
+    WCHAR exePath[_MAX_PATH] = { 0 };
+    GetModuleFileNameW(baseModule, exePath, MAX_PATH);
+    sExePath = exePath;
+    sExeName = sExePath.filename().string();
+
+    // Log module details
+    spdlog::info("Module Name: {0:s}", sExeName.c_str());
+    spdlog::info("Module Path: {0:s}", sExePath.string().c_str());
+    spdlog::info("Module Address: {0:x}", (uintptr_t)baseModule);
+    spdlog::info("Module Timesstamp: {0:d}", Memory::ModuleTimestamp(baseModule));
+    spdlog::info("----------");
 }
 
 void ReadConfig()
 {
     // Initialise config
-    std::ifstream iniFile(".\\MGSHDFix.ini");
+    std::ifstream iniFile(sConfigFile);
     if (!iniFile)
     {
-        LOG_F(ERROR, "Failed to load config file.");
+        spdlog::critical("Failed to load config file.");
+        spdlog::critical("Make sure {} is present in the game folder.", sConfigFile);
+
     }
     else
     {
         ini.parse(iniFile);
     }
 
+    // Read ini file
     inipp::get_value(ini.sections["Custom Resolution"], "Enabled", bCustomResolution);
     inipp::get_value(ini.sections["Custom Resolution"], "Width", iCustomResX);
     inipp::get_value(ini.sections["Custom Resolution"], "Height", iCustomResY);
@@ -474,6 +181,7 @@ void ReadConfig()
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFOVFix);
     inipp::get_value(ini.sections["Launcher Config"], "SkipLauncher", bLauncherConfigSkipLauncher);
 
+    // Read launcher settings from ini
     std::string sLauncherConfigCtrlType = "kbd";
     std::string sLauncherConfigRegion = "us";
     std::string sLauncherConfigLanguage = "en";
@@ -483,129 +191,72 @@ void ReadConfig()
     inipp::get_value(ini.sections["Launcher Config"], "MSXGame", sLauncherConfigMSXGame);
     inipp::get_value(ini.sections["Launcher Config"], "MSXWallType", iLauncherConfigMSXWallType);
     inipp::get_value(ini.sections["Launcher Config"], "MSXWallAlign", sLauncherConfigMSXWallAlign);
-
-    auto findStringInVector = [](std::string& str, const std::initializer_list<std::string>& search) -> int {
-        std::transform(str.begin(), str.end(), str.begin(),
-            [](unsigned char c) { return std::tolower(c); });
-
-        auto it = std::find(search.begin(), search.end(), str);
-        if (it != search.end())
-            return std::distance(search.begin(), it);
-        return 0;
-    };
-
-    iLauncherConfigCtrlType = findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
-    iLauncherConfigRegion = findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
-    iLauncherConfigLanguage = findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
+    iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
+    iLauncherConfigRegion = Util::findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
+    iLauncherConfigLanguage = Util::findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
 
     // Log config parse
-    LOG_F(INFO, "Config Parse: bCustomResolution: %d", bCustomResolution);
-    LOG_F(INFO, "Config Parse: iCustomResX: %d", iCustomResX);
-    LOG_F(INFO, "Config Parse: iCustomResY: %d", iCustomResY);
-    LOG_F(INFO, "Config Parse: bWindowedMode: %d", bWindowedMode);
-    LOG_F(INFO, "Config Parse: bBorderlessMode: %d", bBorderlessMode);
-    LOG_F(INFO, "Config Parse: iAnisotropicFiltering: %d", iAnisotropicFiltering);
+    spdlog::info("Config Parse: bCustomResolution: {}", bCustomResolution);
+    spdlog::info("Config Parse: iCustomResX: {}", iCustomResX);
+    spdlog::info("Config Parse: iCustomResY: {}", iCustomResY);
+    spdlog::info("Config Parse: bWindowedMode: {}", bWindowedMode);
+    spdlog::info("Config Parse: bBorderlessMode: {}", bBorderlessMode);
+    spdlog::info("Config Parse: iAnisotropicFiltering: {}", iAnisotropicFiltering);
     if (iAnisotropicFiltering < 0 || iAnisotropicFiltering > 16)
     {
         iAnisotropicFiltering = std::clamp(iAnisotropicFiltering, 0, 16);
-        LOG_F(INFO, "Config Parse: iAnisotropicFiltering value invalid, clamped to %d", iAnisotropicFiltering);
+        spdlog::info("Config Parse: iAnisotropicFiltering value invalid, clamped to {}", iAnisotropicFiltering);
     }
-    LOG_F(INFO, "Config Parse: bFramebufferFix: %d", bFramebufferFix);
-    LOG_F(INFO, "Config Parse: bSkipIntroLogos: %d", bSkipIntroLogos);
-    LOG_F(INFO, "Config Parse: bDisableCursor: %d", bDisableCursor);
-    LOG_F(INFO, "Config Parse: bMouseSensitivity: %d", bMouseSensitivity);
-    LOG_F(INFO, "Config Parse: fMouseSensitivityXMulti: %.2f", fMouseSensitivityXMulti);
-    LOG_F(INFO, "Config Parse: fMouseSensitivityYMulti: %.2f", fMouseSensitivityYMulti);
-    LOG_F(INFO, "Config Parse: iTextureBufferSizeMB: %d", iTextureBufferSizeMB);
-    LOG_F(INFO, "Config Parse: bAspectFix: %d", bAspectFix);
-    LOG_F(INFO, "Config Parse: bHUDFix: %d", bHUDFix);
-    LOG_F(INFO, "Config Parse: bFOVFix: %d", bFOVFix);
-    LOG_F(INFO, "Config Parse: bLauncherConfigSkipLauncher: %d", bLauncherConfigSkipLauncher);
-    LOG_F(INFO, "Config Parse: iLauncherConfigCtrlType: %d", iLauncherConfigCtrlType);
-    LOG_F(INFO, "Config Parse: iLauncherConfigRegion: %d", iLauncherConfigRegion);
-    LOG_F(INFO, "Config Parse: iLauncherConfigLanguage: %d", iLauncherConfigLanguage);
-
-    // Force windowed mode if borderless is enabled but windowed is not. There is undoubtedly a more elegant way to handle this.
+    spdlog::info("Config Parse: bFramebufferFix: {}", bFramebufferFix);
+    spdlog::info("Config Parse: bSkipIntroLogos: {}", bSkipIntroLogos);
+    spdlog::info("Config Parse: bDisableCursor: {}", bDisableCursor);
+    spdlog::info("Config Parse: bMouseSensitivity: {}", bMouseSensitivity);
+    spdlog::info("Config Parse: fMouseSensitivityXMulti: {}", fMouseSensitivityXMulti);
+    spdlog::info("Config Parse: fMouseSensitivityYMulti: {}", fMouseSensitivityYMulti);
+    spdlog::info("Config Parse: iTextureBufferSizeMB: {}", iTextureBufferSizeMB);
+    spdlog::info("Config Parse: bAspectFix: {}", bAspectFix);
+    spdlog::info("Config Parse: bHUDFix: {}", bHUDFix);
+    spdlog::info("Config Parse: bFOVFix: {}", bFOVFix);
+    spdlog::info("Config Parse: bLauncherConfigSkipLauncher: {}", bLauncherConfigSkipLauncher);
+    spdlog::info("Config Parse: iLauncherConfigCtrlType: {}", iLauncherConfigCtrlType);
+    spdlog::info("Config Parse: iLauncherConfigRegion: {}", iLauncherConfigRegion);
+    spdlog::info("Config Parse: iLauncherConfigLanguage: {}", iLauncherConfigLanguage);
     if (bBorderlessMode)
     {
         bWindowedMode = true;
-        LOG_F(INFO, "Config Parse: Borderless mode enabled.");
+        spdlog::info("Config Parse: Borderless mode enabled.");
     }
+    spdlog::info("----------");
 
-    // Custom resolution
+    // Calculate aspect ratio / use desktop res instead
     if (iCustomResX > 0 && iCustomResY > 0)
     {
-        fNewX = (float)iCustomResX;
-        fNewY = (float)iCustomResY;
-        fNewAspect = (float)iCustomResX / (float)iCustomResY;
+        fAspectRatio = (float)iCustomResX / (float)iCustomResY;
     }
     else
     {
-        // Grab desktop resolution
         RECT desktop;
         GetWindowRect(GetDesktopWindow(), &desktop);
-        fNewX = (float)desktop.right;
-        fNewY = (float)desktop.bottom;
         iCustomResX = (int)desktop.right;
         iCustomResY = (int)desktop.bottom;
-        fNewAspect = (float)desktop.right / (float)desktop.bottom;
+        fAspectRatio = (float)desktop.right / (float)desktop.bottom;
     }
+    fAspectMultiplier = fAspectRatio / fNativeAspect;
+    fHUDWidth = fDefaultHUDHeight * fAspectRatio;
+    fHUDWidthOffset = (float)(iCustomResX - fHUDWidth) / 2;
 
-    // Check if <16:9
-    if (fNewAspect < fNativeAspect)
-    {
-        bNarrowAspect = true;
-    }
-
-    // Disable ultrawide fixes at 16:9
-    if (fNewAspect == fNativeAspect)
-    {
-        bAspectFix = false;
-        bHUDFix = false;
-        LOG_F(INFO, "Config Parse: Aspect ratio is native, disabling ultrawide fixes.");
-    }
-
-    // HUD variables
-    fAspectMultiplier = (float)fNewAspect / fNativeAspect;
-    fHUDWidth = (float)fNewY * fNativeAspect;
-    fHUDHeight = (float)fNewY;
-    fHUDWidthOffset = (float)(fNewX - fHUDWidth) / 2;
-    fHUDHeightOffset = 0;
-    if (bNarrowAspect) 
-    { 
-        fHUDWidth = fNewX; 
-        fHUDHeight = (float)fNewX / fNativeAspect;
-
-        fHUDWidthOffset = 0;
-        fHUDHeightOffset = (float)(fNewY - fHUDHeight) / 2;
-
-    }
-    iHUDWidth = (int)fHUDWidth;
-    iHUDHeight = (int)fHUDHeight;
-    iHUDWidthOffset = (int)fHUDWidthOffset;
-    iHUDHeightOffset = (int)fHUDHeightOffset;
-
-    LOG_F(INFO, "Custom Resolution: fNewAspect: %.4f", fNewAspect);
-    LOG_F(INFO, "Custom Resolution: fAspectMultiplier: %.4f", fAspectMultiplier);
-    LOG_F(INFO, "Custom Resolution: fHUDWidth: %.4f", fHUDWidth);
-    LOG_F(INFO, "Custom Resolution: fHUDHeight: %.4f", fHUDHeight);
-    LOG_F(INFO, "Custom Resolution: fHUDWidthOffset: %.4f", fHUDWidthOffset);
-    LOG_F(INFO, "Custom Resolution: fHUDHeightOffset: %.4f", fHUDHeightOffset);
+    // Log aspect ratio stuff
+    spdlog::info("Custom Resolution: fAspectRatio: {}", fAspectRatio);
+    spdlog::info("Custom Resolution: fAspectMultiplier: {}", fAspectMultiplier);
+    spdlog::info("Custom Resolution: fHUDWidth: {}", fHUDWidth);
+    spdlog::info("Custom Resolution: fHUDHeight: {}", fHUDHeight);
+    spdlog::info("Custom Resolution: fHUDWidthOffset: {}", fHUDWidthOffset);
+    spdlog::info("Custom Resolution: fHUDHeightOffset: {}", fHUDHeightOffset);
+    spdlog::info("----------");
 }
 
 bool DetectGame()
 {
-    // Get game name and exe path
-    WCHAR exePath[_MAX_PATH] = { 0 };
-    GetModuleFileName(baseModule, exePath, MAX_PATH);
-    sExePath = exePath;
-    sExeName = sExePath.filename().string();
-
-    LOG_F(INFO, "Module Name: %s", sExeName.c_str());
-    LOG_F(INFO, "Module Path: %s", sExePath.string().c_str());
-    LOG_F(INFO, "Module Address: %p", baseModule);
-    LOG_F(INFO, "Module Timestamp: %u", Memory::ModuleTimestamp(baseModule)); // TODO: convert from unix timestamp to string, store in sGameVersion?
-
     eGameType = MgsGame::Unknown;
     // Special handling for launcher.exe
     if (sExeName == "launcher.exe")
@@ -615,29 +266,29 @@ bool DetectGame()
             auto gamePath = sExePath.parent_path() / info.ExeName;
             if (std::filesystem::exists(gamePath))
             {
-                LOG_F(INFO, "Detected launcher for game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+                spdlog::info("Detected launcher for game: {} (app {})", info.GameTitle.c_str(), info.SteamAppId);
                 eGameType = MgsGame::Launcher;
                 game = &info;
                 return true;
             }
         }
 
-        LOG_F(INFO, "Failed to detect supported game, unknown launcher");
+        spdlog::info("Failed to detect supported game, unknown launcher");
         return false;
     }
 
-    for(const auto& [type, info] : kGames)
+    for (const auto& [type, info] : kGames)
     {
-        if(info.ExeName == sExeName)
+        if (info.ExeName == sExeName)
         {
-            LOG_F(INFO, "Detected game: %s (app %d)", info.GameTitle.c_str(), info.SteamAppId);
+            spdlog::info("Detected game: {} (app {})", info.GameTitle.c_str(), info.SteamAppId);
             eGameType = type;
             game = &info;
             return true;
         }
     }
 
-    LOG_F(INFO, "Failed to detect supported game, %s isn't supported by MGSHDFix", sExeName.c_str());
+    spdlog::info("Failed to detect supported game, {} isn't supported by MGSHDFix", sExeName.c_str());
     return false;
 }
 
@@ -650,17 +301,17 @@ void CustomResolution()
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_ResolutionAddress);
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is {}", (uintptr_t)MGS2_MGS3_ResolutionAddress);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0xE), iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x15), iCustomResY);
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: New Custom Resolution = %dx%d", iCustomResX, iCustomResY);
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: New Custom Resolution = {}x{}", iCustomResX, iCustomResY);
         }
         else if (!MGS2_MGS3_ResolutionScanResult)
         {
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
 
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
@@ -673,18 +324,19 @@ void CustomResolution()
                 if (MGS2_MGS3_FramebufferFixScanResult)
                 {
                     DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
-                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Address is 0x%" PRIxPTR, i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Address is 0x{}", i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
 
                     Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
-                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Patched instruction.", i);
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Patched instruction.", i);
                 }
                 else if (!MGS2_MGS3_FramebufferFixScanResult)
                 {
-                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Framebuffer %d: Pattern scan failed.", i);
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Pattern scan failed.", i);
                 }
             }
         }
 
+        /*
         // MGS 2 | MGS 3: Windowed mode
         // Thanks emoose!
         if (bWindowedMode)
@@ -693,18 +345,20 @@ void CustomResolution()
             if (MGS2_MGS3_WindowModeScanResult)
             {
                 DWORD64 MGS2_MGS3_WindowModeAddress = (uintptr_t)MGS2_MGS3_WindowModeScanResult + 0x7;
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
 
                 Memory::PatchBytes(MGS2_MGS3_WindowModeAddress, "\x00", 1);
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Patched instruction.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Patched instruction.");
             }
             else if (!MGS2_MGS3_WindowModeScanResult)
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
             }
         }
+        */
     }
 
+    /*
     // MGS 2: Borderless mode
     if (eGameType == MgsGame::MGS2 && bBorderlessMode)
     {
@@ -716,12 +370,12 @@ void CustomResolution()
             MGS2_CreateWindowExAReturnJMP = MGS2_CreateWindowExAAddress + MGS2_CreateWindowExAHookLength;
             Memory::DetourFunction64((void*)MGS2_CreateWindowExAAddress, MGS2_CreateWindowExA_CC, MGS2_CreateWindowExAHookLength);
 
-            LOG_F(INFO, "MGS 2: Borderless: Hook length is %d bytes", MGS2_CreateWindowExAHookLength);
-            LOG_F(INFO, "MGS 2: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CreateWindowExAAddress);
+            spdlog::info("MGS 2: Borderless: Hook length is {} bytes", MGS2_CreateWindowExAHookLength);
+            spdlog::info("MGS 2: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CreateWindowExAAddress);
         }
         else if (!MGS2_CreateWindowExAScanResult)
         {
-            LOG_F(INFO, "MGS 2: Borderless: Pattern scan failed.");
+            spdlog::info("MGS 2: Borderless: Pattern scan failed.");
         }
     }
     else if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bBorderlessMode)
@@ -734,14 +388,15 @@ void CustomResolution()
             MGS3_CreateWindowExAReturnJMP = MGS3_CreateWindowExAAddress + MGS3_CreateWindowExAHookLength;
             Memory::DetourFunction64((void*)MGS3_CreateWindowExAAddress, MGS3_CreateWindowExA_CC, MGS3_CreateWindowExAHookLength);
 
-            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Hook length is %d bytes", MGS3_CreateWindowExAHookLength);
-            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
+            spdlog::info("MG/MG2 | MGS 3: Borderless: Hook length is {} bytes", MGS3_CreateWindowExAHookLength);
+            spdlog::info("MG/MG2 | MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
         }
         else if (!MGS3_CreateWindowExAScanResult)
         {
-            LOG_F(INFO, "MG/MG2 | MGS 3: Borderless: Pattern scan failed.");
+            spdlog::info("MG/MG2 | MGS 3: Borderless: Pattern scan failed.");
         }
     }   
+     */
 }
 
 void IntroSkip()
@@ -754,20 +409,21 @@ void IntroSkip()
     uint8_t* MGS2_MGS3_InitialIntroStateScanResult = Memory::PatternScan(baseModule, "75 ? C7 05 ? ? ? ? 01 00 00 00 C3");
     if (!MGS2_MGS3_InitialIntroStateScanResult)
     {
-        LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Pattern scan failed.");
+        spdlog::info("MGS 2 | MGS 3: Skip Intro Logos: Pattern scan failed.");
         return;
     }
 
     uint32_t* MGS2_MGS3_InitialIntroStatePtr = (uint32_t*)(MGS2_MGS3_InitialIntroStateScanResult + 8);
-    LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Initial state: %x", *MGS2_MGS3_InitialIntroStatePtr);
+    spdlog::info("MGS 2 | MGS 3: Skip Intro Logos: Initial state: {}", *MGS2_MGS3_InitialIntroStatePtr);
 
     uint32_t NewState = 3;
     Memory::PatchBytes((uintptr_t)MGS2_MGS3_InitialIntroStatePtr, (const char*)&NewState, sizeof(NewState));
-    LOG_F(INFO, "MGS 2 | MGS 3: Skip Intro Logos: Patched state: %x", *MGS2_MGS3_InitialIntroStatePtr);
+    spdlog::info("MGS 2 | MGS 3: Skip Intro Logos: Patched state: {}", *MGS2_MGS3_InitialIntroStatePtr);
 }
 
 void ScaleEffects()
 {
+    /*
     if (eGameType == MgsGame::MGS2 && bCustomResolution)
     {
         // MGS 2: Scale effects correctly. (text, overlays, fades etc)
@@ -787,16 +443,16 @@ void ScaleEffects()
                 fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fHUDWidth);
             }
 
-            LOG_F(INFO, "MGS 2: Scale Effects X: Hook length is %d bytes", MGS2_EffectsScaleXHookLength);
-            LOG_F(INFO, "MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
+            spdlog::info("MGS 2: Scale Effects X: Hook length is {} bytes", MGS2_EffectsScaleXHookLength);
+            spdlog::info("MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
 
             DWORD64 MGS2_EffectsScaleX2Address = (uintptr_t)MGS2_EffectsScaleScanResult - 0x2B;
             int MGS2_EffectsScaleX2HookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleX2Address, 13);
             MGS2_EffectsScaleX2ReturnJMP = MGS2_EffectsScaleX2Address + MGS2_EffectsScaleX2HookLength;
             Memory::DetourFunction64((void*)MGS2_EffectsScaleX2Address, MGS2_EffectsScaleX2_CC, MGS2_EffectsScaleX2HookLength);
 
-            LOG_F(INFO, "MGS 2: Scale Effects X 2: Hook length is %d bytes", MGS2_EffectsScaleX2HookLength);
-            LOG_F(INFO, "MGS 2: Scale Effects X 2: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleX2Address);
+            spdlog::info("MGS 2: Scale Effects X 2: Hook length is {} bytes", MGS2_EffectsScaleX2HookLength);
+            spdlog::info("MGS 2: Scale Effects X 2: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleX2Address);
 
             // Y scale
             DWORD64 MGS2_EffectsScaleYAddress = (uintptr_t)MGS2_EffectsScaleScanResult + 0x24;
@@ -812,18 +468,20 @@ void ScaleEffects()
 
             Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
 
-            LOG_F(INFO, "MGS 2: Scale Effects Y: Hook length is %d bytes", MGS2_EffectsScaleYHookLength);
-            LOG_F(INFO, "MGS 2: Scale Effects Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
+            spdlog::info("MGS 2: Scale Effects Y: Hook length is {} bytes", MGS2_EffectsScaleYHookLength);
+            spdlog::info("MGS 2: Scale Effects Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
         }
         else if (!MGS2_EffectsScaleScanResult)
         {
-            LOG_F(INFO, "MGS 2: Scale Effects: Pattern scan failed.");
+            spdlog::info("MGS 2: Scale Effects: Pattern scan failed.");
         }
     }
+    */
 }
 
 void AspectFOVFix()
 {
+    /*
     if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
@@ -836,12 +494,12 @@ void AspectFOVFix()
             MGS3_GameplayAspectReturnJMP = MGS3_GameplayAspectAddress + MGS3_GameplayAspectHookLength;
             Memory::DetourFunction64((void*)MGS3_GameplayAspectAddress, MGS3_GameplayAspect_CC, MGS3_GameplayAspectHookLength);
 
-            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Hook length is %d bytes", MGS3_GameplayAspectHookLength);
-            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectAddress);
+            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Hook length is {} bytes", MGS3_GameplayAspectHookLength);
+            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectAddress);
         }
         else if (!MGS3_GameplayAspectScanResult)
         {
-            LOG_F(INFO, "MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
+            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
     else if (eGameType == MgsGame::MGS2 && bAspectFix)
@@ -856,12 +514,12 @@ void AspectFOVFix()
             MGS2_GameplayAspectReturnJMP = MGS2_GameplayAspectAddress + MGS2_GameplayAspectHookLength;
             Memory::DetourFunction64((void*)MGS2_GameplayAspectAddress, MGS2_GameplayAspect_CC, MGS2_GameplayAspectHookLength);
 
-            LOG_F(INFO, "MGS 2: Aspect Ratio: Hook length is %d bytes", MGS2_GameplayAspectHookLength);
-            LOG_F(INFO, "MGS 2: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_GameplayAspectAddress);
+            spdlog::info("MGS 2: Aspect Ratio: Hook length is {} bytes", MGS2_GameplayAspectHookLength);
+            spdlog::info("MGS 2: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_GameplayAspectAddress);
         }
         else if (!MGS2_GameplayAspectScanResult)
         {
-            LOG_F(INFO, "MGS 2: Aspect Ratio: Pattern scan failed.");
+            spdlog::info("MGS 2: Aspect Ratio: Pattern scan failed.");
         }
     }
     
@@ -877,12 +535,12 @@ void AspectFOVFix()
             MGS3_FOVReturnJMP = MGS3_FOVAddress + MGS3_FOVHookLength;
             Memory::DetourFunction64((void*)MGS3_FOVAddress, MGS3_FOV_CC, MGS3_FOVHookLength);
 
-            LOG_F(INFO, "MGS 3: FOV: Hook length is %d bytes", MGS3_FOVHookLength);
-            LOG_F(INFO, "MGS 3: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_FOVAddress);
+            spdlog::info("MGS 3: FOV: Hook length is {} bytes", MGS3_FOVHookLength);
+            spdlog::info("MGS 3: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_FOVAddress);
         }
         else if (!MGS3_FOVScanResult)
         {
-            LOG_F(INFO, "MGS 3: FOV: Pattern scan failed.");
+            spdlog::info("MGS 3: FOV: Pattern scan failed.");
         }
     }
     else if (eGameType == MgsGame::MGS2 && bNarrowAspect && bFOVFix)
@@ -896,18 +554,20 @@ void AspectFOVFix()
             MGS2_FOVReturnJMP = MGS2_FOVAddress + MGS2_FOVHookLength;
             Memory::DetourFunction64((void*)MGS2_FOVAddress, MGS2_FOV_CC, MGS2_FOVHookLength);
 
-            LOG_F(INFO, "MGS 2: FOV: Hook length is %d bytes", MGS2_FOVHookLength);
-            LOG_F(INFO, "MGS 2: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FOVAddress);
+            spdlog::info("MGS 2: FOV: Hook length is {} bytes", MGS2_FOVHookLength);
+            spdlog::info("MGS 2: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FOVAddress);
         }
         else if (!MGS2_FOVScanResult)
         {
-            LOG_F(INFO, "MGS 2: FOV: Pattern scan failed.");
+            spdlog::info("MGS 2: FOV: Pattern scan failed.");
         }
     }
+    */
 }
 
 void HUDFix()
 {
+    /*
     if (eGameType == MgsGame::MGS2 && bHUDFix)
     {
         // MGS 2: HUD
@@ -930,12 +590,12 @@ void HUDFix()
             MGS2_HUDWidthReturnJMP = MGS2_HUDWidthAddress + MGS2_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS2_HUDWidthAddress, MGS2_HUDWidth_CC, MGS2_HUDWidthHookLength);
 
-            LOG_F(INFO, "MGS 2: HUD Width: Hook length is %d bytes", MGS2_HUDWidthHookLength);
-            LOG_F(INFO, "MGS 2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDWidthAddress);
+            spdlog::info("MGS 2: HUD Width: Hook length is {} bytes", MGS2_HUDWidthHookLength);
+            spdlog::info("MGS 2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_HUDWidthAddress);
         }
         else if (!MGS2_HUDWidthScanResult)
         {
-            LOG_F(INFO, "MGS 2: HUD Fix: Pattern scan failed.");
+            spdlog::info("MGS 2: HUD Fix: Pattern scan failed.");
         }
 
         // MGS 2: Radar
@@ -947,16 +607,16 @@ void HUDFix()
             MGS2_RadarWidthReturnJMP = MGS2_RadarWidthAddress + MGS2_RadarWidthHookLength;
             Memory::DetourFunction64((void*)MGS2_RadarWidthAddress, MGS2_RadarWidth_CC, MGS2_RadarWidthHookLength);
 
-            LOG_F(INFO, "MGS 2: Radar Width: Hook length is %d bytes", MGS2_RadarWidthHookLength);
-            LOG_F(INFO, "MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
+            spdlog::info("MGS 2: Radar Width: Hook length is {} bytes", MGS2_RadarWidthHookLength);
+            spdlog::info("MGS 2: Radar Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthAddress);
 
             DWORD64 MGS2_RadarWidthOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x42;
             int MGS2_RadarWidthOffsetHookLength = 18; // length disassembler causes crashes for some reason?
             MGS2_RadarWidthOffsetReturnJMP = MGS2_RadarWidthOffsetAddress + MGS2_RadarWidthOffsetHookLength;
             Memory::DetourFunction64((void*)MGS2_RadarWidthOffsetAddress, MGS2_RadarWidthOffset_CC, MGS2_RadarWidthOffsetHookLength);
 
-            LOG_F(INFO, "MGS 2: Radar Width Offset: Hook length is %d bytes", MGS2_RadarWidthOffsetHookLength);
-            LOG_F(INFO, "MGS 2: Radar Width Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthOffsetAddress);
+            spdlog::info("MGS 2: Radar Width Offset: Hook length is {} bytes", MGS2_RadarWidthOffsetHookLength);
+            spdlog::info("MGS 2: Radar Width Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarWidthOffsetAddress);
 
             DWORD64 MGS2_RadarHeightOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x88;
             int MGS2_RadarHeightOffsetHookLength = 16;
@@ -964,12 +624,12 @@ void HUDFix()
             MGS2_RadarHeightOffsetValueAddress = *(int*)(MGS2_RadarHeightOffsetAddress + 0xC) + (MGS2_RadarHeightOffsetAddress + 0xC) + 0x4;
             Memory::DetourFunction64((void*)MGS2_RadarHeightOffsetAddress, MGS2_RadarHeightOffset_CC, MGS2_RadarHeightOffsetHookLength);
 
-            LOG_F(INFO, "MGS 2: Radar Height Offset: Hook length is %d bytes", MGS2_RadarHeightOffsetHookLength);
-            LOG_F(INFO, "MGS 2: Radar Height Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarHeightOffsetAddress);
+            spdlog::info("MGS 2: Radar Height Offset: Hook length is {} bytes", MGS2_RadarHeightOffsetHookLength);
+            spdlog::info("MGS 2: Radar Height Offset: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_RadarHeightOffsetAddress);
         }
         else if (!MGS2_RadarWidthScanResult)
         {
-            LOG_F(INFO, "MGS 2: Radar Fix: Pattern scan failed.");
+            spdlog::info("MGS 2: Radar Fix: Pattern scan failed.");
         }
 
          // MGS 2: Codec Portraits
@@ -981,12 +641,12 @@ void HUDFix()
             MGS2_CodecPortraitsReturnJMP = MGS2_CodecPortraitsAddress + MGS2_CodecPortraitsHookLength;
             Memory::DetourFunction64((void*)MGS2_CodecPortraitsAddress, MGS2_CodecPortraits_CC, MGS2_CodecPortraitsHookLength);
 
-            LOG_F(INFO, "MGS 2: Codec Portraits: Hook length is %d bytes", MGS2_CodecPortraitsHookLength);
-            LOG_F(INFO, "MGS 2: Codec Portraits: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CodecPortraitsAddress);
+            spdlog::info("MGS 2: Codec Portraits: Hook length is {} bytes", MGS2_CodecPortraitsHookLength);
+            spdlog::info("MGS 2: Codec Portraits: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CodecPortraitsAddress);
         }
         else if (!MGS2_CodecPortraitsScanResult)
         {
-            LOG_F(INFO, "MGS 2: Codec Portraits: Pattern scan failed.");
+            spdlog::info("MGS 2: Codec Portraits: Pattern scan failed.");
         }
 
         // MGS 2: Disable motion blur. 
@@ -994,14 +654,14 @@ void HUDFix()
         if (MGS2_MotionBlurScanResult && bWindowedMode)
         {
             DWORD64 MGS2_MotionBlurAddress = (uintptr_t)MGS2_MotionBlurScanResult;
-            LOG_F(INFO, "MGS 2: Motion Blur: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MotionBlurAddress);
+            spdlog::info("MGS 2: Motion Blur: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MotionBlurAddress);
 
             Memory::PatchBytes(MGS2_MotionBlurAddress, "\x48\x31\xDB\x90\x90\x90", 6);
-            LOG_F(INFO, "MGS 2: Motion Blur: Patched instruction.");
+            spdlog::info("MGS 2: Motion Blur: Patched instruction.");
         }
         else if (!MGS2_MotionBlurScanResult)
         {
-            LOG_F(INFO, "MGS 2: Motion Blur: Pattern scan failed.");
+            spdlog::info("MGS 2: Motion Blur: Pattern scan failed.");
         }
     }
     else if (eGameType == MgsGame::MGS3 && bHUDFix)
@@ -1024,12 +684,12 @@ void HUDFix()
             MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
 
-            LOG_F(INFO, "MGS 3: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
-            LOG_F(INFO, "MGS 3: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
+            spdlog::info("MGS 3: HUD Width: Hook length is {} bytes", MGS3_HUDWidthHookLength);
+            spdlog::info("MGS 3: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
         }
         else if (!MGS3_HUDWidthScanResult)
         {
-            LOG_F(INFO, "MGS 3: HUD Width: Pattern scan failed.");
+            spdlog::info("MGS 3: HUD Width: Pattern scan failed.");
         }
     }
     else if ((eGameType == MgsGame::MG && fNewAspect > fNativeAspect) || (eGameType == MgsGame::MG && fNewAspect < fNativeAspect))
@@ -1052,12 +712,12 @@ void HUDFix()
             MGS3_HUDWidthReturnJMP = MGS3_HUDWidthAddress + MGS3_HUDWidthHookLength;
             Memory::DetourFunction64((void*)MGS3_HUDWidthAddress, MGS3_HUDWidth_CC, MGS3_HUDWidthHookLength);
 
-            LOG_F(INFO, "MG1/MG2: HUD Width: Hook length is %d bytes", MGS3_HUDWidthHookLength);
-            LOG_F(INFO, "MG1/MG2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
+            spdlog::info("MG1/MG2: HUD Width: Hook length is {} bytes", MGS3_HUDWidthHookLength);
+            spdlog::info("MG1/MG2: HUD Width: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_HUDWidthAddress);
         }
         else if (!MGS3_HUDWidthScanResult)
         {
-            LOG_F(INFO, "MG1/MG2: HUD Width: Pattern scan failed.");
+            spdlog::info("MG1/MG2: HUD Width: Pattern scan failed.");
         }
     }
 
@@ -1068,20 +728,22 @@ void HUDFix()
         if (MGS2_MGS3_LetterboxingScanResult)
         {
             DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_LetterboxingAddress);
+            spdlog::info("MGS 2 | MGS 3: Letterboxing: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_LetterboxingAddress);
 
             Memory::Write(MGS2_MGS3_LetterboxingAddress, (int)0);
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
+            spdlog::info("MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
         }
         else if (!MGS2_MGS3_LetterboxingScanResult)
         {
-            LOG_F(INFO, "MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
+            spdlog::info("MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
         }
     }
+    */
 }
 
 void Miscellaneous()
 {
+    /*
     if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
     {
         if (bDisableCursor)
@@ -1092,14 +754,14 @@ void Miscellaneous()
             if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
             {
                 DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
 
                 Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
             }
             else if (!MGS2_MGS3_MouseCursorScanResult)
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
             }
         }
 
@@ -1111,9 +773,9 @@ void Miscellaneous()
             uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "39 AF 48 09 00 00");
             if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_IsWindowedCheck);
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_ShowWindowCall);
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_SetFullscreenEnd);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_IsWindowedCheck);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_ShowWindowCall);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_SetFullscreenEnd);
 
                 // Patch out the jnz after the windowed check
                 Memory::PatchBytes((uintptr_t)(MGS_WndProc_IsWindowedCheck + 7), "\x90\x90\x90\x90\x90\x90", 6);
@@ -1125,16 +787,18 @@ void Miscellaneous()
                 uint8_t jmper[] = { 0xEB, 0x00 };
                 jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
 
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
                 Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
             }
         }
     }
+    */
 
+    /*
     if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
         uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
@@ -1144,19 +808,19 @@ void Miscellaneous()
             DWORD64 gpRenderBackendPtrAddr = MGS2_MGS3_SetSamplerStateInsnAddress + 3;
 
             gpRenderBackend = *(int*)gpRenderBackendPtrAddr + gpRenderBackendPtrAddr + 4;
-            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: gpRenderBackend = 0x%" PRIxPTR, (uintptr_t)gpRenderBackend);
+            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: gpRenderBackend = 0x%" PRIxPTR, (uintptr_t)gpRenderBackend);
 
             int MGS2_MGS3_SetSamplerStateInsnHookLength = Memory::GetHookLength((char*)MGS2_MGS3_SetSamplerStateInsnAddress, 14);
 
-            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Hook length is %d bytes", MGS2_MGS3_SetSamplerStateInsnHookLength);
-            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_SetSamplerStateInsnAddress);
+            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Hook length is {} bytes", MGS2_MGS3_SetSamplerStateInsnHookLength);
+            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_SetSamplerStateInsnAddress);
 
             MGS2_MGS3_SetSamplerStateAnisoReturnJMP = MGS2_MGS3_SetSamplerStateInsnAddress + MGS2_MGS3_SetSamplerStateInsnHookLength;
             Memory::DetourFunction64((void*)MGS2_MGS3_SetSamplerStateInsnAddress, MGS2_MGS3_SetSamplerStateAniso_CC, MGS2_MGS3_SetSamplerStateInsnHookLength);
         }
         else
         {
-            LOG_F(INFO, "MGS 2 | MGS 3: Anisotropic Filtering: Sampler state pattern scan failed.");
+            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Sampler state pattern scan failed.");
         }
     }
 
@@ -1171,22 +835,23 @@ void Miscellaneous()
             MGS3_MouseSensitivityXReturnJMP = MGS3_MouseSensitivityXAddress + MGS3_MouseSensitivityXHookLength;
             Memory::DetourFunction64((void*)MGS3_MouseSensitivityXAddress, MGS3_MouseSensitivityX_CC, MGS3_MouseSensitivityXHookLength);
 
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity X: Hook length is %d bytes", MGS3_MouseSensitivityXHookLength);
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityXAddress);
+            spdlog::info("MGS 3: Mouse Sensitivity X: Hook length is {} bytes", MGS3_MouseSensitivityXHookLength);
+            spdlog::info("MGS 3: Mouse Sensitivity X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityXAddress);
 
             DWORD64 MGS3_MouseSensitivityYAddress = (uintptr_t)MGS3_MouseSensitivityScanResult + 0x33;
             int MGS3_MouseSensitivityYHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityYAddress, 13);
             MGS3_MouseSensitivityYReturnJMP = MGS3_MouseSensitivityYAddress + MGS3_MouseSensitivityYHookLength;
             Memory::DetourFunction64((void*)MGS3_MouseSensitivityYAddress, MGS3_MouseSensitivityY_CC, MGS3_MouseSensitivityYHookLength);
 
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity Y: Hook length is %d bytes", MGS3_MouseSensitivityYHookLength);
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityYAddress);
+            spdlog::info("MGS 3: Mouse Sensitivity Y: Hook length is {} bytes", MGS3_MouseSensitivityYHookLength);
+            spdlog::info("MGS 3: Mouse Sensitivity Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityYAddress);
         }
         else if (!MGS3_MouseSensitivityScanResult)
         {
-            LOG_F(INFO, "MGS 3: Mouse Sensitivity: Pattern scan failed.");
+            spdlog::info("MGS 3: Mouse Sensitivity: Pattern scan failed.");
         }
     }
+    */
 
     if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
@@ -1195,19 +860,19 @@ void Miscellaneous()
 
         // Scan for the 9 mallocs which set buffer inside CTextureBuffer::sInstance
         bool failure = false;
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
             uint8_t* MGS3_CTextureBufferMallocResult = Memory::PatternScan(baseModule, "75 ?? B9 00 00 00 01 FF");
-            if(MGS3_CTextureBufferMallocResult)
+            if (MGS3_CTextureBufferMallocResult)
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CTextureBufferMallocResult + 3);
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") old buffer size: %d", i, MGS3_CTextureBufferMallocResult, *bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) old buffer size: {}", i, (uintptr_t)MGS3_CTextureBufferMallocResult, (uintptr_t)*bufferAmount);
                 Memory::Write((uintptr_t)bufferAmount, NewSize);
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") new buffer size: %d", i, MGS3_CTextureBufferMallocResult, *bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) new buffer size: {}", i, (uintptr_t)MGS3_CTextureBufferMallocResult, (uintptr_t)*bufferAmount);
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d: Pattern scan failed.", i);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", i);
                 failure = true;
                 break;
             }
@@ -1222,13 +887,13 @@ void Miscellaneous()
             if (MGS3_CBaseTextureMallocResult)
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CBaseTextureMallocResult + 3);
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") old buffer size: %d", 9, MGS3_CBaseTextureMallocResult, *bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) old buffer size: {}", 9, (uintptr_t)MGS3_CBaseTextureMallocResult, (uintptr_t)*bufferAmount);
                 Memory::Write((uintptr_t)bufferAmount, NewSize);
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d (0x%" PRIxPTR ") new buffer size: %d", 9, MGS3_CBaseTextureMallocResult, *bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) new buffer size: {}", 9, (uintptr_t)MGS3_CBaseTextureMallocResult, (uintptr_t)*bufferAmount);
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 3: Texture Buffer Size: #%d: Pattern scan failed.", 9);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", 9);
             }
         }
     }
@@ -1236,6 +901,7 @@ void Miscellaneous()
 
 void ViewportFix()
 {
+    /*
     if (eGameType == MgsGame::MGS3)
     {
         MH_STATUS status;
@@ -1248,16 +914,16 @@ void ViewportFix()
 
             if (status != MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Render Water Surface: Hook failed.");
+                spdlog::info("MGS 3: Render Water Surface: Hook failed.");
             }
             else if (status == MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Render Water Surface: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_RenderWaterSurfaceScanAddress);
+                spdlog::info("MGS 3: Render Water Surface: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_RenderWaterSurfaceScanAddress);
             }
         }
         else
         {
-            LOG_F(INFO, "MGS 3:  Render Water Surface: Pattern scan failed.");
+            spdlog::info("MGS 3:  Render Water Surface: Pattern scan failed.");
         }
 
         uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? F3 44 ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? 00 00");
@@ -1268,25 +934,26 @@ void ViewportFix()
 
             if (status != MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook failed.");
+                spdlog::info("MGS 3: Get Viewport Camera Offset: Hook failed.");
             }
             else if (status == MH_OK)
             {
-                LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_GetViewportCameraOffsetYScanAddress);
+                spdlog::info("MGS 3: Get Viewport Camera Offset: Hook successful. Hook address is 0x%" PRIxPTR, MGS3_GetViewportCameraOffsetYScanAddress);
             }
         }
         else
         {
-            LOG_F(INFO, "MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
+            spdlog::info("MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
         }
     }
+    */
 }
 
 using NHT_COsContext_SetControllerID_Fn = void (*)(int controllerType);
 NHT_COsContext_SetControllerID_Fn NHT_COsContext_SetControllerID = nullptr;
 void NHT_COsContext_SetControllerID_Hook(int controllerType)
 {
-    LOG_F(INFO, "NHT_COsContext_SetControllerID_Hook: controltype %d -> %d", controllerType, iLauncherConfigCtrlType);
+    spdlog::info("NHT_COsContext_SetControllerID_Hook: controltype {} -> {}", controllerType, iLauncherConfigCtrlType);
     NHT_COsContext_SetControllerID(iLauncherConfigCtrlType);
 }
 
@@ -1294,7 +961,7 @@ using MGS3_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int, in
 MGS3_COsContext_InitializeSKUandLang_Fn MGS3_COsContext_InitializeSKUandLang = nullptr;
 void __fastcall MGS3_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang, int sku)
 {
-    LOG_F(INFO, "MGS3_COsContext_InitializeSKUandLang: lang %d -> %d, sku %d -> %d", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
+    spdlog::info("MGS3_COsContext_InitializeSKUandLang: lang {} -> {}, sku {} -> {}", sku, iLauncherConfigRegion, lang, iLauncherConfigLanguage);
     MGS3_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage, iLauncherConfigRegion);
 }
 
@@ -1302,7 +969,7 @@ using MGS2_COsContext_InitializeSKUandLang_Fn = void(__fastcall*)(void*, int);
 MGS2_COsContext_InitializeSKUandLang_Fn MGS2_COsContext_InitializeSKUandLang = nullptr;
 void __fastcall MGS2_COsContext_InitializeSKUandLang_Hook(void* thisptr, int lang)
 {
-    LOG_F(INFO, "MGS2_COsContext_InitializeSKUandLang: lang %d -> %d", lang, iLauncherConfigLanguage);
+    spdlog::info("MGS2_COsContext_InitializeSKUandLang: lang {} -> {}", lang, iLauncherConfigLanguage);
     MGS2_COsContext_InitializeSKUandLang(thisptr, iLauncherConfigLanguage);
 }
 
@@ -1317,7 +984,7 @@ void LauncherConfigOverride()
         {
             if (!std::filesystem::exists(steamAppidPath))
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Creating steam_appid.txt to allow direct EXE launches.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Creating steam_appid.txt to allow direct EXE launches.");
                 std::ofstream steamAppidOut(steamAppidPath);
                 if (steamAppidOut.is_open())
                 {
@@ -1326,19 +993,21 @@ void LauncherConfigOverride()
                 }
                 if (std::filesystem::exists(steamAppidPath))
                 {
-                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt created successfully.");
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt created successfully.");
                 }
                 else
                 {
-                    LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt creation failed.");
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: steam_appid.txt creation failed.");
                 }
             }
         }
         catch (const std::exception& ex)
         {
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
         }
     }
+
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
     if (eGameType == MgsGame::Launcher)
@@ -1347,13 +1016,14 @@ void LauncherConfigOverride()
         {
             auto gameExePath = sExePath.parent_path() / game->ExeName;
 
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, attempting game launch");
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, attempting game launch");
 
             PROCESS_INFORMATION processInfo = {};
             STARTUPINFO startupInfo = {};
             startupInfo.cb = sizeof(STARTUPINFO);
 
             std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
+
 
             if (game->ExeName == "METAL GEAR.exe")
             {
@@ -1364,10 +1034,7 @@ void LauncherConfigOverride()
                     std::transform(transformedString.begin(), transformedString.end(), transformedString.begin(), transformation);
 
                     // Convert the transformed string to std::wstring
-#pragma warning (disable : 1786 ) // SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-                    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-                    std::wstring wideString = converter.from_bytes(transformedString);
-
+                    std::wstring wideString = Util::utf8_decode(transformedString);
                     return wideString;
                     };
 
@@ -1376,7 +1043,8 @@ void LauncherConfigOverride()
                 commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign, ::toupper); // -wallalign must be uppercase
             }
 
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: %ls", commandLine.c_str());
+            //spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: %ls", commandLine.c_str());
+
 
             // Call CreateProcess to start the game process
             if (CreateProcess(nullptr, (LPWSTR)commandLine.c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
@@ -1390,11 +1058,13 @@ void LauncherConfigOverride()
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+                //spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
             }
         }
         return;
     }
+
+    // ----------------
 
     // Certain config such as language/button style is normally passed from launcher to game via arguments
     // When game EXE gets ran directly this config is left at default (english game, xbox buttons)
@@ -1402,7 +1072,7 @@ void LauncherConfigOverride()
     HMODULE engineModule = GetModuleHandleA("Engine.dll");
     if (!engineModule)
     {
-        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
+        spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
         return;
     }
 
@@ -1419,11 +1089,11 @@ void LauncherConfigOverride()
         {
             if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext_InitializeSKUandLang, MGS3_COsContext_InitializeSKUandLang_Hook))
             {
-                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Region/Language settings from INI");
+                spdlog::info("MG/MG2 | MGS 3: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Region/Language settings from INI");
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                spdlog::info("MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
             }
         }
         else
@@ -1433,22 +1103,22 @@ void LauncherConfigOverride()
             {
                 if (Memory::HookIAT(baseModule, "Engine.dll", MGS2_COsContext_InitializeSKUandLang, MGS2_COsContext_InitializeSKUandLang_Hook))
                 {
-                    LOG_F(INFO, "MGS 2: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Language setting from INI");
+                    spdlog::info("MGS 2: Launcher Config: Hooked COsContext::InitializeSKUandLang, overriding with Language setting from INI");
                 }
                 else
                 {
-                    LOG_F(INFO, "MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                    spdlog::info("MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
                 }
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
+                spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
             }
         }
     }
     else
     {
-        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
+        spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
     }
 
     if (!hasCtrltype)
@@ -1458,21 +1128,21 @@ void LauncherConfigOverride()
         {
             if (Memory::HookIAT(baseModule, "Engine.dll", NHT_COsContext_SetControllerID, NHT_COsContext_SetControllerID_Hook))
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Hooked NHT_COsContext_SetControllerID, overriding with CtrlType setting from INI");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Hooked NHT_COsContext_SetControllerID, overriding with CtrlType setting from INI");
             }
             else
             {
-                LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
             }
         }
         else
         {
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
+            spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
         }
     }
     else
     {
-        LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: Launcher Config: -ctrltype specified on command-line, skipping INI override");
+        spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: -ctrltype specified on command-line, skipping INI override");
     }
 }
 
@@ -1486,11 +1156,6 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     if (DetectGame())
     {
-        auto mhStatus = MH_Initialize();
-
-        if (mhStatus != MH_OK)
-            LOG_F(INFO, "MG/MG2 | MGS 2 | MGS 3: MinHook: Failed to initialize with error %d", mhStatus);
-
         LauncherConfigOverride();
         CustomResolution();
         IntroSkip();
