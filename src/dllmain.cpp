@@ -141,7 +141,7 @@ void Logging()
     // Log module details
     spdlog::info("Module Name: {0:s}", sExeName.c_str());
     spdlog::info("Module Path: {0:s}", sExePath.string().c_str());
-    spdlog::info("Module Address: {0:x}", (uintptr_t)baseModule);
+    spdlog::info("Module Address: 0x{0:x}", (uintptr_t)baseModule);
     spdlog::info("Module Timesstamp: {0:d}", Memory::ModuleTimestamp(baseModule));
     spdlog::info("----------");
 }
@@ -301,7 +301,7 @@ void CustomResolution()
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is {}", (uintptr_t)MGS2_MGS3_ResolutionAddress);
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_ResolutionAddress - (uintptr_t)baseModule);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
@@ -314,6 +314,54 @@ void CustomResolution()
             spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
 
+        // MGS 2 | MGS 3: CreateWindowExA
+        uint8_t* MGS2_MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? 44 ?? ?? ?? ?? FF ?? ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ??");
+        if (MGS2_MGS3_CreateWindowExAScanResult)
+        {
+            spdlog::info("CreateWindowExA: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid CreateWindowExAMidHook{};
+            CreateWindowExAMidHook = safetyhook::create_mid(MGS2_MGS3_CreateWindowExAScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    spdlog::info("CreateWindowEXA: Styles are {:x}", ctx.r9);
+                });
+        }
+        else if (!MGS2_MGS3_CreateWindowExAScanResult)
+        {
+            spdlog::error("CreateWindowExA: Pattern scan failed.");
+        }
+
+        // MGS 2 | MGS 3: WindowedMode
+        uint8_t* MGS2_MGS3_WindowedModeScanResult = Memory::PatternScan(baseModule, "B9 05 00 00 00 E8 ?? ?? ?? ?? 85 ?? 75 ??");
+        if (MGS2_MGS3_WindowedModeScanResult)
+        {
+            spdlog::info("WindowedMode: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeScanResult - (uintptr_t)baseModule);
+            DWORD64 MGS2_MGS3_WindowedModeAddress = Memory::GetAbsolute((uintptr_t)MGS2_MGS3_WindowedModeScanResult + 0x6);
+            spdlog::info("WindowedMode: 2nd address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeAddress - (uintptr_t)baseModule);
+
+            static SafetyHookMid WindowedModeMidHook{};
+            WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeAddress + 0xA,
+                [](SafetyHookContext& ctx)
+                {
+                    if (bWindowedMode || bBorderlessMode)
+                    {
+                        ctx.rax = 0;
+                    }
+                    else
+                    {
+                        ctx.rax = 1;
+                    }
+                });
+
+
+        }
+        else if (!MGS2_MGS3_WindowedModeScanResult)
+        {
+            spdlog::error("WindowedMode: Pattern scan failed.");
+        }
+
+        /*
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
         // Thanks emoose!
         if (bFramebufferFix)
@@ -335,27 +383,8 @@ void CustomResolution()
                 }
             }
         }
-
-        /*
-        // MGS 2 | MGS 3: Windowed mode
-        // Thanks emoose!
-        if (bWindowedMode)
-        {
-            uint8_t* MGS2_MGS3_WindowModeScanResult = Memory::PatternScan(baseModule, "0F 84 ?? ?? ?? ?? ?? 01 48 ?? ?? E8 ?? ?? ?? ??");
-            if (MGS2_MGS3_WindowModeScanResult)
-            {
-                DWORD64 MGS2_MGS3_WindowModeAddress = (uintptr_t)MGS2_MGS3_WindowModeScanResult + 0x7;
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_WindowModeAddress);
-
-                Memory::PatchBytes(MGS2_MGS3_WindowModeAddress, "\x00", 1);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Patched instruction.");
-            }
-            else if (!MGS2_MGS3_WindowModeScanResult)
-            {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Window Mode: Pattern scan failed.");
-            }
-        }
         */
+      
     }
 
     /*
@@ -853,6 +882,7 @@ void Miscellaneous()
     }
     */
 
+    /*
     if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
         // MG/MG2 | MGS3: texture buffer size extension
@@ -897,6 +927,7 @@ void Miscellaneous()
             }
         }
     }
+    */
 }
 
 void ViewportFix()
@@ -1007,8 +1038,6 @@ void LauncherConfigOverride()
         }
     }
 
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
     // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
     if (eGameType == MgsGame::Launcher)
     {
@@ -1043,7 +1072,8 @@ void LauncherConfigOverride()
                 commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign, ::toupper); // -wallalign must be uppercase
             }
 
-            //spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: %ls", commandLine.c_str());
+            string sCommandLine(commandLine.begin(), commandLine.end());
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: {}", sCommandLine.c_str());
 
 
             // Call CreateProcess to start the game process
@@ -1058,13 +1088,11 @@ void LauncherConfigOverride()
             }
             else
             {
-                //spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
             }
         }
         return;
     }
-
-    // ----------------
 
     // Certain config such as language/button style is normally passed from launcher to game via arguments
     // When game EXE gets ran directly this config is left at default (english game, xbox buttons)

@@ -19,9 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="external\safetyhook\safetyhook.cpp" />
+    <ClCompile Include="external\safetyhook\Zydis.c" />
     <ClCompile Include="src\dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\safetyhook\safetyhook.hpp" />
+    <ClInclude Include="external\safetyhook\Zydis.h" />
     <ClInclude Include="src\helper.hpp" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>

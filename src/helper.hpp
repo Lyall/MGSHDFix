@@ -86,6 +86,11 @@ namespace Memory
         return nullptr;
     }
 
+    uintptr_t GetAbsolute(uintptr_t address) noexcept
+    {
+        return (address + 4 + *reinterpret_cast<std::int32_t*>(address));
+    }
+
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction)
     {
         auto* base = (uint8_t*)callerModule;
