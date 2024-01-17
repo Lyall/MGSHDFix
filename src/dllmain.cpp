@@ -50,8 +50,8 @@ float fAspectRatio;
 float fAspectMultiplier;
 float fHUDWidth;
 float fHUDHeight;
-float fDefaultHUDWidth = (float)1920;
-float fDefaultHUDHeight = (float)1080;
+float fDefaultHUDWidth = (float)1280;
+float fDefaultHUDHeight = (float)720;
 float fHUDWidthOffset;
 float fHUDHeightOffset;
 
@@ -417,60 +417,58 @@ void IntroSkip()
 
 void ScaleEffects()
 {
-    /*
     if (eGameType == MgsGame::MGS2 && bCustomResolution)
     {
-        // MGS 2: Scale effects correctly. (text, overlays, fades etc)
-        uint8_t* MGS2_EffectsScaleScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
-        if (MGS2_EffectsScaleScanResult)
+        // MGS 2: Scale Effects
+        uint8_t* MGS2_ScaleEffectsScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
+        if (MGS2_ScaleEffectsScanResult)
         {
-            // X scale
-            DWORD64 MGS2_EffectsScaleXAddress = (uintptr_t)MGS2_EffectsScaleScanResult;
-            int MGS2_EffectsScaleXHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleXAddress, 13);
-            MGS2_EffectsScaleXReturnJMP = MGS2_EffectsScaleXAddress + MGS2_EffectsScaleXHookLength;
-            Memory::DetourFunction64((void*)MGS2_EffectsScaleXAddress, MGS2_EffectsScaleX_CC, MGS2_EffectsScaleXHookLength);
+            spdlog::info("MGS 2: Scale Effects: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_ScaleEffectsScanResult - (uintptr_t)baseModule);
 
-            float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleXAddress - 0x4));
-            fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fNewX);       
+            float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute((uintptr_t)MGS2_ScaleEffectsScanResult - 0x4));
+            float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute((uintptr_t)MGS2_ScaleEffectsScanResult + 0x28));
+            spdlog::info("MGS 2: Scale Effects: Default X is {}, Y is {}", fMGS2_DefaultEffectScaleX, fMGS2_DefaultEffectScaleY);
+            static float fMGS2_EffectScaleX;
+            static float fMGS2_EffectScaleY;
             if (bHUDFix)
             {
-                fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fMGS2_DefaultHUDX / fHUDWidth);
+                fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fDefaultHUDWidth / fHUDWidth);
+                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fDefaultHUDWidth / (float)iCustomResY);
+                spdlog::info("MGS 2: Scale Effects (HUD Fix Enabled): New X is {}, Y is {}", fMGS2_EffectScaleX, fMGS2_EffectScaleY);
             }
-
-            spdlog::info("MGS 2: Scale Effects X: Hook length is {} bytes", MGS2_EffectsScaleXHookLength);
-            spdlog::info("MGS 2: Scale Effects X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleXAddress);
-
-            DWORD64 MGS2_EffectsScaleX2Address = (uintptr_t)MGS2_EffectsScaleScanResult - 0x2B;
-            int MGS2_EffectsScaleX2HookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleX2Address, 13);
-            MGS2_EffectsScaleX2ReturnJMP = MGS2_EffectsScaleX2Address + MGS2_EffectsScaleX2HookLength;
-            Memory::DetourFunction64((void*)MGS2_EffectsScaleX2Address, MGS2_EffectsScaleX2_CC, MGS2_EffectsScaleX2HookLength);
-
-            spdlog::info("MGS 2: Scale Effects X 2: Hook length is {} bytes", MGS2_EffectsScaleX2HookLength);
-            spdlog::info("MGS 2: Scale Effects X 2: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleX2Address);
-
-            // Y scale
-            DWORD64 MGS2_EffectsScaleYAddress = (uintptr_t)MGS2_EffectsScaleScanResult + 0x24;
-            int MGS2_EffectsScaleYHookLength = Memory::GetHookLength((char*)MGS2_EffectsScaleYAddress, 13);
-            MGS2_EffectsScaleYReturnJMP = MGS2_EffectsScaleYAddress + MGS2_EffectsScaleYHookLength;
-
-            float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute(MGS2_EffectsScaleYAddress + 0x4));
-            fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDY / fNewY);
-            if (bHUDFix && bNarrowAspect)
+            else
             {
-                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fMGS2_DefaultHUDX / fNewX);
+                fMGS2_EffectScaleX = (float)fMGS2_DefaultEffectScaleX / (fDefaultHUDWidth / (float)iCustomResX);
+                fMGS2_EffectScaleY = (float)fMGS2_DefaultEffectScaleY / (fDefaultHUDHeight / (float)iCustomResY);
+                spdlog::info("MGS 2: Scale Effects: New X is {}, Y is {}", fMGS2_EffectScaleX, fMGS2_EffectScaleY);
             }
 
-            Memory::DetourFunction64((void*)MGS2_EffectsScaleYAddress, MGS2_EffectsScaleY_CC, MGS2_EffectsScaleYHookLength);
+            static SafetyHookMid ScaleEffectsXMidHook{};
+            ScaleEffectsXMidHook = safetyhook::create_mid(MGS2_ScaleEffectsScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm1.f32[0] = fMGS2_EffectScaleX;
+                });
 
-            spdlog::info("MGS 2: Scale Effects Y: Hook length is {} bytes", MGS2_EffectsScaleYHookLength);
-            spdlog::info("MGS 2: Scale Effects Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_EffectsScaleYAddress);
+            static SafetyHookMid ScaleEffectsX2MidHook{};
+            ScaleEffectsX2MidHook = safetyhook::create_mid(MGS2_ScaleEffectsScanResult - 0x2B,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm1.f32[0] = fMGS2_EffectScaleX;
+                });
+
+            static SafetyHookMid ScaleEffectsYMidHook{};
+            ScaleEffectsYMidHook = safetyhook::create_mid(MGS2_ScaleEffectsScanResult + 0x2C,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm1.f32[0] = fMGS2_EffectScaleY;
+                });
         }
-        else if (!MGS2_EffectsScaleScanResult)
+        else if (!MGS2_ScaleEffectsScanResult)
         {
-            spdlog::info("MGS 2: Scale Effects: Pattern scan failed.");
+            spdlog::error("MGS 2: Scale Effects: Pattern scan failed.");
         }
     }
-    */
 }
 
 void AspectFOVFix()
