@@ -221,11 +221,6 @@ void ReadConfig()
     spdlog::info("Config Parse: iLauncherConfigCtrlType: {}", iLauncherConfigCtrlType);
     spdlog::info("Config Parse: iLauncherConfigRegion: {}", iLauncherConfigRegion);
     spdlog::info("Config Parse: iLauncherConfigLanguage: {}", iLauncherConfigLanguage);
-    if (bBorderlessMode)
-    {
-        bWindowedMode = true;
-        spdlog::info("Config Parse: Borderless mode enabled.");
-    }
     spdlog::info("----------");
 
     // Calculate aspect ratio / use desktop res instead
@@ -301,7 +296,7 @@ void CustomResolution()
         if (MGS2_MGS3_ResolutionScanResult)
         {
             DWORD64 MGS2_MGS3_ResolutionAddress = (uintptr_t)MGS2_MGS3_ResolutionScanResult + 0x3;
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_ResolutionAddress - (uintptr_t)baseModule);
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_ResolutionAddress - (uintptr_t)baseModule);
 
             Memory::Write(MGS2_MGS3_ResolutionAddress, iCustomResX);
             Memory::Write((MGS2_MGS3_ResolutionAddress + 0x7), iCustomResY);
@@ -314,67 +309,84 @@ void CustomResolution()
             spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
 
-        // MGS 2 | MGS 3: CreateWindowExA
-        uint8_t* MGS2_MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? 44 ?? ?? ?? ?? FF ?? ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ??");
+        // MG 1/2 | MGS 2 | MGS 3: WindowedMode
+        uint8_t* MGS2_MGS3_WindowedModeScanResult = Memory::PatternScan(baseModule, "49 ?? ?? 01 75 ?? 0F ?? ?? 41 ?? ?? 0F ?? ?? ?? ?? ??");
+        if (MGS2_MGS3_WindowedModeScanResult)
+        {
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: WindowedMode: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeScanResult - (uintptr_t)baseModule);
+            
+            // Set windowed mode
+            static SafetyHookMid WindowedModeMidHook{};
+            WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x54,
+                [](SafetyHookContext& ctx)
+                {
+                    if (bWindowedMode || bBorderlessMode) 
+                    { 
+                        ctx.rax = 1; 
+                    }
+                    else 
+                    { 
+                        ctx.rax = 0;
+                    }
+                });
+
+            // Set window size X
+            static SafetyHookMid WindowedModeXMidHook{};
+            WindowedModeXMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x60,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.rax = iCustomResX;
+                });
+
+            // Set window size Y
+            static SafetyHookMid WindowedModeYMidHook{};
+            WindowedModeYMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x6C,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.rax = iCustomResY;
+                }); 
+        }
+        else if (!MGS2_MGS3_WindowedModeScanResult)
+        {
+            spdlog::error("MG/MG2 | MGS 2 | MGS 3: WindowedMode: Pattern scan failed.");
+        }
+        
+        // MG 1/2 | MGS 2 | MGS 3: CreateWindowExA
+        // TODO: Make a proper hook for this.
+        uint8_t* MGS2_MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "FF ?? ?? ?? ?? ?? 48 8B ?? ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 48 ?? ??");
         if (MGS2_MGS3_CreateWindowExAScanResult)
         {
-            spdlog::info("CreateWindowExA: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
-
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
+            
             static SafetyHookMid CreateWindowExAMidHook{};
             CreateWindowExAMidHook = safetyhook::create_mid(MGS2_MGS3_CreateWindowExAScanResult,
                 [](SafetyHookContext& ctx)
                 {
-                    spdlog::info("CreateWindowEXA: Styles are {:x}", ctx.r9);
+                    if (bBorderlessMode)
+                    {
+                        ctx.r9 = 0x90000008;
+                    }
                 });
         }
         else if (!MGS2_MGS3_CreateWindowExAScanResult)
         {
-            spdlog::error("CreateWindowExA: Pattern scan failed.");
+            spdlog::error("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Pattern scan failed.");
         }
 
-        // MGS 2 | MGS 3: WindowedMode
-        uint8_t* MGS2_MGS3_WindowedModeScanResult = Memory::PatternScan(baseModule, "B9 05 00 00 00 E8 ?? ?? ?? ?? 85 ?? 75 ??");
-        if (MGS2_MGS3_WindowedModeScanResult)
-        {
-            spdlog::info("WindowedMode: Address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeScanResult - (uintptr_t)baseModule);
-            DWORD64 MGS2_MGS3_WindowedModeAddress = Memory::GetAbsolute((uintptr_t)MGS2_MGS3_WindowedModeScanResult + 0x6);
-            spdlog::info("WindowedMode: 2nd address is {0:s}+{1:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeAddress - (uintptr_t)baseModule);
-
-            static SafetyHookMid WindowedModeMidHook{};
-            WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeAddress + 0xA,
-                [](SafetyHookContext& ctx)
-                {
-                    if (bWindowedMode || bBorderlessMode)
-                    {
-                        ctx.rax = 0;
-                    }
-                    else
-                    {
-                        ctx.rax = 1;
-                    }
-                });
-
-
-        }
-        else if (!MGS2_MGS3_WindowedModeScanResult)
-        {
-            spdlog::error("WindowedMode: Pattern scan failed.");
-        }
-
-        /*
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
         // Thanks emoose!
         if (bFramebufferFix)
         {
-            for (int i = 1; i <= 2; ++i) // Two results to change, unsure if first result is actually used but we NOP it anyway.
+            // Need to stop hor + vert from being modified.
+            for (int i = 1; i <= 2; ++i)
             {
-                uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 48 ?? ?? ?? 03 C2 89 ?? ??");
+                uint8_t* MGS2_MGS3_FramebufferFixScanResult = Memory::PatternScan(baseModule, "03 ?? 41 ?? ?? ?? C7 ?? ?? ?? ?? ?? ?? 00 00 00");
                 if (MGS2_MGS3_FramebufferFixScanResult)
                 {
-                    DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x9;
-                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Address is 0x{}", i, (uintptr_t)MGS2_MGS3_FramebufferFixAddress);
+                    DWORD64 MGS2_MGS3_FramebufferFixAddress = (uintptr_t)MGS2_MGS3_FramebufferFixScanResult + 0x2;
+                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Address is {:s}+{:x}", i, sExeName.c_str(), (uintptr_t)MGS2_MGS3_FramebufferFixAddress - (uintptr_t)baseModule);
 
-                    Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90", 3);
+                    Memory::PatchBytes(MGS2_MGS3_FramebufferFixAddress, "\x90\x90\x90\x90", 4);
                     spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Patched instruction.", i);
                 }
                 else if (!MGS2_MGS3_FramebufferFixScanResult)
@@ -382,50 +394,8 @@ void CustomResolution()
                     spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Pattern scan failed.", i);
                 }
             }
-        }
-        */
-      
-    }
-
-    /*
-    // MGS 2: Borderless mode
-    if (eGameType == MgsGame::MGS2 && bBorderlessMode)
-    {
-        uint8_t* MGS2_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "41 ?? ?? ?? 48 ?? ?? ?? 44 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 4C ?? ?? ?? ??");
-        if (MGS2_CreateWindowExAScanResult)
-        {
-            DWORD64 MGS2_CreateWindowExAAddress = (uintptr_t)MGS2_CreateWindowExAScanResult + 0x5;
-            int MGS2_CreateWindowExAHookLength = Memory::GetHookLength((char*)MGS2_CreateWindowExAAddress, 13);
-            MGS2_CreateWindowExAReturnJMP = MGS2_CreateWindowExAAddress + MGS2_CreateWindowExAHookLength;
-            Memory::DetourFunction64((void*)MGS2_CreateWindowExAAddress, MGS2_CreateWindowExA_CC, MGS2_CreateWindowExAHookLength);
-
-            spdlog::info("MGS 2: Borderless: Hook length is {} bytes", MGS2_CreateWindowExAHookLength);
-            spdlog::info("MGS 2: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_CreateWindowExAAddress);
-        }
-        else if (!MGS2_CreateWindowExAScanResult)
-        {
-            spdlog::info("MGS 2: Borderless: Pattern scan failed.");
-        }
-    }
-    else if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bBorderlessMode)
-    {
-        uint8_t* MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "48 ?? ?? ?? ?? 00 00 4C ?? ?? ?? ?? 48 ?? ?? ?? ?? 44 ?? ?? ?? ??");
-        if (MGS3_CreateWindowExAScanResult)
-        {
-            DWORD64 MGS3_CreateWindowExAAddress = (uintptr_t)MGS3_CreateWindowExAScanResult;
-            int MGS3_CreateWindowExAHookLength = Memory::GetHookLength((char*)MGS3_CreateWindowExAAddress, 13);
-            MGS3_CreateWindowExAReturnJMP = MGS3_CreateWindowExAAddress + MGS3_CreateWindowExAHookLength;
-            Memory::DetourFunction64((void*)MGS3_CreateWindowExAAddress, MGS3_CreateWindowExA_CC, MGS3_CreateWindowExAHookLength);
-
-            spdlog::info("MG/MG2 | MGS 3: Borderless: Hook length is {} bytes", MGS3_CreateWindowExAHookLength);
-            spdlog::info("MG/MG2 | MGS 3: Borderless: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_CreateWindowExAAddress);
-        }
-        else if (!MGS3_CreateWindowExAScanResult)
-        {
-            spdlog::info("MG/MG2 | MGS 3: Borderless: Pattern scan failed.");
-        }
+        }      
     }   
-     */
 }
 
 void IntroSkip()
@@ -827,9 +797,10 @@ void Miscellaneous()
     }
     */
 
-    /*
+   
     if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
+        /*
         uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
         if (MGS2_MGS3_SetSamplerStateInsnResult)
         {
@@ -851,38 +822,57 @@ void Miscellaneous()
         {
             spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Sampler state pattern scan failed.");
         }
+        */
+
+        uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? ?? ?? ?? 44 39 ?? ?? 38 ?? ?? ?? 74 ?? 44 89 ?? ?? ?? ?? ?? ?? EB ?? 48 ?? ??");
+        if (MGS3_SetSamplerStateInsnScanResult)
+        {
+            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_SetSamplerStateInsnScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid SetSamplerStateInsnXMidHook{};
+            SetSamplerStateInsnXMidHook = safetyhook::create_mid(MGS3_SetSamplerStateInsnScanResult + 0x7,
+                [](SafetyHookContext& ctx)
+                {
+                    *reinterpret_cast<int*>(ctx.rcx + ctx.rax + 0x438 + 0x14) = iAnisotropicFiltering;
+                    ctx.r9 = 0x55;
+                });
+
+        }
+        else if (!MGS3_SetSamplerStateInsnScanResult)
+        {
+            spdlog::error("MGS 3: Mouse Sensitivity: Pattern scan failed.");
+        }
     }
+    
 
     if (eGameType == MgsGame::MGS3 && bMouseSensitivity)
     {
-        // MGS 3: Mouse sensitivity
-        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
+        // MG 1/2 | MGS 2 | MGS 3: MouseSensitivity
+        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? ?? 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
         if (MGS3_MouseSensitivityScanResult)
         {
-            DWORD64 MGS3_MouseSensitivityXAddress = (uintptr_t)MGS3_MouseSensitivityScanResult;
-            int MGS3_MouseSensitivityXHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityXAddress, 13);
-            MGS3_MouseSensitivityXReturnJMP = MGS3_MouseSensitivityXAddress + MGS3_MouseSensitivityXHookLength;
-            Memory::DetourFunction64((void*)MGS3_MouseSensitivityXAddress, MGS3_MouseSensitivityX_CC, MGS3_MouseSensitivityXHookLength);
+            spdlog::info("MGS 3: Mouse Sensitivity: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
 
-            spdlog::info("MGS 3: Mouse Sensitivity X: Hook length is {} bytes", MGS3_MouseSensitivityXHookLength);
-            spdlog::info("MGS 3: Mouse Sensitivity X: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityXAddress);
+            static SafetyHookMid MouseSensitivityXMidHook{};
+            MouseSensitivityXMidHook = safetyhook::create_mid(MGS3_MouseSensitivityScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm0.f32[0] *= fMouseSensitivityXMulti;
+                });
 
-            DWORD64 MGS3_MouseSensitivityYAddress = (uintptr_t)MGS3_MouseSensitivityScanResult + 0x33;
-            int MGS3_MouseSensitivityYHookLength = Memory::GetHookLength((char*)MGS3_MouseSensitivityYAddress, 13);
-            MGS3_MouseSensitivityYReturnJMP = MGS3_MouseSensitivityYAddress + MGS3_MouseSensitivityYHookLength;
-            Memory::DetourFunction64((void*)MGS3_MouseSensitivityYAddress, MGS3_MouseSensitivityY_CC, MGS3_MouseSensitivityYHookLength);
-
-            spdlog::info("MGS 3: Mouse Sensitivity Y: Hook length is {} bytes", MGS3_MouseSensitivityYHookLength);
-            spdlog::info("MGS 3: Mouse Sensitivity Y: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_MouseSensitivityYAddress);
+            static SafetyHookMid MouseSensitivityYMidHook{};
+            MouseSensitivityYMidHook = safetyhook::create_mid(MGS3_MouseSensitivityScanResult + 0x2E,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm0.f32[0] *= fMouseSensitivityYMulti;
+                });
         }
         else if (!MGS3_MouseSensitivityScanResult)
         {
-            spdlog::info("MGS 3: Mouse Sensitivity: Pattern scan failed.");
+            spdlog::error("MGS 3: Mouse Sensitivity: Pattern scan failed.");
         }
     }
-    */
-
-    /*
+   
     if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
         // MG/MG2 | MGS3: texture buffer size extension
@@ -896,9 +886,9 @@ void Miscellaneous()
             if (MGS3_CTextureBufferMallocResult)
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CTextureBufferMallocResult + 3);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) old buffer size: {}", i, (uintptr_t)MGS3_CTextureBufferMallocResult, (uintptr_t)*bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) old buffer size: {}", i, sExeName.c_str(), (uintptr_t)MGS3_CTextureBufferMallocResult - (uintptr_t)baseModule, (uintptr_t)*bufferAmount);
                 Memory::Write((uintptr_t)bufferAmount, NewSize);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) new buffer size: {}", i, (uintptr_t)MGS3_CTextureBufferMallocResult, (uintptr_t)*bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) new buffer size: {}", i, sExeName.c_str(), (uintptr_t)MGS3_CTextureBufferMallocResult - (uintptr_t)baseModule, (uintptr_t)*bufferAmount);
             }
             else
             {
@@ -913,13 +903,13 @@ void Miscellaneous()
             // CBaseTexture::Create seems to contain code that mallocs buffers based on 16MiB shifted by index of the mip being loaded
             // (ie: size = 16MiB >> mipIndex)
             // We'll make sure to increase the base 16MiB size it uses too
-            uint8_t* MGS3_CBaseTextureMallocResult = Memory::PatternScan(baseModule, "75 ?? B8 00 00 00 01");
-            if (MGS3_CBaseTextureMallocResult)
+            uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScan(baseModule, "75 ?? B8 00 00 00 01");
+            if (MGS3_CBaseTextureMallocScanResult)
             {
-                uint32_t* bufferAmount = (uint32_t*)(MGS3_CBaseTextureMallocResult + 3);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) old buffer size: {}", 9, (uintptr_t)MGS3_CBaseTextureMallocResult, (uintptr_t)*bufferAmount);
+                uint32_t* bufferAmount = (uint32_t*)(MGS3_CBaseTextureMallocScanResult + 3);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) old buffer size: {}", 9, sExeName.c_str(), (uintptr_t)MGS3_CBaseTextureMallocScanResult - (uintptr_t)baseModule, (uintptr_t)*bufferAmount);
                 Memory::Write((uintptr_t)bufferAmount, NewSize);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} (0x{}) new buffer size: {}", 9, (uintptr_t)MGS3_CBaseTextureMallocResult, (uintptr_t)*bufferAmount);
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) new buffer size: {}", 9, sExeName.c_str(), (uintptr_t)MGS3_CBaseTextureMallocScanResult - (uintptr_t)baseModule, (uintptr_t)*bufferAmount);
             }
             else
             {
@@ -927,7 +917,7 @@ void Miscellaneous()
             }
         }
     }
-    */
+    
 }
 
 void ViewportFix()
