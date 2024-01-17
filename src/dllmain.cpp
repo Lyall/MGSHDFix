@@ -232,7 +232,7 @@ void ReadConfig()
         fAspectRatio = (float)desktop.right / (float)desktop.bottom;
     }
     fAspectMultiplier = fAspectRatio / fNativeAspect;
-    fHUDWidth = fDefaultHUDHeight * fAspectRatio;
+    fHUDWidth = iCustomResY * fNativeAspect;
     fHUDWidthOffset = (float)(iCustomResX - fHUDWidth) / 2;
 
     // Log aspect ratio stuff
