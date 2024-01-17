@@ -473,21 +473,23 @@ void ScaleEffects()
 
 void AspectFOVFix()
 {
-    /*
+    // Fix aspect ratio
     if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bAspectFix)
     {
         // MGS 3: Fix gameplay aspect ratio
-        // TODO: Signature is not unique (2 results)
-        uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? 7A ?? 75 ?? F3 0F ?? ?? ?? ?? ?? ?? C3");
+        uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? E8 ?? ?? ?? ?? 48 8D ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ??");
         if (MGS3_GameplayAspectScanResult)
         {
-            DWORD64 MGS3_GameplayAspectAddress = (uintptr_t)MGS3_GameplayAspectScanResult;
-            int MGS3_GameplayAspectHookLength = Memory::GetHookLength((char*)MGS3_GameplayAspectAddress, 13);
-            MGS3_GameplayAspectReturnJMP = MGS3_GameplayAspectAddress + MGS3_GameplayAspectHookLength;
-            Memory::DetourFunction64((void*)MGS3_GameplayAspectAddress, MGS3_GameplayAspect_CC, MGS3_GameplayAspectHookLength);
+            spdlog::info("MGS 3: Aspect Ratio: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_GameplayAspectScanResult - (uintptr_t)baseModule);
+            DWORD64 MGS3_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS3_GameplayAspectScanResult + 0x5);
+            spdlog::info("MGS 3: Aspect Ratio: Function address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_GameplayAspectAddress - (uintptr_t)baseModule);
 
-            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Hook length is {} bytes", MGS3_GameplayAspectHookLength);
-            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_GameplayAspectAddress);
+            static SafetyHookMid MGS3_GameplayAspectMidHook{};
+            MGS3_GameplayAspectMidHook = safetyhook::create_mid(MGS3_GameplayAspectAddress + 0x38,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm1.f32[0] /= fAspectMultiplier;
+                });
         }
         else if (!MGS3_GameplayAspectScanResult)
         {
@@ -497,17 +499,19 @@ void AspectFOVFix()
     else if (eGameType == MgsGame::MGS2 && bAspectFix)
     {
         // MGS 2: Fix gameplay aspect ratio
-        // TODO: Signature is not unique (2 results)
-        uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "0F ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? 75 ?? F3 0F ?? ?? ?? ?? ?? ?? C3");
+        uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "48 8D ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ??");
         if (MGS2_GameplayAspectScanResult)
         {
-            DWORD64 MGS2_GameplayAspectAddress = (uintptr_t)MGS2_GameplayAspectScanResult;
-            int MGS2_GameplayAspectHookLength = Memory::GetHookLength((char*)MGS2_GameplayAspectAddress, 13);
-            MGS2_GameplayAspectReturnJMP = MGS2_GameplayAspectAddress + MGS2_GameplayAspectHookLength;
-            Memory::DetourFunction64((void*)MGS2_GameplayAspectAddress, MGS2_GameplayAspect_CC, MGS2_GameplayAspectHookLength);
+            spdlog::info("MGS 2: Aspect Ratio: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_GameplayAspectScanResult - (uintptr_t)baseModule);
+            DWORD64 MGS2_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS2_GameplayAspectScanResult + 0xB);
+            spdlog::info("MGS 2: Aspect Ratio: Function address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_GameplayAspectAddress - (uintptr_t)baseModule);
 
-            spdlog::info("MGS 2: Aspect Ratio: Hook length is {} bytes", MGS2_GameplayAspectHookLength);
-            spdlog::info("MGS 2: Aspect Ratio: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_GameplayAspectAddress);
+            static SafetyHookMid MGS2_GameplayAspectMidHook{};
+            MGS2_GameplayAspectMidHook = safetyhook::create_mid(MGS2_GameplayAspectAddress + 0x38,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm0.f32[0] /= fAspectMultiplier;
+                });
         }
         else if (!MGS2_GameplayAspectScanResult)
         {
@@ -516,45 +520,53 @@ void AspectFOVFix()
     }
     
     // Convert FOV to vert- to match 16:9 horizontal field of view
-    if (eGameType == MgsGame::MGS3 && bNarrowAspect && bFOVFix)
+    if (eGameType == MgsGame::MGS3 && bFOVFix)
     {
         // MGS 3: FOV
         uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? ?? ?? ?? E8 ?? ?? ?? ??");
         if (MGS3_FOVScanResult)
         {
-            DWORD64 MGS3_FOVAddress = (uintptr_t)MGS3_FOVScanResult;
-            int MGS3_FOVHookLength = Memory::GetHookLength((char*)MGS3_FOVAddress, 13);
-            MGS3_FOVReturnJMP = MGS3_FOVAddress + MGS3_FOVHookLength;
-            Memory::DetourFunction64((void*)MGS3_FOVAddress, MGS3_FOV_CC, MGS3_FOVHookLength);
+            spdlog::info("MGS 3: FOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_FOVScanResult - (uintptr_t)baseModule);
 
-            spdlog::info("MGS 3: FOV: Hook length is {} bytes", MGS3_FOVHookLength);
-            spdlog::info("MGS 3: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS3_FOVAddress);
+            static SafetyHookMid MGS3_FOVMidHook{};
+            MGS3_FOVMidHook = safetyhook::create_mid(MGS3_FOVScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    if (fAspectRatio < fNativeAspect)
+                    {
+                        ctx.xmm2.f32[0] *= fAspectMultiplier;
+                    }
+                });
         }
         else if (!MGS3_FOVScanResult)
         {
             spdlog::info("MGS 3: FOV: Pattern scan failed.");
         }
     }
-    else if (eGameType == MgsGame::MGS2 && bNarrowAspect && bFOVFix)
+    else if (eGameType == MgsGame::MGS2 && bFOVFix)
     {
         // MGS 2: FOV
         uint8_t* MGS2_FOVScanResult = Memory::PatternScan(baseModule, "44 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? ?? 00 00");
         if (MGS2_FOVScanResult)
         {
-            DWORD64 MGS2_FOVAddress = (uintptr_t)MGS2_FOVScanResult;
-            int MGS2_FOVHookLength = 18;
-            MGS2_FOVReturnJMP = MGS2_FOVAddress + MGS2_FOVHookLength;
-            Memory::DetourFunction64((void*)MGS2_FOVAddress, MGS2_FOV_CC, MGS2_FOVHookLength);
+            spdlog::info("MGS 2: FOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_FOVScanResult - (uintptr_t)baseModule);
 
-            spdlog::info("MGS 2: FOV: Hook length is {} bytes", MGS2_FOVHookLength);
-            spdlog::info("MGS 2: FOV: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_FOVAddress);
+            static SafetyHookMid MGS2_FOVMidHook{};
+            MGS2_FOVMidHook = safetyhook::create_mid(MGS2_FOVScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    if (fAspectRatio < fNativeAspect)
+                    {
+                        ctx.xmm2.f32[0] *= fAspectMultiplier;
+                    }
+                });
         }
         else if (!MGS2_FOVScanResult)
         {
             spdlog::info("MGS 2: FOV: Pattern scan failed.");
         }
     }
-    */
+    
 }
 
 void HUDFix()
