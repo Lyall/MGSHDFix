@@ -66,6 +66,5 @@ This list will contain bugs which may or may not be fixed.
 [@emoose](https://github.com/emoose) for contributing fixes. <br />
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
-[Loguru](https://github.com/emilk/loguru) for logging. <br />
-[length-disassembler](https://github.com/Nomade040/length-disassembler) for length disassembly. <br />
-[minhook](https://github.com/TsudaKageyu/minhook) for hooking.
+[spdlog](https://github.com/gabime/spdlog) for logging. <br />
+[safetyhook](https://github.com/cursey/safetyhook) for hooking.
