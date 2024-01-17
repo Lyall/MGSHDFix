@@ -25,14 +25,12 @@ bool bFOVFix;
 bool bCustomResolution;
 int iCustomResX;
 int iCustomResY;
-bool bSkipIntroLogos;
 bool bWindowedMode;
 bool bBorderlessMode;
-int iAnisotropicFiltering;
 bool bFramebufferFix;
+bool bSkipIntroLogos;
+int iAnisotropicFiltering;
 int iTextureBufferSizeMB;
-bool bDisableBackgroundInput;
-bool bDisableCursor;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
@@ -170,8 +168,6 @@ void ReadConfig()
     inipp::get_value(ini.sections["Anisotropic Filtering"], "Samples", iAnisotropicFiltering);
     inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
-    inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
-    inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
@@ -209,7 +205,6 @@ void ReadConfig()
     }
     spdlog::info("Config Parse: bFramebufferFix: {}", bFramebufferFix);
     spdlog::info("Config Parse: bSkipIntroLogos: {}", bSkipIntroLogos);
-    spdlog::info("Config Parse: bDisableCursor: {}", bDisableCursor);
     spdlog::info("Config Parse: bMouseSensitivity: {}", bMouseSensitivity);
     spdlog::info("Config Parse: fMouseSensitivityXMulti: {}", fMouseSensitivityXMulti);
     spdlog::info("Config Parse: fMouseSensitivityYMulti: {}", fMouseSensitivityYMulti);
@@ -742,88 +737,8 @@ void HUDFix()
 
 void Miscellaneous()
 {
-    /*
-    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
-    {
-        if (bDisableCursor)
-        {
-            // MGS 2 | MGS 3: Disable mouse cursor
-            // Thanks again emoose!
-            uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
-            if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
-            {
-                DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_MouseCursorAddress);
-
-                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
-            }
-            else if (!MGS2_MGS3_MouseCursorScanResult)
-            {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
-            }
-        }
-
-        if (bWindowedMode && bDisableBackgroundInput)
-        {
-            // MG/MG2 | MGS 2 | MGS 3: Disable Background Input
-            uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "83 BF 80 02 00 00 00 0F");
-            uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "8B D5 FF 15 ?? ?? ?? ?? 48 8B 8F B0 02 00 00");
-            uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "39 AF 48 09 00 00");
-            if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
-            {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_IsWindowedCheck);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_ShowWindowCall);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at 0x%" PRIxPTR, (uintptr_t)MGS_WndProc_SetFullscreenEnd);
-
-                // Patch out the jnz after the windowed check
-                Memory::PatchBytes((uintptr_t)(MGS_WndProc_IsWindowedCheck + 7), "\x90\x90\x90\x90\x90\x90", 6);
-
-                // We included 2 more bytes in MGS_WndProc_ShowWindowCall sig to reduce matches, but we want to keep those
-                MGS_WndProc_ShowWindowCall += 2;
-
-                // Skip the ShowWindow & SetFullscreenState block by figuring out how many bytes to skip over
-                uint8_t jmper[] = { 0xEB, 0x00 };
-                jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
-
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
-                Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
-            }
-            else
-            {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
-            }
-        }
-    }
-    */
-
-   
     if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
-        /*
-        uint8_t* MGS2_MGS3_SetSamplerStateInsnResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 38 04 00 00");
-        if (MGS2_MGS3_SetSamplerStateInsnResult)
-        {
-            DWORD64 MGS2_MGS3_SetSamplerStateInsnAddress = (uintptr_t)MGS2_MGS3_SetSamplerStateInsnResult;
-            DWORD64 gpRenderBackendPtrAddr = MGS2_MGS3_SetSamplerStateInsnAddress + 3;
-
-            gpRenderBackend = *(int*)gpRenderBackendPtrAddr + gpRenderBackendPtrAddr + 4;
-            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: gpRenderBackend = 0x%" PRIxPTR, (uintptr_t)gpRenderBackend);
-
-            int MGS2_MGS3_SetSamplerStateInsnHookLength = Memory::GetHookLength((char*)MGS2_MGS3_SetSamplerStateInsnAddress, 14);
-
-            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Hook length is {} bytes", MGS2_MGS3_SetSamplerStateInsnHookLength);
-            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Hook address is 0x%" PRIxPTR, (uintptr_t)MGS2_MGS3_SetSamplerStateInsnAddress);
-
-            MGS2_MGS3_SetSamplerStateAnisoReturnJMP = MGS2_MGS3_SetSamplerStateInsnAddress + MGS2_MGS3_SetSamplerStateInsnHookLength;
-            Memory::DetourFunction64((void*)MGS2_MGS3_SetSamplerStateInsnAddress, MGS2_MGS3_SetSamplerStateAniso_CC, MGS2_MGS3_SetSamplerStateInsnHookLength);
-        }
-        else
-        {
-            spdlog::info("MGS 2 | MGS 3: Anisotropic Filtering: Sampler state pattern scan failed.");
-        }
-        */
-
         uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? ?? ?? ?? 44 39 ?? ?? 38 ?? ?? ?? 74 ?? 44 89 ?? ?? ?? ?? ?? ?? EB ?? 48 ?? ??");
         if (MGS3_SetSamplerStateInsnScanResult)
         {
@@ -833,17 +748,20 @@ void Miscellaneous()
             SetSamplerStateInsnXMidHook = safetyhook::create_mid(MGS3_SetSamplerStateInsnScanResult + 0x7,
                 [](SafetyHookContext& ctx)
                 {
+                    // [rcx+rax+0x438] = D3D11_SAMPLER_DESC, +0x14 = MaxAnisotropy
                     *reinterpret_cast<int*>(ctx.rcx + ctx.rax + 0x438 + 0x14) = iAnisotropicFiltering;
+
+                    // Override filter mode in r9d with aniso value and run compare from orig game code
+                    // Game code will then copy in r9d & update D3D etc when r9d is different to existing value
                     ctx.r9 = 0x55;
                 });
 
         }
         else if (!MGS3_SetSamplerStateInsnScanResult)
         {
-            spdlog::error("MGS 3: Mouse Sensitivity: Pattern scan failed.");
+            spdlog::error("MGS 2 | MGS 3: Anisotropic Filtering: Pattern scan failed.");
         }
     }
-    
 
     if (eGameType == MgsGame::MGS3 && bMouseSensitivity)
     {
