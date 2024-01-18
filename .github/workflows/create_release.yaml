@@ -6,7 +6,6 @@ on:
       version:
         description: 'Release version number'
         required: true
-  pull_request:
         
 jobs:
   build:
@@ -26,6 +25,7 @@ jobs:
 
     - uses: robinraju/release-downloader@v1.8
       with:
+        repository: "ThirteenAG/Ultimate-ASI-Loader"
         latest: true
         fileName: "Ultimate-ASI-Loader_x64.zip"
     - run: unzip Ultimate-ASI-Loader_x64.zip -d ${{ github.event.repository.name }}
