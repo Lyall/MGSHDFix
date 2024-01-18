@@ -31,8 +31,8 @@ jobs:
         repository: "ThirteenAG/Ultimate-ASI-Loader"
         latest: true
         fileName: "Ultimate-ASI-Loader_x64.zip"
-    - run: unzip Ultimate-ASI-Loader_x64.zip -d ${{ github.event.repository.name }}
-    - run: mv {{ github.event.repository.name }}\dinput8.dll d3d11.dll
+    - run: unzip Ultimate-ASI-Loader_x64.zip -d .\
+    - run: mv .\dinput8.dll .\d3d11.dll
     - run: 7z a -tzip ${{ github.event.repository.name }}_${{ github.event.inputs.version }}.zip README.md ${{ github.event.repository.name }}.ini ${{ github.event.repository.name }}.asi d3d11.dll
     
     - uses: ncipollo/release-action@v1
