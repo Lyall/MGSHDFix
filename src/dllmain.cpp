@@ -34,6 +34,8 @@ int iTextureBufferSizeMB;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
+bool bDisableBackgroundInput;
+bool bDisableCursor;
 
 // Launcher ini variables
 bool bLauncherConfigSkipLauncher = false;
@@ -111,7 +113,6 @@ MgsGame eGameType = MgsGame::Unknown;
 
 // cipherxof's Water Surface Rendering Fix
 bool MGS3_UseAdjustedOffsetY = true;
-
 SafetyHookInline MGS3_RenderWaterSurface_hook{};
 int64_t __fastcall MGS3_RenderWaterSurface(int64_t work)
 {
@@ -191,6 +192,8 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
+    inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
+    inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", iTextureBufferSizeMB);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bHUDFix);
@@ -228,6 +231,8 @@ void ReadConfig()
     spdlog::info("Config Parse: bMouseSensitivity: {}", bMouseSensitivity);
     spdlog::info("Config Parse: fMouseSensitivityXMulti: {}", fMouseSensitivityXMulti);
     spdlog::info("Config Parse: fMouseSensitivityYMulti: {}", fMouseSensitivityYMulti);
+    spdlog::info("Config Parse: bDisableBackgroundInput: {}", bDisableBackgroundInput);
+    spdlog::info("Config Parse: bDisableCursor: {}", bDisableCursor);
     spdlog::info("Config Parse: iTextureBufferSizeMB: {}", iTextureBufferSizeMB);
     spdlog::info("Config Parse: bAspectFix: {}", bAspectFix);
     spdlog::info("Config Parse: bHUDFix: {}", bHUDFix);
@@ -601,7 +606,6 @@ void AspectFOVFix()
             spdlog::info("MGS 2: FOV: Pattern scan failed.");
         }
     }
-    
 }
 
 void HUDFix()
@@ -778,6 +782,59 @@ void HUDFix()
 
 void Miscellaneous()
 {
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
+    {
+        if (bDisableCursor)
+        {
+            // MGS 2 | MGS 3: Disable mouse cursor
+            // Thanks again emoose!
+            uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
+            if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+            {
+                DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_MouseCursorAddress - (uintptr_t)baseModule);
+
+                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+            }
+            else if (!MGS2_MGS3_MouseCursorScanResult)
+            {
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+            }
+        }
+
+        if (bWindowedMode && bDisableBackgroundInput)
+        {
+            // MG/MG2 | MGS 2 | MGS 3: Disable Background Input
+            uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "83 BF 80 02 00 00 00 0F");
+            uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "8B D5 FF 15 ?? ?? ?? ?? 48 8B 8F B0 02 00 00");
+            uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "39 AF 48 09 00 00");
+            if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
+            {
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_IsWindowedCheck - (uintptr_t)baseModule);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_ShowWindowCall - (uintptr_t)baseModule);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)baseModule);
+
+                // Patch out the jnz after the windowed check
+                Memory::PatchBytes((uintptr_t)(MGS_WndProc_IsWindowedCheck + 7), "\x90\x90\x90\x90\x90\x90", 6);
+
+                // We included 2 more bytes in MGS_WndProc_ShowWindowCall sig to reduce matches, but we want to keep those
+                MGS_WndProc_ShowWindowCall += 2;
+
+                // Skip the ShowWindow & SetFullscreenState block by figuring out how many bytes to skip over
+                uint8_t jmper[] = { 0xEB, 0x00 };
+                jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
+
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
+                Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
+            }
+            else
+            {
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
+            }
+        }
+    }
+
     if (iAnisotropicFiltering > 0 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2))
     {
         uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? ?? ?? ?? 44 39 ?? ?? 38 ?? ?? ?? 74 ?? 44 89 ?? ?? ?? ?? ?? ?? EB ?? 48 ?? ??");
