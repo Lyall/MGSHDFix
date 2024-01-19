@@ -114,6 +114,8 @@ MgsGame eGameType = MgsGame::Unknown;
 // cipherxof's Water Surface Rendering Fix
 bool MGS3_UseAdjustedOffsetY = true;
 SafetyHookInline MGS3_RenderWaterSurface_hook{};
+SafetyHookInline MGS3_GetViewportCameraOffsetY_hook{};
+
 int64_t __fastcall MGS3_RenderWaterSurface(int64_t work)
 {
     MGS3_UseAdjustedOffsetY = false;
@@ -122,7 +124,6 @@ int64_t __fastcall MGS3_RenderWaterSurface(int64_t work)
     return result;
 }
 
-SafetyHookInline MGS3_GetViewportCameraOffsetY_hook{};
 float MGS3_GetViewportCameraOffsetY()
 {
     return MGS3_UseAdjustedOffsetY ? MGS3_GetViewportCameraOffsetY_hook.stdcall<float>() : 0.00f;
@@ -299,7 +300,7 @@ bool DetectGame()
             }
         }
 
-        spdlog::info("Failed to detect supported game, unknown launcher");
+        spdlog::error("Failed to detect supported game, unknown launcher");
         return false;
     }
 
@@ -314,7 +315,7 @@ bool DetectGame()
         }
     }
 
-    spdlog::info("Failed to detect supported game, {} isn't supported by MGSHDFix", sExeName.c_str());
+    spdlog::error("Failed to detect supported game, {} isn't supported by MGSHDFix", sExeName.c_str());
     return false;
 }
 
@@ -337,7 +338,7 @@ void CustomResolution()
         }
         else if (!MGS2_MGS3_ResolutionScanResult)
         {
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
+            spdlog::error("MG/MG2 | MGS 2 | MGS 3: Custom Resolution: Pattern scan failed.");
         }
 
         // MG 1/2 | MGS 2 | MGS 3: WindowedMode
@@ -422,7 +423,7 @@ void CustomResolution()
                 }
                 else if (!MGS2_MGS3_FramebufferFixScanResult)
                 {
-                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Pattern scan failed.", i);
+                    spdlog::error("MG/MG2 | MGS 2 | MGS 3: Framebuffer {}: Pattern scan failed.", i);
                 }
             }
         }      
@@ -439,7 +440,7 @@ void IntroSkip()
     uint8_t* MGS2_MGS3_InitialIntroStateScanResult = Memory::PatternScan(baseModule, "75 ? C7 05 ? ? ? ? 01 00 00 00 C3");
     if (!MGS2_MGS3_InitialIntroStateScanResult)
     {
-        spdlog::info("MGS 2 | MGS 3: Skip Intro Logos: Pattern scan failed.");
+        spdlog::error("MGS 2 | MGS 3: Skip Intro Logos: Pattern scan failed.");
         return;
     }
 
@@ -533,7 +534,7 @@ void AspectFOVFix()
         }
         else if (!MGS3_GameplayAspectScanResult)
         {
-            spdlog::info("MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
+            spdlog::error("MG/MG2 | MGS 3: Aspect Ratio: Pattern scan failed.");
         }
     }  
     else if (eGameType == MgsGame::MGS2 && bAspectFix)
@@ -555,7 +556,7 @@ void AspectFOVFix()
         }
         else if (!MGS2_GameplayAspectScanResult)
         {
-            spdlog::info("MGS 2: Aspect Ratio: Pattern scan failed.");
+            spdlog::error("MGS 2: Aspect Ratio: Pattern scan failed.");
         }
     }
     
@@ -580,7 +581,7 @@ void AspectFOVFix()
         }
         else if (!MGS3_FOVScanResult)
         {
-            spdlog::info("MGS 3: FOV: Pattern scan failed.");
+            spdlog::error("MGS 3: FOV: Pattern scan failed.");
         }
     }
     else if (eGameType == MgsGame::MGS2 && bFOVFix)
@@ -603,7 +604,7 @@ void AspectFOVFix()
         }
         else if (!MGS2_FOVScanResult)
         {
-            spdlog::info("MGS 2: FOV: Pattern scan failed.");
+            spdlog::error("MGS 2: FOV: Pattern scan failed.");
         }
     }
 }
@@ -638,7 +639,7 @@ void HUDFix()
         }
         else if (!MGS2_HUDWidthScanResult)
         {
-            spdlog::info("MGS 2: HUD: Pattern scan failed.");
+            spdlog::error("MGS 2: HUD: Pattern scan failed.");
         }
         
         // MGS 2: Radar
@@ -687,7 +688,7 @@ void HUDFix()
         }
         else if (!MGS2_RadarWidthScanResult)
         {
-            spdlog::info("MGS 2: Radar Fix: Pattern scan failed.");
+            spdlog::error("MGS 2: Radar Fix: Pattern scan failed.");
         }
         
         // MGS 2: Codec Portraits
@@ -714,7 +715,7 @@ void HUDFix()
         }
         else if (!MGS2_CodecPortraitsScanResult)
         {
-            spdlog::info("MGS 2: Codec Portraits: Pattern scan failed.");
+            spdlog::error("MGS 2: Codec Portraits: Pattern scan failed.");
         }
 
         // MGS 2: Disable motion blur. 
@@ -728,7 +729,7 @@ void HUDFix()
         }
         else if (!MGS2_MotionBlurScanResult)
         {
-            spdlog::info("MGS 2: Motion Blur: Pattern scan failed.");
+            spdlog::error("MGS 2: Motion Blur: Pattern scan failed.");
         }
     }
     else if (eGameType == MgsGame::MGS3 && bHUDFix || eGameType == MgsGame::MG && fAspectRatio != fNativeAspect)
@@ -757,7 +758,7 @@ void HUDFix()
         }
         else if (!MGS3_HUDWidthScanResult)
         {
-            spdlog::info("MG1/2 | MGS 3: HUD Width: Pattern scan failed.");
+            spdlog::error("MG1/2 | MGS 3: HUD Width: Pattern scan failed.");
         } 
     }
 
@@ -775,7 +776,7 @@ void HUDFix()
         }
         else if (!MGS2_MGS3_LetterboxingScanResult)
         {
-            spdlog::info("MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
+            spdlog::error("MGS 2 | MGS 3: Letterboxing: Pattern scan failed.");
         }
     }
 }
@@ -799,7 +800,7 @@ void Miscellaneous()
             }
             else if (!MGS2_MGS3_MouseCursorScanResult)
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
             }
         }
 
@@ -830,7 +831,7 @@ void Miscellaneous()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
+                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
             }
         }
     }
@@ -908,7 +909,7 @@ void Miscellaneous()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", i);
+                spdlog::error("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", i);
                 failure = true;
                 break;
             }
@@ -929,7 +930,7 @@ void Miscellaneous()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", 9);
+                spdlog::error("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", 9);
             }
         }
     }
@@ -954,7 +955,7 @@ void ViewportFix()
         }
         else
         {
-            spdlog::info("MGS 3:  Render Water Surface: Pattern scan failed.");
+            spdlog::error("MGS 3:  Render Water Surface: Pattern scan failed.");
         }
 
         uint8_t* MGS3_GetViewportCameraOffsetYScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? F3 44 ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? 00 00");
@@ -971,7 +972,7 @@ void ViewportFix()
         }
         else
         {
-            spdlog::info("MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
+            spdlog::error("MGS 3: Get Viewport Camera Offset: Pattern scan failed.");
         }
     }
 }
@@ -1030,7 +1031,7 @@ void LauncherConfigOverride()
         }
         catch (const std::exception& ex)
         {
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
+            spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Config: steam_appid.txt creation failed (exception: %s)", ex.what());
         }
     }
 
@@ -1084,7 +1085,7 @@ void LauncherConfigOverride()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
             }
         }
         return;
@@ -1096,7 +1097,7 @@ void LauncherConfigOverride()
     HMODULE engineModule = GetModuleHandleA("Engine.dll");
     if (!engineModule)
     {
-        spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
+        spdlog::error("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to get Engine.dll module handle");
         return;
     }
 
@@ -1117,7 +1118,7 @@ void LauncherConfigOverride()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                spdlog::error("MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
             }
         }
         else
@@ -1131,18 +1132,18 @@ void LauncherConfigOverride()
                 }
                 else
                 {
-                    spdlog::info("MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                    spdlog::error("MGS 2: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
                 }
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
+                spdlog::error("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
             }
         }
     }
     else
     {
-        spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
+        spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: -region/-lan specified on command-line, skipping INI override");
     }
 
     if (!hasCtrltype)
@@ -1156,12 +1157,12 @@ void LauncherConfigOverride()
             }
             else
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
+                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to apply NHT_COsContext_SetControllerID IAT hook");
             }
         }
         else
         {
-            spdlog::info("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
+            spdlog::error("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate NHT_COsContext_SetControllerID export");
         }
     }
     else
