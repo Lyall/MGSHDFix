@@ -219,6 +219,11 @@ void ReadConfig()
     spdlog::info("Config Parse: bCustomResolution: {}", bCustomResolution);
     spdlog::info("Config Parse: iCustomResX: {}", iCustomResX);
     spdlog::info("Config Parse: iCustomResY: {}", iCustomResY);
+    if (bBorderlessMode)
+    {
+        bWindowedMode = true;
+        spdlog::info("Config Parse: bBorderlessMode enabled. Enabling bWindowedMode");
+    }
     spdlog::info("Config Parse: bWindowedMode: {}", bWindowedMode);
     spdlog::info("Config Parse: bBorderlessMode: {}", bBorderlessMode);
     spdlog::info("Config Parse: iAnisotropicFiltering: {}", iAnisotropicFiltering);
@@ -342,41 +347,21 @@ void CustomResolution()
         }
 
         // MG 1/2 | MGS 2 | MGS 3: WindowedMode
-        uint8_t* MGS2_MGS3_WindowedModeScanResult = Memory::PatternScan(baseModule, "49 ?? ?? 01 75 ?? 0F ?? ?? 41 ?? ?? 0F ?? ?? ?? ?? ??");
+        uint8_t* MGS2_MGS3_WindowedModeScanResult = Memory::PatternScan(baseModule, "48 ?? ?? E8 ?? ?? ?? ?? 84 ?? 0F 84 ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 41 ?? 03 00 00 00");
         if (MGS2_MGS3_WindowedModeScanResult)
         {
             spdlog::info("MG/MG2 | MGS 2 | MGS 3: WindowedMode: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeScanResult - (uintptr_t)baseModule);
-            
             // Set windowed mode
             static SafetyHookMid WindowedModeMidHook{};
-            WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x54,
+            WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult,
                 [](SafetyHookContext& ctx)
                 {
-                    if (bWindowedMode || bBorderlessMode) 
-                    { 
-                        ctx.rax = 1; 
-                    }
-                    else 
-                    { 
-                        ctx.rax = 0;
+                    if (bWindowedMode || bBorderlessMode)
+                    {
+                        ctx.rdx = 0;
                     }
                 });
-
-            // Set window size X
-            static SafetyHookMid WindowedModeXMidHook{};
-            WindowedModeXMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x60,
-                [](SafetyHookContext& ctx)
-                {
-                    ctx.rax = iCustomResX;
-                });
-
-            // Set window size Y
-            static SafetyHookMid WindowedModeYMidHook{};
-            WindowedModeYMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult + 0x6C,
-                [](SafetyHookContext& ctx)
-                {
-                    ctx.rax = iCustomResY;
-                }); 
+            
         }
         else if (!MGS2_MGS3_WindowedModeScanResult)
         {
@@ -394,9 +379,10 @@ void CustomResolution()
             CreateWindowExAMidHook = safetyhook::create_mid(MGS2_MGS3_CreateWindowExAScanResult,
                 [](SafetyHookContext& ctx)
                 {
-                    if (bBorderlessMode)
+                    if (bBorderlessMode && bWindowedMode)
                     {
-                        ctx.r9 = 0x90000008;
+                        // Does not work
+                        ctx.r9 = 0x90000000;
                     }
                 });
         }
@@ -720,7 +706,7 @@ void HUDFix()
 
         // MGS 2: Disable motion blur. 
         uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScan(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
-        if (MGS2_MotionBlurScanResult && bWindowedMode)
+        if (MGS2_MotionBlurScanResult)
         {
             spdlog::info("MGS 2: Motion Blur: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MotionBlurScanResult - (uintptr_t)baseModule);
 
@@ -787,15 +773,17 @@ void Miscellaneous()
     {
         if (bDisableCursor)
         {
-            // MGS 2 | MGS 3: Disable mouse cursor
+            // MG/MG2 | MGS 2 | MGS 3: Disable mouse cursor
             // Thanks again emoose!
-            uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "?? ?? BA ?? ?? 00 00 FF ?? ?? ?? ?? ?? 48 ?? ??");
+            uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "BA 00 7F 00 00 33 ?? FF ?? ?? ?? ?? ?? 48 ?? ??");
             if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
             {
                 DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_MouseCursorAddress - (uintptr_t)baseModule);
 
-                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress, "\xEB", 1);
+                // The game enters 32512 in the RDX register for the function USER32.LoadCursorA to load IDC_ARROW (normal select arrow in windows)
+                // Set this to 0 and no cursor icon is loaded
+                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress + 0x2, "\x00", 1);
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
             }
             else if (!MGS2_MGS3_MouseCursorScanResult)
@@ -806,18 +794,18 @@ void Miscellaneous()
 
         if (bWindowedMode && bDisableBackgroundInput)
         {
-            // MG/MG2 | MGS 2 | MGS 3: Disable Background Input
-            uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "83 BF 80 02 00 00 00 0F");
-            uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "8B D5 FF 15 ?? ?? ?? ?? 48 8B 8F B0 02 00 00");
-            uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "39 AF 48 09 00 00");
+            // MGS 2: Disable Background Input
+            uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "4D ?? ?? 0F ?? ?? 83 ?? ?? ?? 00 00 00 88 ?? ?? ?? 00 00 0F ?? ?? ?? ?? ??") + 0x13;
+            uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "0F ?? ?? 8B ?? FF 15 ?? ?? ?? ?? 48 8B ?? ?? ?? 00 00 ?? ?? ??") + 0x3;
+            uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "48 8B ?? FF ?? ?? 39 ?? ?? ?? 00 00 74 ?? 48 8B ?? ?? ?? ?? ??") + 0x6;
             if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
             {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: IsWindowedCheck at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_IsWindowedCheck - (uintptr_t)baseModule);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_ShowWindowCall - (uintptr_t)baseModule);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: SetFullscreenEnd at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)baseModule);
+                spdlog::info("MGS 2: Disable Background Input: IsWindowedCheck at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_IsWindowedCheck - (uintptr_t)baseModule);
+                spdlog::info("MGS 2: Disable Background Input: ShowWindowCall at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_ShowWindowCall - (uintptr_t)baseModule);
+                spdlog::info("MGS 2: Disable Background Input: SetFullscreenEnd at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)baseModule);
 
                 // Patch out the jnz after the windowed check
-                Memory::PatchBytes((uintptr_t)(MGS_WndProc_IsWindowedCheck + 7), "\x90\x90\x90\x90\x90\x90", 6);
+                Memory::PatchBytes((uintptr_t)MGS_WndProc_IsWindowedCheck, "\x90\x90\x90\x90\x90\x90", 6);
 
                 // We included 2 more bytes in MGS_WndProc_ShowWindowCall sig to reduce matches, but we want to keep those
                 MGS_WndProc_ShowWindowCall += 2;
@@ -826,12 +814,12 @@ void Miscellaneous()
                 uint8_t jmper[] = { 0xEB, 0x00 };
                 jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
 
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: ShowWindowCall jmp skipping %x bytes", jmper[1]);
+                spdlog::info("MGS 2: Disable Background Input: ShowWindowCall jmp skipping {:x} bytes", jmper[1]);
                 Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
             }
             else
             {
-                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Disable Background Input: Pattern scan failed.");
+                spdlog::error("MGS 2: Disable Background Input: Pattern scan failed.");
             }
         }
     }
