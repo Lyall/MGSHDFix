@@ -111,6 +111,26 @@ const std::map<MgsGame, GameInfo> kGames = {
 const GameInfo* game = nullptr;
 MgsGame eGameType = MgsGame::Unknown;
 
+// SetWindowPos hook
+SafetyHookInline SetWindowPos_hook{};
+BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
+{
+    // Might have to do something here
+    return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
+// CreateWindowExA hook
+SafetyHookInline CreateWindowExA_hook{};
+HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    if (bBorderlessMode)
+    {
+        dwStyle &= ~WS_POPUP;
+        dwExStyle &= ~WS_EX_APPWINDOW;
+    }
+    return CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+}
+
 // cipherxof's Water Surface Rendering Fix
 bool MGS3_UseAdjustedOffsetY = true;
 SafetyHookInline MGS3_RenderWaterSurface_hook{};
@@ -369,22 +389,12 @@ void CustomResolution()
         }
         
         // MG 1/2 | MGS 2 | MGS 3: CreateWindowExA
-        // TODO: Make a proper hook for this.
         uint8_t* MGS2_MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "FF ?? ?? ?? ?? ?? 48 8B ?? ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 48 ?? ??");
         if (MGS2_MGS3_CreateWindowExAScanResult)
         {
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
-            
-            static SafetyHookMid CreateWindowExAMidHook{};
-            CreateWindowExAMidHook = safetyhook::create_mid(MGS2_MGS3_CreateWindowExAScanResult,
-                [](SafetyHookContext& ctx)
-                {
-                    if (bBorderlessMode && bWindowedMode)
-                    {
-                        // Does not work
-                        ctx.r9 = 0x90000000;
-                    }
-                });
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
+                CreateWindowExA_hook = safetyhook::create_inline(&CreateWindowExA, reinterpret_cast<void*>(CreateWindowExA_hooked));
+                SetWindowPos_hook = safetyhook::create_inline(&SetWindowPos, reinterpret_cast<void*>(SetWindowPos_hooked));
         }
         else if (!MGS2_MGS3_CreateWindowExAScanResult)
         {
