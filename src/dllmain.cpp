@@ -18,6 +18,7 @@ string sLogFile = "MGSHDFix.log";
 string sConfigFile = "MGSHDFix.ini";
 string sExeName;
 filesystem::path sExePath;
+RECT rcDesktop;
 
 // Ini Variables
 bool bAspectFix;
@@ -116,14 +117,11 @@ MgsGame eGameType = MgsGame::Unknown;
 SafetyHookInline SetWindowPos_hook{};
 BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
-    RECT desktop;
-    GetWindowRect(GetDesktopWindow(), &desktop);
-
     // Set window size to desktop res and pos to center of screen
     if (bBorderlessMode)
     {
-        spdlog::info("SetWindowPos: Borderless: Set window pos to {}:{} and size to {}x{}", 0, 0, desktop.right, desktop.bottom);
-        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, 0, 0, desktop.right, desktop.bottom, uFlags);
+        spdlog::info("SetWindowPos: Borderless: Set window pos to {}:{} and size to {}x{}", 0, 0, rcDesktop.right, rcDesktop.bottom);
+        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, 0, 0, rcDesktop.right, rcDesktop.bottom, uFlags);
     }
 
     return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
@@ -133,13 +131,11 @@ BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y
 SafetyHookInline CreateWindowExA_hook{};
 HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
-    RECT desktop;
-    GetWindowRect(GetDesktopWindow(), &desktop);
     if (bBorderlessMode)
     {
         spdlog::info("CreateWindowExA: ClassName = {}, WindowName = {}, dwStyle = {:x}", lpClassName, lpWindowName, dwStyle);
         auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-        SetWindowPos(hWnd, HWND_TOP, 0, 0, desktop.right, desktop.bottom, NULL);
+        SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
         return hWnd;
     }
     return CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
@@ -290,11 +286,9 @@ void ReadConfig()
     }
     else
     {
-        RECT desktop;
-        GetWindowRect(GetDesktopWindow(), &desktop);
-        iCustomResX = (int)desktop.right;
-        iCustomResY = (int)desktop.bottom;
-        fAspectRatio = (float)desktop.right / (float)desktop.bottom;
+        iCustomResX = (int)rcDesktop.right;
+        iCustomResY = (int)rcDesktop.bottom;
+        fAspectRatio = (float)rcDesktop.right / (float)rcDesktop.bottom;
     }
     fAspectMultiplier = fAspectRatio / fNativeAspect;
 
