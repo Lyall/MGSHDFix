@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include <inipp/inipp.h>
-#define SPDLOG_WCHAR_TO_UTF8_SUPPORT
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <safetyhook.hpp>
@@ -280,6 +279,7 @@ void ReadConfig()
     spdlog::info("----------");
 
     // Calculate aspect ratio / use desktop res instead
+    GetWindowRect(GetDesktopWindow(), &rcDesktop);
     if (iCustomResX > 0 && iCustomResY > 0)
     {
         fAspectRatio = (float)iCustomResX / (float)iCustomResY;
