@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <stdio.h>
-#include "external/minhook/MinHook.h"
 
 using namespace std;
 
@@ -23,96 +22,7 @@ namespace Memory
         VirtualProtect((LPVOID)address, numBytes, oldProtect, &oldProtect);
     }
 
-    void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size) 
-    {
-        memcpy(buffer, reinterpret_cast<const void*>(address), size); 
-    }
-
-    uintptr_t ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets)
-    {
-        MEMORY_BASIC_INFORMATION mbi;
-        for (auto& offset : offsets)
-        {
-            if (!VirtualQuery(reinterpret_cast<LPCVOID>(base), &mbi, sizeof(MEMORY_BASIC_INFORMATION)) || mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))
-                return 0;
-
-            base = *reinterpret_cast<uintptr_t*>(base) + offset;
-        }
-
-        return base;
-    }
-
-    int GetHookLength(char* src, int minLen)
-    {
-        int lengthHook = 0;
-        const int size = 15;
-        char buffer[size];
-
-        memcpy(buffer, src, size);
-
-        // must be >= 14
-        while (lengthHook <= minLen)
-            lengthHook += ldisasm(&buffer[lengthHook], true);
-
-        return lengthHook;
-    }
-
-    bool DetourFunction32(void* src, void* dst, int len)
-    {
-        if (len < 5) return false;
-
-        DWORD curProtection;
-        VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &curProtection);
-
-        memset(src, 0x90, len);
-
-        uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - 5;
-
-        *(BYTE*)src = 0xE9;
-        *(uintptr_t*)((uintptr_t)src + 1) = relativeAddress;
-
-        DWORD temp;
-        VirtualProtect(src, len, curProtection, &temp);
-
-        return true;
-    }
-
-    void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
-    {
-        DWORD MinLen = 14;
-
-        if (dwLen < MinLen) return NULL;
-
-        BYTE stub[] = {
-        0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
-        };
-
-        void* pTrampoline = VirtualAlloc(0, dwLen + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-
-        DWORD dwOld = 0;
-        VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
-
-        DWORD64 retto = (DWORD64)pSource + dwLen;
-
-        // trampoline
-        memcpy(stub + 6, &retto, 8);
-        memcpy((void*)((DWORD_PTR)pTrampoline), pSource, dwLen);
-        memcpy((void*)((DWORD_PTR)pTrampoline + dwLen), stub, sizeof(stub));
-
-        // orig
-        memcpy(stub + 6, &pDestination, 8);
-        memcpy(pSource, stub, sizeof(stub));
-
-        for (int i = MinLen; i < dwLen; i++)
-        {
-            *(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
-        }
-
-        VirtualProtect(pSource, dwLen, dwOld, &dwOld);
-        return (void*)((DWORD_PTR)pTrampoline);
-    }
-
+   
     static HMODULE GetThisDllHandle()
     {
         MEMORY_BASIC_INFORMATION info;
@@ -214,15 +124,29 @@ namespace Memory
                 return TRUE;
             }
         }
-
         return FALSE;
     }
+}
 
-    MH_STATUS HookFunction(LPVOID target, LPVOID detour, LPVOID* ppOriginal)
+namespace Util
+{
+    auto findStringInVector = [](std::string& str, const std::initializer_list<std::string>& search) -> int {
+        std::transform(str.begin(), str.end(), str.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+
+        auto it = std::find(search.begin(), search.end(), str);
+        if (it != search.end())
+            return std::distance(search.begin(), it);
+        return 0;
+        };
+
+    // Convert an UTF8 string to a wide Unicode String
+    std::wstring utf8_decode(const std::string& str)
     {
-        MH_STATUS status = MH_CreateHook(target, detour, ppOriginal);
-        if (status == MH_OK)
-            MH_EnableHook(target);
-        return status;
+        if (str.empty()) return std::wstring();
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+        std::wstring wstrTo(size_needed, 0);
+        MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+        return wstrTo;
     }
 }
