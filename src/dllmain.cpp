@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include <inipp/inipp.h>
+#define SPDLOG_WCHAR_TO_UTF8_SUPPORT
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <safetyhook.hpp>
@@ -115,7 +116,16 @@ MgsGame eGameType = MgsGame::Unknown;
 SafetyHookInline SetWindowPos_hook{};
 BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
-    // Might have to do something here
+    RECT desktop;
+    GetWindowRect(GetDesktopWindow(), &desktop);
+
+    // Set window size to desktop res and pos to center of screen
+    if (bBorderlessMode)
+    {
+        spdlog::info("SetWindowPos: Borderless: Set window pos to {}:{} and size to {}x{}", 0, 0, desktop.right, desktop.bottom);
+        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, 0, 0, desktop.right, desktop.bottom, uFlags);
+    }
+
     return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
@@ -123,10 +133,14 @@ BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y
 SafetyHookInline CreateWindowExA_hook{};
 HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
+    RECT desktop;
+    GetWindowRect(GetDesktopWindow(), &desktop);
     if (bBorderlessMode)
     {
-        dwStyle &= ~WS_POPUP;
-        dwExStyle &= ~WS_EX_APPWINDOW;
+        spdlog::info("CreateWindowExA: ClassName = {}, WindowName = {}, dwStyle = {:x}", lpClassName, lpWindowName, dwStyle);
+        auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+        SetWindowPos(hWnd, HWND_TOP, 0, 0, desktop.right, desktop.bottom, NULL);
+        return hWnd;
     }
     return CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 }
@@ -393,8 +407,10 @@ void CustomResolution()
         if (MGS2_MGS3_CreateWindowExAScanResult)
         {
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
+                
                 CreateWindowExA_hook = safetyhook::create_inline(&CreateWindowExA, reinterpret_cast<void*>(CreateWindowExA_hooked));
                 SetWindowPos_hook = safetyhook::create_inline(&SetWindowPos, reinterpret_cast<void*>(SetWindowPos_hooked));
+
         }
         else if (!MGS2_MGS3_CreateWindowExAScanResult)
         {
