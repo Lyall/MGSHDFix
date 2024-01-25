@@ -460,6 +460,28 @@ void IntroSkip()
 
 void ScaleEffects()
 {
+    if ((eGameType == MgsGame::MGS3 || eGameType == MgsGame::MGS2) && bCustomResolution)
+    {
+        // MGS 2: MGS 3: Fix scaling for added volume menu in v1.4.0 patch
+        uint8_t* MGS2_MGS3_VolumeMenuScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? 48 ?? ?? ?? 89 ?? ?? ?? 00 00 F3 0F ?? ?? 89 ?? ?? ?? 00 00");
+        if (MGS2_MGS3_VolumeMenuScanResult)
+        {
+            spdlog::info("MGS 3: Volume menu: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_VolumeMenuScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid MGS2_MGS3_VolumeMenuMidHook{};
+            MGS2_MGS3_VolumeMenuMidHook = safetyhook::create_mid(MGS2_MGS3_VolumeMenuScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    ctx.xmm2.f32[0] = (float)1280;
+                    ctx.xmm3.f32[0] = (float)720;
+                });
+        }
+        else if (!MGS2_MGS3_VolumeMenuScanResult)
+        {
+            spdlog::error("MGS 3: Volume menu: Pattern scan failed.");
+        }
+    }
+
     if (eGameType == MgsGame::MGS2 && bCustomResolution)
     {
         // MGS 2: Scale Effects
