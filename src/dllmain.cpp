@@ -117,12 +117,19 @@ SafetyHookInline SetWindowPos_hook{};
 BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
     // Set window size to desktop res and pos to center of screen
+    // Seems to only be necessary for MGS2 but we'll hook it just in case.
     if (bBorderlessMode)
     {
         spdlog::info("SetWindowPos: Borderless: Set window pos to {}:{} and size to {}x{}", 0, 0, rcDesktop.right, rcDesktop.bottom);
         return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, 0, 0, rcDesktop.right, rcDesktop.bottom, uFlags);
     }
 
+    // Ensure window size set to custom resolution and retains prior position
+    if (bWindowedMode)
+    {
+        spdlog::info("SetWindowPos: Windowed: Set window pos to {}:{} and size to {}x{}", X, Y, iCustomResX, iCustomResY);
+        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, iCustomResX, iCustomResY, uFlags);
+    }
     return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
@@ -248,11 +255,6 @@ void ReadConfig()
     spdlog::info("Config Parse: bCustomResolution: {}", bCustomResolution);
     spdlog::info("Config Parse: iCustomResX: {}", iCustomResX);
     spdlog::info("Config Parse: iCustomResY: {}", iCustomResY);
-    if (bBorderlessMode)
-    {
-        bWindowedMode = true;
-        spdlog::info("Config Parse: bBorderlessMode enabled. Enabling bWindowedMode");
-    }
     spdlog::info("Config Parse: bWindowedMode: {}", bWindowedMode);
     spdlog::info("Config Parse: bBorderlessMode: {}", bBorderlessMode);
     spdlog::info("Config Parse: iAnisotropicFiltering: {}", iAnisotropicFiltering);
@@ -379,11 +381,11 @@ void CustomResolution()
         if (MGS2_MGS3_WindowedModeScanResult)
         {
             spdlog::info("MG/MG2 | MGS 2 | MGS 3: WindowedMode: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedModeScanResult - (uintptr_t)baseModule);
-            // Set windowed mode
             static SafetyHookMid WindowedModeMidHook{};
             WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult,
                 [](SafetyHookContext& ctx)
                 {
+                    // Force windowed mode if windowed or borderless is set
                     if (bWindowedMode || bBorderlessMode)
                     {
                         ctx.rdx = 0;
@@ -400,10 +402,11 @@ void CustomResolution()
         uint8_t* MGS2_MGS3_CreateWindowExAScanResult = Memory::PatternScan(baseModule, "FF ?? ?? ?? ?? ?? 48 8B ?? ?? ?? ?? ?? 48 ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? ?? 48 ?? ?? ?? ?? ?? ?? 48 ?? ??");
         if (MGS2_MGS3_CreateWindowExAScanResult)
         {
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
-                
-                CreateWindowExA_hook = safetyhook::create_inline(&CreateWindowExA, reinterpret_cast<void*>(CreateWindowExA_hooked));
-                SetWindowPos_hook = safetyhook::create_inline(&SetWindowPos, reinterpret_cast<void*>(SetWindowPos_hooked));
+            // This is not necessary but it's useful to have a location where we can check to make sure the hook is applied.
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
+
+            CreateWindowExA_hook = safetyhook::create_inline(&CreateWindowExA, reinterpret_cast<void*>(CreateWindowExA_hooked));
+            SetWindowPos_hook = safetyhook::create_inline(&SetWindowPos, reinterpret_cast<void*>(SetWindowPos_hooked));
 
         }
         else if (!MGS2_MGS3_CreateWindowExAScanResult)
