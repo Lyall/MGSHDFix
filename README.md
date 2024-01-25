@@ -47,12 +47,10 @@ This list will contain bugs which may or may not be fixed.
 ### MGS 2
 - Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
 - Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
-- Volume options screen added in v1.4.0 patch is not scaled correctly. ([#78](https://github.com/Lyall/MGSHDFix/issues/78))
 
 ### MGS 3
 - Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
 - Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
-- Volume options screen added in v1.4.0 patch is not scaled correctly. ([#78](https://github.com/Lyall/MGSHDFix/issues/78))
   
 ## Screenshots
 
