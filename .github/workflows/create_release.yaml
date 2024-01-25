@@ -9,7 +9,7 @@ on:
         
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
     steps:
@@ -29,7 +29,7 @@ jobs:
         latest: true
         fileName: "Ultimate-ASI-Loader_x64.zip"
     - run: unzip Ultimate-ASI-Loader_x64.zip -d .\
-    - run: wget https://raw.githubusercontent.com/ThirteenAG/Ultimate-ASI-Loader/master/license -o .\UltimateASILoader_LICENSE.md
+    - run: C:\msys64\usr\bin\wget.exe https://raw.githubusercontent.com/ThirteenAG/Ultimate-ASI-Loader/master/license -o .\UltimateASILoader_LICENSE.md
     - run: mv .\dinput8.dll .\d3d11.dll
     - run: 7z a -tzip ${{ github.event.repository.name }}_${{ github.event.inputs.version }}.zip README.md ${{ github.event.repository.name }}.ini ${{ github.event.repository.name }}.asi d3d11.dll UltimateASILoader_LICENSE.md
     
