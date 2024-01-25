@@ -294,7 +294,7 @@ void ReadConfig()
 
     // HUD variables
     fHUDWidth = iCustomResY * fNativeAspect;
-    fHUDHeight = (float)iCustomResX;
+    fHUDHeight = (float)iCustomResY;
     fHUDWidthOffset = (float)(iCustomResX - fHUDWidth) / 2;
     fHUDHeightOffset = 0;
     if (fAspectRatio < fNativeAspect)
