@@ -8,6 +8,7 @@
 using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
+HMODULE unityPlayer;
 
 // Logger and config setup
 inipp::Ini<char> ini;
@@ -814,26 +815,37 @@ void HUDFix()
 
 void Miscellaneous()
 {
-    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG || eGameType == MgsGame::Launcher)
     {
         if (bDisableCursor)
         {
-            // MG/MG2 | MGS 2 | MGS 3: Disable mouse cursor
+            // Launcher | MG/MG2 | MGS 2 | MGS 3: Disable mouse cursor
             // Thanks again emoose!
             uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(baseModule, "BA 00 7F 00 00 33 ?? FF ?? ?? ?? ?? ?? 48 ?? ??");
-            if (MGS2_MGS3_MouseCursorScanResult && bWindowedMode)
+            if (eGameType == MgsGame::Launcher)
             {
-                DWORD64 MGS2_MGS3_MouseCursorAddress = (uintptr_t)MGS2_MGS3_MouseCursorScanResult;
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_MouseCursorAddress - (uintptr_t)baseModule);
+                unityPlayer = GetModuleHandleA("UnityPlayer.dll");
+                MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(unityPlayer, "BA 00 7F 00 00 33 ?? FF ?? ?? ?? ?? ?? 48 ?? ??");
+            }
 
+            if (MGS2_MGS3_MouseCursorScanResult)
+            {
+                if (eGameType == MgsGame::Launcher)
+                {
+                    spdlog::info("Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_MouseCursorScanResult - (uintptr_t)unityPlayer);
+                }
+                else
+                {
+                    spdlog::info("Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_MouseCursorScanResult - (uintptr_t)baseModule);
+                }
                 // The game enters 32512 in the RDX register for the function USER32.LoadCursorA to load IDC_ARROW (normal select arrow in windows)
                 // Set this to 0 and no cursor icon is loaded
-                Memory::PatchBytes(MGS2_MGS3_MouseCursorAddress + 0x2, "\x00", 1);
-                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
+                Memory::PatchBytes((uintptr_t)MGS2_MGS3_MouseCursorScanResult + 0x2, "\x00", 1);
+                spdlog::info("Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Patched instruction.");
             }
             else if (!MGS2_MGS3_MouseCursorScanResult)
             {
-                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
+                spdlog::error("Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
             }
         }
     }
