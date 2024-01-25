@@ -12,7 +12,7 @@ HMODULE baseModule = GetModuleHandle(NULL);
 // Logger and config setup
 inipp::Ini<char> ini;
 string sFixName = "MGSHDFix";
-string sFixVer = "2.0";
+string sFixVer = "2.1";
 string sLogFile = "MGSHDFix.log";
 string sConfigFile = "MGSHDFix.ini";
 string sExeName;
