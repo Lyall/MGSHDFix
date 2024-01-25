@@ -469,7 +469,7 @@ void ScaleEffects()
         uint8_t* MGS2_MGS3_VolumeMenuScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? 48 ?? ?? ?? 89 ?? ?? ?? 00 00 F3 0F ?? ?? 89 ?? ?? ?? 00 00");
         if (MGS2_MGS3_VolumeMenuScanResult)
         {
-            spdlog::info("MGS 2 | MGS 3: Volume menu: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_VolumeMenuScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2 | MGS 3: Volume Menu: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_VolumeMenuScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_MGS3_VolumeMenuMidHook{};
             MGS2_MGS3_VolumeMenuMidHook = safetyhook::create_mid(MGS2_MGS3_VolumeMenuScanResult,
@@ -481,7 +481,7 @@ void ScaleEffects()
         }
         else if (!MGS2_MGS3_VolumeMenuScanResult)
         {
-            spdlog::error("MGS 2 | MGS 3: Volume menu: Pattern scan failed.");
+            spdlog::error("MGS 2 | MGS 3: Volume Menu: Pattern scan failed.");
         }
     }
 
