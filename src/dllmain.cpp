@@ -391,6 +391,10 @@ void CustomResolution()
                     {
                         ctx.rdx = 0;
                     }
+                    else
+                    {
+                        ctx.rdx = 1;
+                    }
                 });
             
         }
