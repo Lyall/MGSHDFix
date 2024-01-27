@@ -113,23 +113,26 @@ const std::map<MgsGame, GameInfo> kGames = {
 const GameInfo* game = nullptr;
 MgsGame eGameType = MgsGame::Unknown;
 
-// CreateWindowExA hook
+// CreateWindowExA Hook
 SafetyHookInline CreateWindowExA_hook{};
 HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
-    if (bBorderlessMode)
+    // Don
+    if (bBorderlessMode && (eGameType != MgsGame::Unknown))
     {
-        spdlog::info("CreateWindowExA: ClassName = {}, WindowName = {}, dwStyle = {:x}", lpClassName, lpWindowName, dwStyle);
         auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
         SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
+        spdlog::info("CreateWindowExA: Borderless: ClassName = {}, WindowName = {}, dwStyle = {:x}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight);
+        spdlog::info("CreateWindowExA: Borderless: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, (int)rcDesktop.right, (int)rcDesktop.bottom);
         return hWnd;
     }
 
-    if (bWindowedMode)
+    if (bWindowedMode && (eGameType != MgsGame::Unknown))
     {
-        spdlog::info("SetWindowPos: Windowed: Set window pos to {}:{} and size to {}x{}", X, Y, iCustomResX, iCustomResY);
         auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-        SetWindowPos(hWnd, HWND_TOP, X, Y, iCustomResX, iCustomResY, NULL);
+        SetWindowPos(hWnd, HWND_TOP, 0, 0, iCustomResX, iCustomResY, NULL);
+        spdlog::info("CreateWindowExA: Windowed: ClassName = {}, WindowName = {}, dwStyle = {:x}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight);
+        spdlog::info("CreateWindowExA: Windowed: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, iCustomResX, iCustomResY);
         return hWnd;
     }
 
@@ -374,7 +377,7 @@ void CustomResolution()
             WindowedModeMidHook = safetyhook::create_mid(MGS2_MGS3_WindowedModeScanResult,
                 [](SafetyHookContext& ctx)
                 {
-                    // Force windowed mode if windowed or borderless is set
+                    // Force windowed mode if windowed or borderless is set.
                     if (bWindowedMode || bBorderlessMode)
                     {
                         ctx.rdx = 0;
@@ -384,7 +387,6 @@ void CustomResolution()
                         ctx.rdx = 1;
                     }
                 });
-            
         }
         else if (!MGS2_MGS3_WindowedModeScanResult)
         {
@@ -415,20 +417,20 @@ void CustomResolution()
                 {
                     if (bBorderlessMode)
                     {
-                        // Set X and Y to 0 to position window at centre of screen
+                        // Set X and Y to 0 to position window at centre of screen.
                         ctx.r8 = 0;
                         ctx.r9 = 0;
-                        // Set window width and height to desktop resolution
+                        // Set window width and height to desktop resolution.
                         *reinterpret_cast<int*>(ctx.rsp + 0x20) = (int)rcDesktop.right;
                         *reinterpret_cast<int*>(ctx.rsp + 0x28) = (int)rcDesktop.bottom;
                     }
 
                     if (bWindowedMode)
                     {
-                        // Set X and Y to 0 to position window at centre of screen in case the window is off-screen
+                        // Set X and Y to 0 to position window at centre of screen in case the window is off-screen.
                         ctx.r8 = 0;
                         ctx.r9 = 0;
-                        // Set window width and height to custom resolution
+                        // Set window width and height to custom resolution.
                         *reinterpret_cast<int*>(ctx.rsp + 0x20) = iCustomResX;
                         *reinterpret_cast<int*>(ctx.rsp + 0x28) = iCustomResY;
                     }
