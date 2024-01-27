@@ -113,27 +113,6 @@ const std::map<MgsGame, GameInfo> kGames = {
 const GameInfo* game = nullptr;
 MgsGame eGameType = MgsGame::Unknown;
 
-// SetWindowPos hook
-SafetyHookInline SetWindowPos_hook{};
-BOOL __stdcall SetWindowPos_hooked(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
-{
-    // Set window size to desktop res and pos to center of screen
-    // Seems to only be necessary for MGS2 but we'll hook it just in case.
-    if (bBorderlessMode)
-    {
-        spdlog::info("SetWindowPos: Borderless: Set window pos to {}:{} and size to {}x{}", 0, 0, rcDesktop.right, rcDesktop.bottom);
-        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, 0, 0, rcDesktop.right, rcDesktop.bottom, uFlags);
-    }
-
-    // Ensure window size set to custom resolution and retains prior position
-    if (bWindowedMode)
-    {
-        spdlog::info("SetWindowPos: Windowed: Set window pos to {}:{} and size to {}x{}", X, Y, iCustomResX, iCustomResY);
-        return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, iCustomResX, iCustomResY, uFlags);
-    }
-    return SetWindowPos_hook.stdcall<BOOL>(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
-}
-
 // CreateWindowExA hook
 SafetyHookInline CreateWindowExA_hook{};
 HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
@@ -145,6 +124,15 @@ HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR l
         SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
         return hWnd;
     }
+
+    if (bWindowedMode)
+    {
+        spdlog::info("SetWindowPos: Windowed: Set window pos to {}:{} and size to {}x{}", X, Y, iCustomResX, iCustomResY);
+        auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+        SetWindowPos(hWnd, HWND_TOP, X, Y, iCustomResX, iCustomResY, NULL);
+        return hWnd;
+    }
+
     return CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 }
 
@@ -409,14 +397,48 @@ void CustomResolution()
         {
             // This is not necessary but it's useful to have a location where we can check to make sure the hook is applied.
             spdlog::info("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_CreateWindowExAScanResult - (uintptr_t)baseModule);
-
             CreateWindowExA_hook = safetyhook::create_inline(&CreateWindowExA, reinterpret_cast<void*>(CreateWindowExA_hooked));
-            SetWindowPos_hook = safetyhook::create_inline(&SetWindowPos, reinterpret_cast<void*>(SetWindowPos_hooked));
 
         }
         else if (!MGS2_MGS3_CreateWindowExAScanResult)
         {
             spdlog::error("MG/MG2 | MGS 2 | MGS 3: CreateWindowExA: Pattern scan failed.");
+        }
+
+        // MG 1/2 | MGS 2 | MGS 3: SetWindowPos
+        uint8_t* MGS2_MGS3_SetWindowPosScanResult = Memory::PatternScan(baseModule, "33 ?? 48 ?? ?? ?? FF ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? 02 00 00");
+        if (MGS2_MGS3_SetWindowPosScanResult)
+        {
+            static SafetyHookMid SetWindowPosMidHook{};
+            SetWindowPosMidHook = safetyhook::create_mid(MGS2_MGS3_SetWindowPosScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    if (bBorderlessMode)
+                    {
+                        // Set X and Y to 0 to position window at centre of screen
+                        ctx.r8 = 0;
+                        ctx.r9 = 0;
+                        // Set window width and height to desktop resolution
+                        *reinterpret_cast<int*>(ctx.rsp + 0x20) = (int)rcDesktop.right;
+                        *reinterpret_cast<int*>(ctx.rsp + 0x28) = (int)rcDesktop.bottom;
+                    }
+
+                    if (bWindowedMode)
+                    {
+                        // Set X and Y to 0 to position window at centre of screen in case the window is off-screen
+                        ctx.r8 = 0;
+                        ctx.r9 = 0;
+                        // Set window width and height to custom resolution
+                        *reinterpret_cast<int*>(ctx.rsp + 0x20) = iCustomResX;
+                        *reinterpret_cast<int*>(ctx.rsp + 0x28) = iCustomResY;
+                    }
+                });
+
+            spdlog::info("MG/MG2 | MGS 2 | MGS 3: SetWindowPos: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SetWindowPosScanResult - (uintptr_t)baseModule);
+        }
+        else if (!MGS2_MGS3_SetWindowPosScanResult)
+        {
+            spdlog::error("MG/MG2 | MGS 2 | MGS 3: SetWindowPos: Pattern scan failed.");
         }
 
         // MGS 2 | MGS 3: Framebuffer fix, stops the framebuffer from being set to maximum display resolution.
