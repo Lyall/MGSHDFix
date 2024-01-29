@@ -36,7 +36,6 @@ int iTextureBufferSizeMB;
 bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
-bool bDisableBackgroundInput;
 bool bDisableCursor;
 
 // Launcher ini variables
@@ -221,7 +220,6 @@ void ReadConfig()
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
-    inipp::get_value(ini.sections["Disable Background Input"], "Enabled", bDisableBackgroundInput);
     inipp::get_value(ini.sections["Disable Mouse Cursor"], "Enabled", bDisableCursor);
     inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", iTextureBufferSizeMB);
     inipp::get_value(ini.sections["Fix Aspect Ratio"], "Enabled", bAspectFix);
@@ -260,7 +258,6 @@ void ReadConfig()
     spdlog::info("Config Parse: bMouseSensitivity: {}", bMouseSensitivity);
     spdlog::info("Config Parse: fMouseSensitivityXMulti: {}", fMouseSensitivityXMulti);
     spdlog::info("Config Parse: fMouseSensitivityYMulti: {}", fMouseSensitivityYMulti);
-    spdlog::info("Config Parse: bDisableBackgroundInput: {}", bDisableBackgroundInput);
     spdlog::info("Config Parse: bDisableCursor: {}", bDisableCursor);
     spdlog::info("Config Parse: iTextureBufferSizeMB: {}", iTextureBufferSizeMB);
     spdlog::info("Config Parse: bAspectFix: {}", bAspectFix);
@@ -875,37 +872,6 @@ void Miscellaneous()
             {
                 spdlog::error("Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor: Pattern scan failed.");
             }
-        }
-    }
-
-    if (eGameType == MgsGame::MGS2 && bWindowedMode && bDisableBackgroundInput)
-    {
-        // MGS 2: Disable Background Input
-        uint8_t* MGS_WndProc_IsWindowedCheck = Memory::PatternScan(baseModule, "4D ?? ?? 0F ?? ?? 83 ?? ?? ?? 00 00 00 88 ?? ?? ?? 00 00 0F ?? ?? ?? ?? ??") + 0x13;
-        uint8_t* MGS_WndProc_ShowWindowCall = Memory::PatternScan(baseModule, "0F ?? ?? 8B ?? FF 15 ?? ?? ?? ?? 48 8B ?? ?? ?? 00 00 ?? ?? ??") + 0x3;
-        uint8_t* MGS_WndProc_SetFullscreenEnd = Memory::PatternScan(baseModule, "48 8B ?? FF ?? ?? 39 ?? ?? ?? 00 00 74 ?? 48 8B ?? ?? ?? ?? ??") + 0x6;
-        if (MGS_WndProc_IsWindowedCheck && MGS_WndProc_ShowWindowCall && MGS_WndProc_SetFullscreenEnd)
-        {
-            spdlog::info("MGS 2: Disable Background Input: IsWindowedCheck at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_IsWindowedCheck - (uintptr_t)baseModule);
-            spdlog::info("MGS 2: Disable Background Input: ShowWindowCall at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_ShowWindowCall - (uintptr_t)baseModule);
-            spdlog::info("MGS 2: Disable Background Input: SetFullscreenEnd at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)baseModule);
-
-            // Patch out the jnz after the windowed check
-            Memory::PatchBytes((uintptr_t)MGS_WndProc_IsWindowedCheck, "\x90\x90\x90\x90\x90\x90", 6);
-
-            // We included 2 more bytes in MGS_WndProc_ShowWindowCall sig to reduce matches, but we want to keep those
-            MGS_WndProc_ShowWindowCall += 2;
-
-            // Skip the ShowWindow & SetFullscreenState block by figuring out how many bytes to skip over
-            uint8_t jmper[] = { 0xEB, 0x00 };
-            jmper[1] = (uint8_t)((uintptr_t)MGS_WndProc_SetFullscreenEnd - (uintptr_t)(MGS_WndProc_ShowWindowCall + 2));
-
-            spdlog::info("MGS 2: Disable Background Input: ShowWindowCall jmp skipping {:x} bytes", jmper[1]);
-            Memory::PatchBytes((uintptr_t)MGS_WndProc_ShowWindowCall, (const char*)jmper, 2);
-        }
-        else
-        {
-            spdlog::error("MGS 2: Disable Background Input: Pattern scan failed.");
         }
     }
 
