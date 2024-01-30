@@ -116,7 +116,6 @@ MgsGame eGameType = MgsGame::Unknown;
 SafetyHookInline CreateWindowExA_hook{};
 HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
-    // Don
     if (bBorderlessMode && (eGameType != MgsGame::Unknown))
     {
         auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
@@ -344,7 +343,24 @@ bool DetectGame()
 }
 
 void CustomResolution()
-{
+{ 
+    /*
+    // MGS 2 | MGS 3: MSAA
+    uint8_t* MGS2_MGS3_texcreateScanResult = Memory::PatternScan(baseModule, "B9 01 00 00 00 44 ?? ?? 74 ?? 44 ?? ?? 75 ??");
+    if (MGS2_MGS3_texcreateScanResult)
+    {
+        spdlog::info("MGS 2 | MGS 3: texcreate: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_texcreateScanResult - (uintptr_t)baseModule);
+        // All render targets?
+        Memory::PatchBytes((uintptr_t)MGS2_MGS3_texcreateScanResult + 0x1, "\x08", 1);
+        // Only 4x MSAA'd render targets
+        //Memory::PatchBytes((uintptr_t)MGS2_MGS3_texcreateScanResult + 0x10, "\x01", 1);
+    }
+    else if (!MGS2_MGS3_texcreateScanResult)
+    {
+        spdlog::error("MGS 2 | MGS 3: texcreate: Pattern scan failed.");
+    }
+    */
+
     if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bCustomResolution)
     {
         // MGS 2 | MGS 3: Custom Resolution
