@@ -13,7 +13,7 @@ HMODULE unityPlayer;
 // Logger and config setup
 inipp::Ini<char> ini;
 string sFixName = "MGSHDFix";
-string sFixVer = "2.1";
+string sFixVer = "2.2";
 string sLogFile = "MGSHDFix.log";
 string sConfigFile = "MGSHDFix.ini";
 string sExeName;
