@@ -203,6 +203,28 @@ template <typename T>
 concept FnPtr = requires(T f) { std::is_pointer_v<T>&& std::is_function_v<std::remove_pointer_t<T>>; };
 
 bool is_executable(uint8_t* address);
+
+class UnprotectMemory {
+public:
+    UnprotectMemory() = delete;
+    ~UnprotectMemory();
+    UnprotectMemory(const UnprotectMemory&) = delete;
+    UnprotectMemory(UnprotectMemory&& other) noexcept;
+    UnprotectMemory& operator=(const UnprotectMemory&) = delete;
+    UnprotectMemory& operator=(UnprotectMemory&& other) noexcept;
+
+private:
+    friend std::optional<UnprotectMemory> unprotect(uint8_t*, size_t);
+
+    UnprotectMemory(uint8_t* address, size_t size, uint32_t original_protection)
+        : m_address{address}, m_size{size}, m_original_protection{original_protection} {}
+
+    uint8_t* m_address{};
+    size_t m_size{};
+    uint32_t m_original_protection{};
+};
+
+[[nodiscard]] std::optional<UnprotectMemory> unprotect(uint8_t* address, size_t size);
 } // namespace safetyhook
 
 namespace safetyhook {
@@ -218,6 +240,8 @@ public:
             SHORT_JUMP_IN_TRAMPOLINE,              ///< The trampoline contains a short jump.
             IP_RELATIVE_INSTRUCTION_OUT_OF_RANGE,  ///< An IP-relative instruction is out of range.
             UNSUPPORTED_INSTRUCTION_IN_TRAMPOLINE, ///< An unsupported instruction was found in the trampoline.
+            FAILED_TO_UNPROTECT,                   ///< Failed to unprotect memory.
+            NOT_ENOUGH_SPACE,                      ///< Not enough space to create the hook.
         } type;
 
         /// @brief Extra information about the error.
@@ -260,6 +284,16 @@ public:
         [[nodiscard]] static Error unsupported_instruction_in_trampoline(uint8_t* ip) {
             return {.type = UNSUPPORTED_INSTRUCTION_IN_TRAMPOLINE, .ip = ip};
         }
+
+        /// @brief Create a FAILED_TO_UNPROTECT error.
+        /// @param ip The IP of the problematic instruction.
+        /// @return The new FAILED_TO_UNPROTECT error.
+        [[nodiscard]] static Error failed_to_unprotect(uint8_t* ip) { return {.type = FAILED_TO_UNPROTECT, .ip = ip}; }
+
+        /// @brief Create a NOT_ENOUGH_SPACE error.
+        /// @param ip The IP of the problematic instruction.
+        /// @return The new NOT_ENOUGH_SPACE error.
+        [[nodiscard]] static Error not_enough_space(uint8_t* ip) { return {.type = NOT_ENOUGH_SPACE, .ip = ip}; }
     };
 
     /// @brief Create an inline hook.
@@ -599,41 +633,41 @@ public:
 
     /// @brief Creates a new MidHook object.
     /// @param target The address of the function to hook.
-    /// @param destination The destination function.
+    /// @param destination_fn The destination function.
     /// @return The MidHook object or a MidHook::Error if an error occurred.
     /// @note This will use the default global Allocator.
     /// @note If you don't care about error handling, use the easy API (safetyhook::create_mid).
-    [[nodiscard]] static std::expected<MidHook, Error> create(void* target, MidHookFn destination);
+    [[nodiscard]] static std::expected<MidHook, Error> create(void* target, MidHookFn destination_fn);
 
     /// @brief Creates a new MidHook object.
     /// @param target The address of the function to hook.
-    /// @param destination The destination function.
+    /// @param destination_fn The destination function.
     /// @return The MidHook object or a MidHook::Error if an error occurred.
     /// @note This will use the default global Allocator.
     /// @note If you don't care about error handling, use the easy API (safetyhook::create_mid).
-    [[nodiscard]] static std::expected<MidHook, Error> create(FnPtr auto target, MidHookFn destination) {
-        return create(reinterpret_cast<void*>(target), destination);
+    [[nodiscard]] static std::expected<MidHook, Error> create(FnPtr auto target, MidHookFn destination_fn) {
+        return create(reinterpret_cast<void*>(target), destination_fn);
     }
 
     /// @brief Creates a new MidHook object with a given Allocator.
     /// @param allocator The Allocator to use.
     /// @param target The address of the function to hook.
-    /// @param destination The destination function.
+    /// @param destination_fn The destination function.
     /// @return The MidHook object or a MidHook::Error if an error occurred.
     /// @note If you don't care about error handling, use the easy API (safetyhook::create_mid).
     [[nodiscard]] static std::expected<MidHook, Error> create(
-        const std::shared_ptr<Allocator>& allocator, void* target, MidHookFn destination);
+        const std::shared_ptr<Allocator>& allocator, void* target, MidHookFn destination_fn);
 
     /// @brief Creates a new MidHook object with a given Allocator.
     /// @tparam T The type of the function to hook.
     /// @param allocator The Allocator to use.
     /// @param target The address of the function to hook.
-    /// @param destination The destination function.
+    /// @param destination_fn The destination function.
     /// @return The MidHook object or a MidHook::Error if an error occurred.
     /// @note If you don't care about error handling, use the easy API (safetyhook::create_mid).
     [[nodiscard]] static std::expected<MidHook, Error> create(
-        const std::shared_ptr<Allocator>& allocator, FnPtr auto target, MidHookFn destination) {
-        return create(allocator, reinterpret_cast<void*>(target), destination);
+        const std::shared_ptr<Allocator>& allocator, FnPtr auto target, MidHookFn destination_fn) {
+        return create(allocator, reinterpret_cast<void*>(target), destination_fn);
     }
 
     MidHook() = default;
@@ -912,15 +946,11 @@ namespace safetyhook {
 #include <cstdint>
 #include <functional>
 
-#if __has_include(<Windows.h>)
-#include <Windows.h>
-#elif __has_include(<windows.h>)
-#include <windows.h>
-#else
-#error "Windows.h not found"
-#endif
-
 namespace safetyhook {
+using ThreadId = uint32_t;
+using ThreadHandle = void*;
+using ThreadContext = void*;
+
 /// @brief Executes a function while all other threads are frozen. Also allows for visiting each frozen thread and
 /// modifying it's context.
 /// @param run_fn The function to run while all other threads are frozen.
@@ -928,14 +958,14 @@ namespace safetyhook {
 /// @note The visit function will be called in the order that the threads were frozen.
 /// @note The visit function will be called before the run function.
 /// @note Keep the logic inside run_fn and visit_fn as simple as possible to avoid deadlocks.
-void execute_while_frozen(
-    const std::function<void()>& run_fn, const std::function<void(uint32_t, HANDLE, CONTEXT&)>& visit_fn = {});
+void execute_while_frozen(const std::function<void()>& run_fn,
+    const std::function<void(ThreadId, ThreadHandle, ThreadContext)>& visit_fn = {});
 
 /// @brief Will modify the context of a thread's IP to point to a new address if its IP is at the old address.
 /// @param ctx The thread context to modify.
 /// @param old_ip The old IP address.
 /// @param new_ip The new IP address.
-void fix_ip(CONTEXT& ctx, uint8_t* old_ip, uint8_t* new_ip);
+void fix_ip(ThreadContext ctx, uint8_t* old_ip, uint8_t* new_ip);
 } // namespace safetyhook
 
 using SafetyHookContext = safetyhook::Context;
