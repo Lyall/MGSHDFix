@@ -149,4 +149,11 @@ namespace Util
         MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
         return wstrTo;
     }
+
+    std::pair<int, int> GetPhysicalDesktopDimensions() {
+        if (DEVMODE devMode{ .dmSize = sizeof(DEVMODE) }; EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &devMode))
+            return { devMode.dmPelsWidth, devMode.dmPelsHeight };
+
+        return {};
+    }
 }
