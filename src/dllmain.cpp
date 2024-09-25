@@ -1,24 +1,28 @@
 #include "stdafx.h"
 #include "helper.hpp"
+
 #include <inipp/inipp.h>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/base_sink.h>
 #include <safetyhook.hpp>
-
-using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 HMODULE unityPlayer;
 
-// Logger and config setup
-inipp::Ini<char> ini;
+// Version
 string sFixName = "MGSHDFix";
 string sFixVer = "2.2";
-string sLogFile = "MGSHDFix.log";
-string sConfigFile = "MGSHDFix.ini";
-string sExeName;
-filesystem::path sExePath;
-RECT rcDesktop;
+
+// Logger
+std::shared_ptr<spdlog::logger> logger;
+std::string sLogFile = sFixName + ".log";
+std::filesystem::path sExePath;
+std::string sExeName;
+
+// Ini
+inipp::Ini<char> ini;
+std::string sConfigFile = sFixName + ".ini";
+std::pair DesktopDimensions = { 0,0 };
 
 // Ini Variables
 bool bAspectFix;
@@ -59,6 +63,8 @@ float fHUDWidthOffset;
 float fHUDHeightOffset;
 float fMGS2_EffectScaleX;
 float fMGS2_EffectScaleY;
+int iCurrentResX;
+int iCurrentResY;
 
 const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
     "ps5",
@@ -119,9 +125,9 @@ HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR l
     if (bBorderlessMode && (eGameType != MgsGame::Unknown))
     {
         auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-        SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
+        SetWindowPos(hWnd, HWND_TOP, 0, 0, DesktopDimensions.first, DesktopDimensions.second, NULL);
         spdlog::info("CreateWindowExA: Borderless: ClassName = {}, WindowName = {}, dwStyle = {:x}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight);
-        spdlog::info("CreateWindowExA: Borderless: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, (int)rcDesktop.right, (int)rcDesktop.bottom);
+        spdlog::info("CreateWindowExA: Borderless: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, (int)DesktopDimensions.first, (int)DesktopDimensions.second);
         return hWnd;
     }
 
@@ -155,55 +161,137 @@ float MGS3_GetViewportCameraOffsetY()
     return MGS3_UseAdjustedOffsetY ? MGS3_GetViewportCameraOffsetY_hook.stdcall<float>() : 0.00f;
 }
 
-void Logging()
-{
-    // spdlog initialisation
-    {
-        try
-        {
-            auto logger = spdlog::basic_logger_mt(sFixName.c_str(), sLogFile, true);
-            spdlog::set_default_logger(logger);
+// Spdlog sink (truncate on startup, single file)
+template<typename Mutex>
+class size_limited_sink : public spdlog::sinks::base_sink<Mutex> {
+public:
+    explicit size_limited_sink(const std::string& filename, size_t max_size)
+        : _filename(filename), _max_size(max_size) {
+        truncate_log_file();
 
-        }
-        catch (const spdlog::spdlog_ex& ex)
-        {
-            AllocConsole();
-            FILE* dummy;
-            freopen_s(&dummy, "CONOUT$", "w", stdout);
-            std::cout << "Log initialisation failed: " << ex.what() << std::endl;
+        _file.open(_filename, std::ios::app);
+        if (!_file.is_open()) {
+            throw spdlog::spdlog_ex("Failed to open log file " + filename);
         }
     }
 
-    spdlog::flush_on(spdlog::level::debug);
-    spdlog::info("{} v{} loaded.", sFixName.c_str(), sFixVer.c_str());
-    spdlog::info("----------");
+protected:
+    void sink_it_(const spdlog::details::log_msg& msg) override {
+        if (std::filesystem::exists(_filename) && std::filesystem::file_size(_filename) >= _max_size) {
+            return;
+        }
 
+        spdlog::memory_buf_t formatted;
+        this->formatter_->format(msg, formatted);
+
+        _file.write(formatted.data(), formatted.size());
+        _file.flush();
+    }
+
+    void flush_() override {
+        _file.flush();
+    }
+
+private:
+    std::ofstream _file;
+    std::string _filename;
+    size_t _max_size;
+
+    void truncate_log_file() {
+        if (std::filesystem::exists(_filename)) {
+            std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::trunc);
+            ofs.close();
+        }
+    }
+};
+
+void CalculateAspectRatio(bool bLog)
+{
+    // Calculate aspect ratio
+    fAspectRatio = (float)iCurrentResX / (float)iCurrentResY;
+    fAspectMultiplier = fAspectRatio / fNativeAspect;
+
+    // HUD variables
+    fHUDWidth = iCurrentResY * fNativeAspect;
+    fHUDHeight = (float)iCurrentResY;
+    fHUDWidthOffset = (float)(iCurrentResX - fHUDWidth) / 2;
+    fHUDHeightOffset = 0;
+    if (fAspectRatio < fNativeAspect) {
+        fHUDWidth = (float)iCurrentResX;
+        fHUDHeight = (float)iCurrentResX / fNativeAspect;
+        fHUDWidthOffset = 0;
+        fHUDHeightOffset = (float)(iCurrentResY - fHUDHeight) / 2;
+    }
+
+    if (bLog) {
+        // Log details about current resolution
+        spdlog::info("----------");
+        spdlog::info("Current Resolution: Resolution: {}x{}", iCurrentResX, iCurrentResY);
+        spdlog::info("Current Resolution: fAspectRatio: {}", fAspectRatio);
+        spdlog::info("Current Resolution: fAspectMultiplier: {}", fAspectMultiplier);
+        spdlog::info("Current Resolution: fHUDWidth: {}", fHUDWidth);
+        spdlog::info("Current Resolution: fHUDHeight: {}", fHUDHeight);
+        spdlog::info("Current Resolution: fHUDWidthOffset: {}", fHUDWidthOffset);
+        spdlog::info("Current Resolution: fHUDHeightOffset: {}", fHUDHeightOffset);
+        spdlog::info("----------");
+    }
+}
+
+void Logging()
+{
     // Get game name and exe path
     WCHAR exePath[_MAX_PATH] = { 0 };
     GetModuleFileNameW(baseModule, exePath, MAX_PATH);
     sExePath = exePath;
     sExeName = sExePath.filename().string();
+    sExePath = sExePath.remove_filename();
 
-    // Log module details
-    spdlog::info("Module Name: {0:s}", sExeName.c_str());
-    spdlog::info("Module Path: {0:s}", sExePath.string().c_str());
-    spdlog::info("Module Address: 0x{0:x}", (uintptr_t)baseModule);
-    spdlog::info("Module Timesstamp: {0:d}", Memory::ModuleTimestamp(baseModule));
-    spdlog::info("----------");
+    // spdlog initialisation
+    {
+        try {
+            // Create 10MB truncated logger
+            logger = std::make_shared<spdlog::logger>(sLogFile, std::make_shared<size_limited_sink<std::mutex>>(sExePath.string() + sLogFile, 10 * 1024 * 1024));
+            spdlog::set_default_logger(logger);
+
+            spdlog::flush_on(spdlog::level::debug);
+            spdlog::info("----------");
+            spdlog::info("{} v{} loaded.", sFixName.c_str(), sFixVer.c_str());
+            spdlog::info("----------");
+            spdlog::info("Log file: {}", sExePath.string() + sLogFile);
+            spdlog::info("----------");
+
+            // Log module details
+            spdlog::info("Module Name: {0:s}", sExeName.c_str());
+            spdlog::info("Module Path: {0:s}", sExePath.string());
+            spdlog::info("Module Address: 0x{0:x}", (uintptr_t)baseModule);
+            spdlog::info("Module Timestamp: {0:d}", Memory::ModuleTimestamp(baseModule));
+            spdlog::info("----------");
+        }
+        catch (const spdlog::spdlog_ex& ex) {
+            AllocConsole();
+            FILE* dummy;
+            freopen_s(&dummy, "CONOUT$", "w", stdout);
+            std::cout << "Log initialisation failed: " << ex.what() << std::endl;
+            FreeLibraryAndExitThread(baseModule, 1);
+        }
+    }
 }
 
 void ReadConfig()
 {
     // Initialise config
-    std::ifstream iniFile(sConfigFile);
-    if (!iniFile)
-    {
-        spdlog::critical("Failed to load config file.");
-        spdlog::critical("Make sure {} is present in the game folder.", sConfigFile);
-
+    std::ifstream iniFile(sExePath.string() + sConfigFile);
+    if (!iniFile) {
+        AllocConsole();
+        FILE* dummy;
+        freopen_s(&dummy, "CONOUT$", "w", stdout);
+        std::cout << "" << sFixName.c_str() << " v" << sFixVer.c_str() << " loaded." << std::endl;
+        std::cout << "ERROR: Could not locate config file." << std::endl;
+        std::cout << "ERROR: Make sure " << sConfigFile.c_str() << " is located in " << sExePath.string().c_str() << std::endl;
+        FreeLibraryAndExitThread(baseModule, 1);
     }
-    else
-    {
+    else {
+        spdlog::info("Config file: {}", sExePath.string() + sConfigFile);
         ini.parse(iniFile);
     }
 
@@ -268,41 +356,11 @@ void ReadConfig()
     spdlog::info("Config Parse: iLauncherConfigLanguage: {}", iLauncherConfigLanguage);
     spdlog::info("----------");
 
-    // Calculate aspect ratio / use desktop res instead
-    GetWindowRect(GetDesktopWindow(), &rcDesktop);
-    if (iCustomResX > 0 && iCustomResY > 0)
-    {
-        fAspectRatio = (float)iCustomResX / (float)iCustomResY;
-    }
-    else
-    {
-        iCustomResX = (int)rcDesktop.right;
-        iCustomResY = (int)rcDesktop.bottom;
-        fAspectRatio = (float)rcDesktop.right / (float)rcDesktop.bottom;
-    }
-    fAspectMultiplier = fAspectRatio / fNativeAspect;
-
-    // HUD variables
-    fHUDWidth = iCustomResY * fNativeAspect;
-    fHUDHeight = (float)iCustomResY;
-    fHUDWidthOffset = (float)(iCustomResX - fHUDWidth) / 2;
-    fHUDHeightOffset = 0;
-    if (fAspectRatio < fNativeAspect)
-    {
-        fHUDWidth = (float)iCustomResX;
-        fHUDHeight = (float)iCustomResX / fNativeAspect;
-        fHUDWidthOffset = 0;
-        fHUDHeightOffset = (float)(iCustomResY - fHUDHeight) / 2;
-    }
-
-    // Log aspect ratio stuff
-    spdlog::info("Custom Resolution: fAspectRatio: {}", fAspectRatio);
-    spdlog::info("Custom Resolution: fAspectMultiplier: {}", fAspectMultiplier);
-    spdlog::info("Custom Resolution: fHUDWidth: {}", fHUDWidth);
-    spdlog::info("Custom Resolution: fHUDHeight: {}", fHUDHeight);
-    spdlog::info("Custom Resolution: fHUDWidthOffset: {}", fHUDWidthOffset);
-    spdlog::info("Custom Resolution: fHUDHeightOffset: {}", fHUDHeightOffset);
-    spdlog::info("----------");
+    // Grab desktop resolution/aspect
+    DesktopDimensions = Util::GetPhysicalDesktopDimensions();
+    iCustomResX = iCurrentResX = DesktopDimensions.first;
+    iCustomResY = iCurrentResY = DesktopDimensions.second;
+    CalculateAspectRatio(true);
 }
 
 bool DetectGame()
@@ -344,22 +402,6 @@ bool DetectGame()
 
 void CustomResolution()
 { 
-    /*
-    // MGS 2 | MGS 3: MSAA
-    uint8_t* MGS2_MGS3_texcreateScanResult = Memory::PatternScan(baseModule, "B9 01 00 00 00 44 ?? ?? 74 ?? 44 ?? ?? 75 ??");
-    if (MGS2_MGS3_texcreateScanResult)
-    {
-        spdlog::info("MGS 2 | MGS 3: texcreate: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_texcreateScanResult - (uintptr_t)baseModule);
-        // All render targets?
-        Memory::PatchBytes((uintptr_t)MGS2_MGS3_texcreateScanResult + 0x1, "\x08", 1);
-        // Only 4x MSAA'd render targets
-        //Memory::PatchBytes((uintptr_t)MGS2_MGS3_texcreateScanResult + 0x10, "\x01", 1);
-    }
-    else if (!MGS2_MGS3_texcreateScanResult)
-    {
-        spdlog::error("MGS 2 | MGS 3: texcreate: Pattern scan failed.");
-    }
-    */
 
     if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG) && bCustomResolution)
     {
@@ -434,8 +476,8 @@ void CustomResolution()
                         ctx.r8 = 0;
                         ctx.r9 = 0;
                         // Set window width and height to desktop resolution.
-                        *reinterpret_cast<int*>(ctx.rsp + 0x20) = (int)rcDesktop.right;
-                        *reinterpret_cast<int*>(ctx.rsp + 0x28) = (int)rcDesktop.bottom;
+                        *reinterpret_cast<int*>(ctx.rsp + 0x20) = (int)DesktopDimensions.first;
+                        *reinterpret_cast<int*>(ctx.rsp + 0x28) = (int)DesktopDimensions.second;
                     }
 
                     if (bWindowedMode)
