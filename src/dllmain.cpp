@@ -546,7 +546,6 @@ void CustomResolution()
                 if (MGS2_MGS3_FullscreenFramebufferFixScanResult)
                 {
                     spdlog::info("MG/MG2 | MGS 2 | MGS 3: Fullscreen Framebuffer {}: Address is {:s}+{:x}", i, sExeName.c_str(), (uintptr_t)MGS2_MGS3_FullscreenFramebufferFixScanResult - (uintptr_t)baseModule);
-
                     Memory::PatchBytes((uintptr_t)MGS2_MGS3_FullscreenFramebufferFixScanResult + 0x2, "\x90\x90\x90\x90", 4);
                     spdlog::info("MG/MG2 | MGS 2 | MGS 3: Fullscreen Framebuffer {}: Patched instruction.", i);
                 }
@@ -566,7 +565,6 @@ void CustomResolution()
                     Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x2A, "\xEB", 1);
                 if (eGameType == MgsGame::MGS2)
                     Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x27, "\xEB", 1);
-               
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Windowed Framebuffer: Patched instructions.");
             }
             else if (!MGS2_MGS3_WindowedFramebufferFixScanResult)
