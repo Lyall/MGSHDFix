@@ -29,12 +29,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
 - Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS2**" or "**steamapps\common\MGS3**" for Steam).
 
-### Reshade/DXVK
-- For use with DXVK or Reshade try renaming the ASI loader DLL (`d3d11.dll`) to `wininet.dll`.
-
 ### Steam Deck/Linux additional instructions
 Steam Deck users can also enjoy a native 800p (16:10) experience by installing this mod.
-- Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="d3d11=n,b" %command%` in the launch options.
+- Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="winmm=n,b" %command%` in the launch options.
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
