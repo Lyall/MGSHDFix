@@ -557,19 +557,22 @@ void CustomResolution()
             }
 
             // Windowed framebuffer
-            uint8_t* MGS2_MGS3_WindowedFramebufferFixScanResult = Memory::PatternScan(baseModule, "76 ?? F3 0F ?? ?? 41 ?? ?? F3 0F ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??");
+            uint8_t* MGS2_MGS3_WindowedFramebufferFixScanResult = Memory::PatternScan(baseModule, "?? ?? F3 0F ?? ?? 41 ?? ?? F3 0F ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??");
             if (MGS2_MGS3_WindowedFramebufferFixScanResult)
             {
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Windowed Framebuffer: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult - (uintptr_t)baseModule);
                 Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult, "\xEB", 1);
-                Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x2A, "\xEB", 1);
+                if (eGameType == MgsGame::MGS3)
+                    Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x2A, "\xEB", 1);
+                if (eGameType == MgsGame::MGS2)
+                    Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x27, "\xEB", 1);
+               
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Windowed Framebuffer: Patched instructions.");
             }
             else if (!MGS2_MGS3_WindowedFramebufferFixScanResult)
             {
                 spdlog::error("MG/MG2 | MGS 2 | MGS 3: Windowed Framebuffer: Pattern scan failed.");
             }
-
         }   
     }   
 }
