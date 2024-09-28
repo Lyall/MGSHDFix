@@ -1038,9 +1038,8 @@ void Miscellaneous()
         }
     }
    
-    if (iTextureBufferSizeMB > 16 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
+    if (iTextureBufferSizeMB > 128 && (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG))
     {
-        /* TODO: FIX THIS
         // MG/MG2 | MGS3: texture buffer size extension
         uint32_t NewSize = iTextureBufferSizeMB * 1024 * 1024;
 
@@ -1048,7 +1047,7 @@ void Miscellaneous()
         bool failure = false;
         for (int i = 0; i < 9; i++)
         {
-            uint8_t* MGS3_CTextureBufferMallocResult = Memory::PatternScan(baseModule, "75 ?? B9 00 00 00 01 FF");
+            uint8_t* MGS3_CTextureBufferMallocResult = Memory::PatternScan(baseModule, "75 ?? B9 00 00 00 08 FF");
             if (MGS3_CTextureBufferMallocResult)
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CTextureBufferMallocResult + 3);
@@ -1069,7 +1068,7 @@ void Miscellaneous()
             // CBaseTexture::Create seems to contain code that mallocs buffers based on 16MiB shifted by index of the mip being loaded
             // (ie: size = 16MiB >> mipIndex)
             // We'll make sure to increase the base 16MiB size it uses too
-            uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScan(baseModule, "75 ?? B8 00 00 00 01");
+            uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScan(baseModule, "75 ?? 00 00 00 08 8B ??");
             if (MGS3_CBaseTextureMallocScanResult)
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CBaseTextureMallocScanResult + 3);
@@ -1082,7 +1081,6 @@ void Miscellaneous()
                 spdlog::error("MG/MG2 | MGS 3: Texture Buffer Size: #{}: Pattern scan failed.", 9);
             }
         }
-        */
     }
     
 }
