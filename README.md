@@ -1,5 +1,5 @@
 # Metal Gear Solid Master Collection Fix
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
+[![Patreon-Button](https://github.com/Lyall/FISTFix/assets/695941/19c468ac-52af-4790-b4eb-5187c06af949)](https://www.patreon.com/Wintermance) [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)<br />
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total.svg)](https://github.com/Lyall/MGSHDFix/releases)
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
@@ -43,10 +43,13 @@ This list will contain bugs which may or may not be fixed.
 ### MGS 2
 - Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
 - Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
+- Prerendered camera pictures are black. ([#60](https://github.com/Lyall/MGSHDFix/issues/60))
+- Vector based graphic effects (such as rain) do not get scaled up at higher resolutions. ([#90](https://github.com/Lyall/MGSHDFix/issues/90) & [#96](https://github.com/Lyall/MGSHDFix/issues/96))
 
 ### MGS 3
 - Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
 - Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
+- Vector based graphic effects (such as rain) do not get scaled up at higher resolutions. ([#90](https://github.com/Lyall/MGSHDFix/issues/90) & [#96](https://github.com/Lyall/MGSHDFix/issues/96))
   
 ## Screenshots
 
@@ -59,7 +62,7 @@ This list will contain bugs which may or may not be fixed.
 | Metal Gear Solid 3 |
 
 ## Credits
-[@emoose](https://github.com/emoose) for contributing fixes. <br />
+[@emoose](https://github.com/emoose) & [@cipherxof](https://github.com/cipherxof) for contributing fixes. <br />
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
