@@ -29,9 +29,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
 - Extract the contents of the release zip in to the the game folder.<br />(e.g. "**steamapps\common\MGS2**" or "**steamapps\common\MGS3**" for Steam).
 
-### Steam Deck/Linux additional instructions
-Steam Deck users can also enjoy a native 800p (16:10) experience by installing this mod.
-- Open up the Steam properties of either MGS2/MGS3 and put `WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%` in the launch options.
+### Steam Deck/Linux Additional Instructions
+🚩**You do not need to do this if you are using Windows!**
+- Open up the game properties of either MGS2/MGS3 in Steam and add `WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%` to the launch options.
 
 ## Configuration
 - See **MGSHDFix.ini** to adjust settings for the fix.
