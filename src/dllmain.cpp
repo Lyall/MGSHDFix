@@ -1411,6 +1411,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             SetThreadPriority(mainHandle, THREAD_PRIORITY_HIGHEST); // set our Main thread priority higher than the games thread
             CloseHandle(mainHandle);
         }
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED); //fixes the monitor going to sleep during cutscenes.
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:

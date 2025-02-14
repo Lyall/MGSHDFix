@@ -20,6 +20,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Mouse sensitivity adjustment (MGS3).
 - Corrects gameplay/cutscene aspect ratio (MGS2/MGS3).
 - Corrects window size on displays with High DPI scaling enabled. #127
+- Corrects the monitor going to sleep during long cutscenes.
 - Launcher skip (see ini to configure).
 - Skip intro logos (MGS2/MGS3).
 - Adjustable anisotropic filtering (MGS2/MGS3).
