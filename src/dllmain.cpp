@@ -35,7 +35,6 @@ int iInternalResX;
 int iInternalResY;
 bool bWindowedMode;
 bool bBorderlessMode;
-bool bDPIScalingFix;
 bool bFramebufferFix;
 bool bSkipIntroLogos;
 int iAnisotropicFiltering;
@@ -314,7 +313,6 @@ void ReadConfig()
     inipp::get_value(ini.sections["Internal Resolution"], "Width", iInternalResX);
     inipp::get_value(ini.sections["Internal Resolution"], "Height", iInternalResY);
     inipp::get_value(ini.sections["Anisotropic Filtering"], "Samples", iAnisotropicFiltering);
-    inipp::get_value(ini.sections["DPI Scaling Fix"], "Enabled", bDPIScalingFix);
     inipp::get_value(ini.sections["Framebuffer Fix"], "Enabled", bFramebufferFix);
     inipp::get_value(ini.sections["Skip Intro Logos"], "Enabled", bSkipIntroLogos);
     inipp::get_value(ini.sections["Mouse Sensitivity"], "Enabled", bMouseSensitivity);
@@ -363,7 +361,6 @@ void ReadConfig()
         iAnisotropicFiltering = std::clamp(iAnisotropicFiltering, 0, 16);
         spdlog::info("Config Parse: iAnisotropicFiltering value invalid, clamped to {}", iAnisotropicFiltering);
     }
-    spdlog::info("Config Parse: bDPIScalingFix: {}", bDPIScalingFix);
     spdlog::info("Config Parse: bFramebufferFix: {}", bFramebufferFix);
     spdlog::info("Config Parse: bSkipIntroLogos: {}", bSkipIntroLogos);
     spdlog::info("Config Parse: bMouseSensitivity: {}", bMouseSensitivity);
@@ -424,7 +421,7 @@ bool DetectGame()
 
 void FixDPIScaling()
 {
-    if (bDPIScalingFix && (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)){
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG){
         SetProcessDPIAware();
         spdlog::info("MG/MG2 | MGS 2 | MGS 3: High-DPI scaling fixed.");
     }
