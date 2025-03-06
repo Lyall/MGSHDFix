@@ -11,7 +11,7 @@ HMODULE unityPlayer;
 
 // Version
 string sFixName = "MGSHDFix";
-string sFixVer = "2.3";
+string sFixVer = "2.3.1";
 
 // Logger
 std::shared_ptr<spdlog::logger> logger;
@@ -417,6 +417,14 @@ bool DetectGame()
 
     spdlog::error("Failed to detect supported game, {} isn't supported by MGSHDFix", sExeName.c_str());
     return false;
+}
+
+void FixDPIScaling()
+{
+    if (eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG){
+        SetProcessDPIAware();
+        spdlog::info("MG/MG2 | MGS 2 | MGS 3: High-DPI scaling fixed.");
+    }
 }
 
 void CustomResolution()
@@ -1331,6 +1339,7 @@ DWORD __stdcall Main(void*)
     if (DetectGame())
     {
         LauncherConfigOverride();
+        FixDPIScaling();
         CustomResolution();
         IntroSkip();
         ScaleEffects();
@@ -1399,6 +1408,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
             SetThreadPriority(mainHandle, THREAD_PRIORITY_HIGHEST); // set our Main thread priority higher than the games thread
             CloseHandle(mainHandle);
         }
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED); //fixes the monitor going to sleep during cutscenes.
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
