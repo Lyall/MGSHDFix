@@ -11,7 +11,7 @@ HMODULE unityPlayer;
 
 // Version
 string sFixName = "MGSHDFix";
-string sFixVer = "2.3.1";
+string sFixVer = "2.3.2";
 
 // Logger
 std::shared_ptr<spdlog::logger> logger;
@@ -471,6 +471,77 @@ void CustomResolution()
                         *reinterpret_cast<int*>(ctx.rbx + 0x58) = iInternalResY;
                     }
                 });
+            
+            // Replace loading screens with the appropriate size
+            if ((eGameType == MgsGame::MGS2 || eGameType == MgsGame::MGS3) && iOutputResY >= 1080) {
+
+                uint8_t* MGS2_MGS3_SplashScreens = Memory::PatternScan(baseModule, "5f 37 32 30 2e 63 74 78 72 00 00"); //  _720.ctxr
+                if (!MGS2_MGS3_SplashScreens)               // plus a little extra padding equal to the longest string length (11/wqhd) to make sure we don't overwrite unintended stuff.
+                    spdlog::error("MGS 2 | MGS 3: Custom Resolution: Splashscreens {}: Pattern scan failed.");
+                
+                while (MGS2_MGS3_SplashScreens)
+                {
+                    if (iOutputResY >= 2160){
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x5f\x34\x6b\x2e\x63\x74\x78\x72\x00", 9); //  _4k.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Splashscreen (4K) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else if (iOutputResY >= 1440) {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x5F\x77\x71\x68\x64\x2E\x63\x74\x78\x72\x00", 11); //  _wqhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Splashscreen (1440p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x5F\x66\x68\x64\x2E\x63\x74\x78\x72\x00", 10); //  _fhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Splashscreen (1080p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    MGS2_MGS3_SplashScreens = Memory::PatternScan(baseModule, "5f 37 32 30 2e 63 74 78 72 00"); 
+                    //Loop through to hit all three - ie konami, kojima, and bluepoint
+                }
+            
+                MGS2_MGS3_SplashScreens = Memory::PatternScan(baseModule, "2F 6C 6F 61 64 69 6E 67 2E 63 74 78 72 00 00 00 00 00 00"); //  /loading.ctxr
+
+                if (!MGS2_MGS3_SplashScreens)
+                {
+                    spdlog::error("MGS 2 | MGS 3: Custom Resolution: Loading Screen (ENG) {}: Pattern scan failed.");
+                }
+                else
+                {
+                    if (iOutputResY >= 2160) {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x34\x6B\x2E\x63\x74\x78\x72\x00", 17); // /loading_4k.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (ENG|4K) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else if (iOutputResY >= 1440) {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x77\x71\x68\x64\x2E\x63\x74\x78\x72\x00", 19); //  /loading_wqhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (ENG|1440p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x66\x68\x64\x2E\x63\x74\x78\x72\x00", 18); //  /loading_fhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (ENG|1080p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                }
+                
+                MGS2_MGS3_SplashScreens = Memory::PatternScan(baseModule, "2F 6C 6F 61 64 69 6E 67 5F 6A 70 2E 63 74 78 72 00 00 00 00 00"); //    /loading_jp.ctxr 
+                                                                                                                         
+                if (!MGS2_MGS3_SplashScreens)
+                {
+                    spdlog::error("MGS 2 | MGS 3: Custom Resolution: Loading Screen (JPN) {}: Pattern scan failed.");
+                }
+                else
+                {
+                    if (iOutputResY >= 2160) {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x6A\x70\x5F\x34\x6B\x2E\x63\x74\x78\x72\x00", 20); // /loading_jp_4k.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (JPN|4k) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else if (iOutputResY >= 1440) {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x6A\x70\x5F\x77\x71\x68\x64\x2E\x63\x74\x78\x72\x00", 23); // /loading_jp_wqhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (JPN|1440p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                    else {
+                        Memory::PatchBytes((uintptr_t)MGS2_MGS3_SplashScreens, "\x2F\x6C\x6F\x61\x64\x69\x6E\x67\x5F\x6A\x70\x5F\x66\x68\x64\x2E\x63\x74\x78\x72\x00", 21); // /loading_jp_fhd.ctxr
+                        spdlog::info("MGS 2 | MGS 3: Custom Resolution: Loading screen (JPN|1080p) patched at {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_SplashScreens - (uintptr_t)baseModule);
+                    }
+                }
+
+            }
         }
         else if (!MGS2_MGS3_InternalResolutionScanResult || !MGS2_MGS3_OutputResolution1ScanResult || !MGS2_MGS3_OutputResolution2ScanResult)
         {
