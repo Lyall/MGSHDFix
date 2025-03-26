@@ -11,7 +11,7 @@ HMODULE unityPlayer;
 
 // Version
 string sFixName = "MGSHDFix";
-string sFixVer = "2.3.1";
+string sFixVer = "2.3.3";
 
 // Logger
 std::shared_ptr<spdlog::logger> logger;
@@ -569,7 +569,7 @@ void CustomResolution()
             {
                 spdlog::info("MG/MG2 | MGS 2 | MGS 3: Windowed Framebuffer: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult - (uintptr_t)baseModule);
                 Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult, "\xEB", 1);
-                if (eGameType == MgsGame::MGS3)
+                if (eGameType == MgsGame::MGS3 || eGameType == MgsGame::MG)
                     Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x2A, "\xEB", 1);
                 if (eGameType == MgsGame::MGS2)
                     Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult + 0x27, "\xEB", 1);
