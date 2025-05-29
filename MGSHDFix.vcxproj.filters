@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\features\gamma_correction.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\color_filters.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\line_scaling.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\stereo_audio.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="external\safetyhook\safetyhook.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\d3d11_api.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\gamevars.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\helper.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\pause_on_focus_loss.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\intro_skip.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\wireframe.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\msaa.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\effect_speeds.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
+    <ClCompile Include="external\safetyhook\Zydis.c">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mute_warning.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\features\gamma_correction.hpp">
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\line_scaling.hpp">
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\stereo_audio.hpp">
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="external\safetyhook\safetyhook.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\stdafx.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\d3d11_api.hpp">
+      <Filter>APIs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\d3dcompile_api.hpp">
+      <Filter>APIs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\helper.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\pause_on_focus_loss.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\intro_skip.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\wireframe.hpp">
+      <Filter>WIP</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\gamevars.hpp">
+      <Filter>APIs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\common.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="external\safetyhook\Zydis.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\effect_speeds.hpp">
+      <Filter>WIP</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\mgshdfix.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="MGSHDFix.ini">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Fixes">
+      <UniqueIdentifier>{bd2458c5-47ae-4124-832d-713ce24b26ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Features">
+      <UniqueIdentifier>{f87fe3af-588a-4513-95d0-fe5158c2e0ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{9e661797-fd7d-422f-845a-a1101bcd6f30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{e7e651f5-92ec-4540-86a7-9622adfc5a53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="APIs">
+      <UniqueIdentifier>{99e51cdd-825e-416d-a43f-14b1be6b1d4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WIP">
+      <UniqueIdentifier>{bf88c80f-7def-446d-918f-ef7f741e166e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
