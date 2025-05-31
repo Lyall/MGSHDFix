@@ -4,8 +4,9 @@ class EffectSpeedFix
 {
 public:
     bool isEnabled;
-    void Initialize() const;
     std::chrono::time_point<std::chrono::high_resolution_clock> solidusDashAct_NextUpdate;
+
+    void Initialize() const;
 };
 
 inline EffectSpeedFix g_EffectSpeedFix;

@@ -2,12 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp" />
-    <ClCompile Include="src\features\gamma_correction.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fixes\color_filters.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\line_scaling.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -38,20 +32,29 @@
     <ClCompile Include="src\features\msaa.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\effect_speeds.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="external\safetyhook\Zydis.c">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mute_warning.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\color_filters.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\effect_speeds.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\asi_loader_checks.cpp">
+      <Filter>Mod Compatibility Checks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\reshade_compatibility_checks.cpp">
+      <Filter>Mod Compatibility Checks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\gamma_correction.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\features\gamma_correction.hpp">
-      <Filter>Fixes</Filter>
-    </ClInclude>
     <ClInclude Include="src\fixes\line_scaling.hpp">
       <Filter>Fixes</Filter>
     </ClInclude>
@@ -92,6 +95,15 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\effect_speeds.hpp">
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\asi_loader_checks.hpp">
+      <Filter>Mod Compatibility Checks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\reshade_compatibility_checks.hpp">
+      <Filter>Mod Compatibility Checks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\gamma_correction.hpp">
       <Filter>WIP</Filter>
     </ClInclude>
   </ItemGroup>
@@ -126,6 +138,9 @@
     </Filter>
     <Filter Include="WIP">
       <UniqueIdentifier>{bf88c80f-7def-446d-918f-ef7f741e166e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mod Compatibility Checks">
+      <UniqueIdentifier>{eb938042-38bb-48eb-9abf-a8734bbf2808}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

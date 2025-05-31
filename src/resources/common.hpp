@@ -18,7 +18,12 @@ extern MgsGame eGameType;
 extern inipp::Ini<char> ini;
 extern HMODULE baseModule;
 extern std::string sGameVersion;
+extern std::filesystem::path sExePath;
+extern std::string sFixName;
+
 
 //Config Options
 extern int iCurrentResY;
 extern float fAspectRatio;
+extern bool bOutdatedReshade;
+extern bool bLauncherConfigSkipLauncher;

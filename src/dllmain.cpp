@@ -3,6 +3,8 @@
 #include <safetyhook.hpp>
 #include <spdlog/sinks/base_sink.h>
 
+#include "asi_loader_checks.hpp"
+#include "reshade_compatibility_checks.hpp"
 #include "d3d11_api.hpp"
 #include "intro_skip.hpp"
 #include "gamma_correction.hpp"
@@ -60,6 +62,7 @@ bool bMouseSensitivity;
 float fMouseSensitivityXMulti;
 float fMouseSensitivityYMulti;
 bool bDisableCursor;
+bool bOutdatedReshade;
 
 // Launcher ini variables
 bool bLauncherConfigSkipLauncher = false;
@@ -370,29 +373,6 @@ void Init_LogSysInfo()
     GlobalMemoryStatusEx(&status);
     double totalMemory = status.ullTotalPhys / 1024 / 1024;    ///Total physical RAM in MB.
     spdlog::info("System Details - RAM: {} GB ({} MB)", ceil((totalMemory / 1024) * 100) / 100, totalMemory);
-}
-
-void Init_ASILoaderSanityChecks()
-{
-    //Don't simplify by removing filesystem::exists() from this check. While GetFileDescription does handle non-existent files own its own, checking filesystem::exists() first saves 400+ ms of initialization time
-    if(std::filesystem::exists(sExePath / "d3d11.dll") && (Util::GetFileDescription((sExePath / "d3d11.dll").string()) == Util::GetFileDescription((sExePath / "winhttp.dll").string())))
-    {
-        AllocConsole();
-        FILE* dummy;
-        freopen_s(&dummy, "CONOUT$", "w", stdout);
-        std::cout << "DUPLICATE MOD LOADER ERROR: Multiple ASI Loader .dll's detected! This can cause inconsistent bugs and crashes.\n"; 
-        spdlog::error("DUPLICATE MOD LOADER ERROR: Multiple ASI Loader .dll installations detected! This can cause inconsistent bugs and crashes.");
-        std::cout << "DUPLICATE MOD LOADER ERROR: Please delete d3d11.dll, it has been replaced by winhttp.dll & wininit.dll.\n";
-        spdlog::error("DUPLICATE MOD LOADER ERROR: Please delete d3d11.dll, it has been replaced by winhttp.dll & wininit.dll.");
-#ifndef _WIN32
-        std::cout << "DUPLICATE MOD LOADER ERROR: Steam Deck / Linux users must also replace their Steam game launch paramaters with the following command:\n";
-        spdlog::error("DUPLICATE MOD LOADER ERROR: Steam Deck / Linux users must also replace their Steam game launch paramaters with the following command:");
-        std::cout << "`WINEDLLOVERRIDES=\"wininet,winhttp=n,b\" % command % `\n";
-        spdlog::error("`WINEDLLOVERRIDES=\"wininet,winhttp=n,b\" % command % `");
-#endif
-        spdlog::info("----------");
-    }
-    Util::CheckForASIFiles(sFixName, true, true); //Exit thread & warn the user if multiple copies of MGSHDFix are trying to initialize.
 }
 
 void Init_ReadConfig()
@@ -1415,34 +1395,12 @@ void Init_LauncherConfigOverride()
         }
     }
 
-    bool foundReshade = FALSE;
-    if (!bLauncherConfigSkipLauncher && (std::filesystem::exists(sExePath / "dxgi.dll") && Util::GetFileDescription((sExePath / "dxgi.dll").string()) == "ReShade"))
-    {
-        foundReshade = TRUE;
-        spdlog::error(              "------ CONFIGURATION ERROR ------\n"
-                            "ReShade (dxgi.dll) is currently installed but MGSHDFix's LauncherSkip is disabled.\n"
-                            "ReShade isn't compatible with the main launcher & causes it to crash.\n"
-                            "Forcing LauncherSkip ON. Remove ReShade (dxgi.dll) if you need to access the launcher.\n"
-                                        "------ CONFIGURATION ERROR ------");
-    }
-
     // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
     if (eGameType & LAUNCHER)
     {
         if (!bLauncherConfigSkipLauncher)
         {
-            if (foundReshade)
-            {
-                AllocConsole();
-                FILE* dummy;
-                freopen_s(&dummy, "CONOUT$", "w", stdout);
-                std::cout << "Mod Configuration Error\n"
-                    "ReShade (dxgi.dll) is currently installed but MGSHDFix's LauncherSkip is disabled.\n"
-                    "ReShade isn't compatible with the main launcher & causes it to crash.\n"
-                    "Remove ReShade (dxgi.dll) if you need to access the launcher.\n";
-                bLauncherConfigSkipLauncher = TRUE;
-            }
-            else if (bLauncherJumpStart)
+            if (bLauncherJumpStart)
             {
                 LPWSTR commandLine = GetCommandLineW();
                 bool hasJumpstart = wcsstr(commandLine, L"-jump gamestart");
@@ -1524,7 +1482,7 @@ void Init_LauncherConfigOverride()
         return;
     }
     //Fixes a windows crash error message that sometimes appears when exiting through the main menu (which normally reopens the launcher.)
-    else if ((bLauncherConfigSkipLauncher || foundReshade) && (eGameType & (MG | MGS2 | MGS3)))
+    else if ((bLauncherConfigSkipLauncher || bOutdatedReshade) && (eGameType & (MG | MGS2 | MGS3)))
     {
         uint8_t* ShouldStartLauncher_mbResult = Memory::PatternScanSilent(baseModule, "85 DB 74 ?? 48 83 C4");
         if (ShouldStartLauncher_mbResult)
@@ -1696,14 +1654,16 @@ void InitializeSubsystems()
     INITIALIZE(Init_LogSysInfo());
     INITIALIZE(Init_ASILoaderSanityChecks());
     if (DetectGame())
-    {                                                //Initialization order (these systems initialize vars used by following ones.)
-        INITIALIZE(g_GameVars.Initialize());         //1
-        INITIALIZE(Init_D3D11Hooks());               //2 Caches the D3DDevice, DXGIFactory, and D3DContext from D3DCreateDevice/DXGICreateFactory
-        INITIALIZE(Init_ReadConfig());               //3
-        INITIALIZE(Init_CalculateScreenSize());      //4
-        INITIALIZE(Init_LauncherConfigOverride());   //5
-        INITIALIZE(Init_FixDPIScaling());            //6 Needs to be anywhere before the window is created in CustomResolution.
-        INITIALIZE(Init_CustomResolution());         //7
+    {
+        //Initialization order (these systems initialize vars used by following ones.)
+        INITIALIZE(g_GameVars.Initialize());           //1
+        INITIALIZE(Init_D3D11Hooks());                 //2 Caches the D3DDevice, DXGIFactory, and D3DContext from D3DCreateDevice/DXGICreateFactory
+        INITIALIZE(Init_ReadConfig());                 //3
+        INITIALIZE(Init_ReshadeCompatibilityChecks()); //4 Dependent on ReadConfig, must also be before LauncherConfigOverride
+        INITIALIZE(Init_CalculateScreenSize());        //4
+        INITIALIZE(Init_LauncherConfigOverride());     //5
+        INITIALIZE(Init_FixDPIScaling());              //6 Needs to be anywhere before the window is created in CustomResolution.
+        INITIALIZE(Init_CustomResolution());           //7
         INITIALIZE(g_IntroSkip.Initialize());
         INITIALIZE(g_StereoAudioFix.Initialize());
         INITIALIZE(Init_ScaleEffects());

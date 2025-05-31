@@ -258,15 +258,29 @@ namespace Util
     }
 
     ///Scans all valid ASI directories for any .asi files matching the fileName.
-    bool CheckForASIFiles(std::string fileName, bool checkForDuplicates, bool setFixPath)
+    bool CheckForASIFiles(std::string fileName, bool checkForDuplicates, bool setFixPath, const char* checkCreationDate)
     {
         std::array<std::string, 4> paths = { "", "plugins", "scripts", "update" };
         std::filesystem::path foundPath;
         for (const auto& path : paths)
         {
-            if (std::filesystem::exists(sExePath / path / (fileName + ".asi")))
+            auto filePath = sExePath / path / (fileName + ".asi");
+            if (std::filesystem::exists(filePath))
             {
-                if (!foundPath.empty()) //multiple versions found
+                if (checkCreationDate)
+                {
+                    auto fileTime = std::filesystem::last_write_time(filePath);
+                    auto fileTimeChrono = std::chrono::system_clock::to_time_t(std::chrono::clock_cast<std::chrono::system_clock>(fileTime));
+                    std::tm fileCreationTime = *std::localtime(&fileTimeChrono);
+                    std::tm checkDate = {};
+                    std::istringstream ss(checkCreationDate);
+                    ss >> std::get_time(&checkDate, "%Y-%m-%d");
+                    if (ss.fail() || std::mktime(&fileCreationTime) >= std::mktime(&checkDate))
+                    {
+                        continue; // Skip this file if it doesn't meet the creation date requirement
+                    }
+                }
+                if (!foundPath.empty()) // multiple versions found
                 {
                     AllocConsole();
                     FILE* dummy;
@@ -278,7 +292,6 @@ namespace Util
                     spdlog::error("{}", errorMessage);
                     FreeLibraryAndExitThread(baseModule, 1);
                 }
-
                 foundPath = path;
                 if (setFixPath)
                 {
@@ -292,5 +305,6 @@ namespace Util
         }
         return FALSE;
     }
+
     
 }

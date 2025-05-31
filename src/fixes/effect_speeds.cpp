@@ -17,12 +17,9 @@
 /// It has been modified to use RTC timesteps for 1:1 PS2 accurate frame-timing.
 /// 
 /// Overlapping integrations originating from MGSFPSUnlock are 
-/// automatically disabled so that MGSFPSUnlock's unlocked 
-/// framerate support can take priority.
+/// automatically disabled when older versions of MGSFPSUnlock are
+/// detected to allow it to continue functioning till it's updated.
 ///
-/// Please submit any new additions to this file to their
-/// codebase as well so there's parity in functionality
-/// at 144FPS & beyond. <3
 /////////////////////////////////////////////////////////////////
 
 SafetyHookInline solidusFireDashAct_hook {};
@@ -39,7 +36,7 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 
     if (current_time >= g_EffectSpeedFix.solidusDashAct_NextUpdate)
     {
-        g_EffectSpeedFix.solidusDashAct_NextUpdate = g_EffectSpeedFix.solidusDashAct_NextUpdate + std::chrono::microseconds(static_cast<int64_t>(std::chrono::microseconds::period::den / 31.5));
+        g_EffectSpeedFix.solidusDashAct_NextUpdate = g_EffectSpeedFix.solidusDashAct_NextUpdate + std::chrono::microseconds(static_cast<int64_t>(std::chrono::microseconds::period::den / 34.0));
         return solidusFireDashAct_hook.fastcall<int64_t>(work);
     }
 
@@ -100,10 +97,10 @@ void EffectSpeedFix::Initialize() const
         return;
     }
 
-
+    /*
     if (IsDebuggerPresent())
     {
-        /*
+
         if (uint8_t* Tidal4Result = Memory::PatternScan(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2: Effect Speed Fix : effect\\tidal4.c", NULL, NULL))
         {
             static SafetyHookMid Tidal4MidHook {};
@@ -147,8 +144,9 @@ void EffectSpeedFix::Initialize() const
             splashPartsSlow_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_splashPartsSlowScanAddress), reinterpret_cast<void*>(MGS2_splashPartsSlow));
             LOG_HOOK(splashPartsSlow_hook, "MGS 2: Effect Speed Fix: demo_effect\\d_splash_parts_slow.c", NULL, NULL)
         }
-        */
+    
     }
+        */
 
 
     if (uint8_t* MGS2_flyingSmokeSlowScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? FF 4B ?? 83 7B ?? ?? 7D", "MGS 2: Effect Speed Fix : effect3\\flying_smoke_slow.c", NULL, NULL))
@@ -157,16 +155,14 @@ void EffectSpeedFix::Initialize() const
         flyingSmokeSlow_MidHook = safetyhook::create_mid(MGS2_flyingSmokeSlowScanResult,
             [](SafetyHookContext& ctx)
             {
-                spdlog::info("duration before {}", ctx.r8);
                 ctx.r8 = (unsigned int)(ctx.r8 * g_GameVars.ActorWaitMultiplier() * (g_GameVars.InCutscene() ? 2 : 1)); // double the duration in cutscenes
-                spdlog::info("duration after {}", ctx.r8);
             });
         LOG_HOOK(flyingSmokeSlow_MidHook, "MGS 2: Effect Speed Fix: effect3\\flying_smoke_slow.c", NULL, NULL)
     }
 
-    if (Util::CheckForASIFiles("MGSFPSUnlock", false, false))
+    if (Util::CheckForASIFiles("MGSFPSUnlock", false, false, "2025-05-25"))
     {
-        spdlog::info("MGS 2: Effect Speed Fix: MGSFPSUnlock detected, disabling.");
+        spdlog::info("MGS 2: Effect Speed Fix: Outdated version of MGSFPSUnlock detected, disabling.");
         return;
     }
 

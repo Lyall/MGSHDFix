@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\asi_loader_checks.cpp" />
     <ClCompile Include="external\safetyhook\safetyhook.cpp" />
     <ClCompile Include="external\safetyhook\Zydis.c" />
+    <ClCompile Include="src\fixes\reshade_compatibility_checks.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\features\gamma_correction.cpp" />
     <ClCompile Include="src\features\intro_skip.cpp" />
@@ -39,6 +41,7 @@
   <ItemGroup>
     <ClInclude Include="external\safetyhook\safetyhook.hpp" />
     <ClInclude Include="external\safetyhook\Zydis.h" />
+    <ClInclude Include="src\fixes\asi_loader_checks.hpp" />
     <ClInclude Include="src\resources\gamevars.hpp" />
     <ClInclude Include="src\resources\common.hpp" />
     <ClInclude Include="src\features\gamma_correction.hpp" />
@@ -51,6 +54,7 @@
     <ClInclude Include="src\resources\d3d11_api.hpp" />
     <ClInclude Include="src\resources\d3dcompile_api.hpp" />
     <ClInclude Include="src\resources\helper.hpp" />
+    <ClInclude Include="src\fixes\reshade_compatibility_checks.hpp" />
     <ClInclude Include="src\resources\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
