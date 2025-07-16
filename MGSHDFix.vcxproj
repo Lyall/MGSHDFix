@@ -35,6 +35,7 @@
     <ClCompile Include="external\safetyhook\src\os.windows.cpp" />
     <ClCompile Include="external\safetyhook\src\utility.cpp" />
     <ClCompile Include="external\safetyhook\src\vmt_hook.cpp" />
+    <ClCompile Include="src\resources\gpu_check.cpp" />
     <ClCompile Include="src\resources\logging.cpp" />
     <ClCompile Include="src\fixes\skyboxes.cpp" />
     <ClCompile Include="src\features\mg1_custom_loading_screens.cpp" />
@@ -62,9 +63,11 @@
     <ClCompile Include="src\fixes\water_reflections.cpp" />
     <ClCompile Include="src\features\texture_buffer_size.cpp" />
     <ClCompile Include="src\resources\steamworks_api.cpp" />
+    <ClCompile Include="src\features\stat_persistence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\safetyhook\include\safetyhook.hpp" />
+    <ClInclude Include="src\resources\gpu_check.hpp" />
     <ClInclude Include="src\resources\logging.hpp" />
     <ClInclude Include="src\fixes\skyboxes.hpp" />
     <ClInclude Include="src\fixes\aiming_after_equip.hpp" />
@@ -95,13 +98,14 @@
     <ClInclude Include="src\fixes\water_reflections.hpp" />
     <ClInclude Include="src\features\texture_buffer_size.hpp" />
     <ClInclude Include="src\resources\steamworks_api.hpp" />
+    <ClInclude Include="src\resources\steam_achievements.hpp" />
+    <ClInclude Include="src\features\stat_persistence.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MGSHDFix.ini" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="mgshdfix.ico" />
     <Image Include="src\resources\mgshdfix.ico" />
   </ItemGroup>
   <ItemGroup>

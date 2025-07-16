@@ -32,6 +32,9 @@ namespace Memory
     uintptr_t GetRelativeOffset(uint8_t* addr) noexcept;
 
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction);
+
+    void* ReadIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction);
+    BOOL WriteIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction, void* detourFunction);
 }
 
 namespace Util

@@ -8,9 +8,16 @@
 #include <fstream>
 #include <regex>
 #include <iomanip>
+#include <sstream>
 
 #include "logging.hpp"
 #include "version.h"
+
+#if (defined(REPO_GITHUB) + defined(REPO_CODEBERG) + defined(REPO_GITLAB)) > 1
+#error "Only one of REPO_GITHUB, REPO_CODEBERG, or REPO_GITLAB may be defined at a time."
+#elif !(defined(REPO_GITHUB) || defined(REPO_CODEBERG) || defined(REPO_GITLAB))
+#error "You must define one of REPO_GITHUB, REPO_CODEBERG, or REPO_GITLAB."
+#endif
 
 #pragma comment(lib, "winhttp.lib")
 
@@ -31,44 +38,55 @@ LatestVersionChecker::LatestVersionChecker(const std::string& dllVersion,
 
 bool LatestVersionChecker::checkForUpdates()
 {
-    std::string cachedLatest, warnedVersion;
+    // Determine proper-cased apiHostStr for logging
+    const std::string apiHostStr =
+#ifdef REPO_GITHUB
+        "GitHub.com";
+#elif defined(REPO_CODEBERG)
+        "Codeberg.org";
+#elif defined(REPO_GITLAB)
+        "GitLab.com";
+#else
+#error "No repository API defined (REPO_GITHUB / REPO_CODEBERG / REPO_GITLAB)"
+#endif
+
+        std::string cachedLatest, warnedVersion;
     bool cacheIsFresh = false;
 
     if (!loadCache(cachedLatest, warnedVersion, cacheIsFresh))
     {
-        // No cache at all -> query GitHub
+        // No cache at all -> query API
+        spdlog::info("Version Check: No cache found. Contacting {} API for latest version.", apiHostStr);
+
         if (!queryGitHubLatestVersion(cachedLatest))
         {
-            // GitHub failed -> assume OK
-            spdlog::info("Version Check: Unable to contact GitHub. Skipping version check.");
+            spdlog::info("Version Check: Unable to contact {} API. Skipping version check.", apiHostStr);
             return false;
         }
 
-        // Save initial cache with empty warnedVersion
         saveCache(cachedLatest, "");
     }
     else if (!cacheIsFresh)
     {
-        // Cache exists but stale -> refresh latestVersion
-        std::string githubLatest;
-        if (queryGitHubLatestVersion(githubLatest))
+        spdlog::info("Version Check: Cache stale. Refreshing from {} API.", apiHostStr);
+        std::string latestFromApi;
+        if (queryGitHubLatestVersion(latestFromApi))
         {
-            cachedLatest = githubLatest;
-            saveCache(cachedLatest, warnedVersion); // preserve warnedVersion
+            cachedLatest = latestFromApi;
+            saveCache(cachedLatest, warnedVersion);
         }
     }
     else
     {
-        spdlog::info("Version Check: Under 24 hours since last version check. Skipping Github API call.");
+        spdlog::info("Version Check: Under {} hours since last update check. Skipping {} API call.", m_cacheTTLHours, apiHostStr);
     }
 
     int cmp = compareSemVer(m_dllVersion, cachedLatest);
 
     if (cmp < 0)
     {
-        // Always log to spdlog when outdated
-        spdlog::warn("Version Check: A new version of MGSHDFix is available.");
-        spdlog::warn("Vection Check - Current Version : {}, Latest Release : {}", m_dllVersion, cachedLatest);
+        spdlog::warn("Version Check: A new version of {} is available from {}.", sFixName, apiHostStr);
+        spdlog::warn("Version Check - Current Version: {}, Latest Release: {}", m_dllVersion, cachedLatest);
 
         if (warnedVersion != cachedLatest)
         {
@@ -76,29 +94,24 @@ bool LatestVersionChecker::checkForUpdates()
             {
                 Logging::ShowConsole();
                 std::cout << sFixName << " Update Notice: A new version of " << sFixName << " is available for download.\nCurrent Version: "
-                << m_dllVersion << ", Latest Version: " << cachedLatest << std::endl;
-
+                    << m_dllVersion << ", Latest Version: " << cachedLatest << std::endl;
             }
             saveCache(cachedLatest, cachedLatest);
             return true;
         }
-
-        // Already warned in console, but still log every time
         return false;
     }
     else if (cmp > 0)
     {
-        spdlog::info("Version Check: Welcome back, Commander! You're running a development build of MGSHDFix!");
-        spdlog::info("Version Check - Current Version : {}, Latest Release : {}", m_dllVersion, cachedLatest);
+        spdlog::info("Version Check: Welcome back, Commander! You're running a development build of {}!", sFixName);
+        spdlog::info("Version Check - Current Version: {}, Latest Release: {}", m_dllVersion, cachedLatest);
         return false;
     }
 
-    spdlog::info("Version Check: MGSHDFix is up to date.");
-    spdlog::info("Version Check - Current Version: {}", m_dllVersion); 
+    spdlog::info("Version Check: {} is up to date ({}).", sFixName, apiHostStr);
+    spdlog::info("Version Check - Current Version: {}", m_dllVersion);
     return false;
 }
-
-
 
 bool LatestVersionChecker::loadCache(std::string& cachedLatest, std::string& warnedVersion, bool& cacheIsFresh)
 {
@@ -133,14 +146,40 @@ void LatestVersionChecker::saveCache(const std::string& latestVersion, const std
 
 std::wstring LatestVersionChecker::buildUserAgent() const
 {
-    std::string ua = "MGSHDFix/";
+    std::string ua = sFixName + "/";
     ua += VERSION_STRING;
     return std::wstring(ua.begin(), ua.end());
 }
 
 bool LatestVersionChecker::queryGitHubLatestVersion(std::string& latestVersion)
 {
-    spdlog::info("Version Check: Contacting GitHub API for latest version...");
+    // Determine lowercase apiHost for HTTP calls
+    const std::wstring apiHost =
+#ifdef REPO_GITHUB
+        L"api.github.com";
+#elif defined(REPO_CODEBERG)
+        L"codeberg.org";
+#elif defined(REPO_GITLAB)
+        L"gitlab.com";
+#else
+#error "No repository API defined (REPO_GITHUB / REPO_CODEBERG / REPO_GITLAB)"
+#endif
+
+        // Compose path according to repo
+        std::wstring path;
+#ifdef REPO_GITHUB
+    path = L"/repos/" + std::wstring(m_repoOwner.begin(), m_repoOwner.end()) + L"/" +
+        std::wstring(m_repoName.begin(), m_repoName.end()) + L"/releases/latest";
+#elif defined(REPO_CODEBERG)
+    path = L"/api/v1/repos/" + std::wstring(m_repoOwner.begin(), m_repoOwner.end()) + L"/" +
+        std::wstring(m_repoName.begin(), m_repoName.end()) + L"/releases/latest";
+#elif defined(REPO_GITLAB)
+    path = L"/api/v4/projects/" + std::wstring(m_repoOwner.begin(), m_repoOwner.end()) + L"%2F" +
+        std::wstring(m_repoName.begin(), m_repoName.end()) + L"/releases";
+#endif
+
+    spdlog::info("Version Check: Contacting {} API for latest version...", std::string(apiHost.begin(), apiHost.end()));
+
     HINTERNET hSession = WinHttpOpen(
         buildUserAgent().c_str(),
         WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
@@ -156,17 +195,15 @@ bool LatestVersionChecker::queryGitHubLatestVersion(std::string& latestVersion)
 
     HINTERNET hConnect = WinHttpConnect(
         hSession,
-        L"api.github.com",
+        apiHost.c_str(),
         INTERNET_DEFAULT_HTTPS_PORT,
         0);
+
     if (!hConnect)
     {
         WinHttpCloseHandle(hSession);
         return false;
     }
-
-    std::wstring path = L"/repos/" + std::wstring(m_repoOwner.begin(), m_repoOwner.end()) + L"/" +
-        std::wstring(m_repoName.begin(), m_repoName.end()) + L"/releases/latest";
 
     HINTERNET hRequest = WinHttpOpenRequest(
         hConnect,
@@ -176,6 +213,7 @@ bool LatestVersionChecker::queryGitHubLatestVersion(std::string& latestVersion)
         WINHTTP_NO_REFERER,
         WINHTTP_DEFAULT_ACCEPT_TYPES,
         WINHTTP_FLAG_SECURE);
+
     if (!hRequest)
     {
         WinHttpCloseHandle(hConnect);

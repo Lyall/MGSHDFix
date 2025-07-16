@@ -213,6 +213,48 @@ inline uint8_t get_##name##l(const safetyhook::Context& regs) { return regs.fiel
         SetFlag(regs, FLAG_AF, val);
     }
 
+    // ==========================================================
+// DWORDx and SDWORDx helpers
+// ==========================================================
+
+// DWORD1/DWORD2: lower and upper 32 bits of a 64-bit value (unsigned)
+
+    inline uint32_t DWORD1(uint64_t val)
+    {
+        return static_cast<uint32_t>(val & 0xFFFFFFFF);
+    }
+    inline uint32_t DWORD2(uint64_t val)
+    {
+        return static_cast<uint32_t>((val >> 32) & 0xFFFFFFFF);
+    }
+    inline void set_DWORD1(uint64_t& val, uint32_t dword)
+    {
+        val = (val & 0xFFFFFFFF00000000ULL) | dword;
+    }
+    inline void set_DWORD2(uint64_t& val, uint32_t dword)
+    {
+        val = (val & 0x00000000FFFFFFFFULL) | (uint64_t(dword) << 32);
+    }
+
+    // SDWORD1/SDWORD2: lower and upper 32 bits of a 64-bit value (signed)
+    inline int32_t SDWORD1(int64_t val)
+    {
+        return static_cast<int32_t>(val & 0xFFFFFFFF);
+    }
+    inline int32_t SDWORD2(int64_t val)
+    {
+        return static_cast<int32_t>((val >> 32) & 0xFFFFFFFF);
+    }
+    inline void set_SDWORD1(int64_t& val, int32_t dword)
+    {
+        val = (val & 0xFFFFFFFF00000000LL) | (uint32_t(dword) & 0xFFFFFFFF);
+    }
+    inline void set_SDWORD2(int64_t& val, int32_t dword)
+    {
+        val = (val & 0x00000000FFFFFFFFLL) | (int64_t(uint32_t(dword)) << 32);
+    }
+
+
 #elif defined(_M_IX86) || defined(__i386__)
 
     // --- 8-bit helpers ---

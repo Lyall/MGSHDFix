@@ -53,11 +53,11 @@ void DamagedSaveFix::Initialize()
                 continue;
             }
 
-            Logging::ShowConsole();
             if (!bWarnedOnce)
             {
                 spdlog::error("Damaged save file detected.");
                 spdlog::error("This issue is typically caused by closing the game too quickly after saving, resulting in Steam Cloud syncing old data improperly.");
+                Logging::ShowConsole();
                 std::cout << "MGSHDFix Bugfix: Damaged save file detected.\nThis issue is typically caused by closing the game too quickly after saving, resulting in Steam Cloud syncing old data improperly." << std::endl;
                 bWarnedOnce = true;
             }

@@ -173,6 +173,76 @@ namespace Memory
         }
         return FALSE;
     }
+    // Read the current IAT entry (without changing it)
+    void* ReadIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction)
+    {
+        uint8_t* base = reinterpret_cast<uint8_t*>(callerModule);
+        auto dos_header = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
+        auto nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(base + dos_header->e_lfanew);
+        auto imports = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(
+            base + nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+
+        for (int i = 0; imports[i].Characteristics; ++i)
+        {
+            const char* dllName = reinterpret_cast<const char*>(base + imports[i].Name);
+            if (_stricmp(dllName, targetModule) != 0)
+                continue;
+
+            auto origFirstThunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + imports[i].OriginalFirstThunk);
+            auto firstThunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + imports[i].FirstThunk);
+
+            for (; origFirstThunk->u1.AddressOfData; ++origFirstThunk, ++firstThunk)
+            {
+                auto importByName = reinterpret_cast<IMAGE_IMPORT_BY_NAME*>(base + origFirstThunk->u1.AddressOfData);
+                if (strcmp(reinterpret_cast<const char*>(importByName->Name), targetFunction) != 0)
+                    continue;
+
+                return reinterpret_cast<void*>(firstThunk->u1.Function);
+            }
+        }
+
+        return nullptr;
+    }
+
+    // Write a new pointer into the IAT entry (unconditionally)
+    BOOL WriteIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction, void* detourFunction)
+    {
+        uint8_t* base = reinterpret_cast<uint8_t*>(callerModule);
+        auto dos_header = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
+        auto nt_headers = reinterpret_cast<IMAGE_NT_HEADERS*>(base + dos_header->e_lfanew);
+        auto imports = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(
+            base + nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+
+        for (int i = 0; imports[i].Characteristics; ++i)
+        {
+            const char* dllName = reinterpret_cast<const char*>(base + imports[i].Name);
+            if (_stricmp(dllName, targetModule) != 0)
+                continue;
+
+            auto origFirstThunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + imports[i].OriginalFirstThunk);
+            auto firstThunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + imports[i].FirstThunk);
+
+            for (; origFirstThunk->u1.AddressOfData; ++origFirstThunk, ++firstThunk)
+            {
+                auto importByName = reinterpret_cast<IMAGE_IMPORT_BY_NAME*>(base + origFirstThunk->u1.AddressOfData);
+                if (strcmp(reinterpret_cast<const char*>(importByName->Name), targetFunction) != 0)
+                    continue;
+
+                DWORD oldProtect;
+                if (!VirtualProtect(&firstThunk->u1.Function, sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProtect))
+                    return FALSE;
+
+                firstThunk->u1.Function = reinterpret_cast<ULONG_PTR>(detourFunction);
+
+                VirtualProtect(&firstThunk->u1.Function, sizeof(void*), oldProtect, &oldProtect);
+
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
+
 }
 
 namespace Util
@@ -268,12 +338,12 @@ namespace Util
                 }
                 if (bFoundOnce)
                 {
-                    Logging::ShowConsole();
                     std::string errorMessage = "DUPLICATE FILE ERROR: Duplicate " + fileName + ".asi installations found! Please make sure to delete any old versions!\n";
                     errorMessage.append("DUPLICATE FILE ERROR - Installation 1: ").append((sExePath / foundPath / (fileName + ".asi")).string().append("\n"));
                     errorMessage.append("DUPLICATE FILE ERROR - Installation 2: ").append(filePath.string());
-                    std::cout << errorMessage << std::endl;
                     spdlog::error("{}", errorMessage);
+                    Logging::ShowConsole();
+                    std::cout << errorMessage << std::endl;
                     FreeLibraryAndExitThread(baseModule, 1);
                 }
                 foundPath = path;
@@ -333,9 +403,16 @@ namespace Util
         {
             return g_Logging.bIsSteamDeck;
         }
+
+        g_Logging.bCheckedSteamDeck = true;
+
         // Check for Proton/Steam Deck environment variables
-        return std::getenv("STEAM_COMPAT_CLIENT_INSTALL_PATH") ||
-            std::getenv("STEAM_COMPAT_DATA_PATH") ||
-            std::getenv("XDG_SESSION_TYPE"); // XDG_SESSION_TYPE is often set on Linux
+        if (std::getenv("STEAM_COMPAT_CLIENT_INSTALL_PATH") || std::getenv("STEAM_COMPAT_DATA_PATH") || std::getenv("XDG_SESSION_TYPE"))
+        {
+            g_Logging.bIsSteamDeck = true;
+            return true;
+        }
+        return false;
     }
+
 }

@@ -104,6 +104,12 @@
     <ClCompile Include="src\resources\submodule_initiailization.hpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\gpu_check.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\stat_persistence.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -193,16 +199,26 @@
     <ClInclude Include="src\resources\version.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\gpu_check.hpp">
+      <Filter>Utility\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\resources\RegStateHelpers.hpp">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="src\resources\resource.h" />
+    <ClInclude Include="src\resources\resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\steam_achievements.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\stat_persistence.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">
       <Filter>Resources</Filter>
     </Image>
-    <Image Include="mgshdfix.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">

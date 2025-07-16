@@ -2,27 +2,28 @@
 
 #include <optional>
 #include <cstdint>
+#pragma comment(lib,"steam_api64.lib")
 
 class SteamAPI final
 {
-public:
-    void Setup();
-    void FetchAndCacheSteamID();
+private:
+    static void OnSteamInitialized();
+    static void FetchAndCacheSteamID();
+    static void ResetAllAchievements();
 
-    [[nodiscard]] std::optional<uint64_t> GetSteamID64() const noexcept;
+public:
+    void Setup() const;
+
 
     // Achievement-related wrappers
-    [[nodiscard]] bool RequestCurrentStats() const;
-    [[nodiscard]] bool SetAchievement(const char* achievementID) const;
-    [[nodiscard]] bool ClearAchievement(const char* achievementID) const;
-    [[nodiscard]] bool StoreStats() const;
-    [[nodiscard]] bool GetAchievement(const char* achievementID, bool& achieved) const;
+    [[nodiscard]] static bool SetAchievement(const char* achievementID);
+    [[nodiscard]] static bool ClearAchievement(const char* achievementID);
 
     bool bIsLegitCopy = true;
     bool bIsOnline = true;
-
-private:
     std::optional<uint64_t> steamID;
+    bool bResetAchievements = false;
+
 };
 
 inline SteamAPI g_SteamAPI;

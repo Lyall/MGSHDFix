@@ -36,6 +36,7 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "msaa.hpp"
+#include "stat_persistence.hpp"
 #include "wireframe.hpp"
 
 
@@ -46,8 +47,9 @@ HMODULE unityPlayer;
 // Version
 std::string const sFixVersion = VERSION_STRING;
 std::string sFixName = FIX_NAME;
-constexpr int iConfigVersion = 3; //increment this when making config changes, along with the number at the bottom of the config file
+constexpr int iConfigVersion = 4; //increment this when making config changes, along with the number at the bottom of the config file
                         //that way we can sanity check to ensure people don't have broken/disabled features due to old config files.
+
 
 // Logger
 std::filesystem::path sFixPath;
@@ -218,6 +220,7 @@ static void Init_ReadConfig()
     std::ifstream iniFile((sExePath / sFixPath / sConfigFile).string());
     if (!iniFile) 
     {
+        spdlog::error("CONFIG ERROR: File not found: {}", (sExePath / sFixPath / sConfigFile).string());
         Logging::ShowConsole();
         std::cout << "" << sFixName << " v" << sFixVersion << " loaded." << std::endl;
         std::cout << "ERROR: Could not locate config file." << std::endl;
@@ -233,6 +236,7 @@ static void Init_ReadConfig()
     inipp::get_value(ini.sections["Config Version"], "Version", loadedConfigVersion);
     if (loadedConfigVersion != iConfigVersion) 
     {
+        spdlog::error("CONFIG ERROR: Config file version mismatch! Expected version {}, but found version {}.", iConfigVersion, loadedConfigVersion);
         Logging::ShowConsole();
         std::cout << "" << sFixName << " v" << sFixVersion << " loaded." << std::endl;
         std::cout << "MGSHDFix CONFIG ERROR: Outdated config file!" << std::endl;
@@ -264,7 +268,8 @@ static void Init_ReadConfig()
 
     bShouldCheckForUpdates = Util::stringToBool(ini.sections["Update Notifications"]["CheckForUpdates"]);
     bConsoleNotifications = Util::stringToBool(ini.sections["Update Notifications"]["ConsoleNotifications"]);
-
+    g_StatPersistence.bAchievementPersistenceEnabled = Util::stringToBool(ini.sections["Achievement Persistence"]["Enabled"]);
+    g_SteamAPI.bResetAchievements = Util::stringToBool(ini.sections["Reset All Achievements"]["Reset_All_Achievements"]);
 
     /*//INITIALIZE(Init_GammaShader());
     //INITIALIZE(g_DistanceCulling.Initialize());
@@ -375,7 +380,9 @@ static void Init_ReadConfig()
     {
         spdlog::info("Cofig Parse: Mod update console notifications: {}", bConsoleNotifications);
     }
-    
+
+    spdlog::info("Config Parse: Achievement Persistence: {}", g_StatPersistence.bAchievementPersistenceEnabled);
+    spdlog::info("Config Parse: Reset Achievements: {}", g_SteamAPI.bResetAchievements);
 }
 
 static bool DetectGame()
@@ -1365,7 +1372,7 @@ static void CheckForUpdates()
         return;
     }
     std::filesystem::path cacheFilePath = sGameSavePath / (sFixName + "_version_check.txt");
-    LatestVersionChecker checker(sFixVersion, "Lyall", sFixName, cacheFilePath);
+    LatestVersionChecker checker(sFixVersion, REPO_OWNER, REPO_NAME, cacheFilePath);
     checker.checkForUpdates();
 }
 
@@ -1373,17 +1380,16 @@ static void InitializeSubsystems()
 {
     //Initialization order (these systems initialize vars used by following ones.)
     INITIALIZE(g_Logging.LogSysInfo());            //0
-    INITIALIZE(ASILoaderCompatibility::Check());   //1
-    INITIALIZE(DetectGame());                      //2
+    INITIALIZE(DetectGame());                      //1
+    INITIALIZE(ASILoaderCompatibility::Check());   //2
     INITIALIZE(Init_ReadConfig());                 //3
     INITIALIZE(g_GameVars.Initialize());           //4
     INITIALIZE(g_D3D11Hooks.Initialize());         //5 Caches the D3DDevice, DXGIFactory, and D3DContext from D3DCreateDevice/DXGICreateFactory
-    INITIALIZE(g_SteamAPI.Setup());                //6 Hook early so we don't miss any Steam API calls.
-    INITIALIZE(ReshadeCompatibility::Check());     //7 Dependent on ReadConfig, must also be before LauncherConfigOverride to warn the user before a crash.
-    INITIALIZE(Init_CalculateScreenSize());        //8
-    INITIALIZE(Init_LauncherConfigOverride());     //9
-    INITIALIZE(Init_FixDPIScaling());              //10 Needs to be anywhere before the window is created in CustomResolution.
-    INITIALIZE(Init_CustomResolution());           //11
+    INITIALIZE(ReshadeCompatibility::Check());     //6 Dependent on ReadConfig, must also be before LauncherConfigOverride to warn the user before a crash.
+    INITIALIZE(Init_CalculateScreenSize());        //7
+    INITIALIZE(Init_LauncherConfigOverride());     //8
+    INITIALIZE(Init_FixDPIScaling());              //9 Needs to be anywhere before the window is created in CustomResolution.
+    INITIALIZE(Init_CustomResolution());           //10
     INITIALIZE(Init_ScaleEffects());               
     INITIALIZE(Init_AspectFOVFix());
     INITIALIZE(Init_HUDFix());
@@ -1391,10 +1397,11 @@ static void InitializeSubsystems()
 
         //Features
     INITIALIZE(g_TextureBufferSize.Initialize());
+    INITIALIZE(g_PauseOnFocusLoss.Initialize());
+    INITIALIZE(g_IntroSkip.Initialize());
 
     //INITIALIZE(Init_GammaShader());
     //INITIALIZE(g_DistanceCulling.Initialize());
-    INITIALIZE(g_IntroSkip.Initialize());
     //INITIALIZE(g_MG1CustomLoadingScreens.Initialize());
     //INITIALIZE(g_MultiSampleAntiAliasing.Initialize());
     //INITIALIZE(g_Wireframe.Initialize());
@@ -1403,28 +1410,69 @@ static void InitializeSubsystems()
     INITIALIZE(g_VectorScalingFix.Initialize());
     INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(SkyboxFix::Initialize());
-    //INITIALIZE(g_AimAfterEquipFix.Initialize());
-    //INITIALIZE(g_ColorFilterFix.Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize());
     INITIALIZE(g_StereoAudioFix.Initialize());
+    INITIALIZE(DamagedSaveFix::Initialize());
+    //INITIALIZE(g_AimAfterEquipFix.Initialize());
+    //INITIALIZE(g_ColorFilterFix.Initialize());
 
         //Warnings
-    INITIALIZE(DamagedSaveFix::Initialize());
-    INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_MuteWarning.Setup()); 
 
     if (!(eGameType & LAUNCHER))
     {
-        INITIALIZE(CheckForUpdates()); //ALWAYS END WITH THIS AS IT RELIES ON NETWORK RESPONSE.
+        INITIALIZE(g_SteamAPI.Setup());
+        INITIALIZE(g_StatPersistence.Setup());
+        INITIALIZE(CheckForUpdates());
     }
 }
+
+std::mutex mainThreadFinishedMutex;
+std::condition_variable mainThreadFinishedVar;
+bool mainThreadFinished = false;
 
 DWORD __stdcall Main(void*)
 {
     g_Logging.initStartTime = std::chrono::high_resolution_clock::now();
     g_Logging.Initialize();
+
     INITIALIZE(InitializeSubsystems());
-    return true;
+
+    // Signal any threads (e.g., the memset hook) that are waiting for initialization to finish.
+    {
+        std::lock_guard lock(mainThreadFinishedMutex);
+        mainThreadFinished = true;
+    }
+    mainThreadFinishedVar.notify_all();
+
+    return TRUE;
+}
+
+std::mutex memsetHookMutex;
+bool memsetHookCalled = false;
+static void* (__cdecl* memset_Fn)(void* Dst, int Val, size_t Size); // Pointer to the next function in the memset chain (could be another hook or the real CRT memset).
+static void* __cdecl memset_Hook(void* Dst, int Val, size_t Size) // Our memset hook, which blocks the game's main thread until initialization is complete.
+{
+    std::lock_guard lock(memsetHookMutex);
+
+    if (!memsetHookCalled)
+    {
+        memsetHookCalled = true;
+
+        // Restore the original (or previously-hooked) memset in the IAT.
+        // This ensures future memset calls bypass our hook and run at full speed.
+        Memory::WriteIAT(baseModule, "VCRUNTIME140.dll", "memset", memset_Fn);
+
+        // Block the current thread here until our main initialization is complete.
+        std::unique_lock finishedLock(mainThreadFinishedMutex);
+        mainThreadFinishedVar.wait(finishedLock, []
+            {
+                return mainThreadFinished;
+            });
+    }
+
+    // Forward the memset call to the next function (another hook or the real memset).
+    return reinterpret_cast<decltype(memset_Fn)>(memset_Fn)(Dst, Val, Size);
 }
 
 
@@ -1432,13 +1480,33 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 {
     if (ul_reason_for_call == DLL_PROCESS_ATTACH)
     {
-        if (const HANDLE mainHandle = CreateThread(NULL, 0, Main, 0, CREATE_SUSPENDED, 0))
+        HMODULE vcruntime140 = GetModuleHandleA("VCRUNTIME140.dll");
+        if (vcruntime140)
         {
-            SetThreadPriority(mainHandle, THREAD_PRIORITY_TIME_CRITICAL); // set our Main thread priority higher than the games thread
+            // Read the current IAT entry for memset in the base module.
+            // Note: it may already point to another mod's hook if they loaded first.
+            void* currentIATMemset = Memory::ReadIAT(baseModule, "VCRUNTIME140.dll", "memset");
+
+            // Save the current pointer so we can call it later (chaining to the next hook or real memset).
+            memset_Fn = reinterpret_cast<decltype(memset_Fn)>(currentIATMemset);
+
+            // Overwrite the IAT entry with our memset_Hook, so our code intercepts memset calls.
+            // We always overwrite unconditionally to ensure our hook is active.
+            // This will prevent other mods that also hook memset from unpausing the main thread before our Main() has finished.
+            Memory::WriteIAT(baseModule, "VCRUNTIME140.dll", "memset", &memset_Hook);
+        }
+
+        // Create our main thread, which runs the initialization logic.
+        if (const HANDLE mainHandle = CreateThread(nullptr, 0, Main, nullptr, CREATE_SUSPENDED, nullptr))
+        {
+            SetThreadPriority(mainHandle, THREAD_PRIORITY_TIME_CRITICAL); // Give our thread higher priority than the game's.
             ResumeThread(mainHandle);
             CloseHandle(mainHandle);
         }
-        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED); //fixes the monitor going to sleep during cutscenes.
+
+        // Prevent monitor or system sleep while the game is running.
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED);
     }
+
     return TRUE;
 }

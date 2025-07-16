@@ -2,6 +2,8 @@
 #include "logging.hpp"
 
 #include <spdlog/sinks/base_sink.h>
+
+#include "gpu_check.hpp"
 #include "steamworks_api.hpp"
 
 extern std::filesystem::path sFixPath;
@@ -103,6 +105,8 @@ void Logging::Initialize()
             {
                 spdlog::info("New log subdirectory created.");
             }
+            spdlog::info("Checking for duplicate intallations of {}.", sFixName);
+            Util::CheckForASIFiles(sFixName, true, true, nullptr); //Sets sFixPath. Exit thread & warn the user if multiple copies of MGSHDFix are trying to initialize.
             spdlog::info("{} v{} loaded.", sFixName, sFixVersion);
             spdlog::info("ASI plugin location: {}", (sExePath / sFixPath / (sFixName + ".asi")).string());
             spdlog::info("----------");
@@ -174,24 +178,32 @@ void Logging::LogSysInfo()
 
     spdlog::info("System Details - CPU: {}", cpu);
 
-    std::string deviceString;
-    for (int i = 0; ; i++)
+    if (Util::IsSteamOS())
     {
-        DISPLAY_DEVICE dd = { sizeof(dd), 0 };
-        BOOL f = EnumDisplayDevices(NULL, i, &dd, EDD_GET_DEVICE_INTERFACE_NAME);
-        if (!f)
-        {
-            break; //that's all, folks.
-        }
-        char deviceStringBuffer[128];
-        WideCharToMultiByte(CP_UTF8, 0, dd.DeviceString, -1, deviceStringBuffer, sizeof(deviceStringBuffer), NULL, NULL);
-        if (deviceString == deviceStringBuffer) //each monitor reports what gpu is driving it, lets just double check in case we're looking at a laptop with mixed usage.
-        {
-            continue;
-        }
-        deviceString = deviceStringBuffer;
-        spdlog::info("System Details - GPU: {}", deviceString);
+        spdlog::info("System Details - Detected Steam Deck (SteamOS / Proton).");
     }
+    else
+    {
+        std::string deviceString;
+        for (int i = 0; ; i++)
+        {
+            DISPLAY_DEVICE dd = { sizeof(dd), 0 };
+            BOOL f = EnumDisplayDevices(NULL, i, &dd, EDD_GET_DEVICE_INTERFACE_NAME);
+            if (!f)
+            {
+                break; //that's all, folks.
+            }
+            char deviceStringBuffer[128];
+            WideCharToMultiByte(CP_UTF8, 0, dd.DeviceString, -1, deviceStringBuffer, sizeof(deviceStringBuffer), NULL, NULL);
+            if (deviceString == deviceStringBuffer) //each monitor reports what gpu is driving it, lets just double check in case we're looking at a laptop with mixed usage.
+            {
+                continue;
+            }
+            deviceString = deviceStringBuffer;
+            CheckMinimumGPU(deviceString);
+        }
+    }
+
 
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
@@ -204,8 +216,6 @@ void Logging::LogSysInfo()
 
     if (Util::IsSteamOS())
     {
-        g_Logging.bCheckedSteamDeck = true;
-        g_Logging.bIsSteamDeck = true;
         os = GetSteamOSVersion();
     }
     else

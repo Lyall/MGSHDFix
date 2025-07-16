@@ -2,6 +2,8 @@
 #include "gamevars.hpp"
 #include "effect_speeds.hpp"
 #include "logging.hpp"
+#include "stat_persistence.hpp"
+
 
 void GameVars::Initialize()
 {
@@ -12,6 +14,19 @@ void GameVars::Initialize()
         actorWaitValue = reinterpret_cast<double*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "66 0F 2F 05 ?? ?? ?? ?? 73 ?? 33 C0", "MGS 2: GameVars: actorWaitValue") + 4));
         currentStage = reinterpret_cast<char const*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 4C 8D 05", "MGS 2: GameVars: currentStage") + 3));
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
+        {
+            static SafetyHookMid levelTransitionMidHook {};
+            levelTransitionMidHook = safetyhook::create_mid(LevelTransitionResult,
+                [](SafetyHookContext& ctx)
+                {
+                    OnLevelTransition();
+                });
+            LOG_HOOK(levelTransitionMidHook, "GameVars: Level Transition")
+        }
+    }
+    else if (eGameType & MGS3)
+    {
+        if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 5F ?? E9 ?? ?? ?? ?? 39 1D", "GameVars: Level Transition"))
         {
             static SafetyHookMid levelTransitionMidHook {};
             levelTransitionMidHook = safetyhook::create_mid(LevelTransitionResult,
@@ -47,5 +62,6 @@ const char* GameVars::GetCurrentStage() const
 void GameVars::OnLevelTransition()
 {
     g_EffectSpeedFix.Reset();
+    g_StatPersistence.SaveStats();
 }
 

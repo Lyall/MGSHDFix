@@ -61,14 +61,14 @@ bool VectorScalingFix::CompileGeometryShader()
     }
     if(iVectorLineScale < DEFAULT_LINE_SCALE*0.5)
     {
+        spdlog::warn("Config Warning");
+        spdlog::warn("Line scale is currently set to more that double the default size of Screen Height / 360 (6 pixels wide,) with individual raindrops currently set to {} ({} pixels wide.)", iVectorLineScale, iInternalResY / iVectorLineScale);
+        spdlog::warn("If you intend for line effects to be MASSIVE like this, set \"Silence Scaling Warnings\" to true in the config");
         Logging::ShowConsole();
         std::cout << "MGSHDFix Config Warning:\n"
                      "Line scale is currently set to more that double the default size of Screen Height/360 (" << iInternalResY / 360 << " pixels wide),\n"
                      "with individual raindrops currently set to " << iVectorLineScale << " (" << iInternalResY / iVectorLineScale << " pixels wide.)\n"
                      "If you intend for line effects to be MASSIVE like this, set \"Silence Scaling Warnings\" to true in the config";
-        spdlog::warn("Config Warning");
-        spdlog::warn("Line scale is currently set to more that double the default size of Screen Height / 360 (6 pixels wide,) with individual raindrops currently set to {} ({} pixels wide.)", iVectorLineScale, iInternalResY / iVectorLineScale);
-        spdlog::warn("If you intend for line effects to be MASSIVE like this, set \"Silence Scaling Warnings\" to true in the config");
     }
     else
     {
