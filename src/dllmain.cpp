@@ -230,7 +230,17 @@ static void Init_ReadConfig()
 
     spdlog::info("Config file: {}", (sExePath / sFixPath / sConfigFile).string());
     ini.parse(iniFile);
-    
+    if (!ini.errors.empty())
+    {
+        spdlog::error("Error parsing ini file, encountered {} errors at these lines:", ini.errors.size());
+        Logging::ShowConsole();
+        std::cout << "Error parsing ini file, encountered " << ini.errors.size() << " errors at these lines:" << std::endl;
+        for (auto err : ini.errors)
+        {
+            spdlog::error(err);
+            std::cout << err << std::endl;
+        }
+    }
 
     int loadedConfigVersion;
     inipp::get_value(ini.sections["Config Version"], "Version", loadedConfigVersion);
