@@ -10,10 +10,12 @@ private:
     static void OnSteamInitialized();
     static void FetchAndCacheSteamID();
     static void ResetAllAchievements();
+    bool bInitialized = false;
 
 public:
     void Setup() const;
 
+    static void LogControllers();
 
     // Achievement-related wrappers
     [[nodiscard]] static bool SetAchievement(const char* achievementID);

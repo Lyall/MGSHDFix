@@ -8,12 +8,14 @@
 #pragma warning(disable:4828)
 #include <isteamuser.h>
 #include <isteamuserstats.h>
+#include "isteaminput.h"
 
 #pragma warning(pop)
 
 namespace
 {
     SafetyHookMid SteamMidhook;
+    SafetyHookMid SteamInputMidhook;
 
 }
 
@@ -23,7 +25,7 @@ void SteamAPI::FetchAndCacheSteamID()
     CSteamID mySteamID = SteamUser()->GetSteamID();
     if (!mySteamID.IsValid())
     {
-        spdlog::error("Steam Achievements - Failed to fetch SteamID. Is Steam running?");
+        spdlog::error("SteamAPI: Failed to fetch SteamID. Is Steam running?");
         return;
     }
     g_SteamAPI.steamID = mySteamID.ConvertToUint64();
@@ -32,7 +34,9 @@ void SteamAPI::FetchAndCacheSteamID()
 
 void SteamAPI::OnSteamInitialized()
 {
-    ResetAllAchievements(); //This must ALWAYS be called before StatPersistence to make sure we don't wipe out the user's persistence file if they cancel the reset.
+    g_SteamAPI.bInitialized = true;
+    ResetAllAchievements(); //DON'T FREAK OUT READING THIS. bResetAchievements needs to be true, and there's multiple user confirmations first.
+                            //This must ALWAYS be called before StatPersistence to make sure we don't wipe out the user's persistence file if they cancel the reset.
     g_StatPersistence.OnSteamInitialized();
 }
 
@@ -179,7 +183,7 @@ void SteamAPI::Setup() const
 {
     if (!bIsLegitCopy)
     {
-        spdlog::warn("Steam Achievements: Steam achievement/stat tracking fixes are disabled due to non-legitimate copy.");
+        spdlog::warn("SteamAPI: Steam achievement/stat tracking fixes are disabled due to non-legitimate copy.");
         return;
     }
 
@@ -197,4 +201,50 @@ void SteamAPI::Setup() const
             });
         LOG_HOOK(SteamMidhook, "SteamAPI Initialization")
     }
+
+}
+
+void SteamAPI::LogControllers()
+{
+    if (!g_SteamAPI.bInitialized)
+    {
+        return;
+    }
+    ISteamInput* steamInput = SteamInput();
+    InputHandle_t handles[STEAM_INPUT_MAX_COUNT] = {};
+    steamInput->RunFrame();
+    int count = steamInput->GetConnectedControllers(handles);
+
+    spdlog::info("SteamInput: Detected {} controller{}.", count, count == 1 ? "" : "s");
+
+    for (int i = 0; i < count; ++i)
+    {
+        InputHandle_t handle = handles[i];
+        ESteamInputType type = steamInput->GetInputTypeForHandle(handle);
+        int gamepadIndex = steamInput->GetGamepadIndexForController(handle);
+
+        const char* typeStr = "Unknown";
+        switch (type)
+        {
+        case k_ESteamInputType_SteamController: typeStr = "Steam Controller"; break;
+        case k_ESteamInputType_XBox360Controller: typeStr = "Xbox 360"; break;
+        case k_ESteamInputType_XBoxOneController: typeStr = "Xbox One"; break;
+        case k_ESteamInputType_PS4Controller: typeStr = "PS4"; break;
+        case k_ESteamInputType_PS5Controller: typeStr = "PS5"; break;
+        case k_ESteamInputType_SwitchProController: typeStr = "Switch Pro"; break;
+        case k_ESteamInputType_GenericGamepad: typeStr = "Generic Gamepad"; break;
+        case k_ESteamInputType_AppleMFiController: typeStr = "Apple MFi"; break;
+        case k_ESteamInputType_AndroidController: typeStr = "Android Controller"; break;
+        case k_ESteamInputType_SwitchJoyConPair: typeStr = "Switch Joy-Con Pair"; break;
+        case k_ESteamInputType_SwitchJoyConSingle: typeStr = "Switch Joy-Con Single"; break;
+        case k_ESteamInputType_MobileTouch: typeStr = "Mobile Touch"; break;
+        case k_ESteamInputType_PS3Controller: typeStr = "PS3"; break;
+        case k_ESteamInputType_SteamDeckController: typeStr = "Steam Deck"; break;
+        default: break;
+        }
+
+        spdlog::info("SteamInput: Controller #{} | Type: {} | Handle: {} | Input Handler: {}", i+1, typeStr, handle, gamepadIndex == -1 ? "Steam Input" : std::to_string(gamepadIndex));
+
+    }
+
 }

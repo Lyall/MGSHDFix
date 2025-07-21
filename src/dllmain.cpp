@@ -1358,6 +1358,8 @@ void afterD3D11CreateDevice()
 {
     g_VectorScalingFix.LoadCompiledShader();
     g_MuteWarning.CheckStatus();
+    g_SteamAPI.LogControllers();
+
 
     //createGammaShader();
 
