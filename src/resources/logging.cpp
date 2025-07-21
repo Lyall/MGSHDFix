@@ -93,6 +93,7 @@ void Logging::Initialize()
             {
                 std::filesystem::create_directory(sExePath / "logs"); //create a "logs" subdirectory in the game folder to keep the main directory tidy.
             }
+            g_Logging.bLoaded = true;
             // Create 10MB truncated logger
             std::filesystem::path sLogFile = sFixName + ".log";
             std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(sLogFile.string(), std::make_shared<size_limited_sink<std::mutex>>((sExePath / "logs" / sLogFile).string(), 10 * 1024 * 1024));
@@ -241,28 +242,43 @@ void Logging::LogSysInfo()
             }
         }
 
+        // Read UBR (Update Build Revision) value from registry
+        DWORD ubr = 0;
+        if (key != nullptr)
+        {
+            DWORD ubrSize = sizeof(ubr);
+            RegQueryValueExA(key, "UBR", nullptr, nullptr, reinterpret_cast<LPBYTE>(&ubr), &ubrSize);
+        }
+
         RegCloseKey(key);
 
         HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-        while (ntdll)
+        if (ntdll)
         {
             typedef LONG(WINAPI* RtlGetVersion_t)(PRTL_OSVERSIONINFOW);
             RtlGetVersion_t RtlGetVersion =
                 reinterpret_cast<RtlGetVersion_t>(GetProcAddress(ntdll, "RtlGetVersion"));
-            if (!RtlGetVersion) break;
+            if (RtlGetVersion)
+            {
+                RTL_OSVERSIONINFOW info = {};
+                info.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOW);
 
-            RTL_OSVERSIONINFOW info = {};
-            info.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOW);
+                if (RtlGetVersion(&info) == 0)
+                {
+                    // Append build number and UBR (e.g. " (26100.4652)")
+                    os += " (" + std::to_string(info.dwBuildNumber) + "." + std::to_string(ubr) + ")";
 
-            if (RtlGetVersion(&info) != 0) break;
-            os += " (build " + std::to_string(info.dwBuildNumber) + ")";
-
-            if (info.dwBuildNumber < 22000) break;
-            std::size_t pos = os.find("Windows 10");
-
-            if (pos == std::string::npos) break;
-            os.replace(pos, 10, "Windows 11");
-            break;
+                    // Replace "Windows 10" with "Windows 11" if build number is 22000 or greater
+                    if (info.dwBuildNumber >= 22000)
+                    {
+                        std::size_t pos = os.find("Windows 10");
+                        if (pos != std::string::npos)
+                        {
+                            os.replace(pos, 10, "Windows 11");
+                        }
+                    }
+                }
+            }
         }
     }
     if (!os.empty()) spdlog::info("System Details - OS:  {}", os);
