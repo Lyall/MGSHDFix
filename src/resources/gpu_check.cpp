@@ -20,20 +20,82 @@ namespace
 
     // GPU tier table without suffixes
     std::vector<GpuEntry> gpuTable = {
-        {"GTX 750 TI", 40}, {"GTX 950", 55}, {"GTX 960", 65}, {"GTX 970", 100},
-        {"GTX 980", 120}, {"GTX 980 TI", 140}, {"GTX 1050", 60}, {"GTX 1050 TI", 70},
-        {"GTX 1060 3GB", 110}, {"GTX 1060 6GB", 120}, {"GTX 1070", 150}, {"GTX 1080", 170},
+        // NVIDIA GPUs
+        {"GTX 650", 30}, {"GTX 650 TI", 35}, {"GTX 660", 50}, {"GTX 660 TI", 55},
+        {"GTX 670", 70}, {"GTX 680", 80}, {"GTX 690", 90},
+        {"GTX 750", 35}, {"GTX 750 TI", 40},
+        {"GTX 950", 55}, {"GTX 960", 65}, {"GTX 970", 100}, {"GTX 980", 120}, {"GTX 980 TI", 140},
+        {"GTX TITAN", 120}, {"GTX TITAN BLACK", 130}, {"GTX TITAN X", 150},
+        {"GTX 1050", 60}, {"GTX 1050 TI", 70},
+        {"GTX 1060 3GB", 110}, {"GTX 1060 6GB", 120}, {"GTX 1070", 150}, {"GTX 1070 TI", 160},
+        {"GTX 1080", 170}, {"GTX 1080 TI", 200},
         {"GTX 1650", 85}, {"GTX 1650 SUPER", 95}, {"GTX 1660", 125}, {"GTX 1660 TI", 135},
-        {"RTX 2060", 180}, {"RTX 2070", 200}, {"RTX 2080", 220}, {"RTX 3060", 200},
-        {"RTX 3070", 260}, {"RTX 3080", 300}, {"RTX 3090", 350}, {"RTX 4060", 220},
-        {"RTX 4070 TI", 310}, {"RTX 4070", 280}, {"RTX 4080", 350}, {"RTX 4090", 400},
-        {"R9 270X", 55}, {"R9 280", 70}, {"R9 290", 100}, {"R9 290X", 110},
-        {"RX 460", 50}, {"RX 470", 95}, {"RX 480", 100}, {"RX 570", 100},
-        {"RX 580", 110}, {"RX 590", 115}, {"RX 5500 XT", 120}, {"RX 5600 XT", 140},
-        {"RX 5700", 160}, {"RX 6600", 170}, {"RX 6700 XT", 220}, {"RX 6800", 270},
-        {"RX 6900 XT", 310}, {"RX 7600", 190}, {"RX 7700 XT", 230}, {"RX 7800 XT", 270},
+        {"RTX 2060", 180}, {"RTX 2060 SUPER", 190}, {"RTX 2070", 200}, {"RTX 2070 SUPER", 210},
+        {"RTX 2080", 220}, {"RTX 2080 SUPER", 230}, {"RTX 2080 TI", 250},
+        {"RTX 3060", 200}, {"RTX 3060 TI", 230}, {"RTX 3070", 260}, {"RTX 3070 TI", 280},
+        {"RTX 3080", 300}, {"RTX 3080 TI", 320}, {"RTX 3090", 350}, {"RTX 3090 TI", 370},
+        {"RTX 4060", 220}, {"RTX 4060 TI", 240}, {"RTX 4070", 280}, {"RTX 4070 TI", 310},
+        {"RTX 4080", 350}, {"RTX 4090", 400},
+
+        // AMD GPUs
+        {"R7 250", 30}, {"R7 250X", 35}, {"R7 260", 45}, {"R7 260X", 50},
+        {"R9 270", 50}, {"R9 270X", 55}, {"R9 280", 70}, {"R9 280X", 80},
+        {"R9 285", 85}, {"R9 290", 100}, {"R9 290X", 110}, {"R9 295X2", 130},
+        {"RX 460", 50}, {"RX 470", 95}, {"RX 480", 100}, {"RX 550", 40}, {"RX 560", 55},
+        {"RX 570", 100}, {"RX 580", 110}, {"RX 590", 115},
+        {"RX VEGA 56", 130}, {"RX VEGA 64", 150},
+        {"RX 5500 XT", 120}, {"RX 5600 XT", 140}, {"RX 5700", 160}, {"RX 5700 XT", 170},
+        {"RX 6500 XT", 100}, {"RX 6600", 170}, {"RX 6600 XT", 180},
+        {"RX 6700", 200}, {"RX 6700 XT", 220}, {"RX 6800", 270}, {"RX 6800 XT", 290},
+        {"RX 6900 XT", 310}, {"RX 6950 XT", 320},
+        {"RX 7600", 190}, {"RX 7600 XT", 200},
+        {"RX 7700 XT", 230}, {"RX 7800 XT", 270},
         {"RX 7900 XT", 340}, {"RX 7900 XTX", 360},
+
+        // Intel HD Graphics (Gen 6-8 iGPUs)
+        {"HD GRAPHICS", 3},
+        {"HD GRAPHICS 2000", 3},
+        {"HD GRAPHICS 2500", 4},
+        {"HD GRAPHICS 3000", 5},
+        {"HD GRAPHICS 4000", 10},
+        {"HD GRAPHICS 4200", 12},
+        {"HD GRAPHICS 4400", 13},
+        {"HD GRAPHICS 4600", 15},
+        {"HD GRAPHICS 5000", 18},
+        {"HD GRAPHICS 505", 19},
+        {"HD GRAPHICS 510", 20},
+        {"HD GRAPHICS 515", 20},
+        {"HD GRAPHICS 520", 22},
+        {"HD GRAPHICS 530", 24},
+        {"HD GRAPHICS 6000", 26},
+
+        // Intel UHD Graphics (Gen 9-12 iGPUs)
+        {"UHD GRAPHICS 600", 25},
+        {"UHD GRAPHICS 610", 28},
+        {"UHD GRAPHICS 615", 30},
+        {"UHD GRAPHICS 620", 32},
+        {"UHD GRAPHICS 630", 35},
+        {"UHD GRAPHICS 730", 38},
+        {"UHD GRAPHICS 750", 40},
+        {"UHD GRAPHICS 770", 45},
+
+        // Intel Iris / Iris Pro / Iris Plus
+        {"IRIS", 30},
+        {"IRIS PRO 5200", 32},
+        {"IRIS PRO 580", 40},
+        {"IRIS PLUS 540", 35},
+        {"IRIS PLUS 550", 38},
+        {"IRIS PLUS 655", 40},
+        {"IRIS XE", 60},
+
+        // Intel Arc GPUs
+        {"ARC A310", 90},
+        {"ARC A380", 120},
+        {"ARC A580", 170},
+        {"ARC A750", 210},
+        {"ARC A770", 230},
     };
+
 
     // Sort GPU table descending by model length for potential substring matching (not strictly necessary here)
     struct TableSorter
@@ -115,7 +177,7 @@ namespace
     int ParseAndEstimate(const std::string& name)
     {
         // Regex extracts: prefix (GTX/RTX/RX/etc), model number, optional suffix (TI/SUPER/ULTRA)
-        std::regex re(R"((GTX|RTX|RX|ARC|HD|IRIS)\s*([0-9]{3,4})(?:\s*(TI|SUPER|ULTRA))?)");
+        std::regex re(R"((GTX|RTX|RX|ARC|HD|IRIS|UHD|XE)\s*([0-9]{3,4})(?:\s*(TI|SUPER|ULTRA))?)");
         std::smatch match;
         if (std::regex_search(name, match, re))
         {
@@ -143,6 +205,15 @@ namespace
             else if (prefix == "HD")
             {
                 baseTier = 10;
+            }
+            else if (prefix == "UHD")
+            {
+                baseTier = 25;
+                if (modelNum >= 700) baseTier = 35;
+            }
+            else if (prefix == "XE")
+            {
+                baseTier = 60;
             }
 
             if (!suffix.empty())
@@ -204,6 +275,12 @@ void CheckMinimumGPU(const std::string& gpuName)
     std::string vendor = GetVendor(upper);
 
     int tier = GetTier(upper);
+
+    if (tier == 0 && vendor == "INTEL")
+    {
+        spdlog::warn("System Details - GPU: {} detected as Intel integrated graphics.", gpuName);
+        tier = 20; // fallback for unrecognized Intel
+    }
 
     if (tier == 0)
     {
