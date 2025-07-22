@@ -1384,7 +1384,7 @@ static void CheckForUpdates()
         return;
     }
     std::filesystem::path cacheFilePath = sGameSavePath / (sFixName + "_version_check.txt");
-    LatestVersionChecker checker(sFixVersion, REPO_OWNER, REPO_NAME, cacheFilePath);
+    LatestVersionChecker checker(cacheFilePath);
     checker.checkForUpdates();
 }
 

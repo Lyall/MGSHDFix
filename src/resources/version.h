@@ -1,15 +1,10 @@
 ﻿#pragma once
 
 // Core name & version
-#define FIX_NAME          "MGSHDFix"
-#define VERSION_STRING    "2.5.1"
-#define REPO_OWNER       "Lyall" //Owner of the repository to check for updates, ie github.com/ -> Lyall <- this part
-#define REPO_NAME         "MGSHDFix" //Name of the repository to check for updates, ie github.com/Lyall/ -> MGSHDFix <- this part
-/// Defines the repository API to use for version checking
-#define REPO_GITHUB
-//#define REPO_CODEBERG
-//#define REPO_GITLAB
-
+#define FIX_NAME "MGSHDFix"
+#define VERSION_STRING "2.5.1"
+#define PRIMARY_REPO_URL "https://github.com/Lyall/MGSHDFix"
+//#define FALLBACK_REPO_URL "https://codeberg.org/Lyall/MGSHDFix"
 
 #define VERSION_MAJOR     2
 #define VERSION_MINOR     5
