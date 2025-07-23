@@ -3,11 +3,13 @@
 
 #include <map>
 
-extern std::string const sFixVersion;
-extern std::string sExeName;
-extern std::filesystem::path sGameSavePath;
+inline std::string sExeName;
+inline std::filesystem::path sExePath;
+inline std::filesystem::path sGameSavePath;
 
-extern HMODULE engineModule;
+inline HMODULE baseModule = GetModuleHandle(NULL);
+inline HMODULE engineModule;
+inline HMODULE unityPlayer;
 
 
 struct GameInfo
@@ -16,7 +18,7 @@ struct GameInfo
     std::string ExeName;
     int SteamAppId;
 };
-extern const GameInfo* game;
+inline const GameInfo* game = nullptr;
 
 enum MgsGame : std::uint8_t
 {
@@ -27,19 +29,10 @@ enum MgsGame : std::uint8_t
     LAUNCHER = 1 << 3,
     UNKNOWN  = 1 << 4
 };
-extern const std::map<MgsGame, GameInfo> kGames;
-extern MgsGame eGameType;
+inline MgsGame eGameType = UNKNOWN;
 
-extern HMODULE baseModule;
-extern std::string sGameVersion;
-extern std::filesystem::path sExePath;
-extern std::string sFixName;
-
-
-//Config Options
-extern int iOutputResY;
-extern int iInternalResY;
-extern float fAspectRatio;
-extern bool bOutdatedReshade;
-extern bool bLauncherConfigSkipLauncher;
-
+inline const std::map<MgsGame, GameInfo> kGames = {
+    {MGS2, {"Metal Gear Solid 2 MC", "METAL GEAR SOLID2.exe", 2131640}},
+    {MGS3, {"Metal Gear Solid 3 MC", "METAL GEAR SOLID3.exe", 2131650}},
+    {MG, {"Metal Gear / Metal Gear 2 (MSX)", "METAL GEAR.exe", 2131680}},
+};

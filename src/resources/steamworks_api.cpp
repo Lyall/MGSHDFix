@@ -1,6 +1,5 @@
 #include "common.hpp"
 #include "steamworks_api.hpp"
-#include "stat_persistence.hpp"
 #include <logging.hpp>
 
 
@@ -11,6 +10,8 @@
 #include "isteaminput.h"
 
 #pragma warning(pop)
+
+void AfterSteamInitialized();
 
 namespace
 {
@@ -37,7 +38,7 @@ void SteamAPI::OnSteamInitialized()
     g_SteamAPI.bInitialized = true;
     ResetAllAchievements(); //DON'T FREAK OUT READING THIS. bResetAchievements needs to be true, and there's multiple user confirmations first.
                             //This must ALWAYS be called before StatPersistence to make sure we don't wipe out the user's persistence file if they cancel the reset.
-    g_StatPersistence.OnSteamInitialized();
+    AfterSteamInitialized();
 }
 
 

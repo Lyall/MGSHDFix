@@ -1,5 +1,19 @@
+#include "common.hpp"
 #include "version_checking.hpp"
+
 #include "logging.hpp"
+
+void CheckForUpdates()
+{
+    if (!bShouldCheckForUpdates)
+    {
+        spdlog::info("Mod update checking disabled via config.");
+        return;
+    }
+    std::filesystem::path cacheFilePath = sGameSavePath / (sFixName + "_version_check.txt");
+    LatestVersionChecker checker(cacheFilePath);
+    checker.checkForUpdates();
+}
 
 LatestVersionChecker::LatestVersionChecker(const std::filesystem::path& cacheFile)
     : m_cacheFile(cacheFile)
@@ -26,8 +40,6 @@ bool LatestVersionChecker::checkForUpdates()
 #include <winhttp.h>
 
 #pragma comment(lib, "winhttp.lib")
-
-extern bool bConsoleNotifications;
 
 inline std::string to_lower(std::string str)
 {
@@ -129,7 +141,7 @@ bool LatestVersionChecker::checkForUpdates()
 
         if (warnedVersion != cachedLatest)
         {
-            if (bConsoleNotifications)
+            if (bConsoleUpdateNotifications)
             {
                 Logging::ShowConsole();
                 std::cout << FIX_NAME << " Update Notice: New version of " << FIX_NAME << " is available.\nCurrent Version: "

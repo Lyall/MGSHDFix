@@ -3,8 +3,7 @@
 #include "stdafx.h"
 #include "RegStateHelpers.hpp"
 
-
-extern bool bVerboseLogging;
+inline std::filesystem::path sFixPath;
 
 namespace Memory
 {
@@ -39,7 +38,7 @@ namespace Memory
 
 namespace Util
 {
-    extern int findStringInVector(std::string& str, const std::initializer_list<std::string>& search);
+    int findStringInVector(std::string& str, const std::initializer_list<std::string>& search);
 
     // Convert an UTF8 string to a wide Unicode String
     std::wstring utf8_decode(const std::string& str);
@@ -63,7 +62,7 @@ namespace Util
 {\
     if (hook)\
     {\
-        if (bVerboseLogging)\
+        if (g_Logging.bVerboseLogging)\
         {\
             spdlog::info("{}: Hook installed.", prefix);\
         }\

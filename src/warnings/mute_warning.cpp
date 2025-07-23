@@ -41,7 +41,7 @@ void MuteWarning::Setup()
             spdlog::error("MG-MG2 | MGS 2 | MGS3: Mute Warning: Settings strut not found.");
             return;
         }
-        if (bVerboseLogging)
+        if (g_Logging.bVerboseLogging)
         {
             spdlog::info("MG-MG2 | MGS 2 | MGS3: Mute Warning: Settings strut is at {:s}+{:x}", sExeName.c_str(), reinterpret_cast<uintptr_t>(muteWarningAddress) - reinterpret_cast<uintptr_t>(baseModule));
         }

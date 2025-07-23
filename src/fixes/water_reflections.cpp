@@ -31,12 +31,7 @@ void WaterReflectionFix::Initialize() const
         if (MGS3_RenderWaterSurfaceScanResult && MGS3_RenderWaterSurfaceScanAddress)
         {
             MGS3_RenderWaterSurface_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS3_RenderWaterSurfaceScanAddress), reinterpret_cast<void*>(MGS3_RenderWaterSurface));
-            if (!MGS3_RenderWaterSurface_hook)
-            {
-                spdlog::info("MGS 3: Render Water Surface: Hook failed.");
-                return;
-            }
-            spdlog::info("MGS 3: Render Water Surface: Hook successful. Address is {:s}+{:x}", sExeName.c_str(), MGS3_RenderWaterSurfaceScanAddress - (uintptr_t)baseModule);
+            LOG_HOOK(MGS3_RenderWaterSurface_hook, "MGS 3: Render Water Surface")
         }
         else
         {
@@ -48,12 +43,7 @@ void WaterReflectionFix::Initialize() const
         if (MGS3_GetViewportCameraOffsetYScanResult && MGS3_GetViewportCameraOffsetYScanAddress)
         {
             MGS3_GetViewportCameraOffsetY_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS3_GetViewportCameraOffsetYScanAddress), reinterpret_cast<void*>(MGS3_GetViewportCameraOffsetY));
-            if (!MGS3_GetViewportCameraOffsetY_hook)
-            {
-                spdlog::info("MGS 3: Get Viewport Camera Offset: Hook failed.");
-                return;
-            }
-            spdlog::info("MGS 3: Get Viewport Camera Offset: Hook successful. Address is {:s}+{:x}", sExeName.c_str(), MGS3_GetViewportCameraOffsetYScanAddress - (uintptr_t)baseModule);
+            LOG_HOOK(MGS3_GetViewportCameraOffsetY_hook, "MGS 3: Get Viewport Camera Offset")
         }
         else
         {

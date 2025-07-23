@@ -16,6 +16,7 @@ public:
     bool bLoaded = false;
     bool bIsSteamDeck = false;
     bool bCheckedSteamDeck = false;
+    bool bVerboseLogging = true;
 };
 
 /// Global logging instance

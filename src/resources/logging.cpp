@@ -5,9 +5,7 @@
 
 #include "gpu_check.hpp"
 #include "steamworks_api.hpp"
-
-extern std::filesystem::path sFixPath;
-
+#include "version.h"
 
 
 // Spdlog sink (truncate on startup, single file)

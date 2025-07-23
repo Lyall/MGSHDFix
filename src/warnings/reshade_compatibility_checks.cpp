@@ -1,5 +1,7 @@
 #include "common.hpp"
 #include "reshade_compatibility_checks.hpp"
+
+#include "config.hpp"
 #include "logging.hpp"
 
 void ReshadeCompatibility::Check()

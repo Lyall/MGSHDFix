@@ -37,3 +37,8 @@ private:
 
 #endif
 };
+
+inline bool bShouldCheckForUpdates;
+inline bool bConsoleUpdateNotifications;
+
+void CheckForUpdates();

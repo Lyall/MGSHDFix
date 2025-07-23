@@ -1,13 +1,8 @@
-#include "helper.hpp"
+#include "common.hpp"
+
 #include "logging.hpp"
 
 #pragma comment(lib,"Version.lib")
-
-extern HMODULE baseModule;
-extern std::filesystem::path sExePath;
-extern std::filesystem::path sFixPath;
-extern std::string sExeName;
-
 
 namespace Memory
 {
@@ -114,7 +109,7 @@ namespace Memory
         std::uint8_t* foundPattern = PatternScanSilent(module, signature);
         if (foundPattern)
         {
-            if (bVerboseLogging)
+            if (g_Logging.bVerboseLogging)
             {
 
                 spdlog::info("{}: Pattern scan found. Address: {:s}+{:x}", prefix, sExeName.c_str(), (uintptr_t)foundPattern - (uintptr_t)baseModule);

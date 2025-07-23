@@ -6,6 +6,15 @@
 #define PRIMARY_REPO_URL "https://github.com/Lyall/MGSHDFix"
 //#define FALLBACK_REPO_URL "https://codeberg.org/Lyall/MGSHDFix"
 
+
+// Version
+inline constexpr std::string sFixVersion = VERSION_STRING;
+inline constexpr std::string sFixName = FIX_NAME;
+inline constexpr int iConfigVersion = 4; //increment this when making config changes, along with the number at the bottom of the config file
+//that way we can sanity check to ensure people don't have broken/disabled features due to old config files.
+
+
+
 #define VERSION_MAJOR     2
 #define VERSION_MINOR     5
 #define VERSION_PATCH     1

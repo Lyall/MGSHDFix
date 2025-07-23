@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\resources\config.cpp" />
     <ClCompile Include="external\safetyhook\src\allocator.cpp" />
     <ClCompile Include="external\safetyhook\src\easy.cpp" />
     <ClCompile Include="external\safetyhook\src\inline_hook.cpp" />
@@ -66,6 +67,7 @@
     <ClCompile Include="src\features\stat_persistence.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\config.hpp" />
     <ClInclude Include="external\safetyhook\include\safetyhook.hpp" />
     <ClInclude Include="src\resources\gpu_check.hpp" />
     <ClInclude Include="src\resources\logging.hpp" />
@@ -73,7 +75,6 @@
     <ClInclude Include="src\fixes\aiming_after_equip.hpp" />
     <ClInclude Include="src\fixes\color_filters.hpp" />
     <ClInclude Include="src\resources\RegStateHelpers.hpp" />
-    <ClInclude Include="src\resources\resource.h" />
     <ClInclude Include="src\resources\version_checking.hpp" />
     <ClInclude Include="src\resources\version.h" />
     <ClInclude Include="src\warnings\corrupt_save_message.hpp" />

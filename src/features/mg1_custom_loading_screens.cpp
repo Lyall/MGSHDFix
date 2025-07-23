@@ -1,5 +1,7 @@
 #include "common.hpp"
 #include "mg1_custom_loading_screens.hpp"
+
+#include "config.hpp"
 #include "logging.hpp"
 
 void MG1CustomLoadingScreens::Initialize() const
