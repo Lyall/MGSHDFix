@@ -1,23 +1,23 @@
 ﻿#pragma once
+// ReSharper disable CppClangTidyModernizeMacroToEnum
 
 // Core name & version
 #define FIX_NAME "MGSHDFix"
-#define VERSION_STRING "2.5.1"
 #define PRIMARY_REPO_URL "https://github.com/Lyall/MGSHDFix"
 //#define FALLBACK_REPO_URL "https://codeberg.org/Lyall/MGSHDFix"
 
+#define VERSION_MAJOR 2
+#define VERSION_MINOR 5
+#define VERSION_PATCH 1
 
-// Version
-inline constexpr std::string sFixVersion = VERSION_STRING;
-inline constexpr std::string sFixName = FIX_NAME;
 inline constexpr int iConfigVersion = 4; //increment this when making config changes, along with the number at the bottom of the config file
 //that way we can sanity check to ensure people don't have broken/disabled features due to old config files.
 
-
-
-#define VERSION_MAJOR     2
-#define VERSION_MINOR     5
-#define VERSION_PATCH     1
+#define STRINGIFY_HELPER(x) #x
+#define STRINGIFY(x) STRINGIFY_HELPER(x)
+#define VERSION_STRING STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
+inline constexpr std::string sFixVersion = VERSION_STRING;
+inline constexpr std::string sFixName = FIX_NAME;
 
 // Metadata
 #define COMPANY_NAME      "Lyall & Contributors"

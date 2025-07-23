@@ -20,10 +20,11 @@ jobs:
         VERSION_FILE="src/resources/version.h"
         echo "Reading version from $VERSION_FILE"
 
-        version_line=$(grep '#define VERSION_STRING' "$VERSION_FILE")
-        echo "Found line: $version_line"
+        VERSION_MAJOR=$(grep '#define VERSION_MAJOR' "$VERSION_FILE" | awk '{print $3}')
+        VERSION_MINOR=$(grep '#define VERSION_MINOR' "$VERSION_FILE" | awk '{print $3}')
+        VERSION_PATCH=$(grep '#define VERSION_PATCH' "$VERSION_FILE" | awk '{print $3}')
 
-        version=$(echo "$version_line" | sed -E 's/#define VERSION_STRING +"([^"]+)"/\1/')
+        version="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
         echo "Parsed version: $version"
 
         echo "version=$version" >> $GITHUB_OUTPUT
