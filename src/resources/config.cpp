@@ -15,6 +15,75 @@
 #include "stat_persistence.hpp"
 
 
+// -----------------------------------------------------------------------------
+// ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
+// Automatically logs missing/invalid values and exits the thread immediately.
+// By Afevis/ShizCalev, 2025.
+// -----------------------------------------------------------------------------
+
+namespace ConfigHelper
+{
+    /// Terminates execution with a fatal INI error
+    inline void FatalConfigError(const std::string& section, const std::string& key, const std::string& reason)
+    {
+        std::string message = "[" + sFixName +  " Config Helper] Failed to read config key '" + key +
+            "' in section '" + section + "': " + reason;
+
+        spdlog::error(message);
+        spdlog::error("Please check that you're using the latest version's config file, and that there are no typos in it.");
+        Logging::ShowConsole();
+        std::cout << message << std::endl;
+        std::cout << "Please check that you're using the latest version's config file, and that there are no typos in it." << std::endl;
+
+        FreeLibraryAndExitThread(baseModule, 1);
+    }
+
+    /// Internal parsing helper
+    template <typename T>
+    bool TryParse(const std::string& str, T& out)
+    {
+        std::istringstream iss(str);
+        return (iss >> std::boolalpha >> out) ? true : false;
+    }
+
+    /// Parses bool values with case-insensitivity and common boolean strings
+    template <>
+    inline bool TryParse<bool>(const std::string& str, bool& out)
+    {
+        std::string val = str;
+        std::transform(val.begin(), val.end(), val.begin(), ::tolower);
+        if (val == "1" || val == "true" || val == "yes" || val == "on")
+        {
+            out = true;
+            return true;
+        }
+        if (val == "0" || val == "false" || val == "no" || val == "off")
+        {
+            out = false;
+            return true;
+        }
+        return false;
+    }
+
+    /// Generic value loader from INI with hard error on failure
+    template <typename T>
+    void getValue(const inipp::Ini<char>& ini, const std::string& section, const std::string& key, T& out)
+    {
+        auto secIt = ini.sections.find(section);
+        if (secIt == ini.sections.end())
+            FatalConfigError(section, key, "Section not found");
+
+        const auto& keyvals = secIt->second;
+        auto keyIt = keyvals.find(key);
+        if (keyIt == keyvals.end())
+            FatalConfigError(section, key, "Key not found");
+
+        if (!TryParse<T>(keyIt->second, out))
+            FatalConfigError(section, key, "Failed to parse value '" + keyIt->second + "'");
+    }
+}
+
+
 void Config::Read()
 {
     std::filesystem::path sConfigFile = sFixName + ".ini";
@@ -46,44 +115,44 @@ void Config::Read()
         }
     }
 
-    int loadedConfigVersion;
-    inipp::get_value(ini.sections["Config Version"], "Version", loadedConfigVersion);
-    if (loadedConfigVersion != iConfigVersion)
-    {
-        spdlog::error("CONFIG ERROR: Config file version mismatch! Expected version {}, but found version {}.", iConfigVersion, loadedConfigVersion);
-        Logging::ShowConsole();
-        std::cout << "" << sFixName << " v" << sFixVersion << " loaded." << std::endl;
-        std::cout << "MGSHDFix CONFIG ERROR: Outdated config file!" << std::endl;
-        std::cout << "MGSHDFix CONFIG ERROR: Please install -all- the files from the latest release!" << std::endl;
-        return FreeLibraryAndExitThread(baseModule, 1);
-    }
-
     // Grab desktop resolution
     DesktopDimensions = Util::GetPhysicalDesktopDimensions();
 
     // Read ini file
-    g_Logging.bVerboseLogging = Util::stringToBool(ini.sections["Verbose Logging"]["Enabled"]);
-    bOutputResolution = Util::stringToBool(ini.sections["Output Resolution"]["Enabled"]);
-    inipp::get_value(ini.sections["Output Resolution"], "Width", iOutputResX);
-    inipp::get_value(ini.sections["Output Resolution"], "Height", iOutputResY);
-    bWindowedMode = Util::stringToBool(ini.sections["Output Resolution"]["Windowed"]);
-    bBorderlessMode = Util::stringToBool(ini.sections["Output Resolution"]["Borderless"]);
-    inipp::get_value(ini.sections["Internal Resolution"], "Width", iInternalResX);
-    inipp::get_value(ini.sections["Internal Resolution"], "Height", iInternalResY);
-    inipp::get_value(ini.sections["Anisotropic Filtering"], "Samples", iAnisotropicFiltering);
-    bDisableTextureFiltering = Util::stringToBool(ini.sections["Disable Texture Filtering"]["DisableTextureFiltering"]);
-    bFramebufferFix = Util::stringToBool(ini.sections["Framebuffer Fix"]["Enabled"]);
-    bLauncherJumpStart = Util::stringToBool(ini.sections["Launcher Config"]["LauncherJumpStart"]);
-    g_IntroSkip.isEnabled = Util::stringToBool(ini.sections["Skip Intro Logos"]["Enabled"]);
-    g_StereoAudioFix.isEnabled = Util::stringToBool(ini.sections["Force Stereo Audio"]["Enabled"]);
-    g_PauseOnFocusLoss.bPauseOnFocusLoss = Util::stringToBool(ini.sections["Pause On Focus Loss"]["Enabled"]);
-    g_PauseOnFocusLoss.bSpeedrunnerBugfixOverride = Util::stringToBool(ini.sections["Pause On Focus Loss"]["SpeedrunnerBugfixOverride"]);
-    g_MuteWarning.bEnabled = Util::stringToBool(ini.sections["Mute Warning"]["Enabled"]);
+    ConfigHelper::getValue(ini, "Verbose Logging", "Enabled", g_Logging.bVerboseLogging);
 
-    bShouldCheckForUpdates = Util::stringToBool(ini.sections["Update Notifications"]["CheckForUpdates"]);
-    bConsoleUpdateNotifications = Util::stringToBool(ini.sections["Update Notifications"]["ConsoleNotifications"]);
-    g_StatPersistence.bAchievementPersistenceEnabled = Util::stringToBool(ini.sections["Achievement Persistence"]["Enabled"]);
-    g_SteamAPI.bResetAchievements = Util::stringToBool(ini.sections["Reset All Achievements"]["Reset_All_Achievements"]);
+    ConfigHelper::getValue(ini, "Output Resolution", "Enabled", bOutputResolution);
+    ConfigHelper::getValue(ini, "Output Resolution", "Width", iOutputResX);
+    ConfigHelper::getValue(ini, "Output Resolution", "Height", iOutputResY);
+    ConfigHelper::getValue(ini, "Output Resolution", "Windowed", bWindowedMode);
+    ConfigHelper::getValue(ini, "Output Resolution", "Borderless", bBorderlessMode);
+
+    ConfigHelper::getValue(ini, "Internal Resolution", "Width", iInternalResX);
+    ConfigHelper::getValue(ini, "Internal Resolution", "Height", iInternalResY);
+
+    ConfigHelper::getValue(ini, "Anisotropic Filtering", "Samples", iAnisotropicFiltering);
+
+    ConfigHelper::getValue(ini, "Disable Texture Filtering", "DisableTextureFiltering", bDisableTextureFiltering);
+
+    ConfigHelper::getValue(ini, "Framebuffer Fix", "Enabled", bFramebufferFix);
+
+    ConfigHelper::getValue(ini, "Launcher Config", "LauncherJumpStart", bLauncherJumpStart);
+
+    ConfigHelper::getValue(ini, "Skip Intro Logos", "Enabled", g_IntroSkip.isEnabled);
+    ConfigHelper::getValue(ini, "Force Stereo Audio", "Enabled", g_StereoAudioFix.isEnabled);
+
+    ConfigHelper::getValue(ini, "Pause On Focus Loss", "Enabled", g_PauseOnFocusLoss.bPauseOnFocusLoss);
+    ConfigHelper::getValue(ini, "Pause On Focus Loss", "SpeedrunnerBugfixOverride", g_PauseOnFocusLoss.bSpeedrunnerBugfixOverride);
+
+    ConfigHelper::getValue(ini, "Mute Warning", "Enabled", g_MuteWarning.bEnabled);
+
+    ConfigHelper::getValue(ini, "Update Notifications", "CheckForUpdates", bShouldCheckForUpdates);
+    ConfigHelper::getValue(ini, "Update Notifications", "ConsoleNotifications", bConsoleUpdateNotifications);
+
+    ConfigHelper::getValue(ini, "Achievement Persistence", "Enabled", g_StatPersistence.bAchievementPersistenceEnabled);
+
+    ConfigHelper::getValue(ini, "Reset All Achievements", "Reset_All_Achievements", g_SteamAPI.bResetAchievements);
+
 
     /*//INITIALIZE(Init_GammaShader());
     //INITIALIZE(g_DistanceCulling.Initialize());
@@ -94,26 +163,31 @@ void Config::Read()
     //INITIALIZE(g_ColorFilterFix.Initialize());*/
 
     //inipp::get_value(ini.sections["MG1 Custom Loading Screens"], "Enabled", g_MG1CustomLoadingScreens.isEnabled);
-    bMouseSensitivity = Util::stringToBool(ini.sections["Mouse Sensitivity"]["Enabled"]);
-    inipp::get_value(ini.sections["Mouse Sensitivity"], "X Multiplier", fMouseSensitivityXMulti);
-    inipp::get_value(ini.sections["Mouse Sensitivity"], "Y Multiplier", fMouseSensitivityYMulti);
-    bDisableCursor = Util::stringToBool(ini.sections["Disable Mouse Cursor"]["Enabled"]);
-    inipp::get_value(ini.sections["Texture Buffer"], "SizeMB", g_TextureBufferSize.iTextureBufferSizeMB);
-    bAspectFix = Util::stringToBool(ini.sections["Fix Aspect Ratio"]["Enabled"]);
-    bHUDFix = Util::stringToBool(ini.sections["Fix HUD"]["Enabled"]);
-    bFOVFix = Util::stringToBool(ini.sections["Fix FOV"]["Enabled"]);
-    bLauncherConfigSkipLauncher = Util::stringToBool(ini.sections["Launcher Config"]["SkipLauncher"]);
+    ConfigHelper::getValue(ini, "Mouse Sensitivity", "Enabled", bMouseSensitivity);
+    ConfigHelper::getValue(ini, "Mouse Sensitivity", "X Multiplier", fMouseSensitivityXMulti);
+    ConfigHelper::getValue(ini, "Mouse Sensitivity", "Y Multiplier", fMouseSensitivityYMulti);
+
+    ConfigHelper::getValue(ini, "Disable Mouse Cursor", "Enabled", bDisableCursor);
+
+    ConfigHelper::getValue(ini, "Texture Buffer", "SizeMB", g_TextureBufferSize.iTextureBufferSizeMB);
+
+    ConfigHelper::getValue(ini, "Fix Aspect Ratio", "Enabled", bAspectFix);
+    ConfigHelper::getValue(ini, "Fix HUD", "Enabled", bHUDFix);
+    ConfigHelper::getValue(ini, "Fix FOV", "Enabled", bFOVFix);
+
+    ConfigHelper::getValue(ini, "Launcher Config", "SkipLauncher", bLauncherConfigSkipLauncher);
+
 
     // Read launcher settings from ini
     std::string sLauncherConfigCtrlType = "kbd";
     std::string sLauncherConfigRegion = "us";
     std::string sLauncherConfigLanguage = "en";
-    inipp::get_value(ini.sections["Launcher Config"], "CtrlType", sLauncherConfigCtrlType);
-    inipp::get_value(ini.sections["Launcher Config"], "Region", sLauncherConfigRegion);
-    inipp::get_value(ini.sections["Launcher Config"], "Language", sLauncherConfigLanguage);
-    inipp::get_value(ini.sections["Launcher Config"], "MSXGame", sLauncherConfigMSXGame);
-    inipp::get_value(ini.sections["Launcher Config"], "MSXWallType", iLauncherConfigMSXWallType);
-    inipp::get_value(ini.sections["Launcher Config"], "MSXWallAlign", sLauncherConfigMSXWallAlign);
+    ConfigHelper::getValue(ini, "Launcher Config", "CtrlType", sLauncherConfigCtrlType);
+    ConfigHelper::getValue(ini, "Launcher Config", "Region", sLauncherConfigRegion);
+    ConfigHelper::getValue(ini, "Launcher Config", "Language", sLauncherConfigLanguage);
+    ConfigHelper::getValue(ini, "Launcher Config", "MSXGame", sLauncherConfigMSXGame);
+    ConfigHelper::getValue(ini, "Launcher Config", "MSXWallType", iLauncherConfigMSXWallType);
+    ConfigHelper::getValue(ini, "Launcher Config", "MSXWallAlign", sLauncherConfigMSXWallAlign);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
     iLauncherConfigRegion = Util::findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
     iLauncherConfigLanguage = Util::findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
@@ -180,7 +254,7 @@ void Config::Read()
     spdlog::info("Config Parse: Muted Audio Console Warnings: {}", g_MuteWarning.bEnabled);
     if (eGameType & (MGS2 | MGS3))
     {
-        g_VectorScalingFix.bEnableVectorLineFix = Util::stringToBool(ini.sections["Vector Line Fix"]["Enabled"]);
+        ConfigHelper::getValue(ini, "Vector Line Fix", "Enabled", g_VectorScalingFix.bEnableVectorLineFix);
         spdlog::info("Config Parse: Fix Vector Effect (Rain) Scaling: {}", g_VectorScalingFix.bEnableVectorLineFix);
         if (g_VectorScalingFix.bEnableVectorLineFix)
         {

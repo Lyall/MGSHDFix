@@ -356,29 +356,6 @@ namespace Util
         return FALSE;
     }
 
-    bool stringToBool(const std::string& str)
-    {
-        std::string lowerStr = str;
-        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
-            [](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-        if (lowerStr == "true" || lowerStr == "1")
-        {
-            return true;
-        }
-        if (lowerStr == "false" || lowerStr == "0")
-        {
-            return false;
-        }
-        // Handle cases where the string is not a recognized boolean representation
-        // For example, throw an exception, return a default value, or log an error.
-        // For simplicity, this example returns false for unrecognized strings.
-        return false;
-    }
-
-
     std::string GetUppercaseNameAtIndex(const std::initializer_list<std::string>& list, int index)
     {
         if (index >= 0 && index < static_cast<int>(list.size()))
