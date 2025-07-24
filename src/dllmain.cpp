@@ -1196,6 +1196,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 {
     if (ul_reason_for_call == DLL_PROCESS_ATTACH)
     {
+        DisableThreadLibraryCalls(hModule);
+
         HMODULE vcruntime140 = GetModuleHandleA("VCRUNTIME140.dll");
         if (vcruntime140)
         {

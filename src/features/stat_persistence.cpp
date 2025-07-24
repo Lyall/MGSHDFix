@@ -190,7 +190,6 @@ void StatPersistence::MGS3_SnakeEyes_SetSeen(int iSceneNumber)
             g_StatPersistence.bUpdatedState = true; \
             return; \
         } \
-        spdlog::info("setting {} to cached val {}", iCurrentNum, g_StatPersistence.currentCountVar+1);\
         reghelpers::set_eax(ctx, g_StatPersistence.currentCountVar++); \
     } while (0)
 

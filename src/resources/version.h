@@ -4,7 +4,7 @@
 // Core name & version
 #define FIX_NAME "MGSHDFix"
 #define PRIMARY_REPO_URL "https://github.com/Lyall/MGSHDFix"
-//#define FALLBACK_REPO_URL "https://codeberg.org/Lyall/MGSHDFix"
+#define FALLBACK_REPO_URL "https://github.com/ShizCalev/MGSHDFix"
 
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 5
