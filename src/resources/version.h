@@ -8,10 +8,8 @@
 
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 5
-#define VERSION_PATCH 1
+#define VERSION_PATCH 2
 
-inline constexpr int iConfigVersion = 4; //increment this when making config changes, along with the number at the bottom of the config file
-//that way we can sanity check to ensure people don't have broken/disabled features due to old config files.
 
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
