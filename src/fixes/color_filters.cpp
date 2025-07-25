@@ -36,7 +36,7 @@ void ColorFilterFix::Initialize()
         // Patch the color filter to use normal filter (0x38) instead of green (0x39) or blue (0x3A)
         Memory::PatchBytes(MGS2_ColorFilterAddress, "\x38", 1);
         
-        spdlog::info("MGS 2: Color Filter Fix: Patched color filter to normal at address {:s}+{:x}", 
+        spdlog::info("MGS 2: Color Filter Fix: Patched color filter to normal at address {:s}+{:X}", 
                      sExeName.c_str(), (uintptr_t)MGS2_ColorFilterResult - (uintptr_t)baseModule);
     }
     */

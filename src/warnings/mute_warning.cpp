@@ -43,7 +43,7 @@ void MuteWarning::Setup()
         }
         if (g_Logging.bVerboseLogging)
         {
-            spdlog::info("MG-MG2 | MGS 2 | MGS3: Mute Warning: Settings strut is at {:s}+{:x}", sExeName.c_str(), reinterpret_cast<uintptr_t>(muteWarningAddress) - reinterpret_cast<uintptr_t>(baseModule));
+            spdlog::info("MG-MG2 | MGS 2 | MGS3: Mute Warning: Settings strut is at {:s}+{:X}", sExeName.c_str(), reinterpret_cast<uintptr_t>(muteWarningAddress) - reinterpret_cast<uintptr_t>(baseModule));
         }
     }
 

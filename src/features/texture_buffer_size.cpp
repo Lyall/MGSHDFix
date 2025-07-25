@@ -16,9 +16,9 @@ void TextureBufferSize::Initialize() const
             if (uint8_t* MGS3_CTextureBufferMallocResult = Memory::PatternScanSilent(baseModule, "75 ?? B9 00 00 00 08 FF"))
             {
                 uint32_t* bufferAmount = (uint32_t*)(MGS3_CTextureBufferMallocResult + 3);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) old buffer size: {}", i, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CTextureBufferMallocResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:X}) old buffer size: {}", i, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CTextureBufferMallocResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
                 Memory::Write((uintptr_t)bufferAmount, NewSize);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) new buffer size: {}", i, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CTextureBufferMallocResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:X}) new buffer size: {}", i, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CTextureBufferMallocResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
             }
             else
             {
@@ -36,9 +36,9 @@ void TextureBufferSize::Initialize() const
             if (uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScanSilent(baseModule, "75 ?? 00 00 00 08 8B ??"))
             {
                 uint32_t* bufferAmount = reinterpret_cast<uint32_t*>(MGS3_CBaseTextureMallocScanResult + 3);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) old buffer size: {}", 9, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CBaseTextureMallocScanResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:X}) old buffer size: {}", 9, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CBaseTextureMallocScanResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
                 Memory::Write(reinterpret_cast<uintptr_t>(bufferAmount), NewSize);
-                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:x}) new buffer size: {}", 9, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CBaseTextureMallocScanResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
+                spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:X}) new buffer size: {}", 9, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CBaseTextureMallocScanResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));
             }
             else
             {

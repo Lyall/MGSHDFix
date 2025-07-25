@@ -62,7 +62,7 @@ HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR l
         {
             auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
             SetWindowPos(hWnd, HWND_TOP, 0, 0, DesktopDimensions.first, DesktopDimensions.second, NULL);
-            spdlog::info("CreateWindowExA: Borderless: ClassName = {}, WindowName = {}, dwStyle = {:x}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight);
+            spdlog::info("CreateWindowExA: Borderless: ClassName = {}, WindowName = {}, dwStyle = 0x{:08X}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, WS_POPUP, X, Y, nWidth, nHeight);
             spdlog::info("CreateWindowExA: Borderless: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, (int)DesktopDimensions.first, (int)DesktopDimensions.second);
             g_D3D11Hooks.MainHwnd = hWnd;
             return hWnd;
@@ -72,7 +72,7 @@ HWND WINAPI CreateWindowExA_hooked(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR l
         {
             auto hWnd = CreateWindowExA_hook.stdcall<HWND>(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
             SetWindowPos(hWnd, HWND_TOP, 0, 0, iOutputResX, iOutputResY, NULL);
-            spdlog::info("CreateWindowExA: Windowed: ClassName = {}, WindowName = {}, dwStyle = {:x}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight);
+            spdlog::info("CreateWindowExA: Windowed: ClassName = {}, WindowName = {}, dwStyle = 0x{:08X}, X = {}, Y = {}, nWidth = {}, nHeight = {}", lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight);
             spdlog::info("CreateWindowExA: Windowed: SetWindowPos to X = {}, Y = {}, cx = {}, cy = {}", 0, 0, iOutputResX, iOutputResY);
             g_D3D11Hooks.MainHwnd = hWnd;
             return hWnd;
@@ -454,7 +454,7 @@ static void Init_AspectFOVFix()
         if (uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? E8 ?? ?? ?? ?? 48 8D ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ??", "MGS 3: Aspect Ratio"))
         {
             DWORD64 MGS3_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS3_GameplayAspectScanResult + 0x5);
-            spdlog::info("MGS 3: Aspect Ratio: Function address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_GameplayAspectAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 3: Aspect Ratio: Function address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_GameplayAspectAddress - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS3_GameplayAspectMidHook{};
             MGS3_GameplayAspectMidHook = safetyhook::create_mid(MGS3_GameplayAspectAddress + 0x38,
@@ -472,7 +472,7 @@ static void Init_AspectFOVFix()
         if (uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "48 8D ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ??", "MGS 2: Aspect Ratio"))
         {
             DWORD64 MGS2_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS2_GameplayAspectScanResult + 0xB);
-            spdlog::info("MGS 2: Aspect Ratio: Function address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_GameplayAspectAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Aspect Ratio: Function address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_GameplayAspectAddress - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_GameplayAspectMidHook{};
             MGS2_GameplayAspectMidHook = safetyhook::create_mid(MGS2_GameplayAspectAddress + 0x38,
@@ -531,7 +531,7 @@ static void Init_HUDFix()
         uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ??");
         if (MGS2_HUDWidthScanResult)
         {
-            spdlog::info("MGS 2: HUD: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_HUDWidthScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: HUD: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_HUDWidthScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_HUDWidthMidHook{};
             MGS2_HUDWidthMidHook = safetyhook::create_mid(MGS2_HUDWidthScanResult + 0xD,
@@ -562,7 +562,7 @@ static void Init_HUDFix()
         {
             // Radar width
             DWORD64 MGS2_RadarWidthAddress = (uintptr_t)MGS2_RadarWidthScanResult;
-            spdlog::info("MGS 2: Radar Width: Hook address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_RadarWidthAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Radar Width: Hook address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_RadarWidthAddress - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_RadarWidthMidHook{};
             MGS2_RadarWidthMidHook = safetyhook::create_mid(MGS2_RadarWidthScanResult,
@@ -580,7 +580,7 @@ static void Init_HUDFix()
 
             // Radar width offset
             DWORD64 MGS2_RadarWidthOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x54;
-            spdlog::info("MGS 2: Radar Width Offset: Hook address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_RadarWidthOffsetAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Radar Width Offset: Hook address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_RadarWidthOffsetAddress - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_RadarWidthOffsetMidHook{};
             MGS2_RadarWidthOffsetMidHook = safetyhook::create_mid(MGS2_RadarWidthOffsetAddress,
@@ -591,7 +591,7 @@ static void Init_HUDFix()
 
             // Radar height offset
             DWORD64 MGS2_RadarHeightOffsetAddress = (uintptr_t)MGS2_RadarWidthScanResult + 0x90;
-            spdlog::info("MGS 2: Radar Height Offset: Hook address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_RadarHeightOffsetAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Radar Height Offset: Hook address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_RadarHeightOffsetAddress - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_RadarHeightOffsetMidHook{};
             MGS2_RadarHeightOffsetMidHook = safetyhook::create_mid(MGS2_RadarHeightOffsetAddress,
@@ -610,7 +610,7 @@ static void Init_HUDFix()
         uint8_t* MGS2_CodecPortraitsScanResult = Memory::PatternScanSilent(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??");
         if (MGS2_CodecPortraitsScanResult)
         {
-            spdlog::info("MGS 2: Codec Portraits: Hook address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_CodecPortraitsScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Codec Portraits: Hook address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_CodecPortraitsScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MGS2_CodecPortraitsMidHook{};
             MGS2_CodecPortraitsMidHook = safetyhook::create_mid(MGS2_CodecPortraitsScanResult,
@@ -636,7 +636,7 @@ static void Init_HUDFix()
         uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScanSilent(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
         if (MGS2_MotionBlurScanResult)
         {
-            spdlog::info("MGS 2: Motion Blur: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MotionBlurScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2: Motion Blur: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_MotionBlurScanResult - (uintptr_t)baseModule);
 
             Memory::PatchBytes((uintptr_t)MGS2_MotionBlurScanResult, "\x48\x31\xDB\x90\x90\x90", 6);
             spdlog::info("MGS 2: Motion Blur: Patched instruction.");
@@ -668,7 +668,7 @@ static void Init_HUDFix()
                     }
                 });
 
-            spdlog::info("MG1/2 | MGS 3: HUD Width: Hook address is{:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_HUDWidthScanResult - (uintptr_t)baseModule);
+            spdlog::info("MG1/2 | MGS 3: HUD Width: Hook address is{:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_HUDWidthScanResult - (uintptr_t)baseModule);
         }
         else if (!MGS3_HUDWidthScanResult)
         {
@@ -683,7 +683,7 @@ static void Init_HUDFix()
         if (MGS2_MGS3_LetterboxingScanResult)
         {
             DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;
-            spdlog::info("MGS 2 | MGS 3: Letterboxing: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_LetterboxingAddress - (uintptr_t)baseModule);
+            spdlog::info("MGS 2 | MGS 3: Letterboxing: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_MGS3_LetterboxingAddress - (uintptr_t)baseModule);
 
             Memory::Write(MGS2_MGS3_LetterboxingAddress, (int)0);
             spdlog::info("MGS 2 | MGS 3: Letterboxing: Disabled letterboxing.");
@@ -741,7 +741,7 @@ static void Init_Miscellaneous()
         uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScanSilent(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? ?? 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
         if (MGS3_MouseSensitivityScanResult)
         {
-            spdlog::info("MGS 3: Mouse Sensitivity: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 3: Mouse Sensitivity: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MouseSensitivityXMidHook{};
             MouseSensitivityXMidHook = safetyhook::create_mid(MGS3_MouseSensitivityScanResult,

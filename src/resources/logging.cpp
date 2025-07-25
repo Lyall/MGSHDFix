@@ -115,8 +115,8 @@ void Logging::Initialize()
             // Log module details
             spdlog::info("Module Name: {0:s}", sExeName.c_str());
             spdlog::info("Module Path: {0:s}", sExePath.string());
-            spdlog::info("Module Address: 0x{0:x}", (uintptr_t)baseModule);
-            spdlog::info("Module First Instruction: 0x{0:x}", (uintptr_t)baseModule+0x1000);
+            spdlog::info("Module Address: 0x{0:X}", (uintptr_t)baseModule);
+            spdlog::info("Module First Segment: 0x{0:X}", (uintptr_t)baseModule+0x1000);
             spdlog::info("Module Version: {}", Memory::GetModuleVersion(baseModule));
             if (std::filesystem::exists(sExePath / "steamclient64.dll") || std::filesystem::exists(sExePath / "steamclient.dll") || std::filesystem::exists(sExePath / "GameOverlayRenderer64.dll") || std::filesystem::exists(sExePath / "GameOverlayRenderer.dll"))
             {
