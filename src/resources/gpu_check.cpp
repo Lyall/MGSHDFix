@@ -110,6 +110,26 @@ namespace
         }
     } tableSorter;
 
+    std::string SanitizeGPUName(const std::string& name)
+    {
+        std::string sanitized = name;
+        // Use regex to remove (c), (r), (tm) case insensitive, with optional spaces inside parentheses
+        std::regex trademark_re(R"(\(\s*(c|r|tm)\s*\))", std::regex_constants::icase);
+        sanitized = std::regex_replace(sanitized, trademark_re, "");
+        // Also trim extra spaces left after removal
+        // Simple trim leading and trailing spaces:
+        sanitized.erase(sanitized.begin(), std::find_if(sanitized.begin(), sanitized.end(), [](unsigned char ch)
+            {
+                return !std::isspace(ch);
+            }));
+        sanitized.erase(std::find_if(sanitized.rbegin(), sanitized.rend(), [](unsigned char ch)
+            {
+                return !std::isspace(ch);
+            }).base(), sanitized.end());
+
+        return sanitized;
+    }
+
     // Convert string to uppercase for case-insensitive matching
     std::string ToUpper(std::string str)
     {
@@ -243,15 +263,33 @@ namespace
     // 2) If no exact match, parse and estimate tier with suffix
     int GetTier(const std::string& upperName)
     {
+        // 1) Exact match first
         for (const auto& entry : gpuTable)
         {
-            if (upperName == entry.model)  // Exact match only!
+            if (upperName == entry.model)
             {
                 return entry.tier;
             }
         }
-        return ParseAndEstimate(upperName);
+
+        int estimatedTier = ParseAndEstimate(upperName);
+        if (estimatedTier > 0)
+        {
+            return estimatedTier;
+        }
+
+        for (const auto& entry : gpuTable)
+        {
+            if (upperName.find(entry.model) != std::string::npos)
+            {
+                return entry.tier;
+            }
+        }
+
+        // No match found
+        return 0;
     }
+
 
     // Compute minimum tier once, at startup, from MINIMUM_GPU_NAME
     const int kMinimumTier = []
@@ -271,20 +309,22 @@ namespace
 
 void CheckMinimumGPU(const std::string& gpuName)
 {
-    std::string upper = ToUpper(gpuName);
+    std::string sanitizedName = SanitizeGPUName(gpuName);
+
+    std::string upper = ToUpper(sanitizedName);
     std::string vendor = GetVendor(upper);
 
     int tier = GetTier(upper);
 
     if (tier == 0 && vendor == "INTEL")
     {
-        spdlog::warn("System Details - GPU: {} detected as Intel integrated graphics.", gpuName);
+        spdlog::warn("System Details - GPU: {} detected as Intel integrated graphics.", sanitizedName);
         tier = 20; // fallback for unrecognized Intel
     }
 
     if (tier == 0)
     {
-        spdlog::warn("System Details - GPU: {} ({}) was not recognized.", gpuName, vendor);
+        spdlog::warn("System Details - GPU: {} ({}) was not recognized.", sanitizedName, vendor);
         spdlog::warn("System Details - GPU: The game requires a minimum of a {} or equivalent.", MINIMUM_GPU_NAME);
         spdlog::warn("System Details - GPU: Degraded performance (ie \"Snake moving in slow motion\") and crashing likely to occur.");
         return;
@@ -292,7 +332,7 @@ void CheckMinimumGPU(const std::string& gpuName)
 
     if (tier < kMinimumTier)
     {
-        spdlog::info("System Details - GPU: {}", gpuName);
+        spdlog::info("System Details - GPU: {}", sanitizedName);
         spdlog::warn("System Details - GPU: This GPU is below the minimum system requirements of a {} or equivalent.", MINIMUM_GPU_NAME);
         int percent = tier * 100 / kMinimumTier;
         spdlog::warn("System Details - GPU: Estimated performance compared to a {}: {}%", MINIMUM_GPU_NAME, percent);
@@ -300,6 +340,6 @@ void CheckMinimumGPU(const std::string& gpuName)
     }
     else
     {
-        spdlog::info("System Details - GPU: {}", gpuName);
+        spdlog::info("System Details - GPU: {}", sanitizedName);
     }
 }
