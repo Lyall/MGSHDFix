@@ -8,7 +8,7 @@
 
 bool PauseOnFocusLoss::ShouldFixPauseState()
 {
-    return g_PauseOnFocusLoss.bPauseOnFocusLoss ? (g_GameVars.InCutscene() || g_GameVars.InPadDemo()) : true;
+    return g_PauseOnFocusLoss.bPauseOnFocusLoss ? (g_GameVars.InCutscene() || g_GameVars.InScriptedSequence()) : true;
 }
 
 void PauseOnFocusLoss::Initialize()

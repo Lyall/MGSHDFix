@@ -9,8 +9,8 @@ void GameVars::Initialize()
 {
     if (eGameType & MGS2)
     {
-        cutsceneFlag = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "44 39 35 ?? ?? ?? ?? 89 15", "MGS 2: GameVars: cutsceneFlag") + 3));
-        padDemoFlag = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 45 33 F6 8B 0D", "MGS 2: GameVars: padDemoFlag") + 2));
+        cutsceneFlag = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 45 33 F6 8B 0D", "MGS 2: GameVars: cutsceneFlag") + 2));
+        scriptedSequenceFlag = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "44 39 35 ?? ?? ?? ?? 89 15", "MGS 2: GameVars: scriptedSequenceFlag") + 3));
         actorWaitValue = reinterpret_cast<double*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "66 0F 2F 05 ?? ?? ?? ?? 73 ?? 33 C0", "MGS 2: GameVars: actorWaitValue") + 4));
         currentStage = reinterpret_cast<char const*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 4C 8D 05", "MGS 2: GameVars: currentStage") + 3));
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
@@ -39,14 +39,14 @@ void GameVars::Initialize()
     }
 }
 
-bool GameVars::InCutscene() const
+bool GameVars::InCutscene() const //does not count pad demos or FMVs, only full cutscenes.
 {
     return cutsceneFlag == nullptr ? false : (*cutsceneFlag == 1);
 }
 
-bool GameVars::InPadDemo() const
+bool GameVars::InScriptedSequence() const //Scripted sequences, i.e., forced codec calls, cutscenes, pad demos (ingame tutorials & forced movements ala first meeting Stillman), and FMVs.
 {
-    return padDemoFlag == nullptr ? false : (*padDemoFlag == 1);
+    return scriptedSequenceFlag == nullptr ? false : (*scriptedSequenceFlag == 1);
 }
 
 double GameVars::ActorWaitMultiplier() const
