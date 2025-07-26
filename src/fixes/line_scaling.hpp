@@ -1,5 +1,7 @@
 ﻿#pragma once
+
 #include <d3d11.h>
+#include <wrl/client.h>
 
 class VectorScalingFix final
 {
@@ -7,7 +9,8 @@ private:
     bool CompileGeometryShader();
 
     static constexpr int DEFAULT_LINE_SCALE = 360;
-    ID3DBlob* compiledShaderBytecode = nullptr;
+
+    Microsoft::WRL::ComPtr<ID3DBlob> compiledShaderBytecode;
 
 public:
     void Initialize();
