@@ -310,6 +310,11 @@ namespace
 void CheckMinimumGPU(const std::string& gpuName, UINT product, UINT version, UINT subVersion, UINT build)
 {
     std::string sanitizedName = SanitizeGPUName(gpuName);
+    if (std::string_view(ToUpper(sanitizedName)).starts_with("LLVMPIPE"))
+    {
+        spdlog::info("Game is running on Proton Compatibility Layer: {}", sanitizedName);
+        return;
+    }
 
     std::string upper = ToUpper(sanitizedName);
     std::string vendor = GetVendor(upper);
