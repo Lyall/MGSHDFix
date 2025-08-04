@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="fix_default_gpu.cpp" />
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
@@ -255,7 +256,11 @@
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX86</AdditionalLibraryDirectories>
+      <ImportLibrary />
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MGS3_Dev|Win32'">
     <ClCompile>
@@ -280,7 +285,11 @@
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX86</AdditionalLibraryDirectories>
+      <ImportLibrary />
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -307,7 +316,11 @@
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX86</AdditionalLibraryDirectories>
+      <ImportLibrary />
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MGS2_Dev|x64'">
     <ClCompile>
@@ -333,7 +346,12 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>external\SteamworksSDK\redistributable_bin\win64;%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX64</AdditionalLibraryDirectories>
+      <ImportLibrary />
+      <AdditionalOptions>/NOIMPLIB %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MGS3_Dev|x64'">
     <ClCompile>
@@ -359,7 +377,12 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>external\SteamworksSDK\redistributable_bin\win64;%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX64</AdditionalLibraryDirectories>
+      <ImportLibrary />
+      <AdditionalOptions>/NOIMPLIB %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -386,7 +409,12 @@
       <AdditionalLibraryDirectories>external\SteamworksSDK\redistributable_bin\win64;%(AdditionalLibraryDirectories);$(SolutionDir)external\zydis\msvc\bin\ReleaseX64</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Zydis.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(OutDir)\pdb\$(TargetName).pdb</ProgramDatabaseFile>
+      <ImportLibrary />
+      <AdditionalOptions>/NOIMPLIB %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>del /Q "$(OutDir)*.exp"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

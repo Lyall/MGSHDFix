@@ -3,7 +3,6 @@
 
 #include <spdlog/sinks/base_sink.h>
 
-#include "gpu_check.hpp"
 #include "steamworks_api.hpp"
 #include "version.h"
 
@@ -189,6 +188,7 @@ void Logging::LogSysInfo()
     else
     {
         std::string deviceString;
+        int gpuIndex = 1;
         for (int i = 0; ; i++)
         {
             DISPLAY_DEVICE dd = { sizeof(dd), 0 };
@@ -204,7 +204,8 @@ void Logging::LogSysInfo()
                 continue;
             }
             deviceString = deviceStringBuffer;
-            CheckMinimumGPU(deviceString);
+            spdlog::info("System Details - GPU #{}: {}", gpuIndex, deviceString);
+            gpuIndex++;
         }
     }
 

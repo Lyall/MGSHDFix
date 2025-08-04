@@ -167,6 +167,14 @@ void Config::Read()
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, "MGS2 Sunglasses", "ShouldWearSunglasses", sShouldWearSunglasses);
+    std::transform(sShouldWearSunglasses.begin(), sShouldWearSunglasses.end(), sShouldWearSunglasses.begin(), ::tolower);
+    if (sShouldWearSunglasses != "normal" && sShouldWearSunglasses != "always" && sShouldWearSunglasses != "never")
+    {
+        spdlog::error("Invalid config value for MGS2 Sunglasses: {}", sShouldWearSunglasses);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for MGS2 Sunglasses: " << sShouldWearSunglasses << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
     if (sShouldWearSunglasses != "normal")
     {
         g_MGS2Sunglasses.bEnabled = true;

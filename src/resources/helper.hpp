@@ -152,3 +152,101 @@ namespace Util
 #define MAKE_HOOK_TRAMPOLINE(module, pattern, name, retType, body)                 \
     MAKE_HOOK_TRAMPOLINE_IMPL(module, pattern, name, retType, body, UNIQUE_NAME(_unique))
 
+struct HookGuard
+{
+    bool& flag;
+    HookGuard(bool& f) : flag(f)
+    {
+        flag = true;
+    }
+    ~HookGuard()
+    {
+        flag = false;
+    }
+};
+
+template <typename T>
+class ComPtrLite
+{
+public:
+    ComPtrLite() = default;
+    ComPtrLite(T* ptr)
+    {
+        Set(ptr);
+    }
+    ~ComPtrLite()
+    {
+        Release();
+    }
+
+    ComPtrLite(const ComPtrLite&) = delete;
+    ComPtrLite& operator=(const ComPtrLite&) = delete;
+
+    ComPtrLite(ComPtrLite&& other) noexcept
+    {
+        Attach(other.Detach());
+    }
+    ComPtrLite& operator=(ComPtrLite&& other) noexcept
+    {
+        if (this != &other)
+        {
+            Release();
+            Attach(other.Detach());
+        }
+        return *this;
+    }
+
+    void Set(T* ptr)
+    {
+        if (ptr != m_ptr)
+        {
+            Release();
+            if (ptr) ptr->AddRef();
+            m_ptr = ptr;
+        }
+    }
+
+    void Attach(T* ptr)
+    {
+        Release();
+        m_ptr = ptr;
+    }
+
+    T* Detach()
+    {
+        T* ptr = m_ptr;
+        m_ptr = nullptr;
+        return ptr;
+    }
+
+    void Release()
+    {
+        if (m_ptr)
+        {
+            m_ptr->Release();
+            m_ptr = nullptr;
+        }
+    }
+
+    T* Get() const
+    {
+        return m_ptr;
+    }
+    T** GetAddressOf()
+    {
+        return &m_ptr;
+    }
+
+    operator T* () const
+    {
+        return m_ptr;
+    }
+    T* operator->() const
+    {
+        return m_ptr;
+    }
+
+private:
+    T* m_ptr = nullptr;
+};
+

@@ -122,6 +122,9 @@
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="fix_default_gpu.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">

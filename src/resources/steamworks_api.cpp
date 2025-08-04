@@ -219,7 +219,8 @@ void SteamAPI::OnSteamInputLoaded()
     ISteamInput* steamInput = SteamInput();
     steamInput->RunFrame();
     g_SteamAPI.iNumberOfControllers = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "89 05 ?? ?? ?? ?? 85 C0 75 ?? 33 DB", "MGS 2: SteamInput: iNumberOfControllers") + 2));
-    *g_SteamAPI.iNumberOfControllers = steamInput->GetConnectedControllers(g_SteamAPI.controllerHandles);
+    InputHandle_t controllerHandles[STEAM_INPUT_MAX_COUNT] = {};
+    *g_SteamAPI.iNumberOfControllers = steamInput->GetConnectedControllers(controllerHandles);
 
     spdlog::info("SteamInput: Detected {} controller{}.", *g_SteamAPI.iNumberOfControllers, *g_SteamAPI.iNumberOfControllers == 1 ? "" : "s");
 
@@ -252,8 +253,6 @@ void SteamAPI::OnSteamInputLoaded()
             "ingame_cmn_radio_menu",    //0xF
             "ingame_cmn_pause_menu",    //0x10
         };
-        g_SteamAPI.hL1Button = SteamInput()->GetDigitalActionHandle("ingame_cmn_lock_on");
-        g_SteamAPI.hR1Button = SteamInput()->GetDigitalActionHandle("ingame_cmn_pov_cam");
     }
     else if (eGameType & MGS3)
     {
@@ -275,8 +274,6 @@ void SteamAPI::OnSteamInputLoaded()
             "ingame_cmn_radio_menu",    //0xF
             "ingame_cmn_survival_viwer",//0x10
         };
-        g_SteamAPI.hL1Button = SteamInput()->GetDigitalActionHandle("ingame_cmn_weapon_aim");
-        g_SteamAPI.hR1Button = SteamInput()->GetDigitalActionHandle("ingame_cmn_pov_cam");
 
     }
     else if (eGameType & MG)
@@ -303,7 +300,7 @@ void SteamAPI::OnSteamInputLoaded()
 
     for (int i = 0; i < *g_SteamAPI.iNumberOfControllers; ++i)
     {
-        InputHandle_t handle = g_SteamAPI.controllerHandles[i];
+        InputHandle_t handle = controllerHandles[i];
         ESteamInputType type = steamInput->GetInputTypeForHandle(handle);
         int gamepadIndex = steamInput->GetGamepadIndexForController(handle);
 
@@ -336,7 +333,8 @@ void SteamAPI::OnSteamInputLoaded()
             spdlog::error("-------------------    ERROR     ----------------------");
             spdlog::error("SteamInput: Controller #{} | Type: {} | Handle: {} | Status: ERROR: Gamepad Handler is NOT correct - {}", i + 1, typeStr, handle, gamepadIndex);
             spdlog::error("SteamInput: Gamepad detected using incorrect input handler (ie Steam Input drivers.)");
-            spdlog::error("SteamInput: This indicates a Steam Input / OS level game controller driver conflict (do you have DS4Win installed?");
+            spdlog::error("SteamInput: This indicates a Steam Input / OS level game controller driver conflict.");
+            spdlog::error("SteamInput: It's been reported that deleting the \"controller_base\" folder from your main Steam directory & then restarting Steam will resolve this issue.");
             spdlog::error("-------------------    ERROR     ----------------------");
         }
 
@@ -379,6 +377,6 @@ void SteamAPI::OnSteamInputLoaded()
             }
         }
     }
-
+    spdlog::info("SteamInput: Initialization complete.");
     AfterSteamInputInitialized();
 }

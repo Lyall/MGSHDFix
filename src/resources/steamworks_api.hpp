@@ -33,11 +33,6 @@ public:
     bool bResetAchievements = false;
 
     int* iNumberOfControllers = nullptr;
-    InputHandle_t controllerHandles[STEAM_INPUT_MAX_COUNT] = {};
-
-    InputDigitalActionHandle_t hL1Button = {};
-    InputDigitalActionHandle_t hR1Button = {};
-
 
 };
 

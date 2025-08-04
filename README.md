@@ -32,6 +32,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to continue aiming your gun after firing it while in first-person/while holding lock-on.
 
 ## Bug Fixes
+- Fixes the collection's games sometimes defaulting to intergrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
 - Fixes gameplay/cutscene aspect ratio for ultrawide resolutions (MGS2/MGS3).
 - Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/Lyall/MGSHDFix/pull/127)
 - Fixes the monitor going to sleep during long cutscenes (for Windows only, Linux needs to be [fixed by Valve](https://github.com/ValveSoftware/Proton/issues/8881).

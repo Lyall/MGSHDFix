@@ -307,7 +307,7 @@ namespace
 
 } // namespace
 
-void CheckMinimumGPU(const std::string& gpuName)
+void CheckMinimumGPU(const std::string& gpuName, UINT product, UINT version, UINT subVersion, UINT build)
 {
     std::string sanitizedName = SanitizeGPUName(gpuName);
 
@@ -318,28 +318,29 @@ void CheckMinimumGPU(const std::string& gpuName)
 
     if (tier == 0 && vendor == "INTEL")
     {
-        spdlog::warn("System Details - GPU: {} detected as Intel integrated graphics.", sanitizedName);
+        spdlog::warn("GPU WARNING: {} detected as Intel integrated graphics.", sanitizedName);
         tier = 20; // fallback for unrecognized Intel
     }
 
     if (tier == 0)
     {
-        spdlog::warn("System Details - GPU: {} ({}) was not recognized.", sanitizedName, vendor);
-        spdlog::warn("System Details - GPU: The game requires a minimum of a {} or equivalent.", MINIMUM_GPU_NAME);
-        spdlog::warn("System Details - GPU: Degraded performance (ie \"Snake moving in slow motion\") and crashing likely to occur.");
+        spdlog::warn("-------------------    GPU WARNING     ----------------------");
+        spdlog::warn("GPU WARNING: {} ({}) was not recognized.", sanitizedName, vendor);
+        spdlog::warn("GPU WARNING: The game requires a minimum of a {} or equivalent.", MINIMUM_GPU_NAME);
+        spdlog::warn("GPU WARNING: Degraded performance (ie \"Snake moving in slow motion\") and crashing likely to occur.");
+        spdlog::warn("-------------------    GPU WARNING     ----------------------");
         return;
     }
 
+    spdlog::info("Game is running on GPU: {} (Driver Version: {}.{}.{}.{})", sanitizedName, product, version, subVersion, build);
+
     if (tier < kMinimumTier)
     {
-        spdlog::info("System Details - GPU: {}", sanitizedName);
-        spdlog::warn("System Details - GPU: This GPU is below the minimum system requirements of a {} or equivalent.", MINIMUM_GPU_NAME);
+        spdlog::warn("-------------------    GPU WARNING     ----------------------");
+        spdlog::warn("GPU WARNING: This GPU is below the minimum system requirements of a {} or equivalent.", MINIMUM_GPU_NAME);
         int percent = tier * 100 / kMinimumTier;
-        spdlog::warn("System Details - GPU: Estimated performance compared to a {}: {}%", MINIMUM_GPU_NAME, percent);
-        spdlog::warn("System Details - GPU: Degraded performance (ie \"Snake moving in slow motion\") and crashing likely to occur.");
-    }
-    else
-    {
-        spdlog::info("System Details - GPU: {}", sanitizedName);
+        spdlog::warn("GPU WARNING: Estimated performance compared to a {}: {}%", MINIMUM_GPU_NAME, percent);
+        spdlog::warn("GPU WARNING: Degraded performance (ie \"Snake moving in slow motion\") and crashing likely to occur.");
+        spdlog::warn("-------------------    GPU WARNING     ----------------------");
     }
 }

@@ -1,5 +1,7 @@
 #pragma once
+#include "helper.hpp"
 #include <d3d11.h>
+
 
 class D3D11Hooks final
 {
@@ -12,8 +14,9 @@ public:
     HWND MainHwnd = nullptr;
 
     // ===================== Device and Context =====================
-    ID3D11Device* d3dDevice = nullptr;
-    ID3D11DeviceContext* d3dDeviceContext = nullptr;
+    ComPtrLite<ID3D11Device> d3dDevice;
+
+    ComPtrLite<ID3D11DeviceContext> d3dDeviceContext;
 
     // ===================== DXGI =====================
     IDXGIAdapter* dxgiAdapter = nullptr;

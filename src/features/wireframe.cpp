@@ -2,7 +2,7 @@
 #include "d3d11_api.hpp"
 #include "logging.hpp"
 
-
+/*
 void CreateWireframeRasterizerState()
 {
     // Define the rasterizer state description
@@ -41,3 +41,4 @@ void Cleanup()
     if (g_D3D11Hooks.d3dDeviceContext) g_D3D11Hooks.d3dDeviceContext->Release();
     if (g_D3D11Hooks.d3dDevice) g_D3D11Hooks.d3dDevice->Release();
 }
+*/

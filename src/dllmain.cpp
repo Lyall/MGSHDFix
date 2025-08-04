@@ -1061,40 +1061,48 @@ static bool DetectGame()
 
 void AfterSteamInitialized()
 {
+    static bool bInitialized = false;
+    if (bInitialized)
+    {
+        spdlog::warn("AfterSteamInitialized() called multiple times, skipping initialization.");
+        return;
+    }
+    bInitialized = true;
+
+    spdlog::info("AfterSteamInitialized() started");
     g_StatPersistence.OnSteamInitialized();
+    spdlog::info("AfterSteamInitialized() completed");
 }
 
 void AfterSteamInputInitialized()
 {
+    static bool bInitialized = false;
+    if (bInitialized)
+    {
+        spdlog::warn("AfterSteamInputInitialized() called multiple times, skipping initialization.");
+        return;
+    }
+    bInitialized = true;
 
 }
 
-void preCreateDXGIFactory()
+
+void afterPresent()
 {
-
-
-}
-
-void afterCreateDXGIFactory()
-{
-
-}
-
-void preD3D11CreateDevice()
-{
-
-}
-
-void afterD3D11CreateDevice()
-{
+    static bool bInitialized = false;
+    if (bInitialized)
+    {
+        spdlog::warn("afterPresent() called multiple times, skipping initialization.");
+        return;
+    }
+    bInitialized = true;
+    spdlog::info("afterPresent() started");
     g_VectorScalingFix.LoadCompiledShader();
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
 
 
-    //createGammaShader();
-
-    //SetGamma(1.0);
+    spdlog::info("afterPresent() completed");
 }
 
 static void InitializeSubsystems()
@@ -1124,7 +1132,6 @@ static void InitializeSubsystems()
     INITIALIZE(g_MGS2Sunglasses.Initialize());
 
 
-    //INITIALIZE(Init_GammaShader());
     //INITIALIZE(g_DistanceCulling.Initialize());
     //INITIALIZE(g_MG1CustomLoadingScreens.Initialize());
     //INITIALIZE(g_MultiSampleAntiAliasing.Initialize());
@@ -1234,6 +1241,5 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         // Prevent monitor or system sleep while the game is running.
         SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED);
     }
-
     return TRUE;
 }
