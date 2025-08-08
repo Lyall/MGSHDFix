@@ -92,7 +92,7 @@ void Logging::Initialize()
             }
             // Create 10MB truncated logger
             std::filesystem::path sLogFile = sFixName + ((sExeName == "launcher.exe") ? "_Launcher" : "_Game") + ".log";
-            std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(sLogFile.string(), std::make_shared<size_limited_sink<std::mutex>>((sExePath / "logs" / sLogFile).string(), 10 * 1024 * 1024));
+            std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(sLogFile.string(), std::make_shared<size_limited_sink<std::mutex>>((sExePath / "logs" / sLogFile).string(), 15 * 1024 * 1024));
             spdlog::set_default_logger(logger);
 
             spdlog::flush_on(spdlog::level::debug);

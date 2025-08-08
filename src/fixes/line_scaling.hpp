@@ -1,19 +1,27 @@
 ﻿#pragma once
-#include <d3d11.h>
+
 
 class VectorScalingFix final
 {
 private:
     bool CompileGeometryShader();
-
     static constexpr int DEFAULT_LINE_SCALE = 360;
-    ID3DBlob* compiledShaderBytecode = nullptr;
 
 public:
     void Initialize();
     void LoadCompiledShader() const;
 
-    bool bEnableVectorLineFix = false;
+    bool bFixRain = true;
+    bool bFixUI = true;
+
+    bool bToggleRainShader = true;
+    bool bToggleUIShader = true;
+    int bToggleWireframe = false;
+
+    int vkRainShaderToggle = 0;
+    int vkUIShaderToggle = 0;
+    int vkWireframeToggle = 0;
+
     bool bNeedsCompiler = false;
     double iVectorLineScale = 360;
 };

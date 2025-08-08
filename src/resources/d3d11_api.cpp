@@ -5,62 +5,107 @@
 #include "line_scaling.hpp"
 #include "logging.hpp"
 
-#pragma comment(lib,"d3d11.lib")
+#pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
 #include <dxgi.h>
+#include "gamma_correction.hpp"
+#include "input_handler.hpp"
 
-// Function declarations
 void afterPresent();
 
-// Global hook storage
 namespace
 {
+    // Hooks
     SafetyHookInline CreateDXGIFactory_hook {};
     SafetyHookInline CreateSwapChain_hook {};
     SafetyHookInline PresentHook {};
+    SafetyHookInline ResizeBuffersHook {};
+    SafetyHookInline CreateTexture2DHook {};
 
     using PresentFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT);
     PresentFn oPresent = nullptr;
 
-    HRESULT __stdcall HookedPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, UINT flags)
+    using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
+    ResizeBuffersFn oResizeBuffers = nullptr;
+    /*
+    using CreateTexture2DFn = HRESULT(__stdcall*)(
+        ID3D11Device*,
+        const D3D11_TEXTURE2D_DESC*,
+        const D3D11_SUBRESOURCE_DATA*,
+        ID3D11Texture2D**);
+
+    HRESULT __stdcall HookedCreateTexture2D(
+        ID3D11Device* device,
+        const D3D11_TEXTURE2D_DESC* pDesc,
+        const D3D11_SUBRESOURCE_DATA* pInitialData,
+        ID3D11Texture2D** ppTexture2D)
     {
-        static bool initialized = false;
-        if (!initialized)
+        return CreateTexture2DHook.stdcall<HRESULT>(device, pDesc, pInitialData, ppTexture2D);
+    }
+
+    void HookDevice(ID3D11Device* device)
+    {
+        if (!device || CreateTexture2DHook)
+            return;
+
+        void** vtable = *reinterpret_cast<void***>(device);
+        CreateTexture2DHook = safetyhook::create_inline(
+            vtable[5],
+            reinterpret_cast<void*>(HookedCreateTexture2D)
+        );
+
+        LOG_HOOK(CreateTexture2DHook, "CreateTexture2D");
+    }*/
+
+    void RefreshDeviceAndContext(IDXGISwapChain* swap)
+    {
+        ComPtr<ID3D11Device> device;
+        if (SUCCEEDED(swap->GetDevice(__uuidof(ID3D11Device), reinterpret_cast<void**>(device.GetAddressOf()))) && device)
         {
-            initialized = true;
-            g_D3D11Hooks.swapChain = pSwapChain;
+            g_D3D11Hooks.d3dDevice = device;
 
-            // Fetch device from swapchain
-            ID3D11Device* device = nullptr;
-            HRESULT hr = pSwapChain->GetDevice(__uuidof(ID3D11Device), reinterpret_cast<void**>(&device));
-            if (SUCCEEDED(hr) && device)
+            ComPtr<ID3D11DeviceContext> context;
+            device->GetImmediateContext(context.GetAddressOf());
+            if (context)
             {
-                g_D3D11Hooks.d3dDevice.Set(device);
+                g_D3D11Hooks.d3dDeviceContext = context;
+                spdlog::info("D3D11 Device and Context refreshed successfully.");
 
-                ID3D11DeviceContext* context = nullptr;
-                device->GetImmediateContext(&context);
-                if (context)
-                {
-                    g_D3D11Hooks.d3dDeviceContext.Set(context);
-                    context->Release(); 
-                }
-
-                device->Release(); 
+                //HookDevice(device.Get());
             }
             else
             {
-                spdlog::error("Failed to get D3D11Device from SwapChain. HRESULT: 0x{:08X}", hr);
+                spdlog::error("Failed to get ID3D11DeviceContext from ID3D11Device.");
             }
+        }
+        else
+        {
+            spdlog::error("Failed to get ID3D11Device from IDXGISwapChain.");
+        }
+    }
 
-            // Get adapter via IDXGISwapChain -> IDXGIDevice -> IDXGIAdapter
+
+
+    HRESULT __stdcall HookedPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, UINT flags)
+    {
+        static bool firstInit = false;
+
+        if (!firstInit)
+        {
+            firstInit = true;
+
+            g_D3D11Hooks.swapChain = pSwapChain;
+            RefreshDeviceAndContext(pSwapChain);
+
+            // ==== GPU logging + driver version check ====
             IDXGIDevice* dxgiDevice = nullptr;
             if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&dxgiDevice))) && dxgiDevice)
             {
                 IDXGIAdapter* adapter = nullptr;
                 if (SUCCEEDED(dxgiDevice->GetAdapter(&adapter)) && adapter)
                 {
-                    g_D3D11Hooks.dxgiAdapter = adapter; // don't release, store raw
+                    g_D3D11Hooks.dxgiAdapter = adapter;
 
                     DXGI_ADAPTER_DESC desc;
                     if (SUCCEEDED(adapter->GetDesc(&desc)))
@@ -86,18 +131,39 @@ namespace
                 }
                 dxgiDevice->Release();
             }
-            else
-            {
-                spdlog::error("Failed to get IDXGIDevice from SwapChain.");
-            }
-
             afterPresent();
         }
 
+        {
+            ComPtr<ID3D11Device> deviceFromSwap;
+            if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), reinterpret_cast<void**>(deviceFromSwap.GetAddressOf()))))
+            {
+                static ComPtr<ID3D11Device> lastDevice;
+                if (deviceFromSwap.Get() != lastDevice.Get())
+                {
+                    lastDevice = deviceFromSwap;
+                    RefreshDeviceAndContext(pSwapChain);
+                }
+            }
+
+        }
+
+        g_InputHandler.Update();
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 
 
+    HRESULT __stdcall HookedResizeBuffers(
+        IDXGISwapChain* pSwapChain,
+        UINT BufferCount,
+        UINT Width,
+        UINT Height,
+        DXGI_FORMAT NewFormat,
+        UINT SwapChainFlags)
+    {
+        RefreshDeviceAndContext(pSwapChain);
+        return ResizeBuffersHook.call<HRESULT>(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+    }
 
     void HookSwapChainPresent(IDXGISwapChain* swapChain)
     {
@@ -109,6 +175,10 @@ namespace
 
         PresentHook = safetyhook::create_inline(vtable[8], reinterpret_cast<void*>(HookedPresent));
         LOG_HOOK(PresentHook, "PresentHook");
+
+        oResizeBuffers = reinterpret_cast<ResizeBuffersFn>(vtable[13]);
+        ResizeBuffersHook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(HookedResizeBuffers));
+        LOG_HOOK(ResizeBuffersHook, "ResizeBuffersHook");
     }
 
     HRESULT __stdcall HookedCreateSwapChain(IDXGIFactory* pFactory, IUnknown* pDevice, DXGI_SWAP_CHAIN_DESC* pDesc, IDXGISwapChain** ppSwapChain)
@@ -117,6 +187,7 @@ namespace
         if (SUCCEEDED(result) && ppSwapChain && *ppSwapChain)
         {
             g_D3D11Hooks.swapChain = *ppSwapChain;
+            RefreshDeviceAndContext(*ppSwapChain);
             HookSwapChainPresent(*ppSwapChain);
         }
         else
@@ -134,8 +205,7 @@ namespace
         if (SUCCEEDED(result))
         {
             g_D3D11Hooks.dxgiFactory = static_cast<IDXGIFactory*>(*ppFactory);
-            // Hook CreateSwapChain now
-            void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.dxgiFactory);
+            void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.dxgiFactory.Get());
             CreateSwapChain_hook = safetyhook::create_inline(vtable[10], reinterpret_cast<void*>(HookedCreateSwapChain));
             LOG_HOOK(CreateSwapChain_hook, "CreateSwapChain.");
         }
@@ -154,7 +224,6 @@ void D3D11Hooks::Initialize()
     LOG_HOOK(CreateDXGIFactory_hook, "CreateDXGIFactory");
 }
 
-
 void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
 {
     if (!g_VectorScalingFix.bNeedsCompiler)
@@ -163,5 +232,3 @@ void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
         spdlog::info("D3D11Hooks: Released d3dcompiler_43.dll as it is no longer needed.");
     }
 }
-
-

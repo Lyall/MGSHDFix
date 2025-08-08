@@ -57,6 +57,9 @@ namespace Util
     std::string GetUppercaseNameAtIndex(const std::initializer_list<std::string>& list, int index);
 
     bool IsSteamOS();
+
+    void DumpBytes(uint64_t address);
+
 }
 
 
@@ -164,89 +167,3 @@ struct HookGuard
         flag = false;
     }
 };
-
-template <typename T>
-class ComPtrLite
-{
-public:
-    ComPtrLite() = default;
-    ComPtrLite(T* ptr)
-    {
-        Set(ptr);
-    }
-    ~ComPtrLite()
-    {
-        Release();
-    }
-
-    ComPtrLite(const ComPtrLite&) = delete;
-    ComPtrLite& operator=(const ComPtrLite&) = delete;
-
-    ComPtrLite(ComPtrLite&& other) noexcept
-    {
-        Attach(other.Detach());
-    }
-    ComPtrLite& operator=(ComPtrLite&& other) noexcept
-    {
-        if (this != &other)
-        {
-            Release();
-            Attach(other.Detach());
-        }
-        return *this;
-    }
-
-    void Set(T* ptr)
-    {
-        if (ptr != m_ptr)
-        {
-            Release();
-            if (ptr) ptr->AddRef();
-            m_ptr = ptr;
-        }
-    }
-
-    void Attach(T* ptr)
-    {
-        Release();
-        m_ptr = ptr;
-    }
-
-    T* Detach()
-    {
-        T* ptr = m_ptr;
-        m_ptr = nullptr;
-        return ptr;
-    }
-
-    void Release()
-    {
-        if (m_ptr)
-        {
-            m_ptr->Release();
-            m_ptr = nullptr;
-        }
-    }
-
-    T* Get() const
-    {
-        return m_ptr;
-    }
-    T** GetAddressOf()
-    {
-        return &m_ptr;
-    }
-
-    operator T* () const
-    {
-        return m_ptr;
-    }
-    T* operator->() const
-    {
-        return m_ptr;
-    }
-
-private:
-    T* m_ptr = nullptr;
-};
-

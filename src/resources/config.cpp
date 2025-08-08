@@ -5,6 +5,7 @@
 
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
+#include "input_handler.hpp"
 #include "intro_skip.hpp"
 #include "line_scaling.hpp"
 #include "logging.hpp"
@@ -283,10 +284,17 @@ void Config::Read()
     spdlog::info("Config Parse: Muted Audio Console Warnings: {}", g_MuteWarning.bEnabled);
     if (eGameType & (MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, "Vector Line Fix", "Enabled", g_VectorScalingFix.bEnableVectorLineFix);
-        spdlog::info("Config Parse: Fix Vector Effect (Rain) Scaling: {}", g_VectorScalingFix.bEnableVectorLineFix);
-        if (g_VectorScalingFix.bEnableVectorLineFix)
+        ConfigHelper::getValue(ini, "Vector Line Fix", "Fix Rain", g_VectorScalingFix.bFixRain);
+        ConfigHelper::getValue(ini, "Vector Line Fix", "Fix UI", g_VectorScalingFix.bFixUI);
+        spdlog::info("Config Parse: Fix Vector Effect (Rain/Laser/Bullet Trail) Scaling: {}", g_VectorScalingFix.bFixRain);
+        spdlog::info("Config Parse: Fix Vector Effect (UI / HUD) Scaling: {}", g_VectorScalingFix.bFixUI);
+        if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {
+
+            InputHandler::GetKeybind(ini, "Hotkeys", "Toggle Rain Shader", g_VectorScalingFix.vkRainShaderToggle);
+            InputHandler::GetKeybind(ini, "Hotkeys", "Toggle UI Shader", g_VectorScalingFix.vkUIShaderToggle);
+            InputHandler::GetKeybind(ini, "Hotkeys", "Cycle Wireframe Mode", g_VectorScalingFix.vkWireframeToggle);
+
             g_VectorScalingFix.bNeedsCompiler = true; // Set this during config so the compiler can be released via D3D11Hooks::UnloadCompilerCheck once it's no longer needed.
             inipp::get_value(ini.sections["Vector Line Fix"], "Line Scale", g_VectorScalingFix.iVectorLineScale);
             spdlog::info("Config Parse: Vector Effect Width: {} / {} pixels wide.", g_VectorScalingFix.iVectorLineScale, iInternalResY / g_VectorScalingFix.iVectorLineScale);

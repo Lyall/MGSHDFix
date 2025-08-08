@@ -27,7 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="fix_default_gpu.cpp" />
+    <ClCompile Include="src\resources\input_handler.cpp" />
+    <ClCompile Include="src\resources\fix_default_gpu.cpp" />
+    <ClCompile Include="src\features\postfx.cpp" />
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
@@ -54,8 +56,6 @@
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\features\gamma_correction.cpp" />
     <ClCompile Include="src\features\intro_skip.cpp" />
-    <ClCompile Include="src\features\msaa.cpp" />
-    <ClCompile Include="src\features\wireframe.cpp" />
     <ClCompile Include="src\fixes\color_filters.cpp" />
     <ClCompile Include="src\fixes\effect_speeds.cpp" />
     <ClCompile Include="src\fixes\line_scaling.cpp" />
@@ -71,12 +71,14 @@
     <ClCompile Include="src\features\stat_persistence.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
     <ClInclude Include="src\resources\config.hpp" />
     <ClInclude Include="external\safetyhook\include\safetyhook.hpp" />
     <ClInclude Include="src\resources\gpu_check.hpp" />
+    <ClInclude Include="src\resources\input_handler.hpp" />
     <ClInclude Include="src\resources\logging.hpp" />
     <ClInclude Include="src\fixes\skyboxes.hpp" />
     <ClInclude Include="src\fixes\aiming_after_equip.hpp" />
@@ -85,7 +87,6 @@
     <ClInclude Include="src\resources\version_checking.hpp" />
     <ClInclude Include="src\resources\version.h" />
     <ClInclude Include="src\warnings\corrupt_save_message.hpp" />
-    <ClInclude Include="src\features\msaa.hpp" />
     <ClInclude Include="src\warnings\mute_warning.hpp" />
     <ClInclude Include="src\features\mg1_custom_loading_screens.hpp" />
     <ClInclude Include="src\features\distance_culling.hpp" />
@@ -94,7 +95,6 @@
     <ClInclude Include="src\resources\common.hpp" />
     <ClInclude Include="src\features\gamma_correction.hpp" />
     <ClInclude Include="src\features\intro_skip.hpp" />
-    <ClInclude Include="src\features\wireframe.hpp" />
     <ClInclude Include="src\fixes\effect_speeds.hpp" />
     <ClInclude Include="src\fixes\line_scaling.hpp" />
     <ClInclude Include="src\fixes\pause_on_focus_loss.hpp" />

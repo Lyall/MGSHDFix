@@ -4,24 +4,89 @@
 #include <d3dcompiler.h>
 
 #include "config.hpp"
+#include "input_handler.hpp"
 #include "logging.hpp"
+
 
 namespace
 {
+    ComPtr<ID3D11GeometryShader> geometryShader;
     SafetyHookInline MGS3_DrawIndexedPrimitive_Hook {};
-}
+    ComPtr<ID3DBlob> compiledShaderBytecode;
+    SafetyHookInline D3D11_DrawInstanced_Hook {};
+    SafetyHookInline D3D11_Draw_Hook {};
 
-uint64_t MGS3_DrawIndexedPrimitive_Hooked(void* CD3DCachedDevice, int topologyType, int BaseVertexIndex, int MinVertexIndex, int NumVertices, int startIndex, int primCount)
-{ //This is called every frame, DO NOT add logging or the I/O will nuke performance.
-    if(!(topologyType == 0x1 || topologyType == 0x2))
-    {
+    /*
+ *D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP = no change
+ *D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ = no change
+        D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED,
+        
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP
+
+        D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ*/
+
+    using DrawFn = void(__stdcall*)(ID3D11DeviceContext* context, UINT VertexCount, UINT StartVertexLocation);
+
+
+    uint64_t MGS3_DrawIndexedPrimitive_Hooked(void* CD3DCachedDevice, int topologyType, int BaseVertexIndex, int MinVertexIndex, int NumVertices, int startIndex, int primCount)
+    { //This is called every frame, DO NOT add logging or the I/O will nuke performance.
+
+        if (g_VectorScalingFix.bToggleWireframe && (topologyType == D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST || (g_VectorScalingFix.bToggleWireframe > 1 && topologyType == D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP)))
+        {
+            g_D3D11Hooks.d3dDeviceContext->GSSetShader(geometryShader.Get(), nullptr, 0);
+            const auto ret = MGS3_DrawIndexedPrimitive_Hook.call<uint64_t>(CD3DCachedDevice, topologyType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
+            g_D3D11Hooks.d3dDeviceContext->GSSetShader(nullptr, nullptr, 0);
+            return ret;
+        }
+
+        if (g_VectorScalingFix.bToggleRainShader && (topologyType == D3D11_PRIMITIVE_TOPOLOGY_POINTLIST || topologyType == D3D11_PRIMITIVE_TOPOLOGY_LINELIST))
+        {
+            g_D3D11Hooks.d3dDeviceContext->GSSetShader(geometryShader.Get(), nullptr, 0);
+            const auto ret = MGS3_DrawIndexedPrimitive_Hook.call<uint64_t>(CD3DCachedDevice, topologyType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
+            g_D3D11Hooks.d3dDeviceContext->GSSetShader(nullptr, nullptr, 0);
+            return ret;
+        }
+
         return MGS3_DrawIndexedPrimitive_Hook.call<uint64_t>(CD3DCachedDevice, topologyType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
     }
-    g_D3D11Hooks.d3dDeviceContext->GSSetShader(g_D3D11Hooks.geometryShader, nullptr, 0);
-    const auto ret = MGS3_DrawIndexedPrimitive_Hook.call<uint64_t>(CD3DCachedDevice, topologyType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount);
-    g_D3D11Hooks.d3dDeviceContext->GSSetShader(nullptr, nullptr, 0);
-    return ret;
+
+    void __stdcall HookedDraw(ID3D11DeviceContext* context, UINT VertexCount, UINT StartVertexLocation)
+    {
+        D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+        context->IAGetPrimitiveTopology(&topology);
+
+        if (g_VectorScalingFix.bToggleUIShader && (topology == D3D11_PRIMITIVE_TOPOLOGY_LINELIST || topology == D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP))
+        {
+            ID3D11GeometryShader* currentGS = nullptr;
+            context->GSGetShader(&currentGS, nullptr, nullptr);
+
+            if (!currentGS && geometryShader)
+            {
+                context->GSSetShader(geometryShader.Get(), nullptr, 0);
+            }
+
+            D3D11_Draw_Hook.call<void>(context, VertexCount, StartVertexLocation);
+
+            if (!currentGS && geometryShader)
+            {
+                context->GSSetShader(nullptr, nullptr, 0);
+            }
+
+            if (currentGS)
+            {
+                currentGS->Release();
+            }
+        }
+        else
+        {
+            D3D11_Draw_Hook.call<void>(context, VertexCount, StartVertexLocation);
+        }
+    }
+
 }
+
 
 void VectorScalingFix::LoadCompiledShader() const
 {
@@ -30,22 +95,59 @@ void VectorScalingFix::LoadCompiledShader() const
     {
         return;
     }
-    if (!g_D3D11Hooks.geometryShader && compiledShaderBytecode && g_D3D11Hooks.d3dDevice)
+
+    if (geometryShader || !compiledShaderBytecode)
     {
-        const HRESULT result = g_D3D11Hooks.d3dDevice->CreateGeometryShader(
-            compiledShaderBytecode->GetBufferPointer(),
-            compiledShaderBytecode->GetBufferSize(),
-            nullptr,
-            &g_D3D11Hooks.geometryShader
-        );
-
-        if (FAILED(result))
-            spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create geometry shader on device");
-        else
-            spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader.");
+        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Geometry shader or compiled shader bytecode already exists.");
+        return;
     }
-}
 
+    if (!g_D3D11Hooks.d3dDevice)
+    {
+        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device is not initialized.");
+        return;
+    }
+
+    HRESULT result = g_D3D11Hooks.d3dDevice->CreateGeometryShader(
+        compiledShaderBytecode->GetBufferPointer(),
+        compiledShaderBytecode->GetBufferSize(),
+        nullptr,
+        geometryShader.GetAddressOf()
+    );
+
+    if (FAILED(result))
+    {
+        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create geometry shader on device");
+        return;
+    }
+
+    if (!bFixUI)
+    {
+        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: UI Fix is disabled, skipping hooking Draw calls for UI Fix geometry shader...");
+        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
+        return;
+    }
+
+    if (!g_D3D11Hooks.d3dDeviceContext)
+    {
+        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device context is not initialized.");
+        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to hook Draw calls for UI Fix geometry shader.");
+        return;
+    }
+
+
+    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Hooking Draw calls to apply UI Fix geometry shader...");
+    void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
+    D3D11_Draw_Hook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(HookedDraw));
+    LOG_HOOK(D3D11_Draw_Hook, "ID3D11DeviceContext::Draw");
+
+    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
+    
+    g_InputHandler.RegisterHotkey(vkUIShaderToggle, "UI Shader Toggle" ,[]()
+        {
+            g_VectorScalingFix.bToggleUIShader = !g_VectorScalingFix.bToggleUIShader;
+        });
+}
 
 bool VectorScalingFix::CompileGeometryShader()
 {
@@ -55,7 +157,6 @@ bool VectorScalingFix::CompileGeometryShader()
         spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Failed to load d3dcompiler_43.dll");
         return false;
     }
-
 
     pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
     if (!D3DCompileFunc)
@@ -136,12 +237,11 @@ bool VectorScalingFix::CompileGeometryShader()
             OutputStream.RestartStrip();
         }
     )";
-    const char* shaderCode = shaderString.c_str();
-    ID3DBlob* compiledShader;
-    ID3DBlob* errorMsgs;
+    ComPtr<ID3DBlob> compiledShader;
+    ComPtr<ID3DBlob> errorMsgs;
     HRESULT hr = D3DCompileFunc(
-        shaderCode,
-        strlen(shaderCode),
+        shaderString.c_str(),
+        shaderString.size(),
         "geometry_shader",
         nullptr,
         nullptr,
@@ -149,11 +249,13 @@ bool VectorScalingFix::CompileGeometryShader()
         "gs_4_0",
         0,
         0,
-        &compiledShader,
-        &errorMsgs
+        compiledShader.GetAddressOf(),
+        errorMsgs.GetAddressOf()
     );
+
     bNeedsCompiler = false;
     D3D11Hooks::UnloadCompiler(d3dcompiler);
+
     if (FAILED(hr))
     {
         if (errorMsgs)
@@ -167,6 +269,7 @@ bool VectorScalingFix::CompileGeometryShader()
         }
         return false;
     }
+
     compiledShaderBytecode = compiledShader;
     spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compiled successfully!");
     return true;
@@ -178,10 +281,10 @@ void VectorScalingFix::Initialize()
     {
         return;
     }
-    if (!bEnableVectorLineFix)
+
+    if (!bFixRain && !bFixUI)
     {
         spdlog::info("MGS 2 | MGS 3: Vector Line Fix: Config disabled. Skipping");
-
         return;
     }
 
@@ -190,10 +293,31 @@ void VectorScalingFix::Initialize()
         return;
     }
 
+    if (!bFixRain)
+    {
+        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Initialize: Rain Fix is disabled, not hooking Rain/Laser/Bullet effects.");
+        return;
+    }
+
     if (uint8_t* MGS3_DrawIndexedPrimitive_ScanResult = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC 20 FF 41 ?? 41 8B ??", "MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive"))
     {   //Technically only needed for MGS3. MGS2 does have the function as well, but it's not used. Let's patch it anyway for futureproofing.
         MGS3_DrawIndexedPrimitive_Hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS3_DrawIndexedPrimitive_ScanResult), reinterpret_cast<void*>(MGS3_DrawIndexedPrimitive_Hooked));
         LOG_HOOK(MGS3_DrawIndexedPrimitive_Hook, "MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive")
+
+        g_InputHandler.RegisterHotkey(vkRainShaderToggle, "Rain Shader Toggle" ,[]()
+            {
+                g_VectorScalingFix.bToggleRainShader = !g_VectorScalingFix.bToggleRainShader;
+            });
+
+        g_InputHandler.RegisterHotkey(vkWireframeToggle, "Wireframe Toggle" ,[]()
+            {
+                if (g_VectorScalingFix.bToggleWireframe > 1)
+                {
+                    g_VectorScalingFix.bToggleWireframe = 0;
+                    return;
+                }
+                g_VectorScalingFix.bToggleWireframe++;
+            });
     }
-    
+
 }

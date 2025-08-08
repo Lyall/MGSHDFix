@@ -19,12 +19,6 @@
     <ClCompile Include="src\features\intro_skip.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\wireframe.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
-    <ClCompile Include="src\features\msaa.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\color_filters.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
@@ -122,8 +116,14 @@
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="fix_default_gpu.cpp">
+    <ClCompile Include="src\resources\fix_default_gpu.cpp">
       <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\postfx.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\input_handler.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,12 +152,6 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\intro_skip.hpp">
-      <Filter>Features\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\features\wireframe.hpp">
-      <Filter>Features\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\features\msaa.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\pause_on_focus_loss.hpp">
@@ -237,6 +231,12 @@
     </ClInclude>
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp">
       <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\postfx.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\input_handler.hpp">
+      <Filter>Utility\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -436,4 +436,13 @@ namespace Util
         return false;
     }
 
+    void DumpBytes(uint64_t address)
+    {
+        BYTE* fn = reinterpret_cast<BYTE*>(address);
+        spdlog::info("First 6 bytes at DrawInstanced address:");
+        for (int i = 0; i < 6; ++i)
+        {
+            spdlog::info("  0x{:02X}", fn[i]);
+        }
+    }
 }

@@ -28,20 +28,27 @@ void KeepAimingAfterFiring::Initialize()
             }
             if (g_KeepAimingAfterFiring.bAlwaysKeepAiming)
             {
-                ctx.r12 = 2;
+                ctx.r12 = g_GameVars.GetAimingState();
                 return;
             }
             if (g_KeepAimingAfterFiring.bKeepAimingInFirstPerson && g_GameVars.MGS2IsHoldingFirstPerson())
             {
-                ctx.r12 = 2;
+                ctx.r12 = g_GameVars.GetAimingState();
                 return;
             }
             if (g_KeepAimingAfterFiring.bKeepAimingOnLockOn && g_GameVars.MGS2IsHoldingLockOn())
             {
-                ctx.r12 = 2;
+                ctx.r12 = g_GameVars.GetAimingState();
                 return;
             }
         });
+            MAKE_HOOK_MID(baseModule, "66 44 89 B8 ?? ?? ?? ?? 8B 15", "crouch fix", {
+                if (ctx.r15 == 2 && ctx.rdx == 0xDC)
+                {
+                    ctx.r15 = 1;
+                    spdlog::info("MGS 2: Keep Aiming After Firing - forced");
+                }
+            });
     }
     else if (eGameType & MGS3)
     {
