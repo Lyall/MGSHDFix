@@ -40,6 +40,8 @@ namespace Util
 {
 #if !defined(RELEASE_BUILD)
         void DumpContext(const safetyhook::Context& ctx);
+
+        void DumpBytes(uint64_t address);
 #endif
 
     int findStringInVector(std::string& str, const std::initializer_list<std::string>& search);
@@ -57,8 +59,6 @@ namespace Util
     std::string GetUppercaseNameAtIndex(const std::initializer_list<std::string>& list, int index);
 
     bool IsSteamOS();
-
-    void DumpBytes(uint64_t address);
 
 }
 

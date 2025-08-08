@@ -39,7 +39,6 @@
 #include "distance_culling.hpp"
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
-#include "wireframe.hpp"
 
 
 // Aspect ratio + HUD stuff

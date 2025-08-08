@@ -6,6 +6,10 @@
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
+**Featured by**:  
+[IGN (Video Guide)](https://www.ign.com/videos/how-to-fix-the-metal-gear-solid-master-collection-on-pc-with-mods) • [IGN (Best Mods List)](https://www.ign.com/wikis/metal-gear-solid-master-collection-vol-1/Best_Mods) • [Digital Foundry / Eurogamer](https://youtu.be/zkdxOQ2kGMc?t=536) • [PC Gamer](https://www.pcgamer.com/it-only-took-hours-for-modders-to-crowbar-4k-support-into-the-metal-gear-solid-master-collectionnow-theyve-added-ultrawide-high-res-ui-support-and-more/) • [Rock Paper Shotgun](https://www.rockpapershotgun.com/modders-polish-metal-gear-solids-pc-master-collection-with-ultrawide-support-sharper-textures-and-more) • [Ocelot (YouTube)](https://www.youtube.com/watch?v=CwgWJgc58_4)
+
+
 ## Games Supported
 - Metal Gear 1/2 (MSX)
 - Metal Gear Solid 2
@@ -30,6 +34,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Adds support for custom PS2 controller glyphs without overwriting existing textures.
 - Option to force Snake / Raiden to wear their sunglasses (and outright disable their sunglasses.)
 - Option to continue aiming your gun after firing it while in first-person/while holding lock-on.
+- Toggleable wireframe modes.
 
 ## Bug Fixes
 - Fixes the collection's games sometimes defaulting to intergrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
@@ -43,6 +48,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes the bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
 - Fixes various visual effects which ran at double speed, causing them to end early compared to on the PS2 (these issue even occur on PCSX2/PS2 emulation) (MGS2).
 - Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/Lyall/MGSHDFix/pull/140)
+- Fixes UI scaling. [PR #181](github.com/Lyall/MGSHDFix/pull/181)
 - Fixes broken skybox initialization procs (MGS2). [PR#142](https://github.com/Lyall/MGSHDFix/pull/142)
 
 ## Logging / Warnings for Common Configuration Issues
@@ -89,18 +95,22 @@ This list will contain bugs which may or may not be fixed.
 
 ## Screenshots
 
-| ![ezgif-3-82fd6eedda](https://github.com/Lyall/MGSHDFix/assets/695941/b01453c7-b4ee-4903-bd34-340371873ecb) |
+| ![MGS2 widescreen cutscene preview](screenshots/after/mgs2%20-%20widescreen.gif) |
 |:--:|
-![2131640_20250428235619_1](https://github.com/user-attachments/assets/610b1318-5d8c-4c36-ada2-3c883f38b33b)
-![2131640_20250428225953_1](https://github.com/user-attachments/assets/2bf8fbdf-e274-4454-83c3-1a8c82f5c11c)
-![2131640_20250501025301_1](https://github.com/user-attachments/assets/7872b59e-27e9-4e29-a19f-9f468007f9d0)
-![2131640_20250501025407_1](https://github.com/user-attachments/assets/7dd0b26c-915d-4549-9f74-03346ecea812)
+![MGS2 - Correctly scaled rain in 'D00T' scene](screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png)
+![MGS2 - Correctly scaled rain during Olga cutscene](screenshots/after/mgs2%20-%20d05t%20-%20rain%20(olga).png)
+![MGS2 - Restored Big Shell skybox 1](screenshots/after/mgs2%20-%20skyboxes%201.png)
+![MGS2 - Restored Big Shell skybox 2](screenshots/after/mgs2%20-%20skyboxes%202.png)
+![MGS2 - Correct flames effect in Solidus fight](screenshots/after/mgs2%20-%20w24a%20-%20solidus%20flames.png)
+![MGS2 - Corrected Binocular / Vector UI scaling](screenshots/after/mgs2%20-%20w32a%20-%20scope.png)
 | Metal Gear Solid 2 |
 
-| ![ezgif-3-982e93f49a](https://github.com/Lyall/MGSHDFix/assets/695941/5530a42e-6b6a-4eb0-a714-ba3e7c3a1dc3) |
+| ![MGS3 widescreen gameplay preview](screenshots/after/mgs3%20-%20widescreen.gif) |
 |:--:|
-![2131650_20250429005837_1](https://github.com/user-attachments/assets/b5ea0b75-3944-422e-a0c9-0c542d22a55c)
-![vlcsnap-2025-04-30-01h48m54s182](https://github.com/user-attachments/assets/725a0b36-1862-4e91-b524-82aff39616ef)
+![MGS3 - Correctly scaled rain on bridge scene](screenshots/after/mgs3%20-%20bridge%20rain.png)
+![MGS3 - Correctly scaled rain in The Sorrow's river](screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
+![MGS3 - Wireframe mode visual](screenshots/after/mgs3%20-%20wireframe.png)
+![MGS3 - Corrected Thermal vision UI](screenshots/after/mgs3%20-%20thermals.png)
 | Metal Gear Solid 3 |
 
 ## Building
@@ -114,7 +124,7 @@ Open MGSFPSUnlock.sln in Visual Studio (2022) and build.
 
 ## Credits
 [@Lyall](https://codeberg.org/Lyall) for their amazing work making widescreen fix mods, and most importantly, the original creation of this mod!<br />
-[@ShizCalev/Afevis](https://github.com/shizcalev) for long-term maintenance and contributing fixes.<br />
+[@ShizCalev/Afevis](https://github.com/shizcalev) for long-term maintenance (taking over the project in early 2025), and contributing fixes.<br />
 [@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), and [Zenf0](https://next.nexusmods.com/profile/zenf0) for contributing fixes/features. <br />
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
