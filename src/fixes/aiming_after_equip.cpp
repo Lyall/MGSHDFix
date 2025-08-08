@@ -18,7 +18,7 @@ void FixAimAfterEquip::Initialize()
             g_GameVars.SetAimingState(0);
         });
 
-        MAKE_HOOK_MID(baseModule, "89 B3 ?? ?? ?? ?? 48 8B 83 ?? ?? ?? ?? 4C 8B 74 24, "MGS2: Aiming After Equip - Raiden", {
+        MAKE_HOOK_MID(baseModule, "89 B3 ?? ?? ?? ?? 48 8B 83 ?? ?? ?? ?? 4C 8B 74 24", "MGS2: Aiming After Equip - Raiden", {
             if ((uint32_t)ctx.rsi == 0)
             {
                 g_GameVars.SetAimingState(0);
