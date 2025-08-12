@@ -91,8 +91,8 @@ void Logging::Initialize()
                 std::filesystem::create_directory(sExePath / "logs"); //create a "logs" subdirectory in the game folder to keep the main directory tidy.
             }
             // Create 10MB truncated logger
-            std::filesystem::path sLogFile = sFixName + ((sExeName == "launcher.exe") ? "_Launcher" : "_Game") + ".log";
-            std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(sLogFile.string(), std::make_shared<size_limited_sink<std::mutex>>((sExePath / "logs" / sLogFile).string(), 15 * 1024 * 1024));
+            g_Logging.sLogFile = (sExePath / "logs" / (sFixName + ((sExeName == "launcher.exe") ? "_Launcher" : "_Game") + ".log"));
+            std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(g_Logging.sLogFile.string(), std::make_shared<size_limited_sink<std::mutex>>(g_Logging.sLogFile.string(), 15 * 1024 * 1024));
             spdlog::set_default_logger(logger);
 
             spdlog::flush_on(spdlog::level::debug);
@@ -107,11 +107,11 @@ void Logging::Initialize()
             spdlog::info("{} v{} loaded.", sFixName, sFixVersion);
             spdlog::info("ASI plugin location: {}", (sExePath / sFixPath / (sFixName + ".asi")).string());
             spdlog::info("----------");
-            spdlog::info("Log file: {}", (sExePath / "logs" / sLogFile).string());
+            spdlog::info("Log file: {}", g_Logging.sLogFile.string());
             if (std::filesystem::path pOldLogFile = sExePath / "logs" / (sFixName + ".log"); std::filesystem::exists(pOldLogFile))
             {
                 spdlog::warn("Found an outdated log file from a previous version of MGSHDFix. Removing: {}", pOldLogFile.string());
-                std::filesystem::remove(pOldLogFile);
+                //std::filesystem::remove(pOldLogFile);
             }
             spdlog::info("----------");
 

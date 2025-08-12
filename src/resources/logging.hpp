@@ -1,6 +1,7 @@
 #pragma once
 #include <spdlog/spdlog.h>
 #include <chrono>
+#include <filesystem>
 
 class Logging final
 {
@@ -16,6 +17,7 @@ public:
     bool bIsSteamDeck = false;
     bool bCheckedSteamDeck = false;
     bool bVerboseLogging = true;
+    std::filesystem::path sLogFile;
 };
 
 /// Global logging instance

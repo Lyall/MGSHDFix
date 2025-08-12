@@ -116,7 +116,7 @@
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\resources\fix_default_gpu.cpp">
+    <ClCompile Include="src\fixes\fix_default_gpu.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\features\postfx.cpp">
@@ -124,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="src\resources\input_handler.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -237,6 +240,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\input_handler.hpp">
       <Filter>Utility\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

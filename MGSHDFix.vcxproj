@@ -27,8 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp" />
     <ClCompile Include="src\resources\input_handler.cpp" />
-    <ClCompile Include="src\resources\fix_default_gpu.cpp" />
+    <ClCompile Include="src\fixes\fix_default_gpu.cpp" />
     <ClCompile Include="src\features\postfx.cpp" />
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
@@ -71,6 +72,7 @@
     <ClCompile Include="src\features\stat_persistence.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
     <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
@@ -201,11 +203,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.asi</TargetExt>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <CustomBuildAfterTargets />
   </PropertyGroup>
@@ -213,25 +215,25 @@
     <TargetExt>.asi</TargetExt>
     <OutDir>C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid2mc\mods\MGSHDFix-49-2-6-0-1754035545\plugins\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MGS3_Dev|x64'">
     <TargetExt>.asi</TargetExt>
     <OutDir>C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid3mc\mods\MGSHDFix-139-2-6-0-1754035569\plugins\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MGS2_Dev|Win32'">
     <OutDir>C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid2mc\mods\MGSHDFix-49-2-2-0-1717710976\plugins\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MGS3_Dev|Win32'">
     <OutDir>C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid2mc\mods\MGSHDFix-49-2-2-0-1717710976\plugins\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\imgui;external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MGS2_Dev|Win32'">
     <ClCompile>
@@ -244,7 +246,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -273,7 +275,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -304,7 +306,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -335,7 +337,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -366,7 +368,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -397,7 +399,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\resources;$(ProjectDir)src\features;$(ProjectDir)src\fixes;$(ProjectDir)src\warnings;$(ProjectDir)src\gui</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

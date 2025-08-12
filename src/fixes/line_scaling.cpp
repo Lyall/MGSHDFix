@@ -121,11 +121,11 @@ namespace
 
 void VectorScalingFix::LoadCompiledShader() const
 {
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Attempting to load compiled geometry shader...");
     if (!(eGameType & (MGS2 | MGS3)))
     {
         return;
     }
+    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Attempting to load compiled geometry shader...");
 
     if (geometryShader || !compiledShaderBytecode)
     {
