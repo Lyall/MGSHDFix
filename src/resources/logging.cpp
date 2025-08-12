@@ -111,7 +111,7 @@ void Logging::Initialize()
             if (std::filesystem::path pOldLogFile = sExePath / "logs" / (sFixName + ".log"); std::filesystem::exists(pOldLogFile))
             {
                 spdlog::warn("Found an outdated log file from a previous version of MGSHDFix. Removing: {}", pOldLogFile.string());
-                //std::filesystem::remove(pOldLogFile);
+                std::filesystem::remove(pOldLogFile);
             }
             spdlog::info("----------");
 
