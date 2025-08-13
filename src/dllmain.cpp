@@ -25,6 +25,7 @@
 #include "texture_buffer_size.hpp"
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
+#include "depth_of_field.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -40,7 +41,6 @@
 #include "distance_culling.hpp"
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
-#include "mgs3_hud_fixes.hpp"
 
 
 // Aspect ratio + HUD stuff
@@ -1147,6 +1147,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_FixAimAfterEquip.Initialize());
     INITIALIZE(g_FixAimingFullTilt.Initialize());
     INITIALIZE(g_MGS3HudFixes.Initialize());
+    INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(g_ColorFilterFix.Initialize());
 
         //Warnings

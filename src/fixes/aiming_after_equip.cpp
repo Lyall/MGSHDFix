@@ -28,7 +28,7 @@ void FixAimAfterEquip::Initialize()
 
         MAKE_HOOK_MID(baseModule, "BB ?? ?? ?? ?? 66 89 81", "MGS2: test 2", {
             spdlog::info("test 2");
-            //Util::DumpContext(ctx);
+            Util::DumpContext(ctx);
             });
 
     }

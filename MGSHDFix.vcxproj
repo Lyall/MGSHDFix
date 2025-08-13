@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\depth_of_field.cpp" />
     <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp" />
     <ClCompile Include="src\resources\input_handler.cpp" />
     <ClCompile Include="src\fixes\fix_default_gpu.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="src\features\stat_persistence.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\depth_of_field.hpp" />
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
     <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
