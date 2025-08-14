@@ -2,6 +2,7 @@
 #include "logging.hpp"
 #include "submodule_initiailization.hpp"
 #include "config.hpp"
+#include "config_keys.hpp"
 
 ///Resources
 #include "d3d11_api.hpp"
@@ -22,7 +23,7 @@
 #include "line_scaling.hpp"
 #include "skyboxes.hpp"
 #include "stereo_audio.hpp"
-#include "texture_buffer_size.hpp"
+//#include "texture_buffer_size.hpp"
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "depth_of_field.hpp"
@@ -886,7 +887,7 @@ static void Init_LauncherConfigOverride()
 
                 commandLine += L" -mgst " + transformString(sLauncherConfigMSXGame, ::tolower); // -mgst must be lowercase
                 commandLine += L" -walltype " + std::to_wstring(iLauncherConfigMSXWallType);
-                commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign, ::toupper); // -wallalign must be uppercase
+                commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign.substr(0, 1),::toupper); // -wallalign must be uppercase
             }
 
             std::string sCommandLine = Util::WideToUTF8(commandLine);
@@ -1125,7 +1126,7 @@ static void InitializeSubsystems()
     INITIALIZE(Init_Miscellaneous());
 
         //Features
-    INITIALIZE(g_TextureBufferSize.Initialize());
+    //INITIALIZE(g_TextureBufferSize.Initialize());
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());
     INITIALIZE(g_KeepAimingAfterFiring.Initialize());

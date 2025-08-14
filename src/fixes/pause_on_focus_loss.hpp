@@ -7,7 +7,7 @@ public:
     static bool ShouldFixPauseState();
 
     bool bPauseOnFocusLoss;
-    bool bSpeedrunnerBugfixOverride;
+    bool bFixAltTabBugs;
 };
 
 inline PauseOnFocusLoss g_PauseOnFocusLoss;

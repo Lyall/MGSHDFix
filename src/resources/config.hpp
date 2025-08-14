@@ -39,33 +39,4 @@ inline std::string sLauncherConfigMSXGame = "mg1";
 inline int iLauncherConfigMSXWallType = 0;
 inline std::string sLauncherConfigMSXWallAlign = "C";
 
-
-inline const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
-    "ps5",
-    "ps4",
-    "xbox",
-    "nx",
-    "stmd",
-    "kbd",
-    "ps2"
-};
-
-inline const std::initializer_list<std::string> kLauncherConfigLanguages = {
-    "en",
-    "jp",
-    "fr",
-    "gr",
-    "it",
-    "pr",
-    "sp",
-    "du",
-    "ru"
-};
-
-inline const std::initializer_list<std::string> kLauncherConfigRegions = {
-    "us",
-    "jp",
-    "eu"
-};
-
 inline std::pair DesktopDimensions = { 0,0 };

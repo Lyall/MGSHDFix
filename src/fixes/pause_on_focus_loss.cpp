@@ -13,7 +13,7 @@ bool PauseOnFocusLoss::ShouldFixPauseState()
 
 void PauseOnFocusLoss::Initialize()
 {
-    if (g_PauseOnFocusLoss.bSpeedrunnerBugfixOverride)
+    if (!g_PauseOnFocusLoss.bFixAltTabBugs)
     {
         return;
     }

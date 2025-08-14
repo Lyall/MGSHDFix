@@ -14,3 +14,6 @@
 [submodule "external/SteamworksSDK"]
 	path = external/SteamworksSDK
 	url = https://github.com/rlabrecque/SteamworksSDK
+[submodule "external/wxWidgets"]
+	path = external/wxWidgets
+	url = https://github.com/wxWidgets/wxWidgets

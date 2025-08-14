@@ -14,17 +14,26 @@
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
 #define VERSION_STRING STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
-inline constexpr std::string sFixVersion = VERSION_STRING;
-inline constexpr std::string sFixName = FIX_NAME;
+inline const std::string sFixVersion = VERSION_STRING;
+inline const std::string sFixName = FIX_NAME;
 
 // Metadata
 #define COMPANY_NAME      "Lyall & Contributors"
 #define PRODUCT_NAME      FIX_NAME
-#define FILE_DESCRIPTION  FIX_NAME " ASI Plugin"
-#define INTERNAL_NAME     FIX_NAME ".asi"
-#define ORIGINAL_FILENAME FIX_NAME ".asi"
 #define PRODUCT_VERSION   VERSION_STRING
 #define FILE_VERSION      VERSION_STRING
 #define LEGAL_COPYRIGHT   "© 2025 Lyall & Contributors. Licensed under the MIT License."
 #define LEGAL_TRADEMARKS  ""
 #define COMMENTS          ""
+#define FILE_DESCRIPTION_ASI     FIX_NAME " ASI Plugin"
+#define INTERNAL_NAME_ASI        FIX_NAME ".asi"
+#define ORIGINAL_FILENAME_ASI    FIX_NAME ".asi"
+#define FILE_DESCRIPTION_CONFIG  FIX_NAME " Config Tool"
+#define INTERNAL_NAME_CONFIG     FIX_NAME " Config Tool.exe"
+#define ORIGINAL_FILENAME_CONFIG FIX_NAME " Config Tool.exe"
+
+#define IDI_ICON1           101
+#define IDB_BANNER_MG1      102
+#define IDB_BANNER_MGS2     103
+#define IDB_BANNER_MGS3     104
+

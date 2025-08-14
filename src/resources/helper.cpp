@@ -283,16 +283,17 @@ namespace Util
 
     int findStringInVector(std::string& str, const std::initializer_list<std::string>& search)
     {
-        std::transform(str.begin(), str.end(), str.begin(),
-            [](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-        auto it = std::find(search.begin(), search.end(), str);
-        if (it != search.end())
-            return (int)std::distance(search.begin(), it);
+        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+        for (auto it = search.begin(); it != search.end(); ++it)
+        {
+            std::string lower = *it;
+            std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+            if (str == lower)
+                return static_cast<int>(std::distance(search.begin(), it));
+        }
         return 0;
     }
+
 
     // Convert an UTF8 string to a wide Unicode String
     std::wstring UTF8toWide(const std::string& str)

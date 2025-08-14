@@ -13,7 +13,7 @@
 #include "pause_on_focus_loss.hpp"
 #include "steamworks_api.hpp"
 #include "stereo_audio.hpp"
-#include "texture_buffer_size.hpp"
+//#include "texture_buffer_size.hpp"
 #include "version_checking.hpp"
 #include "stat_persistence.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -89,6 +89,7 @@ namespace ConfigHelper
 }
 
 
+#include "config_keys.hpp"
 void Config::Read()
 {
     std::filesystem::path sConfigFile = sFixName + ".ini";
@@ -124,50 +125,49 @@ void Config::Read()
     DesktopDimensions = Util::GetPhysicalDesktopDimensions();
 
     // Read ini file
-    ConfigHelper::getValue(ini, "Verbose Logging", "Enabled", g_Logging.bVerboseLogging);
+    ConfigHelper::getValue(ini, ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, g_Logging.bVerboseLogging);
 
-    ConfigHelper::getValue(ini, "Output Resolution", "Enabled", bOutputResolution);
-    ConfigHelper::getValue(ini, "Output Resolution", "Width", iOutputResX);
-    ConfigHelper::getValue(ini, "Output Resolution", "Height", iOutputResY);
-    ConfigHelper::getValue(ini, "Output Resolution", "Windowed", bWindowedMode);
-    ConfigHelper::getValue(ini, "Output Resolution", "Borderless", bBorderlessMode);
+    ConfigHelper::getValue(ini, ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, bOutputResolution);
+    ConfigHelper::getValue(ini, ConfigKeys::WindowWidth_Section, ConfigKeys::WindowWidth_Setting, iOutputResX);
+    ConfigHelper::getValue(ini, ConfigKeys::WindowHeight_Section, ConfigKeys::WindowHeight_Setting, iOutputResY);
+    ConfigHelper::getValue(ini, ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting, bWindowedMode);
+    ConfigHelper::getValue(ini, ConfigKeys::BorderlessWindowed_Section, ConfigKeys::BorderlessWindowed_Setting, bBorderlessMode);
 
-    ConfigHelper::getValue(ini, "Internal Resolution", "Width", iInternalResX);
-    ConfigHelper::getValue(ini, "Internal Resolution", "Height", iInternalResY);
+    ConfigHelper::getValue(ini, ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, iInternalResX);
+    ConfigHelper::getValue(ini, ConfigKeys::RenderScaleHeight_Section, ConfigKeys::RenderScaleHeight_Setting, iInternalResY);
 
-    ConfigHelper::getValue(ini, "Anisotropic Filtering", "Samples", iAnisotropicFiltering);
+    ConfigHelper::getValue(ini, ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, iAnisotropicFiltering);
 
-    ConfigHelper::getValue(ini, "Disable Texture Filtering", "DisableTextureFiltering", bDisableTextureFiltering);
+    ConfigHelper::getValue(ini, ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, bDisableTextureFiltering);
 
-    ConfigHelper::getValue(ini, "Framebuffer Fix", "Enabled", bFramebufferFix);
+    ConfigHelper::getValue(ini, ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, bFramebufferFix);
 
-    ConfigHelper::getValue(ini, "Launcher Config", "LauncherJumpStart", bLauncherJumpStart);
+    ConfigHelper::getValue(ini, ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, bLauncherJumpStart);
 
-    ConfigHelper::getValue(ini, "Skip Intro Logos", "Enabled", g_IntroSkip.isEnabled);
-    ConfigHelper::getValue(ini, "Force Stereo Audio", "Enabled", g_StereoAudioFix.isEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::SkipIntroLogos_Section, ConfigKeys::SkipIntroLogos_Setting, g_IntroSkip.isEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::ForceStereoAudio_Section, ConfigKeys::ForceStereoAudio_Setting, g_StereoAudioFix.isEnabled);
 
-    ConfigHelper::getValue(ini, "Pause On Focus Loss", "Enabled", g_PauseOnFocusLoss.bPauseOnFocusLoss);
-    ConfigHelper::getValue(ini, "Pause On Focus Loss", "SpeedrunnerBugfixOverride", g_PauseOnFocusLoss.bSpeedrunnerBugfixOverride);
+    ConfigHelper::getValue(ini, ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, g_PauseOnFocusLoss.bPauseOnFocusLoss);
+    ConfigHelper::getValue(ini, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Section, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Setting, g_PauseOnFocusLoss.bFixAltTabBugs);
 
-    ConfigHelper::getValue(ini, "Mute Warning", "Enabled", g_MuteWarning.bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, g_MuteWarning.bEnabled);
 
-    ConfigHelper::getValue(ini, "Update Notifications", "CheckForUpdates", bShouldCheckForUpdates);
-    ConfigHelper::getValue(ini, "Update Notifications", "ConsoleNotifications", bConsoleUpdateNotifications);
+    ConfigHelper::getValue(ini, ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, bShouldCheckForUpdates);
+    ConfigHelper::getValue(ini, ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, bConsoleUpdateNotifications);
 
-    ConfigHelper::getValue(ini, "Achievement Persistence", "Enabled", g_StatPersistence.bAchievementPersistenceEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, g_StatPersistence.bAchievementPersistenceEnabled);
 
-    ConfigHelper::getValue(ini, "Reset All Achievements", "Reset_All_Achievements", g_SteamAPI.bResetAchievements);
+    ConfigHelper::getValue(ini, ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, g_SteamAPI.bResetAchievements);
 
-    ConfigHelper::getValue(ini, "Keep Aiming After Firing", "AlwaysKeepAiming", g_KeepAimingAfterFiring.bAlwaysKeepAiming);
-    ConfigHelper::getValue(ini, "Keep Aiming After Firing", "While in First Person", g_KeepAimingAfterFiring.bKeepAimingInFirstPerson);
-    ConfigHelper::getValue(ini, "Keep Aiming After Firing", "While Holding Lock On", g_KeepAimingAfterFiring.bKeepAimingOnLockOn);
+    ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, g_KeepAimingAfterFiring.bAlwaysKeepAiming);
+    ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, g_KeepAimingAfterFiring.bKeepAimingInFirstPerson);
+    ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, g_KeepAimingAfterFiring.bKeepAimingOnLockOn);
 
-    ConfigHelper::getValue(ini, "Fix Aiming After Equip", "Enabled", g_FixAimAfterEquip.bEnabled);
-    ConfigHelper::getValue(ini, "Fix Aiming On Full Tilt", "Enabled", g_FixAimingFullTilt.bEnabled);
-
+    ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, g_FixAimingFullTilt.bEnabled);
 
     std::string sShouldWearSunglasses;
-    ConfigHelper::getValue(ini, "MGS2 Sunglasses", "ShouldWearSunglasses", sShouldWearSunglasses);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
     std::transform(sShouldWearSunglasses.begin(), sShouldWearSunglasses.end(), sShouldWearSunglasses.begin(), ::tolower);
     if (sShouldWearSunglasses != "normal" && sShouldWearSunglasses != "always" && sShouldWearSunglasses != "never")
     {
@@ -185,44 +185,48 @@ void Config::Read()
         }
     }
 
-    /*//INITIALIZE(Init_GammaShader());
-    //INITIALIZE(g_DistanceCulling.Initialize());
-    //INITIALIZE(g_MultiSampleAntiAliasing.Initialize());
-    //INITIALIZE(g_Wireframe.Initialize());
+    ConfigHelper::getValue(ini, ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, bMouseSensitivity);
+    ConfigHelper::getValue(ini, ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, fMouseSensitivityXMulti);
+    ConfigHelper::getValue(ini, ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, fMouseSensitivityYMulti);
 
-    //INITIALIZE(g_ColorFilterFix.Initialize());*/
+    ConfigHelper::getValue(ini, ConfigKeys::DisableMouseCursor_Section, ConfigKeys::DisableMouseCursor_Setting, bDisableCursor);
 
-    //inipp::get_value(ini.sections["MG1 Custom Loading Screens"], "Enabled", g_MG1CustomLoadingScreens.isEnabled);
-    ConfigHelper::getValue(ini, "Mouse Sensitivity", "Enabled", bMouseSensitivity);
-    ConfigHelper::getValue(ini, "Mouse Sensitivity", "X Multiplier", fMouseSensitivityXMulti);
-    ConfigHelper::getValue(ini, "Mouse Sensitivity", "Y Multiplier", fMouseSensitivityYMulti);
+    ConfigHelper::getValue(ini, ConfigKeys::FixAspectRatio_Section, ConfigKeys::FixAspectRatio_Setting, bAspectFix);
+    ConfigHelper::getValue(ini, ConfigKeys::FixHUD_Section, ConfigKeys::FixHUD_Setting, bHUDFix);
+    ConfigHelper::getValue(ini, ConfigKeys::FixFOV_Section, ConfigKeys::FixFOV_Setting, bFOVFix);
 
-    ConfigHelper::getValue(ini, "Disable Mouse Cursor", "Enabled", bDisableCursor);
-
-    ConfigHelper::getValue(ini, "Texture Buffer", "SizeMB", g_TextureBufferSize.iTextureBufferSizeMB);
-
-    ConfigHelper::getValue(ini, "Fix Aspect Ratio", "Enabled", bAspectFix);
-    ConfigHelper::getValue(ini, "Fix HUD", "Enabled", bHUDFix);
-    ConfigHelper::getValue(ini, "Fix FOV", "Enabled", bFOVFix);
-
-    ConfigHelper::getValue(ini, "Launcher Config", "SkipLauncher", bLauncherConfigSkipLauncher);
-
+    ConfigHelper::getValue(ini, ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, bLauncherConfigSkipLauncher);
 
     // Read launcher settings from ini
     std::string sLauncherConfigCtrlType = "kbd";
     std::string sLauncherConfigRegion = "us";
     std::string sLauncherConfigLanguage = "en";
-    ConfigHelper::getValue(ini, "Launcher Config", "CtrlType", sLauncherConfigCtrlType);
-    ConfigHelper::getValue(ini, "Launcher Config", "Region", sLauncherConfigRegion);
-    ConfigHelper::getValue(ini, "Launcher Config", "Language", sLauncherConfigLanguage);
-    ConfigHelper::getValue(ini, "Launcher Config", "MSXGame", sLauncherConfigMSXGame);
-    ConfigHelper::getValue(ini, "Launcher Config", "MSXWallType", iLauncherConfigMSXWallType);
-    ConfigHelper::getValue(ini, "Launcher Config", "MSXWallAlign", sLauncherConfigMSXWallAlign);
+    ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
+    ConfigHelper::getValue(ini, ConfigKeys::Region_Section, ConfigKeys::Region_Setting, sLauncherConfigRegion);
+    ConfigHelper::getValue(ini, ConfigKeys::Language_Section, ConfigKeys::Language_Setting, sLauncherConfigLanguage);
+    ConfigHelper::getValue(ini, ConfigKeys::SkipLauncherMSXGame_Section, ConfigKeys::SkipLauncherMSXGame_Setting, sLauncherConfigMSXGame);
+    ConfigHelper::getValue(ini, ConfigKeys::MSXWallType_Section, ConfigKeys::MSXWallType_Setting, iLauncherConfigMSXWallType);
+    ConfigHelper::getValue(ini, ConfigKeys::MSXWallAlign_Section, ConfigKeys::MSXWallAlign_Setting, sLauncherConfigMSXWallAlign);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
     iLauncherConfigRegion = Util::findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
     iLauncherConfigLanguage = Util::findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
 
+    // Vector Line Fix
+    if (eGameType & (MGS2 | MGS3))
+    {
+        ConfigHelper::getValue(ini, ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, g_VectorScalingFix.bFixRain);
+        ConfigHelper::getValue(ini, ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, g_VectorScalingFix.bFixUI);
+        if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
+        {
+            InputHandler::GetKeybind(ini, ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, g_VectorScalingFix.vkRainShaderToggle);
+            InputHandler::GetKeybind(ini, ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, g_VectorScalingFix.vkUIShaderToggle);
+            InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
 
+            g_VectorScalingFix.bNeedsCompiler = true;
+            inipp::get_value(ini.sections[ConfigKeys::VectorLineScale_Section], ConfigKeys::VectorLineScale_Setting, g_VectorScalingFix.iVectorLineScale);
+            spdlog::info("Config Parse: Vector Effect Width: {} / {} pixels wide.", g_VectorScalingFix.iVectorLineScale, iInternalResY / g_VectorScalingFix.iVectorLineScale);
+        }
+    }
 
     // Log config parse
     spdlog::info("Config Parse: Verbose Logging: {}", g_Logging.bVerboseLogging);
@@ -247,7 +251,6 @@ void Config::Read()
     spdlog::info("Config Parse: Fix Ultrawide Aspect Ratio: {}", bAspectFix);
     spdlog::info("Config Parse: Fix Ultrawide HUD: {}", bHUDFix);
     spdlog::info("Config Parse: Fix Ultrawide FOV: {}", bFOVFix);
-    spdlog::info("Config Parse: Texture Buffer Size (PER TEXTURE): {}MB", g_TextureBufferSize.iTextureBufferSizeMB); //g_TextureBufferSize
     spdlog::info("Config Parse: Anisotropic Filtering Level: {}", iAnisotropicFiltering);
     if (iAnisotropicFiltering < 0 || iAnisotropicFiltering > 16)
     {
@@ -259,12 +262,7 @@ void Config::Read()
     spdlog::info("Config Parse: Mouse Sensitivity: {}", bMouseSensitivity);
     spdlog::info("Config Parse: Mouse Sensitivity X Multiplier: {}", fMouseSensitivityXMulti);
     spdlog::info("Config Parse: Mouse Sensitivity Y Multiplier: {}", fMouseSensitivityYMulti);
-
-
-    //spdlog::info("Config Parse: bMG1CustomLoadingScreens: {}", g_MG1CustomLoadingScreens.isEnabled);
-
     spdlog::info("Config Parse: Launcher Jump Start: {}", bLauncherJumpStart);
-
     spdlog::info("Config Parse: Launcher - Skip Launcher: {}", bLauncherConfigSkipLauncher);
     spdlog::info("Config Parse: Launcher - Controller Glyphs: {} ( {} )", iLauncherConfigCtrlType, Util::GetUppercaseNameAtIndex(kLauncherConfigCtrlTypes, iLauncherConfigCtrlType));
     spdlog::info("Config Parse: Launcher - MSX Game: {}", sLauncherConfigMSXGame);
@@ -278,38 +276,21 @@ void Config::Read()
     }
     spdlog::info("Config Parse: Skip Intro Videos: {}", g_IntroSkip.isEnabled);
     spdlog::info("Config Parse: Pause On Focus Loss: {}", g_PauseOnFocusLoss.bPauseOnFocusLoss);
-    spdlog::info("Config Parse: Cutscene Asset Loading Fix - Speedrunner Override: {}", g_PauseOnFocusLoss.bSpeedrunnerBugfixOverride);
-
+    spdlog::info("Config Parse: Cutscene Asset Loading Fix - Speedrunner Override: {}", g_PauseOnFocusLoss.bFixAltTabBugs);
     spdlog::info("Config Parse: Force Stereo Audio: {}", g_StereoAudioFix.isEnabled);
     spdlog::info("Config Parse: Muted Audio Console Warnings: {}", g_MuteWarning.bEnabled);
     if (eGameType & (MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, "Vector Line Fix", "Fix Rain", g_VectorScalingFix.bFixRain);
-        ConfigHelper::getValue(ini, "Vector Line Fix", "Fix UI", g_VectorScalingFix.bFixUI);
         spdlog::info("Config Parse: Fix Vector Effect (Rain/Laser/Bullet Trail) Scaling: {}", g_VectorScalingFix.bFixRain);
         spdlog::info("Config Parse: Fix Vector Effect (UI / HUD) Scaling: {}", g_VectorScalingFix.bFixUI);
-        if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
-        {
-
-            InputHandler::GetKeybind(ini, "Hotkeys", "Toggle Rain Shader", g_VectorScalingFix.vkRainShaderToggle);
-            InputHandler::GetKeybind(ini, "Hotkeys", "Toggle UI Shader", g_VectorScalingFix.vkUIShaderToggle);
-            InputHandler::GetKeybind(ini, "Hotkeys", "Cycle Wireframe Mode", g_VectorScalingFix.vkWireframeToggle);
-
-            g_VectorScalingFix.bNeedsCompiler = true; // Set this during config so the compiler can be released via D3D11Hooks::UnloadCompilerCheck once it's no longer needed.
-            inipp::get_value(ini.sections["Vector Line Fix"], "Line Scale", g_VectorScalingFix.iVectorLineScale);
-            spdlog::info("Config Parse: Vector Effect Width: {} / {} pixels wide.", g_VectorScalingFix.iVectorLineScale, iInternalResY / g_VectorScalingFix.iVectorLineScale);
-        }
     }
-
     spdlog::info("Cofig Parse: Check for mod updates: {}", bShouldCheckForUpdates);
     if (bShouldCheckForUpdates)
     {
         spdlog::info("Cofig Parse: Mod update console notifications: {}", bConsoleUpdateNotifications);
     }
-
     spdlog::info("Config Parse: Achievement Persistence: {}", g_StatPersistence.bAchievementPersistenceEnabled);
     spdlog::info("Config Parse: Reset Achievements: {}", g_SteamAPI.bResetAchievements);
-
     if (g_KeepAimingAfterFiring.bAlwaysKeepAiming)
     {
         spdlog::info("Config Parse: Keep Aiming After Firing - Always Keep Aiming: Enabled");
@@ -323,12 +304,7 @@ void Config::Read()
     {
         spdlog::info("Config Parse: Keep Aiming After Firing - Always Keep Aiming: Disabled");
     }
-
-
-
     spdlog::info("Config Parse: Fix Aiming After Equip: {}", g_FixAimAfterEquip.bEnabled);
     spdlog::info("Config Parse: Fix Aiming Full Tilt: {}", g_FixAimingFullTilt.bEnabled);
-
     spdlog::info("Config Parse: MGS2 Sunglasses - {}", (sShouldWearSunglasses == "normal" ? "Normal" : (sShouldWearSunglasses == "always" ? "Always Wearing Sunglasses" : "Never Wearing Sunglasses")));
-
 }
