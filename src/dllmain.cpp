@@ -1073,6 +1073,7 @@ void AfterSteamInitialized()
     spdlog::info("AfterSteamInitialized() started");
     g_StatPersistence.OnSteamInitialized();
     spdlog::info("AfterSteamInitialized() completed");
+
 }
 
 void AfterSteamInputInitialized()

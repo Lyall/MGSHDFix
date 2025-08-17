@@ -92,7 +92,7 @@ namespace ConfigHelper
 #include "config_keys.hpp"
 void Config::Read()
 {
-    std::filesystem::path sConfigFile = sFixName + ".ini";
+    std::filesystem::path sConfigFile = sFixName + ".settings";
 
     std::ifstream iniFile((sExePath / sFixPath / sConfigFile).string());
     if (!iniFile)

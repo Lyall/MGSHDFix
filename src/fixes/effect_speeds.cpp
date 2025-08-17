@@ -214,7 +214,7 @@ void EffectSpeedFix::Initialize()
         debrisVelocityHook = safetyhook::create_mid(MGS2_DEMO_CreateDebrisTex_SetupResult,
         [](SafetyHookContext& ctx)
             {
-                if (strcmp(g_GameVars.GetCurrentStage(), "d12t3") == 0) // T12a1D The Seizure of Metal gear Demo (liquid ocelot first encounter)
+                if (g_GameVars.IsStage(MGS2Stages::D12T3)) // T12a1D The Seizure of Metal gear Demo (liquid ocelot first encounter)
                 {
                     switch (g_EffectSpeedFix.iDebrisIteration) //28 total, last 3 are at the end.
                     {
@@ -237,7 +237,7 @@ void EffectSpeedFix::Initialize()
                     }
                     
                 }
-                else if (strcmp(g_GameVars.GetCurrentStage(), "d012p01") == 0) // P012_01_P01 Fortune encounter 1 polygon demo 1 (BC connecting bridge - Fortune vs Seals encounter)
+                else if (g_GameVars.IsStage(MGS2Stages::D012P01)) // P012_01_P01 Fortune encounter 1 polygon demo 1 (BC connecting bridge - Fortune vs Seals encounter)
                 {
                     ctx.xmm0.f32[0] /= 18.0f;
                 }
@@ -286,7 +286,7 @@ void EffectSpeedFix::Initialize()
                     }
 
                 }
-                else */if (strcmp(g_GameVars.GetCurrentStage(), "d012p01") == 0)
+                else */if (g_GameVars.IsStage(MGS2Stages::D012P01))
                 {
                     // P012_01_P01 Fortune encounter 1 polygon demo 1 (BC connecting bridge - Fortune vs Seals encounter)
                     g_EffectSpeedFix.iExplosionDuration *= static_cast<int>(FRAME_IOP_MULTIPLIER) * 10;

@@ -30,8 +30,8 @@ struct Field
         Choice,
         Hotkey // new type for key/mouse capture
     } type;
-    wxString defStr;
-    int defInt = 0;
+    wxString defaultString;
+    int defaultInt = 0;
     std::vector<wxString> choices;
 };
 
@@ -266,8 +266,8 @@ static size_t FindResourceSize(int resID, const wchar_t* resType)
 static int GetBannerResourceID()
 {
     namespace fs = std::filesystem;
-    fs::path exePath = wxStandardPaths::Get().GetExecutablePath().ToStdString();
-    fs::path parentPath = exePath.parent_path().parent_path();
+    fs::path exePath = wxGetCwd().ToStdString();
+    fs::path parentPath = exePath.parent_path();
 
     if (fs::exists(parentPath / "METAL GEAR.exe"))
         return IDB_BANNER_MG1;
@@ -335,7 +335,8 @@ public:
         SendMessage(hwnd, WM_SETICON, ICON_SMALL, 0);
         SendMessage(hwnd, WM_SETICON, ICON_BIG, 0);
 
-        m_iniPath = wxStandardPaths::Get().GetExecutablePath().BeforeLast('\\') + "\\MGSHDFix.settings";
+        wxString cwd = wxGetCwd();
+        m_iniPath = cwd + "\\MGSHDFix.settings";
         m_conf = new wxFileConfig("", "", m_iniPath, "", wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_NO_ESCAPE_CHARACTERS);
 
         wxNotebook* tabs = new wxNotebook(this, wxID_ANY);
@@ -371,7 +372,7 @@ public:
                 {
                 case Field::Bool:
                 {
-                    bool v = field.defInt != 0;
+                    bool v = field.defaultInt != 0;
                     m_conf->Read(path, &v);
                     auto* cb = new wxCheckBox(sectionSizer->GetStaticBox(), wxID_ANY, "");
                     cb->SetValue(v);
@@ -380,7 +381,7 @@ public:
                 }
                 case Field::Int:
                 {
-                    long v = field.defInt;
+                    long v = field.defaultInt;
                     m_conf->Read(path, &v);
                     auto* sp = new wxSpinCtrl(sectionSizer->GetStaticBox(), wxID_ANY, std::to_string(v),
                         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100000, v);
@@ -389,14 +390,14 @@ public:
                 }
                 case Field::Str:
                 {
-                    wxString v = field.defStr;
+                    wxString v = field.defaultString;
                     m_conf->Read(path, &v);
                     ctrl = new wxTextCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;
                 }
                 case Field::Choice:
                 {
-                    wxString v = field.defStr;
+                    wxString v = field.defaultString;
                     m_conf->Read(path, &v);
                     auto* ch = new wxChoice(sectionSizer->GetStaticBox(), wxID_ANY);
                     for (auto& c : field.choices) ch->Append(c);
@@ -407,7 +408,7 @@ public:
                 }
                 case Field::Hotkey:
                 {
-                    wxString v = field.defStr;
+                    wxString v = field.defaultString;
                     m_conf->Read(path, &v);
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;

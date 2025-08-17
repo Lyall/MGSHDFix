@@ -247,9 +247,11 @@
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\depth_of_field.hpp" />
     <ClInclude Include="src\resources\config_keys.hpp">
       <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\depth_of_field.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

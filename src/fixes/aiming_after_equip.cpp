@@ -26,10 +26,7 @@ void FixAimAfterEquip::Initialize()
             g_GameVars.SetAimingState(0);
             });
 
-        MAKE_HOOK_MID(baseModule, "BB ?? ?? ?? ?? 66 89 81", "MGS2: test 2", {
-            spdlog::info("test 2");
-            Util::DumpContext(ctx);
-            });
+
 
     }
     else if (eGameType & MGS3)
@@ -40,6 +37,13 @@ void FixAimAfterEquip::Initialize()
                 g_GameVars.SetAimingState(0);
             }
             });
+
+        MAKE_HOOK_MID(baseModule, "44 89 0D ?? ?? ?? ?? EB ?? 48 8D 05", "MGS2: test 2", {
+        spdlog::info("FIX THE PREVIOUS / GROUP EQUIP FOR 3");
+        Util::DumpContext(ctx);
+            });
     }
+
+   
 
 }

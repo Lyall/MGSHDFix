@@ -144,3 +144,126 @@ void GameVars::OnLevelTransition()
     MGS2Sunglasses::CheckOnTransition();
 }
 
+
+namespace
+{
+#define X(name, id, mode, disp) { id, mode, disp },
+
+    inline const Stage g_StagesMGS2[] = { MGS2_STAGE_LIST };
+    inline const Stage g_StagesMGS3[] = { MGS3_STAGE_LIST };
+
+#undef X
+
+    inline const Stage* FindStageByName(const char* currentStage)
+    {
+        if (!currentStage)
+            return nullptr;
+
+        // eGameType is always valid (exactly one of {MGS2, MGS3})
+        const Stage* begin = nullptr;
+        const Stage* end = nullptr;
+
+        if (eGameType & MGS2)
+        {
+            begin = std::begin(g_StagesMGS2);
+            end = std::end(g_StagesMGS2);
+        }
+        else if (eGameType & MGS3)
+        {
+            begin = std::begin(g_StagesMGS3);
+            end = std::end(g_StagesMGS3);
+        }
+
+        for (auto it = begin; it != end; ++it)
+        {
+            if (_stricmp(it->sStageId, currentStage) == 0)
+                return &(*it);
+        }
+
+        return nullptr;
+    }
+}
+
+std::string GameVars::GetRichPresenceString() const
+{
+    const char* currentStage = GetCurrentStage();
+    const Stage* s = FindStageByName(currentStage);
+
+    if (s == nullptr)
+    {
+        if (currentStage == nullptr)
+        {
+            return "Unknown Stage";
+        }
+        return std::string("Unknown Stage (") + currentStage + ")";
+    }
+
+    // VR formatting uses " | ", everything else uses ": "
+    const bool isVR = (std::strncmp(s->sGameMode, "VR:", 3) == 0);
+    std::string result;
+
+    if (isVR)
+    {
+        result = std::string(s->sGameMode) + " | " + s->sRichPresenceName;
+    }
+    else
+    {
+        result = std::string(s->sGameMode) + ": " + s->sRichPresenceName;
+    }
+
+    if (InCutscene())
+    {
+        result += " - In Cutscene";
+    }
+
+    return result;
+}
+
+std::string GameVars::GetGameMode() const
+{
+    const char* currentStage = GetCurrentStage();
+    const Stage* s = FindStageByName(currentStage);
+
+    if (s != nullptr)
+    {
+        return s->sGameMode;
+    }
+
+    if (currentStage == nullptr)
+    {
+        return "Unknown";
+    }
+
+    return std::string("Unknown (") + currentStage + ")";
+}
+
+bool GameVars::IsStage(const char* stageConst) const
+{
+    const char* current = GetCurrentStage();
+    if (current == nullptr)
+    {
+        spdlog::error("IsStage() called with null current stage pointer");
+        return false;
+    }
+
+    return _stricmp(current, stageConst) == 0;
+}
+
+bool GameVars::IsAnyStage(std::initializer_list<const char*> stages) const
+{
+    const char* current = GetCurrentStage();
+    if (current == nullptr)
+    {
+        spdlog::error("IsAnyStage() called with null current stage pointer");
+        return false;
+    }
+
+    for (const char* s : stages)
+    {
+        if (_stricmp(current, s) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
