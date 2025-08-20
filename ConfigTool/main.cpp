@@ -343,14 +343,25 @@ public:
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;
                 }
+                case Field::Spacer:
+                {
+                    auto* spacer = new wxPanel(sectionSizer->GetStaticBox(), wxID_ANY);
+                    spacer->SetMinSize(wxSize(0, 10)); // adjust height as needed
+                    grid->Add(spacer, 0, wxEXPAND);
+                    continue;
                 }
 
-                // Tooltip (on the control)
-                if (!field.tooltip.IsEmpty())
-                    ctrl->SetToolTip(field.tooltip);
+                }
 
-                grid->Add(ctrl, 0, wxEXPAND);
-                m_controls[{field.section, field.key}] = ctrl;
+                if (ctrl)
+                {
+                    if (!field.tooltip.IsEmpty())
+                    {
+                        ctrl->SetToolTip(field.tooltip);
+                    }
+                    grid->Add(ctrl, 0, wxEXPAND);
+                    m_controls[{field.section, field.key}] = ctrl;
+                }
             }
 
             panel->SetSizer(vbox);

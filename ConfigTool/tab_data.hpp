@@ -13,7 +13,8 @@ struct Field
         Int,
         Str,
         Choice,
-        Hotkey // key/mouse capture
+        Hotkey, // key/mouse capture
+        Spacer,
     } type;
 
     wxString defaultString;
@@ -50,10 +51,10 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
     { wxString("Graphics"), {
         { ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, Field::Bool, "", 1, {}, ConfigKeys::ForceWindowSize_Help, ConfigKeys::ForceWindowSize_Tooltip },
         { ConfigKeys::WindowWidth_Section, ConfigKeys::WindowWidth_Setting, Field::Int, "", 0, {}, ConfigKeys::WindowWidth_Help, ConfigKeys::WindowWidth_Tooltip,
-            std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting) },
+                std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting) },
         { ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting, Field::Bool, "", 1, {}, ConfigKeys::WindowedMode_Help, ConfigKeys::WindowedMode_Tooltip },
         { ConfigKeys::WindowHeight_Section, ConfigKeys::WindowHeight_Setting, Field::Int, "", 0, {}, ConfigKeys::WindowHeight_Help, ConfigKeys::WindowHeight_Tooltip,
-            std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting) },
+                std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting) },
         { ConfigKeys::BorderlessWindowed_Section, ConfigKeys::BorderlessWindowed_Setting, Field::Bool, "", 1, {}, ConfigKeys::BorderlessWindowed_Help, ConfigKeys::BorderlessWindowed_Tooltip,
                 std::make_pair(ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting)},
         { ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, Field::Int, "", 0, {}, ConfigKeys::RenderScaleWidth_Help, ConfigKeys::RenderScaleWidth_Tooltip },
@@ -82,15 +83,19 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, Field::Hotkey, "Insert", 0, {}, ConfigKeys::ToggleRainShader_Help, ConfigKeys::ToggleRainShader_Tooltip },
         { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, Field::Hotkey, "Delete", 0, {}, ConfigKeys::ToggleUIShader_Help, ConfigKeys::ToggleUIShader_Tooltip },
         { ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, Field::Hotkey, "End", 0, {}, ConfigKeys::CycleWireframeMode_Help, ConfigKeys::CycleWireframeMode_Tooltip },
+
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, Field::Bool, "", 0, {}, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip },
-        { ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, Field::Int, "", 1, {}, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip },
-        { ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, Field::Int, "", 1, {}, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip },
+        { ConfigKeys::OverrideMouseSensitivity_Section, "", Field::Spacer, "", 0, {}, "", "" },
+        { ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, Field::Int, "", 1, {}, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
+                std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting)},
+        { ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, Field::Int, "", 1, {}, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
+                std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting)},
     }},
     { wxString("Achievements"), {
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, Field::Bool, "", 1, {}, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip },
         { ConfigKeys::ResetAllAchievements_Section, "Safety Switch", Field::Bool, "", 0, {}, ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip },
         { ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, Field::Bool, "", 0, {}, ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip,
-            std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch")},
+                std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch")},
     }},
     { wxString("MGSHDFix / Internal"), {
         { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, Field::Bool, "", 1, {}, ConfigKeys::CheckForUpdates_Help, ConfigKeys::CheckForUpdates_Tooltip },

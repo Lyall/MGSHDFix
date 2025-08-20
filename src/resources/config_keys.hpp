@@ -208,7 +208,7 @@ namespace ConfigKeys
     constexpr const char* MSXWallType_Tooltip = "";
 
     constexpr const char* MSXWallAlign_Section = "Launcher Config";
-    constexpr const char* MSXWallAlign_Setting = "MSXWallAlign";
+    constexpr const char* MSXWallAlign_Setting = "MSX Window Placement";
     constexpr const char* MSXWallAlign_Help = "";
     constexpr const char* MSXWallAlign_Tooltip = "";
 
@@ -269,7 +269,7 @@ namespace ConfigKeys
     constexpr const char* AchievementPersistence_Help = "";
     constexpr const char* AchievementPersistence_Tooltip = "";
 
-    constexpr const char* ResetAllAchievements_Section = "CAUTION - THIS WILL RESET ALL ACHIEVEMENTS.";
+    constexpr const char* ResetAllAchievements_Section = "CAUTION - THIS WILL RESET ALL ACHIEVEMENTS";
     constexpr const char* ResetAllAchievements_Setting = "Reset All Achivements";
     constexpr const char* ResetAllAchievements_Help = "";
     constexpr const char* ResetAllAchievements_Tooltip = "";
