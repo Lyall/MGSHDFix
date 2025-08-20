@@ -11,6 +11,7 @@
 #include "version_checking.hpp"
 
 ///Features
+#include "distance_culling.hpp"
 #include "effect_speeds.hpp"
 #include "intro_skip.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -19,11 +20,12 @@
 #include "mgs2_sunglasses.hpp"
 
 ///Fixes
+#include "aiming_full_tilt.hpp"
+#include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
 #include "skyboxes.hpp"
 #include "stereo_audio.hpp"
-//#include "texture_buffer_size.hpp"
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "depth_of_field.hpp"
@@ -35,11 +37,11 @@
 #include "reshade_compatibility_checks.hpp"
 
 ///WIP
+//#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0,
+                                    //so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
-#include "aiming_full_tilt.hpp"
 #include "color_filters.hpp"
-#include "distance_culling.hpp"
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 
@@ -1140,6 +1142,7 @@ static void InitializeSubsystems()
     //INITIALIZE(g_Wireframe.Initialize());
 
         //Fixes
+    INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
     INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(SkyboxFix::Initialize());

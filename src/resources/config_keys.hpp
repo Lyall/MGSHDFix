@@ -97,9 +97,12 @@ namespace ConfigKeys
     constexpr const char* FixAimingFullTilt_Section = "Bugfixes";
     constexpr const char* FixAimingFullTilt_Setting = "Fix Aiming On Full Tilt";
 
+    constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
+    constexpr const char* CPUCoreLimit_Setting = "Limit Games to 2 CPU Cores";
+
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";
-    constexpr const char* KeepAimingAfterFiring_Always_Setting = "Always Keep Aiming After Firing";
+    constexpr const char* KeepAimingAfterFiring_Always_Setting = "Always Keep Aiming";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Setting = "While in First Person";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Section = "Keep Aiming After Firing";
@@ -125,8 +128,8 @@ namespace ConfigKeys
     constexpr const char* MSXWallAlign_Section = "Launcher Config";
     constexpr const char* MSXWallAlign_Setting = "MSXWallAlign";
 
-    constexpr const char* ForceStereoAudio_Section = "Various";
-    constexpr const char* ForceStereoAudio_Setting = "Force Stereo Audio / Fix Codec Volume";
+    constexpr const char* ForceStereoAudio_Section = "System Specific Fixes";
+    constexpr const char* ForceStereoAudio_Setting = "Force Stereo Audio Output";
 
     constexpr const char* MuteWarning_Section = "Mute Warning";
     constexpr const char* MuteWarning_Setting = "Enabled";

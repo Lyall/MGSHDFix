@@ -134,6 +134,9 @@
     <ClCompile Include="src\resources\probe.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\cpu_core_limit.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -254,6 +257,9 @@
       <Filter>Config</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\depth_of_field.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\cpu_core_limit.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>

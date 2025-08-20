@@ -194,6 +194,7 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Section, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::ForceStereoAudio_Section, ConfigKeys::ForceStereoAudio_Setting, Field::Bool, "", 0, {} },
+        { ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, Field::Bool, "", 1, {} },
