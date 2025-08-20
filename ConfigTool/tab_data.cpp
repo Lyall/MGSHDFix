@@ -111,7 +111,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, 1 },
 
         { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
-          std::nullopt, false, Field::Int, 360, 1, 10000 },
+          std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
 
         { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
           std::nullopt, false, Field::Bool, 1 },
@@ -151,17 +151,20 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, 1 },
 
         { ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, ConfigKeys::MGS2Sunglasses_Help, ConfigKeys::MGS2Sunglasses_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "Normal", { "Normal","Always","Never" } }
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } }
     }},
     { wxString("Controls | Hotkeys"), {
+        { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
+          std::nullopt, false, Field::Bool, 0},
+
         { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, ConfigKeys::ToggleRainShader_Help, ConfigKeys::ToggleRainShader_Tooltip,
           std::nullopt, false, Field::Hotkey, 0, 0, 0, "Insert" },
 
-        { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, ConfigKeys::ToggleUIShader_Help, ConfigKeys::ToggleUIShader_Tooltip,
-          std::nullopt, false, Field::Hotkey, 0, 0, 0, "Delete" },
-
         { ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, ConfigKeys::CycleWireframeMode_Help, ConfigKeys::CycleWireframeMode_Tooltip,
           std::nullopt, false, Field::Hotkey, 0, 0, 0, "End" },
+
+        { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, ConfigKeys::ToggleUIShader_Help, ConfigKeys::ToggleUIShader_Tooltip,
+          std::nullopt, false, Field::Hotkey, 0, 0, 0, "Delete" },
 
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, 0 },

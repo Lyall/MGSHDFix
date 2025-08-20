@@ -27,6 +27,8 @@ public:
     // Returns a human-friendly name for a VK (prefers OS names; falls back to "VK 0xNN").
     static std::string GetKeyNameFromVK(int vkCode);
 
+    bool bCaptureInputsWhileAltTabbed = false;
+
 private:
     std::vector<Hotkey> hotkeys;
 

@@ -228,26 +228,43 @@ namespace ConfigKeys
     constexpr const char* DisableMouseCursor_Tooltip = "";
 
     constexpr const char* OverrideMouseSensitivity_Section = "Mouse Sensitivity";
-    constexpr const char* OverrideMouseSensitivity_Setting = "Enabled";
+    constexpr const char* OverrideMouseSensitivity_Setting = "Override Mouse Sensitivity";
     constexpr const char* OverrideMouseSensitivity_Help = "";
-    constexpr const char* OverrideMouseSensitivity_Tooltip = "";
+    constexpr const char* OverrideMouseSensitivity_Tooltip = "Multiplies reported X/Y position of the cursor to increase sensitivity.\n"
+                                                             "Higher multipliers produce more sensitivity.";
 
     constexpr const char* MouseSensitivity_XMultiplier_Section = "Mouse Sensitivity";
     constexpr const char* MouseSensitivity_XMultiplier_Setting = "X Multiplier";
     constexpr const char* MouseSensitivity_XMultiplier_Help = "";
-    constexpr const char* MouseSensitivity_XMultiplier_Tooltip = "";
+    constexpr const char* MouseSensitivity_XMultiplier_Tooltip = "Multiplies reported X position of the cursor to increase sensitivity.\n"
+                                                                 "Higher multipliers produce more sensitivity.";
 
     constexpr const char* MouseSensitivity_YMultiplier_Section = "Mouse Sensitivity";
     constexpr const char* MouseSensitivity_YMultiplier_Setting = "Y Multiplier";
     constexpr const char* MouseSensitivity_YMultiplier_Help = "";
-    constexpr const char* MouseSensitivity_YMultiplier_Tooltip = "";
+    constexpr const char* MouseSensitivity_YMultiplier_Tooltip = "Multiplies reported Y position of the cursor to increase sensitivity.\n"
+                                                                 "Higher multipliers produce more sensitivity.";
 
-    constexpr const char* MGS2Sunglasses_Section = "MGS2 Sunglasses";
-    constexpr const char* MGS2Sunglasses_Setting = "ShouldWearSunglasses";
+    constexpr const char* MGS2Sunglasses_Section = "Various";
+    constexpr const char* MGS2Sunglasses_Setting = "MGS2 - Force Sunglasses";
     constexpr const char* MGS2Sunglasses_Help = "";
-    constexpr const char* MGS2Sunglasses_Tooltip = "";
+    constexpr const char* MGS2Sunglasses_Tooltip = "Forces Snake/Raiden to always wear their New Game+ Sunglasses.\n"
+                                                   "\n"
+                                                   "Normal = The vanilla behavior, sunglasses only worn on third playthroughs.\n"
+                                                   "Always = Always force Snake/Raiden to wear sunglasses.\n"
+                                                   "Never = Snake/Raiden will never wear sunglasses.";
+    constexpr const char* MGS2Sunglasses_Option_Normal = "Normal";
+    constexpr const char* MGS2Sunglasses_Option_Always = "Always";
+    constexpr const char* MGS2Sunglasses_Option_Never = "Never";
+
 
     // Hotkeys
+    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Section = "Hotkeys";
+    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Setting = "Capture Hotkeys While Alt-Tabbed";
+    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Help = "";
+    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Tooltip = "If hotkey inputs should be captured while the window\n"
+                                                                      "does NOT have focused / is alt-tabbed.";
+
     constexpr const char* ToggleRainShader_Section = "Hotkeys";
     constexpr const char* ToggleRainShader_Setting = "Toggle Rain Shader";
     constexpr const char* ToggleRainShader_Help = "";

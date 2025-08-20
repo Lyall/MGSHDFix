@@ -169,17 +169,17 @@ void Config::Read()
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
     std::transform(sShouldWearSunglasses.begin(), sShouldWearSunglasses.end(), sShouldWearSunglasses.begin(), ::tolower);
-    if (sShouldWearSunglasses != "normal" && sShouldWearSunglasses != "always" && sShouldWearSunglasses != "never")
+    if (sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Normal && sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Always && sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Never)
     {
         spdlog::error("Invalid config value for MGS2 Sunglasses: {}", sShouldWearSunglasses);
         Logging::ShowConsole();
         std::cout << "Invalid config value for MGS2 Sunglasses: " << sShouldWearSunglasses << std::endl;
         return FreeLibraryAndExitThread(baseModule, 1);
     }
-    if (sShouldWearSunglasses != "normal")
+    if (sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Normal)
     {
         g_MGS2Sunglasses.bEnabled = true;
-        if (sShouldWearSunglasses == "always")
+        if (sShouldWearSunglasses == ConfigKeys::MGS2Sunglasses_Option_Always)
         {
             g_MGS2Sunglasses.bAlwaysWearingSunglasses = true;
         }
@@ -211,6 +211,7 @@ void Config::Read()
     iLauncherConfigRegion = Util::findStringInVector(sLauncherConfigRegion, kLauncherConfigRegions);
     iLauncherConfigLanguage = Util::findStringInVector(sLauncherConfigLanguage, kLauncherConfigLanguages);
 
+    ConfigHelper::getValue(ini, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, g_InputHandler.bCaptureInputsWhileAltTabbed);
     // Vector Line Fix
     if (eGameType & (MGS2 | MGS3))
     {
@@ -306,5 +307,6 @@ void Config::Read()
     }
     spdlog::info("Config Parse: Fix Aiming After Equip: {}", g_FixAimAfterEquip.bEnabled);
     spdlog::info("Config Parse: Fix Aiming Full Tilt: {}", g_FixAimingFullTilt.bEnabled);
-    spdlog::info("Config Parse: MGS2 Sunglasses - {}", (sShouldWearSunglasses == "normal" ? "Normal" : (sShouldWearSunglasses == "always" ? "Always Wearing Sunglasses" : "Never Wearing Sunglasses")));
+    spdlog::info("Config Parse: MGS2 Sunglasses - {}", (sShouldWearSunglasses == ConfigKeys::MGS2Sunglasses_Option_Normal ? "Normal" : (sShouldWearSunglasses == ConfigKeys::MGS2Sunglasses_Option_Always ? "Always Wearing Sunglasses" : "Never Wearing Sunglasses")));
+    spdlog::info("Config Parse: Capture Inputs While Alt-Tabbed: {}", g_InputHandler.bCaptureInputsWhileAltTabbed);
 }

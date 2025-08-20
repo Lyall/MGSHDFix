@@ -42,9 +42,8 @@
 #include "version.h"
 #include "tab_data.hpp"
 constexpr int iWindowSizeX = 716;
-constexpr int iWindowSizeY = 760;
+constexpr int iWindowSizeY = 680;
 
-// Custom control for capturing hotkeys
 class HotkeyCaptureCtrl : public wxTextCtrl
 {
 public:
@@ -378,7 +377,7 @@ public:
                 case Field::Spacer:
                 {
                     auto* spacer = new wxPanel(sectionSizer->GetStaticBox(), wxID_ANY);
-                    spacer->SetMinSize(wxSize(0, 10)); // adjust height as needed
+                    spacer->SetMinSize(wxSize(0, 10));
                     grid->Add(spacer, 0, wxEXPAND);
                     continue;
                 }
@@ -387,6 +386,15 @@ public:
 
                 if (ctrl)
                 {
+                    if (auto* cb = wxDynamicCast(ctrl, wxCheckBox))
+                        cb->Bind(wxEVT_CHECKBOX, &ConfigFrame::MarkDirty, this);
+                    else if (auto* sp = wxDynamicCast(ctrl, wxSpinCtrl))
+                        sp->Bind(wxEVT_SPINCTRL, &ConfigFrame::MarkDirty, this);
+                    else if (auto* tc = wxDynamicCast(ctrl, wxTextCtrl))
+                        tc->Bind(wxEVT_TEXT, &ConfigFrame::MarkDirty, this);
+                    else if (auto* ch = wxDynamicCast(ctrl, wxChoice))
+                        ch->Bind(wxEVT_CHOICE, &ConfigFrame::MarkDirty, this);
+
                     // Always show a tooltip (except for spacers)
                     if (field.type != Field::Spacer)
                     {
@@ -468,6 +476,7 @@ public:
         mainSizer->Add(btnSizer, 0, wxEXPAND | wxALL, 5);
 
         SetSizer(mainSizer);
+        Bind(wxEVT_CLOSE_WINDOW, &ConfigFrame::OnClose, this);
         Centre();
 
         Bind(wxEVT_BUTTON, &ConfigFrame::OnSave, this, wxID_SAVE);
@@ -476,11 +485,52 @@ public:
                 Close();
             }, wxID_EXIT);
 
-        // Apply prerequisites at startup
         ApplyPrerequisites();
     }
 
 private:
+    bool m_dirty = false;
+
+    void MarkDirty(wxEvent& e)
+    {
+        m_dirty = true;
+        e.Skip();
+    }
+
+    void OnClose(wxCloseEvent& event)
+    {
+        if (m_dirty)
+        {
+            wxMessageDialog dlg(
+                this,
+                "You have unsaved changes. What would you like to do?",
+                "Unsaved Changes",
+                wxYES_NO | wxCANCEL | wxICON_WARNING
+            );
+            dlg.SetYesNoCancelLabels("Save and Exit", "Exit Without Saving", "Cancel");
+
+            int choice = dlg.ShowModal();
+            if (choice == wxID_YES)
+            {
+                wxCommandEvent dummy;
+                OnSave(dummy);
+                event.Skip(); // continue closing
+                return;
+            }
+            else if (choice == wxID_NO)
+            {
+                event.Skip(); // close without saving
+                return;
+            }
+            else // Cancel
+            {
+                event.Veto(); // abort close
+                return;
+            }
+        }
+
+        event.Skip(); // no changes, just close
+    }
     void ApplyPrerequisites()
     {
         for (auto& tab : kTabs)
@@ -558,7 +608,7 @@ private:
 
 
 
-    void OnSave(wxCommandEvent&)
+    void OnSave(const wxCommandEvent&)
     {
         std::map<wxString, std::map<wxString, wxString>> iniData;
         for (auto& kv : m_controls)
@@ -589,8 +639,11 @@ private:
                 out << "\n";
             }
         }
+
+        m_dirty = false;
         Close();
     }
+
 
     wxFileConfig* m_conf;
     wxString m_iniPath;
