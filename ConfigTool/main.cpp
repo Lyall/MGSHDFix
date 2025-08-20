@@ -338,7 +338,14 @@ public:
                     int v = field.defaultInt;
                     m_conf->Read(path, &v);
 
-                    v = std::clamp(v, field.minInt, field.maxInt);
+                    if (int clamped = std::clamp(v, field.minInt, field.maxInt); clamped != v)
+                    {
+                        wxLogWarning("Out-of-range value %d for [%s/%s], clamped to %d",
+                            v, field.section, field.key, clamped);
+                        v = clamped;
+                        m_dirty = true; 
+                    }
+
 
                     auto* sp = new wxSpinCtrl(sectionSizer->GetStaticBox(), wxID_ANY,
                         std::to_string(v),
@@ -347,6 +354,7 @@ public:
                         field.minInt, field.maxInt, v);
 
                     ctrl = sp;
+                    ctrl->Bind(wxEVT_ANY, &ConfigFrame::MarkDirty, this);
                     break;
                 }
                 case Field::Str:
@@ -360,13 +368,36 @@ public:
                 {
                     wxString v = field.defaultString;
                     m_conf->Read(path, &v);
+
                     auto* ch = new wxChoice(sectionSizer->GetStaticBox(), wxID_ANY);
-                    for (auto& c : field.choices) ch->Append(c);
-                    if (ch->FindString(v) == wxNOT_FOUND) ch->Append(v);
-                    ch->SetStringSelection(v);
+                    for (auto& c : field.choices)
+                        ch->Append(c);
+
+                    if (int idx = ch->FindString(v); idx != wxNOT_FOUND)
+                    {
+                        ch->SetSelection(idx);
+                    }
+                    else
+                    {
+                        wxLogWarning("Invalid value '%s' for [%s/%s], resetting to default '%s'",
+                            v, field.section, field.key, field.defaultString);
+
+                        if (int defIdx = ch->FindString(field.defaultString); !field.defaultString.IsEmpty() && defIdx != wxNOT_FOUND)
+                        {
+                            ch->SetSelection(defIdx);
+                        }
+                        else if (!field.choices.empty())
+                        {
+                            ch->SetSelection(0); 
+                        }
+                        m_dirty = true;
+                    }
+
                     ctrl = ch;
+                    ctrl->Bind(wxEVT_ANY, &ConfigFrame::MarkDirty, this);
                     break;
                 }
+
                 case Field::Hotkey:
                 {
                     wxString v = field.defaultString;

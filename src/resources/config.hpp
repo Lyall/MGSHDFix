@@ -1,4 +1,5 @@
 #pragma once
+#include "config_keys.hpp"
 
 class Config final
 {
@@ -35,8 +36,8 @@ inline bool bLauncherConfigSkipLauncher = false;
 inline int iLauncherConfigCtrlType = 5;
 inline int iLauncherConfigRegion = 0;
 inline int iLauncherConfigLanguage = 0;
-inline std::string sLauncherConfigMSXGame = "mg1";
+inline std::string sLauncherConfigMSXGame = ConfigKeys::SkipLauncherMSX_Option_MG1;
 inline int iLauncherConfigMSXWallType = 0;
-inline std::string sLauncherConfigMSXWallAlign = "C";
+inline std::string sLauncherConfigMSXWallAlign = ConfigKeys::MSXWallAlign_Option_Center;
 
 inline std::pair DesktopDimensions = { 0,0 };

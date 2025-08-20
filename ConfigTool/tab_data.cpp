@@ -31,37 +31,37 @@
 const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
     { wxString("General"), {
         { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, ConfigKeys::FixAimingAfterEquip_Help, ConfigKeys::FixAimingAfterEquip_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::DisableMouseCursor_Section, ConfigKeys::DisableMouseCursor_Setting, ConfigKeys::DisableMouseCursor_Help, ConfigKeys::DisableMouseCursor_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, ConfigKeys::FixAimingFullTilt_Help, ConfigKeys::FixAimingFullTilt_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Section, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Setting, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Help, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::ForceStereoAudio_Section, ConfigKeys::ForceStereoAudio_Setting, ConfigKeys::ForceStereoAudio_Help, ConfigKeys::ForceStereoAudio_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, ConfigKeys::CPUCoreLimit_Help, ConfigKeys::CPUCoreLimit_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Help, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Tooltip,
-          std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, 1 },
+          std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
         { ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, ConfigKeys::KeepAimingAfterFiring_Always_Help, ConfigKeys::KeepAimingAfterFiring_Always_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Help, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Tooltip,
-          std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, 1 },
+          std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
         { ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::Region_Section, ConfigKeys::Region_Setting, ConfigKeys::Region_Help, ConfigKeys::Region_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigRegions.begin(), 0),
@@ -81,19 +81,19 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
     }},
     { wxString("Graphics"), {
         { ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, ConfigKeys::ForceWindowSize_Help, ConfigKeys::ForceWindowSize_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::WindowWidth_Section, ConfigKeys::WindowWidth_Setting, ConfigKeys::WindowWidth_Help, ConfigKeys::WindowWidth_Tooltip,
           std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting), false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
 
         { ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting, ConfigKeys::WindowedMode_Help, ConfigKeys::WindowedMode_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::WindowHeight_Section, ConfigKeys::WindowHeight_Setting, ConfigKeys::WindowHeight_Help, ConfigKeys::WindowHeight_Tooltip,
           std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting), false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
 
         { ConfigKeys::BorderlessWindowed_Section, ConfigKeys::BorderlessWindowed_Setting, ConfigKeys::BorderlessWindowed_Help, ConfigKeys::BorderlessWindowed_Tooltip,
-          std::make_pair(ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting), false, Field::Bool, 1 },
+          std::make_pair(ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting), false, Field::Bool, true },
 
         { ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, ConfigKeys::RenderScaleWidth_Help, ConfigKeys::RenderScaleWidth_Tooltip,
           std::nullopt, false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
@@ -105,57 +105,57 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Int, 16, 0, D3D11_DEFAULT_MAX_ANISOTROPY },
 
         { ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, ConfigKeys::DisableTextureFiltering_Help, ConfigKeys::DisableTextureFiltering_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, ConfigKeys::FixVectorRain_Help, ConfigKeys::FixVectorRain_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
           std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
 
         { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixAspectRatio_Section, ConfigKeys::FixAspectRatio_Setting, ConfigKeys::FixAspectRatio_Help, ConfigKeys::FixAspectRatio_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixHUD_Section, ConfigKeys::FixHUD_Setting, ConfigKeys::FixHUD_Help, ConfigKeys::FixHUD_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::FixFOV_Section, ConfigKeys::FixFOV_Setting, ConfigKeys::FixFOV_Help, ConfigKeys::FixFOV_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, ConfigKeys::FramebufferFix_Help, ConfigKeys::FramebufferFix_Tooltip,
-          std::nullopt, false, Field::Bool, 1 }
+          std::nullopt, false, Field::Bool, true }
     }},
     { wxString("Tweaks"), {
         { ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, ConfigKeys::LauncherJumpStart_Help, ConfigKeys::LauncherJumpStart_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::SkipIntroLogos_Section, ConfigKeys::SkipIntroLogos_Setting, ConfigKeys::SkipIntroLogos_Help, ConfigKeys::SkipIntroLogos_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, ConfigKeys::SkipLauncher_Help, ConfigKeys::SkipLauncher_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::SkipLauncherMSXGame_Section, ConfigKeys::SkipLauncherMSXGame_Setting, ConfigKeys::SkipLauncherMSXGame_Help, ConfigKeys::SkipLauncherMSXGame_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "MG1", { "MG1","MG2" } },
+          std::make_pair(ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting), false, Field::Choice, 0, 0, 0, ConfigKeys::SkipLauncherMSX_Option_MG1, {ConfigKeys::SkipLauncherMSX_Option_MG1,ConfigKeys::SkipLauncherMSX_Option_MG2}},
 
         { ConfigKeys::MSXWallType_Section, ConfigKeys::MSXWallType_Setting, ConfigKeys::MSXWallType_Help, ConfigKeys::MSXWallType_Tooltip,
-          std::nullopt, false, Field::Int, 0 },
+          std::nullopt, false, Field::Int, 0 , 0, 6},
 
         { ConfigKeys::MSXWallAlign_Section, ConfigKeys::MSXWallAlign_Setting, ConfigKeys::MSXWallAlign_Help, ConfigKeys::MSXWallAlign_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "Center", { "Left","Right","Center" } },
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MSXWallAlign_Option_Center, {ConfigKeys::MSXWallAlign_Option_Center, ConfigKeys::MSXWallAlign_Option_Left, ConfigKeys::MSXWallAlign_Option_Right} },
 
         { ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, ConfigKeys::MuteWarning_Help, ConfigKeys::MuteWarning_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, ConfigKeys::MGS2Sunglasses_Help, ConfigKeys::MGS2Sunglasses_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } }
     }},
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
-          std::nullopt, false, Field::Bool, 0},
+          std::nullopt, false, Field::Bool, false},
 
         { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, ConfigKeys::ToggleRainShader_Help, ConfigKeys::ToggleRainShader_Tooltip,
           std::nullopt, false, Field::Hotkey, 0, 0, 0, "Insert" },
@@ -167,7 +167,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Hotkey, 0, 0, 0, "Delete" },
 
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::OverrideMouseSensitivity_Section, "",
           "", "",
@@ -183,23 +183,23 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
     }},
     { wxString("Achievements"), {
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::ResetAllAchievements_Section, "Safety Switch",
           ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip,
-          std::nullopt, false, Field::Bool, 0 },
+          std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip,
-          std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch"), false, Field::Bool, 0 }
+          std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch"), false, Field::Bool, false }
     }},
     { wxString("MGSHDFix / Internal"), {
         { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, ConfigKeys::CheckForUpdates_Help, ConfigKeys::CheckForUpdates_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, ConfigKeys::UpdateConsoleNotifications_Help, ConfigKeys::UpdateConsoleNotifications_Tooltip,
-          std::nullopt, false, Field::Bool, 1 },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, ConfigKeys::VerboseLogging_Help, ConfigKeys::VerboseLogging_Tooltip,
-          std::nullopt, false, Field::Bool, 0 }
+          std::nullopt, false, Field::Bool, false }
     }}
 };

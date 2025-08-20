@@ -887,9 +887,12 @@ static void Init_LauncherConfigOverride()
                         return Util::UTF8toWide(transformedString);
                     };
 
-                commandLine += L" -mgst " + transformString(sLauncherConfigMSXGame, ::tolower); // -mgst must be lowercase
+                commandLine += L" -mgst " + std::wstring(sLauncherConfigMSXGame == ConfigKeys::SkipLauncherMSX_Option_MG1 ? L"mg1" : L"mg2"); // -mgst must be lowercase
                 commandLine += L" -walltype " + std::to_wstring(iLauncherConfigMSXWallType);
-                commandLine += L" -wallalign " + transformString(sLauncherConfigMSXWallAlign.substr(0, 1),::toupper); // -wallalign must be uppercase
+                commandLine += L" -wallalign " + std::wstring(
+                    sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Center ? L"C" :
+                    sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Left ? L"L" :
+                    L"R");
             }
 
             std::string sCommandLine = Util::WideToUTF8(commandLine);

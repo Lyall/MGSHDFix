@@ -198,19 +198,24 @@ namespace ConfigKeys
     constexpr const char* Region_Tooltip = "";
 
     constexpr const char* SkipLauncherMSXGame_Section = "Launcher Config";
-    constexpr const char* SkipLauncherMSXGame_Setting = "MSXGame";
+    constexpr const char* SkipLauncherMSXGame_Setting = "MSX Skip Launcher Game";
     constexpr const char* SkipLauncherMSXGame_Help = "";
-    constexpr const char* SkipLauncherMSXGame_Tooltip = "";
+    constexpr const char* SkipLauncherMSXGame_Tooltip = "Which MSX game to launch when skip launcher is enabled.";
+    constexpr const char* SkipLauncherMSX_Option_MG1 = "Metal Gear (MSX)";
+    constexpr const char* SkipLauncherMSX_Option_MG2 = "Metal Gear 2: Solid Snake";
 
     constexpr const char* MSXWallType_Section = "Launcher Config";
-    constexpr const char* MSXWallType_Setting = "MSXWallType";
+    constexpr const char* MSXWallType_Setting = "MSX Wallpaper";
     constexpr const char* MSXWallType_Help = "";
     constexpr const char* MSXWallType_Tooltip = "";
 
     constexpr const char* MSXWallAlign_Section = "Launcher Config";
-    constexpr const char* MSXWallAlign_Setting = "MSX Window Placement";
+    constexpr const char* MSXWallAlign_Setting = "MSX Display Area";
     constexpr const char* MSXWallAlign_Help = "";
     constexpr const char* MSXWallAlign_Tooltip = "";
+    constexpr const char* MSXWallAlign_Option_Left = "Align Left";
+    constexpr const char* MSXWallAlign_Option_Right = "Align Right";
+    constexpr const char* MSXWallAlign_Option_Center = "Align Center";
 
     constexpr const char* ForceStereoAudio_Section = "System Specific Fixes";
     constexpr const char* ForceStereoAudio_Setting = "Force Stereo Audio Output";

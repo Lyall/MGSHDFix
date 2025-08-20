@@ -168,7 +168,6 @@ void Config::Read()
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
-    std::transform(sShouldWearSunglasses.begin(), sShouldWearSunglasses.end(), sShouldWearSunglasses.begin(), ::tolower);
     if (sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Normal && sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Always && sShouldWearSunglasses != ConfigKeys::MGS2Sunglasses_Option_Never)
     {
         spdlog::error("Invalid config value for MGS2 Sunglasses: {}", sShouldWearSunglasses);
