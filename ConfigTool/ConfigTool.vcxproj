@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="tab_data.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\banner_mg1.png">

@@ -1,5 +1,31 @@
+// ============================================================================
+// Project:   Universal Config Tool
+// File:      main.cpp
+//
+// Copyright (c) 2025 Afevis
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// ============================================================================
+
 #include "config_keys.hpp"
 #include <wx/wx.h>
+#include <wx/dcbuffer.h>
 #include <wx/notebook.h>
 #include <wx/fileconf.h>
 #include <wx/spinctrl.h>
@@ -12,7 +38,6 @@
 #include <fstream>
 #include <filesystem>
 #include <windows.h>
-#include <wx/dcbuffer.h> // For wxAutoBufferedPaintDC
 
 #include "version.h"
 #include "tab_data.hpp"
@@ -311,10 +336,17 @@ public:
                 }
                 case Field::Int:
                 {
-                    long v = field.defaultInt;
+                    int v = field.defaultInt;
                     m_conf->Read(path, &v);
-                    auto* sp = new wxSpinCtrl(sectionSizer->GetStaticBox(), wxID_ANY, std::to_string(v),
-                        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100000, v);
+
+                    v = std::clamp(v, field.minInt, field.maxInt);
+
+                    auto* sp = new wxSpinCtrl(sectionSizer->GetStaticBox(), wxID_ANY,
+                        std::to_string(v),
+                        wxDefaultPosition, wxDefaultSize,
+                        wxSP_ARROW_KEYS,
+                        field.minInt, field.maxInt, v);
+
                     ctrl = sp;
                     break;
                 }
@@ -355,10 +387,54 @@ public:
 
                 if (ctrl)
                 {
-                    if (!field.tooltip.IsEmpty())
+                    // Always show a tooltip (except for spacers)
+                    if (field.type != Field::Spacer)
                     {
-                        ctrl->SetToolTip(field.tooltip);
+                        wxString tip;
+
+                        // Use provided tooltip if any
+                        if (!field.tooltip.IsEmpty())
+                            tip = field.tooltip;
+
+                        // Always append default value
+                        if (!tip.IsEmpty())
+                            tip += "\n\n";
+                        tip += "DEFAULT VALUE: ";
+
+                        switch (field.type)
+                        {
+                        case Field::Bool:
+                            tip += (field.defaultInt != 0) ? "Enabled" : "Disabled";
+                            break;
+
+                        case Field::Int:
+                            tip += wxString::Format("%d", field.defaultInt);
+                            break;
+
+                        case Field::Str:
+                        case Field::Hotkey:
+                            if (!field.defaultString.IsEmpty())
+                                tip += "\"" + field.defaultString + "\"";
+                            else
+                                tip += "\"\"";
+                            break;
+
+                        case Field::Choice:
+                            if (!field.defaultString.IsEmpty())
+                                tip += "\"" + field.defaultString + "\"";
+                            else if (!field.choices.empty())
+                                tip += "\"" + field.choices[0] + "\""; // fallback to first option
+                            else
+                                tip += "(none)";
+                            break;
+
+                        default:
+                            break;
+                        }
+
+                        ctrl->SetToolTip(tip);
                     }
+
                     grid->Add(ctrl, 0, wxEXPAND);
                     m_controls[{field.section, field.key}] = ctrl;
                 }
