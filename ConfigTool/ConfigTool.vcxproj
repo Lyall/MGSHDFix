@@ -206,8 +206,8 @@
     <None Include="resources\ConfigTool.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\resources\config_keys.hpp" />
     <ClInclude Include="..\src\resources\version.h" />
+    <ClInclude Include="tab_data.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\ConfigTool.rc" />

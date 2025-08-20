@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\resources\config_keys.hpp">
+    <ClInclude Include="..\src\resources\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\resources\version.h">
+    <ClInclude Include="tab_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

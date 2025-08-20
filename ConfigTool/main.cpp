@@ -12,28 +12,12 @@
 #include <fstream>
 #include <filesystem>
 #include <windows.h>
+#include <wx/dcbuffer.h> // For wxAutoBufferedPaintDC
 
 #include "version.h"
-
+#include "tab_data.hpp"
 constexpr int iWindowSizeX = 716;
 constexpr int iWindowSizeY = 760;
-
-struct Field
-{
-    wxString section;
-    wxString key;
-    enum Type
-    {
-        Bool,
-        Int,
-        Str,
-        Choice,
-        Hotkey // new type for key/mouse capture
-    } type;
-    wxString defaultString;
-    int defaultInt = 0;
-    std::vector<wxString> choices;
-};
 
 // Custom control for capturing hotkeys
 class HotkeyCaptureCtrl : public wxTextCtrl
@@ -58,11 +42,11 @@ private:
         // Left/right modifiers
         if (GetKeyState(VK_LMENU) & 0x8000)
         {
-            SetValue("LAlt"); return;
+            SetValue("LAlt");  return;
         }
         if (GetKeyState(VK_RMENU) & 0x8000)
         {
-            SetValue("RAlt"); return;
+            SetValue("RAlt");  return;
         }
         if (GetKeyState(VK_LCONTROL) & 0x8000)
         {
@@ -82,11 +66,11 @@ private:
         }
         if (GetKeyState(VK_LWIN) & 0x8000)
         {
-            SetValue("LWin"); return;
+            SetValue("LWin");  return;
         }
         if (GetKeyState(VK_RWIN) & 0x8000)
         {
-            SetValue("RWin"); return;
+            SetValue("RWin");  return;
         }
 
         // Function keys
@@ -167,10 +151,6 @@ private:
         SetValue(wxString::Format("VK_%02X", raw));
     }
 
-
-
-
-
     void OnMouseClick(wxMouseEvent& event)
     {
         wxString name;
@@ -185,73 +165,7 @@ private:
     }
 };
 
-// ----------------- FULL SCHEMA -----------------
-static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
-    {"General",{
-        { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::DisableMouseCursor_Section, ConfigKeys::DisableMouseCursor_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Section, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::ForceStereoAudio_Section, ConfigKeys::ForceStereoAudio_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::Region_Section, ConfigKeys::Region_Setting, Field::Choice, "US", 0, { std::begin(kLauncherConfigRegions), std::end(kLauncherConfigRegions) } },
-        { ConfigKeys::Language_Section, ConfigKeys::Language_Setting, Field::Choice, "EN", 0,{ std::begin(kLauncherConfigLanguages), std::end(kLauncherConfigLanguages) } },
-        { ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, Field::Choice, "XBOX", 0,{ std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
-    }},
-    { "Graphics", {
-        { ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::WindowWidth_Section, ConfigKeys::WindowWidth_Setting, Field::Int, "", 0, {} },
-        { ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::WindowHeight_Section, ConfigKeys::WindowHeight_Setting, Field::Int, "", 0, {} },
-        { ConfigKeys::BorderlessWindowed_Section, ConfigKeys::BorderlessWindowed_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, Field::Int, "", 0, {} },
-        { ConfigKeys::RenderScaleHeight_Section, ConfigKeys::RenderScaleHeight_Setting, Field::Int, "", 0, {} },
-        { ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, Field::Int, "", 16, {} },
-        { ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, Field::Int, "", 360, {} },
-        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FixAspectRatio_Section, ConfigKeys::FixAspectRatio_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FixHUD_Section, ConfigKeys::FixHUD_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::FixFOV_Section, ConfigKeys::FixFOV_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, Field::Bool, "", 1, {} },
-    }},
-    { "Tweaks", {
-        { ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::SkipIntroLogos_Section, ConfigKeys::SkipIntroLogos_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::SkipLauncherMSXGame_Section, ConfigKeys::SkipLauncherMSXGame_Setting, Field::Choice, "MG1", 0, {"MG1","MG2"} },
-        { ConfigKeys::MSXWallType_Section, ConfigKeys::MSXWallType_Setting, Field::Int, "", 0, {} },
-        { ConfigKeys::MSXWallAlign_Section, ConfigKeys::MSXWallAlign_Setting, Field::Choice, "Center", 0, {"Left","Right","Center"} },
-        { ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, Field::Choice, "Normal", 0, {"Normal","Always","Never"} },
-    }},
-    { "Controls | Hotkeys", {
-        { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, Field::Hotkey, "Insert", 0, {} },
-        { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, Field::Hotkey, "Delete", 0, {} },
-        { ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, Field::Hotkey, "End", 0, {} },
-        { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, Field::Int, "", 1, {} },
-        { ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, Field::Int, "", 1, {} },
-    }},
-    { "Achievements", {
-        { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, Field::Bool, "", 0, {} },
-    }},
-    {"MGSHDFix / Internal", {
-        { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, Field::Bool, "", 0, {} },
-
-    }},
-};
-
-// -------- Resource Loader Helpers --------
+// Resource Loader Helpers
 static const void* FindResourceData(int resID, const wchar_t* resType)
 {
     HRSRC hRes = FindResourceW(nullptr, MAKEINTRESOURCEW(resID), resType);
@@ -282,9 +196,6 @@ static int GetBannerResourceID()
 
     return IDB_BANNER_MG1;
 }
-
-// ... all your existing includes ...
-#include <wx/dcbuffer.h> // For wxAutoBufferedPaintDC
 
 // Custom fixed-size banner panel
 class BannerPanel : public wxPanel
@@ -322,7 +233,6 @@ private:
         }
     }
 };
-
 
 class ConfigFrame : public wxFrame
 {
@@ -366,9 +276,19 @@ public:
                     vbox->Add(sectionSizer, 0, wxEXPAND | wxALL, 5);
                 }
 
-                grid->Add(new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.key),
-                    0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+                // Label + optional help stacked vertically
+                wxBoxSizer* labelBox = new wxBoxSizer(wxVERTICAL);
+                labelBox->Add(new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.key),
+                    0, wxALIGN_LEFT | wxBOTTOM, 2);
+                if (!field.help.IsEmpty())
+                {
+                    auto* helpText = new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.help);
+                    helpText->SetForegroundColour(*wxBLUE);
+                    labelBox->Add(helpText, 0, wxALIGN_LEFT);
+                }
+                grid->Add(labelBox, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
+                // Create control
                 wxWindow* ctrl = nullptr;
                 wxString path = field.section + "/" + field.key;
 
@@ -419,6 +339,10 @@ public:
                 }
                 }
 
+                // Tooltip (on the control)
+                if (!field.tooltip.IsEmpty())
+                    ctrl->SetToolTip(field.tooltip);
+
                 grid->Add(ctrl, 0, wxEXPAND);
                 m_controls[{field.section, field.key}] = ctrl;
             }
@@ -439,7 +363,6 @@ public:
 #endif
             });
         mainSizer->Add(banner, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 0);
-
 
         mainSizer->Add(tabs, 1, wxEXPAND | wxALL, 5);
 
