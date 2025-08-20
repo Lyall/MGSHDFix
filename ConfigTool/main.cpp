@@ -301,6 +301,12 @@ public:
                     auto* cb = new wxCheckBox(sectionSizer->GetStaticBox(), wxID_ANY, "");
                     cb->SetValue(v);
                     ctrl = cb;
+
+                    // If this checkbox is a prerequisite, hook it
+                    cb->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&)
+                        {
+                            ApplyPrerequisites();
+                        });
                     break;
                 }
                 case Field::Int:
@@ -382,9 +388,89 @@ public:
             {
                 Close();
             }, wxID_EXIT);
+
+        // Apply prerequisites at startup
+        ApplyPrerequisites();
     }
 
 private:
+    void ApplyPrerequisites()
+    {
+        for (auto& tab : kTabs)
+        {
+            for (auto& field : tab.second)
+            {
+                auto it = m_controls.find({ field.section, field.key });
+                if (it == m_controls.end())
+                    continue;
+
+                wxWindow* ctrl = it->second;
+
+                if (field.prerequisite.has_value())
+                {
+                    auto prereq = field.prerequisite.value();
+                    auto prereqIt = m_controls.find(prereq);
+                    if (prereqIt != m_controls.end())
+                    {
+                        if (auto* cb = wxDynamicCast(prereqIt->second, wxCheckBox))
+                        {
+                            bool enabled = cb->GetValue();
+
+                            if (field.prerequisiteNegate)
+                                enabled = !enabled;
+
+                            ctrl->Enable(enabled);
+
+                            if (!enabled)
+                            {
+                                // Reset to saved or default
+                                wxString path = field.section + "/" + field.key;
+                                wxString strVal;
+                                long intVal;
+                                bool boolVal;
+
+                                switch (field.type)
+                                {
+                                case Field::Bool:
+                                    boolVal = field.defaultInt != 0;
+                                    m_conf->Read(path, &boolVal);
+                                    if (auto* c = wxDynamicCast(ctrl, wxCheckBox))
+                                        c->SetValue(boolVal);
+                                    break;
+
+                                case Field::Int:
+                                    intVal = field.defaultInt;
+                                    m_conf->Read(path, &intVal);
+                                    if (auto* c = wxDynamicCast(ctrl, wxSpinCtrl))
+                                        c->SetValue(intVal);
+                                    break;
+
+                                case Field::Str:
+                                case Field::Hotkey:
+                                    strVal = field.defaultString;
+                                    m_conf->Read(path, &strVal);
+                                    if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
+                                        c->SetValue(strVal);
+                                    break;
+
+                                case Field::Choice:
+                                    strVal = field.defaultString;
+                                    m_conf->Read(path, &strVal);
+                                    if (auto* c = wxDynamicCast(ctrl, wxChoice))
+                                        if (c->FindString(strVal) != wxNOT_FOUND)
+                                            c->SetStringSelection(strVal);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
     void OnSave(wxCommandEvent&)
     {
         std::map<wxString, std::map<wxString, wxString>> iniData;

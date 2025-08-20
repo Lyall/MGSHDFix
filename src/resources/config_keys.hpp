@@ -38,40 +38,40 @@ namespace ConfigKeys
 {
     // Graphics
 
-    constexpr const char* ForceWindowSize_Section = "Output Resolution";
-    constexpr const char* ForceWindowSize_Setting = "Enabled";
+    constexpr const char* ForceWindowSize_Section = "Window Settings";
+    constexpr const char* ForceWindowSize_Setting = "Force Window Size";
     constexpr const char* ForceWindowSize_Help = "";
     constexpr const char* ForceWindowSize_Tooltip = "";
 
-    constexpr const char* WindowWidth_Section = "Output Resolution";
-    constexpr const char* WindowWidth_Setting = "Width";
+    constexpr const char* WindowWidth_Section = "Window Settings";
+    constexpr const char* WindowWidth_Setting = "Window Width";
     constexpr const char* WindowWidth_Help = "";
-    constexpr const char* WindowWidth_Tooltip = "";
+    constexpr const char* WindowWidth_Tooltip = "Leave this set to 0 to default to your desktop resolution.";
 
-    constexpr const char* WindowHeight_Section = "Output Resolution";
-    constexpr const char* WindowHeight_Setting = "Height";
+    constexpr const char* WindowHeight_Section = "Window Settings";
+    constexpr const char* WindowHeight_Setting = "Window Height";
     constexpr const char* WindowHeight_Help = "";
-    constexpr const char* WindowHeight_Tooltip = "";
+    constexpr const char* WindowHeight_Tooltip = "Leave this set to 0 to default to your desktop resolution.";
 
-    constexpr const char* WindowedMode_Section = "Output Resolution";
-    constexpr const char* WindowedMode_Setting = "Windowed";
+    constexpr const char* WindowedMode_Section = "Window Settings";
+    constexpr const char* WindowedMode_Setting = "Windowed Mode";
     constexpr const char* WindowedMode_Help = "";
     constexpr const char* WindowedMode_Tooltip = "";
 
-    constexpr const char* BorderlessWindowed_Section = "Output Resolution";
-    constexpr const char* BorderlessWindowed_Setting = "Borderless";
+    constexpr const char* BorderlessWindowed_Section = "Window Settings";
+    constexpr const char* BorderlessWindowed_Setting = "Borderless Window";
     constexpr const char* BorderlessWindowed_Help = "";
     constexpr const char* BorderlessWindowed_Tooltip = "";
 
     constexpr const char* RenderScaleWidth_Section = "Internal Resolution";
     constexpr const char* RenderScaleWidth_Setting = "Width";
     constexpr const char* RenderScaleWidth_Help = "";
-    constexpr const char* RenderScaleWidth_Tooltip = "";
+    constexpr const char* RenderScaleWidth_Tooltip = "Leave this set to 0 to default to your desktop resolution.";
 
     constexpr const char* RenderScaleHeight_Section = "Internal Resolution";
     constexpr const char* RenderScaleHeight_Setting = "Height";
     constexpr const char* RenderScaleHeight_Help = "";
-    constexpr const char* RenderScaleHeight_Tooltip = "";
+    constexpr const char* RenderScaleHeight_Tooltip = "Leave this set to 0 to default to your desktop resolution.";
 
     constexpr const char* AnisotropicFiltering_Section = "Texture Filtering";
     constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
@@ -90,9 +90,9 @@ namespace ConfigKeys
     constexpr const char* FixAspectRatio_Tooltip = "";
 
     constexpr const char* FixHUD_Section = "Ultra-Wide / 16:10+";
-    constexpr const char* FixHUD_Setting = "Fix HUD";
+    constexpr const char* FixHUD_Setting = "Lock HUD && Movies to 16:9";
     constexpr const char* FixHUD_Help = "";
-    constexpr const char* FixHUD_Tooltip = "";
+    constexpr const char* FixHUD_Tooltip = "Scales menus, HUD, and in-game movies to 16:9 when playing in Ultra-wide. May cause some visual glitches.";
 
     constexpr const char* FixFOV_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FixFOV_Setting = "Fix FOV";
@@ -101,7 +101,7 @@ namespace ConfigKeys
 
     constexpr const char* FramebufferFix_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FramebufferFix_Setting = "Fix Framebuffer";
-    constexpr const char* FramebufferFix_Help = "";
+    constexpr const char* FramebufferFix_Help = "(Fixes Pillarboxing issues)";
     constexpr const char* FramebufferFix_Tooltip = "";
 
     // Bugfixes
@@ -146,9 +146,9 @@ namespace ConfigKeys
     constexpr const char* FixAimingFullTilt_Tooltip = "";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
-    constexpr const char* CPUCoreLimit_Setting = "Limit Games to 2 CPU Cores";
+    constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on Ryzen 9800X3D CPUs)";
-    constexpr const char* CPUCoreLimit_Tooltip = "i'm a dog :3";
+    constexpr const char* CPUCoreLimit_Tooltip = "";
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";
@@ -269,21 +269,21 @@ namespace ConfigKeys
     constexpr const char* AchievementPersistence_Help = "";
     constexpr const char* AchievementPersistence_Tooltip = "";
 
-    constexpr const char* ResetAllAchievements_Section = "CAUTION - THIS BOX WILL RESET ALL ACHIEVEMENTS.";
+    constexpr const char* ResetAllAchievements_Section = "CAUTION - THIS WILL RESET ALL ACHIEVEMENTS.";
     constexpr const char* ResetAllAchievements_Setting = "Reset All Achivements";
     constexpr const char* ResetAllAchievements_Help = "";
     constexpr const char* ResetAllAchievements_Tooltip = "";
 
     // Internal
     constexpr const char* CheckForUpdates_Section = "Update Notifications";
-    constexpr const char* CheckForUpdates_Setting = "CheckForUpdates";
+    constexpr const char* CheckForUpdates_Setting = "Check For MGSHDFix Updates";
     constexpr const char* CheckForUpdates_Help = "";
     constexpr const char* CheckForUpdates_Tooltip = "";
 
     constexpr const char* UpdateConsoleNotifications_Section = "Update Notifications";
-    constexpr const char* UpdateConsoleNotifications_Setting = "ConsoleNotifications";
+    constexpr const char* UpdateConsoleNotifications_Setting = "Visible Notifications";
     constexpr const char* UpdateConsoleNotifications_Help = "";
-    constexpr const char* UpdateConsoleNotifications_Tooltip = "";
+    constexpr const char* UpdateConsoleNotifications_Tooltip = "If you want a visible notification when starting the game if an MGSHDFix update is available.";
 
     constexpr const char* VerboseLogging_Section = "Verbose Logging";
     constexpr const char* VerboseLogging_Setting = "Enabled";
