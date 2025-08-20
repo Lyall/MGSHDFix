@@ -192,18 +192,15 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::DisableMouseCursor_Section, ConfigKeys::DisableMouseCursor_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Section, ConfigKeys::PauseOnFocusLoss_SpeedrunnerBugfixOverride_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::ForceStereoAudio_Section, ConfigKeys::ForceStereoAudio_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, Field::Bool, "", 0, {} },
-        { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::Region_Section, ConfigKeys::Region_Setting, Field::Choice, "US", 0, { std::begin(kLauncherConfigRegions), std::end(kLauncherConfigRegions) } },
         { ConfigKeys::Language_Section, ConfigKeys::Language_Setting, Field::Choice, "EN", 0,{ std::begin(kLauncherConfigLanguages), std::end(kLauncherConfigLanguages) } },
+        { ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, Field::Choice, "XBOX", 0,{ std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
     }},
     { "Graphics", {
         { ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, Field::Bool, "", 1, {} },
@@ -215,14 +212,13 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::RenderScaleHeight_Section, ConfigKeys::RenderScaleHeight_Setting, Field::Int, "", 0, {} },
         { ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, Field::Int, "", 16, {} },
         { ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, Field::Bool, "", 0, {} },
+        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, Field::Bool, "", 1, {} },
+        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, Field::Int, "", 360, {} },
+        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::FixAspectRatio_Section, ConfigKeys::FixAspectRatio_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::FixHUD_Section, ConfigKeys::FixHUD_Setting, Field::Bool, "", 0, {} },
         { ConfigKeys::FixFOV_Section, ConfigKeys::FixFOV_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, Field::Int, "", 360, {} },
-        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, Field::Bool, "", 1, {} },
-        { ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, Field::Choice, "XBOX", 0,{ std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
     }},
     { "Tweaks", {
         { ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, Field::Bool, "", 0, {} },
@@ -243,7 +239,14 @@ static const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, Field::Int, "", 1, {} },
     }},
     { "Achievements", {
+        { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, Field::Bool, "", 1, {} },
         { ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, Field::Bool, "", 0, {} },
+    }},
+    {"MGSHDFix / Internal", {
+        { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, Field::Bool, "", 1, {} },
+        { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, Field::Bool, "", 1, {} },
+        { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, Field::Bool, "", 0, {} },
+
     }},
 };
 

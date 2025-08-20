@@ -50,6 +50,7 @@
     <ClCompile Include="src\features\mg1_custom_loading_screens.cpp" />
     <ClCompile Include="src\features\distance_culling.cpp" />
     <ClCompile Include="src\fixes\aiming_after_equip.cpp" />
+    <ClCompile Include="src\resources\probe.cpp" />
     <ClCompile Include="src\resources\submodule_initiailization.hpp" />
     <ClCompile Include="src\resources\version_checking.cpp" />
     <ClCompile Include="src\warnings\corrupt_save_message.cpp" />

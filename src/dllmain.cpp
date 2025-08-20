@@ -1134,7 +1134,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_MGS2Sunglasses.Initialize());
 
 
-    //INITIALIZE(g_DistanceCulling.Initialize());
+    INITIALIZE(g_DistanceCulling.Initialize());
     //INITIALIZE(g_MG1CustomLoadingScreens.Initialize());
     //INITIALIZE(g_MultiSampleAntiAliasing.Initialize());
     //INITIALIZE(g_Wireframe.Initialize());
@@ -1149,7 +1149,9 @@ static void InitializeSubsystems()
     INITIALIZE(g_FixAimAfterEquip.Initialize());
     INITIALIZE(g_FixAimingFullTilt.Initialize());
     INITIALIZE(g_MGS3HudFixes.Initialize());
+#if !defined(RELEASE_BUILD)
     INITIALIZE(g_DepthOfFieldFixes.Initialize());
+#endif
     //INITIALIZE(g_ColorFilterFix.Initialize());
 
         //Warnings

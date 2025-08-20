@@ -131,6 +131,9 @@
     <ClCompile Include="src\fixes\depth_of_field.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\probe.cpp">
+      <Filter>WIP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">

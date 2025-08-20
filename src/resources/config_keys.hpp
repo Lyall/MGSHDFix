@@ -56,31 +56,31 @@ namespace ConfigKeys
     constexpr const char* RenderScaleHeight_Section = "Internal Resolution";
     constexpr const char* RenderScaleHeight_Setting = "Height";
 
-    constexpr const char* AnisotropicFiltering_Section = "Anisotropic Filtering";
-    constexpr const char* AnisotropicFiltering_Setting = "Samples";
+    constexpr const char* AnisotropicFiltering_Section = "Texture Filtering";
+    constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
 
-    constexpr const char* DisableTextureFiltering_Section = "Disable Texture Filtering";
-    constexpr const char* DisableTextureFiltering_Setting = "DisableTextureFiltering";
+    constexpr const char* DisableTextureFiltering_Section = "Texture Filtering";
+    constexpr const char* DisableTextureFiltering_Setting = "Disable Texture Filtering";
 
     // Ultrawide
-    constexpr const char* FixAspectRatio_Section = "Ultra-Wide";
+    constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FixAspectRatio_Setting = "Fix Aspect Ratio";
 
-    constexpr const char* FixHUD_Section = "Ultra-Wide";
+    constexpr const char* FixHUD_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FixHUD_Setting = "Fix HUD";
 
-    constexpr const char* FixFOV_Section = "Ultra-Wide";
+    constexpr const char* FixFOV_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FixFOV_Setting = "Fix FOV";
 
-    constexpr const char* FramebufferFix_Section = "Ultra-Wide";
+    constexpr const char* FramebufferFix_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FramebufferFix_Setting = "Fix Framebuffer";
 
     // Bugfixes
-    constexpr const char* FixVectorRain_Section = "Vector Line Fix";
-    constexpr const char* FixVectorRain_Setting = "Fix Rain";
-    constexpr const char* FixVectorUI_Section = "Vector Line Fix";
-    constexpr const char* FixVectorUI_Setting = "Fix UI";
-    constexpr const char* VectorLineScale_Section = "Vector Line Fix";
+    constexpr const char* FixVectorRain_Section = "Vector Line Scaling Fix";
+    constexpr const char* FixVectorRain_Setting = "Fix Rain Width";
+    constexpr const char* FixVectorUI_Section = "Vector Line Scaling Fix";
+    constexpr const char* FixVectorUI_Setting = "Fix UI Width";
+    constexpr const char* VectorLineScale_Section = "Vector Line Scaling Fix";
     constexpr const char* VectorLineScale_Setting = "Line Scale";
 
     constexpr const char* EffectSpeedFixes_Section = "Bugfixes";
@@ -99,7 +99,7 @@ namespace ConfigKeys
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";
-    constexpr const char* KeepAimingAfterFiring_Always_Setting = "AlwaysKeepAiming";
+    constexpr const char* KeepAimingAfterFiring_Always_Setting = "Always Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Setting = "While in First Person";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Section = "Keep Aiming After Firing";
@@ -125,8 +125,8 @@ namespace ConfigKeys
     constexpr const char* MSXWallAlign_Section = "Launcher Config";
     constexpr const char* MSXWallAlign_Setting = "MSXWallAlign";
 
-    constexpr const char* ForceStereoAudio_Section = "Force Stereo Audio";
-    constexpr const char* ForceStereoAudio_Setting = "Enabled";
+    constexpr const char* ForceStereoAudio_Section = "Various";
+    constexpr const char* ForceStereoAudio_Setting = "Force Stereo Audio / Fix Codec Volume";
 
     constexpr const char* MuteWarning_Section = "Mute Warning";
     constexpr const char* MuteWarning_Setting = "Enabled";
@@ -157,8 +157,8 @@ namespace ConfigKeys
     constexpr const char* AchievementPersistence_Section = "Bugfixes";
     constexpr const char* AchievementPersistence_Setting = "Fix Achievement Stat Tracking";
 
-    constexpr const char* ResetAllAchievements_Section = "Reset All Achievements";
-    constexpr const char* ResetAllAchievements_Setting = "Reset_All_Achievements";
+    constexpr const char* ResetAllAchievements_Section = "CAUTION - THIS BOX WILL RESET ALL ACHIEVEMENTS.";
+    constexpr const char* ResetAllAchievements_Setting = "Reset All Achivements";
 
     // Internal
     constexpr const char* CheckForUpdates_Section = "Update Notifications";

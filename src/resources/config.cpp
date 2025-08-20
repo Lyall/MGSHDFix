@@ -276,7 +276,7 @@ void Config::Read()
     }
     spdlog::info("Config Parse: Skip Intro Videos: {}", g_IntroSkip.isEnabled);
     spdlog::info("Config Parse: Pause On Focus Loss: {}", g_PauseOnFocusLoss.bPauseOnFocusLoss);
-    spdlog::info("Config Parse: Cutscene Asset Loading Fix - Speedrunner Override: {}", g_PauseOnFocusLoss.bFixAltTabBugs);
+    spdlog::info("Config Parse: Cutscene Asset Loading Fix: {}", g_PauseOnFocusLoss.bFixAltTabBugs);
     spdlog::info("Config Parse: Force Stereo Audio: {}", g_StereoAudioFix.isEnabled);
     spdlog::info("Config Parse: Muted Audio Console Warnings: {}", g_MuteWarning.bEnabled);
     if (eGameType & (MGS2 | MGS3))

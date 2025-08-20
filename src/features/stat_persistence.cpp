@@ -435,7 +435,8 @@ void StatPersistence::SaveStats() const
         std::ofstream ofs(pTempSaveFile, std::ios::trunc);
         if (!ofs)
         {
-            throw std::runtime_error("Failed to open temp file for writing");
+            spdlog::error("Steam Stat Persistence: Failed to open temp file for writing: {}", pTempSaveFile.string());
+            return;
         }
 
         if (eGameType & MGS2)
@@ -475,7 +476,8 @@ void StatPersistence::SaveStats() const
         ofs.flush();
         if (!ofs)
         {
-            throw std::runtime_error("Failed to flush temp save file");
+            spdlog::error("Steam Stat Persistence: Failed to flush temp save file: {}", pTempSaveFile.string());
+            return;
         }
 
         ofs.close();
@@ -489,5 +491,6 @@ void StatPersistence::SaveStats() const
     catch (const std::exception& e)
     {
         spdlog::error("Steam Stat Persistence: Failed to save stats: {}", e.what());
+        return;
     }
 }
