@@ -64,15 +64,15 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, 0 },
 
         { ConfigKeys::Region_Section, ConfigKeys::Region_Setting, ConfigKeys::Region_Help, ConfigKeys::Region_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "US",
+          std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigRegions.begin(), 0),
           { std::begin(kLauncherConfigRegions), std::end(kLauncherConfigRegions) } },
 
         { ConfigKeys::Language_Section, ConfigKeys::Language_Setting, ConfigKeys::Language_Help, ConfigKeys::Language_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "EN",
+          std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigLanguages.begin(), 0),
           { std::begin(kLauncherConfigLanguages), std::end(kLauncherConfigLanguages) } },
 
         { ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, ConfigKeys::CtrlType_Help, ConfigKeys::CtrlType_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, "XBOX",
+          std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
 
         { ConfigKeys::CtrlType_Section, "",

@@ -198,9 +198,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, bLauncherConfigSkipLauncher);
 
     // Read launcher settings from ini
-    std::string sLauncherConfigCtrlType = "kbd";
-    std::string sLauncherConfigRegion = "us";
-    std::string sLauncherConfigLanguage = "en";
+    std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
+    std::string sLauncherConfigRegion = *std::next(kLauncherConfigRegions.begin(), 0);
+    std::string sLauncherConfigLanguage = *std::next(kLauncherConfigLanguages.begin(), 0);
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     ConfigHelper::getValue(ini, ConfigKeys::Region_Section, ConfigKeys::Region_Setting, sLauncherConfigRegion);
     ConfigHelper::getValue(ini, ConfigKeys::Language_Section, ConfigKeys::Language_Setting, sLauncherConfigLanguage);
@@ -269,11 +269,10 @@ void Config::Read()
     spdlog::info("Config Parse: Launcher - MSX Game: {}", sLauncherConfigMSXGame);
     spdlog::info("Config Parse: Launcher - Region: {} ({})", iLauncherConfigRegion, Util::GetUppercaseNameAtIndex(kLauncherConfigRegions, iLauncherConfigRegion));
     spdlog::info("Config Parse: Launcher - Language: {} ({})", iLauncherConfigLanguage, Util::GetUppercaseNameAtIndex(kLauncherConfigLanguages, iLauncherConfigLanguage));
-    if (std::string ps2Str = "ps2"; (iLauncherConfigCtrlType == Util::findStringInVector(ps2Str, kLauncherConfigCtrlTypes)))
+    if (iLauncherConfigCtrlType == 6)
     {
         bIsPS2controltype = true;
-        ps2Str = "ps4";
-        iLauncherConfigCtrlType = Util::findStringInVector(ps2Str, kLauncherConfigCtrlTypes);
+        iLauncherConfigCtrlType = 1;
     }
     spdlog::info("Config Parse: Skip Intro Videos: {}", g_IntroSkip.isEnabled);
     spdlog::info("Config Parse: Pause On Focus Loss: {}", g_PauseOnFocusLoss.bPauseOnFocusLoss);

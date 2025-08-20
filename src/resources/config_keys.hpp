@@ -7,31 +7,31 @@
 #include <initializer_list>
 
 inline const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
-    "PS5",
-    "PS4",
-    "XBOX",
-    "NX",
-    "STMD",
-    "KBD",
-    "PS2"
+    "PlayStation 5",
+    "PlayStation 4",
+    "Xbox One",
+    "Nintendo Switch",
+    "Steam Deck",
+    "Keyboard / Mouse",
+    "PlayStation 2"
 };
 
 inline const std::initializer_list<std::string> kLauncherConfigLanguages = {
-    "EN",
-    "JP",
-    "FR",
-    "GR",
-    "IT",
-    "PR",
-    "SP",
-    "DU",
-    "RU"
+    "English",
+    "Japanese",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Spanish",
+    "Dutch",
+    "Russian"
 };
 
 inline const std::initializer_list<std::string> kLauncherConfigRegions = {
-    "US",
-    "JP",
-    "EU"
+    "United States",
+    "Japan",
+    "Europe"
 };
 
 namespace ConfigKeys
