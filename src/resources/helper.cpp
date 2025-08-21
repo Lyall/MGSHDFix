@@ -281,18 +281,22 @@ namespace Util
 #endif
 
 
-    int findStringInVector(std::string& str, const std::initializer_list<std::string>& search)
+    int findStringInVector(const std::string& str, const std::initializer_list<std::string>& search)
     {
-        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
+
         for (auto it = search.begin(); it != search.end(); ++it)
         {
             std::string lower = *it;
             std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-            if (str == lower)
+
+            if (lowerStr == lower)
                 return static_cast<int>(std::distance(search.begin(), it));
         }
         return 0;
     }
+
 
 
     // Convert an UTF8 string to a wide Unicode String
@@ -416,6 +420,17 @@ namespace Util
         return FALSE;
     }
 
+    std::string GetNameAtIndex(const std::initializer_list<std::string>& list, int index)
+    {
+        if (index >= 0 && index < static_cast<int>(list.size()))
+        {
+            auto it = list.begin();
+            std::advance(it, index);
+            return *it;
+        }
+        return "Unknown";
+    }
+
     std::string GetUppercaseNameAtIndex(const std::initializer_list<std::string>& list, int index)
     {
         if (index >= 0 && index < static_cast<int>(list.size()))
@@ -445,6 +460,23 @@ namespace Util
             return true;
         }
         return false;
+    }
+
+    std::string StripQuotes(const std::string& value)
+    {
+        if (value.size() >= 2 && value.front() == '"' && value.back() == '"')
+        {
+            std::string s = value.substr(1, value.size() - 2);
+            // Handle escaped quotes
+            size_t pos = 0;
+            while ((pos = s.find("\\\"", pos)) != std::string::npos)
+            {
+                s.replace(pos, 2, "\"");
+                pos += 1;
+            }
+            return s;
+        }
+        return value;
     }
 
 }

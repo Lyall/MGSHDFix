@@ -305,7 +305,7 @@ void InputHandler::GetKeybind(const inipp::Ini<char>& ini,
         return;
     }
 
-    alias = keyIt->second;
+    alias = Util::StripQuotes(keyIt->second);
     if (alias.empty())
     {
         FatalKeyError(section, key, "Empty value");

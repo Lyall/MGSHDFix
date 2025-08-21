@@ -6,37 +6,16 @@
 #include <string>
 #include <initializer_list>
 
-inline const std::initializer_list<std::string> kLauncherConfigCtrlTypes = {
-    "PlayStation 5",
-    "PlayStation 4",
-    "Xbox One",
-    "Nintendo Switch",
-    "Steam Deck",
-    "Keyboard / Mouse",
-    "PlayStation 2"
-};
-
-inline const std::initializer_list<std::string> kLauncherConfigLanguages = {
-    "English",
-    "Japanese",
-    "French",
-    "German",
-    "Italian",
-    "Portuguese",
-    "Spanish",
-    "Dutch",
-    "Russian"
-};
-
-inline const std::initializer_list<std::string> kLauncherConfigRegions = {
-    "United States",
-    "Japan",
-    "Europe"
-};
-
 namespace ConfigKeys
 {
     // Graphics
+    constexpr const char* ControllerType_PS5 = "PlayStation 5";
+    constexpr const char* ControllerType_PS4 = "PlayStation 4";
+    constexpr const char* ControllerType_XboxOne = "Xbox One";
+    constexpr const char* ControllerType_NintendoSwitch = "Nintendo Switch";
+    constexpr const char* ControllerType_SteamDeck = "Steam Deck";
+    constexpr const char* ControllerType_KeyboardMouse = "Keyboard / Mouse";
+    constexpr const char* ControllerType_PS2 = "PlayStation 2";
 
     constexpr const char* ForceWindowSize_Section = "Window Settings";
     constexpr const char* ForceWindowSize_Setting = "Force Window Size";
@@ -323,3 +302,33 @@ namespace ConfigKeys
 
 
 }
+
+
+
+inline const std::initializer_list<std::string> kLauncherConfigCtrlTypes = { //THESE ARE ORDER SENSITIVE.
+    ConfigKeys::ControllerType_PS5,          //0
+    ConfigKeys::ControllerType_PS4,             //1
+    ConfigKeys::ControllerType_XboxOne,         //2
+    ConfigKeys::ControllerType_NintendoSwitch,  //3
+    ConfigKeys::ControllerType_SteamDeck,       //4
+    ConfigKeys::ControllerType_KeyboardMouse,   //5
+    ConfigKeys::ControllerType_PS2,             //6
+};
+
+inline const std::initializer_list<std::string> kLauncherConfigLanguages = {
+    "English",
+    "Japanese",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Spanish",
+    "Dutch",
+    "Russian"
+};
+
+inline const std::initializer_list<std::string> kLauncherConfigRegions = {
+    "United States",
+    "Japan",
+    "Europe"
+};

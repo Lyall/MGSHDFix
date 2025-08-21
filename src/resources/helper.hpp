@@ -39,12 +39,12 @@ namespace Memory
 namespace Util
 {
 #if !defined(RELEASE_BUILD)
-        void DumpContext(const safetyhook::Context& ctx);
+    void DumpContext(const safetyhook::Context& ctx);
 
-        void DumpBytes(uint64_t address);
+    void DumpBytes(uint64_t address);
 #endif
 
-    int findStringInVector(std::string& str, const std::initializer_list<std::string>& search);
+    int findStringInVector(const std::string& str, const std::initializer_list<std::string>& search);
 
     std::wstring UTF8toWide(const std::string& str);
 
@@ -56,10 +56,13 @@ namespace Util
 
     bool CheckForASIFiles(std::string fileName, bool checkForDuplicates, bool setFixPath, const char* checkCreationDate);
 
+    std::string GetNameAtIndex(const std::initializer_list<std::string>& list, int index);
+
     std::string GetUppercaseNameAtIndex(const std::initializer_list<std::string>& list, int index);
 
     bool IsSteamOS();
 
+    std::string StripQuotes(const std::string& value);
 }
 
 

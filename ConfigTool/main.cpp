@@ -41,10 +41,32 @@
 
 #include "version.h"
 #include "tab_data.hpp"
+
 constexpr int iWindowSizeX = 716;
 constexpr int iWindowSizeY = 680;
 constexpr const char* sSettingsFileName = "MGSHDFix.settings";
 constexpr bool bFullLengthFields = false; //if you want the boxes to span half the window's width.
+
+// ---------------------------------------------------------------------------
+// Quote/unquote helpers for INI-safe string persistence
+// ---------------------------------------------------------------------------
+static wxString QuoteIfNeeded(const wxString& value)
+{
+    wxString escaped = value;
+    escaped.Replace("\"", "\\\""); // escape internal quotes
+    return "\"" + escaped + "\""; // always quote
+}
+
+static wxString Unquote(const wxString& value)
+{
+    wxString s = value;
+    if (s.StartsWith("\"") && s.EndsWith("\"") && s.length() >= 2)
+    {
+        s = s.Mid(1, s.length() - 2);
+        s.Replace("\\\"", "\""); // unescape
+    }
+    return s;
+}
 
 class HotkeyCaptureCtrl final : public wxTextCtrl
 {
@@ -357,7 +379,7 @@ public:
                         wxLogWarning("Out-of-range value %d for [%s/%s], clamped to %d",
                             v, field.section, field.key, clamped);
                         v = clamped;
-                        m_dirty = true; 
+                        m_dirty = true;
                     }
 
 
@@ -375,6 +397,7 @@ public:
                 {
                     wxString v = field.defaultString;
                     m_conf->Read(path, &v);
+                    v = Unquote(v);
                     ctrl = new wxTextCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;
                 }
@@ -382,6 +405,7 @@ public:
                 {
                     wxString v = field.defaultString;
                     m_conf->Read(path, &v);
+                    v = Unquote(v);
 
                     auto* ch = new wxChoice(sectionSizer->GetStaticBox(), wxID_ANY);
                     for (auto& c : field.choices)
@@ -402,7 +426,7 @@ public:
                         }
                         else if (!field.choices.empty())
                         {
-                            ch->SetSelection(0); 
+                            ch->SetSelection(0);
                         }
                         m_dirty = true;
                     }
@@ -416,6 +440,7 @@ public:
                 {
                     wxString v = field.defaultString;
                     m_conf->Read(path, &v);
+                    v = Unquote(v);
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;
                 }
@@ -584,6 +609,7 @@ private:
 
         event.Skip(); // no changes, just close
     }
+
     void ApplyPrerequisites()
     {
         for (auto& tab : kTabs)
@@ -639,6 +665,7 @@ private:
                                 case Field::Hotkey:
                                     strVal = field.defaultString;
                                     m_conf->Read(path, &strVal);
+                                    strVal = Unquote(strVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
                                         c->SetValue(strVal);
                                     break;
@@ -646,6 +673,7 @@ private:
                                 case Field::Choice:
                                     strVal = field.defaultString;
                                     m_conf->Read(path, &strVal);
+                                    strVal = Unquote(strVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxChoice))
                                         if (c->FindString(strVal) != wxNOT_FOUND)
                                             c->SetStringSelection(strVal);
@@ -675,9 +703,9 @@ private:
             else if (auto* sp = wxDynamicCast(ctrl, wxSpinCtrl))
                 value = wxString::Format("%d", sp->GetValue());
             else if (auto* tc = wxDynamicCast(ctrl, wxTextCtrl))
-                value = tc->GetValue();
+                value = QuoteIfNeeded(tc->GetValue());
             else if (auto* ch = wxDynamicCast(ctrl, wxChoice))
-                value = ch->GetStringSelection();
+                value = QuoteIfNeeded(ch->GetStringSelection());
             iniData[section][key] = value;
         }
 
