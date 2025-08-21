@@ -43,8 +43,10 @@
 #include "tab_data.hpp"
 constexpr int iWindowSizeX = 716;
 constexpr int iWindowSizeY = 680;
+constexpr const char* sSettingsFileName = "MGSHDFix.settings";
+constexpr bool bFullLengthFields = false; //if you want the boxes to span half the window's width.
 
-class HotkeyCaptureCtrl : public wxTextCtrl
+class HotkeyCaptureCtrl final : public wxTextCtrl
 {
 public:
     HotkeyCaptureCtrl(wxWindow* parent, wxWindowID id, const wxString& value = "")
@@ -58,10 +60,10 @@ public:
     }
 
 private:
-    void OnKeyDown(wxKeyEvent& event)
+    void OnKeyDown(const wxKeyEvent& event)
     {
-        int code = event.GetKeyCode();
-        int raw = event.GetRawKeyCode(); // Windows VK code
+        const int code = event.GetKeyCode();
+        const int raw = event.GetRawKeyCode(); // Windows VK code
 
         // Left/right modifiers
         if (GetKeyState(VK_LMENU) & 0x8000)
@@ -201,22 +203,30 @@ static const void* FindResourceData(int resID, const wchar_t* resType)
 static size_t FindResourceSize(int resID, const wchar_t* resType)
 {
     HRSRC hRes = FindResourceW(nullptr, MAKEINTRESOURCEW(resID), resType);
-    if (!hRes) return 0;
+    if (!hRes)
+    {
+        return 0;
+    }
     return SizeofResource(nullptr, hRes);
 }
 
 static int GetBannerResourceID()
 {
-    namespace fs = std::filesystem;
-    fs::path exePath = wxGetCwd().ToStdString();
-    fs::path parentPath = exePath.parent_path();
+    const std::filesystem::path exePath = wxGetCwd().ToStdString();
+    const std::filesystem::path parentPath = exePath.parent_path();
 
-    if (fs::exists(parentPath / "METAL GEAR.exe"))
+    if (std::filesystem::exists(parentPath / "METAL GEAR.exe"))
+    {
         return IDB_BANNER_MG1;
-    if (fs::exists(parentPath / "METAL GEAR SOLID2.exe"))
+    }
+    if (std::filesystem::exists(parentPath / "METAL GEAR SOLID2.exe"))
+    {
         return IDB_BANNER_MGS2;
-    if (fs::exists(parentPath / "METAL GEAR SOLID3.exe"))
+    }
+    if (std::filesystem::exists(parentPath / "METAL GEAR SOLID3.exe"))
+    {
         return IDB_BANNER_MGS3;
+    }
 
     return IDB_BANNER_MG1;
 }
@@ -273,8 +283,6 @@ public:
         SendMessage(hwnd, WM_SETICON, ICON_SMALL, 0);
         SendMessage(hwnd, WM_SETICON, ICON_BIG, 0);
 
-        wxString cwd = wxGetCwd();
-        m_iniPath = cwd + "\\MGSHDFix.settings";
         m_conf = new wxFileConfig("", "", m_iniPath, "", wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_NO_ESCAPE_CHARACTERS);
 
         wxNotebook* tabs = new wxNotebook(this, wxID_ANY);
@@ -322,8 +330,14 @@ public:
                 {
                     bool v = field.defaultInt != 0;
                     m_conf->Read(path, &v);
+
                     auto* cb = new wxCheckBox(sectionSizer->GetStaticBox(), wxID_ANY, "");
                     cb->SetValue(v);
+
+                    // Prevent it from accepting inputs from the WHOLE grid cell
+                    cb->SetMinSize(cb->GetBestSize());
+                    cb->SetSizeHints(cb->GetBestSize());
+
                     ctrl = cb;
 
                     // If this checkbox is a prerequisite, hook it
@@ -474,7 +488,15 @@ public:
                         ctrl->SetToolTip(tip);
                     }
 
-                    grid->Add(ctrl, 0, wxEXPAND);
+                    int flags = wxALIGN_CENTER_VERTICAL;
+                    if (bFullLengthFields)
+                    {
+                        flags |= wxEXPAND;
+                    }
+
+                    grid->Add(ctrl, 0, flags);
+
+
                     m_controls[{field.section, field.key}] = ctrl;
                 }
             }
@@ -677,7 +699,7 @@ private:
 
 
     wxFileConfig* m_conf;
-    wxString m_iniPath;
+    wxString m_iniPath = wxGetCwd() + "\\" + sSettingsFileName;
 
     using Key = std::pair<wxString, wxString>;
     struct KeyHash
