@@ -28,6 +28,8 @@ inline const std::string sFixName = FIX_NAME;
 #define FILE_DESCRIPTION_ASI     FIX_NAME " ASI Plugin"
 #define INTERNAL_NAME_ASI        FIX_NAME ".asi"
 #define ORIGINAL_FILENAME_ASI    FIX_NAME ".asi"
+
+// Universal Config Tool Metadata
 #define COMPANY_NAME_CONFIG      "Afevis"
 #define LEGAL_COPYRIGHT_CONFIG   "© 2025 Afevis. Licensed under the MIT License."
 #define FILE_DESCRIPTION_CONFIG  "Universal Config Tool"
