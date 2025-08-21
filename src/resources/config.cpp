@@ -14,6 +14,8 @@
 #include "steamworks_api.hpp"
 #include "stereo_audio.hpp"
 //#include "texture_buffer_size.hpp"
+#include "cpu_core_limit.hpp"
+#include "distance_culling.hpp"
 #include "version_checking.hpp"
 #include "stat_persistence.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -195,6 +197,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::FixFOV_Section, ConfigKeys::FixFOV_Setting, bFOVFix);
 
     ConfigHelper::getValue(ini, ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, bLauncherConfigSkipLauncher);
+    ConfigHelper::getValue(ini, ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, g_CPUCoreLimitFix.bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrass_Section, ConfigKeys::DistanceCullingGrass_Setting, g_DistanceCulling.bOverrideGrass);
 
     // Read launcher settings from ini
     std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
@@ -307,4 +312,7 @@ void Config::Read()
     spdlog::info("Config Parse: Fix Aiming Full Tilt: {}", g_FixAimingFullTilt.bEnabled);
     spdlog::info("Config Parse: MGS2 Sunglasses - {}", (sShouldWearSunglasses == ConfigKeys::MGS2Sunglasses_Option_Normal ? "Normal" : (sShouldWearSunglasses == ConfigKeys::MGS2Sunglasses_Option_Always ? "Always Wearing Sunglasses" : "Never Wearing Sunglasses")));
     spdlog::info("Config Parse: Capture Inputs While Alt-Tabbed: {}", g_InputHandler.bCaptureInputsWhileAltTabbed);
+    spdlog::info("Config Parse: CPU Core Limit Fix: {}", g_CPUCoreLimitFix.bEnabled);
+    spdlog::info("Config Parse: Distance Culling Grass: {}", g_DistanceCulling.bOverrideGrass);
+
 }

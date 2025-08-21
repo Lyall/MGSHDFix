@@ -12,8 +12,8 @@ void CPUCoreLimitFix::ApplyFix()
 
     if (!SetProcessAffinityMask(GetCurrentProcess(), 0x3))
     {
-        spdlog::error("Ryzen CPU Crash Fix: Failed to set process affinity mask. Error code: {}", GetLastError());
+        spdlog::error("CPU affinity limit: Failed to set process affinity mask. Error code: {}", GetLastError());
         return;
     }
-    spdlog::info("Ryzen CPU Crash Fix: Process affinity mask set to 0x3 (CPU 0 and CPU 1). This should help prevent crashes on Ryzen CPUs.");
+    spdlog::info("CPU affinity limit: Process affinity mask set to 0x3 (CPU 0 and CPU 1). This should help prevent crashes on Ryzen CPUs.");
 }

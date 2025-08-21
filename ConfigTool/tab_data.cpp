@@ -60,9 +60,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Help, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Tooltip,
           std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
-        { ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
-          std::nullopt, false, Field::Bool, false },
-
         { ConfigKeys::Region_Section, ConfigKeys::Region_Setting, ConfigKeys::Region_Help, ConfigKeys::Region_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigRegions.begin(), 0),
           { std::begin(kLauncherConfigRegions), std::end(kLauncherConfigRegions) } },
@@ -147,11 +144,15 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::MSXWallAlign_Section, ConfigKeys::MSXWallAlign_Setting, ConfigKeys::MSXWallAlign_Help, ConfigKeys::MSXWallAlign_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MSXWallAlign_Option_Center, {ConfigKeys::MSXWallAlign_Option_Center, ConfigKeys::MSXWallAlign_Option_Left, ConfigKeys::MSXWallAlign_Option_Right} },
 
-        { ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, ConfigKeys::MuteWarning_Help, ConfigKeys::MuteWarning_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+        { ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
 
         { ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, ConfigKeys::MGS2Sunglasses_Help, ConfigKeys::MGS2Sunglasses_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } }
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } },
+
+        { ConfigKeys::DistanceCullingGrass_Section, ConfigKeys::DistanceCullingGrass_Setting, ConfigKeys::DistanceCullingGrass_Help, ConfigKeys::DistanceCullingGrass_Tooltip,
+          std::nullopt, false, Field::Bool, true },
     }},
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
@@ -197,6 +198,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, ConfigKeys::UpdateConsoleNotifications_Help, ConfigKeys::UpdateConsoleNotifications_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, ConfigKeys::MuteWarning_Help, ConfigKeys::MuteWarning_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, ConfigKeys::VerboseLogging_Help, ConfigKeys::VerboseLogging_Tooltip,

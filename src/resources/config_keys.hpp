@@ -83,6 +83,14 @@ namespace ConfigKeys
     constexpr const char* DisableTextureFiltering_Help = "";
     constexpr const char* DisableTextureFiltering_Tooltip = "";
 
+    constexpr const char* DistanceCullingGrass_Section = "Override Render Distance";
+    constexpr const char* DistanceCullingGrass_Setting = "Always Show Grass";
+    constexpr const char* DistanceCullingGrass_Help = "";
+    constexpr const char* DistanceCullingGrass_Tooltip = "Stops grass from vanishing at long distances (a PS2 optimization.)\n"
+                                                         "When enabled, grass stays visible no matter how far away you are.";
+
+
+
     // Ultrawide
     constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";
     constexpr const char* FixAspectRatio_Setting = "Fix Aspect Ratio";
@@ -125,8 +133,8 @@ namespace ConfigKeys
     constexpr const char* EffectSpeedFixes_Help = "";
     constexpr const char* EffectSpeedFixes_Tooltip = "";
 
-    constexpr const char* EnablePauseOnFocusLoss_Section = "Pause On Focus Loss";
-    constexpr const char* EnablePauseOnFocusLoss_Setting = "Enabled";
+    constexpr const char* EnablePauseOnFocusLoss_Section = "Various";
+    constexpr const char* EnablePauseOnFocusLoss_Setting = "Pause On Focus Loss";
     constexpr const char* EnablePauseOnFocusLoss_Help = "";
     constexpr const char* EnablePauseOnFocusLoss_Tooltip = "";
 
@@ -147,7 +155,7 @@ namespace ConfigKeys
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
-    constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on Ryzen 9800X3D CPUs)";
+    constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";
     constexpr const char* CPUCoreLimit_Tooltip = "";
 
     // Gameplay
@@ -311,6 +319,7 @@ namespace ConfigKeys
     constexpr const char* VerboseLogging_Setting = "Enabled";
     constexpr const char* VerboseLogging_Help = "";
     constexpr const char* VerboseLogging_Tooltip = "";
+
 
 
 }

@@ -5,7 +5,7 @@ class DistanceCulling final
 public:
     void Initialize() const;
 
-    bool isEnabled;
+    bool bOverrideGrass;
 };
 
 inline DistanceCulling g_DistanceCulling;
