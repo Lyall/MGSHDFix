@@ -37,11 +37,24 @@ jobs:
 
         echo "version=$version" >> $GITHUB_OUTPUT
 
+    - name: Get wxWidgets submodule hash
+      id: wxhash
+      run: |
+        cd external/wxWidgets
+        $hash = git rev-parse HEAD
+        "hash=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    - name: Cache wxWidgets
+      uses: actions/cache@v4
+      with:
+        path: external/wxWidgets/lib/vc_x64_lib
+        key: wxwidgets-${{ runner.os }}-${{ steps.wxhash.outputs.hash }}
+        
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Build
-      run: msbuild "${{ github.event.repository.name }}.sln" -t:rebuild -verbosity:diag -property:Configuration=Release -property:Platform=x64
+      run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
     # Prepare output structure
     - run: mkdir dist
