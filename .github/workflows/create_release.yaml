@@ -1,5 +1,8 @@
 name: Create Release
 
+env:
+  CI: true
+
 on:
   workflow_dispatch:
 

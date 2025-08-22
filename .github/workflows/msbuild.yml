@@ -1,5 +1,8 @@
 name: MGSHDFix CI Builds
 
+env:
+  CI: true
+
 on:
   push:
     branches: ["**"]
@@ -25,8 +28,14 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
+    - name: Cache wxWidgets
+      uses: actions/cache@v4
+      with:
+        path: external/wxWidgets/lib/vc_x64_lib
+        key: wxwidgets-${{ runner.os }}-3.2.4-${{ hashFiles('external/wxWidgets/include/wx/wx.h') }}
+
     - name: Build
-      run: msbuild "${{ github.event.repository.name }}.sln" -t:rebuild -verbosity:diag -property:Configuration=Release -property:Platform=x64
+      run: msbuild "${{ github.event.repository.name }}.sln" -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
     # Prepare output structure
     - run: mkdir dist
