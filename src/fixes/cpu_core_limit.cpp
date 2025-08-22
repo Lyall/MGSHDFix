@@ -15,5 +15,6 @@ void CPUCoreLimitFix::ApplyFix()
         spdlog::error("CPU affinity limit: Failed to set process affinity mask. Error code: {}", GetLastError());
         return;
     }
-    spdlog::info("CPU affinity limit: Process affinity mask set to 0x3 (CPU 0 and CPU 1). This should help prevent crashes on Ryzen CPUs.");
+    spdlog::info("CPU affinity limit: Process affinity mask set to 0x3 (CPU 0 and CPU 1). This should help prevent crashes on some newer CPUs.");
+    spdlog::warn("CPU affinity limit: If you performance experience issues, such as slowdowns or audio glitches while streaming, disable this fix in the config file.");
 }

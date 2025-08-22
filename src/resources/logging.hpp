@@ -17,7 +17,6 @@ public:
     bool bIsSteamDeck = false;
     bool bCheckedSteamDeck = false;
     bool bVerboseLogging = true;
-    std::filesystem::path sLogFile;
 };
 
 /// Global logging instance

@@ -1142,7 +1142,6 @@ static void InitializeSubsystems()
     INITIALIZE(g_DistanceCulling.Initialize());
     //INITIALIZE(g_MG1CustomLoadingScreens.Initialize());
     //INITIALIZE(g_MultiSampleAntiAliasing.Initialize());
-    //INITIALIZE(g_Wireframe.Initialize());
 
         //Fixes
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
