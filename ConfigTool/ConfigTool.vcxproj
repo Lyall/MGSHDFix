@@ -120,7 +120,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\wxWidgets\include;$(SolutionDir)external\wxWidgets\lib\vc_x64_lib\mswu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)external\wxWidgets\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxmsw33u_core.lib;wxbase33u.lib;wxpng.lib;wxjpeg.lib;wxtiff.lib;wxzlib.lib;wxregexu.lib;comctl32.lib;rpcrt4.lib;uxtheme.lib;oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -160,7 +160,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)external\wxWidgets\include;$(SolutionDir)external\wxWidgets\lib\vc_x64_lib\mswu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)external\wxWidgets\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxmsw33u_core.lib;wxbase33u.lib;wxpng.lib;wxjpeg.lib;wxtiff.lib;wxzlib.lib;wxregexu.lib;comctl32.lib;rpcrt4.lib;uxtheme.lib;oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>

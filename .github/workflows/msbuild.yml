@@ -50,10 +50,10 @@ jobs:
     - name: Add Loader License
       run: Invoke-WebRequest https://raw.githubusercontent.com/ThirteenAG/Ultimate-ASI-Loader/master/license -OutFile dist/UltimateASILoader_LICENSE.md
 
-    - name: Duplicate Loader DLLs
+    - name: Stage Loader DLLs
       run: |
         Copy-Item dist/dinput8.dll dist/wininet.dll
-        Copy-Item dist/dinput8.dll dist/winhttp.dll
+        Move-Item dist/dinput8.dll dist/winhttp.dll
 
     # Logs & metadata
     - run: Copy-Item README.md "dist/logs/${{ github.event.repository.name }}_Game.log"

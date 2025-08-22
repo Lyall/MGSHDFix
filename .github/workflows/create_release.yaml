@@ -3,11 +3,16 @@ name: Create Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: write
     steps:
     - uses: actions/checkout@v4
       with:
@@ -29,31 +34,47 @@ jobs:
 
         echo "version=$version" >> $GITHUB_OUTPUT
 
-    - name: setup-msbuild
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
-    - run: msbuild ${{ github.event.repository.name }}.sln -t:rebuild -verbosity:diag -property:Configuration=Release -property:Platform=x64
-    - run: cp x64\Release\${{ github.event.repository.name }}.asi ${{ github.event.repository.name }}.asi
+    - name: Build
+      run: msbuild "${{ github.event.repository.name }}.sln" -t:rebuild -verbosity:diag -property:Configuration=Release -property:Platform=x64
 
+    # Prepare output structure
+    - run: mkdir dist
+    - run: mkdir dist/plugins
+    - run: mkdir dist/logs
+
+    # Copy built binaries into plugins
+    - run: Copy-Item "x64\Release\${{ github.event.repository.name }}.asi" "dist/plugins/${{ github.event.repository.name }}.asi"
+    - run: Copy-Item "x64\Release\${{ github.event.repository.name }} Config Tool.exe" "dist/plugins/${{ github.event.repository.name }} Config Tool.exe"
+
+    # Download Ultimate ASI Loader
     - uses: robinraju/release-downloader@v1.8
       with:
         repository: "ThirteenAG/Ultimate-ASI-Loader"
         latest: true
         fileName: "Ultimate-ASI-Loader_x64.zip"
-    - run: unzip Ultimate-ASI-Loader_x64.zip -d .\
-    - run: C:\msys64\usr\bin\wget.exe -O .\UltimateASILoader_LICENSE.md https://raw.githubusercontent.com/ThirteenAG/Ultimate-ASI-Loader/master/license
-    - run: cp .\dinput8.dll .\wininet.dll
-    - run: mv .\dinput8.dll .\winhttp.dll
-    - run: mkdir .\logs
-    - run: cp .\README.md .\logs\${{ github.event.repository.name }}_Game.log
-    - run: cp .\README.md .\logs\${{ github.event.repository.name }}_Launcher.log    
-    - run: mkdir .\plugins
-    - run: mv .\README.md .\plugins\${{ github.event.repository.name }}_README.md
-    - run: mv .\${{ github.event.repository.name }}.ini .\plugins\${{ github.event.repository.name }}.ini
-    - run: mv .\${{ github.event.repository.name }}.asi .\plugins\${{ github.event.repository.name }}.asi
-    - run: 7z a -tzip ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip wininet.dll winhttp.dll UltimateASILoader_LICENSE.md
-    - run: 7z a ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip plugins\
-    - run: 7z a ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip logs\
+
+    - name: Extract Loader
+      run: Expand-Archive Ultimate-ASI-Loader_x64.zip -DestinationPath dist
+
+    - name: Add Loader License
+      run: Invoke-WebRequest https://raw.githubusercontent.com/ThirteenAG/Ultimate-ASI-Loader/master/license -OutFile dist/UltimateASILoader_LICENSE.md
+
+    - name: Stage Loader DLLs
+      run: |
+        Copy-Item dist/dinput8.dll dist/wininet.dll
+        Move-Item dist/dinput8.dll dist/winhttp.dll
+
+    # Logs & metadata
+    - run: Copy-Item README.md "dist/logs/${{ github.event.repository.name }}_Game.log"
+    - run: Copy-Item README.md "dist/logs/${{ github.event.repository.name }}_Launcher.log"
+    - run: Copy-Item README.md "dist/plugins/${{ github.event.repository.name }}_README.md"
+
+    # Package everything
+    - name: Create release zip
+      run: 7z a -tzip "${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip" dist\
 
     - uses: ncipollo/release-action@v1
       with:

@@ -170,13 +170,13 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { ConfigKeys::OverrideMouseSensitivity_Section, "",
-          "", "",
-          std::nullopt, false, Field::Spacer },
-
         { ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,
           Field::Int, 1, 1, 100 },
+
+        { ConfigKeys::OverrideMouseSensitivity_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
 
         { ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,

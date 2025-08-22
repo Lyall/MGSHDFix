@@ -24,7 +24,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Borderless/windowed mode.
 - Mouse cursor toggle.
 - Mouse sensitivity adjustment (MGS3).
-- Launcher skips (see ini to configure).
+- Launcher skips (see Config Tool to configure).
 - Skip intro logos (MGS2/MGS3).
 - Option to disable pausing on alt-tab.
 - Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/Lyall/MGSHDFix/pull/162)
@@ -61,7 +61,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 🚩 **If updating from a previous version of MGSHDFix:**
 - Delete `d3d11.dll` from your game folder.
-- Delete old MGSHDFix files (e.g., `MGSHDFix.ini` and `MGSHDFix.asi`) before installing the update.
+- Delete old MGSHDFix files (e.g., `MGSHDFix Config Tool.exe` and `MGSHDFix.asi`) before installing the update.
 
 ### Steps:
 1. Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
@@ -79,7 +79,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ### Configuration
 
-- See **MGSHDFix.ini** in the `/plugins` folder to adjust settings for the fix.
+- See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
 
 ## Known Issues
 Please report any issues you see.
@@ -130,3 +130,4 @@ Open MGSFPSUnlock.sln in Visual Studio (2022) and build.
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
 [safetyhook](https://github.com/cursey/safetyhook) for hooking.
+Universal Config Tool (made by ShizCalev/Afevis).
