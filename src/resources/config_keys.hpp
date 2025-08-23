@@ -291,7 +291,7 @@ namespace ConfigKeys
     constexpr const char* CheckForUpdates_Tooltip = "If MGSHDFix should notify you when launching the game if a new MGSHDFix update is available for download.";
 
     constexpr const char* UpdateConsoleNotifications_Section = "Update Notifications";
-    constexpr const char* UpdateConsoleNotifications_Setting = "Visible Notifications";
+    constexpr const char* UpdateConsoleNotifications_Setting = "In-Game Update Notifications";
     constexpr const char* UpdateConsoleNotifications_Help = "";
     constexpr const char* UpdateConsoleNotifications_Tooltip = "If you want a visible notification when starting the game if an MGSHDFix update is available.\n"
                                                                "Notifications will still be printed to the log file while disabled.";

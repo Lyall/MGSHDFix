@@ -42,11 +42,16 @@
 #include "helper.hpp"
 #include "version.h"
 #include "tab_data.hpp"
+#include "updater.hpp"
 
 constexpr int iWindowSizeX = 716;
 constexpr int iWindowSizeY = 680;
 constexpr const char* sSettingsFileName = "MGSHDFix.settings";
 constexpr bool bFullLengthFields = false; //if you want the boxes to span half the window's width.
+
+#define NEXUS_MG1_URL "https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9"
+#define NEXUS_MGS2_URL "https://www.nexusmods.com/metalgearsolid2mc/mods/49"
+#define NEXUS_MGS3_URL "https://www.nexusmods.com/metalgearsolid3mc/mods/139"
 
 // ---------------------------------------------------------------------------
 // Quote/unquote helpers for INI-safe string persistence
@@ -235,20 +240,24 @@ static size_t FindResourceSize(int resID, const wchar_t* resType)
 
 static int GetBannerResourceID()
 {
-    const std::filesystem::path exePath = wxGetCwd().ToStdString();
+    std::filesystem::path exePath = wxGetCwd().ToStdString();
+    exePath = exePath.parent_path();
     if (std::filesystem::exists(exePath / "METAL GEAR.exe"))
     {
+        iTargetGame = TARGET_GAME_MG1;
         return IDB_BANNER_MG1;
     }
     if (std::filesystem::exists(exePath / "METAL GEAR SOLID2.exe"))
     {
+        iTargetGame = TARGET_GAME_MGS2;
         return IDB_BANNER_MGS2;
     }
     if (std::filesystem::exists(exePath / "METAL GEAR SOLID3.exe"))
     {
+        iTargetGame = TARGET_GAME_MGS3; 
         return IDB_BANNER_MGS3;
     }
-    wxLogError("Unable to find any known Master Collection games in %s", wxGetCwd());
+    wxLogError("Unable to find any known Master Collection games in %s", exePath.string());
 
     return IDB_BANNER_MG1;
 }
@@ -294,7 +303,7 @@ class ConfigFrame : public wxFrame
 {
 public:
     ConfigFrame()
-        : wxFrame(nullptr, wxID_ANY, FIX_NAME " - Universal Config Tool",
+        : wxFrame(nullptr, wxID_ANY, FIX_NAME " v" VERSION_STRING " - Universal Config Tool",
             wxDefaultPosition, wxSize(iWindowSizeX, iWindowSizeY),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
     {
@@ -583,9 +592,10 @@ public:
         banner->SetCursor(wxCursor(wxCURSOR_HAND));
         banner->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent&)
             {
-#ifdef PRIMARY_REPO_URL
-                wxLaunchDefaultBrowser(PRIMARY_REPO_URL);
-#endif
+                wxLaunchDefaultBrowser(iTargetGame == TARGET_GAME_MG1 ? NEXUS_MG1_URL :
+                                        iTargetGame == TARGET_GAME_MGS2 ? NEXUS_MGS2_URL :
+                                        iTargetGame == TARGET_GAME_MGS3 ? NEXUS_MGS3_URL :
+                                        PRIMARY_REPO_URL);
             });
         mainSizer->Add(banner, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 0);
 
@@ -622,7 +632,70 @@ public:
         resetBtn->Bind(wxEVT_BUTTON, &ConfigFrame::OnResetDefaults, this);
 
         ApplyPrerequisites();
+        HandleUpdateCheckPreference();
     }
+
+    void HandleUpdateCheckPreference()
+    {
+        const wxString section = ConfigKeys::CheckForUpdates_Section;
+        const wxString key = ConfigKeys::CheckForUpdates_Setting;
+        const wxString path = section + "/" + key;
+
+        bool hasValue = m_conf->HasEntry(path);
+        long v = 0;
+        if (hasValue)
+        {
+            m_conf->Read(path, &v);
+        }
+
+        const bool shouldPrompt = m_firstRun || !hasValue;
+        if (shouldPrompt)
+        {
+            wxMessageDialog dlg(
+                this,
+                "Do you want to enable automatic update checks?\n\n"
+                "You can change this later in the settings.",
+                "MGSHDFix - Universal Config Tool",
+                wxYES_NO | wxICON_QUESTION
+            );
+            dlg.SetYesNoLabels("Enable", "Disable");
+
+            const bool enable = (dlg.ShowModal() == wxID_YES);
+
+            m_conf->Write(path, enable ? "1" : "0");
+
+            if (auto it = m_controls.find({ section, key }); it != m_controls.end())
+            {
+                if (auto* cb = wxDynamicCast(it->second, wxCheckBox))
+                {
+                    cb->SetValue(enable);
+                }
+            }
+
+            if (!enable || !hasValue)
+            {
+                m_dirty = true;
+            }
+
+            v = enable ? 1 : 0;
+            hasValue = true; 
+            ApplyPrerequisites();
+        }
+
+        wxLogDebug("Update check setting: %s (value=%ld)", hasValue ? "exists" : "missing", v);
+
+        if (hasValue && v == 0)
+        {
+            return;
+        }
+
+        if (v != 0)
+        {
+            CheckForUpdates();
+        }
+    }
+
+
 
 private:
     bool m_dirty = false;
@@ -797,7 +870,7 @@ private:
         }
 
         std::filesystem::path exePath = wxGetCwd().ToStdString();
-        exePath /= "launcher.exe";
+        exePath = exePath.parent_path() / "launcher.exe";
 
         if (std::filesystem::exists(exePath))
         {

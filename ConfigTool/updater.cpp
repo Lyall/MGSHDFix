@@ -1,19 +1,26 @@
-#include "common.hpp"
-#include "version_checking.hpp"
+#include "updater.hpp"
 
-#include "logging.hpp"
+#include <wx/wx.h>
 
-
-// MIRROR SYNC WITH THE CONFIG TOOL'S UPDATER.CPP
+#include "wx/filefn.h"
+#include "wx/log.h"
 
 void CheckForUpdates()
 {
-    if (!bShouldCheckForUpdates)
+    if (!iTargetGame)
     {
-        spdlog::info("Mod update checking disabled via config.");
+        wxLogError("Update Checker: Unable to detect valid Master Collection game in parent folder.");
         return;
     }
-    std::filesystem::path cacheFilePath = sGameSavePath / (sFixName + "_version_check.txt");
+
+    std::filesystem::path base = std::filesystem::path(wxGetCwd().ToStdWstring());
+
+    std::string saveDir =
+        (iTargetGame == TARGET_GAME_MG1) ? "mg12_savedata_win" :
+        (iTargetGame == TARGET_GAME_MGS2) ? "mgs2_savedata_win" :
+        "mgs3_savedata_win";
+    std::filesystem::path cacheFilePath = base.parent_path() / saveDir / (sFixName + "_version_check.txt");
+    wxLogDebug("Update Checker: Using cache file path: %s", cacheFilePath.string());
     LatestVersionChecker checker(cacheFilePath);
     checker.checkForUpdates();
 }
@@ -28,7 +35,7 @@ LatestVersionChecker::LatestVersionChecker(const std::filesystem::path& cacheFil
 
 bool LatestVersionChecker::checkForUpdates()
 {
-    spdlog::error("Update Checker called but no repository URLs are defined (PRIMARY_REPO_URL and FALLBACK_REPO_URL missing).");
+    wxLogError("Update Checker called but no repository URLs are defined (PRIMARY_REPO_URL and FALLBACK_REPO_URL missing).");
     throw std::invalid_argument("Update Checker called but no repository URLs are defined (PRIMARY_REPO_URL and FALLBACK_REPO_URL missing).");
 }
 
@@ -95,7 +102,7 @@ bool LatestVersionChecker::checkForUpdates()
 #if defined(PRIMARY_REPO_URL)
         {
             RepoInfo repoInfo = parseRepoUrl(PRIMARY_REPO_URL);
-            spdlog::info("Version Check: No cache found. Contacting {} API for latest version.", repoInfo.displayName);
+            wxLogDebug("Version Check: No cache found. Contacting %s API for latest version.", repoInfo.displayName);
             attemptedProviders.push_back(repoInfo.displayName);
 
             if (queryLatestVersion(repoInfo, cachedLatest))
@@ -108,7 +115,7 @@ bool LatestVersionChecker::checkForUpdates()
     if (!didCheck)
     {
         RepoInfo repoInfo = parseRepoUrl(FALLBACK_REPO_URL);
-        spdlog::info("Version Check: Primary API failed or missing. Trying fallback {}.", repoInfo.displayName);
+        wxLogDebug("Version Check: Primary API failed or missing. Trying fallback %s.", repoInfo.displayName);
         attemptedProviders.push_back(repoInfo.displayName);
 
         if (queryLatestVersion(repoInfo, cachedLatest))
@@ -119,7 +126,7 @@ bool LatestVersionChecker::checkForUpdates()
 #endif
     if (!didCheck)
     {
-        spdlog::info("Version Check: Unable to contact Repo API. Skipping version check.");
+        wxLogError("Version Check: Unable to contact Repo API. Skipping version check.");
         ShowUpdateContactFailure(attemptedProviders);
         return false;
     }
@@ -131,7 +138,7 @@ bool LatestVersionChecker::checkForUpdates()
 #if defined(PRIMARY_REPO_URL)
         {
             RepoInfo primaryRepoInfo = parseRepoUrl(PRIMARY_REPO_URL);
-            spdlog::info("Version Check: Cache stale. Refreshing from {} API.", primaryRepoInfo.displayName);
+            wxLogDebug("Version Check: Cache stale. Refreshing from %s API.", primaryRepoInfo.displayName);
             attemptedProviders.push_back(primaryRepoInfo.displayName);
 
             std::string latestFromApi;
@@ -145,50 +152,52 @@ bool LatestVersionChecker::checkForUpdates()
 #endif
 
 #if defined(FALLBACK_REPO_URL)
-        if (!didCheck)
-        {
-            RepoInfo fallbackRepoInfo = parseRepoUrl(FALLBACK_REPO_URL);
-            spdlog::info("Version Check: Primary API failed or missing on stale cache. Trying fallback {}.", fallbackRepoInfo.displayName);
-            attemptedProviders.push_back(fallbackRepoInfo.displayName);
+    if (!didCheck)
+    {
+        RepoInfo fallbackRepoInfo = parseRepoUrl(FALLBACK_REPO_URL);
+        wxLogDebug("Version Check: Primary API failed or missing on stale cache. Trying fallback %s.", fallbackRepoInfo.displayName);
+        attemptedProviders.push_back(fallbackRepoInfo.displayName);
 
-            std::string latestFromFallback;
-            if (queryLatestVersion(fallbackRepoInfo, latestFromFallback))
-            {
-                cachedLatest = latestFromFallback;
-                saveCache(cachedLatest, warnedVersion);
-                didCheck = true;
-            }
-        }
-    #endif
-
-        if (!didCheck)
+        std::string latestFromFallback;
+        if (queryLatestVersion(fallbackRepoInfo, latestFromFallback))
         {
-            spdlog::info("Version Check: Unable to contact Repo API on stale cache. Skipping version check.");
-            ShowUpdateContactFailure(attemptedProviders);
-            return false;
+            cachedLatest = latestFromFallback;
+            saveCache(cachedLatest, warnedVersion);
+            didCheck = true;
         }
+    }
+#endif
+
+    if (!didCheck)
+    {
+        wxLogError("Version Check: Unable to contact Repo API on stale cache. Skipping version check.");
+        ShowUpdateContactFailure(attemptedProviders);
+        return false;
+    }
     }
     else
     {
-        spdlog::info("Version Check: Under {} hours since last update check. Skipping update check.", iCacheTTLHours);
+        wxLogDebug("Version Check: Under %i hours since last update check. Skipping update check.", iCacheTTLHours);
     }
 
     const int cmp = compareSemVer(VERSION_STRING, cachedLatest);
 
     if (cmp < 0)
     {
-        spdlog::warn("Version Check: A new version of {} is available.", FIX_NAME);
-        spdlog::warn("Version Check - Current Version: {}, Latest Version: {}", VERSION_STRING, cachedLatest);
+        wxLogDebug("Version Check: A new version of %s is available.", FIX_NAME);
+        wxLogDebug("Version Check - Current Version: %s, Latest Version: %s", VERSION_STRING, cachedLatest);
 
         if (warnedVersion != cachedLatest)
         {
-            if (bConsoleUpdateNotifications)
-            {
-                Logging::ShowConsole();
-                std::cout << FIX_NAME << " Update Notice: New version of " << FIX_NAME
-                    << " is available.\nCurrent Version: " << VERSION_STRING
-                    << ", Latest Version: " << cachedLatest << std::endl;
-            }
+
+            std::string message = "A new version of " + std::string(FIX_NAME) + " is available!\n\n"
+                "Current Version: " + std::string(VERSION_STRING) + "\n"
+                "Latest Version: " + cachedLatest + "\n\n"
+                "Click the banner at the top of the window to\n"
+                "open the " FIX_NAME " Nexus page.\n"
+                                     "\n"
+                                     "(This notification will be silenced for 24 hours.)";
+            wxLogMessage(message);
             saveCache(cachedLatest, cachedLatest);
             return true;
         }
@@ -196,12 +205,12 @@ bool LatestVersionChecker::checkForUpdates()
     }
     else if (cmp > 0)
     {
-        spdlog::info("Version Check: Welcome back, Commander! You are running a development build of {}!", FIX_NAME);
-        spdlog::info("Version Check - Current Version: {}, Latest Release: {}", VERSION_STRING, cachedLatest);
+        wxLogDebug("Version Check: Welcome back, Commander! You are running a development build of %s!", FIX_NAME);
+        wxLogDebug("Version Check - Current Version: %s, Latest Release: %s", VERSION_STRING, cachedLatest);
         return false;
     }
 
-    spdlog::info("Version Check: {} is up to date.", FIX_NAME);
+    wxLogDebug("Version Check: %s is up to date.", FIX_NAME);
     return false;
 }
 
@@ -259,7 +268,7 @@ LatestVersionChecker::RepoInfo LatestVersionChecker::parseRepoUrl(const std::str
 
     if (!std::regex_match(url, m, re))
     {
-        spdlog::error("Version Check: Invalid repository URL format: {}", url);
+        wxLogError("Version Check: Invalid repository URL format: %s", url);
         throw std::invalid_argument("Invalid repository URL: " + url);
     }
 
@@ -293,7 +302,7 @@ LatestVersionChecker::RepoInfo LatestVersionChecker::parseRepoUrl(const std::str
     }
     else
     {
-        spdlog::error("Version Check: Unsupported host: {}", host);
+        wxLogError("Version Check: Unsupported host: %s", host);
         throw std::invalid_argument("Unsupported host: " + host);
     }
 
@@ -302,7 +311,7 @@ LatestVersionChecker::RepoInfo LatestVersionChecker::parseRepoUrl(const std::str
 
 bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::string& latestVersion)
 {
-    spdlog::info("Version Check: Contacting {} API...", repoInfo.displayName);
+    wxLogDebug("Version Check: Contacting %s API...", repoInfo.displayName);
 
     HINTERNET hSession = WinHttpOpen(
         buildUserAgent().c_str(),
@@ -313,7 +322,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hSession)
     {
-        spdlog::error("Version Check: WinHttpOpen failed with error: {}", GetLastError());
+        wxLogError("Version Check: WinHttpOpen failed with error: %s", GetLastError());
         return false;
     }
 
@@ -332,7 +341,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hConnect)
     {
-        spdlog::error("Version Check: WinHttpConnect failed with error: {}", GetLastError());
+        wxLogError("Version Check: WinHttpConnect failed with error: %s", GetLastError());
         WinHttpCloseHandle(hSession);
         return false;
     }
@@ -348,7 +357,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hRequest)
     {
-        spdlog::error("Version Check: WinHttpOpenRequest failed with error: {}", GetLastError());
+        wxLogError("Version Check: WinHttpOpenRequest failed with error: %s", GetLastError());
         WinHttpCloseHandle(hConnect);
         WinHttpCloseHandle(hSession);
         return false;
@@ -358,7 +367,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
     std::wstring userAgentHeader = L"User-Agent: " + buildUserAgent();
     if (!WinHttpAddRequestHeaders(hRequest, userAgentHeader.c_str(), (DWORD)-1, WINHTTP_ADDREQ_FLAG_ADD))
     {
-        spdlog::error("Version Check: WinHttpAddRequestHeaders failed with error: {}", GetLastError());
+        wxLogError("Version Check: WinHttpAddRequestHeaders failed with error: %s", GetLastError());
         WinHttpCloseHandle(hRequest);
         WinHttpCloseHandle(hConnect);
         WinHttpCloseHandle(hSession);
@@ -380,7 +389,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
         {
             if (statusCode < 200 || statusCode >= 300)
             {
-                spdlog::error("Version Check: {} responded with HTTP {}", repoInfo.displayName, statusCode);
+                wxLogError("Version Check: %s responded with HTTP %s", repoInfo.displayName, statusCode);
                 WinHttpCloseHandle(hRequest);
                 WinHttpCloseHandle(hConnect);
                 WinHttpCloseHandle(hSession);
@@ -394,7 +403,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
             DWORD downloaded = 0;
             if (!WinHttpQueryDataAvailable(hRequest, &avail))
             {
-                spdlog::error("Version Check: WinHttpQueryDataAvailable failed with error: {}", GetLastError());
+                wxLogError("Version Check: WinHttpQueryDataAvailable failed with error: %s", GetLastError());
                 break;
             }
             if (!avail)
@@ -405,7 +414,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
             std::string buffer(avail, 0);
             if (!WinHttpReadData(hRequest, &buffer[0], avail, &downloaded))
             {
-                spdlog::error("Version Check: WinHttpReadData failed with error: {}", GetLastError());
+                wxLogError("Version Check: WinHttpReadData failed with error: %s", GetLastError());
                 break;
             }
             response.append(buffer, 0, downloaded);
@@ -413,7 +422,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
     }
     else
     {
-        spdlog::error("Version Check: WinHttpSendRequest or WinHttpReceiveResponse failed with error: {}", GetLastError());
+        wxLogError("Version Check: WinHttpSendRequest or WinHttpReceiveResponse failed with error: %s", GetLastError());
     }
 
     WinHttpCloseHandle(hRequest);
