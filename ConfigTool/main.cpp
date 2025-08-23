@@ -294,7 +294,7 @@ class ConfigFrame : public wxFrame
 {
 public:
     ConfigFrame()
-        : wxFrame(nullptr, wxID_ANY, "MGSHDFix Settings",
+        : wxFrame(nullptr, wxID_ANY, FIX_NAME " - Universal Config Tool",
             wxDefaultPosition, wxSize(iWindowSizeX, iWindowSizeY),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
     {
@@ -305,6 +305,10 @@ public:
         SendMessage(hwnd, WM_SETICON, ICON_SMALL, 0);
         SendMessage(hwnd, WM_SETICON, ICON_BIG, 0);
 
+        if (!std::filesystem::exists(std::filesystem::path(m_iniPath.ToStdWstring())))
+        {
+            m_firstRun = true;
+        }
         m_conf = new wxFileConfig("", "", m_iniPath, "", wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_NO_ESCAPE_CHARACTERS);
 
         m_tabs = new wxNotebook(this, wxID_ANY);
@@ -351,6 +355,10 @@ public:
                 case Field::Bool:
                 {
                     bool v = field.defaultInt != 0;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
                     m_conf->Read(path, &v);
 
                     auto* cb = new wxCheckBox(sectionSizer->GetStaticBox(), wxID_ANY, "");
@@ -372,6 +380,10 @@ public:
                 case Field::Int:
                 {
                     int v = field.defaultInt;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
                     m_conf->Read(path, &v);
 
                     if (int clamped = std::clamp(v, field.minInt, field.maxInt); clamped != v)
@@ -396,6 +408,10 @@ public:
                 case Field::Str:
                 {
                     wxString v = field.defaultString;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
                     ctrl = new wxTextCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
@@ -404,6 +420,10 @@ public:
                 case Field::Choice:
                 {
                     wxString v = field.defaultString;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
 
@@ -439,6 +459,10 @@ public:
                 case Field::Hotkey:
                 {
                     wxString v = field.defaultString;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
@@ -580,6 +604,9 @@ public:
 
 private:
     bool m_dirty = false;
+    bool m_firstRun = false;
+    bool m_missingKeys = false;
+
     wxNotebook* m_tabs = nullptr;
     void MarkDirty(wxEvent& e)
     {
@@ -701,12 +728,30 @@ private:
 
     void OnSaveAndLaunch(wxCommandEvent& event)
     {
-
-        if (m_dirty)
+        if (m_dirty || m_firstRun || m_missingKeys)
         {
+            wxString message;
+            if (m_firstRun)
+            {
+                message =
+                    "This appears to be your first time running the config tool.\n\n"
+                    "You must save your settings before starting the game.";
+            }
+            else if (m_missingKeys)
+            {
+                message =
+                    "Some settings were missing from your config file.\n\n"
+                    "You must save your settings before starting the game.";
+            }
+            else
+            {
+                message =
+                    "You have unsaved changes.\n\n"
+                    "Do you want to save them before launching the game?";
+            }
             wxMessageDialog dlg(
                 this,
-                "You have unsaved changes. Do you want to save them before launching the game?",
+                message,
                 "Unsaved Changes",
                 wxYES_NO | wxCANCEL | wxICON_WARNING
             );
@@ -716,13 +761,14 @@ private:
             if (choice == wxID_YES)
             {
                 wxCommandEvent dummy;
-                OnSave(dummy); // save before launching
+                OnSave(dummy);
             }
             else if (choice == wxID_NO)
             {
                 m_dirty = false;
+                m_firstRun = false; // discarding counts as acknowledging first-run
             }
-            else 
+            else
             {
                 return;
             }
@@ -740,18 +786,37 @@ private:
             wxLogError("Launcher.exe not found in %s", wxGetCwd());
         }
         Close();
-        
     }
+
 
 
 
     void OnClose(wxCloseEvent& event)
     {
-        if (m_dirty)
+        if (m_dirty || m_firstRun || m_missingKeys)
         {
+            wxString message;
+            if (m_firstRun)
+            {
+                message =
+                    "This appears to be your first time running the config tool.\n\n"
+                    "You must save your settings before starting the game.";
+            }
+            else if (m_missingKeys)
+            {
+                message =
+                    "Some settings were missing from your config file.\n\n"
+                    "You must save your settings before starting the game.";
+            }
+            else
+            {
+                message =
+                    "You have unsaved changes.\n\n"
+                    "What would you like to do?";
+            }
             wxMessageDialog dlg(
                 this,
-                "You have unsaved changes. What would you like to do?",
+                message,
                 "Unsaved Changes",
                 wxYES_NO | wxCANCEL | wxICON_WARNING
             );
@@ -762,23 +827,24 @@ private:
             {
                 wxCommandEvent dummy;
                 OnSave(dummy);
-                event.Skip(); // continue closing
+                event.Skip();
                 return;
             }
             else if (choice == wxID_NO)
             {
-                event.Skip(); // close without saving
+                event.Skip();
                 return;
             }
-            else // Cancel
+            else
             {
-                event.Veto(); // abort close
+                event.Veto();
                 return;
             }
         }
 
-        event.Skip(); // no changes, just close
+        event.Skip();
     }
+
 
     void ApplyPrerequisites()
     {
@@ -819,6 +885,10 @@ private:
                                 {
                                 case Field::Bool:
                                     boolVal = field.defaultInt != 0;
+                                    if (!m_conf->HasEntry(path))
+                                    {
+                                        m_missingKeys = true;
+                                    }
                                     m_conf->Read(path, &boolVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxCheckBox))
                                         c->SetValue(boolVal);
@@ -826,6 +896,10 @@ private:
 
                                 case Field::Int:
                                     intVal = field.defaultInt;
+                                    if (!m_conf->HasEntry(path))
+                                    {
+                                        m_missingKeys = true;
+                                    }
                                     m_conf->Read(path, &intVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxSpinCtrl))
                                         c->SetValue(intVal);
@@ -834,6 +908,10 @@ private:
                                 case Field::Str:
                                 case Field::Hotkey:
                                     strVal = field.defaultString;
+                                    if (!m_conf->HasEntry(path))
+                                    {
+                                        m_missingKeys = true;
+                                    }
                                     m_conf->Read(path, &strVal);
                                     strVal = Unquote(strVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
@@ -842,6 +920,10 @@ private:
 
                                 case Field::Choice:
                                     strVal = field.defaultString;
+                                    if (!m_conf->HasEntry(path))
+                                    {
+                                        m_missingKeys = true;
+                                    }
                                     m_conf->Read(path, &strVal);
                                     strVal = Unquote(strVal);
                                     if (auto* c = wxDynamicCast(ctrl, wxChoice))
@@ -892,6 +974,8 @@ private:
         }
 
         m_dirty = false;
+        m_firstRun = false;
+        m_missingKeys = false;
         Close();
     }
 
