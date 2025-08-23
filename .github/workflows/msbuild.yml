@@ -75,6 +75,7 @@ jobs:
     - run: Copy-Item README.md "dist/logs/${{ github.event.repository.name }}_Game.log"
     - run: Copy-Item README.md "dist/logs/${{ github.event.repository.name }}_Launcher.log"
     - run: Copy-Item README.md "dist/plugins/${{ github.event.repository.name }}_README.md"
+    - run: Copy-Item LICENSE.md "dist/plugins/${{ github.event.repository.name }}_LICENSE.md"
 
     # Package everything
     - name: Create release zip
