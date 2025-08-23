@@ -307,11 +307,11 @@ public:
 
         m_conf = new wxFileConfig("", "", m_iniPath, "", wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_NO_ESCAPE_CHARACTERS);
 
-        wxNotebook* tabs = new wxNotebook(this, wxID_ANY);
+        m_tabs = new wxNotebook(this, wxID_ANY);
 
         for (auto& tab : kTabs)
         {
-            wxPanel* panel = new wxPanel(tabs);
+            wxPanel* panel = new wxPanel(m_tabs);
             wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
             wxString currentSection;
             wxStaticBoxSizer* sectionSizer = nullptr;
@@ -527,7 +527,7 @@ public:
             }
 
             panel->SetSizer(vbox);
-            tabs->AddPage(panel, tab.first, false);
+            m_tabs->AddPage(panel, tab.first, false);
         }
 
         wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -543,10 +543,15 @@ public:
             });
         mainSizer->Add(banner, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 0);
 
-        mainSizer->Add(tabs, 1, wxEXPAND | wxALL, 5);
+        mainSizer->Add(m_tabs, 1, wxEXPAND | wxALL, 5);
 
         wxBoxSizer* btnSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        auto* resetBtn = new wxButton(this, wxID_ANY, "Reset to Defaults");
+        btnSizer->Add(resetBtn, 0, wxRIGHT, 5);
+
         btnSizer->AddStretchSpacer();
+
         auto* LaunchBtn = new wxButton(this, wxID_ANY, "Launch Game");
         auto* saveBtn = new wxButton(this, wxID_SAVE, "Save and Exit");
         auto* exitBtn = new wxButton(this, wxID_EXIT, "Exit");
@@ -554,6 +559,7 @@ public:
         btnSizer->Add(LaunchBtn, 0, wxRIGHT, 5);
         btnSizer->Add(saveBtn, 0, wxRIGHT, 5);
         btnSizer->Add(exitBtn, 0);
+
         mainSizer->Add(btnSizer, 0, wxEXPAND | wxALL, 5);
 
 
@@ -567,17 +573,110 @@ public:
                 Close();
             }, wxID_EXIT);
         LaunchBtn->Bind(wxEVT_BUTTON, &ConfigFrame::OnSaveAndLaunch, this);
+        resetBtn->Bind(wxEVT_BUTTON, &ConfigFrame::OnResetDefaults, this);
 
         ApplyPrerequisites();
     }
 
 private:
     bool m_dirty = false;
-
+    wxNotebook* m_tabs = nullptr;
     void MarkDirty(wxEvent& e)
     {
         m_dirty = true;
         e.Skip();
+    }
+
+    int FindFocusTab()
+    {
+        if (m_tabs)
+            return m_tabs->GetSelection();
+        return -1;
+    }
+
+
+    void ResetTabToDefaults(int tabIndex)
+    {
+        if (tabIndex < 0 || tabIndex >= (int)kTabs.size())
+            return;
+
+        auto& fields = kTabs[tabIndex].second;
+
+        for (auto& field : fields)
+        {
+            auto it = m_controls.find({ field.section, field.key });
+            if (it == m_controls.end())
+                continue;
+
+            wxWindow* ctrl = it->second;
+            switch (field.type)
+            {
+            case Field::Bool:
+                if (auto* c = wxDynamicCast(ctrl, wxCheckBox))
+                    c->SetValue(field.defaultInt != 0);
+                break;
+
+            case Field::Int:
+                if (auto* c = wxDynamicCast(ctrl, wxSpinCtrl))
+                    c->SetValue(field.defaultInt);
+                break;
+
+            case Field::Str:
+            case Field::Hotkey:
+                if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
+                    c->SetValue(field.defaultString);
+                break;
+
+            case Field::Choice:
+                if (auto* c = wxDynamicCast(ctrl, wxChoice))
+                {
+                    int idx = c->FindString(field.defaultString);
+                    if (idx != wxNOT_FOUND)
+                        c->SetSelection(idx);
+                    else if (!field.choices.empty())
+                        c->SetSelection(0);
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        ApplyPrerequisites(); // <- make sure dependent fields refresh
+    }
+
+
+
+    void OnResetDefaults(wxCommandEvent&)
+    {
+        wxMessageDialog dlg(
+            this,
+            "Do you want to reset just this tab, or all tabs, to their default values?",
+            "Reset to Defaults",
+            wxYES_NO | wxCANCEL | wxICON_WARNING
+        );
+        dlg.SetYesNoCancelLabels("Reset Tab", "Reset All", "Cancel");
+
+        int choice = dlg.ShowModal();
+
+        if (choice == wxID_YES) // Reset Tab
+        {
+            int sel = FindFocusTab();
+            if (sel >= 0)
+                ResetTabToDefaults(sel);
+        }
+        else if (choice == wxID_NO) // Reset All
+        {
+            for (size_t i = 0; i < kTabs.size(); ++i)
+                ResetTabToDefaults((int)i);
+        }
+        else
+        {
+            return; // Cancel
+        }
+
+        m_dirty = true;
     }
 
     void OnSaveAndLaunch(wxCommandEvent& event)
