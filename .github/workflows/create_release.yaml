@@ -63,7 +63,7 @@ jobs:
 
     # Copy built binaries into plugins
     - run: Copy-Item "x64\Release\${{ github.event.repository.name }}.asi" "dist/plugins/${{ github.event.repository.name }}.asi"
-    - run: Copy-Item "x64\Release\${{ github.event.repository.name }} Config Tool.exe" "dist/plugins/${{ github.event.repository.name }} Config Tool.exe"
+    - run: Copy-Item "x64\Release\${{ github.event.repository.name }} Config Tool.exe" "dist/${{ github.event.repository.name }} Config Tool.exe"
 
     # Download Ultimate ASI Loader
     - uses: robinraju/release-downloader@v1.8

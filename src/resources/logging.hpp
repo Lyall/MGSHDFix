@@ -1,7 +1,6 @@
 #pragma once
 #include <spdlog/spdlog.h>
 #include <chrono>
-#include <filesystem>
 
 class Logging final
 {

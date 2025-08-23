@@ -39,6 +39,7 @@
 #include <filesystem>
 #include <windows.h>
 
+#include "helper.hpp"
 #include "version.h"
 #include "tab_data.hpp"
 
@@ -235,20 +236,19 @@ static size_t FindResourceSize(int resID, const wchar_t* resType)
 static int GetBannerResourceID()
 {
     const std::filesystem::path exePath = wxGetCwd().ToStdString();
-    const std::filesystem::path parentPath = exePath.parent_path();
-
-    if (std::filesystem::exists(parentPath / "METAL GEAR.exe"))
+    if (std::filesystem::exists(exePath / "METAL GEAR.exe"))
     {
         return IDB_BANNER_MG1;
     }
-    if (std::filesystem::exists(parentPath / "METAL GEAR SOLID2.exe"))
+    if (std::filesystem::exists(exePath / "METAL GEAR SOLID2.exe"))
     {
         return IDB_BANNER_MGS2;
     }
-    if (std::filesystem::exists(parentPath / "METAL GEAR SOLID3.exe"))
+    if (std::filesystem::exists(exePath / "METAL GEAR SOLID3.exe"))
     {
         return IDB_BANNER_MGS3;
     }
+    wxLogError("Unable to find any known Master Collection games in %s", wxGetCwd());
 
     return IDB_BANNER_MG1;
 }
@@ -547,11 +547,15 @@ public:
 
         wxBoxSizer* btnSizer = new wxBoxSizer(wxHORIZONTAL);
         btnSizer->AddStretchSpacer();
-        auto* saveBtn = new wxButton(this, wxID_SAVE, "Save");
+        auto* LaunchBtn = new wxButton(this, wxID_ANY, "Launch Game");
+        auto* saveBtn = new wxButton(this, wxID_SAVE, "Save and Exit");
         auto* exitBtn = new wxButton(this, wxID_EXIT, "Exit");
+
+        btnSizer->Add(LaunchBtn, 0, wxRIGHT, 5);
         btnSizer->Add(saveBtn, 0, wxRIGHT, 5);
         btnSizer->Add(exitBtn, 0);
         mainSizer->Add(btnSizer, 0, wxEXPAND | wxALL, 5);
+
 
         SetSizer(mainSizer);
         Bind(wxEVT_CLOSE_WINDOW, &ConfigFrame::OnClose, this);
@@ -562,6 +566,7 @@ public:
             {
                 Close();
             }, wxID_EXIT);
+        LaunchBtn->Bind(wxEVT_BUTTON, &ConfigFrame::OnSaveAndLaunch, this);
 
         ApplyPrerequisites();
     }
@@ -574,6 +579,52 @@ private:
         m_dirty = true;
         e.Skip();
     }
+
+    void OnSaveAndLaunch(wxCommandEvent& event)
+    {
+
+        if (m_dirty)
+        {
+            wxMessageDialog dlg(
+                this,
+                "You have unsaved changes. Do you want to save them before launching the game?",
+                "Unsaved Changes",
+                wxYES_NO | wxCANCEL | wxICON_WARNING
+            );
+            dlg.SetYesNoCancelLabels("Save", "Discard", "Cancel");
+
+            int choice = dlg.ShowModal();
+            if (choice == wxID_YES)
+            {
+                wxCommandEvent dummy;
+                OnSave(dummy); // save before launching
+            }
+            else if (choice == wxID_NO)
+            {
+                m_dirty = false;
+            }
+            else 
+            {
+                return;
+            }
+        }
+
+        std::filesystem::path exePath = wxGetCwd().ToStdString();
+        exePath /= "launcher.exe";
+
+        if (std::filesystem::exists(exePath))
+        {
+            wxExecute(exePath.string());
+        }
+        else
+        {
+            wxLogError("Launcher.exe not found in %s", wxGetCwd());
+        }
+        Close();
+        
+    }
+
+
 
     void OnClose(wxCloseEvent& event)
     {
@@ -727,8 +778,7 @@ private:
 
 
     wxFileConfig* m_conf;
-    wxString m_iniPath = wxGetCwd() + "\\" + sSettingsFileName;
-
+    wxString m_iniPath = wxString((Helper::FindASILocation(sFixName) / sSettingsFileName).wstring());
     using Key = std::pair<wxString, wxString>;
     struct KeyHash
     {
