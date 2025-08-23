@@ -204,6 +204,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, ConfigKeys::VerboseLogging_Help, ConfigKeys::VerboseLogging_Tooltip,
-          std::nullopt, false, Field::Bool, false }
+          std::nullopt, false, Field::Bool, false },
+
+        {"About", "", "", "", std::nullopt, false, Field::Spacer},
+
     }}
 };

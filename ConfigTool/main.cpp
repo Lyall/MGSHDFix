@@ -334,6 +334,28 @@ public:
                     vbox->Add(sectionSizer, 0, wxEXPAND | wxALL, 5);
                 }
 
+                if (field.section == "About")
+                {
+                    wxBoxSizer* aboutSizer = new wxBoxSizer(wxVERTICAL);
+
+                    auto* aboutText = new wxStaticText(
+                        sectionSizer->GetStaticBox(),
+                        wxID_ANY,
+                        "Universal Config Tool, licensed under MIT.\n" //Do not remove this notice.
+                        "     Created by Afevis.\n"                            //Do not remove this notice.
+                        "\n"
+                        "MGSHDFix, licensed under MIT.\n"
+                        "     Originally created by Lyall.\n"
+                        "     Maintained by Afevis (aka ShizCalev.)\n"
+                        "     Additional contributions by Emoose, Cipherxof (aka TriggerHappy), Bud11, and Zenf0."
+                    );
+                    aboutSizer->Add(aboutText, 0, wxALL, 5);
+
+                    sectionSizer->Add(aboutSizer, 0, wxEXPAND | wxALL, 5);
+                    continue; // skip normal control creation
+                }
+
+
                 // Label + optional help stacked vertically
                 wxBoxSizer* labelBox = new wxBoxSizer(wxVERTICAL);
                 labelBox->Add(new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.key),
@@ -391,7 +413,7 @@ public:
                         wxLogWarning("Out-of-range value %d for [%s/%s], clamped to %d",
                             v, field.section, field.key, clamped);
                         v = clamped;
-                        m_dirty = true;
+                        m_missingKeys = true;
                     }
 
 
