@@ -99,7 +99,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
 
         { ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, ConfigKeys::AnisotropicFiltering_Help, ConfigKeys::AnisotropicFiltering_Tooltip,
-          std::nullopt, false, Field::Int, 16, 0, D3D11_DEFAULT_MAX_ANISOTROPY },
+          std::make_pair(ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting), true, Field::Int, 16, 0, D3D11_DEFAULT_MAX_ANISOTROPY},
 
         { ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, ConfigKeys::DisableTextureFiltering_Help, ConfigKeys::DisableTextureFiltering_Tooltip,
           std::nullopt, false, Field::Bool, false },
@@ -198,7 +198,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, ConfigKeys::UpdateConsoleNotifications_Help, ConfigKeys::UpdateConsoleNotifications_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+          std::make_pair(ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting), false, Field::Bool, true},
 
         { ConfigKeys::MuteWarning_Section, ConfigKeys::MuteWarning_Setting, ConfigKeys::MuteWarning_Help, ConfigKeys::MuteWarning_Tooltip,
           std::nullopt, false, Field::Bool, true },

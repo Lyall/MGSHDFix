@@ -58,9 +58,10 @@ namespace ConfigKeys
     constexpr const char* AnisotropicFiltering_Tooltip = "";
 
     constexpr const char* DisableTextureFiltering_Section = "Texture Filtering";
-    constexpr const char* DisableTextureFiltering_Setting = "Disable Texture Filtering";
+    constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
     constexpr const char* DisableTextureFiltering_Help = "";
-    constexpr const char* DisableTextureFiltering_Tooltip = "";
+    constexpr const char* DisableTextureFiltering_Tooltip = "Disables all texture filtering to use nearest neighbor sampling.\n"
+                                                            "This will give the game a pixelated / minecraft-esque appearance.";
 
     constexpr const char* DistanceCullingGrass_Section = "Override Render Distance";
     constexpr const char* DistanceCullingGrass_Setting = "Always Show Grass";
@@ -287,19 +288,18 @@ namespace ConfigKeys
     constexpr const char* CheckForUpdates_Section = "Update Notifications";
     constexpr const char* CheckForUpdates_Setting = "Check For MGSHDFix Updates";
     constexpr const char* CheckForUpdates_Help = "";
-    constexpr const char* CheckForUpdates_Tooltip = "";
+    constexpr const char* CheckForUpdates_Tooltip = "If MGSHDFix should notify you when launching the game if a new MGSHDFix update is available for download.";
 
     constexpr const char* UpdateConsoleNotifications_Section = "Update Notifications";
     constexpr const char* UpdateConsoleNotifications_Setting = "Visible Notifications";
     constexpr const char* UpdateConsoleNotifications_Help = "";
-    constexpr const char* UpdateConsoleNotifications_Tooltip = "If you want a visible notification when starting the game if an MGSHDFix update is available.";
+    constexpr const char* UpdateConsoleNotifications_Tooltip = "If you want a visible notification when starting the game if an MGSHDFix update is available.\n"
+                                                               "Notifications will still be printed to the log file while disabled.";
 
-    constexpr const char* VerboseLogging_Section = "Verbose Logging";
-    constexpr const char* VerboseLogging_Setting = "Enabled";
+    constexpr const char* VerboseLogging_Section = "Internal Settings";
+    constexpr const char* VerboseLogging_Setting = "Debug Logging";
     constexpr const char* VerboseLogging_Help = "";
-    constexpr const char* VerboseLogging_Tooltip = "";
-
-
+    constexpr const char* VerboseLogging_Tooltip = "Enables verbose logging for debugging purposes.";
 
 }
 

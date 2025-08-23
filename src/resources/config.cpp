@@ -68,10 +68,10 @@ namespace ConfigHelper
             "' in section '" + section + "': " + reason;
 
         spdlog::error(message);
-        spdlog::error("Please check that you're using the latest version's config file, and that there are no typos in it.");
+        spdlog::error("Please run the {} to update your settings file.", sFixName + " Config Tool");
         Logging::ShowConsole();
         std::cout << message << std::endl;
-        std::cout << "Please check that you're using the latest version's config file, and that there are no typos in it." << std::endl;
+        std::cout << "Please run the " << sFixName + " Config Tool" << " to update your settings file." << std::endl;
 
         FreeLibraryAndExitThread(baseModule, 1);
     }

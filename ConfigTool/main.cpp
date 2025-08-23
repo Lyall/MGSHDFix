@@ -613,18 +613,33 @@ private:
             {
             case Field::Bool:
                 if (auto* c = wxDynamicCast(ctrl, wxCheckBox))
+                {
                     c->SetValue(field.defaultInt != 0);
+                    wxCommandEvent ev(wxEVT_CHECKBOX, c->GetId());
+                    ev.SetEventObject(c);
+                    wxPostEvent(c, ev);
+                }
                 break;
 
             case Field::Int:
                 if (auto* c = wxDynamicCast(ctrl, wxSpinCtrl))
+                {
                     c->SetValue(field.defaultInt);
+                    wxCommandEvent ev(wxEVT_SPINCTRL, c->GetId());
+                    ev.SetEventObject(c);
+                    wxPostEvent(c, ev);
+                }
                 break;
 
             case Field::Str:
             case Field::Hotkey:
                 if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
+                {
                     c->SetValue(field.defaultString);
+                    wxCommandEvent ev(wxEVT_TEXT, c->GetId());
+                    ev.SetEventObject(c);
+                    wxPostEvent(c, ev);
+                }
                 break;
 
             case Field::Choice:
@@ -635,6 +650,10 @@ private:
                         c->SetSelection(idx);
                     else if (!field.choices.empty())
                         c->SetSelection(0);
+
+                    wxCommandEvent ev(wxEVT_CHOICE, c->GetId());
+                    ev.SetEventObject(c);
+                    wxPostEvent(c, ev);
                 }
                 break;
 
@@ -643,8 +662,9 @@ private:
             }
         }
 
-        ApplyPrerequisites(); // <- make sure dependent fields refresh
+        ApplyPrerequisites(); // update dependent fields
     }
+
 
 
 
