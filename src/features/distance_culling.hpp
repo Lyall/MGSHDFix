@@ -6,6 +6,8 @@ public:
     void Initialize() const;
 
     bool bForceGrassAlways;
+    int vkForceGrassAlwaysToggle = 0;
+
     float fGrassDistanceScalar;
 };
 

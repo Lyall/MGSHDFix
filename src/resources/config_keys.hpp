@@ -321,6 +321,14 @@ namespace ConfigKeys
     constexpr const char* CycleWireframeMode_Help = "";
     constexpr const char* CycleWireframeMode_Tooltip = "Cycle between wireframe rendering modes (available when Rain Width Fix is enabled).";
 
+
+    constexpr const char* ToggleDistanceCullingGrass_Section = "Hotkeys";
+    constexpr const char* ToggleDistanceCullingGrass_Setting = "Toggle Always Show Grass";
+    constexpr const char* ToggleDistanceCullingGrass_Help = "";
+    constexpr const char* ToggleDistanceCullingGrass_Tooltip = "Toggles the Always Show Grass option on/off in real-time, for those who want comparison shots.\n"
+                                                               "\n"
+                                                               "You may have to exit and reenter an area for the change to take effect.";
+
     // Achievements
     constexpr const char* AchievementPersistence_Section = "Bugfixes";
     constexpr const char* AchievementPersistence_Setting = "Fix Achievement Stat Tracking";

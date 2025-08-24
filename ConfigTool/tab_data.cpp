@@ -170,6 +170,10 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, ConfigKeys::ToggleUIShader_Help, ConfigKeys::ToggleUIShader_Tooltip,
           std::make_pair(ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting), false, Field::Hotkey, 0, 0, 0, "Delete" },
 
+        { ConfigKeys::ToggleDistanceCullingGrass_Section, ConfigKeys::ToggleDistanceCullingGrass_Setting, ConfigKeys::ToggleDistanceCullingGrass_Help, ConfigKeys::ToggleDistanceCullingGrass_Tooltip,
+          std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), false, Field::Hotkey, 0, 0, 0, "Page Up" },
+
+
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },
 

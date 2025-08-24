@@ -302,6 +302,10 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, g_DistanceCulling.bForceGrassAlways);
     LOG_CONFIG(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, g_DistanceCulling.bForceGrassAlways);
+    if (g_DistanceCulling.bForceGrassAlways)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::ToggleDistanceCullingGrass_Section, ConfigKeys::ToggleDistanceCullingGrass_Setting, g_DistanceCulling.vkForceGrassAlwaysToggle);
+    }
 
     ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
     LOG_CONFIG(ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
