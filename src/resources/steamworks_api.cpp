@@ -381,7 +381,10 @@ void SteamAPI::OnSteamInputLoaded()
 
         if (bHasUnboundButtons)
         {
+            spdlog::warn("-------------------    WARNING     ----------------------");
             spdlog::warn("SteamInput: One or more actions are unbound for Controller #{}. Please check your Steam Input configuration for this game.", i + 1);
+            spdlog::warn("-------------------    WARNING     ----------------------");
+
         }
     }
     spdlog::info("SteamInput: Initialization complete.");
