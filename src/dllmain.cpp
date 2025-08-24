@@ -830,134 +830,142 @@ static void Init_LauncherConfigOverride()
         }
     }
 
-    // If SkipLauncher is enabled & we're running inside launcher process, we'll just start the game immediately and exit this launcher
+    LPWSTR commandLine = GetCommandLineW();
+
     if (eGameType & LAUNCHER)
     {
-        if (!bLauncherConfigSkipLauncher)
+        bool hasJumpstart = wcsstr(commandLine, L"-jump gamestart");
+
+        if (bLauncherConfigSkipLauncher)
         {
-            if (bLauncherJumpStart)
+            if (!hasJumpstart)
             {
-                LPWSTR commandLine = GetCommandLineW();
-                bool hasJumpstart = wcsstr(commandLine, L"-jump gamestart");
-                if (hasJumpstart)
+                auto gameExePath = sExePath.parent_path() / game->ExeName;
+
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, attempting game launch");
+
+                PROCESS_INFORMATION processInfo {};
+                STARTUPINFO startupInfo {};
+                startupInfo.cb = sizeof(STARTUPINFO);
+
+                std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
+
+
+                if (game->ExeName == kGames.at(MG).ExeName)
                 {
-                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher jumpstart already on commandline.");
-                }
-                else
-                {
-                    std::filesystem::path gameExePath = sExePath.parent_path() / "launcher.exe";
-
-                    PROCESS_INFORMATION processInfo = {};
-                    STARTUPINFO startupInfo = {};
-                    startupInfo.cb = sizeof(STARTUPINFO);
-                    std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
-                    commandLine += L" -jump gamestart";
-                    if (CreateProcess(nullptr, (LPWSTR)commandLine.c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
-                    {
-                        // Successfully started the process
-                        CloseHandle(processInfo.hProcess);
-                        CloseHandle(processInfo.hThread);
-
-                        // Force launcher to exit
-                        ExitProcess(0);
-                    }
-                }
-            }
-        }
-        else
-        {
-            auto gameExePath = sExePath.parent_path() / game->ExeName;
-
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher set, attempting game launch");
-
-            PROCESS_INFORMATION processInfo {};
-            STARTUPINFO startupInfo {};
-            startupInfo.cb = sizeof(STARTUPINFO);
-
-            std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
-
-
-            if (game->ExeName == "METAL GEAR.exe")
-            {
-                // Add launch parameters for MG MSX
-                auto transformString = [](const std::string& input, int (*transformation)(int)) -> std::wstring
+                    // Add launch parameters for MG MSX
+                    auto transformString = [](const std::string& input, int (*transformation)(int)) -> std::wstring
                     {
                         std::string transformedString = input;
                         std::transform(transformedString.begin(), transformedString.end(), transformedString.begin(), transformation);
                         return Util::UTF8toWide(transformedString);
                     };
 
-                commandLine += L" -mgst " + std::wstring(sLauncherConfigMSXGame == ConfigKeys::SkipLauncherMSX_Option_MG1 ? L"mg1" : L"mg2"); // -mgst must be lowercase
-                commandLine += L" -walltype " + std::to_wstring(iLauncherConfigMSXWallType);
-                commandLine += L" -wallalign " + std::wstring(
-                    sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Center ? L"C" :
-                    sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Left ? L"L" :
-                    L"R");
+                    commandLine += L" -mgst " + std::wstring(sLauncherConfigMSXGame == ConfigKeys::SkipLauncherMSX_Option_MG1 ? L"mg1" : L"mg2"); // -mgst must be lowercase
+                    commandLine += L" -walltype " + std::to_wstring(iLauncherConfigMSXWallType);
+
+                    commandLine += L" -wallalign " + std::wstring(
+                        sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Center ? L"C" :
+                        sLauncherConfigMSXWallAlign == ConfigKeys::MSXWallAlign_Option_Left ? L"L" :
+                        L"R");
+                }
+
+                commandLine += L" -launcherpath launcher.exe ";
+
+                std::string sCommandLine = Util::WideToUTF8(commandLine);
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: {}", sCommandLine);
+
+                // Call CreateProcess to start the game process
+                if (CreateProcessW(nullptr, commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+                {
+                    // Successfully started the process
+                    CloseHandle(processInfo.hProcess);
+                    CloseHandle(processInfo.hThread);
+
+                    // Force launcher to exit
+                    ExitProcess(0);
+                }
+                else
+                {
+                    spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+                }
             }
-
-            std::string sCommandLine = Util::WideToUTF8(commandLine);
-            spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launch command line: {}", sCommandLine);
-
-            // Call CreateProcess to start the game process
-            if (CreateProcessW(nullptr, commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+            else //hasJumpstart && bLauncherConfigSkipLauncher -> we reentered the launcher from the main game. lets terminate once the game finishes closing.
             {
-                // Successfully started the process
-                CloseHandle(processInfo.hProcess);
-                CloseHandle(processInfo.hThread);
-
-                // Force launcher to exit
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher jumpstart detected on commandline.");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Waiting for companion game to exit before terminating launcher.");
+                while (Util::IsProcessRunning(sExePath / game->ExeName))
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Companion game exited, exiting launcher.");
                 ExitProcess(0);
+            }
+        }
+        else if (bLauncherJumpStart)
+        {
+            if (!hasJumpstart)
+            {
+
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: JumpStart set, attempting to restart launcher with -jump gamestart");
+                std::filesystem::path gameExePath = sExePath.parent_path() / "launcher.exe";
+
+                PROCESS_INFORMATION processInfo = {};
+                STARTUPINFO startupInfo = {};
+                startupInfo.cb = sizeof(STARTUPINFO);
+                std::wstring commandLine = L"\"" + gameExePath.wstring() + L"\"";
+                commandLine += L" -jump gamestart";
+                if (CreateProcess(nullptr, (LPWSTR)commandLine.c_str(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startupInfo, &processInfo))
+                {
+                    // Successfully started the process
+                    CloseHandle(processInfo.hProcess);
+                    CloseHandle(processInfo.hThread);
+
+                    // Force launcher to exit
+                    ExitProcess(0);
+                }
+                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Failed to restart launcher with jumpstart.");
             }
             else
             {
-                spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher failed to create game EXE process");
+                spdlog::info("MG/MG2 | MGS 2 | MGS 3: Launcher Config: Launcher Jumpstarted.");
             }
         }
+
         return;
     }
-    //Fixes a windows crash error message that sometimes appears when exiting through the main menu (which normally reopens the launcher.)
-    else if ((bLauncherConfigSkipLauncher || bOutdatedReshade) && (eGameType & (MG | MGS2 | MGS3)))
-    {
-        uint8_t* ShouldStartLauncher_mbResult = Memory::PatternScanSilent(baseModule, "85 DB 74 ?? 48 83 C4");
-        if (ShouldStartLauncher_mbResult)
-        {
-            static SafetyHookMid ShouldStartLauncher_mbHook{};
-            ShouldStartLauncher_mbHook = safetyhook::create_mid(ShouldStartLauncher_mbResult,
-                [](SafetyHookContext& ctx)
-                {
-                    spdlog::info("MG/MG2 | MGS 2 | MGS 3: Exit crash fixed.");
-                    ctx.rbx = 0; //ebx -> rbx
-                });
-        }
-        else
-        {
-            spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: SkipLauncher - exit crashfix patternscan failed!");
-        }
-    }
-    
 
 
     // Certain config such as language/button style is normally passed from launcher to game via arguments
     // When game EXE gets ran directly this config is left at default (english game, xbox buttons)
     // If launcher argument isn't detected we'll allow defaults to be changed by hooking the engine functions responsible for them
-    LPWSTR commandLine = GetCommandLineW();
-
     bool hasCtrltype = wcsstr(commandLine, L"-ctrltype") != nullptr;
     bool hasRegion = wcsstr(commandLine, L"-region") != nullptr;
     bool hasLang = wcsstr(commandLine, L"-lan") != nullptr;
 
+    if (!engineModule)
+    {
+        spdlog::error("MG/MG2 | MGS 2 | MGS 3: Launcher Config: engineModule is null, cannot apply INI overrides for Region/Language/ControllerType");
+    }
     if (!hasRegion && !hasLang)
     {
-        MGS3_COsContext_InitializeSKUandLang = decltype(MGS3_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
-        if (MGS3_COsContext_InitializeSKUandLang)
+        if (game->ExeName == kGames.at(MGS3).ExeName || game->ExeName == kGames.at(MG).ExeName)
         {
-            if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext_InitializeSKUandLang, MGS3_COsContext_InitializeSKUandLang_Hook))
+            MGS3_COsContext_InitializeSKUandLang = decltype(MGS3_COsContext_InitializeSKUandLang)(GetProcAddress(engineModule, "?InitializeSKUandLang@COsContext@@QEAAXHH@Z"));
+            if (MGS3_COsContext_InitializeSKUandLang)
             {
-                spdlog::info("MG/MG2 | MGS 3: Launcher Config: Overriding Region/Language with: {} / {}", Util::GetUppercaseNameAtIndex(kLauncherConfigRegions, iLauncherConfigRegion), Util::GetUppercaseNameAtIndex(kLauncherConfigLanguages, iLauncherConfigLanguage));
+                if (Memory::HookIAT(baseModule, "Engine.dll", MGS3_COsContext_InitializeSKUandLang, MGS3_COsContext_InitializeSKUandLang_Hook))
+                {
+                    spdlog::info("MG/MG2 | MGS 3: Launcher Config: Overriding Region/Language with: {} / {}", Util::GetUppercaseNameAtIndex(kLauncherConfigRegions, iLauncherConfigRegion), Util::GetUppercaseNameAtIndex(kLauncherConfigLanguages, iLauncherConfigLanguage));
+                }
+                else
+                {
+                    spdlog::error("MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                }
             }
             else
             {
-                spdlog::error("MG/MG2 | MGS 3: Launcher Config: Failed to apply COsContext::InitializeSKUandLang IAT hook");
+                spdlog::error("MG/MG2 | MGS 3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
             }
         }
         else
@@ -976,7 +984,7 @@ static void Init_LauncherConfigOverride()
             }
             else
             {
-                spdlog::error("MG/MG2 | MGS 2 | MGS3: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
+                spdlog::error("MGS 2: Launcher Config: Failed to locate COsContext::InitializeSKUandLang export");
             }
         }
     }

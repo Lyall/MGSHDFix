@@ -241,7 +241,7 @@ static size_t FindResourceSize(int resID, const wchar_t* resType)
 static int GetBannerResourceID()
 {
     std::filesystem::path exePath = wxGetCwd().ToStdString();
-    exePath = exePath.parent_path();
+    exePath = exePath.parent_path(); 
     if (std::filesystem::exists(exePath / "METAL GEAR.exe"))
     {
         iTargetGame = TARGET_GAME_MG1;

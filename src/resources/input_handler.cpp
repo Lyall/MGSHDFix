@@ -264,7 +264,7 @@ void InputHandler::RegisterHotkey(int vkCode, const char* name, std::function<vo
 void InputHandler::Update()
 {
 
-    if (g_InputHandler.bCaptureInputsWhileAltTabbed && (GetForegroundWindow() != g_D3D11Hooks.MainHwnd))
+    if (!g_InputHandler.bCaptureInputsWhileAltTabbed && (GetForegroundWindow() != g_D3D11Hooks.MainHwnd))
     {
         return;
     }

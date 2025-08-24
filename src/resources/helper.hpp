@@ -44,6 +44,8 @@ namespace Util
     void DumpBytes(uint64_t address);
 #endif
 
+    bool IsProcessRunning(const std::filesystem::path& fullPath);
+
     int findStringInVector(const std::string& str, const std::initializer_list<std::string>& search);
 
     std::wstring UTF8toWide(const std::string& str);

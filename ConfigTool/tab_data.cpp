@@ -90,7 +90,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting), false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
 
         { ConfigKeys::BorderlessWindowed_Section, ConfigKeys::BorderlessWindowed_Setting, ConfigKeys::BorderlessWindowed_Help, ConfigKeys::BorderlessWindowed_Tooltip,
-          std::make_pair(ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting), false, Field::Bool, false },
+          std::make_pair(ConfigKeys::WindowedMode_Section, ConfigKeys::WindowedMode_Setting), false, Field::Bool, true },
 
         { ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, ConfigKeys::RenderScaleWidth_Help, ConfigKeys::RenderScaleWidth_Tooltip,
           std::nullopt, false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },

@@ -1,5 +1,11 @@
 #include "common.hpp"
 
+#include <windows.h>
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <string>
+#include <filesystem>
+
 #include "logging.hpp"
 
 #pragma comment(lib,"Version.lib")
@@ -281,6 +287,46 @@ namespace Util
 #endif
 
 
+    bool IsProcessRunning(const std::filesystem::path& fullPath)
+    {
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (snapshot == INVALID_HANDLE_VALUE)
+        {
+            return false;
+        }
+
+        PROCESSENTRY32W entry {};
+        entry.dwSize = sizeof(entry);
+
+        bool found = false;
+
+        if (Process32FirstW(snapshot, &entry))
+        {
+            do
+            {
+                HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, entry.th32ProcessID);
+                if (hProcess)
+                {
+                    wchar_t buf[MAX_PATH];
+                    DWORD size = MAX_PATH;
+                    if (QueryFullProcessImageNameW(hProcess, 0, buf, &size))
+                    {
+                        if (_wcsicmp(buf, fullPath.c_str()) == 0)
+                        {
+                            found = true;
+                        }
+                    }
+                    CloseHandle(hProcess);
+                    if (found) break;
+                }
+            } while (Process32NextW(snapshot, &entry));
+        }
+
+        CloseHandle(snapshot);
+        return found;
+    }
+
+
     int findStringInVector(const std::string& str, const std::initializer_list<std::string>& search)
     {
         std::string lowerStr = str;
@@ -329,6 +375,7 @@ namespace Util
 
         return result;
     }
+
 
     std::pair<int, int> GetPhysicalDesktopDimensions()
     {
