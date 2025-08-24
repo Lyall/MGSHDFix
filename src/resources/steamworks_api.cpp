@@ -352,12 +352,14 @@ void SteamAPI::OnSteamInputLoaded()
             spdlog::info("SteamInput: Controller #{} | Active Action Set Handle: {}", i + 1, ss.str());
         }
 
+        bool bHasUnboundButtons = false;
         for (const std::string& actionName : actionNames)
         {
             InputDigitalActionHandle_t actionHandle = steamInput->GetDigitalActionHandle(actionName.c_str());
             if (actionHandle == 0)
             {
-                spdlog::warn("SteamInput: Action '{}' not found for Controller #{}", actionName, i + 1);
+                spdlog::warn("SteamInput: Action '{}' not bound for Controller #{}", actionName, i + 1);
+                bHasUnboundButtons = true;
                 continue;
             }
 
@@ -375,6 +377,11 @@ void SteamAPI::OnSteamInputLoaded()
                     originName ? originName : "Unknown"
                 );
             }
+        }
+
+        if (bHasUnboundButtons)
+        {
+            spdlog::warn("SteamInput: One or more actions are unbound for Controller #{}. Please check your Steam Input configuration for this game.", i + 1);
         }
     }
     spdlog::info("SteamInput: Initialization complete.");
