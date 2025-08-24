@@ -41,15 +41,20 @@ struct Field
 
     enum Type
     {
-        Bool, Int, Str, Choice, Hotkey, Spacer
+        Bool, Int, Float, Str, Choice, Hotkey, Spacer
     } type;
 
     int defaultInt = 0;
-    int minInt = 0;
-    int maxInt = 100000;
+    int minInt = std::numeric_limits<int>::lowest();
+    int maxInt = std::numeric_limits<int>::max();
 
     wxString defaultString;
     std::vector<wxString> choices;
+
+    double defaultFloat = 0.0;
+    double minFloat = std::numeric_limits<double>::lowest();
+    double maxFloat = std::numeric_limits<double>::max();
+
 };
 
 extern const std::vector<std::pair<wxString, std::vector<Field>>> kTabs;

@@ -506,6 +506,38 @@ public:
                     grid->Add(spacer, 0, wxEXPAND);
                     continue;
                 }
+                case Field::Float:
+                {
+                    double v = field.defaultFloat;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
+                    m_conf->Read(path, &v);
+
+                    if (double clamped = std::clamp(v, field.minFloat, field.maxFloat); clamped != v)
+                    {
+                        wxLogWarning("Out-of-range float %f for [%s/%s], clamped to %f",
+                            v, field.section, field.key, clamped);
+                        v = clamped;
+                        m_missingKeys = true;
+                    }
+
+                    auto* sp = new wxSpinCtrlDouble(
+                        sectionSizer->GetStaticBox(), wxID_ANY,
+                        wxString::Format("%.2f", v),
+                        wxDefaultPosition, wxDefaultSize,
+                        wxSP_ARROW_KEYS,
+                        field.minFloat, field.maxFloat, v, 0.01 // increment step
+                    );
+
+                    ctrl = sp;
+                    sp->SetMinSize(wxSize(90, -1));
+                    sp->SetSizeHints(90, -1);
+                    ctrl->Bind(wxEVT_ANY, &ConfigFrame::MarkDirty, this);
+                    break;
+                }
+
 
                 }
 
@@ -542,6 +574,10 @@ public:
 
                         case Field::Int:
                             tip += wxString::Format("%d", field.defaultInt);
+                            break;
+
+                        case Field::Float:
+                            tip += wxString::Format("%f", field.defaultFloat);
                             break;
 
                         case Field::Str:
@@ -748,6 +784,16 @@ private:
                 {
                     c->SetValue(field.defaultInt);
                     wxCommandEvent ev(wxEVT_SPINCTRL, c->GetId());
+                    ev.SetEventObject(c);
+                    wxPostEvent(c, ev);
+                }
+                break;
+
+            case Field::Float:
+                if (auto* c = wxDynamicCast(ctrl, wxSpinCtrlDouble))
+                {
+                    c->SetValue(field.defaultFloat);
+                    wxCommandEvent ev(wxEVT_SPINCTRLDOUBLE, c->GetId());
                     ev.SetEventObject(c);
                     wxPostEvent(c, ev);
                 }
@@ -1051,6 +1097,8 @@ private:
                 value = wxString::Format("%d", sp->GetValue());
             else if (auto* tc = wxDynamicCast(ctrl, wxTextCtrl))
                 value = QuoteIfNeeded(tc->GetValue());
+            else if (auto* spd = wxDynamicCast(ctrl, wxSpinCtrlDouble))
+                value = wxString::Format("%f", spd->GetValue());
             else if (auto* ch = wxDynamicCast(ctrl, wxChoice))
                 value = QuoteIfNeeded(ch->GetStringSelection());
             iniData[section][key] = value;

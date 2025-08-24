@@ -300,8 +300,11 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting, bLauncherConfigSkipLauncher);
     LOG_CONFIG(ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, g_CPUCoreLimitFix.bEnabled);
 
-    ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrass_Section, ConfigKeys::DistanceCullingGrass_Setting, g_DistanceCulling.bOverrideGrass);
-    LOG_CONFIG(ConfigKeys::DistanceCullingGrass_Section, ConfigKeys::DistanceCullingGrass_Setting, g_DistanceCulling.bOverrideGrass);
+    ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, g_DistanceCulling.bForceGrassAlways);
+    LOG_CONFIG(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, g_DistanceCulling.bForceGrassAlways);
+
+    ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
+    LOG_CONFIG(ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
 
     // Launcher settings
     std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
