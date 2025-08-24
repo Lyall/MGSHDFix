@@ -8,7 +8,7 @@
 #define FALLBACK_REPO_URL "https://github.com/ShizCalev/MGSHDFix"
 
 #define VERSION_MAJOR 2
-#define VERSION_MINOR 7
+#define VERSION_MINOR 8
 #define VERSION_PATCH 0
 
 
