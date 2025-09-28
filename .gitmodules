@@ -17,3 +17,6 @@
 [submodule "external/wxWidgets"]
 	path = external/wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets
+[submodule "external/mgs_gcx_editor"]
+	path = external/mgs_gcx_editor
+	url = https://github.com/Giza/mgs_gcx_editor
