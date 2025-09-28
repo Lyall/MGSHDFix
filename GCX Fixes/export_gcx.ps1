@@ -1,7 +1,6 @@
 # export-gcx.ps1
 # Scans the current directory for .gcx files and runs:
-#   py ../external/mgs_gcx_editor/_gcx_export_mgs2.py <file.gcx>
-# for each one. Falls back to "python" if "py" is not available.
+#   py <repoRoot>/external/mgs_gcx_editor/_gcx_export_mgs2.py <file.gcx>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -22,12 +21,18 @@ function Get-PythonCmd
     }
 }
 
-# Resolve the editor script path relative to the current directory.
-$scriptRel = Join-Path -Path (Get-Location) -ChildPath "..\external\mgs_gcx_editor\_gcx_export_mgs2.py"
-$scriptPath = Resolve-Path -LiteralPath $scriptRel -ErrorAction SilentlyContinue
-if (-not $scriptPath)
+# Resolve repo root
+$repoRoot = git rev-parse --show-toplevel
+if ($LASTEXITCODE -ne 0 -or -not $repoRoot)
 {
-    throw "Could not find editor script at ../external/mgs_gcx_editor/_gcx_export_mgs2.py relative to $(Get-Location)."
+    throw "Failed to determine git repository root. Are you inside a git repo?"
+}
+
+# Path to export script from repo root
+$scriptPath = Join-Path $repoRoot "external\mgs_gcx_editor\_gcx_export_mgs2.py"
+if (-not (Test-Path $scriptPath))
+{
+    throw "Could not find editor script at $scriptPath"
 }
 
 # Collect .gcx files in the current directory only.
@@ -38,7 +43,6 @@ if ($gcxFiles.Count -eq 0)
     Write-Host "No .gcx files found in $(Get-Location)." -ForegroundColor Yellow
     exit 0
 }
-
 
 $python = Get-PythonCmd
 
@@ -51,8 +55,7 @@ foreach ($f in $gcxFiles)
     $idx++
     Write-Host "[$idx/$total] Exporting '$($f.Name)'" 
 
-    # Call Python with fully qualified paths. Use call operator to preserve exit codes.
-    & $python $scriptPath.Path $f.FullName
+    & $python $scriptPath $f.FullName
     $code = $LASTEXITCODE
 
     if ($code -ne 0)
