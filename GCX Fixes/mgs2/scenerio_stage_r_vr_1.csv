@@ -1,0 +1,4137 @@
+0xe38,,
+0xe39,"M9
+Pistolet tranquillisant avec
+silencieux. Appuyez sur touche
+ pour viser et relâchez pour
+tirer. Avec aiguille laser.","M9
+Pistolet tranquillisant avec
+silencieux. Appuyez sur touche
+ pour viser et relâchez pour
+tirer. Avec aiguille laser."
+0xeb5,"USP
+Auto 9 mm. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 15 salves/chargeur.
+Silencieux en option.","USP
+Auto 9 mm. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 15 salves/chargeur.
+Silencieux en option."
+0xf27,"SOCOM
+Auto 45. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 12 salves/chargeur.
+Silencieux en option.","SOCOM
+Auto 45. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 12 salves/chargeur.
+Silencieux en option."
+0xf99,"PSG1
+Visez en mode d'Observation à 
+la 1ère pers., tirez avec touche
+. Gros plan avec touche ,
+plan général avec touche .","PSG1
+Visez en mode d'Observation à 
+la 1ère pers., tirez avec touche
+. Gros plan avec touche ,
+plan général avec touche ."
+0x1020,"RGB6
+Lance-grenades à 6 coups.
+Appuyez sur touche  pour viser
+et relâchez pour tirer. Modèle
+explosant pendant l'impact.","RGB6
+Lance-grenades à 6 coups.
+Appuyez sur touche  pour viser
+et relâchez pour tirer. Modèle
+explosant pendant l'impact."
+0x109f,"NIKITA
+Touche  pour viser en Obser-
+vation à la 1ère pers. et relâchez
+pour tirer. Contrôlez avec
+le joystick analogique gauche.","NIKITA
+Touche  pour viser en Obser-
+vation à la 1ère pers. et relâchez
+pour tirer. Contrôlez avec
+le joystick analogique gauche."
+0x1127,"Stinger
+Missile sol-air portatif. Visez
+en Obs. à la 1ère pers., tirez
+avec touche . Réglez le viseur
+sur la cible pour verrouiller.","Stinger
+Missile sol-air portatif. Visez
+en Obs. à la 1ère pers., tirez
+avec touche . Réglez le viseur
+sur la cible pour verrouiller."
+0x11b2,"Claymore
+Mine anti-personnel avec capteur
+avant. Appuyez sur touche 
+pour la dégoupiller, rampez
+dessus pour la récupérer.","Claymore
+Mine anti-personnel avec capteur
+avant. Appuyez sur touche 
+pour la dégoupiller, rampez
+dessus pour la récupérer."
+0x1233,"C4
+Explosif avec détonateur à
+distance. Appuyez sur touche 
+pour l'activer et sur touche 
+pour le faire sauter.","C4
+Explosif avec détonateur à
+distance. Appuyez sur touche 
+pour l'activer et sur touche 
+pour le faire sauter."
+0x12ab,"Grenade Chaff
+Elle bloque temporairement
+les dispositifs électroniques.
+Appuyez sur touche  pour viser
+et relâchez pour lancer.","Grenade Chaff
+Elle bloque temporairement
+les dispositifs électroniques.
+Appuyez sur touche  pour viser
+et relâchez pour lancer."
+0x1330,"Grenade paralysante
+Elle paralyse temporairement
+les soldats ennemis. Appuyez sur
+touche  pour viser et relâchez
+pour lancer.","Grenade paralysante
+Elle paralyse temporairement
+les soldats ennemis. Appuyez sur
+touche  pour viser et relâchez
+pour lancer."
+0x13b2,"Microphone
+Il détecte les sons faibles.
+Prenez-le en Obs. à la 1ère
+pers. et déplacez-le avec le
+joystick analogique gauche.","Microphone
+Il détecte les sons faibles.
+Prenez-le en Obs. à la 1ère
+pers. et déplacez-le avec le
+joystick analogique gauche."
+0x1433,"Epée haute fréquence
+Utilisez le joystick analogique
+droit pour taillader, appuyez pour
+frapper vers l'avant, bloquez avec
+, changez avec .","Epée haute fréquence
+Utilisez le joystick analogique
+droit pour taillader, appuyez pour
+frapper vers l'avant, bloquez avec
+, changez avec ."
+0x14c7,"Vaporisateur de réfrigérant
+Pour neutraliser les bombes. Pre-
+nez en Obs. à la 1ère pers. et
+vaporisez avec touche . Qua-
+ntité déterminée par la pression.","Vaporisateur de réfrigérant
+Pour neutraliser les bombes. Pre-
+nez en Obs. à la 1ère pers. et
+vaporisez avec touche . Qua-
+ntité déterminée par la pression."
+0x156d,"AKS-74u
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques.","AKS-74u
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques."
+0x15f5,"Chargeur
+Appuyez sur touche 
+pour le prendre, relâchez pour
+le jeter. Distance déterminée
+par la pression de la touche.","Chargeur
+Appuyez sur touche 
+pour le prendre, relâchez pour
+le jeter. Distance déterminée
+par la pression de la touche."
+0x1673,"Grenade à fragmentation
+Appuyez sur touche  pour
+la prendre, relâchez pour la
+lancer. Distance déterminée
+par la pression de la touche.","Grenade à fragmentation
+Appuyez sur touche  pour
+la prendre, relâchez pour la
+lancer. Distance déterminée
+par la pression de la touche."
+0x1702,"M4
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques.","M4
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques."
+0x1785,"PSG1-T
+Fusil tranquillisant. 
+Tirez avec touche . Gros
+plan avec touche , plan
+général avec touche .","PSG1-T
+Fusil tranquillisant. 
+Tirez avec touche . Gros
+plan avec touche , plan
+général avec touche ."
+0x17f5,"Microphone
+Il détecte les sons faibles.
+Prenez-le en Obs. à la 1ère
+pers. et déplacez-le avec le
+joystick analogique gauche.","Microphone
+Il détecte les sons faibles.
+Prenez-le en Obs. à la 1ère
+pers. et déplacez-le avec le
+joystick analogique gauche."
+0x1876,"Livre
+Publication pour adultes avec
+des photos osées et des sujets
+intéressants. Actionnez touche
+ pour l'installer.","Livre
+Publication pour adultes avec
+des photos osées et des sujets
+intéressants. Actionnez touche
+ pour l'installer."
+0x18f0,"USP
+Auto 9 mm. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 15 salves/chargeur.
+Silencieux fourni.","USP
+Auto 9 mm. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 15 salves/chargeur.
+Silencieux fourni."
+0x195f,"AKS-74u
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques.","AKS-74u
+Fusil d'assaut, 30 salves par
+chargeur. Appuyez légèrement sur
+touche  pour viser et fortement
+pour des tirs automatiques."
+0x19e7,"SOCOM
+Auto 45. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 12 salves/chargeur.
+Silencieux fourni.","SOCOM
+Auto 45. Appuyez sur touche
+ pour viser, relâchez pour
+tirer. 12 salves/chargeur.
+Silencieux fourni."
+0x1a56,"Microphone
+Il détecte les sons faibles.
+Appuyez sur touche  pour
+contacter Jennifer.
+","Microphone
+Il détecte les sons faibles.
+Appuyez sur touche  pour
+contacter Jennifer.
+"
+0x1ab0,,
+0x1ab1,"Ration
+Redonnant des forces.
+Appuyez sur touche  pour la
+consommer. Fait remonter le
+niveau de vie automatiquement.","Ration
+Redonnant des forces.
+Appuyez sur touche  pour la
+consommer. Fait remonter le
+niveau de vie automatiquement."
+0x1b28,"Jumelles
+Elles permettent de faire des
+reconnaissances de loin. Faites
+un gros plan avec touche  et un
+plan général avec touche .","Jumelles
+Elles permettent de faire des
+reconnaissances de loin. Faites
+un gros plan avec touche  et un
+plan général avec touche ."
+0x1bb2,"Remède
+Il soigne le rhume. Prenez-le
+avec touche , après l'avoir
+choisi dans la fenêtre.
+","Remède
+Il soigne le rhume. Prenez-le
+avec touche , après l'avoir
+choisi dans la fenêtre.
+"
+0x1c12,"Pansement
+Il arrête les écoulements
+de sang. Utilisez-le avec touche
+, après l'avoir choisi
+dans la fenêtre.","Pansement
+Il arrête les écoulements
+de sang. Utilisez-le avec touche
+, après l'avoir choisi
+dans la fenêtre."
+0x1c86,"Pentazémine
+Benzodiazépine détendant les
+muscles et traitant le système
+nerveux.
+Utilisez-la avec touche .","Pentazémine
+Benzodiazépine détendant les
+muscles et traitant le système
+nerveux.
+Utilisez-la avec touche ."
+0x1cf8,"Uniforme de terrain
+Même tenue que les soldats
+de Gurlukovich du noyau de la
+Shell 1. Prenez un AK pour
+passer pour un soldat ennemi.","Uniforme de terrain
+Même tenue que les soldats
+de Gurlukovich du noyau de la
+Shell 1. Prenez un AK pour
+passer pour un soldat ennemi."
+0x1d7f,"Gilet pare-balles
+Il est constitué de fibres
+spéciales. Les dommages
+reçus sont réduits de moitié
+quand vous le portez.","Gilet pare-balles
+Il est constitué de fibres
+spéciales. Les dommages
+reçus sont réduits de moitié
+quand vous le portez."
+0x1dfc,"Camouflage optique
+Il s'active quand vous en êtes
+équipé(e) et peut tromper la
+vue de l'ennemi et vous aider
+à vous cacher.","Camouflage optique
+Il s'active quand vous en êtes
+équipé(e) et peut tromper la
+vue de l'ennemi et vous aider
+à vous cacher."
+0x1e7c,"Détecteur de mines
+Procédé chimique qui s'active
+quand vous en êtes équipé(e).
+Il montre la position des
+mines Claymore sur le radar.","Détecteur de mines
+Procédé chimique qui s'active
+quand vous en êtes équipé(e).
+Il montre la position des
+mines Claymore sur le radar."
+0x1f08,"Capteur A
+Détecteur d'explosifs qui
+s'active quand vous l'avez.
+Il montre les C4 parfumées
+sur le radar.","Capteur A
+Détecteur d'explosifs qui
+s'active quand vous l'avez.
+Il montre les C4 parfumées
+sur le radar."
+0x1f73,"Capteur B
+Détecteur d'explosifs à
+scintillateur qui émet des
+bips en détectant les C4
+sans odeur.","Capteur B
+Détecteur d'explosifs à
+scintillateur qui émet des
+bips en détectant les C4
+sans odeur."
+0x1fd9,"Lunettes de vision nocturne
+Elles amplifient les lumières
+faibles pour une visualisation
+améliorée. Elles permettent de
+voir dans le noir.","Lunettes de vision nocturne
+Elles amplifient les lumières
+faibles pour une visualisation
+améliorée. Elles permettent de
+voir dans le noir."
+0x2067,"Lunettes thermiques
+Elles repèrent les sources de
+chaleur et permettent de voir
+dans le noir. Elles servent à
+voir les Claymore aussi.","Lunettes thermiques
+Elles repèrent les sources de
+chaleur et permettent de voir
+dans le noir. Elles servent à
+voir les Claymore aussi."
+0x20f0,"Jumelles
+Elles permettent de faire des
+reconnaissances de loin. Faites
+un gros plan avec touche  et un
+plan général avec touche .","Jumelles
+Elles permettent de faire des
+reconnaissances de loin. Faites
+un gros plan avec touche  et un
+plan général avec touche ."
+0x217a,"Caméra numérique
+Appuyez sur touche  pour pren-
+dre des photos. Faites un gros
+plan avec touche  et un plan
+général avec touche .","Caméra numérique
+Appuyez sur touche  pour pren-
+dre des photos. Faites un gros
+plan avec touche  et un plan
+général avec touche ."
+0x2209,"Boîte en carton 1
+Elle sert à transporter des
+denrées périssables.
+Prenez-la pour vous en vêtir.
+","Boîte en carton 1
+Elle sert à transporter des
+denrées périssables.
+Prenez-la pour vous en vêtir.
+"
+0x2270,"Cigarettes
+Elles entraînent une forte
+dépendance et sont très
+dangereuses pour la santé.
+","Cigarettes
+Elles entraînent une forte
+dépendance et sont très
+dangereuses pour la santé.
+"
+0x22ce,"Carte d'accès
+Carte de sécurité de niveau #1.
+Elle ouvre les portes dont le
+niveau de sécurité est de #1.
+","Carte d'accès
+Carte de sécurité de niveau #1.
+Elle ouvre les portes dont le
+niveau de sécurité est de #1.
+"
+0x233e,"Rasoir électrique
+Il permet un rasage net et
+rapide. Résultat parfait.
+
+","Rasoir électrique
+Il permet un rasage net et
+rapide. Résultat parfait.
+
+"
+0x2389,"Téléphone
+Portable avec fonction de
+vibration. Il peut recevoir
+du courrier électronique.
+","Téléphone
+Portable avec fonction de
+vibration. Il peut recevoir
+du courrier électronique.
+"
+0x23e7,"Caméra
+Appuyez sur touche  pour
+prendre des photos. Gros plan
+avec touche  et plan général
+avec touche .","Caméra
+Appuyez sur touche  pour
+prendre des photos. Gros plan
+avec touche  et plan général
+avec touche ."
+0x245c,"Boîte en carton 2
+Elle sert à transporter des
+appareils électriques.
+Prenez-la pour vous en vêtir.
+","Boîte en carton 2
+Elle sert à transporter des
+appareils électriques.
+Prenez-la pour vous en vêtir.
+"
+0x24c4,"Boîte en carton 3
+Elle sert à transporter des
+fournitures quotidiennes.
+Prenez-la pour vous en vêtir.
+","Boîte en carton 3
+Elle sert à transporter des
+fournitures quotidiennes.
+Prenez-la pour vous en vêtir.
+"
+0x252e,"Boîte en carton mouillée
+Sert à transporter des denrées
+périssables mais est mouillée
+et donc peu solide. Prenez-la
+pour vous en vêtir.","Boîte en carton mouillée
+Sert à transporter des denrées
+périssables mais est mouillée
+et donc peu solide. Prenez-la
+pour vous en vêtir."
+0x25bd,"Capteur AP
+Détecte la vie et vibre à
+l'approche d'un ennemi.
+Aucune autre vibration n'est
+signalée quand il est actif.","Capteur AP
+Détecte la vie et vibre à
+l'approche d'un ennemi.
+Aucune autre vibration n'est
+signalée quand il est actif."
+0x2637,"Boîte en carton 4
+Elle sert à transporter
+des figurines. Prenez-la
+pour vous en vêtir.
+","Boîte en carton 4
+Elle sert à transporter
+des figurines. Prenez-la
+pour vous en vêtir.
+"
+0x2692,"Boîte en carton 5 
+Elle transporte un logiciel 
+de jeu ""voyante"", en forme 
+d'oeil. Prenez-la pour vous 
+en vêtir.","Boîte en carton 5 
+Elle transporte un logiciel 
+de jeu ""voyante"", en forme 
+d'oeil. Prenez-la pour vous 
+en vêtir."
+0x2707,"
+
+
+
+","
+
+
+
+"
+0x270c,"Silencieux pour SOCOM
+Il réduit le bruit des tirs de
+SOCOM. Prenez-le avec le
+SOCOM. Ne peut être séparé
+du SOCOM une fois fixé.","Silencieux pour SOCOM
+Il réduit le bruit des tirs de
+SOCOM. Prenez-le avec le
+SOCOM. Ne peut être séparé
+du SOCOM une fois fixé."
+0x2792,"Silencieux pour AK
+Il réduit le bruit des tirs de
+AKS-74u. Prenez-le avec le
+AK. Ne peut être séparé du
+AK une fois fixé.","Silencieux pour AK
+Il réduit le bruit des tirs de
+AKS-74u. Prenez-le avec le
+AK. Ne peut être séparé du
+AK une fois fixé."
+0x2811,"Caméra
+Appuyez sur touche  pour
+prendre des photos. Gros plan
+avec touche  et plan général
+avec touche .","Caméra
+Appuyez sur touche  pour
+prendre des photos. Gros plan
+avec touche  et plan général
+avec touche ."
+0x2886,"Bandana
+Il appartient à Snake et
+comporte le symbole de
+l'infini (∞).
+","Bandana
+Il appartient à Snake et
+comporte le symbole de
+l'infini (∞).
+"
+0x28d0,"Plaques d'identification
+Optez pour SPECIAL, dans
+l'écran de titre, et passez au
+mode de visualisation pour
+voir les plaques obtenues.","Plaques d'identification
+Optez pour SPECIAL, dans
+l'écran de titre, et passez au
+mode de visualisation pour
+voir les plaques obtenues."
+0x2958,"Disque magnéto-optique
+Fourni par le Président, il
+contient un virus pouvant
+anéantir le fonctionnement
+de GW / Arsenal Gear.","Disque magnéto-optique
+Fourni par le Président, il
+contient un virus pouvant
+anéantir le fonctionnement
+de GW / Arsenal Gear."
+0x29d9,"Silencieux pour USP
+Il réduit le bruit des tirs de
+l'USP. Prenez-le avec l'USP.
+Ne peut être séparé de l'USP
+une fois fixé.","Silencieux pour USP
+Il réduit le bruit des tirs de
+l'USP. Prenez-le avec l'USP.
+Ne peut être séparé de l'USP
+une fois fixé."
+0x2a5a,"Perruque de l'infini
+Perruque longue et colorée.
+Prenez-la pour vous en vêtir.
+Cheveux tortillés en ∞.
+","Perruque de l'infini
+Perruque longue et colorée.
+Prenez-la pour vous en vêtir.
+Cheveux tortillés en ∞.
+"
+0x2ac7,"Perruque A
+Bleue. Prenez-la
+pour vous en vêtir.
+
+","Perruque A
+Bleue. Prenez-la
+pour vous en vêtir.
+
+"
+0x2afa,"Perruque B
+Orange. Prenez-la
+pour vous en vêtir.
+
+","Perruque B
+Orange. Prenez-la
+pour vous en vêtir.
+
+"
+0x2b2e,"Perruque C
+Colorée. Prenez-la
+pour vous en vêtir.
+
+","Perruque C
+Colorée. Prenez-la
+pour vous en vêtir.
+
+"
+0x2b64,"Perruque D
+Colorée. Prenez-la
+pour vous en vêtir.
+
+","Perruque D
+Colorée. Prenez-la
+pour vous en vêtir.
+
+"
+0x2b9a,"Uniforme de terrain
+Identique à celui des soldats
+de Gurlukovich du noyau de la
+Shell 1. Le passe-montagne
+n'est plus de mise.","Uniforme de terrain
+Identique à celui des soldats
+de Gurlukovich du noyau de la
+Shell 1. Le passe-montagne
+n'est plus de mise."
+0x2c1a,"Pentazémine
+Benzodiazépine mettant fin
+aux tremblements de la main.
+Choisissez-la dans la fenêtre
+et utilisez-la avec touche .","Pentazémine
+Benzodiazépine mettant fin
+aux tremblements de la main.
+Choisissez-la dans la fenêtre
+et utilisez-la avec touche ."
+0x2c9f,"Insectes marins
+Créés par génie génétique en
+cas de marée noire. Mangent
+et décomposent le pétrole et
+adorent également les rations.","Insectes marins
+Créés par génie génétique en
+cas de marée noire. Mangent
+et décomposent le pétrole et
+adorent également les rations."
+0x2d2d,AUCUNE REPONSE,AUCUNE REPONSE
+0x2d3c,Otacon,Otacon
+0x2d43,Sauvegarde,Sauvegarde
+0x2d4e,Colonel,Colonel
+0x2d56,Rose,Rose
+0x2d5b,Pliskin,Pliskin
+0x2d63,Stillman,Stillman
+0x2d6c,Snake,Snake
+0x2d72,Emma,Emma
+0x2d77,Mr.X,Mr.X
+0x2d7c,MEMORY CARD (PS2) non insérée.,MEMORY CARD (PS2) non insérée.
+0x2d9d,Pas assez d'espace sur la MEMORY CARD (PS2).,Pas assez d'espace sur la MEMORY CARD (PS2).
+0x2dca,Créer nouvelles données de sauvegarde. OK?,Créer nouvelles données de sauvegarde. OK?
+0x2df7,Ecraser?,Ecraser?
+0x2e00,"MEMORY CARD (PS2) non formatée.|
+Formater et sauvegarder?","MEMORY CARD (PS2) non formatée.|
+Formater et sauvegarder?"
+0x2e3b,Sauvegarde en cours.,Sauvegarde en cours.
+0x2e50,Formatage en cours.,Formatage en cours.
+0x2e64,Sauvegarde terminée.,Sauvegarde terminée.
+0x2e7a,Echec de la sauvegarde.,Echec de la sauvegarde.
+0x2e92,Créer nouvelles données de sauvegarde. OK?,Créer nouvelles données de sauvegarde. OK?
+0x2ebf,Ecraser?,Ecraser?
+0x2ec8,Echec du formatage.,Echec du formatage.
+0x2edc,Oui,Oui
+0x2ee0,Non,Non
+0x2ee4,Aft deck,Aft deck
+0x2eed,"Deck-A, crew's quarters","Deck-A, crew's quarters"
+0x2f05,"Deck-A, crew's lounge","Deck-A, crew's lounge"
+0x2f1b,"Deck-B, crew's quarters","Deck-B, crew's quarters"
+0x2f33,"Deck-C, crew's quarters","Deck-C, crew's quarters"
+0x2f4b,"Deck-D, crew's quarters","Deck-D, crew's quarters"
+0x2f63,"Deck-E, the bridge","Deck-E, the bridge"
+0x2f76,"Navigational deck,wing","Navigational deck,wing"
+0x2f8d,Engine room,Engine room
+0x2f99,"Deck-2, starboard","Deck-2, starboard"
+0x2fab,"Deck-2, port","Deck-2, port"
+0x2fb8,Hold No.1,Hold No.1
+0x2fc2,Hold No.2,Hold No.2
+0x2fcc,Hold No.3,Hold No.3
+0x2fd6,Strut A Deep Sea Dock,Strut A Deep Sea Dock
+0x2fec,Strut A roof,Strut A roof
+0x2ff9,Strut A Pump Room,Strut A Pump Room
+0x300b,AB connecting bridge,AB connecting bridge
+0x3020,Strut B Transformer Room,Strut B Transformer Room
+0x3039,BC connecting bridge,BC connecting bridge
+0x304e,Strut C Dining Hall,Strut C Dining Hall
+0x3062,CD connecting bridge,CD connecting bridge
+0x3077,Strut D Sediment Pool,Strut D Sediment Pool
+0x308d,DE connecting bridge,DE connecting bridge
+0x30a2,Strut E Parcel Room,Strut E Parcel Room
+0x30b6,Strut E heliport,Strut E heliport
+0x30c7,EF connecting bridge,EF connecting bridge
+0x30dc,Strut F warehouse ,Strut F warehouse 
+0x30ef,FA connecting bridge,FA connecting bridge
+0x3104,"Shell 1 Core, 1F","Shell 1 Core, 1F"
+0x3115,"Shell 1 Core, B1","Shell 1 Core, B1"
+0x3126,"Shell 1 Core, B1 Hall","Shell 1 Core, B1 Hall"
+0x313c,"Shell 1 Core, B2 Computer Room","Shell 1 Core, B2 Computer Room"
+0x315b,Shell 1-2 connecting bridge,Shell 1-2 connecting bridge
+0x3177,Shell 1-2 connecting bridge - LG connecting bridge,Shell 1-2 connecting bridge - LG connecting bridge
+0x31aa,Strut L perimeter - KL connecting bridge,Strut L perimeter - KL connecting bridge
+0x31d3,KL connecting bridge,KL connecting bridge
+0x31e8,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0x320a,"Shell 2 Core, 1F Air Purification Room","Shell 2 Core, 1F Air Purification Room"
+0x3231,"Shell 2 Core, B1 Filtration Chamber No.1","Shell 2 Core, B1 Filtration Chamber No.1"
+0x325a,"Shell 2 Core, B1 Filtration Chamber No.2","Shell 2 Core, B1 Filtration Chamber No.2"
+0x3283,Strut L Oil Fence,Strut L Oil Fence
+0x3295,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0x32aa,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0x32bf,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0x32dc,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0x32ef,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0x330a,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0x331e,Federal Hall,Federal Hall
+0x332b,Plant Beginning,Plant Beginning
+0x333b,Tanker Cleared,Tanker Cleared
+0x334a,Plant Cleared,Plant Cleared
+0x3358,Snake Tales A Cleared,Snake Tales A Cleared
+0x336e,Snake Tales B Cleared,Snake Tales B Cleared
+0x3384,Snake Tales C Cleared,Snake Tales C Cleared
+0x339a,Snake Tales D Cleared,Snake Tales D Cleared
+0x33b0,Snake Tales E Cleared,Snake Tales E Cleared
+0x33c6,Philanthropy's hideout,Philanthropy's hideout
+0x33dd,Gap between parallel universes,Gap between parallel universes
+0x33fc,Raiden Tales,Raiden Tales
+0x3409,The singularity,The singularity
+0x3419,-,-
+0x341b,船尾甲板,船尾甲板
+0x3428,船橋一階居住区,船橋一階居住区
+0x343e,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0x346c,船橋ニ階居住区,船橋ニ階居住区
+0x3482,船橋三階居住区,船橋三階居住区
+0x3498,船橋四階居住区,船橋四階居住区
+0x34ae,船橋五階操舵室,船橋五階操舵室
+0x34c4,航海甲板ウィング,航海甲板ウィング
+0x34e0,機関室,機関室
+0x34ea,第ニ甲板,第ニ甲板
+0x34f7,第一船倉,第一船倉
+0x3504,第ニ船倉,第ニ船倉
+0x3511,第三船倉,第三船倉
+0x351e,A脚ポンプ施設,A脚ポンプ施設
+0x3532,AB連絡橋,AB連絡橋
+0x353e,B脚変電室,B脚変電室
+0x354c,BC連絡橋,BC連絡橋
+0x3558,C脚食堂,C脚食堂
+0x3563,CD連絡橋,CD連絡橋
+0x356f,D脚第一沈殿池,D脚第一沈殿池
+0x3583,DE連絡橋,DE連絡橋
+0x358f,E脚貨物集配施設,E脚貨物集配施設
+0x35a6,EF連絡橋,EF連絡橋
+0x35b2,F脚倉庫,F脚倉庫
+0x35bd,FA連絡橋,FA連絡橋
+0x35c9,シェル1中央棟,シェル1中央棟
+0x35e0,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0x3604,G脚油処理施設,G脚油処理施設
+0x3618,GH連絡橋,GH連絡橋
+0x3624,H脚倉庫,H脚倉庫
+0x362f,HI連絡橋,HI連絡橋
+0x363b,I脚機材組立施設,I脚機材組立施設
+0x3652,IJ連絡橋,IJ連絡橋
+0x365e,J脚発電施設,J脚発電施設
+0x366f,JK連絡橋,JK連絡橋
+0x367b,K脚生物化学実験施設,K脚生物化学実験施設
+0x3698,KL連絡橋,KL連絡橋
+0x36a4,L脚汚水処理場,L脚汚水処理場
+0x36b8,LG連絡橋,LG連絡橋
+0x36c4,シェル2中央棟,シェル2中央棟
+0x36db,L脚下部オイルフェンス,L脚下部オイルフェンス
+0x36fe,H脚下部オイルフェンス,H脚下部オイルフェンス
+0x3721,アーセナルギア胃,アーセナルギア胃
+0x373a,アーセナルギア空腸,アーセナルギア空腸
+0x3756,アーセナルギア上行結腸,アーセナルギア上行結腸
+0x3778,アーセナルギア回腸,アーセナルギア回腸
+0x3794,アーセナルギアS状結腸,アーセナルギアS状結腸
+0x37b4,アーセナルギア直腸,アーセナルギア直腸
+0x37d0,麻布十番,麻布十番
+0x37dd,船橋市,船橋市
+0x37e7,青山ニ丁目,青山ニ丁目
+0x37f7,二ューヨーク52番街,二ューヨーク52番街
+0x3815,Strut A Pump Facility,Strut A Pump Facility
+0x382b,AB connecting bridge,AB connecting bridge
+0x3840,Strut B Transformer Room,Strut B Transformer Room
+0x3859,BC connecting bridge,BC connecting bridge
+0x386e,Strut C Dining Hall,Strut C Dining Hall
+0x3882,CD connecting bridge,CD connecting bridge
+0x3897,Strut D Sediment Pool,Strut D Sediment Pool
+0x38ad,DE connecting bridge,DE connecting bridge
+0x38c2,Strut E Material Distribution Facility,Strut E Material Distribution Facility
+0x38e9,EF connecting bridge,EF connecting bridge
+0x38fe,Strut F warehouse,Strut F warehouse
+0x3910,FA connecting bridge,FA connecting bridge
+0x3925,Shell 1 Core,Shell 1 Core
+0x3932,Shell 1 - 2 connecting bridge,Shell 1 - 2 connecting bridge
+0x3950,Strut G Oil Processing Facility,Strut G Oil Processing Facility
+0x3970,GH connecting bridge,GH connecting bridge
+0x3985,Strut H Warehouse,Strut H Warehouse
+0x3997,HI connecting bridge,HI connecting bridge
+0x39ac,Strut I Assembly Facility,Strut I Assembly Facility
+0x39c6,IJ connecting bridge,IJ connecting bridge
+0x39db,Strut J Power Plant,Strut J Power Plant
+0x39ef,JK connecting bridge,JK connecting bridge
+0x3a04,Strut K Biochem Lab,Strut K Biochem Lab
+0x3a18,KL connecting bridge,KL connecting bridge
+0x3a2d,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0x3a4f,LG connecting bridge,LG connecting bridge
+0x3a64,Shell 2 Core,Shell 2 Core
+0x3a71,Strut L Oil Fence,Strut L Oil Fence
+0x3a83,Strut H Oil Fence,Strut H Oil Fence
+0x3a95,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0x3aaa,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0x3abf,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0x3adc,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0x3aef,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0x3b0a,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0x3b1e,Azabu-Juban,Azabu-Juban
+0x3b2a,Hunabashi City,Hunabashi City
+0x3b39,Aoyama Ni-Chome,Aoyama Ni-Chome
+0x3b49,New York 52nd Street,New York 52nd Street
+0x3b5e,Aft deck,Aft deck
+0x3b67,"Deck-A, crew's quarters","Deck-A, crew's quarters"
+0x3b7f,"Deck-A, crew's lounge","Deck-A, crew's lounge"
+0x3b95,"Deck-B, crew's quarters","Deck-B, crew's quarters"
+0x3bad,"Deck-C, crew's quarters","Deck-C, crew's quarters"
+0x3bc5,"Deck-D, crew's quarters","Deck-D, crew's quarters"
+0x3bdd,"Deck-E, the bridge","Deck-E, the bridge"
+0x3bf0,"Navigational deck,wing","Navigational deck,wing"
+0x3c07,Engine room,Engine room
+0x3c13,"Deck-2, starboard","Deck-2, starboard"
+0x3c25,"Deck-2, port","Deck-2, port"
+0x3c32,Hold No.1,Hold No.1
+0x3c3c,Hold No.2,Hold No.2
+0x3c46,Hold No.3,Hold No.3
+0x3c50,第ニ甲板右舷,第ニ甲板右舷
+0x3c63,第ニ甲板左舷,第ニ甲板左舷
+0x3c76,VERY EASY,VERY EASY
+0x3c80,EASY,EASY
+0x3c85,NORMAL,NORMAL
+0x3c8c,HARD,HARD
+0x3c91,EXTREME,EXTREME
+0x3c99,E-EXTREME,E-EXTREME
+0x3ca3,,
+0x3ca4,"M9|
+Betäubungspistole mit Schall-
+dämpfer. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. Mit Laserzeiger.","M9|
+Betäubungspistole mit Schall-
+dämpfer. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. Mit Laserzeiger."
+0x3d1f,"USP|
+9mm Auto. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 15 Schuß/Magazin.
+Schalldämpfer möglich.","USP|
+9mm Auto. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 15 Schuß/Magazin.
+Schalldämpfer möglich."
+0x3d97,"SOCOM
+.45 Pistole. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 12 Schuß/Magazin. 
+Schalldämpfer möglich.","SOCOM
+.45 Pistole. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 12 Schuß/Magazin. 
+Schalldämpfer möglich."
+0x3e14,"PSG1
+Scharfschützengewehr. In der
+Beobachtungspersp. zielen, mit
+-Taste schießen. -Taste 
+zoomt ein, -Taste zoomt aus.","PSG1
+Scharfschützengewehr. In der
+Beobachtungspersp. zielen, mit
+-Taste schießen. -Taste 
+zoomt ein, -Taste zoomt aus."
+0x3e96,"RGB6
+Granatenwerfer mit 6 Schuß.
+Mit der -Taste zielen u. zum 
+Schießen Taste loslassen. 
+Explodiert bei Aufprall.","RGB6
+Granatenwerfer mit 6 Schuß.
+Mit der -Taste zielen u. zum 
+Schießen Taste loslassen. 
+Explodiert bei Aufprall."
+0x3f0e,"NIKITA
+Zum Zielen in der Beobachtgs-
+perspekt. -Taste drücken u.
+zum Feuern loslassen. Geschoß-
+steuerg mit Linker Analog-Stick.","NIKITA
+Zum Zielen in der Beobachtgs-
+perspekt. -Taste drücken u.
+zum Feuern loslassen. Geschoß-
+steuerg mit Linker Analog-Stick."
+0x3f94,"Stinger
+Tragbare Boden-Luft-Rakete.
+In der Beobachtungsperspektive
+zielen und mit der -Taste 
+feuern. Visier auf Ziel richten.","Stinger
+Tragbare Boden-Luft-Rakete.
+In der Beobachtungsperspektive
+zielen und mit der -Taste 
+feuern. Visier auf Ziel richten."
+0x4016,"Claymore
+Schützenmine mit Frontsensor. 
+Zum Legen -Taste drücken. 
+Kann bei Darüberkriechen
+entfernt werden. ","Claymore
+Schützenmine mit Frontsensor. 
+Zum Legen -Taste drücken. 
+Kann bei Darüberkriechen
+entfernt werden. "
+0x408a,"C4
+Plastiksprengstoff mit Fern-
+zünder. Zum Anbringen 
+-Taste drücken. Zur Deto-
+nation -Taste drücken.","C4
+Plastiksprengstoff mit Fern-
+zünder. Zum Anbringen 
+-Taste drücken. Zur Deto-
+nation -Taste drücken."
+0x40fb,"Düppelgranate
+Granate, die elektron. Geräte
+vorübergehend ausschaltet. Mit
+der -Taste zielen und zum 
+Werfen Taste loslassen.","Düppelgranate
+Granate, die elektron. Geräte
+vorübergehend ausschaltet. Mit
+der -Taste zielen und zum 
+Werfen Taste loslassen."
+0x417f,"Phosphorgranate
+Granate betäubt gegnerische 
+Soldaten vorübergehend. Mit
+der -Taste zielen und zum 
+Werfen Taste loslassen.","Phosphorgranate
+Granate betäubt gegnerische 
+Soldaten vorübergehend. Mit
+der -Taste zielen und zum 
+Werfen Taste loslassen."
+0x4200,"Mikrofon
+Das Mikro hört auch leise 
+Geräusche. In der Beobachtgs-
+perspektive halten, mit dem 
+Linker Analog-Stick bewegen.","Mikrofon
+Das Mikro hört auch leise 
+Geräusche. In der Beobachtgs-
+perspektive halten, mit dem 
+Linker Analog-Stick bewegen."
+0x427e,"Hochfrequenzschwert
+Für Hieb Rechter Analog-Stick
+bewegen, zum Stoßen Stick
+drücken. Mit -Taste blocken
+und mit -Taste wechseln.","Hochfrequenzschwert
+Für Hieb Rechter Analog-Stick
+bewegen, zum Stoßen Stick
+drücken. Mit -Taste blocken
+und mit -Taste wechseln."
+0x4308,"Kühlspray
+Zum Entschärfen von Bomben.
+In der Beobachtgspersp. halten
+u. mit -Taste sprühen.Tasten-
+druck reguliert Sprühmenge.","Kühlspray
+Zum Entschärfen von Bomben.
+In der Beobachtgspersp. halten
+u. mit -Taste sprühen.Tasten-
+druck reguliert Sprühmenge."
+0x438e,"AKS-74u
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken.","AKS-74u
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken."
+0x43ff,"Leeres Magazin
+Zum Halten -Taste drücken,
+zum Werfen Taste loslassen.
+Je stärker Sie die Taste drük-
+ken, desto weiter werfen Sie. ","Leeres Magazin
+Zum Halten -Taste drücken,
+zum Werfen Taste loslassen.
+Je stärker Sie die Taste drük-
+ken, desto weiter werfen Sie. "
+0x4489,"Splittergranate
+Zum Halten -Taste drücken,
+zum Werfen Taste loslassen.
+Je stärker Sie die Taste drük-
+ken, desto weiter werfen Sie. ","Splittergranate
+Zum Halten -Taste drücken,
+zum Werfen Taste loslassen.
+Je stärker Sie die Taste drük-
+ken, desto weiter werfen Sie. "
+0x4514,"M4
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken.","M4
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken."
+0x4580,"PSG1-T
+Betäubungsgewehr. In der Beo-
+bachtungspersp. zielen, mit
+-Taste schießen. -Taste 
+zoomt ein, -Taste zoomt aus.","PSG1-T
+Betäubungsgewehr. In der Beo-
+bachtungspersp. zielen, mit
+-Taste schießen. -Taste 
+zoomt ein, -Taste zoomt aus."
+0x4602,"Mikrofon
+Das Mikro hört auch leise 
+Geräusche. In der Beobachtgs-
+perspektive halten, mit dem 
+Linker Analog-Stick bewegen.","Mikrofon
+Das Mikro hört auch leise 
+Geräusche. In der Beobachtgs-
+perspektive halten, mit dem 
+Linker Analog-Stick bewegen."
+0x4680,"Buch
+Publikation für Erwachsene.
+Aufnahmen von Mädchen
+und interessante Artikel. Zum
+Hinlegen -Taste drücken. ","Buch
+Publikation für Erwachsene.
+Aufnahmen von Mädchen
+und interessante Artikel. Zum
+Hinlegen -Taste drücken. "
+0x46f5,"USP
+9mm Auto. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 15 Schuß/Magazin.
+Schalldämpfer möglich.","USP
+9mm Auto. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 15 Schuß/Magazin.
+Schalldämpfer möglich."
+0x476c,"AKS-74u
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken.","AKS-74u
+Sturmgewehr. 30 Schuß/Magazin.
+Zum Zielen -Taste leicht
+drücken, für Automatikfeuer
+fest drücken."
+0x47dd,"SOCOM
+.45 Pistole. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 12 Schuß/Magazin. 
+Schalldämpfer aufgesetzt.","SOCOM
+.45 Pistole. Mit der -Taste 
+zielen und zum Schießen Taste
+loslassen. 12 Schuß/Magazin. 
+Schalldämpfer aufgesetzt."
+0x485c,"Mikrofon
+Das Mikro hört auch leise 
+Geräusche. Mit der -Taste
+Jennifer rufen.
+","Mikrofon
+Das Mikro hört auch leise 
+Geräusche. Mit der -Taste
+Jennifer rufen.
+"
+0x48b0,,
+0x48b1,"Ration
+""Fertiggericht"" füllt aufge-
+brauchte Lebensanzeige auf, 
+wenn Ration geführt wird. Zum 
+Benutzen -Taste drücken. ","Ration
+""Fertiggericht"" füllt aufge-
+brauchte Lebensanzeige auf, 
+wenn Ration geführt wird. Zum 
+Benutzen -Taste drücken. "
+0x4931,"Fernglas
+Militärisches Fernglas für 
+Aufklärung auf große
+Entfernung. -Taste zoomt
+ein, -Taste zoomt aus.","Fernglas
+Militärisches Fernglas für 
+Aufklärung auf große
+Entfernung. -Taste zoomt
+ein, -Taste zoomt aus."
+0x49a5,"Medizin
+Erkältungsmittel. Durch 
+Drücken der -Taste nehmen 
+Sie es ein, wenn das Mittel im
+Fenster ausgewählt ist.","Medizin
+Erkältungsmittel. Durch 
+Drücken der -Taste nehmen 
+Sie es ein, wenn das Mittel im
+Fenster ausgewählt ist."
+0x4a1e,"Verband
+Saugpads stoppen Blutung.
+Durch Drücken der -Taste 
+nehmen Sie es ein, wenn Mittel
+im Fenster ausgewählt ist.","Verband
+Saugpads stoppen Blutung.
+Durch Drücken der -Taste 
+nehmen Sie es ein, wenn Mittel
+im Fenster ausgewählt ist."
+0x4a99,"Pentazemin
+Benzodiazepin Antidepressivum.
+Entspannt die Muskeln, gegen
+autonome Störungen. Durch 
+Drücken der -Taste einnehmen.","Pentazemin
+Benzodiazepin Antidepressivum.
+Entspannt die Muskeln, gegen
+autonome Störungen. Durch 
+Drücken der -Taste einnehmen."
+0x4b1e,"Kampfanzug
+Identisch zur Uniform der 
+Gurlukovich-Soldaten im Kern 
+von Shell 1. Nehmen Sie zur
+Tarnung die AK dazu.","Kampfanzug
+Identisch zur Uniform der 
+Gurlukovich-Soldaten im Kern 
+von Shell 1. Nehmen Sie zur
+Tarnung die AK dazu."
+0x4b93,"Schußsichere Weste 
+Aus Spezialfasern hergestellt.
+Wenn Sie die Weste tragen, 
+erleiden Sie bei Treffern nur 
+halben Schaden.","Schußsichere Weste 
+Aus Spezialfasern hergestellt.
+Wenn Sie die Weste tragen, 
+erleiden Sie bei Treffern nur 
+halben Schaden."
+0x4c12,"Stealth-Tarnung
+Wird bei Tragen aktiviert.
+Kann das Auge des Feindes
+täuschen und hilft Ihnen, 
+sich zu verstecken.","Stealth-Tarnung
+Wird bei Tragen aktiviert.
+Kann das Auge des Feindes
+täuschen und hilft Ihnen, 
+sich zu verstecken."
+0x4c87,"Minendetektor
+Spürt Minen mit Hilfe chem.
+Mittel auf. Wird bei Tragen 
+aktiviert. Zeigt auf dem Radar
+Position von Claymore-Minen.","Minendetektor
+Spürt Minen mit Hilfe chem.
+Mittel auf. Wird bei Tragen 
+aktiviert. Zeigt auf dem Radar
+Position von Claymore-Minen."
+0x4d0b,"Sensor A
+Sprengstoffdetektor mit Ionen-
+spektrometer. Wird bei Tragen 
+aktiviert. Zeigt geruchsaktive
+C4 auf dem Radar.","Sensor A
+Sprengstoffdetektor mit Ionen-
+spektrometer. Wird bei Tragen 
+aktiviert. Zeigt geruchsaktive
+C4 auf dem Radar."
+0x4d83,"Sensor B
+Sprengstoffdetektor mit 
+Neutronenszintillator. 
+Piept bei Entdecken von 
+geruchloser C4.","Sensor B
+Sprengstoffdetektor mit 
+Neutronenszintillator. 
+Piept bei Entdecken von 
+geruchloser C4."
+0x4de6,"Nachtsichtgerät
+Verstärkt schwaches Licht zur 
+besseren Sicht im Dunkeln.
+
+","Nachtsichtgerät
+Verstärkt schwaches Licht zur 
+besseren Sicht im Dunkeln.
+
+"
+0x4e34,"Infrarotsichtgerät
+Zeigt Wärmequelle. Damit kann
+man im Dunkeln sehen. 
+Tragen Sie es, um Claymore-
+Minen sichtbar zu machen.","Infrarotsichtgerät
+Zeigt Wärmequelle. Damit kann
+man im Dunkeln sehen. 
+Tragen Sie es, um Claymore-
+Minen sichtbar zu machen."
+0x4eb4,"Fernglas
+Militärisches Fernglas für 
+Aufklärung auf große
+Entfernung. -Taste zoomt
+ein, -Taste zoomt aus.","Fernglas
+Militärisches Fernglas für 
+Aufklärung auf große
+Entfernung. -Taste zoomt
+ein, -Taste zoomt aus."
+0x4f28,"Digitalkamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+","Digitalkamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+"
+0x4f87,"Karton 1
+Karton für verderbliche 
+Lebensmittel. Wählen Sie den 
+Karton, um ihn zu tragen.
+","Karton 1
+Karton für verderbliche 
+Lebensmittel. Wählen Sie den 
+Karton, um ihn zu tragen.
+"
+0x4fe4,"Zigaretten
+Machen abhängig und sind
+sehr gesundheitsschädigend.
+
+","Zigaretten
+Machen abhängig und sind
+sehr gesundheitsschädigend.
+
+"
+0x5028,"Kartenschlüssel
+Sicherheitskarte für #1. Etage. 
+Öffnet Türen der Sicherheits-
+stufe #1.
+","Kartenschlüssel
+Sicherheitskarte für #1. Etage. 
+Öffnet Türen der Sicherheits-
+stufe #1.
+"
+0x5086,"Rasierapparat
+Elektrisch. Rasiert glatt 
+und schnell, läßt nichts 
+zurück.
+","Rasierapparat
+Elektrisch. Rasiert glatt 
+und schnell, läßt nichts 
+zurück.
+"
+0x50d5,"Telefon
+Handy mit Vibrationsfunktion.
+Zum Empfang von E-Mails.
+
+","Telefon
+Handy mit Vibrationsfunktion.
+Zum Empfang von E-Mails.
+
+"
+0x5116,"Kamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+","Kamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+"
+0x516e,"Karton 2
+Karton für Elektrogeräte. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+","Karton 2
+Karton für Elektrogeräte. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+"
+0x51bf,"Karton 3
+Karton für tägliche Vorräte. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+","Karton 3
+Karton für tägliche Vorräte. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+"
+0x5214,"Nasser Karton 
+Karton für verderbliche 
+Lebensmittel. Nass und nicht
+robust. Wählen Sie den 
+Karton, um ihn zu tragen.","Nasser Karton 
+Karton für verderbliche 
+Lebensmittel. Nass und nicht
+robust. Wählen Sie den 
+Karton, um ihn zu tragen."
+0x528d,"AP-Sensor
+Spürt Lebensfunktionen auf.
+Vibriert bei Nähern des Geg-
+ners. Bei aktiviertem Sensor
+sind andere Vibrationen AUS.","AP-Sensor
+Spürt Lebensfunktionen auf.
+Vibriert bei Nähern des Geg-
+ners. Bei aktiviertem Sensor
+sind andere Vibrationen AUS."
+0x530c,"Karton 4
+Karton für Action-Figuren. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+","Karton 4
+Karton für Action-Figuren. 
+Wählen Sie den Karton,
+um ihn zu tragen.
+"
+0x535d,"Karton 5
+Karton für Spiel-Software. 
+Auffälliges Augendesign.
+Wählen Sie den Karton,
+um ihn zu tragen.","Karton 5
+Karton für Spiel-Software. 
+Auffälliges Augendesign.
+Wählen Sie den Karton,
+um ihn zu tragen."
+0x53c7,"
+
+
+
+","
+
+
+
+"
+0x53cc,"SOCOM-Schalldämpfer
+Bei Aufsetzen auf SOCOM wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit SOCOM wäh-
+len. Entfernen nicht möglich.","SOCOM-Schalldämpfer
+Bei Aufsetzen auf SOCOM wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit SOCOM wäh-
+len. Entfernen nicht möglich."
+0x545c,"AK-Schalldämpfer
+Bei Aufsetzen auf AKS-74u wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit AK wählen.
+Entfernen nicht mehr möglich.","AK-Schalldämpfer
+Bei Aufsetzen auf AKS-74u wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit AK wählen.
+Entfernen nicht mehr möglich."
+0x54eb,"Kamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+","Kamera
+Zum Fotografieren -Taste
+drücken. -Taste zoomt
+ein, -Taste zoomt aus.
+"
+0x5543,"Bandana
+Solid Snakes Bandana mit
+eingesticktem ∞-Symbol 
+(Unendlichkeit).
+","Bandana
+Solid Snakes Bandana mit
+eingesticktem ∞-Symbol 
+(Unendlichkeit).
+"
+0x5590,"Erkennungsmarken 
+Wählen Sie im Titelbildschirm
+'SPECIAL'. Zum Betrachten 
+rufen Sie den Betrachtgsmodus 
+Erkennungsmarken auf.","Erkennungsmarken 
+Wählen Sie im Titelbildschirm
+'SPECIAL'. Zum Betrachten 
+rufen Sie den Betrachtgsmodus 
+Erkennungsmarken auf."
+0x5611,"MO-Diskette
+Laserdisc des Präsidenten.
+Enthält Computervirus zur 
+Zerstörung der Steuerfunktion 
+von GW / Arsenal Gear.","MO-Diskette
+Laserdisc des Präsidenten.
+Enthält Computervirus zur 
+Zerstörung der Steuerfunktion 
+von GW / Arsenal Gear."
+0x568c,"USP-Schalldämpfer
+Bei Aufsetzen auf USP wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit USP wäh-
+len. Entfernen nicht möglich.","USP-Schalldämpfer
+Bei Aufsetzen auf USP wird
+das Schußgeräusch leiser. Zum
+Aufsetzen zus. mit USP wäh-
+len. Entfernen nicht möglich."
+0x5716,"Ewige Perücke
+Farbige Perücke mit langen
+Haaren. Wählen Sie sie, um
+die Perücke zu tragen. 
+∞-förmige Locken.","Ewige Perücke
+Farbige Perücke mit langen
+Haaren. Wählen Sie sie, um
+die Perücke zu tragen. 
+∞-förmige Locken."
+0x578b,"Perücke A
+Blaue Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+","Perücke A
+Blaue Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+"
+0x57d5,"Perücke B
+Orange Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+","Perücke B
+Orange Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+"
+0x5820,"Perücke C
+Farbige Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+","Perücke C
+Farbige Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+"
+0x586c,"Perücke D
+Farbige Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+","Perücke D
+Farbige Perücke. 
+Wählen Sie sie, um die 
+Perücke zu tragen.
+"
+0x58b8,"Kampfanzug
+Identisch zur Uniform der 
+Gurlukovich-Soldaten im Kern 
+von Shell 1. Zum Tragen 
+wählen. Ohne Wollmütze.","Kampfanzug
+Identisch zur Uniform der 
+Gurlukovich-Soldaten im Kern 
+von Shell 1. Zum Tragen 
+wählen. Ohne Wollmütze."
+0x592f,"Pentazemin
+Benzodiazepin Antidepressivum.
+Stoppt Handzittern beim 
+Schießen. Im Fenster wählen 
+u. mit der -Taste einnehmen.","Pentazemin
+Benzodiazepin Antidepressivum.
+Stoppt Handzittern beim 
+Schießen. Im Fenster wählen 
+u. mit der -Taste einnehmen."
+0x59b1,"Meerasseln
+GM-produzierte Viecher, die 
+Ölverschmutzungen beseitigen.
+Fressen und zersetzen Öl. 
+Mögen auch gerne Rationen.","Meerasseln
+GM-produzierte Viecher, die 
+Ölverschmutzungen beseitigen.
+Fressen und zersetzen Öl. 
+Mögen auch gerne Rationen."
+0x5a30,KEINE ANTWORT,KEINE ANTWORT
+0x5a3e,Otacon,Otacon
+0x5a45,Otacon-speichern,Otacon-speichern
+0x5a56,Oberst,Oberst
+0x5a5d,Rose,Rose
+0x5a62,Pliskin,Pliskin
+0x5a6a,Stillman,Stillman
+0x5a73,Snake,Snake
+0x5a79,Emma,Emma
+0x5a7e,Mr.X,Mr.X
+0x5a83,MEMORY CARD (PS2) nicht eingelegt.,MEMORY CARD (PS2) nicht eingelegt.
+0x5aa6,Nicht genug Speicherplatz auf der MEMORY CARD (PS2).,Nicht genug Speicherplatz auf der MEMORY CARD (PS2).
+0x5adb,Neue Speicherdatei für Spieldaten erstellen?,Neue Speicherdatei für Spieldaten erstellen?
+0x5b09,Überschreiben?,Überschreiben?
+0x5b19,"MEMORY CARD (PS2) nicht formatiert.|
+Formatieren und speichern?","MEMORY CARD (PS2) nicht formatiert.|
+Formatieren und speichern?"
+0x5b59,Speichert.,Speichert.
+0x5b64,Formatiert.,Formatiert.
+0x5b70,Speichern beendet.,Speichern beendet.
+0x5b83,Speichern mißlungen.,Speichern mißlungen.
+0x5b99,Neue Speicherdatei für Spieldaten erstellen?,Neue Speicherdatei für Spieldaten erstellen?
+0x5bc7,Überschreiben?,Überschreiben?
+0x5bd7,Formatieren mißlungen.,Formatieren mißlungen.
+0x5bef,Ja,Ja
+0x5bf2,Nein,Nein
+0x5bf7,,
+0x5bf8,"M9
+Arma tranquillanti con silen-
+ziatore. Premi tasto  per
+mirare, rilascia per sparare.
+Con puntatore al laser.","M9
+Arma tranquillanti con silen-
+ziatore. Premi tasto  per
+mirare, rilascia per sparare.
+Con puntatore al laser."
+0x5c6c,"USP
+9mm automatico. Premi tasto
+ per mirare, rilascia per
+sparare. 15 colpi. Puoi 
+usare silenziatore.","USP
+9mm automatico. Premi tasto
+ per mirare, rilascia per
+sparare. 15 colpi. Puoi 
+usare silenziatore."
+0x5cd6,"SOCOM
+Pistola calibro .45. Premi
+tasto  per mirare, rilascia
+per sparare. 12 colpi. Puoi 
+usare silenziatore.","SOCOM
+Pistola calibro .45. Premi
+tasto  per mirare, rilascia
+per sparare. 12 colpi. Puoi 
+usare silenziatore."
+0x5d47,"PSG1
+Fucile di precisione. Mira
+in Visuale Soggettiva, spara
+con tasto . Ingrandisci con
+tasto , riduci con tasto .","PSG1
+Fucile di precisione. Mira
+in Visuale Soggettiva, spara
+con tasto . Ingrandisci con
+tasto , riduci con tasto ."
+0x5dc4,"RGB6
+Lanciagranate a 6 colpi.
+Premi tasto  per mirare,
+lascia per sparare. La granata 
+esplode all'impatto.","RGB6
+Lanciagranate a 6 colpi.
+Premi tasto  per mirare,
+lascia per sparare. La granata 
+esplode all'impatto."
+0x5e33,"NIKITA
+Premi tasto  per mira in
+Visuale Soggettiva, rilascia per
+sparare. Missile controllabile
+con levetta analogica sinistra.","NIKITA
+Premi tasto  per mira in
+Visuale Soggettiva, rilascia per
+sparare. Missile controllabile
+con levetta analogica sinistra."
+0x5eb6,"Stinger
+Missile terra-aria portatile.
+Mira in Visuale Soggettiva, spara
+con tasto . Allinea mirino
+al bersaglio per agganciare.","Stinger
+Missile terra-aria portatile.
+Mira in Visuale Soggettiva, spara
+con tasto . Allinea mirino
+al bersaglio per agganciare."
+0x5f39,"Claymore
+Mina antiuomo con sensore
+frontale. Premi tasto  per
+impostare. Recuperabile
+se ci strisci sopra.","Claymore
+Mina antiuomo con sensore
+frontale. Premi tasto  per
+impostare. Recuperabile
+se ci strisci sopra."
+0x5fa7,"C4
+Esplosivo al plastico con
+detonatore remoto. 
+Premi tasto  per impostare
+e tasto  per detonare.","C4
+Esplosivo al plastico con
+detonatore remoto. 
+Premi tasto  per impostare
+e tasto  per detonare."
+0x6010,"Granata chaff antiradar
+Neutralizza per un po' i
+dispositivi elettronici.
+Premi tasto  per mirare,
+rilascia per lanciare.","Granata chaff antiradar
+Neutralizza per un po' i
+dispositivi elettronici.
+Premi tasto  per mirare,
+rilascia per lanciare."
+0x608d,"Granata stordente
+Stordisce per un po' i
+soldati nemici. Premi tasto
+ per mirare, rilascia per
+lanciare.","Granata stordente
+Stordisce per un po' i
+soldati nemici. Premi tasto
+ per mirare, rilascia per
+lanciare."
+0x60f9,"Microfono
+Può rilevare suoni deboli.
+Tieni in Visuale Soggettiva,
+muovilo con la levetta
+analogica sinistra.","Microfono
+Può rilevare suoni deboli.
+Tieni in Visuale Soggettiva,
+muovilo con la levetta
+analogica sinistra."
+0x6167,"Lama ad alta frequenza
+Muovi levetta analogica destra
+per fendenti e premi per 
+affondi. Blocca con tasto . 
+Alterna con tasto .","Lama ad alta frequenza
+Muovi levetta analogica destra
+per fendenti e premi per 
+affondi. Blocca con tasto . 
+Alterna con tasto ."
+0x61ee,"Spray refrigerante
+Disinnesca bombe. Tienilo in
+Visuale Soggettiva, spruzza
+con tasto . Più forte premi
+e più forte è lo spruzzo.","Spray refrigerante
+Disinnesca bombe. Tienilo in
+Visuale Soggettiva, spruzza
+con tasto . Più forte premi
+e più forte è lo spruzzo."
+0x6276,"AKS-74u
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto  per
+mirare, forte per raffiche
+automatiche.","AKS-74u
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto  per
+mirare, forte per raffiche
+automatiche."
+0x62e2,"Caricatore
+Caricatore vuoto. Premi tasto
+ per tenerlo, rilascia per
+lanciarlo. Più forte premi
+e maggiore è la distanza.","Caricatore
+Caricatore vuoto. Premi tasto
+ per tenerlo, rilascia per
+lanciarlo. Più forte premi
+e maggiore è la distanza."
+0x6360,"Granata dirompente
+Premi tasto  per tenerla, 
+rilascia per lanciarla. 
+Più forte premi e 
+maggiore è la distanza.","Granata dirompente
+Premi tasto  per tenerla, 
+rilascia per lanciarla. 
+Più forte premi e 
+maggiore è la distanza."
+0x63d7,"M4
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto 
+per mirare, forte per
+raffiche automatiche.","M4
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto 
+per mirare, forte per
+raffiche automatiche."
+0x643e,"PSG1-T
+Arma a tranquillanti. Mira 
+in Visuale Soggettiva, spara
+con tasto . Ingrandisci con
+tasto , riduci con tasto .","PSG1-T
+Arma a tranquillanti. Mira 
+in Visuale Soggettiva, spara
+con tasto . Ingrandisci con
+tasto , riduci con tasto ."
+0x64be,"Microfono
+Può rilevare suoni deboli.
+Tieni in Visuale Soggettiva,
+muovilo con la levetta
+analogica sinistra.","Microfono
+Può rilevare suoni deboli.
+Tieni in Visuale Soggettiva,
+muovilo con la levetta
+analogica sinistra."
+0x652c,"Libro
+Pubblicazione porno. Zeppo
+di foto appetitose e di
+articoli interessanti. 
+Premi tasto  per posarlo.","Libro
+Pubblicazione porno. Zeppo
+di foto appetitose e di
+articoli interessanti. 
+Premi tasto  per posarlo."
+0x659a,"USP
+9mm automatico. Premi tasto
+ per mirare, rilascia per
+sparare. 15 colpi. Con
+silenziatore collegato.","USP
+9mm automatico. Premi tasto
+ per mirare, rilascia per
+sparare. 15 colpi. Con
+silenziatore collegato."
+0x6606,"AKS-74u
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto  per
+mirare, forte per raffiche
+automatiche.","AKS-74u
+Fucile d'assalto. 30 colpi.
+Premi leggermente tasto  per
+mirare, forte per raffiche
+automatiche."
+0x6672,"SOCOM
+Pistola calibro .45. Premi tasto
+ per mirare, rilascia per
+sparare. 12 colpi. Puoi 
+usare silenziatore.","SOCOM
+Pistola calibro .45. Premi tasto
+ per mirare, rilascia per
+sparare. 12 colpi. Puoi 
+usare silenziatore."
+0x66e3,"Microfono
+Un microfono che
+può rilevare suoni deboli.
+Premi il tasto  per
+chiamare Jennifer.","Microfono
+Un microfono che
+può rilevare suoni deboli.
+Premi il tasto  per
+chiamare Jennifer."
+0x6744,,
+0x6745,"Razione
+“Pasto pronto” per ridare
+energia. Premi tasto  per 
+mangiare. Se equipaggiata
+ridà vita se sei a 0.","Razione
+“Pasto pronto” per ridare
+energia. Premi tasto  per 
+mangiare. Se equipaggiata
+ridà vita se sei a 0."
+0x67c0,"Binocolo
+Modello militare per
+ricognizione a distanza.
+Ingrandisci con tasto ,
+riduci con tasto .","Binocolo
+Modello militare per
+ricognizione a distanza.
+Ingrandisci con tasto ,
+riduci con tasto ."
+0x6828,"Medicine
+Medicine per raffreddore.
+Premi tasto  per prenderle
+dopo averle selezionate
+nella finestra.","Medicine
+Medicine per raffreddore.
+Premi tasto  per prenderle
+dopo averle selezionate
+nella finestra."
+0x6891,"Benda
+Compresse assorbenti per
+fermare le emorragie.
+Premi tasto  per usarle
+dopo averle selezionate.","Benda
+Compresse assorbenti per
+fermare le emorragie.
+Premi tasto  per usarle
+dopo averle selezionate."
+0x68fa,"Pentazemina
+Antidepressivo alla
+Benzodiazepina. Rilassa i
+muscoli, cura lo squilibrio.
+Usalo col tasto .","Pentazemina
+Antidepressivo alla
+Benzodiazepina. Rilassa i
+muscoli, cura lo squilibrio.
+Usalo col tasto ."
+0x6966,"Uniforme da campo
+Come i soldati di 
+Gurlukovich nel centro di 
+Shell 1. Usala insieme al 
+AK per camuffarti da nemico.","Uniforme da campo
+Come i soldati di 
+Gurlukovich nel centro di 
+Shell 1. Usala insieme al 
+AK per camuffarti da nemico."
+0x69de,"Corazza
+Antiproiettili, in fibre
+speciali. Se la equipaggi
+dimezza i danni che
+subisci.","Corazza
+Antiproiettili, in fibre
+speciali. Se la equipaggi
+dimezza i danni che
+subisci."
+0x6a36,"Mimetica
+Si attiva se equipaggiata.
+Può ingannare visivamente
+l'occhio del nemico, per
+aiutarti a nasconderti.","Mimetica
+Si attiva se equipaggiata.
+Può ingannare visivamente
+l'occhio del nemico, per
+aiutarti a nasconderti."
+0x6aa6,"Cercamine
+Rileva chimicamente le
+mine. Si attiva se lo
+equipaggi e mostra le
+mine Claymore sul radar.","Cercamine
+Rileva chimicamente le
+mine. Si attiva se lo
+equipaggi e mostra le
+mine Claymore sul radar."
+0x6b0c,"Sensore A
+A spettrometria ionica. Si
+attiva se equipaggiato. 
+Mostra sul radar le mine C4 
+col profumo.","Sensore A
+A spettrometria ionica. Si
+attiva se equipaggiato. 
+Mostra sul radar le mine C4 
+col profumo."
+0x6b74,"Sensore B
+A scintillazione di
+neutroni. Suona se
+rileva le C4 inodori.
+","Sensore B
+A scintillazione di
+neutroni. Suona se
+rileva le C4 inodori.
+"
+0x6bbc,"Visore Notturno.
+Amplifica elettronicamente
+la luce debole e farti
+vedere anche al buio.
+","Visore Notturno.
+Amplifica elettronicamente
+la luce debole e farti
+vedere anche al buio.
+"
+0x6c16,"Visore termico
+Visualizza la distribuzione
+del calore e ti permette
+di vedere al buio. Puoi
+usare le Claymore.","Visore termico
+Visualizza la distribuzione
+del calore e ti permette
+di vedere al buio. Puoi
+usare le Claymore."
+0x6c85,"Binocolo
+Modello militare per
+ricognizione a distanza.
+Ingrandisci con tasto ,
+riduci con tasto .","Binocolo
+Modello militare per
+ricognizione a distanza.
+Ingrandisci con tasto ,
+riduci con tasto ."
+0x6ced,"Telecamera digitale
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+","Telecamera digitale
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+"
+0x6d5a,"Scatola di cartone 1
+Scatola per il trasporto
+di cibi deperibili.
+Equipaggiala per
+mettertela addosso.","Scatola di cartone 1
+Scatola per il trasporto
+di cibi deperibili.
+Equipaggiala per
+mettertela addosso."
+0x6dc1,"Nocive alla salute.
+Dopo che le usi,
+sarà difficilissimo
+smettere di fumare.
+","Nocive alla salute.
+Dopo che le usi,
+sarà difficilissimo
+smettere di fumare.
+"
+0x6e10,"Chiave a tessera
+Tessera di sicurezza di
+Livello #1. Apre le porte
+con livello di sicurezza #1.
+","Chiave a tessera
+Tessera di sicurezza di
+Livello #1. Apre le porte
+con livello di sicurezza #1.
+"
+0x6e71,"Rasoio
+Rasoio elettrico.
+Per una rasatura rapida
+e morbida. Rasa alla 
+perfezione.","Rasoio
+Rasoio elettrico.
+Per una rasatura rapida
+e morbida. Rasa alla 
+perfezione."
+0x6ec4,"Telefono
+Telefonino con funzione
+vibrazione. Permette
+di ricevere messaggi
+e-mail.","Telefono
+Telefonino con funzione
+vibrazione. Permette
+di ricevere messaggi
+e-mail."
+0x6f17,"Telecamera
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+","Telecamera
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+"
+0x6f7b,"Scatola di cartone 2
+Scatola per il trasporto
+di apparecchi elettrici.
+Equipaggiala per
+mettertela addosso.","Scatola di cartone 2
+Scatola per il trasporto
+di apparecchi elettrici.
+Equipaggiala per
+mettertela addosso."
+0x6fe7,"Scatola di cartone 3
+Scatola per il trasporto
+di rifornimenti quotidiani.
+Equipaggiala per
+mettertela addosso.","Scatola di cartone 3
+Scatola per il trasporto
+di rifornimenti quotidiani.
+Equipaggiala per
+mettertela addosso."
+0x7056,"Scatola di cartone bagnata
+Scatola per il trasporto
+di cibi deperibili. Bagnata
+e debole. Equipaggiala per
+mettertela addosso.","Scatola di cartone bagnata
+Scatola per il trasporto
+di cibi deperibili. Bagnata
+e debole. Equipaggiala per
+mettertela addosso."
+0x70d5,"Sensore AP
+Rileva forme di vita. Vibra
+se il nemico si avvicina. Se
+attivo, le altre funzioni di
+vibrazione sono spente. ","Sensore AP
+Rileva forme di vita. Vibra
+se il nemico si avvicina. Se
+attivo, le altre funzioni di
+vibrazione sono spente. "
+0x714f,"Scatola di cartone 4
+Scatola per il trasporto
+dei modellini.
+Equipaggiala per
+mettertela addosso.","Scatola di cartone 4
+Scatola per il trasporto
+dei modellini.
+Equipaggiala per
+mettertela addosso."
+0x71b1,"Scatola di cartone 5
+Scatola per trasporto del 
+software. Dai nell'occhio.
+Equipaggiala per
+mettertela addosso.","Scatola di cartone 5
+Scatola per trasporto del 
+software. Dai nell'occhio.
+Equipaggiala per
+mettertela addosso."
+0x7221,"
+
+
+
+","
+
+
+
+"
+0x7226,"Silenziatore SOCOM
+Riduce il rumore se lo fissi
+al SOCOM. Per farlo devi
+equipaggiarlo insieme al
+SOCOM. Non staccabile.","Silenziatore SOCOM
+Riduce il rumore se lo fissi
+al SOCOM. Per farlo devi
+equipaggiarlo insieme al
+SOCOM. Non staccabile."
+0x729f,"Silenziatore AK
+Riduce il rumore se lo fissi
+all'AKS-74u. Per farlo devi
+equipaggiarlo insieme
+all'AK. Non staccabile.","Silenziatore AK
+Riduce il rumore se lo fissi
+all'AKS-74u. Per farlo devi
+equipaggiarlo insieme
+all'AK. Non staccabile."
+0x7316,"Telecamera
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+","Telecamera
+Premi tasto  per scattare
+immagini. Ingrandisci con tasto
+, riduci con tasto .
+"
+0x737a,"Bandana
+La bandana di Solid
+Snake, con il simbolo
+∞ (infinità).
+","Bandana
+La bandana di Solid
+Snake, con il simbolo
+∞ (infinità).
+"
+0x73be,"Piastrine
+Scegli SPECIAL sulla
+schermata titoli e passa
+a Visualizzatore piastrine
+per vedere quelle che hai.","Piastrine
+Scegli SPECIAL sulla
+schermata titoli e passa
+a Visualizzatore piastrine
+per vedere quelle che hai."
+0x742c,"Disco MO
+Disco ottico dato dal 
+Presidente. Contiene un virus
+per distruggere i controlli di
+GW / Arsenal Gear.","Disco MO
+Disco ottico dato dal 
+Presidente. Contiene un virus
+per distruggere i controlli di
+GW / Arsenal Gear."
+0x749c,"Silenziatore USP
+Riduce il rumore se lo fissi
+all'USP. Per farlo devi
+equipaggiarlo insieme
+all'USP. Non staccabile.","Silenziatore USP
+Riduce il rumore se lo fissi
+all'USP. Per farlo devi
+equipaggiarlo insieme
+all'USP. Non staccabile."
+0x7511,"Parrucca infinità
+Parrucca colorata.
+Equipaggiala per
+metterla. Le spire
+sono a forma di ∞.","Parrucca infinità
+Parrucca colorata.
+Equipaggiala per
+metterla. Le spire
+sono a forma di ∞."
+0x7570,"Parrucca A
+Parrucca blu.
+Equipaggiala
+per metterla.
+","Parrucca A
+Parrucca blu.
+Equipaggiala
+per metterla.
+"
+0x75a5,"Parrucca B
+Parrucca arancio.
+Equipaggiala
+per metterla.
+","Parrucca B
+Parrucca arancio.
+Equipaggiala
+per metterla.
+"
+0x75de,"Parrucca C
+Parrucca colorata.
+Equipaggiala
+per metterla.
+","Parrucca C
+Parrucca colorata.
+Equipaggiala
+per metterla.
+"
+0x7618,"Parrucca D
+Parrucca colorata.
+Equipaggiala
+per metterla.
+","Parrucca D
+Parrucca colorata.
+Equipaggiala
+per metterla.
+"
+0x7652,"Uniforme da campo
+Come soldati Gurlukovich 
+nel centro di Shell 1. Per
+metterla, equipaggiala.
+Senza passamontagna.","Uniforme da campo
+Come soldati Gurlukovich 
+nel centro di Shell 1. Per
+metterla, equipaggiala.
+Senza passamontagna."
+0x76c6,"Pentazemina
+Antidepressivo alla Benzo-
+diazepina. Per avere la mano
+ferma. Sceglilo nella finestra
+e usalo col tasto tasto .","Pentazemina
+Antidepressivo alla Benzo-
+diazepina. Per avere la mano
+ferma. Sceglilo nella finestra
+e usalo col tasto tasto ."
+0x7746,"Pidocchi di mare
+Insetti geneticamente
+modificati, divorano e 
+decomporre il petrolio. 
+Adorano le razioni.","Pidocchi di mare
+Insetti geneticamente
+modificati, divorano e 
+decomporre il petrolio. 
+Adorano le razioni."
+0x77b2,NON RISPONDE,NON RISPONDE
+0x77bf,Otacon,Otacon
+0x77c6,Otacon-Salva,Otacon-Salva
+0x77d3,Colonnello,Colonnello
+0x77de,Rose,Rose
+0x77e3,Pliskin,Pliskin
+0x77eb,Stillman,Stillman
+0x77f4,Snake,Snake
+0x77fa,Emma,Emma
+0x77ff,Mr.X,Mr.X
+0x7804,MEMORY CARD (PS2) non inserita.,MEMORY CARD (PS2) non inserita.
+0x7824,Spazio memoria insufficiente sulla MEMORY CARD (PS2).,Spazio memoria insufficiente sulla MEMORY CARD (PS2).
+0x785a,Crea nuovi dati da salvare. OK?,Crea nuovi dati da salvare. OK?
+0x787a,Vuoi sovrascrivere?,Vuoi sovrascrivere?
+0x788e,"MEMORY CARD (PS2) non formattata.|
+Vuoi formattare e salvare?","MEMORY CARD (PS2) non formattata.|
+Vuoi formattare e salvare?"
+0x78cc,Salvataggio in corso.,Salvataggio in corso.
+0x78e2,Formattazione in corso.,Formattazione in corso.
+0x78fa,Salvataggio completato.,Salvataggio completato.
+0x7912,Salvataggio non riuscito.,Salvataggio non riuscito.
+0x792c,Crea nuovi dati da salvare. OK?,Crea nuovi dati da salvare. OK?
+0x794c,Vuoi sovrascrivere?,Vuoi sovrascrivere?
+0x7960,Formattazione non riuscita.,Formattazione non riuscita.
+0x797c,Sì,Sì
+0x7980,No,No
+0x7983,,
+0x7984,"M9
+Tranquilizador silenciador.
+Pulsa el botón  para apuntar 
+y suéltalo para disparar. 
+Equipado con láser.","M9
+Tranquilizador silenciador.
+Pulsa el botón  para apuntar 
+y suéltalo para disparar. 
+Equipado con láser."
+0x79f6,"USP
+Automática 9mm. Pulsa el botón 
+ para apuntar y suéltalo para
+disparar. 15 rondas/cargador.
+Puedes colocar un silenciador.","USP
+Automática 9mm. Pulsa el botón 
+ para apuntar y suéltalo para
+disparar. 15 rondas/cargador.
+Puedes colocar un silenciador."
+0x7a7b,"SOCOM
+Pistola del 45. Pulsa el botón 
+ para apuntar y suéltalo para
+disparar. 15 rondas/cargador.
+Puedes colocar un silenciador.","SOCOM
+Pistola del 45. Pulsa el botón 
+ para apuntar y suéltalo para
+disparar. 15 rondas/cargador.
+Puedes colocar un silenciador."
+0x7b01,"PSG1
+Rifle francotirador. Apunta en
+Primera Persona, dispara con
+el botón . Enfocar botón
+ o alejar botón .","PSG1
+Rifle francotirador. Apunta en
+Primera Persona, dispara con
+el botón . Enfocar botón
+ o alejar botón ."
+0x7b79,"RGB6
+Lanzagranadas de 6 rondas.
+Pulsa el botón  para apuntar, 
+suelta el botón para disparar. 
+Explota al colisionar.","RGB6
+Lanzagranadas de 6 rondas.
+Pulsa el botón  para apuntar, 
+suelta el botón para disparar. 
+Explota al colisionar."
+0x7bf4,"NIKITA
+Botón  para apuntar en 
+Primera Persona, suéltalo para
+disparar. Joystick analógico
+izquierdo para controlarlo.","NIKITA
+Botón  para apuntar en 
+Primera Persona, suéltalo para
+disparar. Joystick analógico
+izquierdo para controlarlo."
+0x7c71,"Stinger
+Misiles portátiles tierra aire
+Apunta en Primera Persona, 
+dispara con el botón . Alinea
+la mirilla con el objetivo. ","Stinger
+Misiles portátiles tierra aire
+Apunta en Primera Persona, 
+dispara con el botón . Alinea
+la mirilla con el objetivo. "
+0x7cf4,"Claymore
+Minas anti personales con 
+sensores frontales. Botón  
+para activarlas. Recógelas 
+gateando por encima de ellas.","Claymore
+Minas anti personales con 
+sensores frontales. Botón  
+para activarlas. Recógelas 
+gateando por encima de ellas."
+0x7d73,"C4
+Explosivos plásticos con 
+detonador remoto. Pulsa el 
+botón  para activarlas y 
+el botón  para que exploten.","C4
+Explosivos plásticos con 
+detonador remoto. Pulsa el 
+botón  para activarlas y 
+el botón  para que exploten."
+0x7dec,"Granadas Chaff
+Granadas que neutralizan 
+temporalmente los aparatos 
+electrónicos. Botón  apuntar
+y suéltalo para lanzarla.","Granadas Chaff
+Granadas que neutralizan 
+temporalmente los aparatos 
+electrónicos. Botón  apuntar
+y suéltalo para lanzarla."
+0x7e6e,"Granada Detonadora
+Dejan inconscientes a los 
+soldados temporalmente. Pulsa 
+el botón  para apuntar y 
+suéltalo para lanzarla.","Granada Detonadora
+Dejan inconscientes a los 
+soldados temporalmente. Pulsa 
+el botón  para apuntar y 
+suéltalo para lanzarla."
+0x7ef2,"Micrófono
+Puede recoger hasta sonidos
+muy bajos. Sujétalo en la 
+Primera Persona y muévelo con
+joystick analógico izquierdo.","Micrófono
+Puede recoger hasta sonidos
+muy bajos. Sujétalo en la 
+Primera Persona y muévelo con
+joystick analógico izquierdo."
+0x7f73,"Cuchillo de Alta Frecuencia
+Joystick analógico derecho para
+blandir y púlsala para cortar. 
+Botón  para bloquear. Botón
+ cambiar entre filo y revés.","Cuchillo de Alta Frecuencia
+Joystick analógico derecho para
+blandir y púlsala para cortar. 
+Botón  para bloquear. Botón
+ cambiar entre filo y revés."
+0x8013,"Espray Refrigerante
+Desactivar bombas. Sujétalo en
+Primera Persona, rocíalo con 
+botón . La fuerza al pulsar
+determina la cantidad rociada.","Espray Refrigerante
+Desactivar bombas. Sujétalo en
+Primera Persona, rocíalo con 
+botón . La fuerza al pulsar
+determina la cantidad rociada."
+0x80a5,"AKS-74u
+Rifle de Asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas/cargador.","AKS-74u
+Rifle de Asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas/cargador."
+0x8116,"Cargador.
+Cargador vacío. Pulsa botón  
+para cogerlo y suéltalo para
+lanzarlo. La fuerza al pulsar
+determina la distancia.  ","Cargador.
+Cargador vacío. Pulsa botón  
+para cogerlo y suéltalo para
+lanzarlo. La fuerza al pulsar
+determina la distancia.  "
+0x8199,"Granada Frag
+Granada. Pulsa el botón  para
+cogerla y suéltalo para 
+lanzarla. La fuerza al pulsar
+determina la distancia. ","Granada Frag
+Granada. Pulsa el botón  para
+cogerla y suéltalo para 
+lanzarla. La fuerza al pulsar
+determina la distancia. "
+0x8219,"M4
+Rifle de asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas por cargador. ","M4
+Rifle de asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas por cargador. "
+0x828a,"PSG1-T
+Rifle tranquilizador. Apunta
+Primera Persona, dispara con
+el botón . Enfocar botón
+ y alejar botón . ","PSG1-T
+Rifle tranquilizador. Apunta
+Primera Persona, dispara con
+el botón . Enfocar botón
+ y alejar botón . "
+0x8303,"Micrófono
+Puede recoger hasta sonidos
+muy bajos. Sujétalo en la 
+Primera Persona y muévelo con
+joystick analógico izquierdo.","Micrófono
+Puede recoger hasta sonidos
+muy bajos. Sujétalo en la 
+Primera Persona y muévelo con
+joystick analógico izquierdo."
+0x8384,"Libro
+Publicación para adultos. Con
+fotos de chicas y reportajes
+interesantes. Pulsa el botón  
+para activarlo.","Libro
+Publicación para adultos. Con
+fotos de chicas y reportajes
+interesantes. Pulsa el botón  
+para activarlo."
+0x83f9,"USP
+Automática de 9mm. Pulsa el
+botón  para apuntar, suéltalo
+para disparar. 15 rondas por
+cargador. Con silenciador.","USP
+Automática de 9mm. Pulsa el
+botón  para apuntar, suéltalo
+para disparar. 15 rondas por
+cargador. Con silenciador."
+0x8475,"AKS-74u
+Rifle de Asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas por cargador.","AKS-74u
+Rifle de Asalto. Pulsa
+ligeramente botón  apuntar
+con fuerza para disparar auto.
+30 rondas por cargador."
+0x84ea,"SOCOM
+Pistola de mano del 45. Botón 
+ para apuntar y suéltalo para
+disparar. 12 rondas/cargador.
+Con silenciador.","SOCOM
+Pistola de mano del 45. Botón 
+ para apuntar y suéltalo para
+disparar. 12 rondas/cargador.
+Con silenciador."
+0x8561,"Micrófono
+Puede recoger hasta sonidos
+muy bajos. Pulsa el botón
+ para llamar a Jennifer.
+","Micrófono
+Puede recoger hasta sonidos
+muy bajos. Pulsa el botón
+ para llamar a Jennifer.
+"
+0x85c0,,
+0x85c1,"Ración
+""Comida precocinada"" aumenta 
+la vida. Botón  para usarla.
+Recupera el nivel de vida 
+cuando ésta llegue a cero.","Ración
+""Comida precocinada"" aumenta 
+la vida. Botón  para usarla.
+Recupera el nivel de vida 
+cuando ésta llegue a cero."
+0x863f,"Binoculares
+Binoculares militares para 
+reconocimiento desde lejos.
+Enfocar con el botón .
+Alejar con el botón .","Binoculares
+Binoculares militares para 
+reconocimiento desde lejos.
+Enfocar con el botón .
+Alejar con el botón ."
+0x86b8,"Medicina
+Medicina para el resfriado. 
+Pulsa el botón  para tomarla 
+cuando la tengas seleccionada.
+","Medicina
+Medicina para el resfriado. 
+Pulsa el botón  para tomarla 
+cuando la tengas seleccionada.
+"
+0x8720,"Vendas
+Vendas absorventes que cortan
+la hemorragia cuando sangres.
+Pulsa el botón  cuando las 
+tengas seleccionadas.","Vendas
+Vendas absorventes que cortan
+la hemorragia cuando sangres.
+Pulsa el botón  cuando las 
+tengas seleccionadas."
+0x8799,"Pentazemin
+Antidepresivos. Relajantes
+musculares que reducen el
+temblor muscular. Utilízalo
+con el botón .","Pentazemin
+Antidepresivos. Relajantes
+musculares que reducen el
+temblor muscular. Utilízalo
+con el botón ."
+0x8809,"Uniforme de Campo
+Uniforme de los soldados de
+Gurlukovich - Núcleo Shell 1.
+Equípate con un AK para ir
+como los soldados enemigos.","Uniforme de Campo
+Uniforme de los soldados de
+Gurlukovich - Núcleo Shell 1.
+Equípate con un AK para ir
+como los soldados enemigos."
+0x888e,"Armadura para el cuerpo
+Chaqueta antibalas hecha con
+fibras especiales. Cuando te
+ataquen, y tengas este objeto,
+sufrirás la mitad de daños.","Armadura para el cuerpo
+Chaqueta antibalas hecha con
+fibras especiales. Cuando te
+ataquen, y tengas este objeto,
+sufrirás la mitad de daños."
+0x891d,"Óptico
+Activado cuando lo lleves.
+Puedes engañar ópticamente
+al ojo del enemigo y podrás
+aprovechar para esconderte.","Óptico
+Activado cuando lo lleves.
+Puedes engañar ópticamente
+al ojo del enemigo y podrás
+aprovechar para esconderte."
+0x8996,"Detector de Minas
+Detecta químicamente minas.
+Activado cuando lo tengas. 
+Indica la posición de las 
+minas Claymore en el radar.","Detector de Minas
+Detecta químicamente minas.
+Activado cuando lo tengas. 
+Indica la posición de las 
+minas Claymore en el radar."
+0x8a19,"Sensor A
+Detector explosivos iónicos.
+Activado cuando lo tengas. 
+Indica en el radar la posición
+de las C4 oloras.","Sensor A
+Detector explosivos iónicos.
+Activado cuando lo tengas. 
+Indica en el radar la posición
+de las C4 oloras."
+0x8a8e,"Sensor B
+Detector de explosivos 
+neutrón chispeante.
+Emite un pitido al detectar 
+las C4 inodoras.","Sensor B
+Detector de explosivos 
+neutrón chispeante.
+Emite un pitido al detectar 
+las C4 inodoras."
+0x8af2,"Gafas de Visión Nocturna
+Amplia electrónicamente la luz
+ténue. Con ellas podrás ver en
+la oscuridad.
+","Gafas de Visión Nocturna
+Amplia electrónicamente la luz
+ténue. Con ellas podrás ver en
+la oscuridad.
+"
+0x8b5c,"Gafas Térmicas
+Visualiza la distribución del
+calor. Permiten ver en la 
+oscuridad. Con ellas podrás
+ver las minas Claymore.","Gafas Térmicas
+Visualiza la distribución del
+calor. Permiten ver en la 
+oscuridad. Con ellas podrás
+ver las minas Claymore."
+0x8bdb,"Binoculares
+Binoculares militares para 
+reconocimiento desde lejos.
+Enfocar con el botón .
+alejar con el botón .","Binoculares
+Binoculares militares para 
+reconocimiento desde lejos.
+Enfocar con el botón .
+alejar con el botón ."
+0x8c54,"Cámara Digital
+Pulsa el botón  para sacar
+fotografías.
+Enfocar con el botón .
+Alejar con el botón .","Cámara Digital
+Pulsa el botón  para sacar
+fotografías.
+Enfocar con el botón .
+Alejar con el botón ."
+0x8cc6,"Caja de Cartón 1
+Cajas de cartón para 
+transportar alimentos 
+perecederos. Equípate con ella
+para llevarla.","Caja de Cartón 1
+Cajas de cartón para 
+transportar alimentos 
+perecederos. Equípate con ella
+para llevarla."
+0x8d35,"Cigarrillos
+Muy adictivos y peligrosos
+para tu salud.
+
+","Cigarrillos
+Muy adictivos y peligrosos
+para tu salud.
+
+"
+0x8d6d,"Llave Tarjeta
+Tarjeta de Seguridad Nivel #1.
+Abre las puertas del nivel de
+seguridad #1.
+","Llave Tarjeta
+Tarjeta de Seguridad Nivel #1.
+Abre las puertas del nivel de
+seguridad #1.
+"
+0x8dc7,"Maquinilla de afeitar
+Maquinilla de afeitar 
+eléctrica de gran apurado.
+No deja nada a su paso.
+","Maquinilla de afeitar
+Maquinilla de afeitar 
+eléctrica de gran apurado.
+No deja nada a su paso.
+"
+0x8e29,"Teléfono
+Teléfono móvil que vibra.
+Con él puedes recibir e-mails.
+
+","Teléfono
+Teléfono móvil que vibra.
+Con él puedes recibir e-mails.
+
+"
+0x8e71,"Cámara
+Pulsa el botón  para sacar
+fotos. Enfocar con el botón .
+Alejar con el botón .
+","Cámara
+Pulsa el botón  para sacar
+fotos. Enfocar con el botón .
+Alejar con el botón .
+"
+0x8ed5,"Caja de Cartón 2
+Cajas de cartón para 
+transportar aparatos 
+eléctricos. Equípate con ella
+para llevarla.","Caja de Cartón 2
+Cajas de cartón para 
+transportar aparatos 
+eléctricos. Equípate con ella
+para llevarla."
+0x8f43,"Caja de Cartón 3
+Cajas de cartón para 
+transportar suministros
+diarios. Equípate con ella
+para llevarla.","Caja de Cartón 3
+Cajas de cartón para 
+transportar suministros
+diarios. Equípate con ella
+para llevarla."
+0x8faf,"Caja de Cartón Mojada
+Cajas de cartón para 
+transportar alimentos 
+perecederos. Mojada y endeble.
+Equípate para llevarla.","Caja de Cartón Mojada
+Cajas de cartón para 
+transportar alimentos 
+perecederos. Mojada y endeble.
+Equípate para llevarla."
+0x902c,"Sensor AP
+Sensor que detecta vida. Vibra 
+cuando se acerca el enemigo. 
+Cuando el sensor esté activado
+no vibrará en otros casos.","Sensor AP
+Sensor que detecta vida. Vibra 
+cuando se acerca el enemigo. 
+Cuando el sensor esté activado
+no vibrará en otros casos."
+0x90b0,"Caja de Cartón 4
+Cajas de cartón para 
+transportar figuras de 
+acción. Equípate con ella
+para llevarla.","Caja de Cartón 4
+Cajas de cartón para 
+transportar figuras de 
+acción. Equípate con ella
+para llevarla."
+0x911c,"Caja de Cartón 5
+Cajas de cartón para 
+transportar videojuegos. ¡Ojo
+con el ""ojo"" de la caja!
+Equípate para llevarla.","Caja de Cartón 5
+Cajas de cartón para 
+transportar videojuegos. ¡Ojo
+con el ""ojo"" de la caja!
+Equípate para llevarla."
+0x9196,"
+
+
+
+","
+
+
+
+"
+0x919b,"Silenciador SOCOM
+Con él, el SOCOM hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+SOCOM. No se puede quitar. ","Silenciador SOCOM
+Con él, el SOCOM hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+SOCOM. No se puede quitar. "
+0x9224,"Silenciador AK
+Con él, el AKS-74u hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+AK. No se puede quitar. ","Silenciador AK
+Con él, el AKS-74u hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+AK. No se puede quitar. "
+0x92a9,"Cámara
+Pulsa el botón  para sacar
+fotos. Enfocar con el botón .
+Alejar con el botón .
+","Cámara
+Pulsa el botón  para sacar
+fotos. Enfocar con el botón .
+Alejar con el botón .
+"
+0x930d,"Bandana
+La bandana de Solid Snake.
+Tiene bordado el símbolo ∞ 
+(infinidad).
+","Bandana
+La bandana de Solid Snake.
+Tiene bordado el símbolo ∞ 
+(infinidad).
+"
+0x935d,"Placas de identidad
+Selecciona SPECIAL en la 
+pantalla de título y accederás
+a la visión placas, podrás ver
+placas identidad obtenidas.","Placas de identidad
+Selecciona SPECIAL en la 
+pantalla de título y accederás
+a la visión placas, podrás ver
+placas identidad obtenidas."
+0x93e9,"Disco MO
+Disco óptico entregado por el
+Presidente. Contiene un virus
+informático para destruir el
+GW /Arsenal Gear.","Disco MO
+Disco óptico entregado por el
+Presidente. Contiene un virus
+informático para destruir el
+GW /Arsenal Gear."
+0x945f,"Silenciador USP
+Con él, el USP hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+USP. No se puede quitar.","Silenciador USP
+Con él, el USP hará menos
+ruido. Para acoplarlo equípate
+al mismo tiempo con él y el
+USP. No se puede quitar."
+0x94e1,"Peluca Infinita
+Peluca de pelo largo de color.
+Equípate para ponértela. Los
+rizos tendrán la forma ∞.
+","Peluca Infinita
+Peluca de pelo largo de color.
+Equípate para ponértela. Los
+rizos tendrán la forma ∞.
+"
+0x954d,"Peluca A
+Peluca azul
+Equípate para ponértela.
+
+","Peluca A
+Peluca azul
+Equípate para ponértela.
+
+"
+0x957f,"Peluca B
+Peluca naranja
+Equípate para ponértela.
+
+","Peluca B
+Peluca naranja
+Equípate para ponértela.
+
+"
+0x95b4,"Peluca C
+Peluca de color
+Equípate para ponértela.
+
+","Peluca C
+Peluca de color
+Equípate para ponértela.
+
+"
+0x95ea,"Peluca D
+Peluca de color
+Equípate para ponértela.
+
+","Peluca D
+Peluca de color
+Equípate para ponértela.
+
+"
+0x9620,"Uniforme de Campo
+Uniforme de los soldados de
+Gurlukovich - Núcleo Shell 1.
+Equípate para ponértelo.
+No tiene pasamontañas.","Uniforme de Campo
+Uniforme de los soldados de
+Gurlukovich - Núcleo Shell 1.
+Equípate para ponértelo.
+No tiene pasamontañas."
+0x96a0,"Pentazemin
+Antidepresivos. Reducen el 
+temblor de la mano al 
+disparar. Selecciónalo en la
+ventana y pulsa el botón .","Pentazemin
+Antidepresivos. Reducen el 
+temblor de la mano al 
+disparar. Selecciónalo en la
+ventana y pulsa el botón ."
+0x971b,"Insectos Marinos
+Modificados genéticamente para
+casos de derrame de crudo. 
+Comen y descomponen el crudo.
+Les encantan las raciones.","Insectos Marinos
+Modificados genéticamente para
+casos de derrame de crudo. 
+Comen y descomponen el crudo.
+Les encantan las raciones."
+0x97a1,SIN RESPUESTA,SIN RESPUESTA
+0x97af,Otacon,Otacon
+0x97b6,Otacon-Guardar,Otacon-Guardar
+0x97c5,Coronel,Coronel
+0x97cd,Rose,Rose
+0x97d2,Pliskin,Pliskin
+0x97da,Stillman,Stillman
+0x97e3,Snake,Snake
+0x97e9,Emma,Emma
+0x97ee,Mr.X,Mr.X
+0x97f3,No hay una MEMORY CARD (PS2) introducida.,No hay una MEMORY CARD (PS2) introducida.
+0x981d,No hay suficiente espacio libre en la MEMORY CARD (PS2).,No hay suficiente espacio libre en la MEMORY CARD (PS2).
+0x9856,Crear nueva información para guardar. ¿OK?,Crear nueva información para guardar. ¿OK?
+0x9883,¿Sobrescribir?,¿Sobrescribir?
+0x9893,"La MEMORY CARD (PS2) no está formateada.|
+¿Formatear y guardar?","La MEMORY CARD (PS2) no está formateada.|
+¿Formatear y guardar?"
+0x98d5,Guardando.,Guardando.
+0x98e0,Formateando.,Formateando.
+0x98ed,Archivo guardado.,Archivo guardado.
+0x98ff,Error al guardar.,Error al guardar.
+0x9911,Crear nueva información para guardar. ¿OK?,Crear nueva información para guardar. ¿OK?
+0x993e,¿Sobrescribir?,¿Sobrescribir?
+0x994e,No se ha formateado.,No se ha formateado.
+0x9963,Sì,Sì
+0x9967,No,No
+0x996a,,
+0x996b,"M9|
+簡易麻酔銃。敵を眠らせる事が|
+できる。#{、武器}#ボ夕ンを押すと構え、
+離すと発砲。サプレッサー、|
+レーザーポイン夕ー装備。","M9|
+簡易麻酔銃。敵を眠らせる事が|
+できる。#{、武器}#ボ夕ンを押すと構え、
+離すと発砲。サプレッサー、|
+レーザーポイン夕ー装備。"
+0x9a42,"USP|
+9mm口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数15発。
+サプレッサー装着可能。","USP|
+9mm口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数15発。
+サプレッサー装着可能。"
+0x9af5,"ソーコム・ピストル|
+45口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数12発。
+サプレッサー装着可能。","ソーコム・ピストル|
+45口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数12発。
+サプレッサー装着可能。"
+0x9bbf,"PSG1|
+自動狙撃銃。装備すると主観で|
+構え、#{、武器}#ボ夕ンを押すと発砲。|
+#{、決定}#ボ夕ンでスコープのズーム
+イン、#{、キャンセル}#ボ夕ンでズームアウト。","PSG1|
+自動狙撃銃。装備すると主観で|
+構え、#{、武器}#ボ夕ンを押すと発砲。|
+#{、決定}#ボ夕ンでスコープのズーム
+イン、#{、キャンセル}#ボ夕ンでズームアウト。"
+0x9cd0,"RGB6|
+40mm6連装グレネードラン|
+チャー。#{、武器}#ボ夕ンを押すと構え、
+離すと発射。榴弾は放物線を|
+描いて飛び着弾すると爆発する。","RGB6|
+40mm6連装グレネードラン|
+チャー。#{、武器}#ボ夕ンを押すと構え、
+離すと発射。榴弾は放物線を|
+描いて飛び着弾すると爆発する。"
+0x9da2,"リモコンミサイル|
+無線誘導飛翔体。通称二キー夕。
+#{、武器}#ボ夕ンを押すと主観で構え、|
+離すと発射。発射後ミサイルを
+左スティックで操作できる。|","リモコンミサイル|
+無線誘導飛翔体。通称二キー夕。
+#{、武器}#ボ夕ンを押すと主観で構え、|
+離すと発射。発射後ミサイルを
+左スティックで操作できる。|"
+0x9e95,"スティンガーミサイル|
+携帯用地対空ミサイル。|
+装備すると主観で構え#{、武器}#ボ夕ン|
+を押すと発射。照準に標的を|
+捉える事でロックオンが可能。","スティンガーミサイル|
+携帯用地対空ミサイル。|
+装備すると主観で構え#{、武器}#ボ夕ン|
+を押すと発射。照準に標的を|
+捉える事でロックオンが可能。"
+0x9f7d,"クレイモア|
+対人指向性地雷。#{、武器}#ボ夕ンを|
+押すと設置。設置後地雷前方の|
+起爆範囲に入る物を感知すると|
+爆発する。ホフクで回収可能。","クレイモア|
+対人指向性地雷。#{、武器}#ボ夕ンを|
+押すと設置。設置後地雷前方の|
+起爆範囲に入る物を感知すると|
+爆発する。ホフクで回収可能。"
+0xa05c,"C4|
+軍用プラスティック爆弾。|
+無線式発火装置で爆破する。|
+#{、武器}#ボ夕ンを押すと設置。|
+設置後、#{、パンチ}#ボ夕ンを押すと爆破。","C4|
+軍用プラスティック爆弾。|
+無線式発火装置で爆破する。|
+#{、武器}#ボ夕ンを押すと設置。|
+設置後、#{、パンチ}#ボ夕ンを押すと爆破。"
+0xa144,"チャフ・グレネード|
+電子妨害用手榴弾。|
+電子機器を一定時間無効に|
+できる。#{、武器}#ボ夕ンを押すと
+構え、離すと投げる。","チャフ・グレネード|
+電子妨害用手榴弾。|
+電子機器を一定時間無効に|
+できる。#{、武器}#ボ夕ンを押すと
+構え、離すと投げる。"
+0xa20d,"ス夕ン・グレネード|
+閃光音響手榴弾。|
+敵を気絶させることができる。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと投げる。","ス夕ン・グレネード|
+閃光音響手榴弾。|
+敵を気絶させることができる。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと投げる。"
+0xa2cb,"指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備すると主観で|
+構え左スティックで方向を操作。","指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備すると主観で|
+構え左スティックで方向を操作。"
+0xa3a2,"刀|
+右スティックを動かして斬る。|
+右スティックを押し込むと突き。
+ボ夕ンを押している間防御。
+#{、武器}#ボ夕ンを押すと刃と峰を反転。","刀|
+右スティックを動かして斬る。|
+右スティックを押し込むと突き。
+ボ夕ンを押している間防御。
+#{、武器}#ボ夕ンを押すと刃と峰を反転。"
+0xa488,"冷却スプレー|
+爆弾処理用冷却スプレー。装備|
+すると主観で構え、#{、武器}#ボ夕ンを|
+押すと冷却剤を噴霧。ボ夕ンを|
+押す強さで噴霧の勢いが変わる。","冷却スプレー|
+爆弾処理用冷却スプレー。装備|
+すると主観で構え、#{、武器}#ボ夕ンを|
+押すと冷却剤を噴霧。ボ夕ンを|
+押す強さで噴霧の勢いが変わる。"
+0xa570,"AKS－74U|
+自動小銃。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。|
+サプレッサー装着可能。","AKS－74U|
+自動小銃。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。|
+サプレッサー装着可能。"
+0xa628,"マガジン|
+銃の空弾倉。|
+#{、武器}#ボ夕ンを押すと構え、
+離すと投げる。#{、武器}#ボ夕ンを|
+押す強さで投擲距離が変わる。","マガジン|
+銃の空弾倉。|
+#{、武器}#ボ夕ンを押すと構え、
+離すと投げる。#{、武器}#ボ夕ンを|
+押す強さで投擲距離が変わる。"
+0xa6f5,"グレネード|
+投擲用破片手榴弾。|
+#{、武器}#ボ夕ンを押すと構え、離すと|
+投げる。#{、武器}#ボ夕ンを押す強さで|
+投擲距離が変わる。","グレネード|
+投擲用破片手榴弾。|
+#{、武器}#ボ夕ンを押すと構え、離すと|
+投げる。#{、武器}#ボ夕ンを押す強さで|
+投擲距離が変わる。"
+0xa7cf,"M4|
+自動小銃。装弾数30発。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。","M4|
+自動小銃。装弾数30発。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。"
+0xa86b,"PSG1－T|
+麻酔弾を射出する狙撃麻酔用銃。
+装備すると主観で構え#{、武器}#ボ夕ン|
+で発砲。#{、決定}#ボ夕ンでズームイン、
+#{、キャンセル}#ボ夕ンでズームアウト。","PSG1－T|
+麻酔弾を射出する狙撃麻酔用銃。
+装備すると主観で構え#{、武器}#ボ夕ン|
+で発砲。#{、決定}#ボ夕ンでズームイン、
+#{、キャンセル}#ボ夕ンでズームアウト。"
+0xa97c,"指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備すると主観で|
+構え左スティックで方向を操作。","指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備すると主観で|
+構え左スティックで方向を操作。"
+0xaa53,"雑誌|
+成人男性向けグラビア雑誌。|
+若い女性モデルの魅力的な写真|
+が満載。企画記事も見逃せない。
+#{、武器}#ボ夕ンで設置。","雑誌|
+成人男性向けグラビア雑誌。|
+若い女性モデルの魅力的な写真|
+が満載。企画記事も見逃せない。
+#{、武器}#ボ夕ンで設置。"
+0xab19,"USP|
+9mm口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数15発。
+サプレッサー装着。","USP|
+9mm口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数15発。
+サプレッサー装着。"
+0xabc6,"AKS－74U|
+自動小銃。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。|
+サプレッサー装着。","AKS－74U|
+自動小銃。|
+#{、武器}#ボ夕ンを軽く押すと構え、|
+強く押すとフルオートで発砲。|
+サプレッサー装着。"
+0xac78,"ソーコム・ピストル|
+45口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数12発。
+サプレッサー装着。","ソーコム・ピストル|
+45口径ハンドガン。|
+#{、武器}#ボ夕ンを押すと構え、|
+離すと発砲。装弾数12発。
+サプレッサー装着。"
+0xad3c,"指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備してボ夕ンを
+押すとジェ二ファーに呼びかける。","指向性マイク|
+マイクを向けた方向の音を拾う。
+通常は聞き取れない小さな音の|
+収音も可能。装備してボ夕ンを
+押すとジェ二ファーに呼びかける。"
+0xae18,,
+0xae19,"レーション|
+軍用携帯糧食。#{LIFE、ライフ}#を回復する。
+#{、決定}#ボ夕ンで使用。装備すると|
+#{LIFE、ライフ}#が無くなった時、自動的に
+使用して#{LIFE、ライフ}#を回復できる。","レーション|
+軍用携帯糧食。#{LIFE、ライフ}#を回復する。
+#{、決定}#ボ夕ンで使用。装備すると|
+#{LIFE、ライフ}#が無くなった時、自動的に
+使用して#{LIFE、ライフ}#を回復できる。"
+0xaf44,"双眼鏡|
+軍用双眼鏡。遠距離から|
+偵察を行う事ができる。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。","双眼鏡|
+軍用双眼鏡。遠距離から|
+偵察を行う事ができる。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。"
+0xb021,"風邪薬|
+総合感冒薬。|
+風邪を治す事ができる。|
+ウィンドウで選んで|
+#{、決定}#ボ夕ンで服用。","風邪薬|
+総合感冒薬。|
+風邪を治す事ができる。|
+ウィンドウで選んで|
+#{、決定}#ボ夕ンで服用。"
+0xb0bb,"止血材|
+止血用吸収パッド。|
+出血している時に使うと血を|
+止める事ができる。ウィンドウ|
+で選んで#{、決定}#ボ夕ンで使用。","止血材|
+止血用吸収パッド。|
+出血している時に使うと血を|
+止める事ができる。ウィンドウ|
+で選んで#{、決定}#ボ夕ンで使用。"
+0xb182,"ペン夕ゼミン|
+ベンゾジアゼピン系抗不安薬。|
+抗不安作用以外に筋弛緩作用、|
+自律神経調節作用等もある。|
+#{、決定}#ボ夕ンで使用。","ペン夕ゼミン|
+ベンゾジアゼピン系抗不安薬。|
+抗不安作用以外に筋弛緩作用、|
+自律神経調節作用等もある。|
+#{、決定}#ボ夕ンで使用。"
+0xb252,"野戦服|
+シェル1中央棟を警備している|
+敵兵士と同じ#{野戦服、B.D.U}#。装備する|
+と着用。同時にAKを装備すれ|
+ば敵兵士に変装する事が可能。","野戦服|
+シェル1中央棟を警備している|
+敵兵士と同じ#{野戦服、B.D.U}#。装備する|
+と着用。同時にAKを装備すれ|
+ば敵兵士に変装する事が可能。"
+0xb32d,"ボディ・アーマー|
+特殊繊維を使用した防弾衣。|
+装備すると着用。着用している|
+間、受けるダメージを半減|
+させる事ができる。","ボディ・アーマー|
+特殊繊維を使用した防弾衣。|
+装備すると着用。着用している|
+間、受けるダメージを半減|
+させる事ができる。"
+0xb3ed,"ステルス迷彩|
+装備すると作動。環境の動的|
+変化に応じて実時間光学処理を|
+実行、可視波長帯域を欺瞞して|
+敵から身を隠すことができる。","ステルス迷彩|
+装備すると作動。環境の動的|
+変化に応じて実時間光学処理を|
+実行、可視波長帯域を欺瞞して|
+敵から身を隠すことができる。"
+0xb4b6,"地雷探知器|
+化学探知を応用した地雷探知器。
+装備すると作動。敷設された|
+クレイモア地雷の位置を|
+レーダーに表示する。","地雷探知器|
+化学探知を応用した地雷探知器。
+装備すると作動。敷設された|
+クレイモア地雷の位置を|
+レーダーに表示する。"
+0xb569,"センサーA|
+イオン易動性分光測定式爆発物|
+探知器。装備すると作動。C4の
+『匂い』を感知し、レーダーに
+表示する。","センサーA|
+イオン易動性分光測定式爆発物|
+探知器。装備すると作動。C4の
+『匂い』を感知し、レーダーに
+表示する。"
+0xb61b,"センサーB|
+中性子後方散乱式爆発物探知器。
+装備すると作動。『匂い』の
+しないC4を感知して警告音を
+発する。","センサーB|
+中性子後方散乱式爆発物探知器。
+装備すると作動。『匂い』の
+しないC4を感知して警告音を
+発する。"
+0xb6c3,"暗視ゴーグル|
+微弱な光を電子的に増幅して|
+映像化する暗視装置。装備して|
+使用。暗い場所でも視界を|
+確保する事ができる。","暗視ゴーグル|
+微弱な光を電子的に増幅して|
+映像化する暗視装置。装備して|
+使用。暗い場所でも視界を|
+確保する事ができる。"
+0xb77a,"赤外線ゴーグル|
+熱源の分布を視覚化する暗視|
+装置。装備して使用。暗い場所|
+でも視界を確保できる。クレイ|
+モア等を可視化する事も可能。","赤外線ゴーグル|
+熱源の分布を視覚化する暗視|
+装置。装備して使用。暗い場所|
+でも視界を確保できる。クレイ|
+モア等を可視化する事も可能。"
+0xb849,"双眼鏡|
+軍用双眼鏡。遠距離から|
+偵察を行う事ができる。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。","双眼鏡|
+軍用双眼鏡。遠距離から|
+偵察を行う事ができる。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。"
+0xb926,"デジ夕ルカメラ|
+写真を撮る事ができる。|
+#{、武器}#ボ夕ンを押すと撮影。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。","デジ夕ルカメラ|
+写真を撮る事ができる。|
+#{、武器}#ボ夕ンを押すと撮影。|
+#{、決定}#ボ夕ンでズームイン、|
+#{、キャンセル}#ボ夕ンでズームアウト。"
+0xba25,"ダンボール箱1|
+生鮮食料品輸送用の|
+ダンボール箱。|
+装備すると着用。","ダンボール箱1|
+生鮮食料品輸送用の|
+ダンボール箱。|
+装備すると着用。"
+0xba8d,"煙草|
+あなたの健康を損なうおそれが|
+ありますので吸い過ぎに|
+注意しましょう|
+喫煙マナーをまもりましょう","煙草|
+あなたの健康を損なうおそれが|
+ありますので吸い過ぎに|
+注意しましょう|
+喫煙マナーをまもりましょう"
+0xbb29,"カード#1|
+レベル#1のセキュリティ・|
+カード。持っているだけで|
+セキュリティ・レベル#1までの|
+扉を開けることができる。","カード#1|
+レベル#1のセキュリティ・|
+カード。持っているだけで|
+セキュリティ・レベル#1までの|
+扉を開けることができる。"
+0xbbe6,"髭剃り|
+電気カミソリ。|
+剃り味滑らか。切れ味抜群。|
+スピーディーな深剃りで|
+剃り残しなし。","髭剃り|
+電気カミソリ。|
+剃り味滑らか。切れ味抜群。|
+スピーディーな深剃りで|
+剃り残しなし。"
+0xbc79,"携帯電話|
+マナーモード付き携帯電話。|
+電子メールの受信も可能。|","携帯電話|
+マナーモード付き携帯電話。|
+電子メールの受信も可能。|"
+0xbcdc,"デジ夕ルカメラ|
+#{、武器}#ボ夕ンで撮影。#{、決定}#ボ夕ンで|
+ズームイン、#{、キャンセル}#ボ夕ンでズーム|
+アウト。ボ夕ン、ボ夕ン
+でプレビューを左右に移動。|","デジ夕ルカメラ|
+#{、武器}#ボ夕ンで撮影。#{、決定}#ボ夕ンで|
+ズームイン、#{、キャンセル}#ボ夕ンでズーム|
+アウト。ボ夕ン、ボ夕ン
+でプレビューを左右に移動。|"
+0xbdf9,"ダンボール箱2|
+電化製品輸送用のダンボール箱。
+装備すると着用。","ダンボール箱2|
+電化製品輸送用のダンボール箱。
+装備すると着用。"
+0xbe5b,"ダンボール箱3|
+日用品輸送用のダンボール箱。
+装備すると着用。","ダンボール箱3|
+日用品輸送用のダンボール箱。
+装備すると着用。"
+0xbeba,"濡れたダンボール箱|
+生鮮食料品輸送用の|
+ダンボール箱。
+濡れて傷んでいる。
+装備すると着用。","濡れたダンボール箱|
+生鮮食料品輸送用の|
+ダンボール箱。
+濡れて傷んでいる。
+装備すると着用。"
+0xbf48,"生体センサー|
+生体反応を感知するセンサー。|
+装備すると作動。敵兵の接近を|
+振動で知らせる。作動中、セン|
+サー以外の振動はオフになる。","生体センサー|
+生体反応を感知するセンサー。|
+装備すると作動。敵兵の接近を|
+振動で知らせる。作動中、セン|
+サー以外の振動はオフになる。"
+0xc01a,"ダンボール箱4|
+アクションフィギュア輸送用の|
+ダンボール箱。|
+装備すると着用。","ダンボール箱4|
+アクションフィギュア輸送用の|
+ダンボール箱。|
+装備すると着用。"
+0xc09a,"ダンボール箱5|
+ゲームソフト輸送用の|
+ダンボール箱。|
+目玉の模様が特徴的。|
+装備すると着用。","ダンボール箱5|
+ゲームソフト輸送用の|
+ダンボール箱。|
+目玉の模様が特徴的。|
+装備すると着用。"
+0xc128,,
+0xc129,"ソーコム・サプレッサー|
+ソーコムに装着すると発砲時の|
+銃声を抑える事ができる。|
+ソーコムと同時に装備する事で|
+装着。装着後は取り外し不可。|","ソーコム・サプレッサー|
+ソーコムに装着すると発砲時の|
+銃声を抑える事ができる。|
+ソーコムと同時に装備する事で|
+装着。装着後は取り外し不可。|"
+0xc202,"AK・サプレッサー|
+AKに装着すると発砲時の
+銃声を抑える事ができる。|
+AKと同時に装備する事で|
+装着。装着後は取り外し不可。|","AK・サプレッサー|
+AKに装着すると発砲時の
+銃声を抑える事ができる。|
+AKと同時に装備する事で|
+装着。装着後は取り外し不可。|"
+0xc2bc,"デジ夕ルカメラ|
+#{、武器}#ボ夕ンで撮影。ボ夕ンで|
+ズームイン、ボ夕ンでズーム|
+アウト。ボ夕ン、ボ夕ン
+でプレビューを左右に移動。|","デジ夕ルカメラ|
+#{、武器}#ボ夕ンで撮影。ボ夕ンで|
+ズームイン、ボ夕ンでズーム|
+アウト。ボ夕ン、ボ夕ン
+でプレビューを左右に移動。|"
+0xc3a1,"無限バンダナ|
+ソリッド・スネーク愛用の|
+バンダナ。∞というマークが|
+縫い込まれている。","無限バンダナ|
+ソリッド・スネーク愛用の|
+バンダナ。∞というマークが|
+縫い込まれている。"
+0xc429,"ドッグ夕グ|
+兵士の認識票。夕イトル画面|
+からSPECIALを選択しDOG |
+TAG VIEWERに入ると取得
+したドッグ夕グを確認できる。","ドッグ夕グ|
+兵士の認識票。夕イトル画面|
+からSPECIALを選択しDOG |
+TAG VIEWERに入ると取得
+したドッグ夕グを確認できる。"
+0xc4d6,"光ディスク|
+大統領から託された光ディスク。
+『G.W』とアーセナルギアの|
+制御機能を破壊するコンピュー|
+夕・ウィルスが入っている。","光ディスク|
+大統領から託された光ディスク。
+『G.W』とアーセナルギアの|
+制御機能を破壊するコンピュー|
+夕・ウィルスが入っている。"
+0xc5ad,"USP・サプレッサー|
+USPに装着すると発砲時の|
+銃声を抑える事ができる。|
+USPと同時に装備する事で|
+装着。装着後は取り外し不可。|","USP・サプレッサー|
+USPに装着すると発砲時の|
+銃声を抑える事ができる。|
+USPと同時に装備する事で|
+装着。装着後は取り外し不可。|"
+0xc66b,"無限ウィッグ|
+茶色のカツラ。|
+装備すると着用。|
+つむじが∞の形をしている。","無限ウィッグ|
+茶色のカツラ。|
+装備すると着用。|
+つむじが∞の形をしている。"
+0xc6e7,"ウィッグA|
+青色のカツラ。|
+装備すると着用。|","ウィッグA|
+青色のカツラ。|
+装備すると着用。|"
+0xc733,"ウィッグB|
+オレンジ色のカツラ。|
+装備すると着用。|","ウィッグB|
+オレンジ色のカツラ。|
+装備すると着用。|"
+0xc788,"ウィッグC|
+＊色のカツラ。|
+装備すると着用。|","ウィッグC|
+＊色のカツラ。|
+装備すると着用。|"
+0xc7d4,"ウィッグD|
+＊色のカツラ。|
+装備すると着用。|","ウィッグD|
+＊色のカツラ。|
+装備すると着用。|"
+0xc820,"野戦服|
+シェル1中央棟を警備している|
+敵兵士と同じ#{野戦服、B.D.U}#。|
+装備すると着用。|
+スカルキャップは既にない。","野戦服|
+シェル1中央棟を警備している|
+敵兵士と同じ#{野戦服、B.D.U}#。|
+装備すると着用。|
+スカルキャップは既にない。"
+0xc8e4,"ペン夕ゼミン|
+ベンゾジアゼピン系抗不安薬。|
+狙撃銃を構えた時の手ぶれを|
+一定時間止める。ウィンドウで|
+選んで#{、決定}#ボ夕ンで服用。","ペン夕ゼミン|
+ベンゾジアゼピン系抗不安薬。|
+狙撃銃を構えた時の手ぶれを|
+一定時間止める。ウィンドウで|
+選んで#{、決定}#ボ夕ンで服用。"
+0xc9bd,"フナムシ|
+原油流出事故用に遺伝子操作で|
+造られた虫。吸着した原油を|
+食べ、特殊な酵素で分解する。|
+レーションも大好物。","フナムシ|
+原油流出事故用に遺伝子操作で|
+造られた虫。吸着した原油を|
+食べ、特殊な酵素で分解する。|
+レーションも大好物。"
+0xca7a,応答ありません。,応答ありません。
+0xca96,オ夕コン,オ夕コン
+0xcaa3,SAVE,SAVE
+0xcaa8,大佐,大佐
+0xcaaf,ローズ,ローズ
+0xcab9,プリスキン,プリスキン
+0xcac9,スティルマン,スティルマン
+0xcadf,スネーク,スネーク
+0xcaec,エマ,エマ
+0xcaf3,ミス夕ーX,ミス夕ーX
+0xcb01,メモリーカード(PS2)が見つかりません,メモリーカード(PS2)が見つかりません
+0xcb34,メモリーカード(PS2)の空き容量が足りません,メモリーカード(PS2)の空き容量が足りません
+0xcb70,"新規にデー夕をセーブします|
+よろしいですか？","新規にデー夕をセーブします|
+よろしいですか？"
+0xcbb5,"デー夕を上書きセーブします|
+よろしいですか？","デー夕を上書きセーブします|
+よろしいですか？"
+0xcbfa,"メモリーカード(PS2)はフォーマットされていません|
+メモリーカード(PS2)をフォーマットして|
+セーブします よろしいですか？","メモリーカード(PS2)はフォーマットされていません|
+メモリーカード(PS2)をフォーマットして|
+セーブします よろしいですか？"
+0xccb2,ファイルのセーブ中,ファイルのセーブ中
+0xccd1,フォーマット中,フォーマット中
+0xcced,ファイルのセーブが終了しました,ファイルのセーブが終了しました
+0xcd1e,ファイルのセーブ中にエラーが発生しました,ファイルのセーブ中にエラーが発生しました
+0xcd5e,新規にデー夕をセーブします。よろしいですか？,新規にデー夕をセーブします。よろしいですか？
+0xcda7,デー夕を上書きセーブします。よろしいですか？,デー夕を上書きセーブします。よろしいですか？
+0xcdf0,フォーマット中にエラーが発生しました,フォーマット中にエラーが発生しました
+0xce2d,Yes,Yes
+0xce31,No,No
+0xce34,"コントローラを接続し直し|
+START ボ夕ンを押して続けてください","コントローラを接続し直し|
+START ボ夕ンを押して続けてください"
+0xce8b,船尾甲板,船尾甲板
+0xce98,船橋一階居住区,船橋一階居住区
+0xceae,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0xcedc,船橋ニ階居住区,船橋ニ階居住区
+0xcef2,船橋三階居住区,船橋三階居住区
+0xcf08,船橋四階居住区,船橋四階居住区
+0xcf1e,船橋五階操舵室,船橋五階操舵室
+0xcf34,航海甲板ウィング,航海甲板ウィング
+0xcf50,機関室,機関室
+0xcf5a,第ニ甲板右舷,第ニ甲板右舷
+0xcf6d,第ニ甲板左舷,第ニ甲板左舷
+0xcf80,第一船倉,第一船倉
+0xcf8d,第ニ船倉,第ニ船倉
+0xcf9a,第三船倉,第三船倉
+0xcfa7,A脚底部海底ドック,A脚底部海底ドック
+0xcfc4,A脚屋上,A脚屋上
+0xcfcf,A脚ポンプ室,A脚ポンプ室
+0xcfe0,AB連絡橋,AB連絡橋
+0xcfec,B脚変電室,B脚変電室
+0xcffa,BC連絡橋,BC連絡橋
+0xd006,C脚食堂,C脚食堂
+0xd011,CD連絡橋,CD連絡橋
+0xd01d,D脚第一沈殿池,D脚第一沈殿池
+0xd031,DE連絡橋,DE連絡橋
+0xd03d,E脚集配場,E脚集配場
+0xd04b,E脚ヘリポート,E脚ヘリポート
+0xd05f,EF連絡橋,EF連絡橋
+0xd06b,F脚倉庫,F脚倉庫
+0xd076,FA連絡橋,FA連絡橋
+0xd082,シェル1中央棟1F,シェル1中央棟1F
+0xd09b,シェル1中央棟B1,シェル1中央棟B1
+0xd0b4,シェル1中央棟B1集会場,シェル1中央棟B1集会場
+0xd0d6,シェル1中央棟B2電算室,シェル1中央棟B2電算室
+0xd0f8,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0xd11c,シェル1シェル2連絡橋～LG連絡橋,シェル1シェル2連絡橋～LG連絡橋
+0xd14e,L脚外周～KL連絡橋,L脚外周～KL連絡橋
+0xd167,KL連絡橋,KL連絡橋
+0xd173,L脚汚水処理場,L脚汚水処理場
+0xd187,シェル2中央棟1F空気清浄室,シェル2中央棟1F空気清浄室
+0xd1af,シェル2中央棟B1第一ろ過室,シェル2中央棟B1第一ろ過室
+0xd1d7,シェル2中央棟B1第ニろ過室,シェル2中央棟B1第ニろ過室
+0xd1ff,L脚下部オイルフェンス,L脚下部オイルフェンス
+0xd222,アーセナルギア胃,アーセナルギア胃
+0xd23b,アーセナルギア空腸,アーセナルギア空腸
+0xd257,アーセナルギア上行結腸,アーセナルギア上行結腸
+0xd279,アーセナルギア回腸,アーセナルギア回腸
+0xd295,アーセナルギアS状結腸,アーセナルギアS状結腸
+0xd2b5,アーセナルギア直腸,アーセナルギア直腸
+0xd2d1,フェデラルホール,フェデラルホール
+0xd2ed,プラント編ス夕ート,プラント編ス夕ート
+0xd309,夕ンカー編クリア,夕ンカー編クリア
+0xd322,プラント編クリア,プラント編クリア
+0xd33b,スネークテイルズAクリア,スネークテイルズAクリア
+0xd35e,スネークテイルズBクリア,スネークテイルズBクリア
+0xd381,スネークテイルズCクリア,スネークテイルズCクリア
+0xd3a4,スネークテイルズDクリア,スネークテイルズDクリア
+0xd3c7,スネークテイルズEクリア,スネークテイルズEクリア
+0xd3ea,フィランソロピーのアジト,フィランソロピーのアジト
+0xd412,並行宇宙の狭間,並行宇宙の狭間
+0xd428,雷電テイルズ,雷電テイルズ
+0xd43b,特異点,特異点
+0xd445,-,-
+0xd447,船尾甲板,船尾甲板
+0xd454,船橋一階居住区,船橋一階居住区
+0xd46a,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0xd498,船橋ニ階居住区,船橋ニ階居住区
+0xd4ae,船橋三階居住区,船橋三階居住区
+0xd4c4,船橋四階居住区,船橋四階居住区
+0xd4da,船橋五階操舵室,船橋五階操舵室
+0xd4f0,航海甲板ウィング,航海甲板ウィング
+0xd50c,機関室,機関室
+0xd516,第ニ甲板,第ニ甲板
+0xd523,第一船倉,第一船倉
+0xd530,第ニ船倉,第ニ船倉
+0xd53d,第三船倉,第三船倉
+0xd54a,A脚ポンプ施設,A脚ポンプ施設
+0xd55e,AB連絡橋,AB連絡橋
+0xd56a,B脚変電室,B脚変電室
+0xd578,BC連絡橋,BC連絡橋
+0xd584,C脚食堂,C脚食堂
+0xd58f,CD連絡橋,CD連絡橋
+0xd59b,D脚第一沈殿池,D脚第一沈殿池
+0xd5af,DE連絡橋,DE連絡橋
+0xd5bb,E脚貨物集配施設,E脚貨物集配施設
+0xd5d2,EF連絡橋,EF連絡橋
+0xd5de,F脚倉庫,F脚倉庫
+0xd5e9,FA連絡橋,FA連絡橋
+0xd5f5,シェル1中央棟,シェル1中央棟
+0xd60c,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0xd630,G脚油処理施設,G脚油処理施設
+0xd644,GH連絡橋,GH連絡橋
+0xd650,H脚倉庫,H脚倉庫
+0xd65b,HI連絡橋,HI連絡橋
+0xd667,I脚機材組立施設,I脚機材組立施設
+0xd67e,IJ連絡橋,IJ連絡橋
+0xd68a,J脚発電施設,J脚発電施設
+0xd69b,JK連絡橋,JK連絡橋
+0xd6a7,K脚生物化学実験施設,K脚生物化学実験施設
+0xd6c4,KL連絡橋,KL連絡橋
+0xd6d0,L脚汚水処理場,L脚汚水処理場
+0xd6e4,LG連絡橋,LG連絡橋
+0xd6f0,シェル2中央棟,シェル2中央棟
+0xd707,L脚下部オイルフェンス,L脚下部オイルフェンス
+0xd72a,H脚下部オイルフェンス,H脚下部オイルフェンス
+0xd74d,アーセナルギア胃,アーセナルギア胃
+0xd766,アーセナルギア空腸,アーセナルギア空腸
+0xd782,アーセナルギア上行結腸,アーセナルギア上行結腸
+0xd7a4,アーセナルギア回腸,アーセナルギア回腸
+0xd7c0,アーセナルギアS状結腸,アーセナルギアS状結腸
+0xd7e0,アーセナルギア直腸,アーセナルギア直腸
+0xd7fc,麻布十番,麻布十番
+0xd809,船橋市,船橋市
+0xd813,青山ニ丁目,青山ニ丁目
+0xd823,二ューヨーク52番街,二ューヨーク52番街
+0xd841,Strut A Pump Facility,Strut A Pump Facility
+0xd857,AB connecting bridge,AB connecting bridge
+0xd86c,Strut B Transformer Room,Strut B Transformer Room
+0xd885,BC connecting bridge,BC connecting bridge
+0xd89a,Strut C Dining Hall,Strut C Dining Hall
+0xd8ae,CD connecting bridge,CD connecting bridge
+0xd8c3,Strut D Sediment Pool,Strut D Sediment Pool
+0xd8d9,DE connecting bridge,DE connecting bridge
+0xd8ee,Strut E Material Distribution Facility,Strut E Material Distribution Facility
+0xd915,EF connecting bridge,EF connecting bridge
+0xd92a,Strut F warehouse,Strut F warehouse
+0xd93c,FA connecting bridge,FA connecting bridge
+0xd951,Shell 1 core,Shell 1 core
+0xd95e,Shell 1 - 2 connecting bridge,Shell 1 - 2 connecting bridge
+0xd97c,Strut G Oil Processing Facility,Strut G Oil Processing Facility
+0xd99c,GH connecting bridge,GH connecting bridge
+0xd9b1,Strut H Warehouse,Strut H Warehouse
+0xd9c3,HI connecting bridge,HI connecting bridge
+0xd9d8,Strut I Assembly Facility,Strut I Assembly Facility
+0xd9f2,IJ connecting bridge,IJ connecting bridge
+0xda07,Strut J Power Plant,Strut J Power Plant
+0xda1b,JK connecting bridge,JK connecting bridge
+0xda30,Strut K Biochem Lab,Strut K Biochem Lab
+0xda44,KL connecting bridge,KL connecting bridge
+0xda59,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0xda7b,LG connecting bridge,LG connecting bridge
+0xda90,Shell 2 Core,Shell 2 Core
+0xda9d,Strut L Oil Fence,Strut L Oil Fence
+0xdaaf,Strut H Oil Fence,Strut H Oil Fence
+0xdac1,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0xdad6,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0xdaeb,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0xdb08,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0xdb1b,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0xdb36,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0xdb4a,Azabu-Juban,Azabu-Juban
+0xdb56,Hunabashi City,Hunabashi City
+0xdb65,Aoyama Ni-Chome,Aoyama Ni-Chome
+0xdb75,New York 52nd Street,New York 52nd Street
+0xdb8a,Aft deck,Aft deck
+0xdb93,"Deck-A, crew's quarters","Deck-A, crew's quarters"
+0xdbab,"Deck-A, crew's lounge","Deck-A, crew's lounge"
+0xdbc1,"Deck-B, crew's quarters","Deck-B, crew's quarters"
+0xdbd9,"Deck-C, crew's quarters","Deck-C, crew's quarters"
+0xdbf1,"Deck-D, crew's quarters","Deck-D, crew's quarters"
+0xdc09,"Deck-E, the bridge","Deck-E, the bridge"
+0xdc1c,"Navigational deck,wing","Navigational deck,wing"
+0xdc33,Engine room,Engine room
+0xdc3f,"Deck 2, starboard","Deck 2, starboard"
+0xdc51,"Deck 2, port","Deck 2, port"
+0xdc5e,Hold No.1,Hold No.1
+0xdc68,Hold No.2,Hold No.2
+0xdc72,Hold No.3,Hold No.3
+0xdc7c,第ニ甲板右舷,第ニ甲板右舷
+0xdc8f,第ニ甲板左舷,第ニ甲板左舷
+0xdca2,,
+0xdca3,"M9|
+Tranquilizer with suppressor.
+Press  button to aim, and
+release to fire. Equipped with
+laser pointer.","M9|
+Tranquilizer with suppressor.
+Press  button to aim, and
+release to fire. Equipped with
+laser pointer."
+0xdd10,"USP|
+9mm auto. Press  button
+to aim, release to fire.
+15 rounds per magazine.
+Can attach suppressor.","USP|
+9mm auto. Press  button
+to aim, release to fire.
+15 rounds per magazine.
+Can attach suppressor."
+0xdd78,"SOCOM
+.45 handgun. Press  button
+to aim, release to fire.
+12 rounds per magazine. 
+Can attach suppressor.","SOCOM
+.45 handgun. Press  button
+to aim, release to fire.
+12 rounds per magazine. 
+Can attach suppressor."
+0xdde5,"PSG1
+Sniper rifle. Aim in First 
+Person View, fire w/  button.
+Zoom in with  button,
+zoom out with  button.","PSG1
+Sniper rifle. Aim in First 
+Person View, fire w/  button.
+Zoom in with  button,
+zoom out with  button."
+0xde5a,"RGB6
+6-round grenade launcher.
+Press  button to aim, and
+release to fire. Grenade will
+explode upon impact.","RGB6
+6-round grenade launcher.
+Press  button to aim, and
+release to fire. Grenade will
+explode upon impact."
+0xdec9,"NIKITA
+Press  button to aim in First
+Person View, release to fire.
+Missile can be controlled with
+left analog stick. ","NIKITA
+Press  button to aim in First
+Person View, release to fire.
+Missile can be controlled with
+left analog stick. "
+0xdf42,"Stinger
+Portable surface-to-air
+missile.  Aim in First Person
+View, fire w/  button. Align
+sight on target to lock on.","Stinger
+Portable surface-to-air
+missile.  Aim in First Person
+View, fire w/  button. Align
+sight on target to lock on."
+0xdfbc,"Claymore
+Anti-personnel landmine w/
+front sensor. Press  button
+to set. Can be retrieved if
+crawled over. ","Claymore
+Anti-personnel landmine w/
+front sensor. Press  button
+to set. Can be retrieved if
+crawled over. "
+0xe02a,"C4
+Plastic explosive w/ remote
+detonator. Press  button 
+to set. Press  button to
+detonate.","C4
+Plastic explosive w/ remote
+detonator. Press  button 
+to set. Press  button to
+detonate."
+0xe08c,"Chaff Grenade
+Grenade that neutralizes
+electronic devices 
+temporarily. Press  button
+to aim, release to throw.","Chaff Grenade
+Grenade that neutralizes
+electronic devices 
+temporarily. Press  button
+to aim, release to throw."
+0xe0ff,"Stun Grenade
+Grenade that stuns enemy
+soldiers temporarily. Press
+ button to aim, release to
+throw.","Stun Grenade
+Grenade that stuns enemy
+soldiers temporarily. Press
+ button to aim, release to
+throw."
+0xe166,"Microphone
+Microphone that can pick up
+small sounds.  Hold in First
+Person View, move w/ left 
+analog stick.","Microphone
+Microphone that can pick up
+small sounds.  Hold in First
+Person View, move w/ left 
+analog stick."
+0xe1d3,"High Frequency Blade
+Move right analog stick to
+slash, press to lunge. Block
+w/  button. Switch between
+blade and back w/  button.","High Frequency Blade
+Move right analog stick to
+slash, press to lunge. Block
+w/  button. Switch between
+blade and back w/  button."
+0xe25c,"Coolant Spray
+For bomb disposal. Hold in
+First Person View, spray w/ 
+button. How strong button is
+pressed varies spray amount.","Coolant Spray
+For bomb disposal. Hold in
+First Person View, spray w/ 
+button. How strong button is
+pressed varies spray amount."
+0xe2df,"AKS-74u
+Assault rifle. 30 rounds per
+magazine. Press  button
+lightly to aim, strongly for
+full automatic fire.","AKS-74u
+Assault rifle. 30 rounds per
+magazine. Press  button
+lightly to aim, strongly for
+full automatic fire."
+0xe351,"Magazine
+Empty magazine. Press 
+button to hold, release to
+throw. How strong button
+is pressed varies distance.","Magazine
+Empty magazine. Press 
+button to hold, release to
+throw. How strong button
+is pressed varies distance."
+0xe3c4,"Frag Grenade
+Grenade. Press  button
+to hold, release to throw.
+How strong button is 
+pressed varies distance.","Frag Grenade
+Grenade. Press  button
+to hold, release to throw.
+How strong button is 
+pressed varies distance."
+0xe435,"M4
+Assault rifle. 30 rounds per
+magazine. Press  button 
+lightly to aim, strongly for
+full automatic fire.","M4
+Assault rifle. 30 rounds per
+magazine. Press  button 
+lightly to aim, strongly for
+full automatic fire."
+0xe4a3,"PSG1-T
+Tranquilizer rifle. Aim in 1st
+Person View, fire w/  button.
+Zoom in with  button,
+zoom out with  button.","PSG1-T
+Tranquilizer rifle. Aim in 1st
+Person View, fire w/  button.
+Zoom in with  button,
+zoom out with  button."
+0xe51d,"Microphone
+Microphone that can pick up
+small sounds. Hold in First
+Person View, move w/ left 
+analog stick.","Microphone
+Microphone that can pick up
+small sounds. Hold in First
+Person View, move w/ left 
+analog stick."
+0xe589,"Book
+Publication w/ adult-oriented
+material. Full of girly photos
+and interesting columns.
+Press  button to set. ","Book
+Publication w/ adult-oriented
+material. Full of girly photos
+and interesting columns.
+Press  button to set. "
+0xe5fe,"USP
+9mm auto. Press  button
+to aim, release to fire.
+15 rounds per magazine. 
+Suppressor attached.","USP
+9mm auto. Press  button
+to aim, release to fire.
+15 rounds per magazine. 
+Suppressor attached."
+0xe664,"AKS-74u
+Assault rifle. 30 rounds per
+magazine. Press  button 
+lightly to aim, strongly for
+full automatic fire.","AKS-74u
+Assault rifle. 30 rounds per
+magazine. Press  button 
+lightly to aim, strongly for
+full automatic fire."
+0xe6d7,"SOCOM
+.45 handgun. Press  button
+to aim, release to fire.
+12 rounds per magazine. 
+Suppressor attached.","SOCOM
+.45 handgun. Press  button
+to aim, release to fire.
+12 rounds per magazine. 
+Suppressor attached."
+0xe742,"Microphone
+Microphone that can pick
+up small sounds.
+Press  button to call
+for Jennifer.","Microphone
+Microphone that can pick
+up small sounds.
+Press  button to call
+for Jennifer."
+0xe79e,,
+0xe79f,"Ration
+""Meal ready to eat"" to restore
+life. Press  button to use.
+Life automatically recovers 
+when down to 0 if equipped.","Ration
+""Meal ready to eat"" to restore
+life. Press  button to use.
+Life automatically recovers 
+when down to 0 if equipped."
+0xe81d,"Binoculars
+Military binoculars allowing
+long-distance reconnaissance.
+Zoom in with  button,
+zoom out with  button.","Binoculars
+Military binoculars allowing
+long-distance reconnaissance.
+Zoom in with  button,
+zoom out with  button."
+0xe896,"Medicine
+Cold medicine.
+Press  button to take while
+having it selected in window.
+","Medicine
+Cold medicine.
+Press  button to take while
+having it selected in window.
+"
+0xe8ec,"Bandage
+Absorbent pads to stop blood
+loss when bleeding.
+Press  button to use while
+having it selected in window.","Bandage
+Absorbent pads to stop blood
+loss when bleeding.
+Press  button to use while
+having it selected in window."
+0xe961,"Pentazemin
+Benzodiazepine anti-
+depressant. Serves as muscle
+relaxant, treats autonomic
+imbalance. Use w/  button.","Pentazemin
+Benzodiazepine anti-
+depressant. Serves as muscle
+relaxant, treats autonomic
+imbalance. Use w/  button."
+0xe9d7,"Field Uniform
+Same uniform as Shell 1 Core
+Gurlukovich soldiers.
+Equip AK at the same time
+to disguise as enemy soldier.","Field Uniform
+Same uniform as Shell 1 Core
+Gurlukovich soldiers.
+Equip AK at the same time
+to disguise as enemy soldier."
+0xea50,"Body Armor
+Bulletproof vest made of
+special fibers. Damage
+incurred when equipped
+is reduced by half.","Body Armor
+Bulletproof vest made of
+special fibers. Damage
+incurred when equipped
+is reduced by half."
+0xeab6,"Stealth
+Activates when equipped.
+Can optically deceive enemy
+eye, helping you to hide.
+","Stealth
+Activates when equipped.
+Can optically deceive enemy
+eye, helping you to hide.
+"
+0xeb0e,"Mine Detector
+Chemically detects mines.
+Activates when equipped.
+Displays position of Claymore
+mines on radar.","Mine Detector
+Chemically detects mines.
+Activates when equipped.
+Displays position of Claymore
+mines on radar."
+0xeb7d,"Sensor A
+Ion mobility spectrometer
+explosive detector. Activates
+when equipped. Displays
+scented C4 on radar.","Sensor A
+Ion mobility spectrometer
+explosive detector. Activates
+when equipped. Displays
+scented C4 on radar."
+0xebeb,"Sensor B
+Neutron scintillator
+explosive detector.
+Beeps when detecting
+odorless C4.","Sensor B
+Neutron scintillator
+explosive detector.
+Beeps when detecting
+odorless C4."
+0xec3f,"N.V.G.
+Electronically amplifies weak
+dim light for visualization.
+Allows one to see in the dark.
+","N.V.G.
+Electronically amplifies weak
+dim light for visualization.
+Allows one to see in the dark.
+"
+0xeca1,"Thermal Goggles
+Visualizes heat source
+distribution. Allows one to
+see in the dark. Claymores
+can be seen when used.","Thermal Goggles
+Visualizes heat source
+distribution. Allows one to
+see in the dark. Claymores
+can be seen when used."
+0xed16,"Binoculars
+Military binoculars allowing
+long-distance reconnaissance.
+Zoom in with  button,
+zoom out with  button.","Binoculars
+Military binoculars allowing
+long-distance reconnaissance.
+Zoom in with  button,
+zoom out with  button."
+0xed8f,"Digital Camera
+Press  button to take
+photographs.
+Zoom in with  button,
+zoom out with  button.","Digital Camera
+Press  button to take
+photographs.
+Zoom in with  button,
+zoom out with  button."
+0xedf7,"Cardboard Box 1
+Cardboard box to transport
+perishable foods. Equip to
+wear. ","Cardboard Box 1
+Cardboard box to transport
+perishable foods. Equip to
+wear. "
+0xee44,"Cigarettes
+Highly addictive and
+hazardous to your health.","Cigarettes
+Highly addictive and
+hazardous to your health."
+0xee7e,"Card Key
+Security card Level #1.
+Opens security level #1 doors.
+
+","Card Key
+Security card Level #1.
+Opens security level #1 doors.
+
+"
+0xeec0,"Shaver
+Electric razor.
+Smooth and quick shaving
+performance. 
+Nothing is left behind.","Shaver
+Electric razor.
+Smooth and quick shaving
+performance. 
+Nothing is left behind."
+0xef16,"Phone
+Mobile phone w/ vibration
+feature. Allows receiving
+of E-mails.
+","Phone
+Mobile phone w/ vibration
+feature. Allows receiving
+of E-mails.
+"
+0xef5d,"Camera
+Press  button for photos.
+Zoom in w/  button, zoom
+out w/  button.
+","Camera
+Press  button for photos.
+Zoom in w/  button, zoom
+out w/  button.
+"
+0xefb1,"Cardboard Box 2
+Cardboard box to transport
+electric appliances. Equip to
+wear.","Cardboard Box 2
+Cardboard box to transport
+electric appliances. Equip to
+wear."
+0xf000,"Cardboard Box 3
+Cardboard box to transport
+daily supplies. Equip to
+wear.","Cardboard Box 3
+Cardboard box to transport
+daily supplies. Equip to
+wear."
+0xf04a,"Wet Cardboard Box
+Cardboard box to transport
+perishable foods. Wet and
+weak. Equip to wear.
+","Wet Cardboard Box
+Cardboard box to transport
+perishable foods. Wet and
+weak. Equip to wear.
+"
+0xf0a7,"AP Sensor
+Sensor detecting lifeforms.
+Vibrates on enemy approach.
+All other vibrations will be
+OFF when sensor is activated.","AP Sensor
+Sensor detecting lifeforms.
+Vibrates on enemy approach.
+All other vibrations will be
+OFF when sensor is activated."
+0xf124,"Cardboard Box 4
+Cardboard box to transport
+action figures. Equip to
+wear.
+","Cardboard Box 4
+Cardboard box to transport
+action figures. Equip to
+wear.
+"
+0xf16f,"Cardboard Box 5
+Cardboard box to transport
+game software. The eye
+design is ""eye-catching.""
+Equip to wear. ","Cardboard Box 5
+Cardboard box to transport
+game software. The eye
+design is ""eye-catching.""
+Equip to wear. "
+0xf1db,"
+
+
+
+","
+
+
+
+"
+0xf1e0,"SOCOM Suppressor
+Firing noise is reduced when
+attached to SOCOM. Equip
+together w/ SOCOM to attach.
+Unremovable once attached.","SOCOM Suppressor
+Firing noise is reduced when
+attached to SOCOM. Equip
+together w/ SOCOM to attach.
+Unremovable once attached."
+0xf25f,"AK Suppressor
+Firing noise is reduced when
+attached to AKS-74u. Equip
+together w/ AK to attach.
+Unremovable once attached.","AK Suppressor
+Firing noise is reduced when
+attached to AKS-74u. Equip
+together w/ AK to attach.
+Unremovable once attached."
+0xf2da,"Camera
+Press  button for photos.
+Zoom in w/  button, zoom
+out w/  button.
+","Camera
+Press  button for photos.
+Zoom in w/  button, zoom
+out w/  button.
+"
+0xf32e,"Bandana
+Solid Snake's bandana.
+∞ (infinity) symbol is
+sewn in.
+","Bandana
+Solid Snake's bandana.
+∞ (infinity) symbol is
+sewn in.
+"
+0xf370,"Dog tags
+Select SPECIAL on title
+screen and enter Dog tag
+Viewer mode to look at
+obtained dog tags.","Dog tags
+Select SPECIAL on title
+screen and enter Dog tag
+Viewer mode to look at
+obtained dog tags."
+0xf3d4,"MO Disc
+Optical disc given by the 
+President. Contains computer
+virus to destroy control 
+function of GW / Arsenal Gear.","MO Disc
+Optical disc given by the 
+President. Contains computer
+virus to destroy control 
+function of GW / Arsenal Gear."
+0xf44d,"USP Suppressor
+Firing noise is reduced when
+attached to USP. Equip
+together w/ USP to attach.
+Unremovable once attached.","USP Suppressor
+Firing noise is reduced when
+attached to USP. Equip
+together w/ USP to attach.
+Unremovable once attached."
+0xf4c6,"Infinity Wig
+Long color hair wig.
+Equip to wear. Hair
+whorl is ∞-shaped.
+","Infinity Wig
+Long color hair wig.
+Equip to wear. Hair
+whorl is ∞-shaped.
+"
+0xf512,"Wig A
+Blue wig
+Equip to wear.
+
+","Wig A
+Blue wig
+Equip to wear.
+
+"
+0xf532,"Wig B
+Orange wig
+Equip to wear.
+
+","Wig B
+Orange wig
+Equip to wear.
+
+"
+0xf554,"Wig C
+Color wig
+Equip to wear.
+
+","Wig C
+Color wig
+Equip to wear.
+
+"
+0xf575,"Wig D
+Color wig
+Equip to wear.
+
+","Wig D
+Color wig
+Equip to wear.
+
+"
+0xf596,"Field Uniform
+Same uniform as Shell 1
+Core Gurlukovich soldiers.
+Equip to wear. Balaclava
+is no longer present.","Field Uniform
+Same uniform as Shell 1
+Core Gurlukovich soldiers.
+Equip to wear. Balaclava
+is no longer present."
+0xf606,"Pentazemin
+Benzodiazepine anti-
+depressant. Stops trembling of
+hand when sniping. Select in
+window and use with  button.","Pentazemin
+Benzodiazepine anti-
+depressant. Stops trembling of
+hand when sniping. Select in
+window and use with  button."
+0xf682,"Sea Lice
+Genetically engineered bugs
+for oil spill accident. Eats
+and decomposes oil. Rations
+are their favorite as well.","Sea Lice
+Genetically engineered bugs
+for oil spill accident. Eats
+and decomposes oil. Rations
+are their favorite as well."
+0xf6fc,NO RESPONSE,NO RESPONSE
+0xf708,Otacon,Otacon
+0xf70f,Otacon-Save,Otacon-Save
+0xf71b,Colonel,Colonel
+0xf723,Rose,Rose
+0xf728,Pliskin,Pliskin
+0xf730,Stillman,Stillman
+0xf739,Snake,Snake
+0xf73f,Emma,Emma
+0xf744,Mr. X,Mr. X
+0xf74a,MEMORY CARD (PS2) not inserted.,MEMORY CARD (PS2) not inserted.
+0xf76a,Insufficient space on the MEMORY CARD (PS2).,Insufficient space on the MEMORY CARD (PS2).
+0xf797,Create new save data. OK?,Create new save data. OK?
+0xf7b1,Overwrite?,Overwrite?
+0xf7bc,"MEMORY CARD (PS2) not formatted.|
+Format and save?","MEMORY CARD (PS2) not formatted.|
+Format and save?"
+0xf7ef,Saving.,Saving.
+0xf7f7,Formatting.,Formatting.
+0xf803,Save completed.,Save completed.
+0xf813,Save failed.,Save failed.
+0xf820,Create new save data. OK?,Create new save data. OK?
+0xf83a,Overwrite?,Overwrite?
+0xf845,Format failed.,Format failed.
+0xf854,Yes,Yes
+0xf858,No,No

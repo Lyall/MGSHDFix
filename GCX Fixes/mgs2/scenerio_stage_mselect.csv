@@ -1,0 +1,392 @@
+0x624,Sauvegarder ?,Sauvegarder ?
+0x632,Oui,Oui
+0x636,Non,Non
+0x63a,メモリーカード(PS2)が見つかりません,メモリーカード(PS2)が見つかりません
+0x66d,ファイルが見つかりません,ファイルが見つかりません
+0x695,これでよろしいですか？,これでよろしいですか？
+0x6ba,ファイルのロード中,ファイルのロード中
+0x6d9,ファイルのロードが正常に終了しました,ファイルのロードが正常に終了しました
+0x713,ファイルのロード中にエラーが発生しました,ファイルのロード中にエラーが発生しました
+0x753,Yes,Yes
+0x757,No,No
+0x75a,MEMORY CARD (PS2) not inserted.,MEMORY CARD (PS2) not inserted.
+0x77a,No MGS2 Substance data found.,No MGS2 Substance data found.
+0x798,Load?,Load?
+0x79e,Now loading.,Now loading.
+0x7ab,Load completed.,Load completed.
+0x7bb,Load failed.,Load failed.
+0x7c8,Yes,Yes
+0x7cc,No,No
+0x7cf,MEMORY CARD (PS2) non insérée.,MEMORY CARD (PS2) non insérée.
+0x7f0,Aucune donnée MGS2 trouvée.,Aucune donnée MGS2 trouvée.
+0x80e,Charger?,Charger?
+0x817,Chargement en cours.,Chargement en cours.
+0x82c,Chargement terminé.,Chargement terminé.
+0x841,Echec du chargement.,Echec du chargement.
+0x856,Oui,Oui
+0x85a,Non,Non
+0x85e,MEMORY CARD (PS2) ist nicht eingelegt.,MEMORY CARD (PS2) ist nicht eingelegt.
+0x885,Keine MGS2-Daten gefunden.,Keine MGS2-Daten gefunden.
+0x8a0,Laden?,Laden?
+0x8a7,Datei wird geladen.,Datei wird geladen.
+0x8bb,Datei ist geladen.,Datei ist geladen.
+0x8ce,Datei konnte nicht geladen werden.,Datei konnte nicht geladen werden.
+0x8f1,Ja,Ja
+0x8f4,Nein,Nein
+0x8f9,No hay una MEMORY CARD (PS2) introducida.,No hay una MEMORY CARD (PS2) introducida.
+0x923,No se ha encontrado información sobre MGS2.,No se ha encontrado información sobre MGS2.
+0x950,¿Cargar?,¿Cargar?
+0x95a,Cargando.,Cargando.
+0x964,Se ha cargado satisfactoriamente.,Se ha cargado satisfactoriamente.
+0x986,No se ha cargado.,No se ha cargado.
+0x998,Sì,Sì
+0x99c,No,No
+0x99f,MEMORY CARD (PS2) non inserita.,MEMORY CARD (PS2) non inserita.
+0x9bf,Nessun dato MGS2 trovato.,Nessun dato MGS2 trovato.
+0x9d9,Vuoi caricare?,Vuoi caricare?
+0x9e8,Caricamento in corso.,Caricamento in corso.
+0x9fe,Caricamento completato.,Caricamento completato.
+0xa16,Caricamento non riuscito.,Caricamento non riuscito.
+0xa30,Sì,Sì
+0xa34,No,No
+0xa37,Aft deck,Aft deck
+0xa40,"Deck-A, crew's quarters","Deck-A, crew's quarters"
+0xa58,"Deck-A, crew's lounge","Deck-A, crew's lounge"
+0xa6e,"Deck-B, crew's quarters","Deck-B, crew's quarters"
+0xa86,"Deck-C, crew's quarters","Deck-C, crew's quarters"
+0xa9e,"Deck-D, crew's quarters","Deck-D, crew's quarters"
+0xab6,"Deck-E, the bridge","Deck-E, the bridge"
+0xac9,"Navigational deck,wing","Navigational deck,wing"
+0xae0,Engine room,Engine room
+0xaec,"Deck-2, starboard","Deck-2, starboard"
+0xafe,"Deck-2, port","Deck-2, port"
+0xb0b,Hold No.1,Hold No.1
+0xb15,Hold No.2,Hold No.2
+0xb1f,Hold No.3,Hold No.3
+0xb29,Strut A Deep Sea Dock,Strut A Deep Sea Dock
+0xb3f,Strut A roof,Strut A roof
+0xb4c,Strut A Pump Room,Strut A Pump Room
+0xb5e,AB connecting bridge,AB connecting bridge
+0xb73,Strut B Transformer Room,Strut B Transformer Room
+0xb8c,BC connecting bridge,BC connecting bridge
+0xba1,Strut C Dining Hall,Strut C Dining Hall
+0xbb5,CD connecting bridge,CD connecting bridge
+0xbca,Strut D Sediment Pool,Strut D Sediment Pool
+0xbe0,DE connecting bridge,DE connecting bridge
+0xbf5,Strut E Parcel Room,Strut E Parcel Room
+0xc09,Strut E heliport,Strut E heliport
+0xc1a,EF connecting bridge,EF connecting bridge
+0xc2f,Strut F warehouse ,Strut F warehouse 
+0xc42,FA connecting bridge,FA connecting bridge
+0xc57,"Shell 1 Core, 1F","Shell 1 Core, 1F"
+0xc68,"Shell 1 Core, B1","Shell 1 Core, B1"
+0xc79,"Shell 1 Core, B1 Hall","Shell 1 Core, B1 Hall"
+0xc8f,"Shell 1 Core, B2 Computer Room","Shell 1 Core, B2 Computer Room"
+0xcae,Shell 1-2 connecting bridge,Shell 1-2 connecting bridge
+0xcca,Shell 1-2 connecting bridge - LG connecting bridge,Shell 1-2 connecting bridge - LG connecting bridge
+0xcfd,Strut L perimeter - KL connecting bridge,Strut L perimeter - KL connecting bridge
+0xd26,KL connecting bridge,KL connecting bridge
+0xd3b,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0xd5d,"Shell 2 Core, 1F Air Purification Room","Shell 2 Core, 1F Air Purification Room"
+0xd84,"Shell 2 Core, B1 Filtration Chamber No.1","Shell 2 Core, B1 Filtration Chamber No.1"
+0xdad,"Shell 2 Core, B1 Filtration Chamber No.2","Shell 2 Core, B1 Filtration Chamber No.2"
+0xdd6,Strut L Oil Fence,Strut L Oil Fence
+0xde8,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0xdfd,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0xe12,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0xe2f,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0xe42,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0xe5d,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0xe71,Federal Hall,Federal Hall
+0xe7e,Plant Beginning,Plant Beginning
+0xe8e,Tanker Cleared,Tanker Cleared
+0xe9d,Plant Cleared,Plant Cleared
+0xeab,Snake Tales A Cleared,Snake Tales A Cleared
+0xec1,Snake Tales B Cleared,Snake Tales B Cleared
+0xed7,Snake Tales C Cleared,Snake Tales C Cleared
+0xeed,Snake Tales D Cleared,Snake Tales D Cleared
+0xf03,Snake Tales E Cleared,Snake Tales E Cleared
+0xf19,Philanthropy's hideout,Philanthropy's hideout
+0xf30,Gap between parallel universes,Gap between parallel universes
+0xf4f,Raiden Tales,Raiden Tales
+0xf5c,The singularity,The singularity
+0xf6c,-,-
+0xf6e,船尾甲板,船尾甲板
+0xf7b,船橋一階居住区,船橋一階居住区
+0xf91,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0xfbf,船橋ニ階居住区,船橋ニ階居住区
+0xfd5,船橋三階居住区,船橋三階居住区
+0xfeb,船橋四階居住区,船橋四階居住区
+0x1001,船橋五階操舵室,船橋五階操舵室
+0x1017,航海甲板ウィング,航海甲板ウィング
+0x1033,機関室,機関室
+0x103d,第ニ甲板,第ニ甲板
+0x104a,第一船倉,第一船倉
+0x1057,第ニ船倉,第ニ船倉
+0x1064,第三船倉,第三船倉
+0x1071,A脚ポンプ施設,A脚ポンプ施設
+0x1085,AB連絡橋,AB連絡橋
+0x1091,B脚変電室,B脚変電室
+0x109f,BC連絡橋,BC連絡橋
+0x10ab,C脚食堂,C脚食堂
+0x10b6,CD連絡橋,CD連絡橋
+0x10c2,D脚第一沈殿池,D脚第一沈殿池
+0x10d6,DE連絡橋,DE連絡橋
+0x10e2,E脚貨物集配施設,E脚貨物集配施設
+0x10f9,EF連絡橋,EF連絡橋
+0x1105,F脚倉庫,F脚倉庫
+0x1110,FA連絡橋,FA連絡橋
+0x111c,シェル1中央棟,シェル1中央棟
+0x1133,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0x1157,G脚油処理施設,G脚油処理施設
+0x116b,GH連絡橋,GH連絡橋
+0x1177,H脚倉庫,H脚倉庫
+0x1182,HI連絡橋,HI連絡橋
+0x118e,I脚機材組立施設,I脚機材組立施設
+0x11a5,IJ連絡橋,IJ連絡橋
+0x11b1,J脚発電施設,J脚発電施設
+0x11c2,JK連絡橋,JK連絡橋
+0x11ce,K脚生物化学実験施設,K脚生物化学実験施設
+0x11eb,KL連絡橋,KL連絡橋
+0x11f7,L脚汚水処理場,L脚汚水処理場
+0x120b,LG連絡橋,LG連絡橋
+0x1217,シェル2中央棟,シェル2中央棟
+0x122e,L脚下部オイルフェンス,L脚下部オイルフェンス
+0x1251,H脚下部オイルフェンス,H脚下部オイルフェンス
+0x1274,アーセナルギア胃,アーセナルギア胃
+0x128d,アーセナルギア空腸,アーセナルギア空腸
+0x12a9,アーセナルギア上行結腸,アーセナルギア上行結腸
+0x12cb,アーセナルギア回腸,アーセナルギア回腸
+0x12e7,アーセナルギアS状結腸,アーセナルギアS状結腸
+0x1307,アーセナルギア直腸,アーセナルギア直腸
+0x1323,麻布十番,麻布十番
+0x1330,船橋市,船橋市
+0x133a,青山ニ丁目,青山ニ丁目
+0x134a,二ューヨーク52番街,二ューヨーク52番街
+0x1368,Strut A Pump Facility,Strut A Pump Facility
+0x137e,AB connecting bridge,AB connecting bridge
+0x1393,Strut B Transformer Room,Strut B Transformer Room
+0x13ac,BC connecting bridge,BC connecting bridge
+0x13c1,Strut C Dining Hall,Strut C Dining Hall
+0x13d5,CD connecting bridge,CD connecting bridge
+0x13ea,Strut D Sediment Pool,Strut D Sediment Pool
+0x1400,DE connecting bridge,DE connecting bridge
+0x1415,Strut E Material Distribution Facility,Strut E Material Distribution Facility
+0x143c,EF connecting bridge,EF connecting bridge
+0x1451,Strut F warehouse,Strut F warehouse
+0x1463,FA connecting bridge,FA connecting bridge
+0x1478,Shell 1 Core,Shell 1 Core
+0x1485,Shell 1 - 2 connecting bridge,Shell 1 - 2 connecting bridge
+0x14a3,Strut G Oil Processing Facility,Strut G Oil Processing Facility
+0x14c3,GH connecting bridge,GH connecting bridge
+0x14d8,Strut H Warehouse,Strut H Warehouse
+0x14ea,HI connecting bridge,HI connecting bridge
+0x14ff,Strut I Assembly Facility,Strut I Assembly Facility
+0x1519,IJ connecting bridge,IJ connecting bridge
+0x152e,Strut J Power Plant,Strut J Power Plant
+0x1542,JK connecting bridge,JK connecting bridge
+0x1557,Strut K Biochem Lab,Strut K Biochem Lab
+0x156b,KL connecting bridge,KL connecting bridge
+0x1580,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0x15a2,LG connecting bridge,LG connecting bridge
+0x15b7,Shell 2 Core,Shell 2 Core
+0x15c4,Strut L Oil Fence,Strut L Oil Fence
+0x15d6,Strut H Oil Fence,Strut H Oil Fence
+0x15e8,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0x15fd,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0x1612,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0x162f,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0x1642,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0x165d,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0x1671,Azabu-Juban,Azabu-Juban
+0x167d,Hunabashi City,Hunabashi City
+0x168c,Aoyama Ni-Chome,Aoyama Ni-Chome
+0x169c,New York 52nd Street,New York 52nd Street
+0x16b1,船尾甲板,船尾甲板
+0x16be,船橋一階居住区,船橋一階居住区
+0x16d4,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0x1702,船橋ニ階居住区,船橋ニ階居住区
+0x1718,船橋三階居住区,船橋三階居住区
+0x172e,船橋四階居住区,船橋四階居住区
+0x1744,船橋五階操舵室,船橋五階操舵室
+0x175a,航海甲板ウィング,航海甲板ウィング
+0x1776,機関室,機関室
+0x1780,第ニ甲板右舷,第ニ甲板右舷
+0x1793,第ニ甲板左舷,第ニ甲板左舷
+0x17a6,第一船倉,第一船倉
+0x17b3,第ニ船倉,第ニ船倉
+0x17c0,第三船倉,第三船倉
+0x17cd,A脚底部海底ドック,A脚底部海底ドック
+0x17ea,A脚屋上,A脚屋上
+0x17f5,A脚ポンプ室,A脚ポンプ室
+0x1806,AB連絡橋,AB連絡橋
+0x1812,B脚変電室,B脚変電室
+0x1820,BC連絡橋,BC連絡橋
+0x182c,C脚食堂,C脚食堂
+0x1837,CD連絡橋,CD連絡橋
+0x1843,D脚第一沈殿池,D脚第一沈殿池
+0x1857,DE連絡橋,DE連絡橋
+0x1863,E脚集配場,E脚集配場
+0x1871,E脚ヘリポート,E脚ヘリポート
+0x1885,EF連絡橋,EF連絡橋
+0x1891,F脚倉庫,F脚倉庫
+0x189c,FA連絡橋,FA連絡橋
+0x18a8,シェル1中央棟1F,シェル1中央棟1F
+0x18c1,シェル1中央棟B1,シェル1中央棟B1
+0x18da,シェル1中央棟B1集会場,シェル1中央棟B1集会場
+0x18fc,シェル1中央棟B2電算室,シェル1中央棟B2電算室
+0x191e,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0x1942,シェル1シェル2連絡橋～LG連絡橋,シェル1シェル2連絡橋～LG連絡橋
+0x1974,L脚外周～KL連絡橋,L脚外周～KL連絡橋
+0x198d,KL連絡橋,KL連絡橋
+0x1999,L脚汚水処理場,L脚汚水処理場
+0x19ad,シェル2中央棟1F空気清浄室,シェル2中央棟1F空気清浄室
+0x19d5,シェル2中央棟B1第一ろ過室,シェル2中央棟B1第一ろ過室
+0x19fd,シェル2中央棟B1第ニろ過室,シェル2中央棟B1第ニろ過室
+0x1a25,L脚下部オイルフェンス,L脚下部オイルフェンス
+0x1a48,アーセナルギア胃,アーセナルギア胃
+0x1a61,アーセナルギア空腸,アーセナルギア空腸
+0x1a7d,アーセナルギア上行結腸,アーセナルギア上行結腸
+0x1a9f,アーセナルギア回腸,アーセナルギア回腸
+0x1abb,アーセナルギアS状結腸,アーセナルギアS状結腸
+0x1adb,アーセナルギア直腸,アーセナルギア直腸
+0x1af7,フェデラルホール,フェデラルホール
+0x1b13,プラント編ス夕ート,プラント編ス夕ート
+0x1b2f,夕ンカー編クリア,夕ンカー編クリア
+0x1b48,プラント編クリア,プラント編クリア
+0x1b61,スネークテイルズAクリア,スネークテイルズAクリア
+0x1b84,スネークテイルズBクリア,スネークテイルズBクリア
+0x1ba7,スネークテイルズCクリア,スネークテイルズCクリア
+0x1bca,スネークテイルズDクリア,スネークテイルズDクリア
+0x1bed,スネークテイルズEクリア,スネークテイルズEクリア
+0x1c10,フィランソロピーのアジト,フィランソロピーのアジト
+0x1c38,並行宇宙の狭間,並行宇宙の狭間
+0x1c4e,雷電テイルズ,雷電テイルズ
+0x1c61,特異点,特異点
+0x1c6b,-,-
+0x1c6d,船尾甲板,船尾甲板
+0x1c7a,船橋一階居住区,船橋一階居住区
+0x1c90,船橋一階リフレッシュルーム,船橋一階リフレッシュルーム
+0x1cbe,船橋ニ階居住区,船橋ニ階居住区
+0x1cd4,船橋三階居住区,船橋三階居住区
+0x1cea,船橋四階居住区,船橋四階居住区
+0x1d00,船橋五階操舵室,船橋五階操舵室
+0x1d16,航海甲板ウィング,航海甲板ウィング
+0x1d32,機関室,機関室
+0x1d3c,第ニ甲板,第ニ甲板
+0x1d49,第一船倉,第一船倉
+0x1d56,第ニ船倉,第ニ船倉
+0x1d63,第三船倉,第三船倉
+0x1d70,A脚ポンプ施設,A脚ポンプ施設
+0x1d84,AB連絡橋,AB連絡橋
+0x1d90,B脚変電室,B脚変電室
+0x1d9e,BC連絡橋,BC連絡橋
+0x1daa,C脚食堂,C脚食堂
+0x1db5,CD連絡橋,CD連絡橋
+0x1dc1,D脚第一沈殿池,D脚第一沈殿池
+0x1dd5,DE連絡橋,DE連絡橋
+0x1de1,E脚貨物集配施設,E脚貨物集配施設
+0x1df8,EF連絡橋,EF連絡橋
+0x1e04,F脚倉庫,F脚倉庫
+0x1e0f,FA連絡橋,FA連絡橋
+0x1e1b,シェル1中央棟,シェル1中央棟
+0x1e32,シェル1シェル2連絡橋,シェル1シェル2連絡橋
+0x1e56,G脚油処理施設,G脚油処理施設
+0x1e6a,GH連絡橋,GH連絡橋
+0x1e76,H脚倉庫,H脚倉庫
+0x1e81,HI連絡橋,HI連絡橋
+0x1e8d,I脚機材組立施設,I脚機材組立施設
+0x1ea4,IJ連絡橋,IJ連絡橋
+0x1eb0,J脚発電施設,J脚発電施設
+0x1ec1,JK連絡橋,JK連絡橋
+0x1ecd,K脚生物化学実験施設,K脚生物化学実験施設
+0x1eea,KL連絡橋,KL連絡橋
+0x1ef6,L脚汚水処理場,L脚汚水処理場
+0x1f0a,LG連絡橋,LG連絡橋
+0x1f16,シェル2中央棟,シェル2中央棟
+0x1f2d,L脚下部オイルフェンス,L脚下部オイルフェンス
+0x1f50,H脚下部オイルフェンス,H脚下部オイルフェンス
+0x1f73,アーセナルギア胃,アーセナルギア胃
+0x1f8c,アーセナルギア空腸,アーセナルギア空腸
+0x1fa8,アーセナルギア上行結腸,アーセナルギア上行結腸
+0x1fca,アーセナルギア回腸,アーセナルギア回腸
+0x1fe6,アーセナルギアS状結腸,アーセナルギアS状結腸
+0x2006,アーセナルギア直腸,アーセナルギア直腸
+0x2022,麻布十番,麻布十番
+0x202f,船橋市,船橋市
+0x2039,青山ニ丁目,青山ニ丁目
+0x2049,二ューヨーク52番街,二ューヨーク52番街
+0x2067,Strut A Pump Facility,Strut A Pump Facility
+0x207d,AB connecting bridge,AB connecting bridge
+0x2092,Strut B Transformer Room,Strut B Transformer Room
+0x20ab,BC connecting bridge,BC connecting bridge
+0x20c0,Strut C Dining Hall,Strut C Dining Hall
+0x20d4,CD connecting bridge,CD connecting bridge
+0x20e9,Strut D Sediment Pool,Strut D Sediment Pool
+0x20ff,DE connecting bridge,DE connecting bridge
+0x2114,Strut E Material Distribution Facility,Strut E Material Distribution Facility
+0x213b,EF connecting bridge,EF connecting bridge
+0x2150,Strut F warehouse,Strut F warehouse
+0x2162,FA connecting bridge,FA connecting bridge
+0x2177,Shell 1 core,Shell 1 core
+0x2184,Shell 1 - 2 connecting bridge,Shell 1 - 2 connecting bridge
+0x21a2,Strut G Oil Processing Facility,Strut G Oil Processing Facility
+0x21c2,GH connecting bridge,GH connecting bridge
+0x21d7,Strut H Warehouse,Strut H Warehouse
+0x21e9,HI connecting bridge,HI connecting bridge
+0x21fe,Strut I Assembly Facility,Strut I Assembly Facility
+0x2218,IJ connecting bridge,IJ connecting bridge
+0x222d,Strut J Power Plant,Strut J Power Plant
+0x2241,JK connecting bridge,JK connecting bridge
+0x2256,Strut K Biochem Lab,Strut K Biochem Lab
+0x226a,KL connecting bridge,KL connecting bridge
+0x227f,Strut L Sewage Treatment Facility,Strut L Sewage Treatment Facility
+0x22a1,LG connecting bridge,LG connecting bridge
+0x22b6,Shell 2 Core,Shell 2 Core
+0x22c3,Strut L Oil Fence,Strut L Oil Fence
+0x22d5,Strut H Oil Fence,Strut H Oil Fence
+0x22e7,Arsenal Gear-Stomach,Arsenal Gear-Stomach
+0x22fc,Arsenal Gear-Jejunum,Arsenal Gear-Jejunum
+0x2311,Arsenal Gear-Ascending Colon,Arsenal Gear-Ascending Colon
+0x232e,Arsenal Gear-Ileum,Arsenal Gear-Ileum
+0x2341,Arsenal Gear-Sigmoid Colon,Arsenal Gear-Sigmoid Colon
+0x235c,Arsenal Gear-Rectum,Arsenal Gear-Rectum
+0x2370,Azabu-Juban,Azabu-Juban
+0x237c,Hunabashi City,Hunabashi City
+0x238b,Aoyama Ni-Chome,Aoyama Ni-Chome
+0x239b,New York 52nd Street,New York 52nd Street
+0x23b0,ロードしますか？,ロードしますか？
+0x23cc,はい,はい
+0x23d3,いいえ,いいえ
+0x23dd,Load ?,Load ?
+0x23e4,Yes,Yes
+0x23e8,No,No
+0x23eb,Charger ?,Charger ?
+0x23f5,Oui,Oui
+0x23f9,Non,Non
+0x23fd,Laden ?,Laden ?
+0x2405,Ja,Ja
+0x2408,Nein,Nein
+0x240d,¿Cargar?,¿Cargar?
+0x2417,Sì,Sì
+0x241b,No,No
+0x241e,Vuoi caricare?,Vuoi caricare?
+0x242d,Sì,Sì
+0x2431,No,No
+0x2434,Speichern ?,Speichern ?
+0x2440,Ja,Ja
+0x2443,Nein,Nein
+0x2448,Salvare ?,Salvare ?
+0x2452,Sì,Sì
+0x2456,No,No
+0x2459,¿ Guardar ?,¿ Guardar ?
+0x2466,Sì,Sì
+0x246a,No,No
+0x246d,セーブしますか？,セーブしますか？
+0x2489,はい,はい
+0x2490,いいえ,いいえ
+0x249a,Save ?,Save ?
+0x24a1,Yes,Yes
+0x24a5,No,No
+0xffffffff,,
+0xffffffff,,
