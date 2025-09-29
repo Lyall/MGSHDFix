@@ -37,6 +37,9 @@ jobs:
 
         echo "version=$version" >> $GITHUB_OUTPUT
 
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+      
     - name: Get wxWidgets submodule hash
       id: wxhash
       run: |
@@ -65,64 +68,76 @@ jobs:
           external/zydis/msvc/bin/ReleaseX64
           external/zydis/msvc/bin/ReleaseX86
         key: zydis-${{ runner.os }}-${{ steps.zydishash.outputs.hash }}
-        
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
-
 
     # -------------------------
-    # MEGATools + GCX cache setup
+    # GCX Zips (MGS2 + MGS3)
     # -------------------------
     - name: Compute GCX cache key
       id: gcxhash
       run: |
-        # Bump this string when GCX files change with the external Mega host.
-        $hash = "gcx-v1"
+        # Bump this string when GCX zips change
+        $hash = "gcx-v6"
         "hash=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-    - name: Cache MEGATools
-      id: mega-cache
+    - name: Cache GCX zip files
+      id: gcx-zip-cache
       uses: actions/cache@v4
       with:
-        path: C:\ProgramData\chocolatey\lib\megatools
-        key: megatools-${{ runner.os }}-1.11.3
+        path: external/*.zip
+        key: gcx-zips-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
 
-    - name: Install MEGATools
-      if: steps.mega-cache.outputs.cache-hit != 'true'
-      run: choco install megatools -y
-
-    - name: Cache GCX files
-      id: gcx-cache
+    # -------------------------
+    # MEGAcmd Setup (only if cache miss)
+    # -------------------------
+    - name: Cache MEGAcmd payload
+      if: steps.gcx-zip-cache.outputs.cache-hit != 'true'
+      id: megacmd-cache
       uses: actions/cache@v4
       with:
-        path: external/gcx/mgs2
-        key: gcx-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
+        path: C:\ProgramData\chocolatey\lib\megacmd
+        key: megacmd-${{ runner.os }}-1.6.3
 
-    - name: Download GCX files
-      if: steps.gcx-cache.outputs.cache-hit != 'true'
+    - name: MEGAcmd install (rebuild shims if cache miss)
+      if: steps.gcx-zip-cache.outputs.cache-hit != 'true'
+      run: choco install megacmd -y --force
+
+    - name: Add MEGAcmd to PATH
+      if: steps.gcx-zip-cache.outputs.cache-hit != 'true'
       run: |
-        mkdir external/gcx/mgs2 -Force
-        megatools dl --no-progress --path external/gcx/mgs2 "https://mega.nz/folder/vxJWhILC#L-x85NXeF7Be2Slgt1qLsA"
-      
-    - name: Copy Vanilla GCX files into GCX Fixes folder
+        echo "$env:LOCALAPPDATA\MEGAcmd" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    # -------------------------
+    # Download GCX zips (only if cache miss)
+    # -------------------------
+    - name: Download GCX zips
+      if: steps.gcx-zip-cache.outputs.cache-hit != 'true'
       run: |
-        $RepoRootDir = "${{ github.workspace }}"
-        $targetDir   = Join-Path $RepoRootDir "GCX Fixes\mgs2"
+        mkdir external -Force
+        mega-get "https://mega.nz/file/LogUGBzB#NcofiyjsbFF_khRe61KdgL6HWLNfiHiSFI9QEsuElS8" "external/mgs2-gcx.zip"
+        mega-get "https://mega.nz/file/XxpDzAYB#H49lYsNhUmH4bdALLYUr_Nl0LjqDMpa-FSQh6jUXdOc" "external/mgs3-gcx.zip"
 
-        # Ensure target exists
-        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+    # -------------------------
+    - name: Extract GCX zips
+      run: |
+        $destMgs2 = "GCX Fixes/mgs2"
+        $destMgs3 = "GCX Fixes/mgs3"
 
-        # Copy all .gcx files
-        Get-ChildItem external/gcx/mgs2 -Recurse -Filter *.gcx | ForEach-Object {
-          Copy-Item $_.FullName -Destination $targetDir -Force
-        }
+        New-Item -ItemType Directory -Force -Path $destMgs2 | Out-Null
+        New-Item -ItemType Directory -Force -Path $destMgs3 | Out-Null
 
-        Write-Host "Final GCX files in ${targetDir}:"
-        Get-ChildItem $targetDir -Recurse | ForEach-Object {
-          Write-Host $_.FullName
-        }
-        
+        Expand-Archive external/mgs2-gcx.zip -DestinationPath $destMgs2 -Force
+        Expand-Archive external/mgs3-gcx.zip -DestinationPath $destMgs3 -Force
+
+        Write-Host "Final GCX files in ${destMgs2}:"
+        Get-ChildItem $destMgs2 -Recurse | ForEach-Object { Write-Host $_.FullName }
+
+        Write-Host "Final GCX files in ${destMgs3}:"
+        Get-ChildItem $destMgs3 -Recurse | ForEach-Object { Write-Host $_.FullName }
+
+
+    # -------------------------
     # Prepare output structure
+    # -------------------------
     - run: mkdir dist
     - run: mkdir dist/plugins
     - run: mkdir dist/logs
@@ -139,11 +154,27 @@ jobs:
 
         Write-Host "Invoking $importScript..."
         pwsh -File $importScript
-        
+
+    - name: Run MGS3 GCX import-gcx.ps1 (en/fr, gr, it, sp)
+      run: |
+        $RepoRootDir = "${{ github.workspace }}"
+        $langs = @("fr","gr","it","sp")
+
+        foreach ($lang in $langs) {
+          $importScript = Join-Path $RepoRootDir "GCX Fixes\mgs3\$lang\import-gcx.ps1"
+
+          if (-not (Test-Path $importScript)) {
+            Write-Warning "import-gcx.ps1 not found for $lang at $importScript"
+            continue
+          }
+
+          Write-Host "Invoking $importScript for $lang..."
+          pwsh -File $importScript
+        }
+
     # -------------------------
-
-
-
+    # Build
+    # -------------------------
     - name: Build
       run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
