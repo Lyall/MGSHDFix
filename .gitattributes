@@ -4,7 +4,7 @@
 * text=auto
 
 # CSVs: keep exact bytes
-*.csv -text
+GCX Fixes/**/*.csv -text
 
 ###############################################################################
 # Set default behavior for command prompt diff.

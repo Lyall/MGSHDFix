@@ -69,13 +69,83 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Build
-      run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
+    # -------------------------
+    # MEGATools + GCX cache setup
+    # -------------------------
+    - name: Compute GCX cache key
+      id: gcxhash
+      run: |
+        # Bump this string when GCX files change with the external Mega host.
+        $hash = "gcx-v1"
+        "hash=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    - name: Cache MEGATools
+      id: mega-cache
+      uses: actions/cache@v4
+      with:
+        path: C:\ProgramData\chocolatey\lib\megatools
+        key: megatools-${{ runner.os }}-1.11.3
+
+    - name: Install MEGATools
+      if: steps.mega-cache.outputs.cache-hit != 'true'
+      run: choco install megatools -y
+
+    - name: Cache GCX files
+      id: gcx-cache
+      uses: actions/cache@v4
+      with:
+        path: external/gcx/mgs2
+        key: gcx-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
+
+    - name: Download GCX files
+      if: steps.gcx-cache.outputs.cache-hit != 'true'
+      run: |
+        mkdir external/gcx/mgs2 -Force
+        megatools dl --no-progress --path external/gcx/mgs2 "https://mega.nz/folder/vxJWhILC#L-x85NXeF7Be2Slgt1qLsA"
+      
+    - name: Copy Vanilla GCX files into GCX Fixes folder
+      run: |
+        $RepoRootDir = "${{ github.workspace }}"
+        $targetDir   = Join-Path $RepoRootDir "GCX Fixes\mgs2"
+
+        # Ensure target exists
+        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+
+        # Copy all .gcx files
+        Get-ChildItem external/gcx/mgs2 -Recurse -Filter *.gcx | ForEach-Object {
+          Copy-Item $_.FullName -Destination $targetDir -Force
+        }
+
+        Write-Host "Final GCX files in ${targetDir}:"
+        Get-ChildItem $targetDir -Recurse | ForEach-Object {
+          Write-Host $_.FullName
+        }
+        
     # Prepare output structure
     - run: mkdir dist
     - run: mkdir dist/plugins
     - run: mkdir dist/logs
+
+    - name: Run MGS2 GCX import-gcx.ps1
+      run: |
+        $RepoRootDir = "${{ github.workspace }}"
+        $importScript = Join-Path $RepoRootDir "GCX Fixes\mgs2\import-gcx.ps1"
+
+        if (-not (Test-Path $importScript)) {
+          Write-Error "import-gcx.ps1 not found at $importScript"
+          exit 1
+        }
+
+        Write-Host "Invoking $importScript..."
+        pwsh -File $importScript
+        
+    # -------------------------
+
+
+
+    - name: Build
+      run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
     # Copy built binaries into plugins
     - run: Copy-Item "x64\Release\${{ github.event.repository.name }}.asi" "dist/plugins/${{ github.event.repository.name }}.asi"

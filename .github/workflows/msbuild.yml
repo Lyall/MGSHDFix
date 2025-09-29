@@ -91,14 +91,7 @@ jobs:
       run: |
         mkdir external/gcx/mgs2 -Force
         megatools dl --no-progress --path external/gcx/mgs2 "https://mega.nz/folder/vxJWhILC#L-x85NXeF7Be2Slgt1qLsA"
-
-    - name: List GCX files
-      run: |
-        Write-Host "GCX folder contents:"
-        Get-ChildItem external/gcx/mgs2 -Recurse | ForEach-Object {
-          Write-Host $_.FullName
-        }
-        
+      
     - name: Copy Vanilla GCX files into GCX Fixes folder
       run: |
         $RepoRootDir = "${{ github.workspace }}"
@@ -116,6 +109,11 @@ jobs:
         Get-ChildItem $targetDir -Recurse | ForEach-Object {
           Write-Host $_.FullName
         }
+        
+    # Prepare output structure
+    - run: mkdir dist
+    - run: mkdir dist/plugins
+    - run: mkdir dist/logs
 
     - name: Run MGS2 GCX import-gcx.ps1
       run: |
@@ -136,11 +134,6 @@ jobs:
 
     - name: Build
       run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
-
-    # Prepare output structure
-    - run: mkdir dist
-    - run: mkdir dist/plugins
-    - run: mkdir dist/logs
 
     # Copy built binaries directly into plugins/
     - run: Copy-Item "x64\Release\${{ github.event.repository.name }}.asi" "dist/plugins/${{ github.event.repository.name }}.asi"
