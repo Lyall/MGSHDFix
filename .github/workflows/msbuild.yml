@@ -65,7 +65,7 @@ jobs:
       id: gcxhash
       run: |
         # Bump this string when GCX files change with the external Mega host.
-        $hash = "gcx-v1"
+        $hash = "gcx-v4"
         "hash=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
     - name: Cache MEGATools
@@ -79,38 +79,84 @@ jobs:
       if: steps.mega-cache.outputs.cache-hit != 'true'
       run: choco install megatools -y
 
-    - name: Cache GCX files
-      id: gcx-cache
+    - name: Locate MEGATools binary
+      id: locate-megatools
+      shell: pwsh
+      run: |
+        $exe = Get-ChildItem "C:\ProgramData\chocolatey\lib\megatools" -Recurse -Filter megatools.exe | Select-Object -First 1 -ExpandProperty FullName
+        Write-Host "Found MEGATools exe at $exe"
+        "exe=$exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    # -------------------------
+    # MGS2 GCX
+    # -------------------------
+    - name: Cache GCX files (MGS2)
+      id: gcx-cache-mgs2
       uses: actions/cache@v4
       with:
         path: external/gcx/mgs2
-        key: gcx-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
+        key: gcx-mgs2-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
 
-    - name: Download GCX files
-      if: steps.gcx-cache.outputs.cache-hit != 'true'
+    - name: Download GCX files (MGS2)
+      if: steps.gcx-cache-mgs2.outputs.cache-hit != 'true'
       run: |
         mkdir external/gcx/mgs2 -Force
-        megatools dl --no-progress --path external/gcx/mgs2 "https://mega.nz/folder/vxJWhILC#L-x85NXeF7Be2Slgt1qLsA"
-      
-    - name: Copy Vanilla GCX files into GCX Fixes folder
+        & "${{ steps.locate-megatools.outputs.exe }}" dl --no-progress --path external/gcx/mgs2 "https://mega.nz/folder/vxJWhILC#L-x85NXeF7Be2Slgt1qLsA"
+
+    - name: Copy Vanilla GCX files into GCX Fixes (MGS2)
       run: |
         $RepoRootDir = "${{ github.workspace }}"
         $targetDir   = Join-Path $RepoRootDir "GCX Fixes\mgs2"
 
-        # Ensure target exists
         New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
 
-        # Copy all .gcx files
         Get-ChildItem external/gcx/mgs2 -Recurse -Filter *.gcx | ForEach-Object {
           Copy-Item $_.FullName -Destination $targetDir -Force
         }
 
         Write-Host "Final GCX files in ${targetDir}:"
-        Get-ChildItem $targetDir -Recurse | ForEach-Object {
-          Write-Host $_.FullName
+        Get-ChildItem $targetDir -Recurse | ForEach-Object { Write-Host $_.FullName }
+
+    # -------------------------
+    # MGS3 GCX
+    # -------------------------
+    - name: Cache GCX files (MGS3)
+      id: gcx-cache-mgs3
+      uses: actions/cache@v4
+      with:
+        path: external/gcx/mgs3
+        key: gcx-mgs3-${{ runner.os }}-${{ steps.gcxhash.outputs.hash }}
+
+    - name: Download GCX files (MGS3)
+      if: steps.gcx-cache-mgs3.outputs.cache-hit != 'true'
+      run: |
+        mkdir external/gcx/mgs3 -Force
+        & "${{ steps.locate-megatools.outputs.exe }}" dl --no-progress --path external/gcx/mgs3 "https://mega.nz/folder/fpYGnRpJ#Pcs5kozzMJdk1IdVhkOnQg"
+
+    - name: Copy Vanilla GCX files into GCX Fixes (MGS3)
+      run: |
+        $RepoRootDir = "${{ github.workspace }}"
+        $sourceDir   = Join-Path $RepoRootDir "external/gcx/mgs3"
+        $targetDir   = Join-Path $RepoRootDir "GCX Fixes\mgs3"
+
+        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+
+        Get-ChildItem $sourceDir -Directory | ForEach-Object {
+          $dest = Join-Path $targetDir $_.Name
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+
+          Get-ChildItem $_.FullName -Recurse -File | ForEach-Object {
+            Copy-Item $_.FullName -Destination $dest -Force
+          }
         }
-        
+
+        Write-Host "Final GCX files in ${targetDir}:"
+        Get-ChildItem $targetDir -Recurse | ForEach-Object { Write-Host $_.FullName }
+
+
+    # -------------------------
     # Prepare output structure
+    # -------------------------
     - run: mkdir dist
     - run: mkdir dist/plugins
     - run: mkdir dist/logs
@@ -127,6 +173,24 @@ jobs:
 
         Write-Host "Invoking $importScript..."
         pwsh -File $importScript
+
+    - name: Run MGS3 GCX import-gcx.ps1 (en/fr, gr, it, sp)
+      run: |
+        $RepoRootDir = "${{ github.workspace }}"
+        $langs = @("fr","gr","it","sp")
+
+        foreach ($lang in $langs) {
+          $importScript = Join-Path $RepoRootDir "GCX Fixes\mgs3\$lang\import-gcx.ps1"
+
+          if (-not (Test-Path $importScript)) {
+            Write-Warning "import-gcx.ps1 not found for $lang at $importScript"
+            continue
+          }
+
+          Write-Host "Invoking $importScript for $lang..."
+          pwsh -File $importScript
+        }
+
         
     # -------------------------
 
