@@ -92,6 +92,13 @@ scenerio_stage_ending.csv,62D81474
 scenerio_stage_init.csv,00000000
 scenerio_stage_mselect.csv,7A5C9EB3
 scenerio_stage_n_title.csv,747B2384
+scenerio_stage_r_plt0.csv,C012294B
+scenerio_stage_r_plt10.csv,227537A6
+scenerio_stage_r_sna_b.csv,C012294B
+scenerio_stage_r_title.csv,C012294B
+scenerio_stage_r_tnk0.csv,C012294B
+scenerio_stage_r_vr_1.csv,4E34734D
+scenerio_stage_r_vr_rp.csv,4E34734D
 scenerio_stage_select.csv,AEE10D08
 scenerio_stage_sp01a.csv,F76ECBB0
 scenerio_stage_sp02a.csv,C9419F22
@@ -247,10 +254,3 @@ scenerio_stage_wp73a.csv,EF59F632
 scenerio_stage_wp74a.csv,A3AC63A2
 scenerio_stage_wp75a.csv,0FB02673
 scenerio.csv,6E5DDD0A
-scenerio_stage_r_plt0.csv,C012294B
-scenerio_stage_r_plt10.csv,227537A6
-scenerio_stage_r_sna_b.csv,C012294B
-scenerio_stage_r_title.csv,C012294B
-scenerio_stage_r_tnk0.csv,C012294B
-scenerio_stage_r_vr_1.csv,4E34734D
-scenerio_stage_r_vr_rp.csv,4E34734D
