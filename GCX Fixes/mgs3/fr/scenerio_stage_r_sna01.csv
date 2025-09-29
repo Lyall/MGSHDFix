@@ -198,14 +198,14 @@ pour le tenir, relâchez pour
 tirer. Ajustez la visée avec
 la touche .
 "
-0xf0c,"Mosin Nagant:
+0xf0c,"Mosin-Nagant:
 Fusil sniper tranquillisant.
 Utilisez la visée avec la touche
 . Appuyez sur la touche
  pour le tenir, relâchez pour
 tirer. Ajustez la visée avec
 la touche .
-","Mosin Nagant:
+","Mosin-Nagant:
 Fusil sniper tranquillisant.
 Utilisez la visée avec la touche
 . Appuyez sur la touche
@@ -1951,12 +1951,12 @@ scope w/  button. Press 
 button to hold, release to fire.
 Adjust scope w/  button.
 "
-0x605b,"Mosin Nagant:
+0x605b,"Mosin-Nagant:
 Tranquilizer sniper rifle. Use
 scope w/  button. Press 
 button to hold, release to fire.
 Adjust scope w/  button.
-","Mosin Nagant:
+","Mosin-Nagant:
 Tranquilizer sniper rifle. Use
 scope w/  button. Press 
 button to hold, release to fire.
@@ -2125,12 +2125,12 @@ release to throw.
 How strong  button is
 pressed varies distance.
 "
-0x67fb,"Tiwanese Cobra meat:
+0x67fb,"Taiwanese Cobra meat:
 Press  button to hold,
 release to throw.
 How strong  button is
 pressed varies distance.
-","Tiwanese Cobra meat:
+","Taiwanese Cobra meat:
 Press  button to hold,
 release to throw.
 How strong  button is
@@ -2620,12 +2620,12 @@ release to throw.
 How strong  button is
 pressed varies distance.
 "
-0x7c3a,"Empreror Scorpion meat:
+0x7c3a,"Emperor Scorpion meat:
 Press  button to hold,
 release to throw.
 How strong  button is
 pressed varies distance.
-","Empreror Scorpion meat:
+","Emperor Scorpion meat:
 Press  button to hold,
 release to throw.
 How strong  button is
@@ -2653,12 +2653,12 @@ release to throw.
 How strong  button is
 pressed varies distance.
 "
-0x7d9c,"Live Tiwanese Cobra:
+0x7d9c,"Live Taiwanese Cobra:
 Press  button to hold,
 release to throw.
 How strong  button is
 pressed varies distance.
-","Live Tiwanese Cobra:
+","Live Taiwanese Cobra:
 Press  button to hold,
 release to throw.
 How strong  button is

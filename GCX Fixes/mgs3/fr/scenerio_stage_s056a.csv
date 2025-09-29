@@ -7579,9 +7579,9 @@ Spray insecticide.
 Spray insecticide.
 "
 0x160ab,"Bug Juice:
-Bug repellant spray.
+Bug repellent spray.
 ","Bug Juice:
-Bug repellant spray.
+Bug repellent spray.
 "
 0x160cc,"おい、ちゃんとIDきてないぞ！
 ","おい、ちゃんとIDきてないぞ！
@@ -8133,14 +8133,14 @@ encoches 7,62[00A0]mm x 54. Taille du chargeur:
 la visée. Appuyez sur la touche  pour changer
 le facteur de zoom de la visée.
 "
-0x17dd5,"Le Mosin Nagant. Un fusil Sniper tranquillisant,
+0x17dd5,"Le Mosin-Nagant. Un fusil Sniper tranquillisant,
 l'arme de prédilection de The End. Adapté par
 The End à partir du M1891/30, un fusil Sniper
 à répétition manuelle utilisé par l'armée soviétique
 pendant la Deuxième Guerre mondiale. Munitions:
 balles tranquillisantes spéciales 7,62 mm x 54R.
 Taille du chargeur: 5 balles.
-","Le Mosin Nagant. Un fusil Sniper tranquillisant,
+","Le Mosin-Nagant. Un fusil Sniper tranquillisant,
 l'arme de prédilection de The End. Adapté par
 The End à partir du M1891/30, un fusil Sniper
 à répétition manuelle utilisé par l'armée soviétique
@@ -9012,9 +9012,9 @@ Grenade pattern camo uniform.
 Grenade pattern camo uniform.
 "
 0x1aa3e,"Mummy
-Bandage pettern camo uniform.
+Bandage pattern camo uniform.
 ","Mummy
-Bandage pettern camo uniform.
+Bandage pattern camo uniform.
 "
 0x1aa63,"Retrieving downloaded Camouflage list
 from memory card (PS2).
@@ -9181,13 +9181,13 @@ Press the  button to use the scope. Press the
  button to change the magnification ratio on
 the scope.
 "
-0x1b64b,"The Mosin Nagant. A tranquilizer sniper rifle, and
+0x1b64b,"The Mosin-Nagant. A tranquilizer sniper rifle, and
 The End's weapon of choice. Adapted by The End
 from the M1891/30, a bolt-action sniper rifle used
 by the Soviet military during World War II.
 Uses special 7.62mm x 54R tranquilizer rounds.
 Magazine size is 5 rounds.
-","The Mosin Nagant. A tranquilizer sniper rifle, and
+","The Mosin-Nagant. A tranquilizer sniper rifle, and
 The End's weapon of choice. Adapted by The End
 from the M1891/30, a bolt-action sniper rifle used
 by the Soviet military during World War II.
@@ -9595,9 +9595,9 @@ taste great.
 0x1cf90,"A downloaded camo uniform.
 ","A downloaded camo uniform.
 "
-0x1cfac,"A grenade pettern camo uniform. Wearing it
+0x1cfac,"A grenade pattern camo uniform. Wearing it
 allows you to use grenades limitlessly.
-","A grenade pettern camo uniform. Wearing it
+","A grenade pattern camo uniform. Wearing it
 allows you to use grenades limitlessly.
 "
 0x1d000,"A bandage pattern camo uniform. Wearing it
@@ -10649,8 +10649,8 @@ complètement.
 0x1ed6f,"Carpaccio de poulpe
 ","Carpaccio de poulpe
 "
-0x1ed84,"Foccacia
-","Foccacia
+0x1ed84,"Focaccia
+","Focaccia
 "
 0x1ed8e,"Vin
 ","Vin
@@ -11685,14 +11685,14 @@ completely.
 0x206bc,"Gorgonzola Cream
 ","Gorgonzola Cream
 "
-0x206ce,"　Fettuccini
-","　Fettuccini
+0x206ce,"　Fettuccine
+","　Fettuccine
 "
 0x206dd,"Octopus Carpaccio
 ","Octopus Carpaccio
 "
-0x206f0,"Foccacia Bread
-","Foccacia Bread
+0x206f0,"Focaccia Bread
+","Focaccia Bread
 "
 0x20700,"Wine
 ","Wine
@@ -12446,10 +12446,10 @@ and please try again.
 "
 0x22084,"Insufficient free space on memory card (PS2).
 At least %dKB of free space is required to
-save data. Contiune with the game?
+save data. Continue with the game?
 ","Insufficient free space on memory card (PS2).
 At least %dKB of free space is required to
-save data. Contiune with the game?
+save data. Continue with the game?
 "
 0x22101,"No memory card (PS2) found. At least %dKB
 of free space is required to save data.
