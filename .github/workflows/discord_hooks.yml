@@ -188,7 +188,8 @@ jobs:
         if: >
           ${{
             github.event_name == 'push' &&
-            startsWith(github.ref, 'refs/heads/master') &&
+            github.ref == 'refs/heads/master' &&
+            github.event.pull_request == null &&
             github.event.pusher.name != 'web-flow' &&
             github.actor != 'github-actions' &&
             (github.event.head_commit && !startsWith(github.event.head_commit.message, 'Merge pull request'))
@@ -197,6 +198,11 @@ jobs:
           cat > commits.json <<'EOF'
           ${{ toJson(github.event.commits) }}
           EOF
+          
+          if ! jq type commits.json | grep -q array; then
+            echo "No commits found, skipping notification."
+            exit 0
+          fi
 
           lines=$(jq -r '
             .[0:5]

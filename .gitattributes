@@ -3,9 +3,8 @@
 ###############################################################################
 * text=auto
 
-# Treat all CSV files as binary so Git never rewrites them
-*.csv binary
-
+# CSVs: keep exact bytes
+*.csv -text
 
 ###############################################################################
 # Set default behavior for command prompt diff.
