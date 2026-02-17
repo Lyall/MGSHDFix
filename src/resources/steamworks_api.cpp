@@ -9,6 +9,7 @@
 #include "isteamuser.h"
 #include "isteamuserstats.h"
 #include "isteaminput.h"
+#include "isteamapps.h"
 #include "version.h"
 
 #pragma warning(pop)
@@ -21,7 +22,34 @@ namespace
     SafetyHookMid SteamMidhook;
     SafetyHookMid SteamInputMidhook;
 
+    void FixMissingDLC()
+    {
+        if (!(eGameType & MGS3))
+        {
+            return;
+        }
+        spdlog::info("MGS3 DLC Fix: Checking for missing high resolution texture DLC...");
+        if (!SteamApps()->BIsSubscribedApp(2314282))
+        {
+            spdlog::info("MGS3 DLC Fix: High resolution texture DLC is missing, adding to library...");
+            SteamApps()->InstallDLC(2314282);
+            if (!SteamApps()->BIsSubscribedApp(2314282))
+            {
+                spdlog::error("MGS3 DLC Fix: Failed to add high resolution texture DLC to library.");
+                return;
+            }
+            SteamApps()->UninstallDLC(2314282);
+            spdlog::info("MGS3 DLC Fix: High resolution texture DLC is now added to steam library.");
+        }
+        else
+        {
+            spdlog::info("MGS3 DLC Fix: High resolution texture DLC is already in library.");
+        }
+
+    }
+
 }
+
 
 
 void SteamAPI::FetchAndCacheSteamID()
@@ -41,6 +69,7 @@ void SteamAPI::OnSteamInitialized()
     g_SteamAPI.bInitialized = true;
     ResetAllAchievements(); //DON'T FREAK OUT READING THIS. bResetAchievements needs to be true, and there's multiple user confirmations first.
                             //This must ALWAYS be called before StatPersistence to make sure we don't wipe out the user's persistence file if they cancel the reset.
+    FixMissingDLC();
     AfterSteamInitialized();
 }
 
