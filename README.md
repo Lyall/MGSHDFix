@@ -80,7 +80,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 - Open up the game properties of either MGS2/MGS3 in Steam and add the following line to the launch options:
 
-      `WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%`
+      WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
 	   
 - MGSHDFix's Config Tool requires **ProtonTricks** to be installed via Linux's **Discover** software store.
 - When opening the MGSHDFix Config Tool on Steam Deck/Linux, a Proton Tricks Wine Prefix window will pop up. Select any game and hit "OK" to open the MGSHDFix Config Tool.
