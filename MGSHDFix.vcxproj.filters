@@ -32,7 +32,7 @@
     <ClCompile Include="src\warnings\reshade_compatibility_checks.cpp">
       <Filter>Warnings</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\water_reflections.cpp">
+    <ClCompile Include="src\fixes\busy_loop_fix.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\features\texture_buffer_size.cpp">
@@ -166,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp">
       <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\water_reflections.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -324,6 +327,9 @@
     </ClInclude>
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp">
       <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\busy_loop_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

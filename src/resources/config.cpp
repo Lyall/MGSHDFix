@@ -31,6 +31,7 @@
 #include "mgs2_restore_dogtags.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "custom_resolution_and_borderless.hpp"
+#include "busy_loop_fix.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -607,8 +608,13 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::SaveFileReadOnlyWarning_Section, ConfigKeys::SaveFileReadOnlyWarning_Setting, CheckGamesaveFolderWritable::bCheckSaveFilesReadOnly);
     LOG_CONFIG(ConfigKeys::SaveFileReadOnlyWarning_Section, ConfigKeys::SaveFileReadOnlyWarning_Setting, CheckGamesaveFolderWritable::bCheckSaveFilesReadOnly);
 
-    
+    // Busy Loop Fix
+    if (eGameType & (MGS2 | MGS3))
+    {
+        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.bEnabled);
 
-        
+        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.bEnabled);
+    }
+
     ConfigLogger::Flush();
 }
