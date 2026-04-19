@@ -115,6 +115,7 @@
     <ClCompile Include="src\resources\gamevars.cpp" />
     <ClCompile Include="src\resources\helper.cpp" />
     <ClCompile Include="src\fixes\water_reflections.cpp" />
+    <ClCompile Include="src\fixes\busy_loop_fix.cpp" />
     <ClCompile Include="src\features\texture_buffer_size.cpp" />
     <ClCompile Include="src\resources\steamworks_api.cpp" />
     <ClCompile Include="src\features\stat_persistence.cpp" />
@@ -124,6 +125,7 @@
   <ItemGroup>
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
+    <ClInclude Include="src\fixes\busy_loop_fix.hpp" />
     <ClInclude Include="src\warnings\background_shuffle_warning.hpp" />
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp" />
     <ClInclude Include="src\features\settings_pesistence.hpp" />

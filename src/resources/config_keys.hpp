@@ -208,7 +208,8 @@ namespace ConfigKeys
                                                                   "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\n"
                                                                   "\n"
                                                                   "Equivalent to: Right-click the game's .exe -> Properties -> Compatibility -> check \"Disable Fullscreen Optimizations\"";
-
+    constexpr const char* BusyLoopFix_Section = "Bugfixes";
+    constexpr const char* BusyLoopFix_Enabled = "Fix high CPU usage";
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";

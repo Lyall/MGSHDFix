@@ -32,6 +32,7 @@
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "windows_fullscreen_optimization.hpp"
+#include "busy_loop_fix.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -466,6 +467,7 @@ static void InitializeSubsystems()
     INITIALIZE(FixAimingFullTilt::Initialize());
     INITIALIZE(MGS3HudFixes::Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
+    INITIALIZE(g_BusyLoopFix.Initialize());
 
 #if !defined(RELEASE_BUILD) //todo category
     //todo: Make ultrawide reposition HUD elements correctly instead of stretching them
@@ -591,6 +593,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     {
         spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
         g_StatPersistence.SaveStats();
+        g_BusyLoopFix.Shutdown();
         spdlog::shutdown();
     }
     return TRUE;
