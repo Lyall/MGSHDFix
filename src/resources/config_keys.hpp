@@ -209,7 +209,16 @@ namespace ConfigKeys
                                                                   "\n"
                                                                   "Equivalent to: Right-click the game's .exe -> Properties -> Compatibility -> check \"Disable Fullscreen Optimizations\"";
     constexpr const char* BusyLoopFix_Section = "Bugfixes";
-    constexpr const char* BusyLoopFix_Enabled = "Fix high CPU usage";
+    constexpr const char* BusyLoopFix_Enabled = "Fix High CPU Usage";
+    constexpr const char* BusyLoopFix_Help = "(Also fixes TWD usage on handheld.)";
+    constexpr const char* BusyLoopFix_Tooltip = "Fixes High CPU & TWD usage.\n"
+                                             "\n"
+                                             "Patch 1.4 moved window message handling to a separate thread, but it continuously polls instead of sleeping when idle.\n"
+                                             "\n"
+                                             "This effectively doubles CPU usage, and on Steam Deck, also doubles total power draw.\n"
+                                             "\n"
+                                             "Fixing this restores normal behavior and improves GPU utilization.";
+
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";

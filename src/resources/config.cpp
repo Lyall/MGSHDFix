@@ -609,7 +609,7 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::SaveFileReadOnlyWarning_Section, ConfigKeys::SaveFileReadOnlyWarning_Setting, CheckGamesaveFolderWritable::bCheckSaveFilesReadOnly);
 
     // Busy Loop Fix
-    if (eGameType & (MGS2 | MGS3))
+    if (eGameType & (MG | MGS2 | MGS3))
     {
         ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.bEnabled);
 

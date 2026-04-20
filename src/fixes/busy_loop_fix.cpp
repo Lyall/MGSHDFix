@@ -20,7 +20,11 @@ BOOL WINAPI BusyLoopFix::PeekMessageW_Hook(LPMSG m, HWND h, UINT a, UINT b, UINT
 void BusyLoopFix::Initialize()
 {
     if (!bEnabled)
+    {
         return;
+    }
+
+
 
     g_instance = this;
 
