@@ -201,36 +201,70 @@ void Logging::LogSysInfo()
 
     spdlog::info("System Details - CPU: {}", cpu);
 
+
     int gpuIndex = 0;
-    std::string deviceString;
+    std::vector<std::string> uniqueGpus;
+    std::unordered_set<std::string> seenGpus;
+
     if (Util::IsSteamOS())
     {
         spdlog::info("System Details - Detected Steam Deck (SteamOS / Proton).");
     }
     else
     {
-        for (int i = 0; ; i++)
+        for (DWORD i = 0; ; i++)
         {
-            DISPLAY_DEVICE dd = { sizeof(dd), 0 };
-            BOOL f = EnumDisplayDevices(NULL, i, &dd, EDD_GET_DEVICE_INTERFACE_NAME);
-            if (!f)
+            DISPLAY_DEVICEW dd = {};
+            dd.cb = sizeof(dd);
+
+            BOOL found = EnumDisplayDevicesW(nullptr, i, &dd, EDD_GET_DEVICE_INTERFACE_NAME);
+            if (!found)
             {
-                break; //that's all, folks.
+                break;
             }
-            gpuIndex++;
-            char deviceStringBuffer[128];
-            WideCharToMultiByte(CP_UTF8, 0, dd.DeviceString, -1, deviceStringBuffer, sizeof(deviceStringBuffer), NULL, NULL);
-            if (deviceString == deviceStringBuffer) //each monitor reports what gpu is driving it, lets just double check in case we're looking at a laptop with mixed usage.
+
+            if ((dd.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) != 0)
             {
                 continue;
             }
-            deviceString = deviceStringBuffer;
-            spdlog::info("System Details - GPU #{}: {}", gpuIndex, deviceString);
+
+            if ((dd.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) == 0)
+            {
+                continue;
+            }
+
+            char deviceStringBuffer[256] = {};
+            WideCharToMultiByte(CP_UTF8, 0, dd.DeviceString, -1, deviceStringBuffer, static_cast<int>(sizeof(deviceStringBuffer)), nullptr, nullptr);
+
+            std::string currentGpu = deviceStringBuffer;
+            if (currentGpu.empty())
+            {
+                continue;
+            }
+
+            if (!seenGpus.insert(currentGpu).second)
+            {
+                continue;
+            }
+
+            uniqueGpus.push_back(currentGpu);
+            gpuIndex = static_cast<int>(uniqueGpus.size());
+
+            spdlog::info("System Details - GPU #{}: {}", gpuIndex, currentGpu);
         }
     }
-    if (gpuIndex == 1) //only one gpu found
+
+    if (uniqueGpus.size() == 1)
     {
-        CheckMinimumGPU(deviceString, false, 0, 0, 0, 0);
+        CheckMinimumGPU(uniqueGpus[0], false, 0, 0, 0, 0);
+    }
+    else if (uniqueGpus.size() == 0)
+    {
+        spdlog::error("System Details - No display-attached GPUs were detected during early enumeration. Please report this issue with your system specifications on our GitHub.");
+    }
+    else
+    {
+        spdlog::info("System Details - Multiple GPUs detected. Driver details & minimum system requirement report will be provided after first Present() call at the end of the log.");
     }
 
 
