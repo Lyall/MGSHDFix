@@ -245,7 +245,7 @@ namespace
             " while update checks are enabled.\n\n"
             "Is your firewall or network blocking the game from reaching the update provider?";
 
-        MessageBoxA(nullptr, msg.c_str(), "MGSHDFix update checker", MB_OK | MB_ICONWARNING);
+        MessageBoxA(nullptr, msg.c_str(), (sFixName + " update checker").c_str(), MB_OK | MB_ICONWARNING);
         g_ShownUpdateContactError = true;
     }
 }
