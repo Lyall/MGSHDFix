@@ -843,7 +843,7 @@ public:
                     ? "This mod fixes nearly 14,000 texture issues, hundreds of transparent textures/models, missing audio/music, and countless localization errors/typos introduced by the 2011 Bluepoint HD remaster."
                     : "This mod fixes nearly 4000 texture issues, over 500 transparent textures/models, restores missing regional content, and corrects countless localization errors/typos introduced by the 2011 Bluepoint HD remaster.";
 
-                statusPanel->SetToolTip(tooltip);
+                //statusPanel->SetToolTip(tooltip);
                 icon->SetToolTip(tooltip);
                 label->SetToolTip(tooltip);
                 statusLabel->SetToolTip(tooltip);
