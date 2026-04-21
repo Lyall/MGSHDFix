@@ -373,8 +373,9 @@ public:
         SetMaxSize(wxSize(iWindowSizeX, iWindowSizeY));
 
         HWND hwnd = (HWND)GetHWND();
-        SendMessage(hwnd, WM_SETICON, ICON_SMALL, 0);
-        SendMessage(hwnd, WM_SETICON, ICON_BIG, 0);
+        HICON hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));
+        SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
         if (!std::filesystem::exists(std::filesystem::path(m_iniPath.ToStdWstring())))
         {
