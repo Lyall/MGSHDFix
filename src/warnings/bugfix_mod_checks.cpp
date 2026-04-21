@@ -390,7 +390,7 @@ void BugfixMods::Check()
                 }
             }
         }
-        
+        /*
         // ------------------------------------------------------
         // MGS2: MGS2 Community Bugfix Compilation
         // ------------------------------------------------------
@@ -480,6 +480,7 @@ void BugfixMods::Check()
             {
                 spdlog::info("Bugfix Mod Checks: MGS2 Community Bugfix Compilation Check: Mod is installed.");
             }
-        }        
+        }        */
     }
+
 }
