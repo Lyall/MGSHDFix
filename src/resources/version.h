@@ -10,7 +10,7 @@
 
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 0
-#define VERSION_PATCH 2
+#define VERSION_PATCH 3
 
 /// Current release version of MGSHDFix at time of compile.
 /// This is automatically set by CI and should be left at 0.0.0.
