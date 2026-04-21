@@ -775,6 +775,87 @@ public:
 
         mainSizer->Add(m_tabs, 1, wxEXPAND | wxALL, 5);
 
+        // Bugfix Compilation status
+        if (iTargetGame == TARGET_GAME_MGS2 || iTargetGame == TARGET_GAME_MGS3)
+        {
+            const std::filesystem::path exePath = Helper::FindASILocation(sFixName).parent_path();
+
+            const char* asiName = (iTargetGame == TARGET_GAME_MGS2)
+                ? "MGS2-Community-Bugfix-Compilation.asi"
+                : "MGS3-Community-Bugfix-Compilation.asi";
+
+            const char* compilationName = (iTargetGame == TARGET_GAME_MGS2)
+                ? "MGS2 Community Bugfix Compilation"
+                : "MGS3 Community Bugfix Compilation";
+
+            const bool bugfixInstalled = std::filesystem::exists(
+                exePath / "plugins" / asiName);
+
+            auto* statusPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+            statusPanel->SetBackgroundColour(m_tabs->GetPage(0)->GetBackgroundColour());
+
+            auto* statusSizer = new wxBoxSizer(wxHORIZONTAL);
+
+            auto* icon = new wxStaticText(statusPanel, wxID_ANY,
+                                          bugfixInstalled ? L"\u2714" : L"\u2718");
+            icon->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+            wxFont iconFont = icon->GetFont();
+            iconFont.SetPointSize(iconFont.GetPointSize() + 2);
+            icon->SetFont(iconFont);
+
+            auto* label = new wxStaticText(statusPanel, wxID_ANY,
+                                           wxString::Format("%s: ", compilationName));
+            label->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+
+            auto* statusLabel = new wxStaticText(statusPanel, wxID_ANY,
+                                                 bugfixInstalled ? "Installed" : "Not Installed");
+            statusLabel->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+            statusLabel->SetFont(statusLabel->GetFont().Bold());
+
+            statusSizer->AddStretchSpacer();
+            statusSizer->Add(icon, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
+            statusSizer->Add(label, 0, wxALIGN_CENTER_VERTICAL);
+            statusSizer->Add(statusLabel, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 8);
+
+            if (!bugfixInstalled)
+            {
+                const char* nexusUrl = (iTargetGame == TARGET_GAME_MGS2)
+                    ? "https://www.nexusmods.com/metalgearsolid2mc/mods/52"
+                    : "https://www.nexusmods.com/metalgearsolid3mc/mods/189";
+
+                const char* githubUrl = (iTargetGame == TARGET_GAME_MGS2)
+                    ? "https://github.com/ShizCalev/MGS2-Community-Bugfix-Compilation"
+                    : "https://github.com/ShizCalev/MGS3-Community-Bugfix-Compilation";
+
+                auto* nexusBtn = new wxButton(statusPanel, wxID_ANY, "Nexus Page");
+                nexusBtn->Bind(wxEVT_BUTTON, [nexusUrl](wxCommandEvent&) {
+                    wxLaunchDefaultBrowser(nexusUrl);
+                               });
+                statusSizer->Add(nexusBtn, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
+
+                auto* githubBtn = new wxButton(statusPanel, wxID_ANY, "GitHub Page");
+                githubBtn->Bind(wxEVT_BUTTON, [githubUrl](wxCommandEvent&) {
+                    wxLaunchDefaultBrowser(githubUrl);
+                                });
+                statusSizer->Add(githubBtn, 0, wxALIGN_CENTER_VERTICAL);
+
+                const char* tooltip = (iTargetGame == TARGET_GAME_MGS2)
+                    ? "This mod fixes nearly 14,000 texture issues, hundreds of transparent textures/models, missing audio/music, and countless localization errors/typos introduced by the 2011 Bluepoint HD remaster."
+                    : "This mod fixes nearly 4000 texture issues, over 500 transparent textures/models, restores missing regional content, and corrects countless localization errors/typos introduced by the 2011 Bluepoint HD remaster.";
+
+                statusPanel->SetToolTip(tooltip);
+                icon->SetToolTip(tooltip);
+                label->SetToolTip(tooltip);
+                statusLabel->SetToolTip(tooltip);
+                nexusBtn->SetToolTip(tooltip);
+                githubBtn->SetToolTip(tooltip);
+            }
+
+            statusSizer->AddStretchSpacer();
+
+            statusPanel->SetSizer(statusSizer);
+            mainSizer->Add(statusPanel, 0, wxEXPAND | wxLEFT | wxRIGHT, 5);
+        }
         wxBoxSizer* btnSizer = new wxBoxSizer(wxHORIZONTAL);
 
         auto* resetBtn = new wxButton(this, wxID_ANY, "Reset to Defaults");
@@ -877,6 +958,7 @@ public:
     }
 
 private:
+    wxStaticText* m_bugfixStatus = nullptr;
     bool m_dirty = false;
     bool m_firstRun = false;
     bool m_missingKeys = false;
