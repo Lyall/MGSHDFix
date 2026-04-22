@@ -293,6 +293,43 @@ void BugfixMods::Check()
 
     HardResetIfEnvironmentChanged(cache, cacheFile);
 
+
+    if (eGameType & (MGS2 | MGS3))
+    {
+        // ------------------------------------------------------
+        // MGS2 & MGS3 Community Bugfix Compilation
+        // ------------------------------------------------------
+
+        {
+            std::filesystem::path CommunityBugfixCompilationASI = sExePath / "plugins" / ((eGameType & MGS2) ? "MGS2-Community-Bugfix-Compilation.asi" : "MGS3-Community-Bugfix-Compilation.asi");
+
+            spdlog::info("Bugfix Mod Checks: Checking for {} Community Bugfix Compilation.", (eGameType & MGS2) ? "MGS2" : "MGS3", CommunityBugfixCompilationASI.string());
+            if (!std::filesystem::exists(CommunityBugfixCompilationASI))
+            {
+                spdlog::info("");
+                spdlog::info("=====================================    Bugfix Mod Checks     =====================================");
+                spdlog::info("{} Community Bugfix Compilation mod is not currently installed.", (eGameType & MGS2) ? "MGS2" : "MGS3");
+                if (eGameType & MGS2)
+                {
+                    spdlog::info("This mod fixes nearly 14,000 texture issues, hundreds of transparent textures / models, missing audio / music, and countless localization errors / typos introduced by the 2011 Bluepoint HD remaster.");
+                }
+                else
+                {
+                    spdlog::info("This mod fixes nearly 4000 texture issues, over 500 transparent textures / models, restores missing regional content, and corrects countless localization errors / typos introduced by the 2011 Bluepoint HD remaster.");
+                }
+                spdlog::info("=====================================    Bugfix Mod Checks     =====================================");
+                spdlog::info("");
+
+            }
+            else
+            {
+                spdlog::info("Bugfix Mod Checks: {} Community Bugfix Compilation Check: Mod is installed.", (eGameType & MGS2) ? "MGS2" : "MGS3");
+            }
+        }
+    }
+
+
+
     if (eGameType & MGS2)
     {
         spdlog::info("Bugfix Mod Checks: Checking for missing MGS2 Bugfix Mods...");
@@ -302,7 +339,7 @@ void BugfixMods::Check()
             // ------------------------------------------------------
             // MGS2: Better Audio Mod Crash Fix Check
             // ------------------------------------------------------
-            spdlog::info("== Bugfix Mod Checks: US/EU DAT language pack detected, checking for MGS2 Better Audio Mod / Crash Fix. ==");
+            spdlog::info("Bugfix Mod Checks: US/EU DAT language pack detected, checking for MGS2 Better Audio Mod / Crash Fix.");
             {
                 const std::string key = "MGS2_BetterAudioMod";
                 const auto sdtPath = sExePath / "us" / "demo" / "_bp" / "p070_01_p01.sdt";
@@ -390,97 +427,7 @@ void BugfixMods::Check()
                 }
             }
         }
-        /*
-        // ------------------------------------------------------
-        // MGS2: MGS2 Community Bugfix Compilation
-        // ------------------------------------------------------
-        
-        {
-            spdlog::info("== Bugfix Mod Checks: Checking for MGS2 Community Bugfix Compilation. ==");
-            const std::string key = "MGS2_CommunityBugfixCompilation";
-            std::filesystem::path CommunityBugfixCompilationASI = sExePath / "plugins" / "MGS2-Community-Bugfix-Compilation.asi";
 
-            spdlog::info("Bugfix Mod Checks: MGS2 Community Bugfix Compilation Check: Checking for plugin: {}", CommunityBugfixCompilationASI.string());
-            if (!std::filesystem::exists(CommunityBugfixCompilationASI))
-            {
-                const WarningPolicy policy { 2, 120 };
-                const uint32_t remaining = GetWarningsRemaining(cache, key, policy);
-
-                if (ShouldWarn(cache, key, policy))
-                {
-                    const bool inInitialPhase = !cache.warn[key].initialPhaseComplete;
-
-                    std::string message;
-                    if (inInitialPhase)
-                    {
-                        const uint32_t remainingAfterThis = (remaining > 0) ? (remaining - 1) : 0;
-                        message =
-                            "Warning: MGS2 Community Bugfix Compilation is not currently installed.\n"
-                            "\n"
-                            "This mod fixes nearly 14,000 texture issues, hundreds of transparent textures/models, missing audio/music, and countless localization errors/typos introduced by the 2011 Bluepoint HD remaster.\n"
-                            "\n"
-                            "Would you like to open the mod page now?\n"
-                            "\n" +
-                            BuildInitialPhaseTail(remainingAfterThis, policy.cooldownDays);
-                    }
-                    else
-                    {
-                        message =
-                            "Reminder: MGS2 Community Bugfix Compilation is not currently installed.\n"
-                            "\n"
-                            "This mod fixes nearly 14,000 texture issues, hundreds of transparent textures/models, missing audio/music, and countless localization errors/typos introduced by the 2011 Bluepoint HD remaster.\n"
-                            "\n"
-                            "Would you like to open the mod page now?\n"
-                            "\n" +
-                            BuildCooldownTail(policy.cooldownDays);
-                    }
-
-                    spdlog::warn(message);
-
-                    if (bEnableVisibleWarnings)
-                    {
-                        if (Util::IsSteamOS())
-                        {
-                            std::cout
-                                << "\n================ MGSHDFix WARNING ================\n\n"
-                                << message
-                                << "\nMod page:\n"
-                                << "https://www.nexusmods.com/metalgearsolid2mc/mods/52\n"
-                                << "\n=================================================\n\n";
-                        }
-                        else
-                        {
-                            if (int result = MessageBoxA(
-                                g_D3D11Hooks.MainHwnd,
-                                message.c_str(),
-                                "MGSHDFix - Bugfix Warning",
-                                MB_ICONWARNING | MB_YESNO);
-                                result == IDYES)
-                            {
-                                ShellExecuteA(
-                                    nullptr,
-                                    "open",
-                                    "https://www.nexusmods.com/metalgearsolid2mc/mods/52",
-                                    nullptr,
-                                    nullptr,
-                                    SW_SHOWNORMAL
-                                );
-                            }
-                        }
-                    }
-
-                    RecordWarning(cache, cacheFile, key, policy);
-                }
-                else
-                {
-                    spdlog::info("Bugfix Mod Checks: MGS2 Community Bugfix Compilation Check: Not currently installed.");
-                }
-            }
-            else
-            {
-                spdlog::info("Bugfix Mod Checks: MGS2 Community Bugfix Compilation Check: Mod is installed.");
-            }
-        }        */
     }
 
 }
