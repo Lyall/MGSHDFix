@@ -137,10 +137,32 @@ jobs:
     - run: Copy-Item README.md "dist/plugins/${{ github.event.repository.name }}_README.md"
     - run: Copy-Item LICENSE.md "dist/plugins/${{ github.event.repository.name }}_LICENSE.md"
 
-    # Package everything
-    - name: Create release zip
+    # Package release zips
+    - name: Create MGS2 Nexus / Base Github Release zip
       working-directory: dist
       run: 7z a -tzip "../${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip" *
+
+    - name: Create MG1 + MG2 Nexus zip
+      run: |
+        Copy-Item dist dist_variant1 -Recurse
+
+        Add-Content "dist_variant1/logs/${{ github.event.repository.name }}_Game.log" "1"
+
+        cd dist_variant1
+        7z a -tzip "../${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MG1.zip" *
+        cd ..
+        Remove-Item dist_variant1 -Recurse -Force
+
+    - name: Create MGS3 Nexus zip
+      run: |
+        Copy-Item dist dist_variant3 -Recurse
+
+        Add-Content "dist_variant3/logs/${{ github.event.repository.name }}_Game.log" "3"
+
+        cd dist_variant3
+        7z a -tzip "../${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MGS3.zip" *
+        cd ..
+        Remove-Item dist_variant3 -Recurse -Force
 
     - uses: ncipollo/release-action@v1
       with:
@@ -151,3 +173,47 @@ jobs:
         draft: true
         generateReleaseNotes: true
         artifactErrorsFailBuild: true
+
+    - name: Upload to NexusMods - MG1 + MG2
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 107230
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MG1.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+            
+    - name: Upload to NexusMods - MGS2
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 462574
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: |
+            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+
+            Texture / Movie resolution is not affected / can be set however desired.
+
+
+    - name: Upload to NexusMods - Upload to NexusMods - MGS3
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 541612
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MGS3.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: |
+            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+
+            Texture / Movie resolution is not affected / can be set however desired.
+
