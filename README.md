@@ -161,7 +161,10 @@ This list will contain bugs which may or may not be fixed.
 git clone https://github.com/Lyall/MGSHDFix.git
 cd MGSHDFix
 git submodule update --init --recursive
+git config submodule.recurse true
 ```
+
+wxWidgets has nested Git submodules; `git config submodule.recurse true` ensures they are automatically updated to the correct commits when pulling.
 
 ### Windows
 Open MGSHDFix.sln in Visual Studio (2026) and build.
