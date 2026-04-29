@@ -71,9 +71,9 @@ def ensure_admin() -> None:
 # CONFIG
 # ==========================================================
 
-ROOT_MGS2 = Path(r"C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid2mc\mods")
-ROOT_MG_MG2 = Path(r"C:\Users\cmkoo\OneDrive\Vortex\metalgearandmetalgear2mc\mods")
-ROOT_MGS3 = Path(r"C:\Users\cmkoo\OneDrive\Vortex\metalgearsolid3mc\mods")
+ROOT_MGS2 = Path(r"C:\Vortex\metalgearsolid2mc\mods")
+ROOT_MG_MG2 = Path(r"C:\Vortex\metalgearandmetalgear2mc\mods")
+ROOT_MGS3 = Path(r"C:\Vortex\metalgearsolid3mc\mods")
 
 ROOTS = [ROOT_MGS2, ROOT_MG_MG2, ROOT_MGS3]
 
@@ -315,6 +315,10 @@ def main() -> int:
 
     if os.environ.get("CI"):
         log("CI environment detected. Skipping update.")
+        return 0
+
+    if not os.environ.get("SHIZ_LOCAL_VORTEX_FILE_SYNC") == "1":
+        log("Skipping local Vortex mod file sync.")
         return 0
 
     log(f"Python: {sys.version}")
