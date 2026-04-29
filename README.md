@@ -158,8 +158,9 @@ This list will contain bugs which may or may not be fixed.
 
 ## Building
 ```bash
-git clone --recursive https://github.com/Lyall/MGSHDFix.git
+git clone https://github.com/Lyall/MGSHDFix.git
 cd MGSHDFix
+git submodule update --init --recursive
 ```
 
 ### Windows
