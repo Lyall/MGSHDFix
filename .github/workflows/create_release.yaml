@@ -37,6 +37,31 @@ jobs:
 
         echo "version=$version" >> $GITHUB_OUTPUT
 
+    - name: Verify release does not already exist
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $version = "${{ steps.extract_version.outputs.version }}"
+
+        Write-Host "Checking whether release/tag already exists for version $version..."
+
+        $releaseExists = gh release view $version --repo "${{ github.repository }}" 2>$null
+
+        if ($LASTEXITCODE -eq 0) {
+          Write-Error "Release posting already exists for version $version. Bump version.h before creating a new release."
+          exit 1
+        }
+
+        $tagExists = git ls-remote --tags origin "refs/tags/$version"
+
+        if ($tagExists) {
+          Write-Error "Git tag already exists for version $version. Bump version.h before creating a new release."
+          exit 1
+        }
+
+        Write-Host "No existing release or tag found for version $version."
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
