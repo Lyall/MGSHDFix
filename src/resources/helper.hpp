@@ -54,6 +54,8 @@ namespace Util
 
     std::string GetFileDescription(const std::string& filePath);
 
+    bool IsRunningUnderWine();
+
     bool CheckForASIFiles(std::string fileName, bool checkForDuplicates, bool setFixPath, const char* checkCreationDate);
 
     std::string GetNameAtIndex(const std::initializer_list<std::string>& list, int index);
