@@ -9,7 +9,7 @@ public:
     static BOOL WINAPI PeekMessageW_Hook(LPMSG m, HWND h, UINT a, UINT b, UINT c);
     static __int64 ActorWait_Hook();
 
-    bool bEnabled = false;
+    int iOption = 0;
     double* m_actorWaitValue = nullptr;
 
 private:

@@ -611,9 +611,9 @@ void Config::Read()
     // Busy Loop Fix
     if (eGameType & (MG | MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.bEnabled);
+        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
 
-        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.bEnabled);
+        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
     }
 
     ConfigLogger::Flush();

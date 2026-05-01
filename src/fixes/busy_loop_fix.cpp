@@ -3,6 +3,9 @@
 #include "busy_loop_fix.hpp"
 #include "logging.hpp"
 #include "helper.hpp"
+#include <timeapi.h>
+
+#pragma comment(lib, "winmm.lib")
 
 static BusyLoopFix* g_instance = nullptr;
 typedef double GetElapsedTime_t();
@@ -20,41 +23,32 @@ BOOL WINAPI BusyLoopFix::PeekMessageW_Hook(LPMSG m, HWND h, UINT a, UINT b, UINT
     return r;
 }
 
-#include <windows.h>
-#include <timeapi.h>
-
-#pragma comment(lib, "winmm.lib")
-
 __int64 BusyLoopFix::ActorWait_Hook()
 {
-    
-    
     __int64 result = g_instance->m_actorWaitHook.call<__int64>();
 
     if (result == 0)
     {
         double elapsed = GetElapsedTime();
-        double target = 0.01666;
+        double target = g_instance->m_actorWaitValue ? *g_instance->m_actorWaitValue : 0.01666;
         double remaining = target - elapsed;
 
-        // sleep isn't perfectly accruate, so we only sleep if more than 3ms remain
-        if (remaining * 1000.0 > 3.0) {
-            //spdlog::info("sleep");
-            timeBeginPeriod(1);
+        if (remaining * 1000.0 > 2.0)
             Sleep(1);
-            timeEndPeriod(1);
-        }
     }
 
     return result;
 }
 
+uintptr_t GetRelativeOffset(uint8_t* addr)
+{
+    return reinterpret_cast<uintptr_t>(addr) + 4 + *reinterpret_cast<int32_t*>(addr);
+}
+
 void BusyLoopFix::Initialize()
 {
-    if (!bEnabled)
-    {
+    if (!iOption)
         return;
-    }
 
     g_instance = this;
 
@@ -68,19 +62,13 @@ void BusyLoopFix::Initialize()
 
     m_peekMessageHook = safetyhook::create_inline(target, PeekMessageW_Hook);
 
-    if (!Util::IsRunningUnderWine())
-    {
-        //return;
-    }
+    if (iOption == 1)
+        return;
+
+    timeBeginPeriod(1);
 
     GetElapsedTime = (GetElapsedTime_t*)Memory::PatternScan(baseModule, "48 83 EC ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8B 05", "MGS 2 | MGS 3: GetElapsedTime");
-    auto targetActorWait = Memory::PatternScan(
-        baseModule,
-        !(eGameType & MGS2)
-        ? "48 83 EC ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8B 05"
-        : "48 83 EC ?? E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 74",
-        "MGS 2 | MGS 3: ActorWait"
-    );
+    auto targetActorWait = Memory::PatternScan(baseModule, "48 83 EC ?? E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 74", "MGS 2 | MGS 3: ActorWait");
 
     if (!targetActorWait)
     {
@@ -88,7 +76,11 @@ void BusyLoopFix::Initialize()
         return;
     }
 
-    //m_actorWaitValue = (double*)Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00 ?? ?? F2 0F 10 0D", "MGS 2 | MGS 3: ActorWaitValue");
+    auto targetActorWaitValue = Memory::PatternScan(baseModule, eGameType & MGS2 ? "83 3D ?? ?? ?? ?? ?? 74 ?? 66 0F 2F 05" : "83 3D ?? ?? ?? ?? 00 ?? ?? F2 0F 10 0D", "MGS 2 | MGS 3: ActorWaitValue");
+    
+    if (targetActorWaitValue)
+        m_actorWaitValue = reinterpret_cast<double*>((reinterpret_cast<uintptr_t>(targetActorWaitValue + 13) + 4 + *reinterpret_cast<int32_t*>(targetActorWaitValue + 13)));
+    
     m_actorWaitHook = safetyhook::create_inline(reinterpret_cast<void*>(targetActorWait), ActorWait_Hook);
 }
 
@@ -97,4 +89,6 @@ void BusyLoopFix::Shutdown()
     m_peekMessageHook = {};
     m_actorWaitHook = {};
     g_instance = nullptr;
+
+    timeEndPeriod(1);
 }
