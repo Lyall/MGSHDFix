@@ -10,7 +10,7 @@ public:
     static __int64 ActorWait_Hook();
 
     bool bEnabled = false;
-    double* m_actorWaitValue;
+    double* m_actorWaitValue = nullptr;
 
 private:
     SafetyHookInline m_peekMessageHook;
