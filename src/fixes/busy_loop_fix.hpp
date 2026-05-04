@@ -10,7 +10,6 @@ public:
     static __int64 ActorWait_Hook();
 
     int iOption = 0;
-    double* m_actorWaitValue = nullptr;
 
 private:
     SafetyHookInline m_peekMessageHook;
