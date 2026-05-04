@@ -60,33 +60,6 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 
 
 
-#ifdef _MGSDEBUGGING
-/*
-SafetyHookInline splashSplash_hook {};
-int64_t __fastcall MGS2_splashSplash(struct _exception* a1)
-{
-    return 120;
-}
-*/
-#endif
-
-#ifdef _MGSDEBUGGING
-/*
-SafetyHookInline splashPartsSlow_hook {};
-int64_t __fastcall MGS2_splashPartsSlow(DWORD* a1, __int16* a2, float duration)
-{
-    if (strcmp(currentStage, "d001p01") == 0)
-    {
-        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
-    }
-    if (strcmp(currentStage, "d13t") == 0)
-    {
-        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
-    }
-    return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration);
-}
-*/
-#endif
 safetyhook::MidHook debrisVelocityHook;
 
 void EffectSpeedFix::Initialize()
@@ -101,99 +74,31 @@ void EffectSpeedFix::Initialize()
         SPDLOG_INFO("MGS 2: Effect Speed Fix: Config disabled. Skipping");
         return;
     }
+
+
+#pragma region RAIN_EFFECTS
+
+    constexpr float rain_slow_c_multiplier = 0.5f; // okajima\effect\rain_slow.c -> NewRainSlow() - runs at double speed in cutscenes
+
+    MAKE_HOOK_MID(baseModule, "39 47 ?? 0F 85 ?? ?? ?? ?? F3 44 0F 10 35", "MGS 2: Effect Speed Fix : rain_slow.c", {
+            if (!g_GameVars.InCutscene())
+            {
+                return;
+            }
+            //spdlog::info("rain_slow before x_delta {}, y_delta {}, z_delta {}", *reinterpret_cast<float*>(ctx.rsp + 0x4C), *reinterpret_cast<float*>(ctx.rsp + 0x20), *reinterpret_cast<float*>(ctx.rsp + 0x50));
+            *reinterpret_cast<float*>(ctx.rsp + 0x4C) *= rain_slow_c_multiplier;  // x_delta
+            *reinterpret_cast<float*>(ctx.rsp + 0x20) *= rain_slow_c_multiplier;  // y_delta
+            *reinterpret_cast<float*>(ctx.rsp + 0x50) *= rain_slow_c_multiplier;  // z_delta
+        });
+
+
+#pragma endregion
+
     
-#ifdef _MGSDEBUGGING
-    /*
-    if (uint8_t* MGS2_traffic_c_Result = Memory::PatternScan(baseModule, "89 53 ?? 33 C9", "MGS 2: Effect Speed Fix : demo\\traffic.c"))
-    {
-        static SafetyHookMid traffic_cMidHook {};
-        traffic_cMidHook = safetyhook::create_mid(MGS2_traffic_c_Result,
-            [](SafetyHookContext& ctx)
-            {
-                spdlog::info("traffic before {}", ctx.rdx);
-                ctx.rdx *= FRAME_IOP_MULTIPLIER; //doesn't seem to get invoked
-                spdlog::info("traffic after {}", ctx.rdx);
-            });
-        LOG_HOOK(traffic_cMidHook, "MGS 2: Effect Speed Fix: demo\\traffic.c")
-    }
-    */
-    /*
-    if (uint8_t* MGS2_traffic_c_2_Result = Memory::PatternScan(baseModule, "41 8B F9 0F 29 74 24 ?? 45 33 C9 45 8B F0", "MGS 2: Effect Speed Fix : demo\\traffic.c #2"))
-    {
-        static SafetyHookMid traffic_c_2_MidHook {};
-        traffic_c_2_MidHook = safetyhook::create_mid(MGS2_traffic_c_2_Result,
-            [](SafetyHookContext& ctx)
-            {
-                spdlog::info("traffic 2 before {}", ctx.r9);
-                ctx.r9 *= FRAME_IOP_MULTIPLIER;
-                spdlog::info("traffic 2 after {}", ctx.r9);
-            });
-        LOG_HOOK(traffic_c_2_MidHook, "MGS 2: Effect Speed Fix: demo\\traffic.c #2")
-    }
-
-    *//*
-    if (uint8_t* MGS2_crosfade_c_Result = Memory::PatternScan(baseModule, "89 5F ?? 79 ?? 89 77", "MGS 2: Effect Speed Fix : effect1\\crosfade.c"))
-    {
-        static SafetyHookMid crosfade_cMidHook {};
-        crosfade_cMidHook = safetyhook::create_mid(MGS2_crosfade_c_Result,
-            [](SafetyHookContext& ctx)
-            {
-                spdlog::info("crossfade before {}", ctx.rbx);
-                ctx.rbx = (unsigned int)(ctx.rbx * g_GameVars.ActorWaitMultiplier() * 2);
-                spdlog::info("crosfade after {}", ctx.rbx);
-            });
-        LOG_HOOK(crosfade_cMidHook, "MGS 2: Effect Speed Fix: effect1\\crosfade.c")
-    }
 
 
-    /*
-    if (uint8_t* Tidal4Result = Memory::PatternScan(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2: Effect Speed Fix : effect\\tidal4.c"))
-    {
-        static SafetyHookMid Tidal4MidHook {};
-        Tidal4MidHook = safetyhook::create_mid(Tidal4Result,
-            [](SafetyHookContext& ctx)
-            {
-                ctx.xmm0.f32[0] *= 2;
-            });
-        LOG_HOOK(Tidal4MidHook, "MGS 2: Effect Speed Fix: effect2\\tidal4.c 1")
-    }
-    */
-    /*
-    
-    if (uint8_t* MGS2_splushSurfaceGravityManScanResult = Memory::PatternScan(baseModule, "F3 0F 11 43 ?? 45 8D 41", "MGS 2: Effect Speed Fix : effect2\\splush_surface_gravity_man.c 1"))
-    { // 2025-05-19 14-32-21
-        static SafetyHookMid splushSurfaceGravityMan1MidHook {};
-        splushSurfaceGravityMan1MidHook = safetyhook::create_mid(MGS2_splushSurfaceGravityManScanResult,
-            [](SafetyHookContext& ctx)
-            {
-                ctx.xmm0.f32[0] /= 2;
-            });
-        LOG_HOOK(splushSurfaceGravityMan1MidHook, "MGS 2: Effect Speed Fix: effect2\\splush_surface_gravity_man.c 1")
-    }
-    */
-
-   /* if (uint8_t* MGS2_splushSurfaceGravityMan2ScanResult = Memory::PatternScan(baseModule, "F3 0F 11 05 ?? ?? ?? ?? F3 0F 11 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 46", "MGS 2: Effect Speed Fix : effect2\\splush_surface_gravity_man.c 2"))
-    {
-        static SafetyHookMid splushSurfaceGravityManMidHook {};
-        splushSurfaceGravityManMidHook = safetyhook::create_mid(MGS2_splushSurfaceGravityMan2ScanResult,
-            [](SafetyHookContext& ctx)
-            {
-                ctx.xmm4.f32[0] /= 2;
-                spdlog::info("splush_surface_gravity corrected");
-            });
-        LOG_HOOK(splushSurfaceGravityManMidHook, "MGS 2: Effect Speed Fix: effect2\\splush_surface_gravity_man.c 2")
-    }*/
 
 
-    /*
-    if (uint8_t* MGS2_splashPartsSlowScanResult = Memory::PatternScan(baseModule, "0F 28 D6 E8 ?? ?? ?? ?? 41 8B 06", "MGS 2: Effect Speed Fix : demo_effect\\d_splash_parts_slow.c"))
-    {
-        uintptr_t MGS2_splashPartsSlowScanAddress = Memory::GetAbsolute((uintptr_t)MGS2_splashPartsSlowScanResult + 0x4);
-        splashPartsSlow_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_splashPartsSlowScanAddress), reinterpret_cast<void*>(MGS2_splashPartsSlow));
-        LOG_HOOK(splashPartsSlow_hook, "MGS 2: Effect Speed Fix: demo_effect\\d_splash_parts_slow.c")
-    }
-    */
-#endif
 
     
     if (uint8_t* MGS2_flyingSmokeSlowScanResult = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? FF 4B ?? 83 7B ?? ?? 7D", "MGS 2: Effect Speed Fix : effect3\\flying_smoke_slow.c"))
@@ -325,3 +230,65 @@ void EffectSpeedFix::Reset()
     iDebrisIteration = 0;
 }
 
+
+
+
+
+////////
+///     old tests on broken shit. need to redo these properly. :3
+/*
+#ifdef _MGSDEBUGGING
+    /*
+    if (uint8_t* MGS2_traffic_c_Result = Memory::PatternScan(baseModule, "89 53 ?? 33 C9", "MGS 2: Effect Speed Fix : demo\\traffic.c"))
+    {
+
+    /*
+    if (uint8_t* MGS2_traffic_c_2_Result = Memory::PatternScan(baseModule, "41 8B F9 0F 29 74 24 ?? 45 33 C9 45 8B F0", "MGS 2: Effect Speed Fix : demo\\traffic.c #2"))
+    {
+
+
+    *//*
+    if (uint8_t* MGS2_crosfade_c_Result = Memory::PatternScan(baseModule, "89 5F ?? 79 ?? 89 77", "MGS 2: Effect Speed Fix : effect1\\crosfade.c"))
+    {
+
+
+    /*
+    if (uint8_t* Tidal4Result = Memory::PatternScan(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2: Effect Speed Fix : effect\\tidal4.c"))
+    {
+
+
+    if (uint8_t* MGS2_splushSurfaceGravityManScanResult = Memory::PatternScan(baseModule, "F3 0F 11 43 ?? 45 8D 41", "MGS 2: Effect Speed Fix : effect2\\splush_surface_gravity_man.c 1"))
+
+
+   /* if (uint8_t* MGS2_splushSurfaceGravityMan2ScanResult = Memory::PatternScan(baseModule, "F3 0F 11 05 ?? ?? ?? ?? F3 0F 11 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 46", "MGS 2: Effect Speed Fix : effect2\\splush_surface_gravity_man.c 2"))
+
+
+
+    /*
+    if (uint8_t* MGS2_splashPartsSlowScanResult = Memory::PatternScan(baseModule, "0F 28 D6 E8 ?? ?? ?? ?? 41 8B 06", "MGS 2: Effect Speed Fix : demo_effect\\d_splash_parts_slow.c"))
+    *
+    *
+#ifdef _MGSDEBUGGING
+/*
+SafetyHookInline splashSplash_hook {};
+int64_t __fastcall MGS2_splashSplash(struct _exception* a1)
+{
+    return 120;
+}
+*/
+
+/*
+SafetyHookInline splashPartsSlow_hook {};
+int64_t __fastcall MGS2_splashPartsSlow(DWORD* a1, __int16* a2, float duration)
+{
+    if (strcmp(currentStage, "d001p01") == 0)
+    {
+        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
+    }
+    if (strcmp(currentStage, "d13t") == 0)
+    {
+        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
+    }
+    return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration);
+}
+*/
