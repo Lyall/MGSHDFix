@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp" />
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp" />
     <ClCompile Include="src\features\mgs2_restore_dogtags.cpp" />
     <ClCompile Include="src\warnings\background_shuffle_warning.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp" />
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
     <ClInclude Include="src\fixes\busy_loop_fix.hpp" />

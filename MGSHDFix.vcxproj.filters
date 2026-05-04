@@ -170,6 +170,9 @@
     <ClCompile Include="src\fixes\water_reflections.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -329,6 +332,9 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\busy_loop_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
