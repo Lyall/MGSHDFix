@@ -4,6 +4,7 @@
 #include "logging.hpp"
 #include "helper.hpp"
 #include <timeapi.h>
+#include <gamevars.hpp>
 
 #pragma comment(lib, "winmm.lib")
 
@@ -30,19 +31,17 @@ __int64 BusyLoopFix::ActorWait_Hook()
     if (result == 0)
     {
         double elapsed = GetElapsedTime();
-        double target = g_instance->m_actorWaitValue ? *g_instance->m_actorWaitValue : 0.01666;
+        double target = g_GameVars.ActorWaitValue();
         double remaining = target - elapsed;
 
-        if (remaining * 1000.0 > 2.0)
+        // sleep may not be fully accurate, even with timeBeginPeriod.
+        // a 3ms buffer should be more than enough to avoid overshooting our 
+        // wait and to reduce cpu usage
+        if (remaining * 1000.0 > 3.0) 
             Sleep(1);
     }
 
     return result;
-}
-
-uintptr_t GetRelativeOffset(uint8_t* addr)
-{
-    return reinterpret_cast<uintptr_t>(addr) + 4 + *reinterpret_cast<int32_t*>(addr);
 }
 
 void BusyLoopFix::Initialize()
@@ -56,7 +55,7 @@ void BusyLoopFix::Initialize()
 
     if (!target)
     {
-        spdlog::info("MGS 2 | MGS 3: BusyLoopFix - Failed to find PeekMessageW!");
+        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find PeekMessageW!");
         return;
     }
 
@@ -67,20 +66,23 @@ void BusyLoopFix::Initialize()
 
     timeBeginPeriod(1);
 
-    GetElapsedTime = (GetElapsedTime_t*)Memory::PatternScan(baseModule, "48 83 EC ?? 48 8D 0D ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8B 05", "MGS 2 | MGS 3: GetElapsedTime");
+    // MGSFPSUnlock hooks this function, so we pattern scan after the hook
+    GetElapsedTime = (GetElapsedTime_t*)(Memory::PatternScan(baseModule, "FF 15 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 0F 57 C0", "MGS 2 | MGS 3: GetElapsedTime") - 0xB);
+
+    if (!GetElapsedTime)
+    {
+        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find GetElapsedTime!");
+        return;
+    }
+    
     auto targetActorWait = Memory::PatternScan(baseModule, "48 83 EC ?? E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 74", "MGS 2 | MGS 3: ActorWait");
 
     if (!targetActorWait)
     {
-        spdlog::info("MGS 3: BusyLoopFix - Failed to find ActorWait!");
+        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find ActorWait!");
         return;
     }
 
-    auto targetActorWaitValue = Memory::PatternScan(baseModule, eGameType & MGS2 ? "83 3D ?? ?? ?? ?? ?? 74 ?? 66 0F 2F 05" : "83 3D ?? ?? ?? ?? 00 ?? ?? F2 0F 10 0D", "MGS 2 | MGS 3: ActorWaitValue");
-    
-    if (targetActorWaitValue)
-        m_actorWaitValue = reinterpret_cast<double*>((reinterpret_cast<uintptr_t>(targetActorWaitValue + 13) + 4 + *reinterpret_cast<int32_t*>(targetActorWaitValue + 13)));
-    
     m_actorWaitHook = safetyhook::create_inline(reinterpret_cast<void*>(targetActorWait), ActorWait_Hook);
 }
 
@@ -90,5 +92,6 @@ void BusyLoopFix::Shutdown()
     m_actorWaitHook = {};
     g_instance = nullptr;
 
-    timeEndPeriod(1);
+    if (iOption > 1)
+        timeEndPeriod(1);
 }
