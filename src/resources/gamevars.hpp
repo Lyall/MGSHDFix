@@ -7,6 +7,7 @@ public:
     [[nodiscard]] bool InCutscene() const; // If we're in a full demo cutscene.
     [[nodiscard]] bool InScriptedSequence() const; // If the game is in a scripted sequence (cutscene or pad demo).
     [[nodiscard]] double ActorWaitMultiplier() const;
+    [[nodiscard]] double ActorWaitValue() const;
 
     [[nodiscard]] std::string GetRichPresenceString() const;
     [[nodiscard]] std::string GetGameMode() const;

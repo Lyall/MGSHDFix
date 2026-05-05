@@ -411,6 +411,13 @@ namespace Util
         return "File description not found.";
     }
 
+    bool IsRunningUnderWine()
+    {
+        HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+        if (!ntdll) return false;
+        return GetProcAddress(ntdll, "wine_get_version") != nullptr;
+    }
+
     ///Scans all valid ASI directories for any .asi files matching the fileName.
     bool CheckForASIFiles(std::string fileName, bool checkForDuplicates, bool setFixPath, const char* checkCreationDate)
     {

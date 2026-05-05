@@ -41,6 +41,7 @@ void GameVars::Initialize()
     {
         aimingState = reinterpret_cast<uint64_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 35 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? 49 89 8D", "MGS 3: GameVars: aimingState") + 2));
         heldTriggers = reinterpret_cast<uint32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 3D ?? ?? ?? ?? BA ?? ?? ?? ?? 41 B8", "MGS 3: GameVars: heldTriggers") + 3));
+        actorWaitValue = reinterpret_cast<double*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00 ?? ?? F2 0F 10 0D", "MGS 2: GameVars: actorWaitValue") + 13));
 
         spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
         spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
@@ -66,6 +67,11 @@ bool GameVars::InCutscene() const //does not count pad demos or FMVs, only full 
 bool GameVars::InScriptedSequence() const //Scripted sequences, i.e., forced codec calls, cutscenes, pad demos (ingame tutorials & forced movements ala first meeting Stillman), and FMVs.
 {
     return scriptedSequenceFlag == nullptr ? false : (*scriptedSequenceFlag == 1);
+}
+
+double GameVars::ActorWaitValue() const
+{
+    return actorWaitValue == nullptr ? 1.0 / 60.0 : *actorWaitValue;
 }
 
 double GameVars::ActorWaitMultiplier() const
