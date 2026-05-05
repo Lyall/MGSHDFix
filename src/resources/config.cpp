@@ -32,6 +32,7 @@
 #include "windows_fullscreen_optimization.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "busy_loop_fix.hpp"
+#include "swap_menu_buttons.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -553,6 +554,8 @@ void Config::Read()
 
     LOG_CONFIG(ConfigKeys::SkipLauncherMSXGame_Section, ConfigKeys::SkipLauncherMSXGame_Setting, sLauncherConfigMSXGame);
 
+    ConfigHelper::getValue(ini, ConfigKeys::MenuButton_Section, ConfigKeys::MenuButton_Setting, SwapMenuButtons::force_menu_buttons);
+    LOG_CONFIG(ConfigKeys::MenuButton_Section, ConfigKeys::MenuButton_Setting, SwapMenuButtons::force_menu_buttons);
 
     ConfigHelper::getValue(ini, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, g_InputHandler.bCaptureInputsWhileAltTabbed);
     LOG_CONFIG(ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, g_InputHandler.bCaptureInputsWhileAltTabbed);

@@ -6,14 +6,17 @@
 #include "gamevars.hpp"
 #include "logging.hpp"
 
-///PS2's I/O subprocessor clock speed in MHz. If an effect ran via a loop on the PS2, it was likely limited by this clock speed as opposed to running at 30 FPS.
-constexpr double PS2_IOP_CLOCKSPEED = 36.864;
-constexpr double FRAME_IOP_DIVIDER = (PS2_IOP_CLOCKSPEED / 60);
-constexpr double FRAME_IOP_MULTIPLIER = (60 / PS2_IOP_CLOCKSPEED);
 
 
 namespace
 {
+
+    ///PS2's I/O subprocessor clock speed in MHz. If an effect ran via a loop on the PS2, it was likely limited by this clock speed as opposed to running at 30 FPS.
+    constexpr double PS2_IOP_CLOCKSPEED = 36.864;
+    constexpr double FRAME_IOP_DIVIDER = (PS2_IOP_CLOCKSPEED / 60);
+    constexpr double FRAME_IOP_MULTIPLIER = (60 / PS2_IOP_CLOCKSPEED);
+
+
     uintptr_t rain_slow_copyback_addr = reinterpret_cast<uintptr_t>(nullptr);
 }
 

@@ -214,7 +214,7 @@ namespace Memory
 
 namespace Util
 {
-#if !defined(RELEASE_BUILD)
+#if defined(ENABLE_DUMP_CONTEXT)
     void DumpContext(const safetyhook::Context& ctx)
     {
         spdlog::info("\n"
@@ -256,13 +256,39 @@ namespace Util
         );
     }
 
-    void DumpBytes(uint64_t address)
+    void DumpBytes(uintptr_t address, size_t count = 16)
     {
-        BYTE* fn = reinterpret_cast<BYTE*>(address);
-        spdlog::info("First 6 bytes at DrawInstanced address:");
-        for (int i = 0; i < 6; ++i)
+        if (address == 0)
         {
-            spdlog::info("  0x{:02X}", fn[i]);
+            spdlog::error("DumpBytes: null address");
+            return;
+        }
+
+        MEMORY_BASIC_INFORMATION mbi {};
+        if (!VirtualQuery(reinterpret_cast<void*>(address), &mbi, sizeof(mbi)))
+        {
+            spdlog::error("DumpBytes: VirtualQuery failed for 0x{:X}", address);
+            return;
+        }
+
+        const bool readable =
+            mbi.State == MEM_COMMIT &&
+            !(mbi.Protect & PAGE_NOACCESS) &&
+            !(mbi.Protect & PAGE_GUARD);
+
+        if (!readable)
+        {
+            spdlog::error("DumpBytes: unreadable address 0x{:X}, protect=0x{:X}", address, mbi.Protect);
+            return;
+        }
+
+        auto* bytes = reinterpret_cast<const uint8_t*>(address);
+
+        spdlog::info("Bytes at 0x{:X}:", address);
+
+        for (size_t i = 0; i < count; ++i)
+        {
+            spdlog::info("  +0x{:02X}: 0x{:02X}", i, bytes[i]);
         }
     }
 #endif

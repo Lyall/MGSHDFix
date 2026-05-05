@@ -149,9 +149,6 @@
     <ClCompile Include="src\features\settings_pesistence.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\swap_menu_buttons.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\warnings\bugfix_mod_checks.cpp">
       <Filter>Warnings</Filter>
     </ClCompile>
@@ -172,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp">
       <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\swap_menu_buttons.cpp">
+      <Filter>Features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -454,6 +454,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_MGS2Sunglasses.Initialize());
     INITIALIZE(g_DistanceCulling.Initialize());
     INITIALIZE(MGS2_RestoreDogtags::Initialize());
+    INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
 
 
 
@@ -480,7 +481,6 @@ static void InitializeSubsystems()
     //INITIALIZE(MGS3FixCameraOffsets::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());
     //INITIALIZE(MG1CropBorders::Initialize());
-    //INITIALIZE(SwapMenuButtons::Initialize());
     //INITIALIZE(MG1CustomLoadingScreens::Initialize());
     //INITIALIZE(AntiAliasing::Initialize());
 #endif

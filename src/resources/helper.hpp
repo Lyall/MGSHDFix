@@ -35,9 +35,12 @@ namespace Memory
 namespace Util
 {
 #if !defined(RELEASE_BUILD)
+#ifndef ENABLE_DUMP_CONTEXT
+#define ENABLE_DUMP_CONTEXT
+#endif
     void DumpContext(const safetyhook::Context& ctx);
 
-    void DumpBytes(uint64_t address);
+    void DumpBytes(uintptr_t address, size_t count);
 #endif
     
     std::string GetCommandLineArgs();

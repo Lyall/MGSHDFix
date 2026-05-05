@@ -79,6 +79,10 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
 
+        { ConfigKeys::MenuButton_Section, ConfigKeys::MenuButton_Setting, ConfigKeys::MenuButton_Help, ConfigKeys::MenuButton_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, "", {ConfigKeys::MenuButton_Option_Default, ConfigKeys::MenuButton_Option_EastForOK, ConfigKeys::MenuButton_Option_SouthForOK} },
+
+
         { ConfigKeys::CtrlType_Section, "",
           "", "",
           std::nullopt, false, Field::Spacer }

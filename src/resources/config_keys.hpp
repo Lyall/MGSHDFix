@@ -264,6 +264,19 @@ namespace ConfigKeys
     constexpr const char* CtrlType_Help = "";
     constexpr const char* CtrlType_Tooltip = "Selects which controller button icons to display in-game.";
 
+    constexpr const char* MenuButton_Section = "Controller Settings";
+    constexpr const char* MenuButton_Setting = "Set Menu OK / Cancel Buttons";
+    constexpr const char* MenuButton_Help = "(MGS2 Only)";
+    constexpr const char* MenuButton_Tooltip = "Sets which button is used for the OK action in menus.\n"
+                                               "\n"
+                                               "East for OK = PS2 Circle Button for Accept, X Button for Cancel\n"
+                                               "\n"
+                                               "South for OK = PS2 X Button for Accept, Circle Button for Cancel";
+    constexpr const char* MenuButton_Option_Default = "Default";
+    constexpr const char* MenuButton_Option_EastForOK = "East for OK";
+    constexpr const char* MenuButton_Option_SouthForOK = "South for OK";
+
+
     constexpr const char* Language_Section = "Language Settings";
     constexpr const char* Language_Setting = "Game Language";
     constexpr const char* Language_Help = "";
@@ -561,3 +574,4 @@ static bool ResolveRegionLanguageNames(const std::array<Game_Language_Pair_View,
 
     return false;
 }
+
