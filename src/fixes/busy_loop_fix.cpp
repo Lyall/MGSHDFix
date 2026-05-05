@@ -30,9 +30,7 @@ __int64 BusyLoopFix::ActorWait_Hook()
 
     if (result == 0)
     {
-        double elapsed = GetElapsedTime();
-        double target = g_GameVars.ActorWaitValue();
-        double remaining = target - elapsed;
+        double remaining = g_GameVars.ActorWaitValue() - GetElapsedTime();
 
         // sleep may not be fully accurate, even with timeBeginPeriod.
         // a 3ms buffer should be more than enough to avoid overshooting our 
