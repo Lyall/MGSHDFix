@@ -11,6 +11,12 @@ constexpr double PS2_IOP_CLOCKSPEED = 36.864;
 constexpr double FRAME_IOP_DIVIDER = (PS2_IOP_CLOCKSPEED / 60);
 constexpr double FRAME_IOP_MULTIPLIER = (60 / PS2_IOP_CLOCKSPEED);
 
+
+namespace
+{
+    uintptr_t rain_slow_copyback_addr = reinterpret_cast<uintptr_t>(nullptr);
+}
+
 /////////////////////////////////////////////////////////////////
 /// Corrects various visual effects in MGS2 which were
 /// hardcoded for the PS2's cutscene physics speed (30 FPS)
@@ -78,23 +84,34 @@ void EffectSpeedFix::Initialize()
 
 #pragma region RAIN_EFFECTS
 
-    constexpr float rain_slow_c_multiplier = 0.5f; // okajima\effect\rain_slow.c -> NewRainSlow() - runs at double speed in cutscenes
+    uint8_t* MGS2_RainSlowBackScanResult = Memory::PatternScan(baseModule, "48 8B 4D ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 45 0F 28 4B ?? 49 8B E3 41 5D", "MGS 2: Effect Speed Fix : rain_slow.c - return address");
+    rain_slow_copyback_addr = reinterpret_cast<uintptr_t>(MGS2_RainSlowBackScanResult);
 
-    MAKE_HOOK_MID(baseModule, "39 47 ?? 0F 85 ?? ?? ?? ?? F3 44 0F 10 35", "MGS 2: Effect Speed Fix : rain_slow.c", {
-            if (!g_GameVars.InCutscene())
-            {
-                return;
-            }
-            //spdlog::info("rain_slow before x_delta {}, y_delta {}, z_delta {}", *reinterpret_cast<float*>(ctx.rsp + 0x4C), *reinterpret_cast<float*>(ctx.rsp + 0x20), *reinterpret_cast<float*>(ctx.rsp + 0x50));
-            *reinterpret_cast<float*>(ctx.rsp + 0x4C) *= rain_slow_c_multiplier;  // x_delta
-            *reinterpret_cast<float*>(ctx.rsp + 0x20) *= rain_slow_c_multiplier;  // y_delta
-            *reinterpret_cast<float*>(ctx.rsp + 0x50) *= rain_slow_c_multiplier;  // z_delta
-        });
+    //rain length is calculated as distance traveled since last frame via DG_COPY_VEC(last_frame_cam_pos, currentcam_pos) @ L250
+    //ergo, scaling vel*0.5 directly results in the rain size also being reduced by 50%.
+    if (rain_slow_copyback_addr)
+    {
+        MAKE_HOOK_MID(baseModule, "?? ?? ?? B8 ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? 2B 81 ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 45 8D 41 ?? ?? ?? ?? ?? B8", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\rain_slow.c -> NewRainSlow() - Frameskip", {
+                if (!g_GameVars.InCutscene())
+                {
+                    return;
+                }
+
+                if (g_EffectSpeedFix.g_rain_slow_skip && rain_slow_copyback_addr)
+                {
+                    ctx.rip = rain_slow_copyback_addr;
+                }
+            });
+    }
+    else
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
+    }
+
 
 
 #pragma endregion
 
-    
 
 
 

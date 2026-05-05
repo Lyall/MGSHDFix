@@ -10,6 +10,7 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#include "effect_speeds.hpp"
 #include "gamma_correction.hpp"
 #include "input_handler.hpp"
 
@@ -149,6 +150,7 @@ namespace
 
         }
 
+        g_EffectSpeedFix.g_rain_slow_skip = !g_EffectSpeedFix.g_rain_slow_skip;
         g_InputHandler.Update();
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
