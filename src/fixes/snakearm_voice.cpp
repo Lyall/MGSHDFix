@@ -18,15 +18,14 @@ void SnakeArmFixes::ApplyFixes() {
     }
 
     // user/sonoyama/solidus/init_sol.c -> InitControl
-    // Get SOL_SolControl (not sure how to properly optimize the pattern)
-    //4B 8B CD 45 8D 41 EC E8 ?? ?? ?? ?? 44 8B 8D D8 00 00 00 
-    //41 B8 0F 00 00 00 8B 8D C4 00 00 00 48 8B D5 E8 ?? ?? ?? ?? A8 01 74 07 E8 ?? ?? ?? ?? 
+    // Get SOL_SolControl (unsure how to properly optimize the pattern, more context attached)
+    //   4B 8B CD 45 8D 41 EC E8 ?? ?? ?? ?? 44 8B 8D D8 00 00 00 
+    //   41 B8 0F 00 00 00 8B 8D C4 00 00 00 48 8B D5 E8 ?? ?? ?? ?? A8 01 74 07 E8 ?? ?? ?? ?? 
     uint8_t* Solidus_InitControl = Memory::PatternScan(baseModule, "EB 05 F3 0F 10 47 64 F3 0F 10 0D ?? ?? ?? ?? 0F 28 D0 48 8B CD E8 ?? ?? ?? ?? 8B D6 48 89 2D", "Solidus Voice Position");
     SolControl = (uintptr_t*)Memory::GetRelativeOffset(Solidus_InitControl + 31);
-    // // Free pointer! Use to match lea instruction.
-    // Memory::Write((uintptr_t)SolControl + 0x40, SolControl);
 
     // user/sonoyama/solidus/snakearm.c -> ClawAttackHit - uses GM_PlayerPosition instead of SOL_SolControl->mov
+    // Same for OnlineHit
     // This is probably not the correct way to change an offset from one global to another.
     uint8_t* ClawAttackHit = Memory::PatternScan(baseModule, "2B C8 48 8D 15 ?? ?? ?? ?? 8B C1 48 8D 0D ?? ?? ?? ?? 8B 0C 81 48 8B", "Solidus Voice Position Fix");
     uint8_t* OnlineHit = Memory::PatternScan(baseModule, "2B C8 48 8D 15 ?? ?? ?? ?? 8B C1 48 8D 0D ?? ?? ?? ?? 8B 0C 81 E8", "Solidus Voice Position Fix 2");
@@ -40,33 +39,34 @@ void SnakeArmFixes::ApplyFixes() {
         Memory::PatchBytes((uintptr_t)OnlineHit + 2, "\x90\x90\x90\x90\x90\x90\x90", 7);
         
         {
-            static SafetyHookMid hook__unique22{};
-            hook__unique22 = safetyhook::create_mid(ClawAttackHit + 2, [](SafetyHookContext& ctx) { {
-                    ctx.rdx = *SolControl;
-                } }); 
-            if (hook__unique22) {
-                if (g_Logging.bVerboseLogging) {
-                    spdlog::info("Solidus Voice Position: Hook 1 installed.");
-                }
-            }
-            else {
-                spdlog::error("Solidus Voice Position: Hook 1 failed.");
-            }
-
-            static SafetyHookMid hook__unique23{};
-            hook__unique23 = safetyhook::create_mid(OnlineHit + 2, [](SafetyHookContext& ctx) { {
+            static SafetyHookMid ClawAttackHook{};
+            ClawAttackHook = safetyhook::create_mid(ClawAttackHit + 2, [](SafetyHookContext& ctx) { {
                     ctx.rdx = *SolControl;
                 } });
-            if (hook__unique23) {
+
+            static SafetyHookMid OnlineHitHook{};
+            OnlineHitHook = safetyhook::create_mid(OnlineHit + 2, [](SafetyHookContext& ctx) { {
+                    ctx.rdx = *SolControl;
+                } });
+
+            if (ClawAttackHook && OnlineHitHook) {
                 if (g_Logging.bVerboseLogging) {
-                    spdlog::info("Solidus Voice Position: Hook 2 installed.");
+                    spdlog::info("Solidus Voice Position: Hooks installed.");
                 }
             }
-            else {
+            else if (ClawAttackHook) {
                 spdlog::error("Solidus Voice Position: Hook 2 failed.");
+            }
+            else if (OnlineHitHook) {
+                spdlog::error("Solidus Voice Position: Hook 1 failed.");
+            }
+            else {
+                spdlog::error("Solidus Voice Position: Hooks failed.");
             }
             
         }
-        spdlog::info("sol goodman.");
+    }
+    else {
+        spdlog::error("Solidus Voice Position: Failed to match one or more hook locations.");
     }
 }
