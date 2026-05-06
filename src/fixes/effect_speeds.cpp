@@ -7,6 +7,53 @@
 #include "logging.hpp"
 
 
+/////////////////////////////////////////////////////////////////
+/// Corrects various visual effects in MGS2 which were
+/// hardcoded for the PS2's cutscene physics speed (30 FPS)
+/// and run at 2x with the HDC/MC's 60 FPS cutscene physics speed
+/// 
+/// SolidusFireAct & CreateDebrisTexture fixes originally made as
+/// part of a modding fix bounty claimed by Cipherxof/Triggerhappy
+/// and originally included in the MGSFPSUnlock mod.
+/// They have been updated to fix several bugs, and upgraded (where needed) 
+/// to use RTC timesteps for 1:1 PS2 accurate frame-timing.
+/// 
+/////////////////////////////////////////////////////////////////
+
+
+#define CUTSCENE_FRAMESKIP_TICK(name) \
+    if (name##_first_hit)             \
+    {                                 \
+        name##_skip = !name##_skip;   \
+    }
+
+#define CUTSCENE_FRAMESKIP_RESET(name) \
+    do                                 \
+    {                                  \
+        name##_first_hit = false;      \
+        name##_skip = false;           \
+    } while (0)
+
+#define CUTSCENE_FRAMESKIP_VARS(name)                            \
+    bool name##_first_hit = false;                               \
+    bool name##_skip = false;                                    \
+    uintptr_t name##_copyback_addr = static_cast<uintptr_t>(0);
+
+#define CUTSCENE_FRAMESKIP_MIDHOOK(name, ctx) \
+    do                                     \
+    {                                      \
+        if (!g_GameVars.InCutscene())      \
+        {                                  \
+            return;                        \
+        }                                  \
+                                           \
+        if (name##_skip)                   \
+        {                                  \
+            ctx.rip = name##_copyback_addr; \
+        }                                  \
+                                           \
+        name##_first_hit = true;           \
+    } while (0)
 
 namespace
 {
@@ -17,32 +64,33 @@ namespace
     constexpr double FRAME_IOP_MULTIPLIER = (60 / PS2_IOP_CLOCKSPEED);
 
 
-    uintptr_t rain_slow_copyback_addr = reinterpret_cast<uintptr_t>(nullptr);
+    CUTSCENE_FRAMESKIP_VARS(rain_slow)
+
 }
 
-/////////////////////////////////////////////////////////////////
-/// Corrects various visual effects in MGS2 which were
-/// hardcoded for the PS2's cutscene physics speed (30 FPS)
-/// and have been running at double speed in all ports since
-/// the 2002 Xbox release.
-/// 
-/// SolidusFireAct & CreateDebrisTexture fixes originally made as
-/// part of a modding fix bounty claimed by Cipherxof/Triggerhappy
-/// and originally included in the MGSFPSUnlock mod.
-/// They have been updated to fix several bugs, and upgraded (where needed) 
-/// to use RTC timesteps for 1:1 PS2 accurate frame-timing.
-/// 
-/// Overlapping integrations originating from MGSFPSUnlock are 
-/// automatically disabled when older versions of MGSFPSUnlock are
-/// detected to maintain backwards compatibility until it's updated.
-///
-/////////////////////////////////////////////////////////////////
+/// Called every frame during Present()
+void EffectSpeedFix::Tick()
+{
+    CUTSCENE_FRAMESKIP_TICK(rain_slow);
+
+
+}
+
+
+///Called on GameVars::OnLevelTransition() to reset counters between cutscenes/levels.
+void EffectSpeedFix::Reset()
+{
+    CUTSCENE_FRAMESKIP_RESET(rain_slow);
+
+    iDebrisIteration = 0;
+}
+
 
 SafetyHookInline solidusFireDashAct_hook {};
 int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 {
     if (!g_GameVars.InCutscene()) // only slow down during cutscenes. the boss fight (which includes pad demos/scripted sequences) runs properly at normal game speed.
-    { 
+    {
         return solidusFireDashAct_hook.fastcall<int64_t>(work);
     }
 
@@ -55,7 +103,7 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
             g_EffectSpeedFix.solidusDashAct_NextUpdate = current_time;
         }
 
-        constexpr double duration = (PS2_IOP_CLOCKSPEED - 1); 
+        constexpr double duration = (PS2_IOP_CLOCKSPEED - 1);
         /*if (strcmp(g_GameVars.GetCurrentStage(), "d045p01") != 0) //P045_01P01 enter the Harrier 1 polygon demo 1 (MC) - Connecting bridge between Shells 1 and 2
         {
             duration -= 1; // Slightly slower than PS2_IOP_CLOCKSPEED to account for particle related performance slowdown on PS2 hardware had during closeup shots.
@@ -95,15 +143,7 @@ void EffectSpeedFix::Initialize()
     if (rain_slow_copyback_addr)
     {
         MAKE_HOOK_MID(baseModule, "?? ?? ?? B8 ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? 2B 81 ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 45 8D 41 ?? ?? ?? ?? ?? B8", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\rain_slow.c -> NewRainSlow() - Frameskip", {
-                if (!g_GameVars.InCutscene())
-                {
-                    return;
-                }
-
-                if (g_EffectSpeedFix.g_rain_slow_skip && rain_slow_copyback_addr)
-                {
-                    ctx.rip = rain_slow_copyback_addr;
-                }
+                CUTSCENE_FRAMESKIP_MIDHOOK(rain_slow, ctx);
             });
     }
     else
@@ -243,15 +283,6 @@ void EffectSpeedFix::Initialize()
     }
     
 }
-
-///Called on GameVars::OnLevelTransition() to reset counters between cutscenes/levels.
-void EffectSpeedFix::Reset() 
-{
-    iDebrisIteration = 0;
-}
-
-
-
 
 
 ////////

@@ -150,7 +150,7 @@ namespace
 
         }
 
-        g_EffectSpeedFix.g_rain_slow_skip = !g_EffectSpeedFix.g_rain_slow_skip;
+        g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
