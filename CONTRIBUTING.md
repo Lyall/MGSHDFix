@@ -16,7 +16,7 @@ https://github.com/A200K/IDA-Pro-SigMaker
 
 Please make an explicit note beside a function if you have to enable "Continue when leaving function scope". While the game typically does not move functions around greatly between game updates, this helps with troubleshooting if a game update breaks something.
 
-
+<br>
 
 **prefix**
 PatternScan() has built in logging in the event a pattern scan fails to find a memory address.
@@ -24,13 +24,13 @@ PatternScan() has built in logging in the event a pattern scan fails to find a m
 If you need to enable this logging, in the MGSHDFix Config Tool, go to `MGSHDFix / Internal` -> `Internal Settings` -> `Debug Logging`
 
 
----------------
+<br>
 
 ## `PatternScanSilent`
 Disables PatternScan's built in logging, useful if you want to have your own unique log messages, i.e. you're verifying that a memory pattern does NOT exist.
 
 
---------------
+<br>
 
 ## Hooking Macros
 
@@ -87,7 +87,7 @@ MAKE_HOOK_MID(baseModule, "89 5F ?? E9 ?? ?? ?? ?? 39 1D", "GameVars: Level Tran
 Please make sure that all hooks have proper logging for if the memory pattern / hook fails to setup, this greatly expedites troubleshooting when things (potentially) break between game updates.
 
 
-----------------
+<br>
 
 ## Reusable Game Variables (ie Cutscene active flag, ActorWaitValue, etc)
 Commonly used game variables are located in GameVars.cpp.
@@ -97,14 +97,16 @@ https://github.com/Lyall/MGSHDFix/blob/master/src/resources/gamevars.cpp
 If you're adding a variable which has obvious re-usage potential for other fixes in the future, add it to GameVars unless there's a valid reason you need it isolated to a specific TU. ♥
 
 
-------------
+<br>
+
 
 ## Translation Units
 Features / fixes are grouped into their own translation units to help with compilation times, & to make things faster to find. (dllmain.cpp used to be over 8000 lines alone.)
 
 If a fix only applies to a single game, preferably prefix the cpp/hpp file for it with the game's abbreviation, i.e. `MGS2_Sunglasses.cpp` to aid in quick visual identification.
 
--------------------
+
+<br>
 
 ## Debugging Features
 
@@ -151,7 +153,10 @@ Dumps (count) number of bytes at a given memory location, and the offset to thos
 [2026-05-07 08:42:58.522] [info]   +0x04: 0x48
 ```
 
----------------
+<br>
+
+<br>
+
 
 ## URL Opening
 Opening URLs on Steam Deck typically leads to the user being stuck on a black screen. 
@@ -159,10 +164,15 @@ Opening URLs on Steam Deck typically leads to the user being stuck on a black sc
 Please check IsSteamOS() whenever opening URLs to ensure that URLs aren't opened directly on Steam Deck.
 
 
+<br>
+
+<br>
 
 ------------
 
+<br>
 
+<br>
 
 # Style Guide
 
