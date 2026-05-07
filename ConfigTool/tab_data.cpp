@@ -128,6 +128,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, ConfigKeys::FixVectorRain_Help, ConfigKeys::FixVectorRain_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, ConfigKeys::FixOpticalCamo_Help, ConfigKeys::FixOpticalCamo_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
           std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
 

@@ -12,6 +12,7 @@
 #include "line_scaling.hpp"
 #include "logging.hpp"
 #include "mute_warning.hpp"
+#include "optical_camo.hpp"
 #include "pause_on_focus_loss.hpp"
 #include "steamworks_api.hpp"
 #include "stereo_audio.hpp"
@@ -568,6 +569,12 @@ void Config::Read()
 
         LOG_CONFIG(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, g_VectorScalingFix.bFixRain);
         LOG_CONFIG(ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, g_VectorScalingFix.bFixUI);
+
+        if (eGameType & MGS2)
+        {
+            ConfigHelper::getValue(ini, ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+            LOG_CONFIG(ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+        }
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {
