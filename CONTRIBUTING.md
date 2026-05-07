@@ -16,6 +16,8 @@ https://github.com/A200K/IDA-Pro-SigMaker
 
 Please make an explicit note beside a function if you have to enable "Continue when leaving function scope". While the game typically does not move functions around greatly between game updates, this helps with troubleshooting if a game update breaks something.
 
+![[Signature_Maker_usage.png]]
+
 <br>
 
 **prefix**
