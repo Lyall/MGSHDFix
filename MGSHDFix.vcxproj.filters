@@ -119,6 +119,9 @@
     <ClCompile Include="src\fixes\depth_of_field.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\optical_camo.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\resources\probe.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
@@ -293,6 +296,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\optical_camo.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\unit_tests.hpp">

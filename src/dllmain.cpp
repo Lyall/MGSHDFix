@@ -28,6 +28,7 @@
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
+#include "optical_camo.hpp"
 #include "stereo_audio.hpp"
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
@@ -462,6 +463,7 @@ static void InitializeSubsystems()
         //Fixes
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
+    INITIALIZE(g_OpticalCamoFix.Initialize());
     INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize()); //todo - fix more effects, ie rain speed, bullet trails, helicopter rotors
     INITIALIZE(g_StereoAudioFix.Initialize());

@@ -144,6 +144,11 @@ namespace ConfigKeys
                                                   "\n"
                                                   "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
 
+    constexpr const char* FixOpticalCamo_Section = "Vector Line Scaling Fix";
+    constexpr const char* FixOpticalCamo_Setting = "Fix Optical Camo";
+    constexpr const char* FixOpticalCamo_Help = "";
+    constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
+
     constexpr const char* FixVectorUI_Section = "Vector Line Scaling Fix";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
     constexpr const char* FixVectorUI_Help = "";
@@ -574,4 +579,3 @@ static bool ResolveRegionLanguageNames(const std::array<Game_Language_Pair_View,
 
     return false;
 }
-
