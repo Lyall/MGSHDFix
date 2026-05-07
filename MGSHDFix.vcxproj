@@ -22,6 +22,7 @@
     <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp" />
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp" />
     <ClCompile Include="src\features\mgs2_restore_dogtags.cpp" />
+    <ClCompile Include="src\fixes\texture_live_swaps.cpp" />
     <ClCompile Include="src\warnings\background_shuffle_warning.cpp" />
     <ClCompile Include="src\warnings\bugfix_mod_checks.cpp" />
     <ClCompile Include="src\features\settings_pesistence.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
     <ClInclude Include="src\fixes\busy_loop_fix.hpp" />
+    <ClInclude Include="src\fixes\texture_live_swaps.hpp" />
     <ClInclude Include="src\warnings\background_shuffle_warning.hpp" />
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp" />
     <ClInclude Include="src\features\settings_pesistence.hpp" />
