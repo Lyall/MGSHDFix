@@ -31,8 +31,6 @@
 
 const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
     { wxString("General"), {
-        { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
-          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, ConfigKeys::FixAimingAfterEquip_Help, ConfigKeys::FixAimingAfterEquip_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -125,18 +123,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, ConfigKeys::DisableTextureFiltering_Help, ConfigKeys::DisableTextureFiltering_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, ConfigKeys::FixVectorRain_Help, ConfigKeys::FixVectorRain_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, ConfigKeys::FixOpticalCamo_Help, ConfigKeys::FixOpticalCamo_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
-          std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
-
-        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
         { ConfigKeys::FixAspectRatio_Section, ConfigKeys::FixAspectRatio_Setting, ConfigKeys::FixAspectRatio_Help, ConfigKeys::FixAspectRatio_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -168,8 +154,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, ConfigKeys::MGS2Sunglasses_Help, ConfigKeys::MGS2Sunglasses_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } },
 
-        { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
-          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, ConfigKeys::DistanceCullingGrassAlways_Help, ConfigKeys::DistanceCullingGrassAlways_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -177,6 +161,30 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, ConfigKeys::DistanceCullingGrassScalar_Help, ConfigKeys::DistanceCullingGrassScalar_Tooltip,
           std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), true, Field::Float, 0 , 0, 0, "", {}, 1.0, 0},
     }},
+    { wxString("Restoration"), {
+
+        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, ConfigKeys::FixVectorRain_Help, ConfigKeys::FixVectorRain_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
+          std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
+
+        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
+        { ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, ConfigKeys::FixOpticalCamo_Help, ConfigKeys::FixOpticalCamo_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
+    } },
+
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
           std::nullopt, false, Field::Bool, false},
@@ -220,6 +228,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
     }},
+
     { wxString("Achievements"), {
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip,
           std::nullopt, false, Field::Bool, true },
