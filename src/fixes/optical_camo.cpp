@@ -5,8 +5,6 @@
 #include "logging.hpp"
 #include "optical_camo.hpp"
 
-#include <algorithm>
-#include <cmath>
 
 namespace
 {
@@ -184,7 +182,7 @@ void OpticalCamoFix::Initialize() const
     constexpr ptrdiff_t kRegisterUploadCallOffset = 0x118;
     uint8_t* refractionRegisterUploadBlock = Memory::PatternScan(
         baseModule,
-        "F3 41 0F 10 87 C0 00 00 00 F3 0F 11 45 70 F3 41 0F 10 8F D0 00 00 00 F3 0F 11 4D 74 F3 41 0F 10 87 E0 00 00 00 F3 0F 11 45 78",
+        "F3 41 0F 10 87 ?? ?? ?? ?? F3 0F 11 45 ?? F3 41 0F 10 8F ?? ?? ?? ?? F3 0F 11 4D ?? F3 41 0F 10 87 ?? ?? ?? ?? F3 0F 11 45",
         "MGS 2: Optical Camo Fix: refraction register upload");
 
     if (!refractionRegisterUploadBlock)
