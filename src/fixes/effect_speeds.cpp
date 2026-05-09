@@ -315,31 +315,3 @@ void EffectSpeedFix::Initialize()
 
 
 
-    /*
-    if (uint8_t* MGS2_splashPartsSlowScanResult = Memory::PatternScan(baseModule, "0F 28 D6 E8 ?? ?? ?? ?? 41 8B 06", "MGS 2: Effect Speed Fix : demo_effect\\d_splash_parts_slow.c"))
-    *
-    *
-#ifdef _MGSDEBUGGING
-/*
-SafetyHookInline splashSplash_hook {};
-int64_t __fastcall MGS2_splashSplash(struct _exception* a1)
-{
-    return 120;
-}
-*/
-
-/*
-SafetyHookInline splashPartsSlow_hook {};
-int64_t __fastcall MGS2_splashPartsSlow(DWORD* a1, __int16* a2, float duration)
-{
-    if (strcmp(currentStage, "d001p01") == 0)
-    {
-        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
-    }
-    if (strcmp(currentStage, "d13t") == 0)
-    {
-        return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration / 2);
-    }
-    return splashPartsSlow_hook.fastcall<int64_t>(a1, a2, duration);
-}
-*/
