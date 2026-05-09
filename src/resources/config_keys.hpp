@@ -102,6 +102,11 @@ namespace ConfigKeys
     constexpr const char* LOD_MGS2_Marines_Tooltip = "When enabled, Marines always use their high polygon model.";
 
 
+    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Player_Setting = "Force High Quality Player Models";
+    constexpr const char* LOD_MGS2_Player_Help = "";
+    constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
+
 
     constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";
     constexpr const char* DistanceCullingGrassAlways_Setting = "Always Show Grass";

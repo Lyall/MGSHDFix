@@ -20,7 +20,12 @@ void DistanceCulling::Initialize() const
             }
         }
 
-
+        if (bMGS2_ForcePlayerLOD)
+        {
+            MAKE_HOOK_MID(baseModule, "8B 8E ?? ?? ?? ?? 8B EF", "MGS2: NewLoDControl()", {
+                ctx.xmm0.f32[0] = 0.0f;
+                          });
+        }
 
 
     }

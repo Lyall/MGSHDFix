@@ -66,7 +66,7 @@ namespace
 
 
     CUTSCENE_FRAMESKIP_VARS(rain_slow);
-    CUTSCENE_FRAMESKIP_VARS(NewSplashPartsSlow_Demo);
+    //CUTSCENE_FRAMESKIP_VARS(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_VARS(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_VARS(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_VARS(NewSplushSurface2Man);
@@ -77,7 +77,7 @@ namespace
 void EffectSpeedFix::Tick()
 {
     CUTSCENE_FRAMESKIP_TICK(rain_slow);
-    CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
+    //CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_TICK(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_TICK(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_TICK(NewSplushSurface2Man);
@@ -90,7 +90,7 @@ void EffectSpeedFix::Tick()
 void EffectSpeedFix::Reset()
 {
     CUTSCENE_FRAMESKIP_RESET(rain_slow);
-    CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
+    //CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_RESET(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_RESET(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_RESET(NewSplushSurface2Man);
