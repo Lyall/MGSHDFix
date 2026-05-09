@@ -64,7 +64,9 @@ namespace
     constexpr double FRAME_IOP_MULTIPLIER = (60 / PS2_IOP_CLOCKSPEED);
 
 
-    CUTSCENE_FRAMESKIP_VARS(rain_slow)
+    CUTSCENE_FRAMESKIP_VARS(rain_slow);
+    CUTSCENE_FRAMESKIP_VARS(NewSplashPartsSlow_Demo);
+    CUTSCENE_FRAMESKIP_VARS(SPH_ActBrkVol1);
 
 }
 
@@ -72,6 +74,8 @@ namespace
 void EffectSpeedFix::Tick()
 {
     CUTSCENE_FRAMESKIP_TICK(rain_slow);
+    CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
+    CUTSCENE_FRAMESKIP_TICK(SPH_ActBrkVol1);
 
 
 }
@@ -81,6 +85,8 @@ void EffectSpeedFix::Tick()
 void EffectSpeedFix::Reset()
 {
     CUTSCENE_FRAMESKIP_RESET(rain_slow);
+    CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
+    CUTSCENE_FRAMESKIP_RESET(SPH_ActBrkVol1);
 
     iDebrisIteration = 0;
 }
@@ -117,6 +123,42 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 
 
 
+SafetyHookInline MGS2_SPH_ActBrkVol1_hook {};
+static void MGS2_SPH_ActBrkVol1_Act_227(int64_t work)
+{
+    if (g_GameVars.InCutscene() && SPH_ActBrkVol1_skip)
+    {
+        return;
+    }
+    SPH_ActBrkVol1_first_hit = true;
+    MGS2_SPH_ActBrkVol1_hook.call(work);
+}
+
+
+SafetyHookInline MGS2_d_splash_parts_slow_hook {};
+static void MGS2_d_splash_parts_slow_Act_424(int64_t work)
+{
+    if (g_GameVars.InCutscene() && NewSplashPartsSlow_Demo_skip)
+    {
+        return;
+    }
+    NewSplashPartsSlow_Demo_first_hit = true;
+    MGS2_d_splash_parts_slow_hook.call(work);
+
+}
+
+SafetyHookInline MGS2_NewSplashPartsSlow_Demo_hook {};
+static void MGS2_NewSplashPartsSlow_Demo_Act_424(int64_t work)
+{
+    if (g_GameVars.InCutscene() && NewSplashPartsSlow_Demo_skip)
+    {
+        return;
+    }
+    NewSplashPartsSlow_Demo_first_hit = true;
+    MGS2_NewSplashPartsSlow_Demo_hook.call(work);
+
+}
+
 safetyhook::MidHook debrisVelocityHook;
 
 void EffectSpeedFix::Initialize()
@@ -133,7 +175,7 @@ void EffectSpeedFix::Initialize()
     }
 
 
-#pragma region RAIN_EFFECTS
+#pragma region D00A
 
     uint8_t* MGS2_RainSlowBackScanResult = Memory::PatternScan(baseModule, "48 8B 4D ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 45 0F 28 4B ?? 49 8B E3 41 5D", "MGS 2: Effect Speed Fix : rain_slow.c - return address");
     rain_slow_copyback_addr = reinterpret_cast<uintptr_t>(MGS2_RainSlowBackScanResult);
@@ -152,7 +194,18 @@ void EffectSpeedFix::Initialize()
     }
 
 
+    MGS2_SPH_ActBrkVol1_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")), MGS2_SPH_ActBrkVol1_Act_227);
+    LOG_HOOK(MGS2_SPH_ActBrkVol1_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")
 
+        /*
+    MGS2_NewSplashPartsSlow_Demo_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 56 57 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F1", "MGS 2: Effect Speed Fix : NewSplashPartsSlow_Demo")), MGS2_NewSplashPartsSlow_Demo_Act_424);
+    LOG_HOOK(MGS2_NewSplashPartsSlow_Demo_hook, "MGS 2: Effect Speed Fix : NewSplashPartsSlow_Demo.c")
+    
+    uintptr_t MGS2_d_splash_parts_slowScanResult = Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C5 ?? 89 43", "MGS 2: Effect Speed Fix : d_splash_parts_slow") + 1);
+    MGS2_d_splash_parts_slowScanResult = Memory::GetAbsolute(MGS2_d_splash_parts_slowScanResult + 0x4D);
+    MGS2_d_splash_parts_slow_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_d_splash_parts_slowScanResult), MGS2_d_splash_parts_slow_Act_424);
+    LOG_HOOK(MGS2_d_splash_parts_slow_hook, "MGS 2: Effect Speed Fix : d_splash_parts_slow.c\\Act_424()")
+    */
 #pragma endregion
 
 
@@ -313,5 +366,4 @@ void EffectSpeedFix::Initialize()
 
    /* if (uint8_t* MGS2_splushSurfaceGravityMan2ScanResult = Memory::PatternScan(baseModule, "F3 0F 11 05 ?? ?? ?? ?? F3 0F 11 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 46", "MGS 2: Effect Speed Fix : effect2\\splush_surface_gravity_man.c 2"))
 
-
-
+*/

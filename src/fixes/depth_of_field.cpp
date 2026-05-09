@@ -5,12 +5,79 @@
 #include "logging.hpp"
 #include "custom_resolution_and_borderless.hpp"
 
+
+
+
+
+
+
+
+
 void DepthOfFieldFixes::Initialize()
 {
     if (!(eGameType & MGS2))
     {
         return;
     }
+
+    /*
+    MAKE_HOOK_MID(baseModule,
+                  "F3 44 0F 11 44 24 ?? E8 ?? ?? ?? ?? 48 8B 0D",
+                  "MGS2: FarFocus DOF blur scale",
+                  {
+                      constexpr float kReferenceWidth = 512.0f;
+                      constexpr float kReferenceHeight = 448.0f;
+
+                      const float scaleX =
+                          static_cast<float>(CustomResolutionAndBorderless::iInternalResX) / kReferenceWidth;
+
+                      const float scaleY =
+                          static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / kReferenceHeight;
+
+                      const float scale = std::max(scaleX, scaleY);
+
+                      if (scale > 1.0f)
+                      {
+                          auto* srcRectX2 = reinterpret_cast<int*>(ctx.rsp + 0x78);
+                          auto* srcRectY2 = reinterpret_cast<int*>(ctx.rsp + 0x7C);
+
+                          *srcRectX2 = std::max(
+                              1,
+                              static_cast<int>(std::round(static_cast<float>(*srcRectX2) / scale)));
+
+                          *srcRectY2 = std::max(
+                              1,
+                              static_cast<int>(std::round(static_cast<float>(*srcRectY2) / scale)));
+                      }
+                  });
+
+    MAKE_HOOK_MID(baseModule,
+                  "C7 44 24 ?? ?? ?? ?? ?? F3 0F 58 C2 F3 0F 58 CB 48 8D 4F ?? F3 0F 11 44 24 ?? F3 0F 11 4C 24 ?? 0F 28 CF F3 44 0F 11 6C 24 ?? F3 44 0F 11 74 24 ?? F3 0F 11 54 24 ?? 0F 28 D7 E8 ?? ?? ?? ?? 48 81 C7",
+                  "MGS2: NearFocus UV scale",
+                  {
+                      constexpr float kReferenceWidth = 512.0f;
+                      constexpr float kReferenceHeight = 448.0f;
+
+                      const float scaleX = static_cast<float>(CustomResolutionAndBorderless::iInternalResX) / kReferenceWidth;
+                      const float scaleY = static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / kReferenceHeight;
+
+                      const float shiftU = scaleX / kReferenceWidth;
+                      const float shiftV = scaleY / kReferenceHeight;
+
+                      if ((ctx.rbx & 1) != 0)
+                      {
+                          ctx.xmm3.f32[0] = shiftU;
+                          ctx.xmm1.f32[0] = 1.0f + shiftU;
+                      }
+
+                      if ((ctx.rbx & 2) != 0)
+                      {
+                          ctx.xmm2.f32[0] = shiftV;
+                          ctx.xmm0.f32[0] = 1.0f + shiftV;
+                      }
+                  });
+
+    /*
     if (!CustomResolutionAndBorderless::bOutputResolution) //remove if you fix a vanilla bug. 
     {
         return;

@@ -478,8 +478,8 @@ static void InitializeSubsystems()
     INITIALIZE(SnakeArmFixes::ApplyFixes());
 
 #if !defined(RELEASE_BUILD) //todo category
-    //todo: Make ultrawide reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(DepthOfFieldFixes.Initialize());
+    //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
+    //INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
     //INITIALIZE(MGS3FixCameraOffsets::Initialize());
@@ -598,7 +598,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     }
     else if (ul_reason_for_call == DLL_PROCESS_DETACH)
     {
-        spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
+        //spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
         g_StatPersistence.SaveStats();
         g_BusyLoopFix.Shutdown();
         spdlog::shutdown();
