@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyModernizeRawStringLiteral
 #include "stdafx.h"
 
 #include "common.hpp"
@@ -67,6 +68,8 @@ namespace
     CUTSCENE_FRAMESKIP_VARS(rain_slow);
     CUTSCENE_FRAMESKIP_VARS(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_VARS(SPH_ActBrkVol1);
+    CUTSCENE_FRAMESKIP_VARS(NewSplushSurfaceMan);
+    CUTSCENE_FRAMESKIP_VARS(NewSplushSurface2Man);
 
 }
 
@@ -76,6 +79,8 @@ void EffectSpeedFix::Tick()
     CUTSCENE_FRAMESKIP_TICK(rain_slow);
     CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_TICK(SPH_ActBrkVol1);
+    CUTSCENE_FRAMESKIP_TICK(NewSplushSurfaceMan);
+    CUTSCENE_FRAMESKIP_TICK(NewSplushSurface2Man);
 
 
 }
@@ -87,6 +92,8 @@ void EffectSpeedFix::Reset()
     CUTSCENE_FRAMESKIP_RESET(rain_slow);
     CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
     CUTSCENE_FRAMESKIP_RESET(SPH_ActBrkVol1);
+    CUTSCENE_FRAMESKIP_RESET(NewSplushSurfaceMan);
+    CUTSCENE_FRAMESKIP_RESET(NewSplushSurface2Man);
 
     iDebrisIteration = 0;
 }
@@ -135,6 +142,30 @@ static void MGS2_SPH_ActBrkVol1_Act_227(int64_t work)
 }
 
 
+SafetyHookInline MGS2_NewSplushSurfaceMan_hook {};
+static void MGS2_NewSplushSurfaceMan_Act_392(int64_t work)
+{
+    if (g_GameVars.InCutscene() && NewSplushSurfaceMan_skip)
+    {
+        return;
+    }
+    NewSplushSurfaceMan_first_hit = true;
+    MGS2_NewSplushSurfaceMan_hook.call(work);
+}
+
+
+SafetyHookInline MGS2_NewSplushSurface2Man_hook {};
+static void MGS2_NewSplushSurface2Man_Act_465(int64_t work)
+{
+    if (g_GameVars.InCutscene() && NewSplushSurface2Man_skip)
+    {
+        return;
+    }
+    NewSplushSurface2Man_first_hit = true;
+    MGS2_NewSplushSurface2Man_hook.call(work);
+}
+
+/*
 SafetyHookInline MGS2_d_splash_parts_slow_hook {};
 static void MGS2_d_splash_parts_slow_Act_424(int64_t work)
 {
@@ -157,7 +188,7 @@ static void MGS2_NewSplashPartsSlow_Demo_Act_424(int64_t work)
     NewSplashPartsSlow_Demo_first_hit = true;
     MGS2_NewSplashPartsSlow_Demo_hook.call(work);
 
-}
+}*/
 
 safetyhook::MidHook debrisVelocityHook;
 
@@ -197,6 +228,20 @@ void EffectSpeedFix::Initialize()
     MGS2_SPH_ActBrkVol1_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")), MGS2_SPH_ActBrkVol1_Act_227);
     LOG_HOOK(MGS2_SPH_ActBrkVol1_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")
 
+
+
+    MGS2_NewSplushSurfaceMan_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()")), MGS2_NewSplushSurfaceMan_Act_392);
+    LOG_HOOK(MGS2_NewSplushSurfaceMan_hook, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()")
+
+
+    MGS2_NewSplushSurface2Man_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()")), MGS2_NewSplushSurface2Man_Act_465);
+    LOG_HOOK(MGS2_NewSplushSurface2Man_hook, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()")
+
+
+
+
+
+        
         /*
     MGS2_NewSplashPartsSlow_Demo_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 56 57 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F1", "MGS 2: Effect Speed Fix : NewSplashPartsSlow_Demo")), MGS2_NewSplashPartsSlow_Demo_Act_424);
     LOG_HOOK(MGS2_NewSplashPartsSlow_Demo_hook, "MGS 2: Effect Speed Fix : NewSplashPartsSlow_Demo.c")
