@@ -10,8 +10,21 @@
 
 void DistanceCulling::Initialize() const
 {
+    if (eGameType & MGS2)
+    {
+        if (bMGS2_MarineForceLOD)
+        {
+            if (uint8_t* MGS2_Marine_LOD = Memory::PatternScan(baseModule, "66 45 85 C0 44 0F 44 C9", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD()"))
+            {
+                Memory::PatchBytes((uintptr_t)MGS2_Marine_LOD, "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
+            }
+        }
 
-    if (eGameType & MGS3)
+
+
+
+    }
+    else if (eGameType & MGS3)
     {
         if (bForceGrassAlways || fGrassDistanceScalar != 1.0f)
         {
