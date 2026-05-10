@@ -176,6 +176,9 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\texture_live_swaps.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\snakearm_voice.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -344,6 +347,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\texture_live_swaps.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\snakearm_voice.hpp">

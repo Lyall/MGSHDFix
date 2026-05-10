@@ -53,6 +53,7 @@
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "swap_menu_buttons.hpp"
+#include "texture_live_swaps.hpp"
 #include "snakearm_voice.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
@@ -475,6 +476,7 @@ static void InitializeSubsystems()
     INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
 
     INITIALIZE(g_BusyLoopFix.Initialize());
+    INITIALIZE(TextureLiveSwaps::ApplyFixes());
     INITIALIZE(SnakeArmFixes::ApplyFixes());
 
 #if !defined(RELEASE_BUILD) //todo category
