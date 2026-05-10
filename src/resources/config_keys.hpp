@@ -95,14 +95,27 @@ namespace ConfigKeys
                                                             "\n"
                                                             "This will give the game a pixelated / Minecraft-esque appearance.";
 
-    constexpr const char* DistanceCullingGrassAlways_Section = "Override Render Distance";
+
+    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
+    constexpr const char* LOD_MGS2_Marines_Help = "";
+    constexpr const char* LOD_MGS2_Marines_Tooltip = "When enabled, Marines always use their high polygon model.";
+
+
+    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Player_Setting = "Force High Quality Player Models";
+    constexpr const char* LOD_MGS2_Player_Help = "";
+    constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
+
+
+    constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";
     constexpr const char* DistanceCullingGrassAlways_Setting = "Always Show Grass";
     constexpr const char* DistanceCullingGrassAlways_Help = "";
     constexpr const char* DistanceCullingGrassAlways_Tooltip = "Prevents grass from disappearing at long distances (which was originally a PS2 performance optimization).\n"
                                                                "\n"
                                                                "When enabled, grass always remains visible regardless of distance.";
 
-    constexpr const char* DistanceCullingGrassScalar_Section = "Override Render Distance";
+    constexpr const char* DistanceCullingGrassScalar_Section = "MGS3 - Override Render Distance";
     constexpr const char* DistanceCullingGrassScalar_Setting = "Custom Grass Distance Multiplier";
     constexpr const char* DistanceCullingGrassScalar_Help = "";
     constexpr const char* DistanceCullingGrassScalar_Tooltip = "Multiplies the grass render distance by this factor for finer control.\n"
@@ -143,6 +156,11 @@ namespace ConfigKeys
     constexpr const char* FixVectorRain_Tooltip = "Fixes Rain/Lasers/Bullet Trails width, which is not scaled up properly from the original PS2 size (always appearing at only 1 pixel width regardless of game resolutions)\n"
                                                   "\n"
                                                   "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
+
+    constexpr const char* FixOpticalCamo_Section = "Bugfixes";
+    constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo";
+    constexpr const char* FixOpticalCamo_Help = "";
+    constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
 
     constexpr const char* FixVectorUI_Section = "Vector Line Scaling Fix";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
@@ -265,7 +283,7 @@ namespace ConfigKeys
     constexpr const char* CtrlType_Tooltip = "Selects which controller button icons to display in-game.";
 
     constexpr const char* MenuButton_Section = "Controller Settings";
-    constexpr const char* MenuButton_Setting = "Set Menu OK / Cancel Buttons";
+    constexpr const char* MenuButton_Setting = "Set Menu OK && Cancel Button";
     constexpr const char* MenuButton_Help = "(MGS2 Only)";
     constexpr const char* MenuButton_Tooltip = "Sets which button is used for the OK action in menus.\n"
                                                "\n"
@@ -574,4 +592,3 @@ static bool ResolveRegionLanguageNames(const std::array<Game_Language_Pair_View,
 
     return false;
 }
-

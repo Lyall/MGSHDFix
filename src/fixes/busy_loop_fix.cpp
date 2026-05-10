@@ -60,7 +60,9 @@ void BusyLoopFix::Initialize()
     m_peekMessageHook = safetyhook::create_inline(target, PeekMessageW_Hook);
 
     if (iOption == 1)
+    {
         return;
+    }
 
     timeBeginPeriod(1);
 

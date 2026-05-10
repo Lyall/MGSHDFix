@@ -40,3 +40,6 @@ inline const std::map<MgsGame, GameInfo> kGames = {
 
 inline bool usDatExists;
 inline bool jpDatExists;
+
+constexpr float f_PS2_Width = 512.0f;
+constexpr float f_PS2_Height = 448.0f;

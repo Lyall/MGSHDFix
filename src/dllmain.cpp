@@ -28,6 +28,7 @@
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
+#include "optical_camo.hpp"
 #include "stereo_audio.hpp"
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
@@ -53,6 +54,7 @@
 #include "resolution_scaling_fixes.hpp"
 #include "swap_menu_buttons.hpp"
 #include "texture_live_swaps.hpp"
+#include "snakearm_voice.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -462,6 +464,7 @@ static void InitializeSubsystems()
         //Fixes
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
+    INITIALIZE(g_OpticalCamoFix.Initialize());
     INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize()); //todo - fix more effects, ie rain speed, bullet trails, helicopter rotors
     INITIALIZE(g_StereoAudioFix.Initialize());
@@ -474,10 +477,11 @@ static void InitializeSubsystems()
 
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(TextureLiveSwaps::ApplyFixes());
+    INITIALIZE(SnakeArmFixes::ApplyFixes());
 
 #if !defined(RELEASE_BUILD) //todo category
-    //todo: Make ultrawide reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(DepthOfFieldFixes.Initialize());
+    //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
+    //INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
     //INITIALIZE(MGS3FixCameraOffsets::Initialize());
@@ -596,7 +600,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     }
     else if (ul_reason_for_call == DLL_PROCESS_DETACH)
     {
-        spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
+        //spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
         g_StatPersistence.SaveStats();
         g_BusyLoopFix.Shutdown();
         spdlog::shutdown();

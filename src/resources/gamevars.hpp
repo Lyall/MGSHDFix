@@ -8,6 +8,7 @@ public:
     [[nodiscard]] bool InScriptedSequence() const; // If the game is in a scripted sequence (cutscene or pad demo).
     [[nodiscard]] double ActorWaitMultiplier() const;
     [[nodiscard]] double ActorWaitValue() const;
+    [[nodiscard]] float get_GM_WaterLevel() const;
 
     [[nodiscard]] std::string GetRichPresenceString() const;
     [[nodiscard]] std::string GetGameMode() const;
@@ -51,6 +52,7 @@ private:
     double* actorWaitValue = nullptr;
     const char* currentStage = nullptr;
     uint32_t* heldTriggers = nullptr;
+    float* GM_WaterLevel = nullptr;
 
 };
 

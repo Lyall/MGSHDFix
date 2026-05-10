@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\snakearm_voice.cpp" />
     <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp" />
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp" />
     <ClCompile Include="src\features\mgs2_restore_dogtags.cpp" />
@@ -32,6 +33,7 @@
     <ClCompile Include="src\fixes\cpu_core_limit.cpp" />
     <ClCompile Include="src\fixes\depth_of_field.cpp" />
     <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp" />
+    <ClCompile Include="src\fixes\optical_camo.cpp" />
     <ClCompile Include="src\fixes\windows_fullscreen_optimization.cpp" />
     <ClCompile Include="src\resources\input_handler.cpp" />
     <ClCompile Include="src\fixes\fix_default_gpu.cpp" />
@@ -125,6 +127,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\snakearm_voice.hpp" />
     <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp" />
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
@@ -137,6 +140,7 @@
     <ClInclude Include="src\fixes\mgs3_fix_camera_offset.hpp" />
     <ClInclude Include="src\fixes\mgs3_fix_holster_after_torture.hpp" />
     <ClInclude Include="src\fixes\cpu_core_limit.hpp" />
+    <ClInclude Include="src\fixes\optical_camo.hpp" />
     <ClInclude Include="src\fixes\windows_fullscreen_optimization.hpp" />
     <ClInclude Include="src\resources\config_keys.hpp" />
     <ClInclude Include="src\fixes\depth_of_field.hpp" />
