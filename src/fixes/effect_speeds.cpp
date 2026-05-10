@@ -13,7 +13,7 @@
 /// hardcoded for the PS2's cutscene physics speed (30 FPS)
 /// and run at 2x with the HDC/MC's 60 FPS cutscene physics speed
 /// 
-/// SolidusFireAct & CreateDebrisTexture fixes originally made as
+/// SolidusFireAct fix originally made as
 /// part of a modding fix bounty claimed by Cipherxof/Triggerhappy
 /// and originally included in the MGSFPSUnlock mod.
 /// They have been updated to fix several bugs, and upgraded (where needed) 
@@ -70,6 +70,7 @@ namespace
     CUTSCENE_FRAMESKIP_VARS(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_VARS(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_VARS(NewSplushSurface2Man);
+    CUTSCENE_FRAMESKIP_VARS(NewDebris_Tex);
 
 }
 
@@ -81,6 +82,7 @@ void EffectSpeedFix::Tick()
     CUTSCENE_FRAMESKIP_TICK(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_TICK(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_TICK(NewSplushSurface2Man);
+    CUTSCENE_FRAMESKIP_TICK(NewDebris_Tex);
 
 
 }
@@ -94,6 +96,7 @@ void EffectSpeedFix::Reset()
     CUTSCENE_FRAMESKIP_RESET(SPH_ActBrkVol1);
     CUTSCENE_FRAMESKIP_RESET(NewSplushSurfaceMan);
     CUTSCENE_FRAMESKIP_RESET(NewSplushSurface2Man);
+    CUTSCENE_FRAMESKIP_RESET(NewDebris_Tex);
 
     iDebrisIteration = 0;
 }
@@ -131,9 +134,9 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 
 
 SafetyHookInline MGS2_SPH_ActBrkVol1_hook {};
-static void MGS2_SPH_ActBrkVol1_Act_227(int64_t work)
+static void MGS2_SPH_ActBrkVol1(int64_t work)
 {
-    if (g_GameVars.InCutscene() && SPH_ActBrkVol1_skip)
+    if (SPH_ActBrkVol1_skip && g_GameVars.InCutscene())
     {
         return;
     }
@@ -143,9 +146,9 @@ static void MGS2_SPH_ActBrkVol1_Act_227(int64_t work)
 
 
 SafetyHookInline MGS2_NewSplushSurfaceMan_hook {};
-static void MGS2_NewSplushSurfaceMan_Act_392(int64_t work)
+static void MGS2_NewSplushSurfaceMan(int64_t work)
 {
-    if (g_GameVars.InCutscene() && NewSplushSurfaceMan_skip)
+    if (NewSplushSurfaceMan_skip && g_GameVars.InCutscene())
     {
         return;
     }
@@ -155,14 +158,27 @@ static void MGS2_NewSplushSurfaceMan_Act_392(int64_t work)
 
 
 SafetyHookInline MGS2_NewSplushSurface2Man_hook {};
-static void MGS2_NewSplushSurface2Man_Act_465(int64_t work)
+static void MGS2_NewSplushSurface2Man(int64_t work)
 {
-    if (g_GameVars.InCutscene() && NewSplushSurface2Man_skip)
+    if (NewSplushSurface2Man_skip && g_GameVars.InCutscene())
     {
         return;
     }
     NewSplushSurface2Man_first_hit = true;
     MGS2_NewSplushSurface2Man_hook.call(work);
+}
+
+
+
+SafetyHookInline MGS2_NewDebris_Tex_hook {};
+static void MGS2_NewDebris_Tex(int64_t work)
+{
+    if (NewDebris_Tex_skip && g_GameVars.InCutscene())
+    {
+        return;
+    }
+    NewDebris_Tex_first_hit = true;
+    MGS2_NewDebris_Tex_hook.call(work);
 }
 
 /*
@@ -225,22 +241,22 @@ void EffectSpeedFix::Initialize()
     }
 
 
-    MGS2_SPH_ActBrkVol1_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")), MGS2_SPH_ActBrkVol1_Act_227);
+    MGS2_SPH_ActBrkVol1_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")), MGS2_SPH_ActBrkVol1);
     LOG_HOOK(MGS2_SPH_ActBrkVol1_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()")
 
 
 
-    MGS2_NewSplushSurfaceMan_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()")), MGS2_NewSplushSurfaceMan_Act_392);
+    MGS2_NewSplushSurfaceMan_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()")), MGS2_NewSplushSurfaceMan);
     LOG_HOOK(MGS2_NewSplushSurfaceMan_hook, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()")
 
 
-    MGS2_NewSplushSurface2Man_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()")), MGS2_NewSplushSurface2Man_Act_465);
+    MGS2_NewSplushSurface2Man_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()")), MGS2_NewSplushSurface2Man);
     LOG_HOOK(MGS2_NewSplushSurface2Man_hook, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()")
 
 
 
 
-
+        //todo - ripple man - 55 8B EC 56 57 6A 00 6A ?? 68 ?? ?? ?? ?? 6A ?? E8 ?? ?? ?? ?? 8B F0 83 C4 ?? 85 F6 0F 84 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 56 E8 ?? ?? ?? ?? 8B 45 ?? 81 4E ?? ?? ?? ?? ?? 89 46 ?? 8B 45 ?? 68 ?? ?? ?? ?? C7 46 ?? 00 00 00 00 C7 46 ?? 00 00 00 00 C7 46 ?? 00 00 00 00 C7 46 ?? ?? ?? ?? ?? 89 46 ?? E8
         
         /*
     MGS2_NewSplashPartsSlow_Demo_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 56 57 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F1", "MGS 2: Effect Speed Fix : NewSplashPartsSlow_Demo")), MGS2_NewSplashPartsSlow_Demo_Act_424);
@@ -255,6 +271,18 @@ void EffectSpeedFix::Initialize()
 
 
 
+
+#pragma region D012P01
+
+
+        MGS2_NewDebris_Tex_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24", "MGS 2: Effect Speed Fix : user\\shibata\\demo\\debris_tex.c -> NewDebris_Tex()")), MGS2_NewDebris_Tex_Act_557);
+    LOG_HOOK(MGS2_NewDebris_Tex_hook, "MGS 2: Effect Speed Fix : user\\shibata\\demo\\debris_tex.c -> NewDebris_Tex()")
+
+
+
+
+
+#pragma endregion 
 
 
 
@@ -321,7 +349,7 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(debrisVelocityHook, "MGS 2: Effect Speed Fix: demo\\debris_tex.c\\CreateDebrisTexture velocity");
     }
 
-    
+    /*
     if (uint8_t* MGS2_createDebrisTexOffset = Memory::PatternScan(baseModule, "45 89 46 ?? E8", "MGS 2: Effect Speed Fix : demo\\debris_tex.c\\CreateDebrisTexture()"))
     {
         static SafetyHookMid MGS2_createDebrisTexMidHook {};
@@ -357,7 +385,7 @@ void EffectSpeedFix::Initialize()
                     }
 
                 }
-                else */if (g_GameVars.IsStage(MGS2Stages::D012P01))
+                else *//*if (g_GameVars.IsStage(MGS2Stages::D012P01))
                 {
                     // P012_01_P01 Fortune encounter 1 polygon demo 1 (BC connecting bridge - Fortune vs Seals encounter)
                     g_EffectSpeedFix.iExplosionDuration *= static_cast<int>(FRAME_IOP_MULTIPLIER) * 10;
@@ -371,8 +399,8 @@ void EffectSpeedFix::Initialize()
 
             });
         LOG_HOOK(MGS2_createDebrisTexMidHook, "MGS 2: Effect Speed Fix: demo\\debris_tex.c\\CreateDebrisTexture()")
- 
     }
+ */
 
     if (uint8_t* MGS2_solidusFireDashActScanResult = Memory::PatternScan(baseModule, "?? ?? ?? ?? ?? 49 8D AB 68 FE FF FF 48 81 EC 88", "MGS 2: Effect Speed Fix : effect\\solidas_dash_fire.c"))
     {

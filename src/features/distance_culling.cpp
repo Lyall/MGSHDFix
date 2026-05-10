@@ -12,6 +12,9 @@ void DistanceCulling::Initialize() const
 {
     if (eGameType & MGS2)
     {
+        //todo - test birds nLod in mgs2x\source\user\okuta\kamome\kmtest.c. 
+        //  disabling their LOD will enable their animation skeletion, need to verify no performance impact.
+
         if (bMGS2_MarineForceLOD)
         {
             if (uint8_t* MGS2_Marine_LOD = Memory::PatternScan(baseModule, "66 45 85 C0 44 0F 44 C9", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD()"))
