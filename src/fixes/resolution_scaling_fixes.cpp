@@ -38,4 +38,11 @@ void ResolutionScalingFixes::ApplyFixes()
         });
     }
 
+    MAKE_HOOK_MID(baseModule, "F3 0F 11 74 24 ?? E8 ?? ?? ?? ?? 81 67", "MGS2: Resolution Scaling Fixes : user\\kira\\radar\\bomb_sensor.c -> setup_bomb_object() - Scale y", {
+        ctx.xmm6.f32[0] *= 0.75f;
+
+                  });
+
 }
+
+
