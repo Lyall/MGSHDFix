@@ -182,6 +182,9 @@
     <ClCompile Include="src\fixes\snakearm_voice.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -355,6 +358,7 @@
     <ClInclude Include="src\fixes\snakearm_voice.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

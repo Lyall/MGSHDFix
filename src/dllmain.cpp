@@ -49,6 +49,7 @@
 #include "color_filters.hpp"
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
+#include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "resolution_scaling_fixes.hpp"
@@ -478,6 +479,8 @@ static void InitializeSubsystems()
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(TextureLiveSwaps::ApplyFixes());
     INITIALIZE(SnakeArmFixes::ApplyFixes());
+    INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+
 
 #if !defined(RELEASE_BUILD) //todo category
     //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
