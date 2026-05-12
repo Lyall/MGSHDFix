@@ -44,7 +44,7 @@ void MGS2_Kirari_Sun2Fix::ApplyFix()
         float cam_x = ctx.xmm6.f32[0];
         float cam_y = ctx.xmm13.f32[0];
         float cam_z = ctx.xmm7.f32[0];
-        float water_level = g_GameVars.get_GM_WaterLevel();
+        float water_level = g_GameVars.get_GM_WaterLevel(); //probably able to simplify to 549596.44, this effect is only used in P070_02_P02 from the look of it.
 
         float camera_offset = cam_y - sparkle_effect_root_pos[1];
         if (camera_offset == 0.0f)

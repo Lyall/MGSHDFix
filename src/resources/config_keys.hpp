@@ -372,7 +372,14 @@ namespace ConfigKeys
     constexpr const char* RestoreDogtagNames_Help = "";
     constexpr const char* RestoreDogtagNames_Tooltip = "Restores the names of dogtags that were edited for copyright/legal reasons (ie Gackt -> Gekko.)";
 
+    constexpr const char* MGS2_PhoneJingle_Section = "Various";
+    constexpr const char* MGS2_PhoneJingle_Setting = "MGS2 - Restore Japanese Phone Ringtone";
+    constexpr const char* MGS2_PhoneJingle_Help = "";
+    constexpr const char* MGS2_PhoneJingle_Tooltip = "Restores the Japanese Sons of Liberty exclusive MGS theme-song phone ringtone that was missing from all future versions of the game.\n"
+                                                     "\n"
+                                                       "This will enable the ringtone for all versions of the game.";
 
+    
 
     // Hotkeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Section = "Hotkeys";

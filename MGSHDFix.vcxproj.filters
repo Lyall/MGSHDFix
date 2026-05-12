@@ -185,6 +185,9 @@
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -358,7 +361,12 @@
     <ClInclude Include="src\fixes\snakearm_voice.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />
+    <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

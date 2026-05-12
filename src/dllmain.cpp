@@ -50,6 +50,7 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
+#include "mgs2_restore_phone_jingle.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "resolution_scaling_fixes.hpp"
@@ -459,6 +460,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_DistanceCulling.Initialize());
     INITIALIZE(MGS2_RestoreDogtags::Initialize());
     INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
+    INITIALIZE(MGS2_RestorePhoneJingle::Apply());
 
 
 

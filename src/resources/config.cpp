@@ -33,6 +33,7 @@
 #include "windows_fullscreen_optimization.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "busy_loop_fix.hpp"
+#include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 
 // -----------------------------------------------------------------------------
@@ -633,6 +634,11 @@ void Config::Read()
 
         LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
     }
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
+
 
     ConfigLogger::Flush();
 }

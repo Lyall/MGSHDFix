@@ -73,7 +73,7 @@ void TextureLiveSwaps::ApplyFixes()
     // - RAY Numbers
     // All three of these are broken in the HD Collection, but Shaved Snake was fixed in the Master Collection...
     // with a function Bluepoint already developed for wig textures (thanks Gaming With Portals for the find).
-    uint8_t* ShavedSnakeCode = Memory::PatternScan(baseModule, "4A 63 14 36 48 8B CD E8 ?? ?? ?? ?? 49 63 16 48 8B CD 48 8B D8 E8 ?? ?? ?? ?? 48 63 57 58", "Texture Swaps (Shaved Snake)");
+    uint8_t* ShavedSnakeCode = Memory::PatternScan(baseModule, "?? ?? ?? ?? 48 8B CD E8 ?? ?? ?? ?? ?? ?? ?? 48 8B CD 48 8B D8", "Texture Swaps (Shaved Snake)");
     if (!ShavedSnakeCode) {
         spdlog::error("Texture Swaps: Failed to match Shaved Snake reference location. Aborting.");
         return;
@@ -83,7 +83,7 @@ void TextureLiveSwaps::ApplyFixes()
 
     // user/takabe/object/eddogtag.c -> CreateDogTagTexture() uses the same copy function, as well as necessary allocation/freeing for additional texture handles.
     // (technically Shaved Snake should have done this too, but it's a non-issue since he never needs to be reset to un-shaved within the stage)
-    uint8_t* DogTagCode = Memory::PatternScan(baseModule, "48 8B CF E8 ?? ?? ?? ?? 8B 57 74 45 33 C0 8B 4F 70 E8 ?? ?? ?? ?? 4C 8B 87 80 00 00 00 48 8B C8 48 8B 57 78 48 8B D8", "Texture Swaps (Dog Tags)");
+    uint8_t* DogTagCode = Memory::PatternScan(baseModule, "48 8B CF E8 ?? ?? ?? ?? 8B 57 ?? 45 33 C0", "Texture Swaps (Dog Tags)");
     if (!DogTagCode) {
         spdlog::error("Texture Swaps: Failed to match dog tag reference location. Aborting.");
         return;
@@ -97,22 +97,22 @@ void TextureLiveSwaps::ApplyFixes()
     // Hook problems
 
     {   // user/takabe/pdray/r_server.c -> RAYSERVER_GetNumberModel()
-        MAKE_HOOK_MID(baseModule, "B9 E4 D5 20 00 E8 ?? ?? ?? ?? 48 89 84 F3 40 06 00 00 48 85 C0", "Texture Swaps (RAY Numbers)", {
+        MAKE_HOOK_MID(baseModule, "B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 89 84 F3", "Texture Swaps (RAY Numbers)", {
             GetAndCopyCtxr(STRCODE_PDRAY_OTHER, ctx.rdx, ctx.r8);
         });
     }
     {   // user/satoyoshi/harrier/har_damage.c -> Har_damage_tex()
-        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B C8 48 89 84 DE 68 01 00 00 E8 ?? ?? ?? ?? 48 8B 4D 37 48 33 CC", "Texture Swaps (Harrier Damage)", {
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B C8 48 89 84 DE", "Texture Swaps (Harrier Damage)", {
             GetAndCopyCtxr(ctx.rcx, ctx.rdx, ctx.r8);
         });
     }
     {   // user/takabe/pdray/r_server.c -> Die()
-        MAKE_HOOK_MID(baseModule, "57 48 83 EC 20 48 8D 99 10 06 00 00 BF 06 00 00 00 48 8B 4B D0 48 85 C9 74 0E", "Texture Swaps (RAY Cleanup)", {
+        MAKE_HOOK_MID(baseModule, "57 48 83 EC ?? 48 8D 99 ?? ?? ?? ?? BF ?? ?? ?? ?? 48 8B 4B", "Texture Swaps (RAY Cleanup)", {
             RestoreCtxrs();
         });
     }
     {   // user/satoyoshi/harrier/har_main.c -> Die() (invokes static function Clean_damage_tex_set() from har_damage.c)
-        MAKE_HOOK_MID(baseModule, "48 8D 8E 98 05 00 00 E8 ?? ?? ?? ?? 48 8D 4E 60 E8 ?? ?? ?? ?? 33 ED 48 8D 9E 68 01 00 00 BF 0C 00 00 00", "Texture Swaps (Harrier Cleanup)", {
+        MAKE_HOOK_MID(baseModule, "48 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 4E ?? E8 ?? ?? ?? ?? 33 ED", "Texture Swaps (Harrier Cleanup)", {
             RestoreCtxrs();
         });
     }
