@@ -57,6 +57,7 @@
 #include "swap_menu_buttons.hpp"
 #include "texture_live_swaps.hpp"
 #include "snakearm_voice.hpp"
+#include "mgs2_coolant_mirror.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -477,6 +478,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS3HudFixes::Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
     INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
+    //INITIALIZE(CoolantMirrorFix::ApplyFix());
 
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(TextureLiveSwaps::ApplyFixes());
