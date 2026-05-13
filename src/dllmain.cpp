@@ -22,6 +22,10 @@
 #include "stat_persistence.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "mgs2_restore_dogtags.hpp"
+#include "swap_menu_buttons.hpp"
+#include "mgs2_restore_phone_jingle.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
+#include "mgs2_difficulty.hpp"
 
 ///Fixes
 #include "aiming_full_tilt.hpp"
@@ -34,6 +38,10 @@
 #include "mgs3_hud_fixes.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
+#include "snakearm_voice.hpp"
+#include "resolution_scaling_fixes.hpp"
+#include "texture_live_swaps.hpp"
+#include "mgs2_coolant_mirror.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -50,14 +58,8 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
-#include "mgs2_restore_phone_jingle.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
-#include "resolution_scaling_fixes.hpp"
-#include "swap_menu_buttons.hpp"
-#include "texture_live_swaps.hpp"
-#include "snakearm_voice.hpp"
-#include "mgs2_coolant_mirror.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -462,7 +464,8 @@ static void InitializeSubsystems()
     INITIALIZE(MGS2_RestoreDogtags::Initialize());
     INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
     INITIALIZE(MGS2_RestorePhoneJingle::Apply());
-
+    //INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
+    INITIALIZE(MGS2_Freecam_And_FPV::Activate());
 
 
         //Fixes

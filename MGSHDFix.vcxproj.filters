@@ -191,6 +191,18 @@
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_3rd_person_freecam.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mgs2_difficulty.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mgs3_first_person_view_mode.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mgs2_first_person_view_mode.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -371,7 +383,19 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp">
-      <Filter>Fixes\Headers</Filter>
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs3_first_person_view_mode.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_difficulty.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

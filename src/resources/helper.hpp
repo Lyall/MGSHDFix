@@ -26,6 +26,8 @@ namespace Memory
 
     uintptr_t GetRelativeOffset(uint8_t* addr) noexcept;
 
+    uintptr_t GetRipRelativeAddress(std::uint8_t* instruction, std::size_t displacementOffset, std::size_t instructionLength) noexcept;
+
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction);
 
     void* ReadIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction);

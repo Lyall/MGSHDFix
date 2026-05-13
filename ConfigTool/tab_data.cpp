@@ -182,6 +182,8 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        {"Bugfixes", "", "", "", std::nullopt, false, Field::Spacer},
+
         { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -197,6 +199,55 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
 
     } },
+
+
+    { wxString("Freecam | FPV"), {
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Tooltip,
+            std::nullopt, false, Field::Bool, false },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Bool, false },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+      { ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+    {ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Float, 0 , 0, 0, "", {}, k3rdPersonFreecamDefaultHorizontalSensitivity, 0.1, 10.0},
+
+
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false,
+            Field::Int, k3rdPersonFreecamDefaultMaxCameraDistance, 100, 10000 },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Float, 0 , 0, 0, "", {}, k3rdPersonFreecamDefaultVerticalSensitivity, 0.1, 10.0},
+
+
+
+      {ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, ConfigKeys::MGS2_First_Person_View_Enabled_Help, ConfigKeys::MGS2_First_Person_View_Enabled_Tooltip,
+            std::nullopt, false, Field::Bool, false },
+      
+        {ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+
+        {ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Help, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Bool, true },
+
+      {ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+
+  } },
 
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
@@ -240,7 +291,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Help, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Tooltip,
           std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
-    }},
+      } },
 
     { wxString("Achievements"), {
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip,

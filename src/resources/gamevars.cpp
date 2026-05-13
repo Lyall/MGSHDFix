@@ -3,6 +3,7 @@
 #include "gamevars.hpp"
 #include "effect_speeds.hpp"
 #include "logging.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "stat_persistence.hpp"
 
@@ -156,6 +157,8 @@ void GameVars::OnLevelTransition()
 {
     g_EffectSpeedFix.Reset();
     g_StatPersistence.SaveStats();
+    
+    MGS2_ThirdPersonFreecam::HandleLevelTransition();
     MGS2Sunglasses::CheckOnTransition();
 }
 

@@ -82,13 +82,23 @@ std::optional<int> InputHandler::ParseVirtualKey(const std::string& aliasRaw)
     if (s.size() > 2 && s.rfind("VK", 0) == 0)
         s = s.substr(2);
 
-    // Normalize keypad prefixes: KP*, KEYPAD*, NP* -> NUMPAD*
+    // Normalize keypad prefixes: KP*, KEYPAD*, NP*, NUM* -> NUMPAD*
     if (s.rfind("KP", 0) == 0)
+    {
         s = "NUMPAD" + s.substr(2);
+    }
     else if (s.rfind("KEYPAD", 0) == 0)
+    {
         s = "NUMPAD" + s.substr(6);
+    }
     else if (s.rfind("NP", 0) == 0)
+    {
         s = "NUMPAD" + s.substr(2);
+    }
+    else if (s.rfind("NUM", 0) == 0 && s.rfind("NUMPAD", 0) != 0)
+    {
+        s = "NUMPAD" + s.substr(3);
+    }
 
     // Unambiguous single-char: only '*' (maps to numpad multiply).
     if (s.size() == 1 && s[0] == '*')
@@ -212,6 +222,35 @@ std::string InputHandler::GetKeyNameFromVK(int vkCode)
     case VK_MBUTTON:  return "Mouse3";
     case VK_XBUTTON1: return "Mouse4";
     case VK_XBUTTON2: return "Mouse5";
+
+    case VK_LMENU:    return "LAlt";
+    case VK_RMENU:    return "RAlt";
+    case VK_LCONTROL: return "LCtrl";
+    case VK_RCONTROL: return "RCtrl";
+    case VK_LSHIFT:   return "LShift";
+    case VK_RSHIFT:   return "RShift";
+    case VK_LWIN:     return "LWin";
+    case VK_RWIN:     return "RWin";
+
+    case VK_NUMPAD0:  return "Num0";
+    case VK_NUMPAD1:  return "Num1";
+    case VK_NUMPAD2:  return "Num2";
+    case VK_NUMPAD3:  return "Num3";
+    case VK_NUMPAD4:  return "Num4";
+    case VK_NUMPAD5:  return "Num5";
+    case VK_NUMPAD6:  return "Num6";
+    case VK_NUMPAD7:  return "Num7";
+    case VK_NUMPAD8:  return "Num8";
+    case VK_NUMPAD9:  return "Num9";
+
+    case VK_DECIMAL:  return "NumDecimal";
+    case VK_DIVIDE:   return "NumDivide";
+    case VK_MULTIPLY: return "NumMultiply";
+    case VK_SUBTRACT: return "NumMinus";
+    case VK_ADD:      return "NumPlus";
+    case VK_NUMLOCK:  return "NumLock";
+
+    case VK_CAPITAL:  return "CapsLock";
     default: break;
     }
 
@@ -222,8 +261,6 @@ std::string InputHandler::GetKeyNameFromVK(int vkCode)
     case VK_PRIOR: case VK_NEXT:
     case VK_END: case VK_HOME:
     case VK_INSERT: case VK_DELETE:
-    case VK_DIVIDE:
-    case VK_NUMLOCK:
         scanCode |= 0x100;
         break;
     default:
