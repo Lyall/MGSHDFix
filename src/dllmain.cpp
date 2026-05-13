@@ -478,7 +478,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS3HudFixes::Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
     INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
-    //INITIALIZE(CoolantMirrorFix::ApplyFix());
+    INITIALIZE(CoolantMirrorFix::ApplyFix());
 
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(TextureLiveSwaps::ApplyFixes());
