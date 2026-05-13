@@ -130,8 +130,8 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\fixes\mgs2_coolant_mirror.hpp" />
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp" />
+    <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp" />
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />
     <ClInclude Include="src\fixes\snakearm_voice.hpp" />
     <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp" />
