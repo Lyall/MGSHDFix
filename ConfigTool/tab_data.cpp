@@ -169,6 +169,13 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+
+                { ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, ConfigKeys::Disable_HDC_Camera_Positions_Help, ConfigKeys::Disable_HDC_Camera_Positions_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+        { ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Help, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting), false, Field::Hotkey, 0, 0, 0, "F6" },
+
     
     }},
     { wxString("Restoration"), {

@@ -22,6 +22,7 @@
     <ClCompile Include="src\features\mgs2_3rd_person_freecam.cpp" />
     <ClCompile Include="src\features\mgs2_difficulty.cpp" />
     <ClCompile Include="src\features\mgs2_first_person_view_mode.cpp" />
+    <ClCompile Include="src\features\original_camera_positions.cpp" />
     <ClCompile Include="src\features\mgs3_first_person_view_mode.cpp" />
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp" />
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp" />
     <ClInclude Include="src\features\mgs2_difficulty.hpp" />
     <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp" />
+    <ClInclude Include="src\features\original_camera_positions.hpp" />
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp" />
     <ClInclude Include="src\features\mgs3_first_person_view_mode.hpp" />
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp" />

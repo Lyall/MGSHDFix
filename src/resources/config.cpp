@@ -36,6 +36,7 @@
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
+#include "original_camera_positions.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -641,11 +642,11 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
    
 
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_Freecam_And_FPV::b3rd_Person_Camera_Enabled);
-    LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_Freecam_And_FPV::b3rd_Person_Camera_Enabled);
-    if (MGS2_Freecam_And_FPV::b3rd_Person_Camera_Enabled)
+    ConfigHelper::getValue(ini, ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
+    LOG_CONFIG(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
+    if (OriginalCameraPositions::bEnabled)
     {
-        InputHandler::GetKeybind(ini, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, OriginalCameraPositions::vkToggle_HDC_Camera_Positions);
+        InputHandler::GetKeybind(ini, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, OriginalCameraPositions::vkToggle_HDC_CameraPositions);
     }
 
 

@@ -441,7 +441,23 @@ namespace ConfigKeys
                                                      "\n"
                                                        "This will enable the ringtone for all versions of the game.";
 
-    
+    constexpr const char* Disable_HDC_Camera_Positions_Section = "Camera Positioning";
+    constexpr const char* Disable_HDC_Camera_Positions_Setting = "Disable HD Collection Camera Positioning";
+    constexpr const char* Disable_HDC_Camera_Positions_Help = "";
+    constexpr const char* Disable_HDC_Camera_Positions_Tooltip = "Disables the 16:9 expanded camera positioning introduced in the HD Collection, which zoomed in the camera on most levels to prevent the sides of screen from seeing outside the bounds of the map.\n"
+                                                                 "\n"
+                                                                 "This results in a loss of information at the top and bottom of the screen in many areas.\n"
+                                                                 "\n"
+                                                                 "Toggling this option ON will return the game back to the original PS2 framing during gameplay.\n"
+                                                                 "\n"
+                                                                 "You -will- see outside of the map at times with this enabled.";
+
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Section = Disable_HDC_Camera_Positions_Section;
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Setting = "HD Collection Camera Toggle";
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Help = "";
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Tooltip = "Toggles the HD Collection Camera Positioning option on/off in real-time.\n"
+                                                                        "\n"
+                                                                        "In most cases, you will have to exit and re-enter the area for camera positions to update.";
 
     // Hotkeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Section = "Hotkeys";

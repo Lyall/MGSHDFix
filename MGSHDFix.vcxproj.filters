@@ -203,6 +203,9 @@
     <ClCompile Include="src\features\mgs2_first_person_view_mode.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\original_camera_positions.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -395,6 +398,9 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\original_camera_positions.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
