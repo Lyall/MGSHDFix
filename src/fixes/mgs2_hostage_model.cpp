@@ -21,6 +21,7 @@ void HostageModel::ApplyFix()
         return;
     }
     // Depends on custom models (provided by community bugfix pack)
+    // Note: no easy way to check for manifest and tri edits? Try it without checking, assume the models come with the manifest.
     if (!exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_def.kms"))
         || !exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_mid.kms"))
         || !exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_low.kms"))
@@ -31,5 +32,73 @@ void HostageModel::ApplyFix()
         //spdlog::warn("Missing one or more assets for hostage hand color fix. Do you have the latest version of the Community Bugfix Pack?");
         return;
     }
-    // TODO: Hook hostage generation, change model ID contingent on type variable being 9 or 10 (should correspond to dark-skinned heads)
+
+    // There are three hostage functions (LODs), all basically identical. They're also basically identical to two other head swap functions.
+    // We can filter by reading which model is used at runtime, but we do need to hook five times instead of three to be sure.
+    // We only want to swap the model for IDs 9 and 10 (the black hostages)
+    {
+        MAKE_HOOK_MID(baseModule, "8B D0 89 6C 24 20", "Hostage Hands", {
+            if (ctx.rsi == 9 || ctx.rsi == 10) {
+                if (ctx.rax == HOS_MALEA_DEF) {
+                    ctx.rax = SPACECORE_HOS_MALEB_DEF;
+                } else if (ctx.rax == HOS_MALEA_MID) {
+                    ctx.rax = SPACECORE_HOS_MALEB_MID;
+                } else if (ctx.rax == HOS_MALEA_LOW) {
+                    ctx.rax = SPACECORE_HOS_MALEB_LOW;
+                }
+            }
+        });
+    }
+    {
+        MAKE_HOOK_MID(baseModule, "8B D0 89 6C 24 20", "Hostage Hands", {
+            if (ctx.rsi == 9 || ctx.rsi == 10) {
+                if (ctx.rax == HOS_MALEA_DEF) {
+                    ctx.rax = SPACECORE_HOS_MALEB_DEF;
+                } else if (ctx.rax == HOS_MALEA_MID) {
+                    ctx.rax = SPACECORE_HOS_MALEB_MID;
+                } else if (ctx.rax == HOS_MALEA_LOW) {
+                    ctx.rax = SPACECORE_HOS_MALEB_LOW;
+                }
+            }
+        });
+    }
+    {
+        MAKE_HOOK_MID(baseModule, "8B D0 89 6C 24 20", "Hostage Hands", {
+            if (ctx.rsi == 9 || ctx.rsi == 10) {
+                if (ctx.rax == HOS_MALEA_DEF) {
+                    ctx.rax = SPACECORE_HOS_MALEB_DEF;
+                } else if (ctx.rax == HOS_MALEA_MID) {
+                    ctx.rax = SPACECORE_HOS_MALEB_MID;
+                } else if (ctx.rax == HOS_MALEA_LOW) {
+                    ctx.rax = SPACECORE_HOS_MALEB_LOW;
+                }
+            }
+        });
+    }
+    {
+        MAKE_HOOK_MID(baseModule, "8B D0 89 6C 24 20", "Hostage Hands", {
+            if (ctx.rsi == 9 || ctx.rsi == 10) {
+                if (ctx.rax == HOS_MALEA_DEF) {
+                    ctx.rax = SPACECORE_HOS_MALEB_DEF;
+                } else if (ctx.rax == HOS_MALEA_MID) {
+                    ctx.rax = SPACECORE_HOS_MALEB_MID;
+                } else if (ctx.rax == HOS_MALEA_LOW) {
+                    ctx.rax = SPACECORE_HOS_MALEB_LOW;
+                }
+            }
+        });
+    }
+    {
+        MAKE_HOOK_MID(baseModule, "8B D0 89 6C 24 20", "Hostage Hands", {
+            if (ctx.rsi == 9 || ctx.rsi == 10) {
+                if (ctx.rax == HOS_MALEA_DEF) {
+                    ctx.rax = SPACECORE_HOS_MALEB_DEF;
+                } else if (ctx.rax == HOS_MALEA_MID) {
+                    ctx.rax = SPACECORE_HOS_MALEB_MID;
+                } else if (ctx.rax == HOS_MALEA_LOW) {
+                    ctx.rax = SPACECORE_HOS_MALEB_LOW;
+                }
+            }
+        });
+    }
 }
