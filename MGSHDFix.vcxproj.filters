@@ -179,7 +179,7 @@
     <ClCompile Include="src\fixes\texture_live_swaps.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\snakearm_voice.cpp">
+    <ClCompile Include="src\fixes\mgs2_snakearm_voice.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp">
@@ -208,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="src\features\mgs2_restore_dogtag_viewer.cpp">
       <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_hostage_model.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,7 +382,7 @@
     <ClInclude Include="src\fixes\texture_live_swaps.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\snakearm_voice.hpp">
+    <ClInclude Include="src\fixes\mgs2_snakearm_voice.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp">
@@ -417,6 +420,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\game_stages.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_hostage_model.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

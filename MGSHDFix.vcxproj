@@ -25,10 +25,11 @@
     <ClCompile Include="src\features\mgs2_restore_dogtag_viewer.cpp" />
     <ClCompile Include="src\features\original_camera_positions.cpp" />
     <ClCompile Include="src\features\mgs3_first_person_view_mode.cpp" />
+    <ClCompile Include="src\fixes\mgs2_hostage_model.cpp" />
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp" />
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp" />
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp" />
-    <ClCompile Include="src\fixes\snakearm_voice.cpp" />
+    <ClCompile Include="src\fixes\mgs2_snakearm_voice.cpp" />
     <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp" />
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp" />
     <ClCompile Include="src\features\mgs2_restore_dogtags.cpp" />
@@ -143,11 +144,12 @@
     <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtag_viewer.hpp" />
     <ClInclude Include="src\features\original_camera_positions.hpp" />
+    <ClInclude Include="src\fixes\mgs2_hostage_model.hpp" />
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp" />
     <ClInclude Include="src\features\mgs3_first_person_view_mode.hpp" />
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp" />
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />
-    <ClInclude Include="src\fixes\snakearm_voice.hpp" />
+    <ClInclude Include="src\fixes\mgs2_snakearm_voice.hpp" />
     <ClInclude Include="src\fixes\resolution_scaling_fixes.hpp" />
     <ClInclude Include="src\features\custom_resolution_and_borderless.hpp" />
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
