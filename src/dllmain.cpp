@@ -465,7 +465,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS2_RestoreDogtags::Initialize());
     INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
     INITIALIZE(MGS2_RestorePhoneJingle::Apply());
-    //INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
+    INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
     INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
     INITIALIZE(OriginalCameraPositions::Activate());
 

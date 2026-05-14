@@ -34,6 +34,8 @@
 #include <wx/choice.h>
 #include <wx/stdpaths.h>
 #include <wx/mstream.h>
+#include <Xinput.h>
+#pragma comment(lib, "Xinput.lib")
 
 #include "helper.hpp"
 #include "version.h"
@@ -109,20 +111,109 @@ static wxString Unquote(const wxString& value)
     return s;
 }
 
+
+namespace
+{
+    constexpr BYTE kPadTriggerThreshold = 30;
+    constexpr SHORT kPadStickThreshold = 12000;
+
+    bool TryGetGamepadButtonInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    {
+        if ((pad.wButtons & XINPUT_GAMEPAD_A) != 0) { outName = "Pad_A"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_B) != 0) { outName = "Pad_B"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_X) != 0) { outName = "Pad_X"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_Y) != 0) { outName = "Pad_Y"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) { outName = "Pad_LB"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) { outName = "Pad_RB"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_BACK) != 0) { outName = "Pad_Back"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_START) != 0) { outName = "Pad_Start"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0) { outName = "Pad_LStick"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0) { outName = "Pad_RStick"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0) { outName = "Pad_DPad_Up"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0) { outName = "Pad_DPad_Down"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0) { outName = "Pad_DPad_Left"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0) { outName = "Pad_DPad_Right"; return true; }
+        if (pad.bLeftTrigger >= kPadTriggerThreshold) { outName = "Pad_LT"; return true; }
+        if (pad.bRightTrigger >= kPadTriggerThreshold) { outName = "Pad_RT"; return true; }
+
+        return false;
+    }
+
+    bool TryGetGamepadStickInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    {
+        if (pad.sThumbLY >= kPadStickThreshold) { outName = "Pad_LThumb_Up"; return true; }
+        if (pad.sThumbLY <= -kPadStickThreshold) { outName = "Pad_LThumb_Down"; return true; }
+        if (pad.sThumbLX <= -kPadStickThreshold) { outName = "Pad_LThumb_Left"; return true; }
+        if (pad.sThumbLX >= kPadStickThreshold) { outName = "Pad_LThumb_Right"; return true; }
+        if (pad.sThumbRY >= kPadStickThreshold) { outName = "Pad_RThumb_Up"; return true; }
+        if (pad.sThumbRY <= -kPadStickThreshold) { outName = "Pad_RThumb_Down"; return true; }
+        if (pad.sThumbRX <= -kPadStickThreshold) { outName = "Pad_RThumb_Left"; return true; }
+        if (pad.sThumbRX >= kPadStickThreshold) { outName = "Pad_RThumb_Right"; return true; }
+
+        return false;
+    }
+}
+
 class HotkeyCaptureCtrl final : public wxTextCtrl
 {
 public:
-    HotkeyCaptureCtrl(wxWindow* parent, wxWindowID id, const wxString& value = "")
+    HotkeyCaptureCtrl(wxWindow* parent, wxWindowID id, const wxString& value = "", bool captureStickInputs = false)
         : wxTextCtrl(parent, id, value, wxDefaultPosition, wxDefaultSize,
-                     wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER)
+                     wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER),
+          m_gamepadCaptureTimer(this),
+          m_captureStickInputs(captureStickInputs)
     {
         Bind(wxEVT_KEY_DOWN, &HotkeyCaptureCtrl::OnKeyDown, this);
         Bind(wxEVT_MIDDLE_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
         Bind(wxEVT_AUX1_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
         Bind(wxEVT_AUX2_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
+        Bind(wxEVT_MOUSEWHEEL, &HotkeyCaptureCtrl::OnMouseWheel, this);
+        Bind(wxEVT_SET_FOCUS, &HotkeyCaptureCtrl::OnFocus, this);
+        Bind(wxEVT_KILL_FOCUS, &HotkeyCaptureCtrl::OnKillFocus, this);
+        Bind(wxEVT_TIMER, &HotkeyCaptureCtrl::OnGamepadTimer, this, m_gamepadCaptureTimer.GetId());
     }
 
 private:
+    wxTimer m_gamepadCaptureTimer;
+    bool m_captureStickInputs = false;
+
+    void OnFocus(wxFocusEvent& event)
+    {
+        m_gamepadCaptureTimer.Start(16);
+        event.Skip();
+    }
+
+    void OnKillFocus(wxFocusEvent& event)
+    {
+        m_gamepadCaptureTimer.Stop();
+        event.Skip();
+    }
+
+    void OnGamepadTimer(wxTimerEvent&)
+    {
+        for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i)
+        {
+            XINPUT_STATE state = {};
+            if (XInputGetState(i, &state) != ERROR_SUCCESS)
+            {
+                continue;
+            }
+
+            wxString name;
+            const bool hasInput = m_captureStickInputs
+                ? TryGetGamepadStickInputName(state.Gamepad, name)
+                : TryGetGamepadButtonInputName(state.Gamepad, name);
+
+            if (!hasInput)
+            {
+                continue;
+            }
+
+            SetValue(name);
+            return;
+        }
+    }
+
     void OnKeyDown(const wxKeyEvent& event)
     {
         const int code = event.GetKeyCode();
@@ -260,14 +351,46 @@ private:
     void OnMouseClick(wxMouseEvent& event)
     {
         wxString name;
+
         if (event.GetButton() == wxMOUSE_BTN_MIDDLE)
+        {
             name = "Mouse3";
+        }
         else if (event.GetButton() == wxMOUSE_BTN_AUX1)
+        {
             name = "Mouse4";
+        }
         else if (event.GetButton() == wxMOUSE_BTN_AUX2)
+        {
             name = "Mouse5";
+        }
+
+        if (name.IsEmpty())
+        {
+            event.Skip();
+            return;
+        }
 
         SetValue(name);
+    }
+
+    void OnMouseWheel(wxMouseEvent& event)
+    {
+        const int wheelRotation = event.GetWheelRotation();
+
+        if (wheelRotation > 0)
+        {
+            SetValue("WheelUp");
+            return;
+        }
+
+        if (wheelRotation < 0)
+        {
+            SetValue("WheelDown");
+            return;
+        }
+
+        event.Skip();
     }
 };
 
@@ -629,6 +752,18 @@ public:
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
                     break;
                 }
+                case Field::StickHotkey:
+                {
+                    wxString v = field.defaultString;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
+                    m_conf->Read(path, &v);
+                    v = Unquote(v);
+                    ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v, true);
+                    break;
+                }
                 case Field::Spacer:
                 {
                     auto* spacer = new wxPanel(sectionSizer->GetStaticBox(), wxID_ANY);
@@ -728,6 +863,7 @@ public:
 
                             case Field::Str:
                             case Field::Hotkey:
+                            case Field::StickHotkey:
                                 if (!field.defaultString.IsEmpty())
                                     tip += "\"" + field.defaultString + "\"";
                                 else
@@ -1519,6 +1655,7 @@ private:
 
             case Field::Str:
             case Field::Hotkey:
+            case Field::StickHotkey:
                 if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
                 {
                     c->SetValue(field.defaultString);
@@ -1856,6 +1993,7 @@ private:
 
                 case Field::Str:
                 case Field::Hotkey:
+                case Field::StickHotkey:
                     strVal = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {

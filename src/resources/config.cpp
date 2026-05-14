@@ -657,6 +657,12 @@ void Config::Read()
     {
         InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Camera);
         InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Camera_Inherit_Camera_Rotation);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Increase_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Decrease_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Reset_Camera_Distance);
+        
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step);
 
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Inherit_Camera_Rotation);
         LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Inherit_Camera_Rotation);

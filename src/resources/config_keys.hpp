@@ -263,12 +263,12 @@ namespace ConfigKeys
 
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
-    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(MOUSE SUPPORT STILL W.I.P.)";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Keeps aiming after firing while in first-person view.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Setting = "Third Person View Toggle";
-    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "(Utilizes your Steam Input binds)";
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Tooltip = "Toggles the third person view on/off.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
@@ -295,6 +295,26 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting = "Vertical Camera Sensitivity";
     constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Help = "";
     constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting = "Camera Distance Increase Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting = "Camera Distance Decrease Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting = "Camera Distance Reset Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting = "Camera Distance Step Amount";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip = "";
 
 
 
@@ -678,6 +698,8 @@ static bool ResolveRegionLanguageNames(const std::array<Game_Language_Pair_View,
     return false;
 }
 
+constexpr int k3rdPersonMaxCameraDistance = 10000;
+constexpr int k3rdPersonMinCameraDistance = 100;
 constexpr int k3rdPersonFreecamDefaultMaxCameraDistance = 4000;
 constexpr float k3rdPersonFreecamDefaultHorizontalSensitivity = 0.6f;
 constexpr float k3rdPersonFreecamDefaultVerticalSensitivity = 0.4f;

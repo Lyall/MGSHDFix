@@ -29,6 +29,26 @@ namespace
         *gBP_3rdPersonCamera_Override = !*gBP_3rdPersonCamera_Override;
     }
 
+    void IncreaseCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = std::min(*gBP_3rdPersonCamera_Dist + MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step, k3rdPersonMaxCameraDistance);
+        spdlog::info("MGS2: Third Person Freecam: Increased camera distance to {}", *gBP_3rdPersonCamera_Dist);
+    
+    }
+
+    void DecreaseCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = std::max(*gBP_3rdPersonCamera_Dist - MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step, k3rdPersonMinCameraDistance);
+
+        spdlog::info("MGS2: Third Person Freecam: Decreased camera distance to {}", *gBP_3rdPersonCamera_Dist);
+    }
+
+    void ResetCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = MGS2_ThirdPersonFreecam::i3rd_Person_Max_Camera_Distance;
+        spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
+    }
+
 }
 
 void MGS2_ThirdPersonFreecam::HandleLevelTransition()
@@ -91,10 +111,9 @@ void MGS2_ThirdPersonFreecam::Activate()
     {
         if (i3rd_Person_Max_Camera_Distance != k3rdPersonFreecamDefaultMaxCameraDistance)
         {
-            *gBP_3rdPersonCamera_Dist = i3rd_Person_Max_Camera_Distance;
-            spdlog::info("MGS2: Third Person Freecam: Set max camera distance to {}", i3rd_Person_Max_Camera_Distance);
+            ResetCameraDistance();
         }
-        /*
+        
         g_InputHandler.RegisterHotkey(vkToggle_3rd_Person_Increase_Camera_Distance, "Third Person Camera - Increase Distance", []()
                                       {
                                           IncreaseCameraDistance();
@@ -103,7 +122,15 @@ void MGS2_ThirdPersonFreecam::Activate()
                                       {
                                           DecreaseCameraDistance();
                                       });
-                                      */
+                                      
+        g_InputHandler.RegisterHotkey(vkToggle_3rd_Person_Reset_Camera_Distance, "Third Person Camera - Reset Distance", []()
+                                      {
+                                          ResetCameraDistance();
+                                      });
+
+
+
+
     }
 
 

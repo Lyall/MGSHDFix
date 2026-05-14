@@ -16,5 +16,11 @@ namespace MGS2_ThirdPersonFreecam
     inline float f3rd_Person_Horizontal_Sensitivity = 0.0f;
     inline float f3rd_Person_Vertical_Sensitivity = 0.0f;
 
+    inline int i3rd_Person_Camera_Step = 250;
+    inline int vkToggle_3rd_Person_Increase_Camera_Distance = 0;
+    inline int vkToggle_3rd_Person_Decrease_Camera_Distance = 0;
+    inline int vkToggle_3rd_Person_Reset_Camera_Distance = 0;
+
+
 
 }
