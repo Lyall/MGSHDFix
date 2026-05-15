@@ -6,6 +6,8 @@ namespace MGS2_ThirdPersonFreecam
 
     void HandleLevelTransition();
 
+    void Tick();
+
     inline bool bEnabled = false;
     inline int vkToggle_Camera = 0;
     inline int vkToggle_Inherit_Camera_Rotation = 0;

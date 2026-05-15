@@ -13,6 +13,7 @@
 #include "effect_speeds.hpp"
 #include "gamma_correction.hpp"
 #include "input_handler.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
 
 void afterPresent();
 
@@ -152,6 +153,7 @@ namespace
 
         g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
+        MGS2_ThirdPersonFreecam::Tick();
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 

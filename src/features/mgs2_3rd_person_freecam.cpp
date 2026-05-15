@@ -3,18 +3,19 @@
 
 #include "mgs2_3rd_person_freecam.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "input_handler.hpp"
 #include "logging.hpp"
 
 namespace
 {
     //TODO: 
-    //      - force camera to isometric when hf blade is equipped
     //      - force camera to isometric on initial entrance of w45a (or figure out how forced angles are determined and force while in the doorway. hzx determined perhaps?)
     //      - disable camera angles when leaning against walls
     //      - block camera increase / decrease when in menus
-    //      - mgs3 cutscene flag !!!! CRITICAL
+    //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
     //      - get fpv inherit camera rotation var
+    //      - real character names / custom character name
 
     //mgs3 -> bp_camera_yoffset()
 
@@ -24,11 +25,29 @@ namespace
 
     int* gBP_3rdPersonCamera_Dist = nullptr;         // max camera distance from player
 
+    bool bCameraForcedDisabled = false;
+    bool bPreviousCameraState = false;
+
     // 3rd person camera overrides
     //FVECTOR gBP_3rdPersonCamera_Target         // Target position that camera looks at
     //FVECTOR gBP_3rdPersonCamera_Eye =      // Eye position where camera is placed
     //SVECTOR gBP_3rdPersonCamera_Rot =      // Rotation around player
 
+    void ReleaseCameraState(bool enabled)
+    {
+        bCameraForcedDisabled = false;
+        *gBP_3rdPersonCamera_Override = enabled;
+    }
+
+    void ForceCameraDisabled()
+    {
+        if (!bCameraForcedDisabled)
+        {
+            bPreviousCameraState = *gBP_3rdPersonCamera_Override;
+            bCameraForcedDisabled = true;
+        }
+        *gBP_3rdPersonCamera_Override = false;
+    }
 
     void Toggle3rdPersonCamera()
     {
@@ -56,6 +75,35 @@ namespace
     }
 
 }
+
+void MGS2_ThirdPersonFreecam::Tick()
+{
+    if (!bEnabled)
+    {
+        return;
+    }
+
+    //if (PLAYER_CAUTION| STATE_CUT_IN)
+
+    if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE)
+    {
+        ForceCameraDisabled();
+    }
+
+    /*
+    if ((g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A)) && )
+    {
+        ForceCameraDisabled();
+    }
+    */
+    if (bCameraForcedDisabled)
+    {
+        ReleaseCameraState(bPreviousCameraState);
+    }
+
+
+}
+
 
 void MGS2_ThirdPersonFreecam::HandleLevelTransition()
 {

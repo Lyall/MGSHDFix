@@ -99,6 +99,20 @@ enum MGS2_GameStateFlags : uint32_t
     STATE_GAMEOVER      = (1u << 31)   /// Game over processing / call a fucking ambulance BUT NOT FOR ME
 };
 
+enum MGS2CameraPriority
+{
+    GM_CAMERA_CUT_IN = 0,  /// Cut-in camera
+    GM_CAMERA_PROG1,       /// Program camera 1
+    GM_CAMERA_SUBJECT,     /// First-person / subjective player camera
+    GM_CAMERA_PROG2,       /// Program camera 2
+    GM_CAMERA_BEHIND,      /// Behind camera
+    GM_CAMERA_PROG3,       /// Program camera 3
+    GM_CAMERA_AREA,        /// Area-specified camera (scenario controlled)
+    GM_CAMERA_PROG4,       /// Program camera 4
+    GM_CAMERA_DEFAULT,     /// Stage default camera
+    GM_CAMERA_MAX
+};
+
 inline constexpr uint32_t GM_STATUS_DETECT = STATE_DETECT;
 
 inline constexpr uint32_t STATE_PLAY_DEMO = (STATE_DEMO | STATE_PRG_DEMO | STATE_PAD_DEMO | STATE_SCN_DEMO);
