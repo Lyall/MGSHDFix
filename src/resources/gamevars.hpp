@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangDiagnosticUniqueObjectDuplication
 #pragma once
 
 class GameVars final
@@ -43,6 +44,9 @@ public:
     [[nodiscard]] bool MGS3IsHoldingFirstPerson() const;
     [[nodiscard]] bool MGS3IsHoldingLockOn() const;
 
+
+    [[nodiscard]] bool PL_Status(std::uint64_t flags) const;
+
 private:
     static void OnLevelTransition();
 
@@ -53,6 +57,8 @@ private:
     const char* currentStage = nullptr;
     uint32_t* heldTriggers = nullptr;
     float* GM_WaterLevel = nullptr;
+
+    std::uint64_t* GM_PlayerStatus = nullptr;
 
 };
 
@@ -178,6 +184,7 @@ enum MGS2_PlayerStatusFlags : uint64_t
 
 enum MGS2WeaponIndex : uint8_t
 {
+    MGS2_WEAPON_INDEX_NONE = 0x0,
     MGS2_WEAPON_INDEX_M9 = 0x1,
     MGS2_WEAPON_INDEX_USP = 0x2,
     MGS2_WEAPON_INDEX_SOCOM = 0x3,
@@ -199,6 +206,140 @@ enum MGS2WeaponIndex : uint8_t
     MGS2_WEAPON_INDEX_PSG1T = 0x13,
     MGS2_WEAPON_INDEX_D_MIC_ZOOMED = 0x14,
     MGS2_WEAPON_INDEX_BOOK = 0x15,
+
+    MGS2_WEAPON_INDEX_MAX_WEAPONS = 0x16,
+
+    MGS2_WEAPON_INDEX_PLAYER_ATTACK = 0x17,
+    MGS2_WEAPON_INDEX_BLADE_FAINT = 0x18,
+    MGS2_WEAPON_INDEX_BLADE_STAB = 0x19,
+    MGS2_WEAPON_INDEX_BLADE_GUARD = 0x1A,
+    MGS2_WEAPON_INDEX_BOX_REMOVE = 0x1B,
+    MGS2_WEAPON_INDEX_KICK1 = 0x1C,
+};
+
+enum MGS2WeaponFlags : uint64_t
+{
+    MGS2_WEAPON_NONE                  = (1ull << MGS2_WEAPON_INDEX_NONE),
+    MGS2_WEAPON_M9                    = (1ull << MGS2_WEAPON_INDEX_M9),
+    MGS2_WEAPON_USP                   = (1ull << MGS2_WEAPON_INDEX_USP),
+    MGS2_WEAPON_SOCOM                 = (1ull << MGS2_WEAPON_INDEX_SOCOM),
+    MGS2_WEAPON_PSG1                  = (1ull << MGS2_WEAPON_INDEX_PSG1),
+    MGS2_WEAPON_RGB6                  = (1ull << MGS2_WEAPON_INDEX_RGB6),
+    MGS2_WEAPON_NIKITA                = (1ull << MGS2_WEAPON_INDEX_NIKITA),
+    MGS2_WEAPON_STINGER               = (1ull << MGS2_WEAPON_INDEX_STINGER),
+    MGS2_WEAPON_CLAYMORE              = (1ull << MGS2_WEAPON_INDEX_CLAYMORE),
+    MGS2_WEAPON_C4                    = (1ull << MGS2_WEAPON_INDEX_C4),
+    MGS2_WEAPON_CHAFF_GRENADE         = (1ull << MGS2_WEAPON_INDEX_CHAFF_GRENADE),
+    MGS2_WEAPON_STUN_GRENADE          = (1ull << MGS2_WEAPON_INDEX_STUN_GRENADE),
+    MGS2_WEAPON_D_MIC                 = (1ull << MGS2_WEAPON_INDEX_D_MIC),
+    MGS2_WEAPON_HIGH_FREQUENCY_BLADE  = (1ull << MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE),
+    MGS2_WEAPON_COOLANT               = (1ull << MGS2_WEAPON_INDEX_COOLANT),
+    MGS2_WEAPON_AKS74U                = (1ull << MGS2_WEAPON_INDEX_AKS74U),
+    MGS2_WEAPON_MAGAZINE              = (1ull << MGS2_WEAPON_INDEX_MAGAZINE),
+    MGS2_WEAPON_GRENADE               = (1ull << MGS2_WEAPON_INDEX_GRENADE),
+    MGS2_WEAPON_M4                    = (1ull << MGS2_WEAPON_INDEX_M4),
+    MGS2_WEAPON_PSG1T                 = (1ull << MGS2_WEAPON_INDEX_PSG1T),
+    MGS2_WEAPON_D_MIC_ZOOMED          = (1ull << MGS2_WEAPON_INDEX_D_MIC_ZOOMED),
+    MGS2_WEAPON_BOOK                  = (1ull << MGS2_WEAPON_INDEX_BOOK),
+};
+
+enum MGS2ItemIndex : uint8_t
+{
+    MGS2_ITEM_INDEX_NONE = 0x0,  /// Unarmed / no item
+    MGS2_ITEM_INDEX_RATION = 0x1,  
+    MGS2_ITEM_INDEX_DUMMY_SCOPE = 0x2,  /// Dummy binoculars
+    MGS2_ITEM_INDEX_MEDICINE = 0x3,  
+    MGS2_ITEM_INDEX_STYPTIC = 0x4,  ///bandage
+    MGS2_ITEM_INDEX_DIAZEPAM = 0x5,  /// pentazemin
+    MGS2_ITEM_INDEX_UNIFORM = 0x6,  /// Enemy soldier uniform
+    MGS2_ITEM_INDEX_BODY_ARMOR = 0x7,  
+    MGS2_ITEM_INDEX_STEALTH = 0x8,  
+    MGS2_ITEM_INDEX_MINE_DETECTOR = 0x9, 
+
+    MGS2_ITEM_INDEX_BOMB_SENSOR_A = 0xA,  
+    MGS2_ITEM_INDEX_BOMB_SENSOR_B = 0xB,  
+    MGS2_ITEM_INDEX_NIGHT_VISION_GOGGLES = 0xC,  
+    MGS2_ITEM_INDEX_THERMAL_GOGGLES = 0xD,  
+    MGS2_ITEM_INDEX_SCOPE = 0xE,  
+    MGS2_ITEM_INDEX_CAMERA = 0xF,  
+    MGS2_ITEM_INDEX_CARDBOARD_BOX_A = 0x10, 
+    MGS2_ITEM_INDEX_CIGARETTES = 0x11, 
+    MGS2_ITEM_INDEX_ID_CARD = 0x12, 
+    MGS2_ITEM_INDEX_SHAVER = 0x13, 
+
+    MGS2_ITEM_INDEX_PHS = 0x14, /// Cell phone
+    MGS2_ITEM_INDEX_TANKER_CAMERA = 0x15, 
+    MGS2_ITEM_INDEX_CARDBOARD_BOX_B = 0x16, 
+    MGS2_ITEM_INDEX_CARDBOARD_BOX_C = 0x17, 
+    MGS2_ITEM_INDEX_WET_CARDBOARD_BOX = 0x18, 
+    MGS2_ITEM_INDEX_VIBRATION_SENSOR = 0x19,
+    MGS2_ITEM_INDEX_CARDBOARD_BOX_D = 0x1A, 
+    MGS2_ITEM_INDEX_CARDBOARD_BOX_E = 0x1B, 
+    MGS2_ITEM_INDEX_RAZOR = 0x1C, //cut body razor?
+    MGS2_ITEM_INDEX_SOCOM_SUPPRESSOR = 0x1D, 
+
+    MGS2_ITEM_INDEX_AKS74U_SUPPRESSOR = 0x1E,
+    MGS2_ITEM_INDEX_DUMMY_TANKER_CAMERA = 0x1F,
+    MGS2_ITEM_INDEX_INFINITY_BANDANA = 0x20,
+    MGS2_ITEM_INDEX_DOG_TAG = 0x21,
+    MGS2_ITEM_INDEX_MO_DISC = 0x22,
+    MGS2_ITEM_INDEX_USP_SUPPRESSOR = 0x23,
+    MGS2_ITEM_INDEX_INFINITY_WIG = 0x24,
+    MGS2_ITEM_INDEX_WIG_A = 0x25, /// Wig A (infinite O2)
+    MGS2_ITEM_INDEX_WIG_B = 0x26, /// Wig B (infinite grip)
+    MGS2_ITEM_INDEX_WIG_C = 0x27, //?
+
+    MGS2_ITEM_INDEX_WIG_D = 0x28, //?
+
+    MGS2_ITEM_INDEX_MAX_ITEMS = 0x29,
+};
+
+enum MGS2ItemFlags : uint64_t
+{
+    MGS2_ITEM_FLAG_NONE = (1ull << MGS2_ITEM_INDEX_NONE),
+    MGS2_ITEM_FLAG_RATION = (1ull << MGS2_ITEM_INDEX_RATION),
+    MGS2_ITEM_FLAG_DUMMY_SCOPE = (1ull << MGS2_ITEM_INDEX_DUMMY_SCOPE),
+    MGS2_ITEM_FLAG_MEDICINE = (1ull << MGS2_ITEM_INDEX_MEDICINE),
+    MGS2_ITEM_FLAG_STYPTIC = (1ull << MGS2_ITEM_INDEX_STYPTIC),
+    MGS2_ITEM_FLAG_DIAZEPAM = (1ull << MGS2_ITEM_INDEX_DIAZEPAM),
+    MGS2_ITEM_FLAG_UNIFORM = (1ull << MGS2_ITEM_INDEX_UNIFORM),
+    MGS2_ITEM_FLAG_BODY_ARMOR = (1ull << MGS2_ITEM_INDEX_BODY_ARMOR),
+    MGS2_ITEM_FLAG_STEALTH = (1ull << MGS2_ITEM_INDEX_STEALTH),
+    MGS2_ITEM_FLAG_MINE_DETECTOR = (1ull << MGS2_ITEM_INDEX_MINE_DETECTOR),
+
+    MGS2_ITEM_FLAG_BOMB_SENSOR_A = (1ull << MGS2_ITEM_INDEX_BOMB_SENSOR_A),
+    MGS2_ITEM_FLAG_BOMB_SENSOR_B = (1ull << MGS2_ITEM_INDEX_BOMB_SENSOR_B),
+    MGS2_ITEM_FLAG_NIGHT_VISION_GOGGLES = (1ull << MGS2_ITEM_INDEX_NIGHT_VISION_GOGGLES),
+    MGS2_ITEM_FLAG_THERMAL_GOGGLES = (1ull << MGS2_ITEM_INDEX_THERMAL_GOGGLES),
+    MGS2_ITEM_FLAG_SCOPE = (1ull << MGS2_ITEM_INDEX_SCOPE),
+    MGS2_ITEM_FLAG_CAMERA = (1ull << MGS2_ITEM_INDEX_CAMERA),
+    MGS2_ITEM_FLAG_CARDBOARD_BOX_A = (1ull << MGS2_ITEM_INDEX_CARDBOARD_BOX_A),
+    MGS2_ITEM_FLAG_CIGARETTES = (1ull << MGS2_ITEM_INDEX_CIGARETTES),
+    MGS2_ITEM_FLAG_ID_CARD = (1ull << MGS2_ITEM_INDEX_ID_CARD),
+    MGS2_ITEM_FLAG_SHAVER = (1ull << MGS2_ITEM_INDEX_SHAVER),
+
+    MGS2_ITEM_FLAG_PHS = (1ull << MGS2_ITEM_INDEX_PHS),
+    MGS2_ITEM_FLAG_TANKER_CAMERA = (1ull << MGS2_ITEM_INDEX_TANKER_CAMERA),
+    MGS2_ITEM_FLAG_CARDBOARD_BOX_B = (1ull << MGS2_ITEM_INDEX_CARDBOARD_BOX_B),
+    MGS2_ITEM_FLAG_CARDBOARD_BOX_C = (1ull << MGS2_ITEM_INDEX_CARDBOARD_BOX_C),
+    MGS2_ITEM_FLAG_WET_CARDBOARD_BOX = (1ull << MGS2_ITEM_INDEX_WET_CARDBOARD_BOX),
+    MGS2_ITEM_FLAG_VIBRATION_SENSOR = (1ull << MGS2_ITEM_INDEX_VIBRATION_SENSOR),
+    MGS2_ITEM_FLAG_CARDBOARD_BOX_D = (1ull << MGS2_ITEM_INDEX_CARDBOARD_BOX_D),
+    MGS2_ITEM_FLAG_CARDBOARD_BOX_E = (1ull << MGS2_ITEM_INDEX_CARDBOARD_BOX_E),
+    MGS2_ITEM_FLAG_RAZOR = (1ull << MGS2_ITEM_INDEX_RAZOR),
+    MGS2_ITEM_FLAG_SOCOM_SUPPRESSOR = (1ull << MGS2_ITEM_INDEX_SOCOM_SUPPRESSOR),
+
+    MGS2_ITEM_FLAG_AKS74U_SUPPRESSOR = (1ull << MGS2_ITEM_INDEX_AKS74U_SUPPRESSOR),
+    MGS2_ITEM_FLAG_DUMMY_TANKER_CAMERA = (1ull << MGS2_ITEM_INDEX_DUMMY_TANKER_CAMERA),
+    MGS2_ITEM_FLAG_INFINITY_BANDANA = (1ull << MGS2_ITEM_INDEX_INFINITY_BANDANA),
+    MGS2_ITEM_FLAG_DOG_TAG = (1ull << MGS2_ITEM_INDEX_DOG_TAG),
+    MGS2_ITEM_FLAG_MO_DISC = (1ull << MGS2_ITEM_INDEX_MO_DISC),
+    MGS2_ITEM_FLAG_USP_SUPPRESSOR = (1ull << MGS2_ITEM_INDEX_USP_SUPPRESSOR),
+    MGS2_ITEM_FLAG_INFINITY_WIG = (1ull << MGS2_ITEM_INDEX_INFINITY_WIG),
+    MGS2_ITEM_FLAG_WIG_A = (1ull << MGS2_ITEM_INDEX_WIG_A),
+    MGS2_ITEM_FLAG_WIG_B = (1ull << MGS2_ITEM_INDEX_WIG_B),
+    MGS2_ITEM_FLAG_WIG_C = (1ull << MGS2_ITEM_INDEX_WIG_C),
+    MGS2_ITEM_FLAG_WIG_D = (1ull << MGS2_ITEM_INDEX_WIG_D),
 };
 
 enum MGS3WeaponIndex : uint8_t
@@ -635,3 +776,154 @@ namespace MGS3Stages
     MGS3_STAGE_LIST
 #undef X
 }
+
+
+
+namespace MGS2_LinkVarBuf
+{
+    inline uintptr_t* linkvarbuf = nullptr;
+
+    template <typename T, uintptr_t Offset>
+    struct LinkVarValue
+    {
+        operator T& () const
+        {
+            return *reinterpret_cast<T*>(*linkvarbuf + Offset);
+        }
+
+        T& get() const
+        {
+            return *reinterpret_cast<T*>(*linkvarbuf + Offset);
+        }
+
+        LinkVarValue& operator=(const T value)
+        {
+            get() = value;
+            return *this;
+        }
+    };
+
+    template <typename T, uintptr_t Offset>
+    struct LinkVarPointer
+    {
+        operator T* () const
+        {
+            return reinterpret_cast<T*>(*linkvarbuf + Offset);
+        }
+
+        T* get() const
+        {
+            return reinterpret_cast<T*>(*linkvarbuf + Offset);
+        }
+
+        T& operator[](const size_t index) const
+        {
+            return get()[index];
+        }
+    };
+
+    inline LinkVarValue<short, 0>       GM_GameClearCount;
+    inline LinkVarValue<short, 2>       GM_TankerClearCount;
+    inline LinkVarValue<short, 4>       GM_PlantClearCount;
+    inline LinkVarValue<short, 6>       GM_Configuration;
+    inline LinkVarValue<int, 8>         GM_Configuration2;
+    inline LinkVarValue<int, 12>        GM_VRConfiguration;
+    inline LinkVarValue<short, 16>      GM_GameLevel;
+    inline LinkVarValue<short, 18>      GM_Result;
+    inline LinkVarValue<short, 20>      GM_Language;
+    inline LinkVarValue<short, 22>      GM_ClearFlag;
+    inline LinkVarValue<short, 24>      GM_ScrAdjX;
+    inline LinkVarValue<short, 26>      GM_ScrAdjY;
+    inline LinkVarPointer<char, 28>     GM_SaveResidentDir;
+    inline LinkVarPointer<char, 44>     GM_SaveAreaDir;
+    inline LinkVarPointer<int, 60>      GM_DogTagFlag;
+    inline LinkVarValue<int, 188>       GM_SaveArea;
+    inline LinkVarValue<int, 192>       GM_SaveMap;
+    inline LinkVarPointer<int, 196>     GM_AreaHistory;
+    inline LinkVarValue<int, 212>       GM_PrevArea;
+    inline LinkVarValue<int, 216>       GM_SaveX;
+    inline LinkVarValue<int, 220>       GM_SaveY;
+    inline LinkVarValue<int, 224>       GM_SaveZ;
+    inline LinkVarValue<int, 228>       GM_StagePlayTime;
+    inline LinkVarValue<int, 232>       GM_PlayerPosX;
+    inline LinkVarValue<int, 236>       GM_PlayerPosY;
+    inline LinkVarValue<int, 240>       GM_PlayerPosZ;
+    inline LinkVarValue<short, 244>     GM_PlayerDir;
+    inline LinkVarValue<short, 246>     GM_PlayerMotion;
+    inline LinkVarValue<short, 248>     GM_BehindRot;
+    inline LinkVarValue<short, 250>     GM_Vitality;
+    inline LinkVarValue<short, 252>     GM_VitalityMax;
+    inline LinkVarValue<short, 254>     GM_O2;
+    inline LinkVarValue<short, 256>     GM_O2Max;
+    inline LinkVarValue<short, 258>     GM_PlayerStance;
+    inline LinkVarValue<short, 260>     GM_Weapon;
+    inline LinkVarValue<short, 262>     GM_Item;
+    inline LinkVarValue<short, 264>     GM_PlayerCold;
+    inline LinkVarValue<short, 266>     GM_PlayerSneezeTime;
+    inline LinkVarValue<int, 268>       GM_PlayerColdCount;
+    inline LinkVarValue<int, 272>       GM_PlayerColdStartTime;
+    inline LinkVarValue<short, 276>     GM_PlayerStateFlag;
+    inline LinkVarValue<short, 278>     GM_WeaponPrev;
+    inline LinkVarValue<short, 280>     GM_ItemPrev;
+    inline LinkVarValue<short, 282>     GM_AlertMode;
+    inline LinkVarValue<short, 284>     GM_StartAlertMode;
+    inline LinkVarPointer<short, 286>   GM_SnakeGripMax;
+    inline LinkVarPointer<short, 294>   GM_RaidenGripMax;
+    inline LinkVarValue<short, 302>     GM_SnakeChin_Up;
+    inline LinkVarValue<short, 304>     GM_RaidenChin_Up;
+    inline LinkVarValue<short, 306>     GM_ContinueCount;
+    inline LinkVarValue<short, 308>     GM_GameOverCount;
+    inline LinkVarValue<short, 310>     GM_SaveCount;
+    inline LinkVarValue<int, 312>       GM_PlayTime;
+    inline LinkVarValue<int, 316>       GM_LastSave;
+    inline LinkVarValue<short, 320>     GM_ShootCount;
+    inline LinkVarValue<short, 322>     GM_AlertCount;
+    inline LinkVarValue<short, 324>     GM_KillCount;
+    inline LinkVarValue<short, 326>     GM_DamageCount;
+    inline LinkVarPointer<int, 328>     GM_ClearCode;
+    inline LinkVarValue<short, 344>     GM_MecaKillCount;
+    inline LinkVarValue<short, 346>     Padding_Dummy;
+    inline LinkVarPointer<short, 348>   GM_Weapons;
+    inline LinkVarPointer<short, 420>   GM_WeaponsMax;
+    inline LinkVarPointer<short, 492>   GM_Items;
+    inline LinkVarPointer<short, 588>   GM_ItemsMax;
+    inline LinkVarPointer<short, 684>   GM_WeaponsR;
+    inline LinkVarPointer<short, 756>   GM_WeaponsMaxR;
+    inline LinkVarPointer<short, 828>   GM_ItemsR;
+    inline LinkVarPointer<short, 924>   GM_ItemsMaxR;
+    inline LinkVarPointer<short, 1020>  GM_WeaponsSaved;
+    inline LinkVarPointer<short, 1092>  GM_ItemsSaved;
+    inline LinkVarValue<int, 1188>      GM_CameraX;
+    inline LinkVarValue<int, 1192>      GM_CameraY;
+    inline LinkVarValue<int, 1196>      GM_CameraZ;
+    inline LinkVarValue<int, 1200>      GM_CamTargX;
+    inline LinkVarValue<int, 1204>      GM_CamTargY;
+    inline LinkVarValue<int, 1208>      GM_CamTargZ;
+    inline LinkVarValue<int, 1212>      GM_CamRotX;
+    inline LinkVarValue<int, 1216>      GM_CamRotY;
+    inline LinkVarValue<int, 1220>      GM_AlertLevel;
+    inline LinkVarValue<short, 1224>    GM_LastCodecFreq;
+    inline LinkVarValue<short, 1226>    GM_GlobalLoadCount;
+    inline LinkVarPointer<int, 1228>    ENEMEM_EneMem;
+    inline LinkVarValue<short, 5452>    GM_ResetLoadCount;
+    inline LinkVarValue<short, 5454>    ENEMEM_CurrentNum;
+    inline LinkVarValue<int, 5456>      GM_TnkerCamStatus;
+    inline LinkVarPointer<char, 5460>   GM_MyName;
+    inline LinkVarValue<int, 5480>      GM_MySexData;
+    inline LinkVarValue<int, 5484>      GM_MyYearData;
+    inline LinkVarValue<int, 5488>      GM_MyMonthData;
+    inline LinkVarValue<int, 5492>      GM_MyDayData;
+    inline LinkVarValue<int, 5496>      GM_MyBloodData;
+    inline LinkVarValue<int, 5500>      GM_MyRegionData;
+    inline LinkVarValue<int, 5504>      GM_StageBreakPoint;
+    inline LinkVarValue<int, 5508>      GM_SelectStageLimit;
+    inline LinkVarValue<short, 5512>    GM_StageNum;
+    inline LinkVarValue<short, 5514>    GM_TitleMenuStatus;
+    inline LinkVarValue<short, 5516>    GM_ShipwormFlag;
+    inline LinkVarValue<short, 5518>    GM_ShipwormCorrode;
+    inline LinkVarValue<short, 5520>    GM_RationUseCount;
+    inline LinkVarValue<short, 5522>    GM_ClearingCount;
+    inline LinkVarValue<short, 5524>    GM_RedFindCount;
+    inline LinkVarValue<short, 5526>    GM_ClearCodeFlag;
+}
+
