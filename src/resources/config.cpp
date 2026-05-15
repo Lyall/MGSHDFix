@@ -37,6 +37,7 @@
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
+#include "mgs2_difficulty.hpp"
 #include "original_camera_positions.hpp"
 
 // -----------------------------------------------------------------------------
@@ -681,6 +682,39 @@ void Config::Read()
         LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fVertical_Sensitivity);
 
     }
+
+
+    std::string sSolidusChokingRestoration;
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+    if (sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both)
+    {
+        spdlog::error("Invalid config value for {}: {}", ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for " << ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting << ": " << sSolidusChokingRestoration << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    if (sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled)
+    {
+        if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingDuration = true;
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingLife = true;
+        }
+        else if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingDuration = true;
+        }
+        else if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingLife = true;
+        }
+    }
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+
+    
 
     /*
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);

@@ -105,7 +105,7 @@ struct Stage
     X(D005P01,  "d005p01",  "Plant", "Raiden On Elevator") \
     X(D005P03,  "d005p03",  "Plant", "Strut A Roof Cutscene") \
     X(D010P01,  "d010p01",  "Plant", "Meeting Vamp") \
-    X(D012P01,  "d012p01",  "Plant", "ADUD") \
+    X(D012P01,  "d012p01",  "Plant", "Meeting Fortune") \
     X(D014P01,  "d014p01",  "Plant", "Stillman Cutscene") \
     X(D021P01,  "d021p01",  "Plant", "Fatman and Ninja") \
     X(D036P03,  "d036p03",  "Plant", "Hostage Cutscene") \

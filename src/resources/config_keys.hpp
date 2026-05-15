@@ -355,6 +355,25 @@ namespace ConfigKeys
 
 
 
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting = "Restore PS2 Solidus Choking Difficulty";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help = "";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip = "Restores the original harder PS2 durations and life reductions for Solidus's choking sequence, which were rebalanced/made easier with the HD Collection.\n"
+                                                                                         "\n"
+                                                                                         "HDC Duration:\n"
+                                                                                         "Very Easy: 600, Easy: 650, Normal: 700, Hard: 750, Extreme: 800, European Extreme: 850\n"
+                                                                                         "PS2 Duration:\n"
+                                                                                         "Very Easy: 600, Easy: 635, Normal: 900, Hard: 1200, Extreme: 1500, European Extreme: 3000\n"
+                                                                                         "\n"
+                                                                                         "HDC Life Amount\n"
+                                                                                         "Very Easy: 200, Easy: 184, Normal: 168, Hard: 152, Extreme: 136, European Extreme: 120\n"
+                                                                                         "PS2 Life Amount\n"
+                                                                                         "Very Easy: 200, Easy: 120, Normal: 100, Hard: 75, Extreme: 50, European Extreme: 30\n";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled = "Disabled";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly = "Life Reduction Only";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly = "Duration Increase Only";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both = "Full Restoration";
+
 
     // Tweaks
     constexpr const char* SkipIntroLogos_Section = "Skip Logo Screens";

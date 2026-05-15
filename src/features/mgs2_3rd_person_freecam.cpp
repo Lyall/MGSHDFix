@@ -103,14 +103,16 @@ void MGS2_ThirdPersonFreecam::Tick()
         return;
     }
 
-    const int playerPosX = MGS2_LinkVarBuf::GM_PlayerPosX;
-    const int playerPosZ = MGS2_LinkVarBuf::GM_PlayerPosZ;
 
-    if ((g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A)) &&
-        playerPosX >= 1358 && playerPosX <= 3000 && playerPosZ >= -137100) //doorway to the room. freecam clips through the geometry pretty heavy when you enter.
+    if (g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A))
     {
-        ForceCameraDisabled();
-        return;
+        const int playerPosX = MGS2_LinkVarBuf::GM_PlayerPosX;
+        const int playerPosZ = MGS2_LinkVarBuf::GM_PlayerPosZ;
+        if (playerPosX >= 1358 && playerPosX <= 3000 && playerPosZ >= -137100) //doorway to the room. freecam clips through the geometry pretty heavy when you enter.
+        {
+            ForceCameraDisabled();
+            return;
+        }
     }
     if (bCameraForcedDisabled)
     {
