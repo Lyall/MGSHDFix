@@ -25,6 +25,16 @@ namespace
 
     bool g_WheelUpPressed = false;
     bool g_WheelDownPressed = false;
+
+    struct HeldHotkeyState
+    {
+        bool repeatWhileHeld = false;
+        DWORD repeatDelayMs = 0;
+        ULONGLONG nextRepeatTick = 0;
+    };
+
+    constexpr DWORD kDefaultHeldHotkeyRepeatDelayMs = 100;
+    std::vector<HeldHotkeyState> g_HeldHotkeyStates;
     WNDPROC g_InputHandlerOriginalWndProc = nullptr;
 
     LRESULT CALLBACK InputHandlerWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -227,6 +237,16 @@ namespace
         }
 
         return false;
+    }
+
+    void EnsureHeldHotkeyStateCount(size_t count)
+    {
+        if (g_HeldHotkeyStates.size() >= count)
+        {
+            return;
+        }
+
+        g_HeldHotkeyStates.resize(count);
     }
 
 }
@@ -583,22 +603,60 @@ void InputHandler::RegisterHotkey(int vkCode, const char* name, std::function<vo
     }
 
     spdlog::info("InputHandler: Registering '{}' on key '{}'.", name, GetKeyNameFromVK(vkCode));
+
     hotkeys.push_back({ vkCode, name, std::move(callback), false });
+
+    HeldHotkeyState heldState = {};
+    heldState.repeatWhileHeld = false;
+    heldState.repeatDelayMs = 0;
+    heldState.nextRepeatTick = 0;
+    g_HeldHotkeyStates.push_back(heldState);
+}
+
+void InputHandler::RegisterHeldHotkey(int vkCode, const char* name, std::function<void()> callback, DWORD repeatDelayMs)
+{
+    std::string existingName;
+    if (KeyAlreadyRegistered(vkCode, existingName))
+    {
+        spdlog::warn("InputHandler: Key '{}' is already bound to '{}'. Overwriting with held '{}'.",
+            GetKeyNameFromVK(vkCode), existingName, name);
+    }
+
+    if (repeatDelayMs == 0)
+    {
+        repeatDelayMs = kDefaultHeldHotkeyRepeatDelayMs;
+    }
+
+    spdlog::info("InputHandler: Registering held '{}' on key '{}' with {}ms repeat delay.",
+        name, GetKeyNameFromVK(vkCode), repeatDelayMs);
+
+    hotkeys.push_back({ vkCode, name, std::move(callback), false });
+
+    HeldHotkeyState heldState = {};
+    heldState.repeatWhileHeld = true;
+    heldState.repeatDelayMs = repeatDelayMs;
+    heldState.nextRepeatTick = 0;
+    g_HeldHotkeyStates.push_back(heldState);
 }
 
 void InputHandler::Update()
 {
-    InstallMouseWheelCapture(g_D3D11Hooks.MainHwnd);
 
     if (!g_InputHandler.bCaptureInputsWhileAltTabbed && (GetForegroundWindow() != g_D3D11Hooks.MainHwnd))
     {
-        g_WheelUpPressed = false;
-        g_WheelDownPressed = false;
         return;
     }
 
-    for (auto& hk : hotkeys)
+    InstallMouseWheelCapture(g_D3D11Hooks.MainHwnd);
+    EnsureHeldHotkeyStateCount(hotkeys.size());
+
+    const ULONGLONG currentTick = GetTickCount64();
+
+    for (size_t i = 0; i < hotkeys.size(); ++i)
     {
+        auto& hk = hotkeys[i];
+        HeldHotkeyState& heldState = g_HeldHotkeyStates[i];
+
         bool keyDown = false;
 
         if (hk.vkCode == VK_WHEELUP)
@@ -609,6 +667,7 @@ void InputHandler::Update()
             }
 
             hk.prevState = false;
+            heldState.nextRepeatTick = 0;
             continue;
         }
 
@@ -620,6 +679,7 @@ void InputHandler::Update()
             }
 
             hk.prevState = false;
+            heldState.nextRepeatTick = 0;
             continue;
         }
 
@@ -632,15 +692,46 @@ void InputHandler::Update()
             keyDown = (GetAsyncKeyState(hk.vkCode) & 0x8000) != 0;
         }
 
-        if (keyDown && !hk.prevState)
+        if (!keyDown)
+        {
+            hk.prevState = false;
+            heldState.nextRepeatTick = 0;
+            continue;
+        }
+
+        if (!hk.prevState)
         {
             if (hk.onPress)
             {
                 hk.onPress();
             }
+
+            hk.prevState = true;
+
+            if (heldState.repeatWhileHeld)
+            {
+                heldState.nextRepeatTick = currentTick + heldState.repeatDelayMs;
+            }
+
+            continue;
         }
 
-        hk.prevState = keyDown;
+        if (!heldState.repeatWhileHeld)
+        {
+            continue;
+        }
+
+        if (currentTick < heldState.nextRepeatTick)
+        {
+            continue;
+        }
+
+        if (hk.onPress)
+        {
+            hk.onPress();
+        }
+
+        heldState.nextRepeatTick = currentTick + heldState.repeatDelayMs;
     }
 
     g_WheelUpPressed = false;

@@ -263,12 +263,22 @@ namespace ConfigKeys
 
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
-    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(MOUSE SUPPORT STILL W.I.P.)";
-    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Keeps aiming after firing while in first-person view.";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
+                                                                 "(MOUSE SUPPORT STILL W.I.P.)";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Enables the third person freecam.\n"
+                                                                    "\n"
+                                                                    "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
+                                                                    "\n"
+                                                                    "This feature was cut around 7/7/2011 per a leftover note found in the source code.\n"
+                                                                    "\n"
+                                                                    "Functionality is a bit glitchy, as this feature was not fully completed.\n"
+                                                                    "Things are still being patched up by hand with love. <3\n"
+                                                                    "\n"
+                                                                    "If the camera gets stuck at a weird angle; enter First Person View, or toggle the third person camera a few times to reset it.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Setting = "Third Person View Toggle";
-    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "(Utilizes your Steam Input binds)";
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "(Controller inputs accepted)\n(Utilizes your Steam Input binds)";
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Tooltip = "Toggles the third person view on/off.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
@@ -296,25 +306,30 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Help = "";
     constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Tooltip = "";
 
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting = "Camera Distance Increase Hotkey";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "";
-
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting = "Camera Distance Decrease Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting = "Camera - Zoom In Hotkey";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Help = "";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip = "";
 
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting = "Camera - Zoom Out Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "";
+
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting = "Camera Distance Reset Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting = "Camera - Zoom Reset Hotkey";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Help = "";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip = "";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting = "Camera Distance Step Amount";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting = "Camera - Zoom Step Amount";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Help = "";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting = "Camera - Zoom Speed";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Help = "(In microseconds)";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Tooltip = "";
 
 
 

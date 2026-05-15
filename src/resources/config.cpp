@@ -33,6 +33,7 @@
 #include "windows_fullscreen_optimization.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "busy_loop_fix.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
@@ -651,30 +652,33 @@ void Config::Read()
 
 
 
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Enabled);
-    LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Enabled);
-    if (MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Enabled)
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::bEnabled);
+    if (MGS2_ThirdPersonFreecam::bEnabled)
     {
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Camera);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Camera_Inherit_Camera_Rotation);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Increase_Camera_Distance);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Decrease_Camera_Distance);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_3rd_Person_Reset_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Camera);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Inherit_Camera_Rotation);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Increase_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Decrease_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Reset_Camera_Distance);
         
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step);
-        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Camera_Step);
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceStep);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceStep);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Inherit_Camera_Rotation);
-        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::b3rd_Person_Camera_Inherit_Camera_Rotation);
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceChangeSpeed);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceChangeSpeed);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Max_Camera_Distance);
-        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::i3rd_Person_Max_Camera_Distance);
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::bInherit_Camera_Rotation);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::bInherit_Camera_Rotation);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::f3rd_Person_Horizontal_Sensitivity);
-        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::f3rd_Person_Horizontal_Sensitivity);
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::iMax_Camera_Distance);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::iMax_Camera_Distance);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::f3rd_Person_Vertical_Sensitivity);
-        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::f3rd_Person_Vertical_Sensitivity);
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fHorizontal_Sensitivity);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fHorizontal_Sensitivity);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fVertical_Sensitivity);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fVertical_Sensitivity);
 
     }
 
