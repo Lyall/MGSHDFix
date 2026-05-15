@@ -251,7 +251,7 @@ enum MGS2ItemIndex : uint8_t
     MGS2_ITEM_INDEX_MEDICINE = 0x3,  
     MGS2_ITEM_INDEX_STYPTIC = 0x4,  ///bandage
     MGS2_ITEM_INDEX_DIAZEPAM = 0x5,  /// pentazemin
-    MGS2_ITEM_INDEX_UNIFORM = 0x6,  /// Enemy soldier uniform
+    MGS2_ITEM_INDEX_UNIFORM = 0x6,  /// BDU
     MGS2_ITEM_INDEX_BODY_ARMOR = 0x7,  
     MGS2_ITEM_INDEX_STEALTH = 0x8,  
     MGS2_ITEM_INDEX_MINE_DETECTOR = 0x9, 
