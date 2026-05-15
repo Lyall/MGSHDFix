@@ -13,6 +13,12 @@ namespace
     //      - force camera to isometric on initial entrance of w45a (or figure out how forced angles are determined and force while in the doorway. hzx determined perhaps?)
     //      - disable camera angles when leaning against walls
     //      - block camera increase / decrease when in menus
+    //      - mgs3 cutscene flag !!!! CRITICAL
+    //      - get fpv inherit camera rotation var
+
+    //mgs3 -> bp_camera_yoffset()
+
+
 
     std::int32_t* gBP_3rdPersonCamera_Override = nullptr;
 

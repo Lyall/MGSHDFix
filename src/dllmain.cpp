@@ -58,6 +58,7 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
+#include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "original_camera_positions.hpp"
@@ -490,6 +491,7 @@ static void InitializeSubsystems()
     INITIALIZE(TextureLiveSwaps::ApplyFixes());
     INITIALIZE(SnakeArmFixes::ApplyFixes());
     INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+    INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
 
 
 #if !defined(RELEASE_BUILD) //todo category
