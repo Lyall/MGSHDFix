@@ -136,6 +136,8 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\game_stages.hpp" />
+    <ClInclude Include="src\resources\mgs2_equipment_enums.hpp" />
     <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp" />
     <ClInclude Include="src\features\mgs2_difficulty.hpp" />
     <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp" />
@@ -151,6 +153,7 @@
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
     <ClInclude Include="src\fixes\busy_loop_fix.hpp" />
     <ClInclude Include="src\fixes\texture_live_swaps.hpp" />
+    <ClInclude Include="src\resources\mgs2_linkvarbuf.hpp" />
     <ClInclude Include="src\warnings\background_shuffle_warning.hpp" />
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp" />
     <ClInclude Include="src\features\settings_pesistence.hpp" />

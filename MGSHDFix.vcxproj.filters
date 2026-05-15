@@ -388,9 +388,6 @@
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp">
-      <Filter>Fixes</Filter>
-    </ClInclude>
     <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
@@ -408,6 +405,18 @@
     </ClInclude>
     <ClInclude Include="src\features\mgs2_restore_dogtag_viewer.hpp">
       <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs2_linkvarbuf.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs2_equipment_enums.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\game_stages.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
