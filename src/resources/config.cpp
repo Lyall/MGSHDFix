@@ -35,6 +35,7 @@
 #include "busy_loop_fix.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
+#include "mgs2_msx_colonel.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -638,6 +639,31 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
     LOG_CONFIG(ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
+
+    std::string sColonelMsxSprite;
+    ConfigHelper::getValue(ini, ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);
+    if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_Subsistence)
+    {
+        g_MGS2RetroColonel.bEnabled = true;
+        g_MGS2RetroColonel.bUseNewSprite = true;
+    }
+    else if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_MSX)
+    {
+        g_MGS2RetroColonel.bEnabled = true;
+        g_MGS2RetroColonel.bUseNewSprite = false;
+    }
+    else if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_Normal)
+    {
+        g_MGS2RetroColonel.bEnabled = false;
+    }
+    else
+    {
+        spdlog::error("Invalid config value for MGS2 Colonel Sprite: {}", sColonelMsxSprite);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for MGS2 Colonel Sprite: " << sColonelMsxSprite << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    LOG_CONFIG(ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);
 
 
     ConfigLogger::Flush();

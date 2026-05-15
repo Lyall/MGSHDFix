@@ -191,6 +191,9 @@
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_msx_colonel.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -372,6 +375,9 @@
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp">
       <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_msx_colonel.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

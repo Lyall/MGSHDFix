@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp" />
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp" />
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mgs2_msx_colonel.hpp" />
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp" />
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp" />
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />

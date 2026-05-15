@@ -377,7 +377,20 @@ namespace ConfigKeys
     constexpr const char* MGS2_PhoneJingle_Help = "";
     constexpr const char* MGS2_PhoneJingle_Tooltip = "Restores the Japanese Sons of Liberty exclusive MGS theme-song phone ringtone that was missing from all future versions of the game.\n"
                                                      "\n"
-                                                       "This will enable the ringtone for all versions of the game.";
+                                                     "This will enable the ringtone for all versions of the game.";
+
+    constexpr const char* UnusedRetroColonel_Section = "Various";
+    constexpr const char* UnusedRetroColonel_Setting = "MGS2 - Retro MSX Colonel Sprite";
+    constexpr const char* UnusedRetroColonel_Help = "";
+    constexpr const char* UnusedRetroColonel_Tooltip = "The Colonel's glitching sometimes matches his sprites from MGS1 and from Ghost Babel. "
+                                                       "Restores a removed use of his sprite from Metal Gear 2: Solid Snake.\n"
+                                                       "\n"
+                                                       "Disabled = The vanilla behavior, MGS1 and Ghost Babel sprites only.\n"
+                                                       "MSX2 = MGS1, Ghost Babel, and the original MSX2 sprite (resembling Richard Crenna as the colonel from Rambo).\n"
+                                                       "Subsistence = MGS1, Ghost Babel, and the redrawn MG2 sprite used from the Subsistence re-release onward. Requires Community Bugfix Compilation.";
+    constexpr const char* UnusedRetroColonel_Option_Normal = "Disabled";
+    constexpr const char* UnusedRetroColonel_Option_MSX = "MSX2";
+    constexpr const char* UnusedRetroColonel_Option_Subsistence = "Subsistence";
 
     
 

@@ -195,6 +195,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, ConfigKeys::MGS2_PhoneJingle_Help, ConfigKeys::MGS2_PhoneJingle_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, ConfigKeys::UnusedRetroColonel_Help, ConfigKeys::UnusedRetroColonel_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::UnusedRetroColonel_Option_Normal, { ConfigKeys::UnusedRetroColonel_Option_Normal, ConfigKeys::UnusedRetroColonel_Option_MSX, ConfigKeys::UnusedRetroColonel_Option_Subsistence } },
+
 
     } },
 
