@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangDiagnosticUniqueObjectDuplication
 #pragma once
 
 
@@ -67,9 +68,9 @@ namespace MGS2_LinkVarBuf
     inline LinkVarValue<int, 220>       GM_SaveY;
     inline LinkVarValue<int, 224>       GM_SaveZ;
     inline LinkVarValue<int, 228>       GM_StagePlayTime;
-    inline LinkVarValue<int, 232>       GM_PlayerPosX;
-    inline LinkVarValue<int, 236>       GM_PlayerPosY;
-    inline LinkVarValue<int, 240>       GM_PlayerPosZ;
+    inline LinkVarValue<int, 232>       GM_PlayerPosX;  ///east / west
+    inline LinkVarValue<int, 236>       GM_PlayerPosY;  ///Height
+    inline LinkVarValue<int, 240>       GM_PlayerPosZ;  ///north / south
     inline LinkVarValue<short, 244>     GM_PlayerDir;
     inline LinkVarValue<short, 246>     GM_PlayerMotion;
     inline LinkVarValue<short, 248>     GM_BehindRot;

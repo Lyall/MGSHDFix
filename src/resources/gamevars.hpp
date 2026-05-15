@@ -48,9 +48,9 @@ public:
     [[nodiscard]] bool MGS3IsHoldingFirstPerson() const;
     [[nodiscard]] bool MGS3IsHoldingLockOn() const;
 
-
-    [[nodiscard]] bool PL_Status(std::uint64_t flags) const;
-
+    [[nodiscard]] uint64_t Get_PL_Status() const;
+    [[nodiscard]] int Get_GM_GameStatus() const;
+    [[nodiscard]] int Get_GM_VRStatus() const;
 private:
     static void OnLevelTransition();
 
@@ -63,6 +63,8 @@ private:
     float* GM_WaterLevel = nullptr;
 
     std::uint64_t* GM_PlayerStatus = nullptr;
+    int* GM_GameStatus = nullptr;
+    int* GM_VRStatus = nullptr;
 
 };
 

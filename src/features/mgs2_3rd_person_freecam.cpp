@@ -10,7 +10,6 @@
 namespace
 {
     //TODO: 
-    //      - force camera to isometric on initial entrance of w45a (or figure out how forced angles are determined and force while in the doorway. hzx determined perhaps?)
     //      - disable camera angles when leaning against walls
     //      - block camera increase / decrease when in menus
     //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
@@ -43,14 +42,19 @@ namespace
     {
         if (!bCameraForcedDisabled)
         {
-            bPreviousCameraState = *gBP_3rdPersonCamera_Override;
+            //spdlog::info("MGS2: Third Person Freecam: Forcing camera disabled. GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
             bCameraForcedDisabled = true;
+            bPreviousCameraState = *gBP_3rdPersonCamera_Override;
         }
         *gBP_3rdPersonCamera_Override = false;
     }
 
     void Toggle3rdPersonCamera()
     {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
         *gBP_3rdPersonCamera_Override = !*gBP_3rdPersonCamera_Override;
     }
 
@@ -71,7 +75,9 @@ namespace
     void ResetCameraDistance()
     {
         *gBP_3rdPersonCamera_Dist = MGS2_ThirdPersonFreecam::iMax_Camera_Distance;
-        spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
+        //spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
+        //spdlog::info("MGS2 GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
+        //spdlog::info("MGS2_LinkVarBuf::GM_PlayerPosX value: {}, MGS2_LinkVarBuf::GM_PlayerPosY value: {}, MGS2_LinkVarBuf::GM_PlayerPosZ value: {}", MGS2_LinkVarBuf::GM_PlayerPosX.get(), MGS2_LinkVarBuf::GM_PlayerPosY.get(), MGS2_LinkVarBuf::GM_PlayerPosZ.get());
     }
 
 }
@@ -83,22 +89,33 @@ void MGS2_ThirdPersonFreecam::Tick()
         return;
     }
 
-    //if (PLAYER_CAUTION| STATE_CUT_IN)
+    //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
+
+    if (g_GameVars.Get_GM_GameStatus() & STATE_VR_ONLY)
+    {
+        ForceCameraDisabled();
+        return;
+    }
 
     if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE)
     {
         ForceCameraDisabled();
+        return;
     }
 
-    /*
-    if ((g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A)) && )
+    const int playerPosX = MGS2_LinkVarBuf::GM_PlayerPosX;
+    const int playerPosZ = MGS2_LinkVarBuf::GM_PlayerPosZ;
+
+    if ((g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A)) &&
+        playerPosX >= 1358 && playerPosX <= 3000 && playerPosZ >= -137100) //doorway to the room. freecam clips through the geometry pretty heavy when you enter.
     {
         ForceCameraDisabled();
+        return;
     }
-    */
     if (bCameraForcedDisabled)
     {
         ReleaseCameraState(bPreviousCameraState);
+        return;
     }
 
 
