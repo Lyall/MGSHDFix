@@ -22,13 +22,13 @@ void HostageModel::ApplyFix()
     }
     // Depends on custom models (provided by community bugfix pack)
     // Note: no easy way to check for manifest and tri edits? Try it without checking, assume the models come with the manifest.
-    if (!exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_def.kms"))
-        || !exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_mid.kms"))
-        || !exists((sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_low.kms"))
-        || !exists((sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_def.cmdl"))
-        || !exists((sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_mid.cmdl"))
-        || !exists((sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_low.cmdl"))
-        || !exists((sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_hos_arm02.bmp.ctxr"))) {
+    if (!exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_def.kms")
+        || !exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_mid.kms")
+        || !exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_low.kms")
+        || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_def.cmdl")
+        || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_mid.cmdl")
+        || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_low.cmdl")
+        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_hos_arm02.bmp.ctxr")) {
         //spdlog::warn("Missing one or more assets for hostage hand color fix. Do you have the latest version of the Community Bugfix Pack?");
         return;
     }
