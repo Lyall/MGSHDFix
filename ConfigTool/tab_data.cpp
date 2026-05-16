@@ -159,6 +159,11 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, true },
 
 
+
+        { ConfigKeys::LOD_MGS2_Hostage_Section, ConfigKeys::LOD_MGS2_Hostage_Setting, ConfigKeys::LOD_MGS2_Hostage_Help, ConfigKeys::LOD_MGS2_Hostage_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
         { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
           std::nullopt, false, Field::Bool, true },
 

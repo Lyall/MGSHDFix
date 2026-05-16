@@ -590,7 +590,7 @@ public:
                     bool v = field.defaultInt != 0;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
 
@@ -615,7 +615,7 @@ public:
                     int v = field.defaultInt;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
 
@@ -642,7 +642,7 @@ public:
                     wxString v = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
@@ -699,7 +699,7 @@ public:
                     wxString v = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
@@ -745,7 +745,7 @@ public:
                     wxString v = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
@@ -757,7 +757,7 @@ public:
                     wxString v = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
                     v = Unquote(v);
@@ -776,7 +776,7 @@ public:
                     double v = field.defaultFloat;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &v);
 
@@ -1113,10 +1113,21 @@ public:
     }
 
 private:
+    using Key = std::pair<wxString, wxString>;
+
+    struct KeyHash
+    {
+        size_t operator()(const Key& k) const
+        {
+            return std::hash<std::string>()((k.first + k.second).ToStdString());
+        }
+    };
+
     wxStaticText* m_bugfixStatus = nullptr;
     bool m_dirty = false;
     bool m_firstRun = false;
     bool m_missingKeys = false;
+    std::vector<Key> m_missingKeyList;
 
     wxNotebook* m_tabs = nullptr;
 
@@ -1127,6 +1138,23 @@ private:
     {
         m_dirty = true;
         e.Skip();
+    }
+
+    void MarkMissingKey(const wxString& section, const wxString& key)
+    {
+        m_missingKeys = true;
+
+        const Key missingKey{ section, key };
+        if (std::find(m_missingKeyList.begin(), m_missingKeyList.end(), missingKey) == m_missingKeyList.end())
+        {
+            m_missingKeyList.push_back(missingKey);
+        }
+    }
+
+    bool IsMissingKey(const wxString& section, const wxString& key) const
+    {
+        const Key missingKey{ section, key };
+        return std::find(m_missingKeyList.begin(), m_missingKeyList.end(), missingKey) != m_missingKeyList.end();
     }
 
     static wxString GetControlDisplayValue(wxWindow* ctrl)
@@ -1213,6 +1241,81 @@ private:
             }
         }
         return out;
+    }
+
+    wxString BuildMissingKeyList() const
+    {
+        wxString out;
+
+        for (const auto& tab : kTabs)
+        {
+            wxString tabTitle = tab.first;
+            tabTitle.Replace("&&", "\x01");
+            tabTitle.Replace("&", "");
+            tabTitle.Replace("\x01", "&");
+
+            wxString tabChunk;
+            wxString currentSection;
+            wxString sectionChunk;
+
+            auto flushSection = [&]()
+                {
+                    if (!sectionChunk.IsEmpty())
+                    {
+                        if (!currentSection.IsEmpty())
+                            tabChunk += "  [" + currentSection + "]\n";
+                        tabChunk += sectionChunk;
+                        sectionChunk.Clear();
+                    }
+                };
+
+            for (const auto& field : tab.second)
+            {
+                if (!IsMissingKey(field.section, field.key))
+                    continue;
+
+                auto it = m_controls.find({ field.section, field.key });
+                if (it == m_controls.end())
+                    continue;
+
+                if (field.section != currentSection)
+                {
+                    flushSection();
+                    currentSection = field.section;
+                }
+
+                sectionChunk += wxString::Format("    %s: <missing> -> %s\n",
+                                                 field.key.c_str(),
+                                                 GetControlDisplayValue(it->second).c_str());
+            }
+            flushSection();
+
+            if (!tabChunk.IsEmpty())
+            {
+                if (!out.IsEmpty())
+                    out += "\n";
+                out += tabTitle + "\n" + tabChunk;
+            }
+        }
+
+        return out;
+    }
+
+    wxString BuildUnsavedChangeList() const
+    {
+        wxString changeList = BuildChangeList();
+        const wxString missingList = BuildMissingKeyList();
+
+        if (!missingList.IsEmpty())
+        {
+            if (!changeList.IsEmpty())
+                changeList += "\n\n";
+
+            changeList += "Missing settings:\n";
+            changeList += missingList;
+        }
+
+        return changeList;
     }
 
 
@@ -1518,9 +1621,14 @@ private:
         bool hasRegion = m_conf->HasEntry(pathRegion);
         bool hasLang = m_conf->HasEntry(pathLang);
 
-        if (!hasRegion || !hasLang)
+        if (!hasRegion)
         {
-            m_missingKeys = true;
+            MarkMissingKey(sectionRegion, keyRegion);
+        }
+
+        if (!hasLang)
+        {
+            MarkMissingKey(sectionLang, keyLang);
         }
 
         if (hasRegion)
@@ -1543,7 +1651,8 @@ private:
         {
             regionCodeStd = defaultRegionCode;
             langCodeStd = defaultLangCode;
-            m_missingKeys = true;
+            MarkMissingKey(sectionRegion, keyRegion);
+            MarkMissingKey(sectionLang, keyLang);
         }
 
         std::string regionName;
@@ -1557,7 +1666,8 @@ private:
                 regionName.assign(pairs[0].Region_Name);
                 langName.assign(pairs[0].Language_Name);
             }
-            m_missingKeys = true;
+            MarkMissingKey(sectionRegion, keyRegion);
+            MarkMissingKey(sectionLang, keyLang);
         }
 
         // Fill region list (select correct region name if present, else first)
@@ -1742,7 +1852,7 @@ private:
 
     void OnSaveAndLaunch(wxCommandEvent& event)
     {
-        wxString changeList = BuildChangeList();
+        wxString changeList = BuildUnsavedChangeList();
         const bool hasRealChanges = !changeList.IsEmpty();
 
         if (hasRealChanges || m_firstRun || m_missingKeys)
@@ -1758,9 +1868,8 @@ private:
             else if (m_missingKeys)
             {
                 message =
-                    "Some settings were missing from your config file.\n\n"
-                    "You must save your settings before starting the game.";
-                changeList.Clear();
+                    "Some settings were missing from your config file and will be restored.\n\n"
+                    "Review the changes below and save before starting the game.";
             }
             else
             {
@@ -1812,7 +1921,7 @@ private:
 
     void OnClose(wxCloseEvent& event)
     {
-        wxString changeList = BuildChangeList();
+        wxString changeList = BuildUnsavedChangeList();
         const bool hasRealChanges = !changeList.IsEmpty();
 
         if (hasRealChanges || m_firstRun || m_missingKeys)
@@ -1828,9 +1937,8 @@ private:
             else if (m_missingKeys)
             {
                 message =
-                    "Some settings were missing from your config file.\n\n"
-                    "You must save your settings before starting the game.";
-                changeList.Clear();
+                    "Some settings were missing from your config file and will be restored.\n\n"
+                    "Review the changes below and save before starting the game.";
             }
             else
             {
@@ -1956,7 +2064,7 @@ private:
                     boolVal = field.defaultInt != 0;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &boolVal);
                     if (auto* c = wxDynamicCast(ctrl, wxCheckBox))
@@ -1969,7 +2077,7 @@ private:
                     intVal = field.defaultInt;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &intVal);
                     if (auto* c = wxDynamicCast(ctrl, wxSpinCtrl))
@@ -1982,7 +2090,7 @@ private:
                     dblVal = field.defaultFloat;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &dblVal);
                     if (auto* c = wxDynamicCast(ctrl, wxSpinCtrlDouble))
@@ -1997,7 +2105,7 @@ private:
                     strVal = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &strVal);
                     strVal = Unquote(strVal);
@@ -2011,7 +2119,7 @@ private:
                     strVal = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
-                        m_missingKeys = true;
+                        MarkMissingKey(field.section, field.key);
                     }
                     m_conf->Read(path, &strVal);
                     strVal = Unquote(strVal);
@@ -2126,6 +2234,7 @@ private:
         m_dirty = false;
         m_firstRun = false;
         m_missingKeys = false;
+        m_missingKeyList.clear();
         SnapshotCurrentValues();
         Close();
     }
@@ -2133,14 +2242,6 @@ private:
     wxFileConfig* m_conf;
     wxString m_iniPath = wxString((Helper::FindASILocation(sFixName) / sSettingsFileName).wstring());
 
-    using Key = std::pair<wxString, wxString>;
-    struct KeyHash
-    {
-        size_t operator()(const Key& k) const
-        {
-            return std::hash<std::string>()((k.first + k.second).ToStdString());
-        }
-    };
     std::unordered_map<Key, wxWindow*, KeyHash> m_controls;
     std::unordered_map<Key, wxString, KeyHash> m_snapshot;
 };

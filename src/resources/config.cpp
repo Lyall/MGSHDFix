@@ -536,6 +536,10 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
 
+
+    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Hostage_Section, ConfigKeys::LOD_MGS2_Hostage_Setting, g_DistanceCulling.bMGS2_ForceHostageLOD);
+    LOG_CONFIG(ConfigKeys::LOD_MGS2_Hostage_Section, ConfigKeys::LOD_MGS2_Hostage_Setting, g_DistanceCulling.bMGS2_ForceHostageLOD);
+
         
 
     ConfigHelper::getValue(ini, ConfigKeys::Region_Section, ConfigKeys::Region_Setting, sSkipLauncherRegion);

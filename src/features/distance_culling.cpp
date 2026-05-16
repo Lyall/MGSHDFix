@@ -30,6 +30,12 @@ void DistanceCulling::Initialize() const
                           });
         }
 
+        if (bMGS2_ForceHostageLOD)
+        {
+            MAKE_HOOK_MID(baseModule, "8B D0 3D ?? ?? ?? ?? 7E", "MGS2: LodHostage()", {
+                ctx.rax = 0.0f;
+                          });
+        }
 
     }
     else if (eGameType & MGS3)
