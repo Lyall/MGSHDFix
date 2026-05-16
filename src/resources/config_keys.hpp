@@ -96,22 +96,40 @@ namespace ConfigKeys
                                                             "This will give the game a pixelated / Minecraft-esque appearance.";
 
 
-    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
     constexpr const char* LOD_MGS2_Marines_Help = "";
     constexpr const char* LOD_MGS2_Marines_Tooltip = "When enabled, Marines always use their high polygon model.";
 
 
-    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Player_Setting = "Force High Quality Player Models";
     constexpr const char* LOD_MGS2_Player_Help = "";
     constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
 
 
-    constexpr const char* LOD_MGS2_Hostage_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Hostage_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Hostage_Setting = "Force High Quality Hostages";
     constexpr const char* LOD_MGS2_Hostage_Help = "";
     constexpr const char* LOD_MGS2_Hostage_Tooltip = "When enabled, Hostage models always use their high polygon model.";
+
+    constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
+    constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
+    constexpr const char* MGS2_Hostage_Type_Help = "";
+    constexpr const char* MGS2_Hostage_Type_Tooltip = "The game swaps which hostages are in Shell 1 core based off your system's real time clock in New Game+ playthroughs.\n"
+                                                      "\n"
+                                                      "Normal = use normal RTC hostages.\n"
+                                                      "\n"
+                                                      "1:00 PM = All hostages are Kato-chan (Japanese comedian.)\n"
+                                                      "\n"
+                                                      "10:00 PM = All hostages are Cathy.\n"
+                                                      "\n"
+                                                      "Midnight = All hostages are Jennifer Love Hewitt.\n";
+    constexpr const char* MGS2_Hostage_Type_Option_Normal = "Normal";
+    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "1:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
+
 
 
     constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";
@@ -751,3 +769,5 @@ constexpr int k3rdPersonMinCameraDistance = 100;
 constexpr int k3rdPersonFreecamDefaultMaxCameraDistance = 4000;
 constexpr float k3rdPersonFreecamDefaultHorizontalSensitivity = 0.6f;
 constexpr float k3rdPersonFreecamDefaultVerticalSensitivity = 0.4f;
+
+

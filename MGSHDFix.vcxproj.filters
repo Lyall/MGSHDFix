@@ -209,6 +209,9 @@
     <ClCompile Include="src\features\mgs2_restore_dogtag_viewer.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -417,6 +420,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\game_stages.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_hostage_type_easter_egg.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

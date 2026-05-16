@@ -38,6 +38,7 @@
 #include "swap_menu_buttons.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
+#include "mgs2_hostage_type_easter_egg.hpp"
 #include "original_camera_positions.hpp"
 
 // -----------------------------------------------------------------------------
@@ -718,7 +719,54 @@ void Config::Read()
     }
     LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
 
-    
+
+    std::string sHostageType;
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+    if (sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Normal &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_OnePM &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_TenPM &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Midnight)
+    {
+        spdlog::error("Invalid config value for {}: {}", ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for " << ConfigKeys::MGS2_Hostage_Type_Setting << ": " << sHostageType << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    if (sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Normal)
+    {
+        if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_OnePM)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_KATOCHAN;
+        }
+        else if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_TenPM)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_CATHY;
+        }
+        else if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_Midnight)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_JENNIFER;
+        }
+    }
+    LOG_CONFIG(ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+
+
+    constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
+    constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
+    constexpr const char* MGS2_Hostage_Type_Help = "";
+    constexpr const char* MGS2_Hostage_Type_Tooltip = "The game swaps which hostages are in Shell 1 core based off your system's real time clock in New Game+ playthroughs.\n"
+        "\n"
+        "Normal = use normal RTC hostages.\n"
+        "\n"
+        "1:00 PM = All hostages are Kato-chan (Japanese comedian.)\n"
+        "\n"
+        "10:00 PM = All hostages are Cathy.\n"
+        "\n"
+        "Midnight = All hostages are Jennifer Love Hewitt.\n";
+    constexpr const char* MGS2_Hostage_Type_Option_Normal = "Normal";
+    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "1:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
+
 
     /*
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);

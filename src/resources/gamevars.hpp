@@ -72,6 +72,25 @@ public:
     [[nodiscard]] int Get_GM_VRStatus() const;
     [[nodiscard]] MGS2GameMode MGS2_GetGameMode() const;
 
+    [[nodiscard]] static constexpr uint32_t GV_StrCode(const char* inputString)
+    {
+        constexpr uint32_t kBitLength = 24;
+        constexpr uint32_t kBitMask = (1u << kBitLength) - 1;
+
+        uint32_t hashValue = 0;
+
+        for (const char* currentChar = inputString; *currentChar != '\0'; ++currentChar)
+        {
+            const auto characterValue = static_cast<unsigned char>(*currentChar);
+
+            hashValue = ((hashValue << 5) | (hashValue >> (kBitLength - 5)));
+            hashValue += characterValue;
+            hashValue &= kBitMask;
+        }
+
+        return (hashValue == 0) ? 1 : hashValue;
+    }
+
 private:
     static void OnLevelTransition();
 

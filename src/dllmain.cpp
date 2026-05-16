@@ -26,6 +26,8 @@
 #include "mgs2_restore_phone_jingle.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
+#include "mgs2_hostage_type_easter_egg.hpp"
+#include "original_camera_positions.hpp"
 
 ///Fixes
 #include "aiming_full_tilt.hpp"
@@ -42,6 +44,7 @@
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_coolant_mirror.hpp"
+#include "mgs2_restore_dogtag_viewer.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -58,10 +61,8 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
-#include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
-#include "original_camera_positions.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -469,6 +470,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
     INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
     INITIALIZE(OriginalCameraPositions::Activate());
+    INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
 
 
 

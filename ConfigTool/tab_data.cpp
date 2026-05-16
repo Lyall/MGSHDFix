@@ -167,13 +167,16 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+                { ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, ConfigKeys::MGS2_Hostage_Type_Help, ConfigKeys::MGS2_Hostage_Type_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_Hostage_Type_Option_Normal, {ConfigKeys::MGS2_Hostage_Type_Option_Normal, ConfigKeys::MGS2_Hostage_Type_Option_OnePM, ConfigKeys::MGS2_Hostage_Type_Option_TenPM, ConfigKeys::MGS2_Hostage_Type_Option_Midnight,} },
+
+
 
         { ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, ConfigKeys::DistanceCullingGrassAlways_Help, ConfigKeys::DistanceCullingGrassAlways_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, ConfigKeys::DistanceCullingGrassScalar_Help, ConfigKeys::DistanceCullingGrassScalar_Tooltip,
           std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), true, Field::Float, 0 , 0, 0, "", {}, 1.0, 0},
-
 
         { ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, ConfigKeys::Disable_HDC_Camera_Positions_Help, ConfigKeys::Disable_HDC_Camera_Positions_Tooltip,
           std::nullopt, false, Field::Bool, false },
