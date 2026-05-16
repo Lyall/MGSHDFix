@@ -10,14 +10,11 @@
 namespace
 {
     //TODO: 
-    //      - disable camera angles when leaning against walls
-    //      - block camera increase / decrease when in menus
+    //      - disable camera angles when leaning against walls | partially done. see v3 known issues below
     //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
-    //      - get fpv inherit camera rotation var
     //      - real character names / custom character name
-    // laser origin
-
-    //mgs3 -> bp_camera_yoffset()
+    //      - laser origin
+    //      - mgs3 -> bp_camera_yoffset()
 
 
 
@@ -25,6 +22,7 @@ namespace
 
     int* gBP_3rdPersonCamera_Dist = nullptr;         // max camera distance from player
     int* gBP_Camera_InheritRot = nullptr;              // Inherit rotation between cameras
+                                                        // the code suggests it has something to do with elevator and locker focus, but i haven't noticed it actually do anything.
 
     bool bCameraForcedDisabled = false;
     bool bPreviousCameraState = false;
@@ -62,7 +60,7 @@ namespace
 
     void IncreaseCameraDistance()
     {
-        if (bCameraForcedDisabled)
+        if (bCameraForcedDisabled) //don't increase while d-padding in menus and shit
         {
             return;
         }
@@ -72,7 +70,7 @@ namespace
 
     void DecreaseCameraDistance()
     {
-        if (bCameraForcedDisabled)
+        if (bCameraForcedDisabled) //don't decrease while d-padding in menus and shit
         {
             return;
         }
@@ -298,7 +296,7 @@ void MGS2_ThirdPersonFreecam::Activate()
                                           if (gBP_Camera_InheritRot != nullptr)
                                           {
                                               *gBP_Camera_InheritRot = !*gBP_Camera_InheritRot;
-                                              spdlog::info("MGS2: Third Person Freecam: Toggled inherit camera rotation to {}", *gBP_Camera_InheritRot);
+                                              //spdlog::info("MGS2: Third Person Freecam: Toggled inherit camera rotation to {}", *gBP_Camera_InheritRot);
                                           }
                                       });
     }
