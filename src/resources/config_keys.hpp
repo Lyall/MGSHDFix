@@ -150,24 +150,24 @@ namespace ConfigKeys
                                                    "Disable if you prefer pillarboxing or letterboxing with a custom resolution.";
 
     // Bugfixes
-    constexpr const char* FixVectorRain_Section = "Vector Line Scaling Fix";
+    constexpr const char* FixVectorRain_Section = "Bugfixes";
     constexpr const char* FixVectorRain_Setting = "Fix Rain Width";
     constexpr const char* FixVectorRain_Help = "";
     constexpr const char* FixVectorRain_Tooltip = "Fixes Rain/Lasers/Bullet Trails width, which is not scaled up properly from the original PS2 size (always appearing at only 1 pixel width regardless of game resolutions)\n"
-                                                  "\n"
-                                                  "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
+        "\n"
+        "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
 
     constexpr const char* FixOpticalCamo_Section = "Bugfixes";
-    constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo";
+    constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo Refraction";
     constexpr const char* FixOpticalCamo_Help = "";
     constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
 
-    constexpr const char* FixVectorUI_Section = "Vector Line Scaling Fix";
+    constexpr const char* FixVectorUI_Section = "Bugfixes";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
     constexpr const char* FixVectorUI_Help = "";
     constexpr const char* FixVectorUI_Tooltip = "Fixes UI line widths that were not scaled up from the original PS2 size.";
 
-    constexpr const char* VectorLineScale_Section = "Vector Line Scaling Fix";
+    constexpr const char* VectorLineScale_Section = "Bugfixes";
     constexpr const char* VectorLineScale_Setting = "Line Scale Size";
     constexpr const char* VectorLineScale_Help = "(360 = Accurate to PCSX2)";
     constexpr const char* VectorLineScale_Tooltip = "Lower numbers increase the width of vector/line effects.\n"
@@ -258,6 +258,122 @@ namespace ConfigKeys
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Setting = "While Holding Lock On";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Help = "";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Tooltip = "Keeps aiming after firing while holding Lock-On (L1).";
+
+
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
+                                                                 "(MOUSE SUPPORT STILL W.I.P.)";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Enables the third person freecam.\n"
+                                                                    "\n"
+                                                                    "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
+                                                                    "\n"
+                                                                    "This feature was cut around 7/7/2011 per a leftover note found in the source code.\n"
+                                                                    "\n"
+                                                                    "Functionality is a bit glitchy, as this feature was not fully completed.\n"
+                                                                    "Things are still being patched up by hand with love. <3\n"
+                                                                    "\n"
+                                                                    "If the camera gets stuck at a weird angle; enter First Person View, or toggle the third person camera a few times to reset it.";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Setting = "Third Person View Toggle";
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "(Controller inputs accepted)\n(Utilizes your Steam Input binds)";
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Tooltip = "Toggles the third person view on/off.";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting = "Inherit Camera Rotation";
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting = "Inherit Camera Rotation Toggle";
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting = "Max Camera Distance";
+    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting = "Horizontal Camera Sensitivity";
+    constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting = "Vertical Camera Sensitivity";
+    constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting = "Camera - Zoom In Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting = "Camera - Zoom Out Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting = "Camera - Zoom Reset Hotkey";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting = "Camera - Zoom Step Amount";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Help = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip = "";
+
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting = "Camera - Zoom Speed";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Help = "(In microseconds)";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Tooltip = "";
+
+
+
+    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person View Mode";
+    constexpr const char* MGS2_First_Person_View_Enabled_Setting = "First Person View Mode Enabled";
+    constexpr const char* MGS2_First_Person_View_Enabled_Help = "";
+    constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "";
+
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person View Movement Enabled By Default";
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Help = "";
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip = "";
+
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Setting = "First Person View Movement Toggle";
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Help = "";
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Tooltip = "";
+
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Setting = "First Person View Toggle";
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Help = "";
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Tooltip = "";
+
+
+
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting = "Restore PS2 Solidus Choking Difficulty";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help = "";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip = "Restores the original harder PS2 durations and life reductions for Solidus's choking sequence, which were rebalanced/made easier with the HD Collection.\n"
+                                                                                         "\n"
+                                                                                         "HDC Duration:\n"
+                                                                                         "Very Easy: 600, Easy: 650, Normal: 700, Hard: 750, Extreme: 800, European Extreme: 850\n"
+                                                                                         "PS2 Duration:\n"
+                                                                                         "Very Easy: 600, Easy: 635, Normal: 900, Hard: 1200, Extreme: 1500, European Extreme: 3000\n"
+                                                                                         "\n"
+                                                                                         "HDC Life Amount\n"
+                                                                                         "Very Easy: 200, Easy: 184, Normal: 168, Hard: 152, Extreme: 136, European Extreme: 120\n"
+                                                                                         "PS2 Life Amount\n"
+                                                                                         "Very Easy: 200, Easy: 120, Normal: 100, Hard: 75, Extreme: 50, European Extreme: 30\n";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled = "Disabled";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly = "Life Reduction Only";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly = "Duration Increase Only";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both = "Full Restoration";
+
 
     // Tweaks
     constexpr const char* SkipIntroLogos_Section = "Skip Logo Screens";
@@ -392,7 +508,23 @@ namespace ConfigKeys
     constexpr const char* UnusedRetroColonel_Option_MSX = "MSX2";
     constexpr const char* UnusedRetroColonel_Option_Subsistence = "Subsistence";
 
-    
+    constexpr const char* Disable_HDC_Camera_Positions_Section = "Camera Positioning";
+    constexpr const char* Disable_HDC_Camera_Positions_Setting = "Disable HD Collection Camera Positioning";
+    constexpr const char* Disable_HDC_Camera_Positions_Help = "";
+    constexpr const char* Disable_HDC_Camera_Positions_Tooltip = "Disables the 16:9 expanded camera positioning introduced in the HD Collection, which zoomed in the camera on most levels to prevent the sides of screen from seeing outside the bounds of the map.\n"
+                                                                 "\n"
+                                                                 "This results in a loss of information at the top and bottom of the screen in many areas.\n"
+                                                                 "\n"
+                                                                 "Toggling this option ON will return the game back to the original PS2 framing during gameplay.\n"
+                                                                 "\n"
+                                                                 "You -will- see outside of the map at times with this enabled.";
+
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Section = Disable_HDC_Camera_Positions_Section;
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Setting = "HD Collection Camera Toggle";
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Help = "";
+    constexpr const char* Disable_HDC_Camera_Positions_ToggleKey_Tooltip = "Toggles the HD Collection Camera Positioning option on/off in real-time.\n"
+                                                                        "\n"
+                                                                        "In most cases, you will have to exit and re-enter the area for camera positions to update.";
 
     // Hotkeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Section = "Hotkeys";
@@ -612,3 +744,9 @@ static bool ResolveRegionLanguageNames(const std::array<Game_Language_Pair_View,
 
     return false;
 }
+
+constexpr int k3rdPersonMaxCameraDistance = 10000;
+constexpr int k3rdPersonMinCameraDistance = 100;
+constexpr int k3rdPersonFreecamDefaultMaxCameraDistance = 4000;
+constexpr float k3rdPersonFreecamDefaultHorizontalSensitivity = 0.6f;
+constexpr float k3rdPersonFreecamDefaultVerticalSensitivity = 0.4f;

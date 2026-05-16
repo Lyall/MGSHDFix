@@ -155,6 +155,14 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } },
 
 
+        { ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, ConfigKeys::LOD_MGS2_Player_Help, ConfigKeys::LOD_MGS2_Player_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
+        { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
         { ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, ConfigKeys::DistanceCullingGrassAlways_Help, ConfigKeys::DistanceCullingGrassAlways_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -162,12 +170,11 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), true, Field::Float, 0 , 0, 0, "", {}, 1.0, 0},
 
 
-        { ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, ConfigKeys::LOD_MGS2_Player_Help, ConfigKeys::LOD_MGS2_Player_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+        { ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, ConfigKeys::Disable_HDC_Camera_Positions_Help, ConfigKeys::Disable_HDC_Camera_Positions_Tooltip,
+          std::nullopt, false, Field::Bool, false },
 
-
-        { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+        { ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Help, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting), false, Field::Hotkey, 0, 0, 0, "F6" },
 
     
     }},
@@ -181,6 +188,8 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
         { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
           std::nullopt, false, Field::Bool, true },
+
+        {"Bugfixes", "", "", "", std::nullopt, false, Field::Spacer},
 
         { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -199,7 +208,80 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::UnusedRetroColonel_Option_Normal, { ConfigKeys::UnusedRetroColonel_Option_Normal, ConfigKeys::UnusedRetroColonel_Option_MSX, ConfigKeys::UnusedRetroColonel_Option_Subsistence } },
 
 
+        { ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled, {ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled,  ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both, } },
+
     } },
+
+
+    { wxString("Freecam | FPV"), {
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Tooltip,
+            std::nullopt, false, Field::Bool, false },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Mouse5" },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Bool, false },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "NumMultiply" },
+
+      { ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+    {ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Float, 0 , 0, 0, "", {}, k3rdPersonFreecamDefaultHorizontalSensitivity, 0.1, 10.0},
+
+
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Int, k3rdPersonFreecamDefaultMaxCameraDistance, k3rdPersonMinCameraDistance, k3rdPersonMaxCameraDistance },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Float, 0 , 0, 0, "", {}, k3rdPersonFreecamDefaultVerticalSensitivity, 0.1, 10.0},
+
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Int, 250, 1, k3rdPersonMaxCameraDistance },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "WheelUp" },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Mouse4" },
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "WheelDown" },
+
+
+                      { ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+
+      {ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Help, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Tooltip,
+                std::make_pair(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting), false, Field::Int, 25, 1, 500 },
+
+
+
+      {ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, ConfigKeys::MGS2_First_Person_View_Enabled_Help, ConfigKeys::MGS2_First_Person_View_Enabled_Tooltip,
+            std::nullopt, false, Field::Bool, false },
+      
+        {ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+
+        {ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Help, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Bool, true },
+
+      {ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+
+
+  } },
 
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
@@ -243,7 +325,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Help, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Tooltip,
           std::make_pair(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting), true, Field::Bool, true },
 
-    }},
+      } },
 
     { wxString("Achievements"), {
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip,

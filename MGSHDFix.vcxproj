@@ -20,6 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
+    <ClCompile Include="src\features\mgs2_3rd_person_freecam.cpp" />
+    <ClCompile Include="src\features\mgs2_difficulty.cpp" />
+    <ClCompile Include="src\features\mgs2_first_person_view_mode.cpp" />
+    <ClCompile Include="src\features\mgs2_restore_dogtag_viewer.cpp" />
+    <ClCompile Include="src\features\original_camera_positions.cpp" />
+    <ClCompile Include="src\features\mgs3_first_person_view_mode.cpp" />
     <ClCompile Include="src\fixes\mgs2_coolant_mirror.cpp" />
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp" />
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp" />
@@ -132,7 +138,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\features\mgs2_msx_colonel.hpp" />
+    <ClInclude Include="src\resources\game_stages.hpp" />
+    <ClInclude Include="src\resources\mgs2_equipment_enums.hpp" />
+    <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp" />
+    <ClInclude Include="src\features\mgs2_difficulty.hpp" />
+    <ClInclude Include="src\features\mgs2_first_person_view_mode.hpp" />
+    <ClInclude Include="src\features\mgs2_restore_dogtag_viewer.hpp" />
+    <ClInclude Include="src\features\original_camera_positions.hpp" />
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp" />
+    <ClInclude Include="src\features\mgs3_first_person_view_mode.hpp" />
     <ClInclude Include="src\fixes\mgs2_coolant_mirror.hpp" />
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp" />
     <ClInclude Include="src\fixes\snakearm_voice.hpp" />
@@ -141,6 +155,7 @@
     <ClInclude Include="src\features\mgs2_restore_dogtags.hpp" />
     <ClInclude Include="src\fixes\busy_loop_fix.hpp" />
     <ClInclude Include="src\fixes\texture_live_swaps.hpp" />
+    <ClInclude Include="src\resources\mgs2_linkvarbuf.hpp" />
     <ClInclude Include="src\warnings\background_shuffle_warning.hpp" />
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp" />
     <ClInclude Include="src\features\settings_pesistence.hpp" />

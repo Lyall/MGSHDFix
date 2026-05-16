@@ -33,9 +33,13 @@
 #include "windows_fullscreen_optimization.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "busy_loop_fix.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_msx_colonel.hpp"
+#include "mgs2_3rd_person_freecam.hpp"
+#include "mgs2_difficulty.hpp"
+#include "original_camera_positions.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -639,6 +643,91 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
     LOG_CONFIG(ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
+   
+
+    ConfigHelper::getValue(ini, ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
+    LOG_CONFIG(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
+    if (OriginalCameraPositions::bEnabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, OriginalCameraPositions::vkToggle_HDC_CameraPositions);
+    }
+
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Enabled_Setting, MGS2_ThirdPersonFreecam::bEnabled);
+    if (MGS2_ThirdPersonFreecam::bEnabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Camera);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Inherit_Camera_Rotation);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Increase_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Decrease_Camera_Distance);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting, MGS2_ThirdPersonFreecam::vkToggle_Reset_Camera_Distance);
+        
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceStep);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceStep);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceChangeSpeed);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting, MGS2_ThirdPersonFreecam::iCameraDistanceChangeSpeed);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::bInherit_Camera_Rotation);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting, MGS2_ThirdPersonFreecam::bInherit_Camera_Rotation);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::iMax_Camera_Distance);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting, MGS2_ThirdPersonFreecam::iMax_Camera_Distance);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fHorizontal_Sensitivity);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fHorizontal_Sensitivity);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fVertical_Sensitivity);
+        LOG_CONFIG(ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Section, ConfigKeys::MGS2_ThirdPersonFreecam_Vertical_Sensitivity_Setting, MGS2_ThirdPersonFreecam::fVertical_Sensitivity);
+
+    }
+
+
+    std::string sSolidusChokingRestoration;
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+    if (sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly &&
+        sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both)
+    {
+        spdlog::error("Invalid config value for {}: {}", ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for " << ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting << ": " << sSolidusChokingRestoration << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    if (sSolidusChokingRestoration != ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled)
+    {
+        if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingDuration = true;
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingLife = true;
+        }
+        else if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingDuration = true;
+        }
+        else if (sSolidusChokingRestoration == ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly)
+        {
+            MGS2_RestoreOriginalDifficulty::bRestoreOriginalSolidusChokingLife = true;
+        }
+    }
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
+
+    
+
+    /*
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
+    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
+    if (MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View_Movement);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
+        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
+    }*/
 
     std::string sColonelMsxSprite;
     ConfigHelper::getValue(ini, ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);

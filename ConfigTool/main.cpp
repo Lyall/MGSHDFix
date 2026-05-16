@@ -34,6 +34,8 @@
 #include <wx/choice.h>
 #include <wx/stdpaths.h>
 #include <wx/mstream.h>
+#include <Xinput.h>
+#pragma comment(lib, "Xinput.lib")
 
 #include "helper.hpp"
 #include "version.h"
@@ -109,20 +111,109 @@ static wxString Unquote(const wxString& value)
     return s;
 }
 
+
+namespace
+{
+    constexpr BYTE kPadTriggerThreshold = 30;
+    constexpr SHORT kPadStickThreshold = 12000;
+
+    bool TryGetGamepadButtonInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    {
+        if ((pad.wButtons & XINPUT_GAMEPAD_A) != 0) { outName = "Pad_A"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_B) != 0) { outName = "Pad_B"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_X) != 0) { outName = "Pad_X"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_Y) != 0) { outName = "Pad_Y"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) { outName = "Pad_LB"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) { outName = "Pad_RB"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_BACK) != 0) { outName = "Pad_Back"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_START) != 0) { outName = "Pad_Start"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0) { outName = "Pad_LStick"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0) { outName = "Pad_RStick"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0) { outName = "Pad_DPad_Up"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0) { outName = "Pad_DPad_Down"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0) { outName = "Pad_DPad_Left"; return true; }
+        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0) { outName = "Pad_DPad_Right"; return true; }
+        if (pad.bLeftTrigger >= kPadTriggerThreshold) { outName = "Pad_LT"; return true; }
+        if (pad.bRightTrigger >= kPadTriggerThreshold) { outName = "Pad_RT"; return true; }
+
+        return false;
+    }
+
+    bool TryGetGamepadStickInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    {
+        if (pad.sThumbLY >= kPadStickThreshold) { outName = "Pad_LThumb_Up"; return true; }
+        if (pad.sThumbLY <= -kPadStickThreshold) { outName = "Pad_LThumb_Down"; return true; }
+        if (pad.sThumbLX <= -kPadStickThreshold) { outName = "Pad_LThumb_Left"; return true; }
+        if (pad.sThumbLX >= kPadStickThreshold) { outName = "Pad_LThumb_Right"; return true; }
+        if (pad.sThumbRY >= kPadStickThreshold) { outName = "Pad_RThumb_Up"; return true; }
+        if (pad.sThumbRY <= -kPadStickThreshold) { outName = "Pad_RThumb_Down"; return true; }
+        if (pad.sThumbRX <= -kPadStickThreshold) { outName = "Pad_RThumb_Left"; return true; }
+        if (pad.sThumbRX >= kPadStickThreshold) { outName = "Pad_RThumb_Right"; return true; }
+
+        return false;
+    }
+}
+
 class HotkeyCaptureCtrl final : public wxTextCtrl
 {
 public:
-    HotkeyCaptureCtrl(wxWindow* parent, wxWindowID id, const wxString& value = "")
+    HotkeyCaptureCtrl(wxWindow* parent, wxWindowID id, const wxString& value = "", bool captureStickInputs = false)
         : wxTextCtrl(parent, id, value, wxDefaultPosition, wxDefaultSize,
-                     wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER)
+                     wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER),
+          m_gamepadCaptureTimer(this),
+          m_captureStickInputs(captureStickInputs)
     {
         Bind(wxEVT_KEY_DOWN, &HotkeyCaptureCtrl::OnKeyDown, this);
         Bind(wxEVT_MIDDLE_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
         Bind(wxEVT_AUX1_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
         Bind(wxEVT_AUX2_DOWN, &HotkeyCaptureCtrl::OnMouseClick, this);
+        Bind(wxEVT_MOUSEWHEEL, &HotkeyCaptureCtrl::OnMouseWheel, this);
+        Bind(wxEVT_SET_FOCUS, &HotkeyCaptureCtrl::OnFocus, this);
+        Bind(wxEVT_KILL_FOCUS, &HotkeyCaptureCtrl::OnKillFocus, this);
+        Bind(wxEVT_TIMER, &HotkeyCaptureCtrl::OnGamepadTimer, this, m_gamepadCaptureTimer.GetId());
     }
 
 private:
+    wxTimer m_gamepadCaptureTimer;
+    bool m_captureStickInputs = false;
+
+    void OnFocus(wxFocusEvent& event)
+    {
+        m_gamepadCaptureTimer.Start(16);
+        event.Skip();
+    }
+
+    void OnKillFocus(wxFocusEvent& event)
+    {
+        m_gamepadCaptureTimer.Stop();
+        event.Skip();
+    }
+
+    void OnGamepadTimer(wxTimerEvent&)
+    {
+        for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i)
+        {
+            XINPUT_STATE state = {};
+            if (XInputGetState(i, &state) != ERROR_SUCCESS)
+            {
+                continue;
+            }
+
+            wxString name;
+            const bool hasInput = m_captureStickInputs
+                ? TryGetGamepadStickInputName(state.Gamepad, name)
+                : TryGetGamepadButtonInputName(state.Gamepad, name);
+
+            if (!hasInput)
+            {
+                continue;
+            }
+
+            SetValue(name);
+            return;
+        }
+    }
+
     void OnKeyDown(const wxKeyEvent& event)
     {
         const int code = event.GetKeyCode();
@@ -186,6 +277,23 @@ private:
         // Special key mapping table
         switch (raw)
         {
+
+        case VK_MBUTTON:   SetValue("Mouse3"); return;
+        case VK_XBUTTON1:  SetValue("Mouse4"); return;
+        case VK_XBUTTON2:  SetValue("Mouse5"); return;
+
+        case VK_CAPITAL:   SetValue("CapsLock"); return;
+        case VK_SHIFT:     SetValue("Shift"); return;
+        case VK_CONTROL:   SetValue("Ctrl"); return;
+        case VK_MENU:      SetValue("Alt"); return;
+        case VK_LMENU:     SetValue("LAlt"); return;
+        case VK_RMENU:     SetValue("RAlt"); return;
+        case VK_LCONTROL:  SetValue("LCtrl"); return;
+        case VK_RCONTROL:  SetValue("RCtrl"); return;
+        case VK_LSHIFT:    SetValue("LShift"); return;
+        case VK_RSHIFT:    SetValue("RShift"); return;
+        case VK_LWIN:      SetValue("LWin"); return;
+        case VK_RWIN:      SetValue("RWin"); return;
         case VK_BACK:      SetValue("Backspace"); return;
         case VK_TAB:       SetValue("Tab"); return;
         case VK_RETURN:    SetValue("Enter"); return;
@@ -243,14 +351,46 @@ private:
     void OnMouseClick(wxMouseEvent& event)
     {
         wxString name;
+
         if (event.GetButton() == wxMOUSE_BTN_MIDDLE)
+        {
             name = "Mouse3";
+        }
         else if (event.GetButton() == wxMOUSE_BTN_AUX1)
+        {
             name = "Mouse4";
+        }
         else if (event.GetButton() == wxMOUSE_BTN_AUX2)
+        {
             name = "Mouse5";
+        }
+
+        if (name.IsEmpty())
+        {
+            event.Skip();
+            return;
+        }
 
         SetValue(name);
+    }
+
+    void OnMouseWheel(wxMouseEvent& event)
+    {
+        const int wheelRotation = event.GetWheelRotation();
+
+        if (wheelRotation > 0)
+        {
+            SetValue("WheelUp");
+            return;
+        }
+
+        if (wheelRotation < 0)
+        {
+            SetValue("WheelDown");
+            return;
+        }
+
+        event.Skip();
     }
 };
 
@@ -417,9 +557,9 @@ public:
                         "     Created by Afevis.\n"                            //Do not remove this notice.
                         "\n"
                         "MGSHDFix, licensed under MIT.\n"
-                        "     Originally created by Lyall.\n"
                         "     Maintained by Afevis (aka ShizCalev.)\n"
-                        "     Additional contributions by Emoose, Cipherxof (aka TriggerHappy), Bud11, and Zenf0."
+                        "     Originally created by Lyall.\n"
+                        "     Contributors: Emoose, Cipherxof (aka TriggerHappy), Bud11, SpaceCore (aka Jacky720), gibletto, Zenf0."
                     );
                     aboutSizer->Add(aboutText, 0, wxALL, 5);
 
@@ -571,7 +711,7 @@ public:
                                  ApplyPrerequisites();
                                  e.Skip();
                              });
-                    
+
                     for (auto& c : field.choices)
                         ch->Append(c);
 
@@ -610,6 +750,18 @@ public:
                     m_conf->Read(path, &v);
                     v = Unquote(v);
                     ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v);
+                    break;
+                }
+                case Field::StickHotkey:
+                {
+                    wxString v = field.defaultString;
+                    if (!m_conf->HasEntry(path))
+                    {
+                        m_missingKeys = true;
+                    }
+                    m_conf->Read(path, &v);
+                    v = Unquote(v);
+                    ctrl = new HotkeyCaptureCtrl(sectionSizer->GetStaticBox(), wxID_ANY, v, true);
                     break;
                 }
                 case Field::Spacer:
@@ -711,6 +863,7 @@ public:
 
                             case Field::Str:
                             case Field::Hotkey:
+                            case Field::StickHotkey:
                                 if (!field.defaultString.IsEmpty())
                                     tip += "\"" + field.defaultString + "\"";
                                 else
@@ -895,6 +1048,8 @@ public:
 
         ApplyPrerequisites();
         HandleUpdateCheckPreference();
+
+        SnapshotCurrentValues();
     }
 
     void HandleUpdateCheckPreference()
@@ -972,6 +1127,150 @@ private:
     {
         m_dirty = true;
         e.Skip();
+    }
+
+    static wxString GetControlDisplayValue(wxWindow* ctrl)
+    {
+        if (!ctrl)
+            return wxString();
+
+        if (auto* cb = wxDynamicCast(ctrl, wxCheckBox))
+            return cb->GetValue() ? "Enabled" : "Disabled";
+        if (auto* sp = wxDynamicCast(ctrl, wxSpinCtrl))
+            return wxString::Format("%d", sp->GetValue());
+        if (auto* spd = wxDynamicCast(ctrl, wxSpinCtrlDouble))
+            return wxString::Format("%g", spd->GetValue());
+        if (auto* tc = wxDynamicCast(ctrl, wxTextCtrl))
+            return "\"" + tc->GetValue() + "\"";
+        if (auto* ch = wxDynamicCast(ctrl, wxChoice))
+            return "\"" + ch->GetStringSelection() + "\"";
+
+        return wxString();
+    }
+
+    void SnapshotCurrentValues()
+    {
+        m_snapshot.clear();
+        for (const auto& kv : m_controls)
+            m_snapshot[kv.first] = GetControlDisplayValue(kv.second);
+    }
+
+    wxString BuildChangeList() const
+    {
+        wxString out;
+        for (const auto& tab : kTabs)
+        {
+            // wxWidgets freaks the fuck out with &'s, lets normalize them
+            wxString tabTitle = tab.first;
+            tabTitle.Replace("&&", "\x01");      
+            tabTitle.Replace("&", "");           
+            tabTitle.Replace("\x01", "&");       
+            wxString tabChunk;
+            wxString currentSection;
+            wxString sectionChunk;
+
+            auto flushSection = [&]()
+                {
+                    if (!sectionChunk.IsEmpty())
+                    {
+                        if (!currentSection.IsEmpty())
+                            tabChunk += "  [" + currentSection + "]\n";
+                        tabChunk += sectionChunk;
+                        sectionChunk.Clear();
+                    }
+                };
+
+            for (const auto& field : tab.second)
+            {
+                auto it = m_controls.find({ field.section, field.key });
+                if (it == m_controls.end())
+                    continue;
+
+                wxString now = GetControlDisplayValue(it->second);
+                auto snapIt = m_snapshot.find({ field.section, field.key });
+                wxString before = (snapIt != m_snapshot.end()) ? snapIt->second : wxString();
+
+                if (now == before)
+                    continue;
+
+                if (field.section != currentSection)
+                {
+                    flushSection();
+                    currentSection = field.section;
+                }
+                sectionChunk += wxString::Format("    %s: %s -> %s\n",
+                                                 field.key.c_str(),
+                                                 before.c_str(),
+                                                 now.c_str());
+            }
+            flushSection();
+
+            if (!tabChunk.IsEmpty())
+            {
+                if (!out.IsEmpty())
+                    out += "\n";
+                out += tabTitle + "\n" + tabChunk;
+            }
+        }
+        return out;
+    }
+
+
+    int ShowUnsavedChangesDialog(const wxString& prompt,
+                                 const wxString& yesLabel,
+                                 const wxString& noLabel,
+                                 const wxString& changeList)
+    {
+        // No diff to show (first run, missing keys, or odd state) -> simple dialog.
+        if (changeList.IsEmpty())
+        {
+            wxMessageDialog dlg(this, prompt, "Unsaved Changes",
+                                wxYES_NO | wxCANCEL | wxICON_WARNING);
+            dlg.SetYesNoCancelLabels(yesLabel, noLabel, "Cancel");
+            return dlg.ShowModal();
+        }
+
+        wxDialog dlg(this, wxID_ANY, "Unsaved Changes",
+                     wxDefaultPosition, wxSize(560, 420),
+                     wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+
+        auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+        auto* msg = new wxStaticText(&dlg, wxID_ANY, prompt);
+        sizer->Add(msg, 0, wxALL, 12);
+
+        auto* listLabel = new wxStaticText(&dlg, wxID_ANY, "Changes since last save:");
+        sizer->Add(listLabel, 0, wxLEFT | wxRIGHT, 12);
+
+        auto* list = new wxTextCtrl(&dlg, wxID_ANY, changeList,
+                                    wxDefaultPosition, wxDefaultSize,
+                                    wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP);
+
+        wxFont mono(wxFontInfo().Family(wxFONTFAMILY_TELETYPE));
+        if (mono.IsOk())
+            list->SetFont(mono);
+        sizer->Add(list, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 12);
+
+        auto* btnSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto* yesBtn = new wxButton(&dlg, wxID_YES, yesLabel);
+        auto* noBtn = new wxButton(&dlg, wxID_NO, noLabel);
+        auto* cancelBtn = new wxButton(&dlg, wxID_CANCEL, "Cancel");
+        btnSizer->AddStretchSpacer();
+        btnSizer->Add(yesBtn, 0, wxRIGHT, 5);
+        btnSizer->Add(noBtn, 0, wxRIGHT, 5);
+        btnSizer->Add(cancelBtn, 0);
+        sizer->Add(btnSizer, 0, wxEXPAND | wxALL, 12);
+
+        dlg.SetSizer(sizer);
+        dlg.SetAffirmativeId(wxID_YES);
+        dlg.SetEscapeId(wxID_CANCEL);
+
+        auto routeBtn = [&dlg](wxCommandEvent& e) { dlg.EndModal(e.GetId()); };
+        yesBtn->Bind(wxEVT_BUTTON, routeBtn);
+        noBtn->Bind(wxEVT_BUTTON, routeBtn);
+        cancelBtn->Bind(wxEVT_BUTTON, routeBtn);
+
+        return dlg.ShowModal();
     }
 
     // ----------------------------
@@ -1356,6 +1655,7 @@ private:
 
             case Field::Str:
             case Field::Hotkey:
+            case Field::StickHotkey:
                 if (auto* c = wxDynamicCast(ctrl, wxTextCtrl))
                 {
                     c->SetValue(field.defaultString);
@@ -1442,7 +1742,10 @@ private:
 
     void OnSaveAndLaunch(wxCommandEvent& event)
     {
-        if (m_dirty || m_firstRun || m_missingKeys)
+        wxString changeList = BuildChangeList();
+        const bool hasRealChanges = !changeList.IsEmpty();
+
+        if (hasRealChanges || m_firstRun || m_missingKeys)
         {
             wxString message;
             if (m_firstRun)
@@ -1450,12 +1753,14 @@ private:
                 message =
                     "This appears to be your first time running the config tool.\n\n"
                     "You must save your settings before starting the game.";
+                changeList.Clear(); // first-run baseline isn't meaningful to diff
             }
             else if (m_missingKeys)
             {
                 message =
                     "Some settings were missing from your config file.\n\n"
                     "You must save your settings before starting the game.";
+                changeList.Clear();
             }
             else
             {
@@ -1463,15 +1768,8 @@ private:
                     "You have unsaved changes.\n\n"
                     "Do you want to save them before launching the game?";
             }
-            wxMessageDialog dlg(
-                this,
-                message,
-                "Unsaved Changes",
-                wxYES_NO | wxCANCEL | wxICON_WARNING
-            );
-            dlg.SetYesNoCancelLabels("Save", "Discard", "Cancel");
 
-            int choice = dlg.ShowModal();
+            int choice = ShowUnsavedChangesDialog(message, "Save", "Discard", changeList);
             if (choice == wxID_YES)
             {
                 wxCommandEvent dummy;
@@ -1486,6 +1784,10 @@ private:
             {
                 return;
             }
+        }
+        else
+        {
+            m_dirty = false;
         }
 
         std::wstring wGameToLaunch = iTargetGame == TARGET_GAME_MG1 ? L"steam://launch/2131680" : iTargetGame == TARGET_GAME_MGS2 ? L"steam://launch/2131640" : iTargetGame == TARGET_GAME_MGS3 ? L"steam://launch/2131650" : L"";
@@ -1510,7 +1812,10 @@ private:
 
     void OnClose(wxCloseEvent& event)
     {
-        if (m_dirty || m_firstRun || m_missingKeys)
+        wxString changeList = BuildChangeList();
+        const bool hasRealChanges = !changeList.IsEmpty();
+
+        if (hasRealChanges || m_firstRun || m_missingKeys)
         {
             wxString message;
             if (m_firstRun)
@@ -1518,12 +1823,14 @@ private:
                 message =
                     "This appears to be your first time running the config tool.\n\n"
                     "You must save your settings before starting the game.";
+                changeList.Clear();
             }
             else if (m_missingKeys)
             {
                 message =
                     "Some settings were missing from your config file.\n\n"
                     "You must save your settings before starting the game.";
+                changeList.Clear();
             }
             else
             {
@@ -1531,15 +1838,8 @@ private:
                     "You have unsaved changes.\n\n"
                     "What would you like to do?";
             }
-            wxMessageDialog dlg(
-                this,
-                message,
-                "Unsaved Changes",
-                wxYES_NO | wxCANCEL | wxICON_WARNING
-            );
-            dlg.SetYesNoCancelLabels("Save and Exit", "Exit Without Saving", "Cancel");
 
-            int choice = dlg.ShowModal();
+            int choice = ShowUnsavedChangesDialog(message, "Save and Exit", "Exit Without Saving", changeList);
             if (choice == wxID_YES)
             {
                 wxCommandEvent dummy;
@@ -1693,6 +1993,7 @@ private:
 
                 case Field::Str:
                 case Field::Hotkey:
+                case Field::StickHotkey:
                     strVal = field.defaultString;
                     if (!m_conf->HasEntry(path))
                     {
@@ -1825,6 +2126,7 @@ private:
         m_dirty = false;
         m_firstRun = false;
         m_missingKeys = false;
+        SnapshotCurrentValues();
         Close();
     }
 
@@ -1840,6 +2142,7 @@ private:
         }
     };
     std::unordered_map<Key, wxWindow*, KeyHash> m_controls;
+    std::unordered_map<Key, wxString, KeyHash> m_snapshot;
 };
 
 class MyApp : public wxApp

@@ -1,0 +1,235 @@
+#include "stdafx.h"
+#include "config_keys.hpp"
+
+#include "mgs2_3rd_person_freecam.hpp"
+#include "common.hpp"
+#include "gamevars.hpp"
+#include "input_handler.hpp"
+#include "logging.hpp"
+
+namespace
+{
+    //TODO: 
+    //      - disable camera angles when leaning against walls
+    //      - block camera increase / decrease when in menus
+    //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
+    //      - get fpv inherit camera rotation var
+    //      - real character names / custom character name
+
+    //mgs3 -> bp_camera_yoffset()
+
+
+
+    std::int32_t* gBP_3rdPersonCamera_Override = nullptr;
+
+    int* gBP_3rdPersonCamera_Dist = nullptr;         // max camera distance from player
+    int* gBP_Camera_InheritRot = nullptr;              // Inherit rotation between cameras
+
+    bool bCameraForcedDisabled = false;
+    bool bPreviousCameraState = false;
+
+    // 3rd person camera overrides
+    //FVECTOR gBP_3rdPersonCamera_Target         // Target position that camera looks at
+    //FVECTOR gBP_3rdPersonCamera_Eye =      // Eye position where camera is placed
+    //SVECTOR gBP_3rdPersonCamera_Rot =      // Rotation around player
+
+    void ReleaseCameraState(bool enabled)
+    {
+        bCameraForcedDisabled = false;
+        *gBP_3rdPersonCamera_Override = enabled;
+    }
+
+    void ForceCameraDisabled()
+    {
+        if (!bCameraForcedDisabled)
+        {
+            //spdlog::info("MGS2: Third Person Freecam: Forcing camera disabled. GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
+            bCameraForcedDisabled = true;
+            bPreviousCameraState = *gBP_3rdPersonCamera_Override;
+        }
+        *gBP_3rdPersonCamera_Override = false;
+    }
+
+    void Toggle3rdPersonCamera()
+    {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
+        *gBP_3rdPersonCamera_Override = !*gBP_3rdPersonCamera_Override;
+    }
+
+    void IncreaseCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = std::min(*gBP_3rdPersonCamera_Dist + MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMaxCameraDistance);
+        spdlog::info("MGS2: Third Person Freecam: Increased camera distance to {}", *gBP_3rdPersonCamera_Dist);
+    
+    }
+
+    void DecreaseCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = std::max(*gBP_3rdPersonCamera_Dist - MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMinCameraDistance);
+
+        spdlog::info("MGS2: Third Person Freecam: Decreased camera distance to {}", *gBP_3rdPersonCamera_Dist);
+    }
+
+    void ResetCameraDistance()
+    {
+        *gBP_3rdPersonCamera_Dist = MGS2_ThirdPersonFreecam::iMax_Camera_Distance;
+        //spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
+        //spdlog::info("MGS2 GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
+        //spdlog::info("MGS2_LinkVarBuf::GM_PlayerPosX value: {}, MGS2_LinkVarBuf::GM_PlayerPosY value: {}, MGS2_LinkVarBuf::GM_PlayerPosZ value: {}", MGS2_LinkVarBuf::GM_PlayerPosX.get(), MGS2_LinkVarBuf::GM_PlayerPosY.get(), MGS2_LinkVarBuf::GM_PlayerPosZ.get());
+    }
+
+}
+
+void MGS2_ThirdPersonFreecam::Tick()
+{
+    if (!bEnabled)
+    {
+        return;
+    }
+
+    //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
+
+    if (g_GameVars.Get_GM_GameStatus() & STATE_VR_ONLY)
+    {
+        ForceCameraDisabled();
+        return;
+    }
+
+    if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE)
+    {
+        ForceCameraDisabled();
+        return;
+    }
+
+
+    if (g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A))
+    {
+        const int playerPosX = MGS2_LinkVarBuf::GM_PlayerPosX;
+        const int playerPosZ = MGS2_LinkVarBuf::GM_PlayerPosZ;
+        if (playerPosX >= 1358 && playerPosX <= 3000 && playerPosZ >= -137100) //doorway to the room. freecam clips through the geometry pretty heavy when you enter.
+        {
+            ForceCameraDisabled();
+            return;
+        }
+    }
+    if (bCameraForcedDisabled)
+    {
+        ReleaseCameraState(bPreviousCameraState);
+        return;
+    }
+
+
+}
+static safetyhook::InlineHook g_CheckBehindCamera_hook;
+
+static __int64 __fastcall CheckBehindCamera_hook(__int64 a1) ///fix wall hugging making the camera freak the fuck out.
+{
+    if (gBP_3rdPersonCamera_Override)
+        return 0;
+    return g_CheckBehindCamera_hook.call<__int64>(a1);
+}
+
+void MGS2_ThirdPersonFreecam::HandleLevelTransition()
+{
+    //todo -> handling for some levels with small entrances where the freecam clips, like w45a
+}
+
+void MGS2_ThirdPersonFreecam::Activate()
+{
+    if (!(eGameType & MGS2))
+    {
+        return;
+    }
+
+    if (!bEnabled)
+    {
+        spdlog::info("MGS2: Third Person Freecam: Config disabled, skipping.");
+        return;
+    }
+
+    const auto NewCamera_Act_sub_14006BC70  = Memory::PatternScan(baseModule,"83 3D ?? ?? ?? ?? 00 0F 28 74 24","MGS2: Third Person Freecam: gBP_3rdPersonCamera_Override");
+    if (NewCamera_Act_sub_14006BC70 == nullptr)
+    {
+        spdlog::error("MGS2: Third Person Freecam: Failed to find g_BP3rdPersonCameraOverride.");
+        return;
+    }
+
+    gBP_3rdPersonCamera_Override = reinterpret_cast<std::int32_t*>(Memory::GetRipRelativeAddress(NewCamera_Act_sub_14006BC70, 2, 7));
+
+    Toggle3rdPersonCamera();
+    if (!*gBP_3rdPersonCamera_Override)
+    {
+        spdlog::error("MGS2: Third Person Freecam: Failed to enable third person camera.");
+        return;
+    }
+    g_InputHandler.RegisterHotkey(vkToggle_Camera, "Third Person Camera Toggle", []()
+                                  {
+                                      Toggle3rdPersonCamera();
+                                  });
+
+    if (fHorizontal_Sensitivity != k3rdPersonFreecamDefaultHorizontalSensitivity)
+    {
+        if (const auto gBP_3rdPersonCamera_HSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C F8 66 29 3D", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_HSpeed") + 4)); gBP_3rdPersonCamera_HSpeed != nullptr)
+        {
+            *gBP_3rdPersonCamera_HSpeed = fHorizontal_Sensitivity;
+            spdlog::info("MGS2: Third Person Freecam: Set horizontal sensitivity to {}", fHorizontal_Sensitivity);
+        }
+    }
+    if (fVertical_Sensitivity != k3rdPersonFreecamDefaultVerticalSensitivity)
+    {
+        if (const auto gBP_3rdPersonCamera_VSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C C0 EB ?? 8B C7", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_VSpeed") + 4)); gBP_3rdPersonCamera_VSpeed != nullptr)
+        {
+            *gBP_3rdPersonCamera_VSpeed = fVertical_Sensitivity;
+            spdlog::info("MGS2: Third Person Freecam: Set vertical sensitivity to {}", fVertical_Sensitivity);
+        }
+    }
+
+    gBP_3rdPersonCamera_Dist = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? F3 0F 11 05", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_Dist") + 3));
+    if (gBP_3rdPersonCamera_Dist != nullptr)
+    {
+        if (iMax_Camera_Distance != k3rdPersonFreecamDefaultMaxCameraDistance)
+        {
+            ResetCameraDistance();
+        }
+        
+        g_InputHandler.RegisterHeldHotkey(vkToggle_Increase_Camera_Distance, "Third Person Camera - Increase Distance", []()
+                                      {
+                                          IncreaseCameraDistance();
+                                      }, iCameraDistanceChangeSpeed);
+        g_InputHandler.RegisterHeldHotkey(vkToggle_Decrease_Camera_Distance, "Third Person Camera - Decrease Distance", []()
+                                      {
+                                          DecreaseCameraDistance();
+                                      }, iCameraDistanceChangeSpeed);
+                                      
+        g_InputHandler.RegisterHotkey(vkToggle_Reset_Camera_Distance, "Third Person Camera - Reset Distance", []()
+                                      {
+                                          ResetCameraDistance();
+                                      });
+
+
+    }
+
+
+    
+    if (const auto PL_IntoSubject = Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00", "MGS2: Third Person Freecam: gBP_Camera_InheritRot"); PL_IntoSubject != nullptr)
+    {
+        gBP_Camera_InheritRot = reinterpret_cast<int*>(Memory::GetRelativeOffset(PL_IntoSubject + 2));
+        *gBP_Camera_InheritRot = bInherit_Camera_Rotation;
+        spdlog::info("MGS2: Third Person Freecam: Set inherit camera rotation to {}", *gBP_Camera_InheritRot ? "true" : "false");
+        g_InputHandler.RegisterHotkey(vkToggle_Inherit_Camera_Rotation, "Third Person Camera - Inherit Rotation Toggle", []()
+                                      {
+                                          if (gBP_Camera_InheritRot != nullptr)
+                                          {
+                                              *gBP_Camera_InheritRot = !*gBP_Camera_InheritRot;
+                                              spdlog::info("MGS2: Third Person Freecam: Toggled inherit camera rotation to {}", *gBP_Camera_InheritRot);
+                                          }
+                                      });
+    }
+
+    g_CheckBehindCamera_hook = safetyhook::create_inline( reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 55 53 57 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 4C 8B F1", "MGS 2: Third Person Freecam: CheckBehindCamera")),reinterpret_cast<void*>(CheckBehindCamera_hook));
+
+}
+

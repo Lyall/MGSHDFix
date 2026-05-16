@@ -41,7 +41,7 @@ struct Field
 
     enum Type
     {
-        Bool, Int, Float, Str, Choice, Hotkey, Spacer
+        Bool, Int, Float, Str, Choice, Hotkey, StickHotkey, Spacer
     } type;
 
     int defaultInt = 0;

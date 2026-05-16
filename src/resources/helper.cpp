@@ -105,6 +105,12 @@ namespace Memory
         return reinterpret_cast<uintptr_t>(addr) + 4 + *reinterpret_cast<int32_t*>(addr);
     }
 
+    uintptr_t GetRipRelativeAddress(std::uint8_t* instruction, std::size_t displacementOffset, std::size_t instructionLength) noexcept
+    {
+        const auto displacement = *reinterpret_cast<std::int32_t*>(instruction + displacementOffset);
+        return reinterpret_cast<uintptr_t>(instruction) + instructionLength + displacement;
+    }
+
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction)
     {
         auto* base = (uint8_t*)callerModule;
