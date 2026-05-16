@@ -48,9 +48,11 @@ public:
     [[nodiscard]] bool MGS3IsHoldingFirstPerson() const;
     [[nodiscard]] bool MGS3IsHoldingLockOn() const;
 
+    void Unset_PL_Status(uint64_t bits) const;
     [[nodiscard]] uint64_t Get_PL_Status() const;
     [[nodiscard]] int Get_GM_GameStatus() const;
     [[nodiscard]] int Get_GM_VRStatus() const;
+
 private:
     static void OnLevelTransition();
 

@@ -81,12 +81,82 @@ namespace
         //spdlog::info("MGS2_LinkVarBuf::GM_PlayerPosX value: {}, MGS2_LinkVarBuf::GM_PlayerPosY value: {}, MGS2_LinkVarBuf::GM_PlayerPosZ value: {}", MGS2_LinkVarBuf::GM_PlayerPosX.get(), MGS2_LinkVarBuf::GM_PlayerPosY.get(), MGS2_LinkVarBuf::GM_PlayerPosZ.get());
     }
 
+    /* v2
+    safetyhook::InlineHook g_CheckBehindCamera_hook;
+    safetyhook::InlineHook g_GM_ChangeCamera_hook;
+
+    bool g_suppressBehindCameraChange = false;
+
+    void __fastcall GM_ChangeCamera_hooked(int chanl) //straight returning CheckBehindCamera results in jumpout shots breaking
+    {
+        if (g_suppressBehindCameraChange)
+        {
+            return;
+        }
+        g_GM_ChangeCamera_hook.call<void>(chanl);
+    }
+
+    __int64 __fastcall CheckBehindCamera_hooked(__int64 a1) //fix wall hugging breaking third person cam
+    {
+        if (*gBP_3rdPersonCamera_Override)
+        {
+            g_suppressBehindCameraChange = true;
+        }
+        __int64 result = g_CheckBehindCamera_hook.call<__int64>(a1);
+        g_suppressBehindCameraChange = false;
+        return result;
+    }
+    */
+
+    // v3 - known issue: hug wall -> enter first person -> exit first person -> wall camera angle activates -> exit wall hug -> need to tap first person to reset camera angle.
+    safetyhook::InlineHook g_GM_ChangeCamera_hook;
+    safetyhook::InlineHook g_GM_SetCameraInterpMode_hook;
+    safetyhook::InlineHook g_PL_LeaveSubject_hook;
+    int g_leavingSubjectFrames = 0;
+
+    bool ShouldSuppressCameraChange()
+    {
+        if (g_GameVars.InCutscene() || g_GameVars.InScriptedSequence())
+        {
+            return false;
+        }
+        return *gBP_3rdPersonCamera_Override && (g_leavingSubjectFrames <= 0) &&
+            (!(g_GameVars.Get_PL_Status() & PLAYER_WATCH) &&
+             (g_GameVars.Get_PL_Status() & (PLAYER_CAUTION | PLAYER_BEHIND)));
+    }
+
+    void __fastcall GM_ChangeCamera_hooked(int chanl)
+    {
+        if (ShouldSuppressCameraChange()) return;
+        g_GM_ChangeCamera_hook.call<void>(chanl);
+    }
+
+    void __fastcall GM_SetCameraInterpMode_hooked(void* cam, int in, int out, int a, int b)
+    {
+        if (ShouldSuppressCameraChange()) return;
+        g_GM_SetCameraInterpMode_hook.call<void>(cam, in, out, a, b);
+    }
+
+    void __fastcall PL_LeaveSubject_hooked(__int64 a1)
+    {
+        g_leavingSubjectFrames = 30;
+        g_PL_LeaveSubject_hook.call<void>(a1);
+    }
 }
 
 void MGS2_ThirdPersonFreecam::Tick()
 {
     if (!bEnabled)
     {
+        return;
+    }
+
+    if (g_leavingSubjectFrames > 0)
+        g_leavingSubjectFrames--;
+
+    if (g_GameVars.InCutscene() || g_GameVars.InScriptedSequence())
+    {
+        ForceCameraDisabled();
         return;
     }
 
@@ -123,14 +193,7 @@ void MGS2_ThirdPersonFreecam::Tick()
 
 
 }
-static safetyhook::InlineHook g_CheckBehindCamera_hook;
 
-static __int64 __fastcall CheckBehindCamera_hook(__int64 a1) ///fix wall hugging making the camera freak the fuck out.
-{
-    if (gBP_3rdPersonCamera_Override)
-        return 0;
-    return g_CheckBehindCamera_hook.call<__int64>(a1);
-}
 
 void MGS2_ThirdPersonFreecam::HandleLevelTransition()
 {
@@ -229,7 +292,9 @@ void MGS2_ThirdPersonFreecam::Activate()
                                       });
     }
 
-    g_CheckBehindCamera_hook = safetyhook::create_inline( reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 55 53 57 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 4C 8B F1", "MGS 2: Third Person Freecam: CheckBehindCamera")),reinterpret_cast<void*>(CheckBehindCamera_hook));
-
+    //g_CheckBehindCamera_hook = safetyhook::create_inline( reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 55 53 57 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 4C 8B F1", "MGS 2: Third Person Freecam: CheckBehindCamera")),reinterpret_cast<void*>(CheckBehindCamera_hooked));
+    g_GM_ChangeCamera_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 B8", "MGS 2: Third Person Freecam: GM_ChangeCamera")+1)), reinterpret_cast<void*>(GM_ChangeCamera_hooked));
+    g_GM_SetCameraInterpMode_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 33 FF 4C 8D 35", "MGS 2: Third Person Freecam: GM_SetCameraInterpMode")), reinterpret_cast<void*>(GM_SetCameraInterpMode_hooked));
+    g_PL_LeaveSubject_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 74 ?? 0F BF 89", "MGS 2: Third Person Freecam: PL_LeaveSubject")), reinterpret_cast<void*>(PL_LeaveSubject_hooked));
 }
 

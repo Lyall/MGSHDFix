@@ -300,6 +300,12 @@ uint64_t GameVars::Get_PL_Status() const
     return GM_PlayerStatus == nullptr ? 0 : *GM_PlayerStatus;
 }
 
+void GameVars::Unset_PL_Status(uint64_t bits) const
+{
+    if (GM_PlayerStatus != nullptr)
+        *GM_PlayerStatus &= ~bits;
+}
+
 int GameVars::Get_GM_GameStatus() const
 {
     return GM_GameStatus == nullptr ? 0 : *GM_GameStatus;
