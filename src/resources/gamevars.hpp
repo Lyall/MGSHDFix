@@ -5,6 +5,24 @@
 #include "mgs2_equipment_enums.hpp"
 #include "game_stages.hpp"
 
+enum class MGS2GameMode
+{
+    Unknown,
+
+    Menu,
+
+    Tanker,
+    Plant,
+    Alternate,
+
+    VRSneaking,
+    VRVariety,
+    VRFirstPerson,
+    VRStreaking,
+    VRWeapons
+};
+
+
 class GameVars final
 {
 public:
@@ -52,6 +70,7 @@ public:
     [[nodiscard]] uint64_t Get_PL_Status() const;
     [[nodiscard]] int Get_GM_GameStatus() const;
     [[nodiscard]] int Get_GM_VRStatus() const;
+    [[nodiscard]] MGS2GameMode MGS2_GetGameMode() const;
 
 private:
     static void OnLevelTransition();

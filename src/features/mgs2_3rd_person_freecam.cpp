@@ -15,6 +15,7 @@ namespace
     //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
     //      - get fpv inherit camera rotation var
     //      - real character names / custom character name
+    // laser origin
 
     //mgs3 -> bp_camera_yoffset()
 
@@ -61,20 +62,30 @@ namespace
 
     void IncreaseCameraDistance()
     {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
         *gBP_3rdPersonCamera_Dist = std::min(*gBP_3rdPersonCamera_Dist + MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMaxCameraDistance);
-        spdlog::info("MGS2: Third Person Freecam: Increased camera distance to {}", *gBP_3rdPersonCamera_Dist);
-    
+        //spdlog::info("MGS2: Third Person Freecam: Increased camera distance to {}", *gBP_3rdPersonCamera_Dist);
     }
 
     void DecreaseCameraDistance()
     {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
         *gBP_3rdPersonCamera_Dist = std::max(*gBP_3rdPersonCamera_Dist - MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMinCameraDistance);
-
-        spdlog::info("MGS2: Third Person Freecam: Decreased camera distance to {}", *gBP_3rdPersonCamera_Dist);
+        //spdlog::info("MGS2: Third Person Freecam: Decreased camera distance to {}", *gBP_3rdPersonCamera_Dist);
     }
 
     void ResetCameraDistance()
     {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
         *gBP_3rdPersonCamera_Dist = MGS2_ThirdPersonFreecam::iMax_Camera_Distance;
         //spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
         //spdlog::info("MGS2 GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
@@ -160,13 +171,13 @@ void MGS2_ThirdPersonFreecam::Tick()
         return;
     }
 
-    //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
-
-    if (g_GameVars.Get_GM_GameStatus() & STATE_VR_ONLY)
+    if (!((g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Plant) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Tanker) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Alternate)))
     {
         ForceCameraDisabled();
         return;
     }
+
+    //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
 
     if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE)
     {

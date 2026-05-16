@@ -264,6 +264,70 @@ std::string GameVars::GetGameMode() const
     return std::string("Unknown (") + currentStage + ")";
 }
 
+MGS2GameMode GameVars::MGS2_GetGameMode() const
+{
+    const Stage* s = FindStageByName(GetCurrentStage());
+
+    if (s == nullptr || s->sGameMode == nullptr)
+    {
+        return MGS2GameMode::Unknown;
+    }
+
+    if (_stricmp(s->sGameMode, "Menu") == 0)
+    {
+        return MGS2GameMode::Menu;
+    }
+
+    if (_stricmp(s->sGameMode, "Tanker") == 0)
+    {
+        return MGS2GameMode::Tanker;
+    }
+
+    if (_stricmp(s->sGameMode, "Plant") == 0)
+    {
+        return MGS2GameMode::Plant;
+    }
+
+    if (_stricmp(s->sGameMode, "Alternate") == 0)
+    {
+        return MGS2GameMode::Alternate;
+    }
+
+    if (_stricmp(s->sGameMode, "VR: Sneaking") == 0)
+    {
+        return MGS2GameMode::VRSneaking;
+    }
+
+    if (_stricmp(s->sGameMode, "VR: Variety") == 0)
+    {
+        return MGS2GameMode::VRVariety;
+    }
+
+    if (_stricmp(s->sGameMode, "VR: First-Person") == 0)
+    {
+        return MGS2GameMode::VRFirstPerson;
+    }
+
+    if (_stricmp(s->sGameMode, "VR: Streaking") == 0)
+    {
+        return MGS2GameMode::VRStreaking;
+    }
+
+    if (_stricmp(s->sGameMode, "VR: Weapons -") == 0)
+    {
+        return MGS2GameMode::VRWeapons;
+    }
+
+    if (strncmp(s->sGameMode, "VR: Weapons", 11) == 0)
+    {
+        return MGS2GameMode::VRWeapons;
+    }
+
+    spdlog::warn("Unknown game mode: {}", s->sGameMode);
+
+    return MGS2GameMode::Unknown;
+}
+
 bool GameVars::IsStage(const char* stageConst) const
 {
     const char* current = GetCurrentStage();
