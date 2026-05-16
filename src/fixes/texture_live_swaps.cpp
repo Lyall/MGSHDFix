@@ -23,6 +23,8 @@ namespace
     FASTCALL_1IN1OUT FreeTexture;
 
     std::list<std::pair<uintptr_t, uintptr_t>> SwapMap;
+    short** GM_Item;
+    char** CurArea;
 }
 
 static void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true) {
