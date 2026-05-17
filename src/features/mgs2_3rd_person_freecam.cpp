@@ -11,11 +11,6 @@ namespace
 {
     //TODO: 
     //      - disable camera angles when leaning against walls | partially done. see v3 known issues below
-    //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
-    //      - real character names / custom character name
-    //      - laser origin
-    //      - mgs3 -> bp_camera_yoffset()
-
 
 
     std::int32_t* gBP_3rdPersonCamera_Override = nullptr;

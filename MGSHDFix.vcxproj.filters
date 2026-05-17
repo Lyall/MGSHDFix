@@ -143,9 +143,6 @@
     <ClCompile Include="src\features\mg1_crop_borders.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
@@ -211,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp">
       <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

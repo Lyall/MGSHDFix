@@ -6,10 +6,12 @@
 
 /*
  
+         //todo:
 
+     //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
+    //      - real character names / custom character name
+    //      - laser origin
 
-
-        //todo: utilize these.
     //int     gBP_1stPersonCamera_Override = 0;             // enable/disable
     int* gBP_1stPersonCamera_Move = nullptr;             // is fpv movement enabled
     int* gBP_1stPersonCamera_Toggle = nullptr;             // is first person toggled on/off

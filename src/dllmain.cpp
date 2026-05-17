@@ -494,6 +494,7 @@ static void InitializeSubsystems()
     INITIALIZE(SnakeArmFixes::ApplyFixes());
     INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
     INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
+    INITIALIZE(MGS3FixCameraOffset::Activate());
 
 
 #if !defined(RELEASE_BUILD) //todo category
@@ -501,7 +502,6 @@ static void InitializeSubsystems()
     //INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
-    //INITIALIZE(MGS3FixCameraOffsets::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());
     //INITIALIZE(MG1CropBorders::Initialize());
     //INITIALIZE(MG1CustomLoadingScreens::Initialize());
