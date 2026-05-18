@@ -1,5 +1,5 @@
 # Metal Gear Solid Master Collection Fix
-[![Releases](https://img.shields.io/github/v/release/Lyall/MGSHDFix)](https://github.com/Lyall/MGSHDFix/releases) [![Downloads](https://img.shields.io/github/downloads/Lyall/MGSHDFix/total)](https://github.com/Lyall/MGSHDFix/releases) ![Commits](https://img.shields.io/github/commit-activity/t/Lyall/MGSHDFix) ![License](https://img.shields.io/github/license/Lyall/MGSHDFix)
+[![Releases](https://img.shields.io/github/v/release/ShizCalev/MGSHDFix)](https://github.com/ShizCalev/MGSHDFix/releases) [![Downloads](https://img.shields.io/github/downloads/ShizCalev/MGSHDFix/total)](https://github.com/ShizCalev/MGSHDFix/releases) ![Commits](https://img.shields.io/github/commit-activity/t/ShizCalev/MGSHDFix) ![License](https://img.shields.io/github/license/ShizCalev/MGSHDFix)
 
 
 [MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)**<br />
@@ -29,9 +29,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Launcher skips (see Config Tool to configure).
 - Skip intro logos (MGS2/MGS3).
 - Option to disable pausing on alt-tab.
-- Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/Lyall/MGSHDFix/pull/162)
+- Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/ShizCalev/MGSHDFix/pull/162)
 - Adjustable anisotropic filtering (MGS2/MGS3).
-- Option to disable bilinear texture filtering, giving the games a pixel art/retro appearance. [PR #138](https://github.com/Lyall/MGSHDFix/pull/138)
+- Option to disable bilinear texture filtering, giving the games a pixel art/retro appearance. [PR #138](https://github.com/ShizCalev/MGSHDFix/pull/138)
 - Increased texture size limits (MG1/MG2/MGS3).
 - Adds support for custom PS2 controller glyphs without overwriting existing textures.
 - Option to force Snake / Raiden to wear their sunglasses (and outright disable their sunglasses.)
@@ -42,17 +42,17 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 ## Bug Fixes
 - Fixes the collection's games sometimes defaulting to intergrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
 - Fixes gameplay/cutscene aspect ratio for ultrawide resolutions (MGS2/MGS3).
-- Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/Lyall/MGSHDFix/pull/127)
+- Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/ShizCalev/MGSHDFix/pull/127)
 - Fixes the monitor going to sleep during long cutscenes (for Windows only, Linux needs to be [fixed by Valve](https://github.com/ValveSoftware/Proton/issues/8881).
 - Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
-- Fixes water surface rendering (MGS3). See [PR #71](https://github.com/Lyall/MGSHDFix/pull/71) for a breakdown of the issue.
+- Fixes water surface rendering (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
 - Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the bug where your character would start aiming right away after re-equipping a gun that was drawn when you put it away. 
 - Fixes the bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
 - Fixes various visual effects which ran at double speed, causing them to end early compared to on the PS2 (these issue even occur on PCSX2/PS2 emulation) (MGS2).
-- Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/Lyall/MGSHDFix/pull/140)
-- Fixes UI scaling. [PR #181](github.com/Lyall/MGSHDFix/pull/181)
-- Fixes typos in several Snake Tales missions, and in the in-game novel "In The Darkness of Shadow Moses". [PR#201](https://github.com/Lyall/MGSHDFix/pull/201)
+- Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/ShizCalev/MGSHDFix/pull/140)
+- Fixes UI scaling. [PR #181](github.com/ShizCalev/MGSHDFix/pull/181)
+- Fixes typos in several Snake Tales missions, and in the in-game novel "In The Darkness of Shadow Moses". [PR#201](https://github.com/ShizCalev/MGSHDFix/pull/201)
 - Many more!
 
 ## Logging / Warnings for Common Configuration Issues
@@ -68,7 +68,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Delete old MGSHDFix files (e.g., `MGSHDFix Config Tool.exe` and `MGSHDFix.asi`) before installing the update.
 
 ### Steps:
-1. Grab the latest release of MGSHDFix from [here.](https://github.com/Lyall/MGSHDFix/releases)
+1. Grab the latest release of MGSHDFix from [here.](https://github.com/ShizCalev/MGSHDFix/releases)
 2. Extract the contents of the release zip into your game folder.
    - (e.g., `steamapps\common\MGS2` or `steamapps\common\MGS3` for Steam.)
 3. Set both "Internal Resolution" & "Internal Upscaling" to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
@@ -93,7 +93,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
 
 ## Support
-Please report any issues you notice on our Github [here](https://github.com/Lyall/MGSHDFix/issues/new/choose).
+Please report any issues you notice on our Github [here](https://github.com/ShizCalev/MGSHDFix/issues/new/choose).
 
 For more immediate problems, you can contact us in the [#HDFix](https://discord.gg/bFv9bZmWDV) channel of the Metal Gear Network Discord.
 
@@ -101,16 +101,16 @@ For more immediate problems, you can contact us in the [#HDFix](https://discord.
 This list will contain bugs which may or may not be fixed.
 
 ### MGS 2
-- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
-- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
+- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/ShizCalev/MGSHDFix/issues/35))
+- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/ShizCalev/MGSHDFix/issues/41))
 
 ### MGS 3
-- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/Lyall/MGSHDFix/issues/35))
-- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/Lyall/MGSHDFix/issues/41))
+- Strength of post-processing may be reduced at higher resolutions. ([#35](https://github.com/ShizCalev/MGSHDFix/issues/35))
+- Various visual issues when using the experimental HUD fix. ([#41](https://github.com/ShizCalev/MGSHDFix/issues/41))
 
 ### MGS Master Collection - Community Bug Tracker
 - A detailed tracker which catalogs all of the known Master Collection bugs (including issues fixed by MGSHDFix) can be located [here](https://docs.google.com/spreadsheets/d/1WhQSRpkC_A9wBDV0o-Pohh1dMhL1H6nbVzvdluIVWrw/edit?gid=0#gid=0).
-- To submit new entries to the tracker, either report a new issue on the MGSHDFix [Github](https://github.com/Lyall/MGSHDFix/issues/new/choose), or use [this form](https://docs.google.com/forms/d/e/1FAIpQLSef8Vx38tHpBsR-dXnawF6X0iad3XU7vmDX29pcmjbaZhQiew/viewform).
+- To submit new entries to the tracker, either report a new issue on the MGSHDFix [Github](https://github.com/ShizCalev/MGSHDFix/issues/new/choose), or use [this form](https://docs.google.com/forms/d/e/1FAIpQLSef8Vx38tHpBsR-dXnawF6X0iad3XU7vmDX29pcmjbaZhQiew/viewform).
 
 ## Examples
 
@@ -158,7 +158,7 @@ This list will contain bugs which may or may not be fixed.
 
 ## Building
 ```bash
-git clone https://github.com/Lyall/MGSHDFix.git
+git clone https://github.com/ShizCalev/MGSHDFix.git
 cd MGSHDFix
 git submodule update --init --recursive
 git config submodule.recurse true
@@ -177,7 +177,7 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 ## Credits
 [@Lyall](https://codeberg.org/Lyall) for their amazing work making widescreen fix mods, and most importantly, the original creation of this mod!<br />
 [@ShizCalev/Afevis](https://github.com/shizcalev) for long-term maintenance (taking over the project in early 2025), and contributing fixes.<br />
-[@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), and [Zenf0](https://next.nexusmods.com/profile/zenf0) for contributing fixes/features. <br />
+[@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), [@SpaceCore](https://github.com/Jacky720), [@gibletto](https://github.com/gibletto) and [Zenf0](https://next.nexusmods.com/profile/zenf0) for contributing fixes/features. <br />
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
