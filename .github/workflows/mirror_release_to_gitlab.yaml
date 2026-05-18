@@ -19,7 +19,7 @@ jobs:
         uses: kujov/gitlab-sync@main
         with:
           gitlab_url: ${{ secrets.GITLAB_URL }}
-          username: ${{ secrets.USERNAME }}
+          username: ${{ secrets.GITLAB_USERNAME }}
           gitlab_pat: ${{ secrets.GITLAB_PAT }}
           git_lfs: true
 
