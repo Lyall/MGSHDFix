@@ -1,0 +1,45 @@
+name: Sync to GitLab
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  release:
+    types:
+      - published
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync repository to GitLab
+        uses: kujov/gitlab-sync@main
+        with:
+          gitlab_url: ${{ secrets.GITLAB_URL }}
+          username: ${{ secrets.USERNAME }}
+          gitlab_pat: ${{ secrets.GITLAB_PAT }}
+          git_lfs: true
+
+  sync-release:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: sync-repo
+
+    steps:
+      - name: Create GitLab release
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          curl --request POST \
+            --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+            --data-urlencode "name=${RELEASE_NAME}" \
+            --data-urlencode "tag_name=${RELEASE_TAG}" \
+            --data-urlencode "description=${RELEASE_BODY}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"
