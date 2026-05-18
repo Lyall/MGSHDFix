@@ -2,7 +2,7 @@
 [![Releases](https://img.shields.io/github/v/release/ShizCalev/MGSHDFix)](https://github.com/ShizCalev/MGSHDFix/releases) [![Downloads](https://img.shields.io/github/downloads/ShizCalev/MGSHDFix/total)](https://github.com/ShizCalev/MGSHDFix/releases) ![Commits](https://img.shields.io/github/commit-activity/t/ShizCalev/MGSHDFix) ![License](https://img.shields.io/github/license/ShizCalev/MGSHDFix)
 
 
-[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)**<br />
+[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | ([GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/)<br />
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
