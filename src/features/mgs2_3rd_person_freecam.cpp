@@ -11,7 +11,8 @@ namespace
 {
     //TODO: 
     //      - disable camera angles when leaning against walls | partially done. see v3 known issues below
-
+	// Make transition to static cam hold inverted input
+	// Falling into ocean needs to force static
 
     std::int32_t* gBP_3rdPersonCamera_Override = nullptr;
 
@@ -60,7 +61,6 @@ namespace
             return;
         }
         *gBP_3rdPersonCamera_Dist = std::min(*gBP_3rdPersonCamera_Dist + MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMaxCameraDistance);
-        //spdlog::info("MGS2: Third Person Freecam: Increased camera distance to {}", *gBP_3rdPersonCamera_Dist);
     }
 
     void DecreaseCameraDistance()
@@ -70,7 +70,6 @@ namespace
             return;
         }
         *gBP_3rdPersonCamera_Dist = std::max(*gBP_3rdPersonCamera_Dist - MGS2_ThirdPersonFreecam::iCameraDistanceStep, k3rdPersonMinCameraDistance);
-        //spdlog::info("MGS2: Third Person Freecam: Decreased camera distance to {}", *gBP_3rdPersonCamera_Dist);
     }
 
     void ResetCameraDistance()
@@ -80,8 +79,6 @@ namespace
             return;
         }
         *gBP_3rdPersonCamera_Dist = MGS2_ThirdPersonFreecam::iMax_Camera_Distance;
-        //spdlog::info("MGS2: Third Person Freecam: Reset camera distance to {}", *gBP_3rdPersonCamera_Dist);
-        //spdlog::info("MGS2 GM_Weapon value: {}, Get_GM_GameStatus value: {}", MGS2_LinkVarBuf::GM_Weapon.get(), g_GameVars.Get_GM_GameStatus());
         //spdlog::info("MGS2_LinkVarBuf::GM_PlayerPosX value: {}, MGS2_LinkVarBuf::GM_PlayerPosY value: {}, MGS2_LinkVarBuf::GM_PlayerPosZ value: {}", MGS2_LinkVarBuf::GM_PlayerPosX.get(), MGS2_LinkVarBuf::GM_PlayerPosY.get(), MGS2_LinkVarBuf::GM_PlayerPosZ.get());
     }
 
@@ -146,6 +143,9 @@ namespace
         g_leavingSubjectFrames = 30;
         g_PL_LeaveSubject_hook.call<void>(a1);
     }
+
+    bool isW45a = false;
+    bool isMainGameOrAlternate = false;
 }
 
 void MGS2_ThirdPersonFreecam::Tick()
@@ -164,7 +164,7 @@ void MGS2_ThirdPersonFreecam::Tick()
         return;
     }
 
-    if (!((g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Plant) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Tanker) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Alternate)))
+    if (!isMainGameOrAlternate)
     {
         ForceCameraDisabled();
         return;
@@ -172,14 +172,14 @@ void MGS2_ThirdPersonFreecam::Tick()
 
     //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
 
-    if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE)
+    if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE || MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_COOLANT)
     {
         ForceCameraDisabled();
         return;
     }
 
 
-    if (g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A))
+    if (isW45a)
     {
         const int playerPosX = MGS2_LinkVarBuf::GM_PlayerPosX;
         const int playerPosZ = MGS2_LinkVarBuf::GM_PlayerPosZ;
@@ -201,7 +201,11 @@ void MGS2_ThirdPersonFreecam::Tick()
 
 void MGS2_ThirdPersonFreecam::HandleLevelTransition()
 {
-    //todo -> handling for some levels with small entrances where the freecam clips, like w45a
+
+    isMainGameOrAlternate = ((g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Plant) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Tanker) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Alternate));
+
+    isW45a = (g_GameVars.IsStage(MGS2Stages::W45A) || g_GameVars.IsStage(MGS2Stages::A45A));
+
 }
 
 void MGS2_ThirdPersonFreecam::Activate()

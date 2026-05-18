@@ -7,8 +7,12 @@
 /*
  
          //todo:
+	// Refactor speed fx for egametype & mgs3
+	// MGS3 rain color fix
+	// Scope zoom in speed
+	// Fix ledge jump forcing camera
 
-     //      - mgs3 cutscene flag for OriginalCameraPositions !!!! CRITICAL
+
     //      - real character names / custom character name
     //      - laser origin
 

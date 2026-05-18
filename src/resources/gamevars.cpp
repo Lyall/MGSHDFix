@@ -318,12 +318,7 @@ MGS2GameMode GameVars::MGS2_GetGameMode() const
         return MGS2GameMode::VRStreaking;
     }
 
-    if (_stricmp(s->sGameMode, "VR: Weapons -") == 0)
-    {
-        return MGS2GameMode::VRWeapons;
-    }
-
-    if (strncmp(s->sGameMode, "VR: Weapons", 11) == 0)
+    if (_strnicmp(s->sGameMode, "VR: Weapons", 11) == 0)
     {
         return MGS2GameMode::VRWeapons;
     }
