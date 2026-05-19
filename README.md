@@ -160,13 +160,14 @@ This list will contain bugs which may or may not be fixed.
 | ![MGS3 widescreen gameplay preview](screenshots/after/mgs3%20-%20widescreen.gif) |
 |:--:|
 
-| Unmodded Metal Gear Solid 3                                                                                                       | MGSHDFix                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20thermals.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20thermals.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20radio%20menu.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20radio%20menu.png" />            |
-| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20wig%20reflection.gif" />         | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20wig%20reflection.gif" />         |
-| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20river%20reflection.jpg" />                       | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20river%20reflection.jpg" />                       |
-| Unmodded Metal Gear Solid 3                                                                                                       | MGSHDFix                                                                                                                         |
+| Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20thermals.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20thermals.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20radio%20menu.png" />     | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20radio%20menu.png" />     |
+| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20wig%20reflection.gif" />   | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20wig%20reflection.gif" />   |
+| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
+| Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix |
+
 ![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing.png)
 
 ![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing_2.png)
