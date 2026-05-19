@@ -1,8 +1,10 @@
 # Metal Gear Solid Master Collection Fix
 [![Releases](https://img.shields.io/github/v/release/ShizCalev/MGSHDFix)](https://github.com/ShizCalev/MGSHDFix/releases) [![Downloads](https://img.shields.io/github/downloads/ShizCalev/MGSHDFix/total)](https://github.com/ShizCalev/MGSHDFix/releases) ![Commits](https://img.shields.io/github/commit-activity/t/ShizCalev/MGSHDFix) ![License](https://img.shields.io/github/license/ShizCalev/MGSHDFix)
 
+[![Discord](https://img.shields.io/discord/1116856754920226876?logo=discord&logoColor=white&label=Metal%20Gear%20Network%20-%20%23HDFix&color=7289DA)](https://discord.gg/bFv9bZmWDV)
 
-[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | ([GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/)<br />
+
+[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | [GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/)<br />
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
@@ -21,39 +23,66 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Metal Gear Solid Delta: Snake Eater | MGSDeltaFix - [Repo](https://codeberg.org/Lyall/MGSDeltaFix) / [Nexus Page](https://www.nexusmods.com/metalgearsoliddeltasnakeeater/mods/27)
 
 ## Features
+> [!NOTE]
+(This is just a partial list, more features and fixes are updated frequently and may be missing.)
+
+#### Shared Engine Features:
 - Custom resolution/ultrawide support.
 - Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
 - Borderless/windowed mode.
 - Mouse cursor toggle.
-- Mouse sensitivity adjustment (MGS3).
 - Launcher skips (see Config Tool to configure).
-- Skip intro logos (MGS2/MGS3).
 - Option to disable pausing on alt-tab.
-- Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/ShizCalev/MGSHDFix/pull/162)
-- Adjustable anisotropic filtering (MGS2/MGS3).
 - Option to disable bilinear texture filtering, giving the games a pixel art/retro appearance. [PR #138](https://github.com/ShizCalev/MGSHDFix/pull/138)
 - Increased texture size limits (MG1/MG2/MGS3).
 - Adds support for custom PS2 controller glyphs without overwriting existing textures.
-- Option to force Snake / Raiden to wear their sunglasses (and outright disable their sunglasses.)
 - Option to continue aiming your gun after firing it while in first-person/while holding lock-on.
 - Toggleable wireframe modes.
-- Many more!
+- Option to force highest level polygon models during gameplay & cutscenes (improving visual qualiity.)
+- Adjustable anisotropic filtering (MGS2/MGS3).
+- Skip intro logos (MGS2/MGS3).
+- Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
+
+#### MGS2 Specific Features:
+- Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
+- Option to restore 2001 Japanese Sons of Liberty phone ringtone.
+- Option to restore PlayStation 2 Solidus choking durations & health reduction (rebalanced in the HDC.)
+- Option to force Snake / Raiden to wear their sunglasses (and outright disable their sunglasses.)
+- Option to force Real Time Clock based hostage Easter Egg.
+
+#### MGS3 Specific Features:
+- Option to force grass to render at all distances.
+- Mouse sensitivity adjustment.
+
 
 ## Bug Fixes
-- Fixes the collection's games sometimes defaulting to intergrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
+#### Shared Engine Bugs:
+- Fix idle wait issue, dramatically reducing CPU usage - increasing game performance.
+- Fixes the collection's games sometimes defaulting to integrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
 - Fixes gameplay/cutscene aspect ratio for ultrawide resolutions (MGS2/MGS3).
 - Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/ShizCalev/MGSHDFix/pull/127)
 - Fixes the monitor going to sleep during long cutscenes (for Windows only, Linux needs to be [fixed by Valve](https://github.com/ValveSoftware/Proton/issues/8881).
-- Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
-- Fixes water surface rendering (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
-- Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the bug where your character would start aiming right away after re-equipping a gun that was drawn when you put it away. 
-- Fixes the bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
-- Fixes various visual effects which ran at double speed, causing them to end early compared to on the PS2 (these issue even occur on PCSX2/PS2 emulation) (MGS2).
+- Fixes tons of visual / particle effects which ran at double speed, causing them to end early compared to on the PS2 (these issue even occur on PCSX2/PS2 emulation) (MGS2).
 - Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/ShizCalev/MGSHDFix/pull/140)
 - Fixes UI scaling. [PR #181](github.com/ShizCalev/MGSHDFix/pull/181)
+- Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/ShizCalev/MGSHDFix/pull/162)
+
+
+#### MGS2 Specific Bug Fixes:
+- Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
+- Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
+- Fixes bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
 - Fixes typos in several Snake Tales missions, and in the in-game novel "In The Darkness of Shadow Moses". [PR#201](https://github.com/ShizCalev/MGSHDFix/pull/201)
-- Many more!
+- Fixes optical camoflauge refraction effects.
+- Fixes unique Metal Gear Ray unit numbers not properly updating.
+- Fixes Harrier not properly updating damaged state textures.
+
+
+#### MGS3 Specific Bug Fixes:
+- Fixes 2011 HD Collection's incorrect camera/viewport height in all cutscenes, cutting off the bottom ~10% of the screen.
+- Fixes water surface rendering (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
+
 
 ## Logging / Warnings for Common Configuration Issues
 - Warnings for common mod compatibility & installation issues - which often result in crashes.
@@ -76,12 +105,13 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ### Steam Deck/Linux Additional Instructions
 
+> [!NOTE]
 **🚩 These steps are only needed if you’re on Steam Deck/Linux. Skip if you’re using Windows.**
 
 - Open up the game properties of either MGS2/MGS3 in Steam and add the following line to the launch options:
 
       WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
-	   
+
 - MGSHDFix's Config Tool requires **ProtonTricks** to be installed via Linux's **Discover** software store.
 - When opening the MGSHDFix Config Tool on Steam Deck/Linux, a Proton Tricks Wine Prefix window will pop up. Select any game and hit "OK" to open the MGSHDFix Config Tool.
    - If you do not have any games in the list, or the MGSHDFix Config Tool fails to launch, add it as a non-steam game and launch it once through Steam to generate a new Proton Tricks Wine Prefix entry.
@@ -137,9 +167,14 @@ This list will contain bugs which may or may not be fixed.
 | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20wig%20reflection.gif" />         | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20wig%20reflection.gif" />         |
 | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20river%20reflection.jpg" />                       | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20river%20reflection.jpg" />                       |
 | Unmodded Metal Gear Solid 3                                                                                                       | MGSHDFix                                                                                                                         |
+![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing.png)
+
+![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing_2.png)
 
 ![MGS3 - Correctly scaled rain on bridge scene](screenshots/after/mgs3%20-%20bridge%20rain.png)
+
 ![MGS3 - Correctly scaled rain in The Sorrow's river](screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
+
 ![MGS3 - Wireframe mode visual](screenshots/after/mgs3%20-%20wireframe.png)
 
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
@@ -147,7 +182,6 @@ This list will contain bugs which may or may not be fixed.
 - MG1 / MG2 - Crop Screen Borders (2011 HDC)
 - MGS2 - Fix Broken Cutscene Color Filters (2002 Xbox)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
-- MGS3 - Fix Cutscene Camera Offset (2011 HDC)
 - MGS3 - Fix Angle of Attack Indicator in FPV with NVG & Thermals (2011 HDC)
 - MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
 - MGS2 / MGS3 - Add Custom Anti-Aliasing Solution (2023 MC)
