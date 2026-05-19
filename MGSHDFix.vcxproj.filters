@@ -212,6 +212,9 @@
     <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\adjustable_captions.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -422,6 +425,9 @@
       <Filter>APIs\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_hostage_type_easter_egg.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\adjustable_captions.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>

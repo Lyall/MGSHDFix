@@ -133,7 +133,25 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, ConfigKeys::FramebufferFix_Help, ConfigKeys::FramebufferFix_Tooltip,
-          std::nullopt, false, Field::Bool, true }
+          std::nullopt, false, Field::Bool, true },
+
+
+
+        { ConfigKeys::Caption_Scale_Section, ConfigKeys::Caption_Scale_Setting, ConfigKeys::Caption_Scale_Help, ConfigKeys::Caption_Scale_Tooltip,
+std::nullopt, false, Field::Int, 100, 1, 100},
+
+
+        { ConfigKeys::Caption_Opacity_Section, ConfigKeys::Caption_Opacity_Setting, ConfigKeys::Caption_Opacity_Help, ConfigKeys::Caption_Opacity_Tooltip,
+          std::nullopt, false, Field::Int, 100, 0, 100},
+
+                { ConfigKeys::Caption_Opacity_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+
+        { ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, ConfigKeys::Caption_Background_Opacity_Help, ConfigKeys::Caption_Background_Opacity_Tooltip,
+          std::nullopt, false, Field::Int, 100, 0, 100 },
+
     }},
     { wxString("Tweaks"), {
         { ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, ConfigKeys::LauncherJumpStart_Help, ConfigKeys::LauncherJumpStart_Tooltip,

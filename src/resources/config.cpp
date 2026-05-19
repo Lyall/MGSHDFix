@@ -40,6 +40,7 @@
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
 #include "original_camera_positions.hpp"
+#include "adjustable_captions.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -750,22 +751,15 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
 
 
-    constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
-    constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
-    constexpr const char* MGS2_Hostage_Type_Help = "";
-    constexpr const char* MGS2_Hostage_Type_Tooltip = "The game swaps which hostages are in Shell 1 core based off your system's real time clock in New Game+ playthroughs.\n"
-        "\n"
-        "Normal = use normal RTC hostages.\n"
-        "\n"
-        "1:00 PM = All hostages are Kato-chan (Japanese comedian.)\n"
-        "\n"
-        "10:00 PM = All hostages are Cathy.\n"
-        "\n"
-        "Midnight = All hostages are Jennifer Love Hewitt.\n";
-    constexpr const char* MGS2_Hostage_Type_Option_Normal = "Normal";
-    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "1:00 PM Hostages";
-    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
-    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Scale_Section, ConfigKeys::Caption_Scale_Setting, AdjustableCaptions::fSubtitleScale);
+    LOG_CONFIG(ConfigKeys::Caption_Scale_Section, ConfigKeys::Caption_Scale_Setting, AdjustableCaptions::fSubtitleScale);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Opacity_Section, ConfigKeys::Caption_Opacity_Setting, AdjustableCaptions::iSubtitleAlpha);
+    LOG_CONFIG(ConfigKeys::Caption_Opacity_Section, ConfigKeys::Caption_Opacity_Setting, AdjustableCaptions::iSubtitleAlpha);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
+    LOG_CONFIG(ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
+
 
 
     /*

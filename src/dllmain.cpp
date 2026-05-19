@@ -63,6 +63,7 @@
 #include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
+#include "adjustable_captions.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -471,6 +472,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
     INITIALIZE(OriginalCameraPositions::Activate());
     INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
+    INITIALIZE(AdjustableCaptions::Apply());
 
 
 

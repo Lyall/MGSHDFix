@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\adjustable_captions.cpp" />
     <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp" />
     <ClCompile Include="src\features\mgs2_3rd_person_freecam.cpp" />
     <ClCompile Include="src\features\mgs2_difficulty.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\adjustable_captions.hpp" />
     <ClInclude Include="src\features\mgs2_hostage_type_easter_egg.hpp" />
     <ClInclude Include="src\resources\game_stages.hpp" />
     <ClInclude Include="src\resources\mgs2_equipment_enums.hpp" />

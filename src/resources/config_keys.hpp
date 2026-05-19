@@ -96,6 +96,21 @@ namespace ConfigKeys
                                                             "This will give the game a pixelated / Minecraft-esque appearance.";
 
 
+    constexpr const char* Caption_Scale_Section = "Caption Settings";
+    constexpr const char* Caption_Scale_Setting = "Caption Size (%)";
+    constexpr const char* Caption_Scale_Help = "";
+    constexpr const char* Caption_Scale_Tooltip = "";
+
+    constexpr const char* Caption_Opacity_Section = "Caption Settings";
+    constexpr const char* Caption_Opacity_Setting = "Caption Opacity (%)";
+    constexpr const char* Caption_Opacity_Help = "";
+    constexpr const char* Caption_Opacity_Tooltip = "";
+
+    constexpr const char* Caption_Background_Opacity_Section = "Caption Settings";
+    constexpr const char* Caption_Background_Opacity_Setting = "Caption Outline Opacity (%)";
+    constexpr const char* Caption_Background_Opacity_Help = "";
+    constexpr const char* Caption_Background_Opacity_Tooltip = "";
+
     constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
     constexpr const char* LOD_MGS2_Marines_Help = "";
