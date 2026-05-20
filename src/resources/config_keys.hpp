@@ -380,26 +380,37 @@ namespace ConfigKeys
 
 
 
-    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person View Mode";
-    constexpr const char* MGS2_First_Person_View_Enabled_Setting = "First Person View Mode Enabled";
+    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person Shooter Mode";
+    constexpr const char* MGS2_First_Person_View_Enabled_Setting = "Enable First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Help = "";
     constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "";
 
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person View Movement Enabled By Default";
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person Shooter - Movement Enabled By Default";
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Help = "";
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip = "";
 
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Setting = "First Person View Movement Toggle";
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Setting = "Toggle First Person Shooter Movement";
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Help = "";
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Tooltip = "";
 
     constexpr const char* MGS2_First_Person_View_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_ToggleKey_Setting = "First Person View Toggle";
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Setting = "Toggle First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_ToggleKey_Help = "";
     constexpr const char* MGS2_First_Person_View_ToggleKey_Tooltip = "";
 
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Setting = "Tap to Keep First Person View Active";
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Help = "";
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Tooltip = "";
+
+
+
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Setting = "Toggle Tap for First Person View";
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Help = "";
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Tooltip = "";
 
 
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "MGS2 - Difficulty Restoration";

@@ -36,11 +36,11 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
-#include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
+#include "mgs2_first_person_view_mode.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -760,19 +760,23 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
     LOG_CONFIG(ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
 
-
-
-    /*
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
-    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
-    if (MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled)
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_First_Person_View::bFirst_Person_View_Enabled);
+    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_First_Person_View::bFirst_Person_View_Enabled);
+    if (MGS2_First_Person_View::bFirst_Person_View_Enabled)
     {
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View_Movement);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_First_Person_Override);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_First_Person_View_Movement);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
-        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
-    }*/
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_First_Person_View::bFirst_Person_View_Movement_Enabled_By_Default);
+        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_First_Person_View::bFirst_Person_View_Movement_Enabled_By_Default);
+    }
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold);
+    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold);
+    if (MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_Hold_First_Person_View);
+    }
 
 
     ConfigLogger::Flush();

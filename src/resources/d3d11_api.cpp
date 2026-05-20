@@ -14,6 +14,7 @@
 #include "gamma_correction.hpp"
 #include "input_handler.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
+#include "mgs2_first_person_view_mode.hpp"
 
 void afterPresent();
 
@@ -153,7 +154,12 @@ namespace
 
         g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
-        MGS2_ThirdPersonFreecam::Tick();
+
+        if (eGameType & MGS2)
+        {
+            MGS2_ThirdPersonFreecam::Tick();
+            MGS2_First_Person_View::Tick();
+        }
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 
