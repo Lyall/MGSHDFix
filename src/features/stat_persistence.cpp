@@ -97,7 +97,7 @@ void StatPersistence::GetAchievementStats()
 
 void StatPersistence::OnSteamInitialized()
 {
-    if (!bAchievementPersistenceEnabled || !(eGameType & (MGS2|MGS3)))
+    if (g_SteamAPI.bDisableSteamAchievementUnlocking || !bAchievementPersistenceEnabled || !(eGameType & (MGS2|MGS3)))
     {
         return;
     }
@@ -218,6 +218,11 @@ void StatPersistence::Setup() const
     }
     if (!(eGameType & (MGS2 | MGS3)))
     {
+        return;
+    }
+    if (g_SteamAPI.bDisableSteamAchievementUnlocking)
+    {
+        spdlog::info("Steam Stat Persistance: Achievement unlocking disabled via config. Skipping setup.");
         return;
     }
     if (!bAchievementPersistenceEnabled)

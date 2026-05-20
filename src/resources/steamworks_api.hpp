@@ -31,6 +31,7 @@ public:
     bool bIsOnline = true;
     std::optional<uint64_t> steamID;
     bool bResetAchievements = false;
+    bool bDisableSteamAchievementUnlocking = false;
 
     int* iNumberOfControllers = nullptr;
 

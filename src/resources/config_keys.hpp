@@ -601,6 +601,12 @@ namespace ConfigKeys
                                                                "You may have to exit and reenter an area for the change to take effect.";
 
     // Achievements
+
+    constexpr const char* DisableSteamAchievements_Section = "DISABLE STEAM ACHIEVEMENTS";
+    constexpr const char* DisableSteamAchievements_Setting = "Disable Unlocking Steam Achievements";
+    constexpr const char* DisableSteamAchievements_Help = "";
+    constexpr const char* DisableSteamAchievements_Tooltip = "Disables Steam achievements for the game.";
+
     constexpr const char* AchievementPersistence_Section = "Bugfixes";
     constexpr const char* AchievementPersistence_Setting = "Fix Achievement Stat Tracking";
     constexpr const char* AchievementPersistence_Help = "";

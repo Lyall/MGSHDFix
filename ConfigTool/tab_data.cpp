@@ -364,12 +364,16 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, ConfigKeys::AchievementPersistence_Help, ConfigKeys::AchievementPersistence_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::DisableSteamAchievements_Section, ConfigKeys::DisableSteamAchievements_Setting, ConfigKeys::DisableSteamAchievements_Help, ConfigKeys::DisableSteamAchievements_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
         { ConfigKeys::ResetAllAchievements_Section, "Safety Switch",
           ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
         { ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, ConfigKeys::ResetAllAchievements_Help, ConfigKeys::ResetAllAchievements_Tooltip,
-          std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch"), false, Field::Bool, false }
+          std::make_pair(ConfigKeys::ResetAllAchievements_Section, "Safety Switch"), false, Field::Bool, false },
+
     }},
     { wxString("MGSHDFix / Internal"), {
         { ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, ConfigKeys::CheckForUpdates_Help, ConfigKeys::CheckForUpdates_Tooltip,

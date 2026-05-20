@@ -208,6 +208,17 @@ void SteamAPI::Setup() const
         LOG_HOOK(SteamMidhook, "SteamAPI Initialization")
     }
 
+    if (bDisableSteamAchievementUnlocking)
+    {
+        uint8_t* SteamUnlockAchievementsScanResult = Memory::PatternScan(baseModule, eGameType & MGS2 ? "41 43 48 5F 30 30 32 5F 25 30 33 64 00" : eGameType & MGS3 ? "41 43 48 5F 30 30 33 5F 25 30 33 64 00" : "41 43 48 5F 31 41 32 5F 25 30 33 64 00", "SteamAPI: Disable Achievement Unlocking");
+        if (SteamUnlockAchievementsScanResult)
+        {
+            Memory::PatchBytes((uintptr_t)SteamUnlockAchievementsScanResult, "\x44", 1);
+            spdlog::info("SteamAPI: Disabled achievement unlocking.");
+            return;
+        }
+    }
+
 }
 
 #if !defined(RELEASE_BUILD)
