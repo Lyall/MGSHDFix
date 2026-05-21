@@ -266,7 +266,7 @@ namespace ConfigKeys
                                                                   "\n"
                                                                   "Equivalent to: Right-click the game's .exe -> Properties -> Compatibility -> check \"Disable Fullscreen Optimizations\"";
     constexpr const char* BusyLoopFix_Section = "Bugfixes";
-    constexpr const char* BusyLoopFix_Enabled = "Fix High CPU Usage";
+    constexpr const char* BusyLoopFix_Setting = "Fix  High  CPU  Usage";
     constexpr const char* BusyLoopFix_Help = "(Also fixes TWD usage on handheld.)";
     constexpr const char* BusyLoopFix_Tooltip = "Fixes High CPU & TWD usage.\n"
                                              "\n"
@@ -276,6 +276,9 @@ namespace ConfigKeys
                                              "\n"
                                              "Fixing this restores normal behavior and improves GPU utilization.";
 
+    constexpr const char* BusyLoopFix_Option_Disabled = "Disabled";
+    constexpr const char* BusyLoopFix_Option_Half = "Half";
+    constexpr const char* BusyLoopFix_Option_Full = "Full";
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";

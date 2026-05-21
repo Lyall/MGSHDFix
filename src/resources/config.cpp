@@ -650,9 +650,28 @@ void Config::Read()
     // Busy Loop Fix
     if (eGameType & (MG | MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
-
-        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
+        std::string sBusyLoopFix;
+        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
+        if (sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Disabled && sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Half && sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Full)
+        {
+            spdlog::error("Invalid config value for {}: {}", ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
+            Logging::ShowConsole();
+            std::cout << "Invalid config value for " << ConfigKeys::BusyLoopFix_Setting << ": " << sBusyLoopFix << std::endl;
+            return FreeLibraryAndExitThread(baseModule, 1);
+        }
+        if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Disabled)
+        {
+            g_BusyLoopFix.iOption = 0;
+        }
+        else if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Half)
+        {
+            g_BusyLoopFix.iOption = 1;
+        }
+        else if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Full)
+        {
+            g_BusyLoopFix.iOption = 2;
+        }
+        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
     }
 
 
