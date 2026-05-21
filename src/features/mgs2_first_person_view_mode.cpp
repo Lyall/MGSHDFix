@@ -121,6 +121,12 @@ void MGS2_First_Person_View::Activate()
         return;
     }
 
+#if !defined(RELEASE_BUILD)
+    g_InputHandler.RegisterHotkey(VK_LEFT, "report state", []()
+                                  {
+                                      spdlog::info("MGS 2: First Person View Mode: Current state - Override: {}, Hold Toggle: {}, Movement: {}, Active: {}", *gBP_1stPersonCamera_Override, *gBP_1stPersonCamera_Hold_Toggle, *gBP_1stPersonCamera_Move, *gBP_1stPersonCamera_Active);
+                                  });
+#endif
 
     const auto gBP_1stPersonCamera_Override_scan  = Memory::PatternScan(baseModule, "8B 15 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 85 D2", "MGS2: First Person View Mode: gBP_1stPersonCamera_Override");
     if (!gBP_1stPersonCamera_Override_scan)
@@ -165,9 +171,15 @@ void MGS2_First_Person_View::Activate()
 
     gBP_1stPersonCamera_Active = reinterpret_cast<int*>(Memory::GetRelativeOffset(gBP_1stPersonCamera_Active_scan + 2));
 
+
+
+    MAKE_HOOK_MID(baseModule, "0F 84 ?? ?? ?? ?? 33 C9 E8 ?? ?? ?? ?? 39 6F", "NewDivingGoggles -> act()", {
+        if (*gBP_1stPersonCamera_Active)
+        {
+            reghelpers::SetFlag(ctx, reghelpers::FLAG_ZF, false);
+        }
+        });
+
+
+
 }
-
-
-
-
-
