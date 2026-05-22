@@ -439,7 +439,7 @@ namespace ConfigKeys
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section = "MGS2 - Difficulty Restoration";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting = "Enable Grenade Cooking";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help = "";
-    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip = "Enables the original PS2 grenade cooking mechanic, allowing players to cook grenades while still being held.\n";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip = "Restores the original PS2 grenade cooking behavior, where time spent holding an armed grenade counts toward its detonation timer.";
     
         
 
