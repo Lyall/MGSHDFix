@@ -74,6 +74,7 @@ public:
     [[nodiscard]] MGS2GameMode MGS2_GetGameMode() const;
 
     [[nodiscard]] int& GV_PauseLevel() const;
+    [[nodiscard]] int& GM_MenuStatus() const;
 
     [[nodiscard]] static constexpr uint32_t GV_StrCode(const char* inputString)
     {
@@ -106,7 +107,7 @@ private:
     float* GM_WaterLevel = nullptr;
 
     std::uint64_t* GM_PlayerStatus = nullptr;
-    int* GM_MenuStatus = nullptr;
+    int* p_GM_MenuStatus = nullptr;
     int* GM_GameStatus = nullptr;
     int* GM_VRStatus = nullptr;
     int* p_GV_PauseLevel = nullptr;

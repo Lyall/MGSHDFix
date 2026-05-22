@@ -5,6 +5,7 @@ namespace MGS2_First_Person_View
     void Activate();
 
     void Tick();
+    bool IsActive();
 
 
     inline bool bFirst_Person_View_Enabled = true;

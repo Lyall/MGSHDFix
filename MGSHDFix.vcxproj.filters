@@ -436,7 +436,9 @@
     <ClInclude Include="src\features\cutscene_pausing.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\resources\mgs2_status_flags.hpp" />
+    <ClInclude Include="src\resources\mgs2_status_flags.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

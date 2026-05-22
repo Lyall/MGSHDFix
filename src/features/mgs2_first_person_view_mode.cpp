@@ -62,6 +62,15 @@ namespace
     
 }
 
+bool MGS2_First_Person_View::IsActive()
+{
+    if (!bFirst_Person_View_Enabled)
+    {
+        return false;
+    }
+    return *gBP_1stPersonCamera_Active;
+}
+
 
 void MGS2_First_Person_View::Tick()
 {

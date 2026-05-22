@@ -22,10 +22,10 @@ void GameVars::Initialize()
 
         heldTriggers = reinterpret_cast<uint32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F2 0F 11 05 ?? ?? ?? ?? 0F 11 0D", "MGS 2: GameVars: heldTriggers") + 4));
         GM_PlayerStatus = reinterpret_cast<uint64_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 48 23 C1 C3", "MGS2: GM_PlayerStatus") + 3));
-        GM_MenuStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? 0F BA E0 ?? 72 ?? E8 ?? ?? ?? ?? E8", "MGS2: GM_MenuStatus") + 2));
+        p_GM_MenuStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? 0F BA E0 ?? 72 ?? E8 ?? ?? ?? ?? E8", "MGS2: p_GM_MenuStatus") + 2));
         GM_GameStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? 8B CB", "MGS2: GM_GameStatus") + 2));
         GM_VRStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B DA 83 E0", "MGS2: GM_VRStatus") + 2));
-        p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: GV_PauseLevel") + 2));
+        p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: p_GV_PauseLevel") + 2));
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
 
         spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
@@ -36,7 +36,7 @@ void GameVars::Initialize()
         spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_WaterLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_WaterLevel - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_PlayerStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_PlayerStatus - (uintptr_t)baseModule);
-        spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_MenuStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: p_GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: p_GV_PauseLeveladdress is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel- (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_VRStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_VRStatus - (uintptr_t)baseModule);
@@ -394,4 +394,16 @@ int& GameVars::GV_PauseLevel() const
     }
 
     return *p_GV_PauseLevel;
+}
+
+
+int& GameVars::GM_MenuStatus() const
+{
+    static int dummyGM_MenuStatus = 0;
+
+    if (p_GM_MenuStatus == nullptr)
+    {
+        return dummyGM_MenuStatus;
+    }
+    return *p_GM_MenuStatus;
 }
