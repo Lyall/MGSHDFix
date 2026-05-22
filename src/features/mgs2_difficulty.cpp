@@ -23,7 +23,6 @@ namespace
     constexpr int PS2_DIFFICULTY_SOLIDUS_CHOKING_LIFE_EXTREME           =   50;     //HDC = 136
     constexpr int PS2_DIFFICULTY_SOLIDUS_CHOKING_LIFE_EUROPEAN_EXTREME  =   30;     //HDC = 120*/
 
-    //gBP_Game_GrenadeExplodeInHand_Enable
 
     //gBP_Game_GrenadeBlast_OuterRange
 
@@ -37,10 +36,22 @@ void MGS2_RestoreOriginalDifficulty::Apply()
         return;
     }
 
-    if (!(bRestoreOriginalSolidusChokingDuration || bRestoreOriginalSolidusChokingLife))
+    if (!(bEnableGrenadeCooking || bRestoreOriginalSolidusChokingDuration || bRestoreOriginalSolidusChokingLife))
     {
         spdlog::info("MGS2: Restore Original Difficulty: Config disabled, skipping.");
         return;
+    }
+
+    if (bEnableGrenadeCooking)
+    {
+        const auto grenade_c__Act_987 = Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? B9", "MGS2_RestoreOriginalDifficulty: gBP_Game_GrenadeExplodeInHand_Enable");
+        if (grenade_c__Act_987 == nullptr)
+        {
+            spdlog::error("MGS2_RestoreOriginalDifficulty: gBP_Game_GrenadeExplodeInHand_Enable - failed to find");
+            return;
+        }
+        std::int32_t* gBP_Game_GrenadeExplodeInHand_Enable = reinterpret_cast<std::int32_t*>(Memory::GetRipRelativeAddress(grenade_c__Act_987, 2, 7));
+        *gBP_Game_GrenadeExplodeInHand_Enable = 1;
     }
 
     if (bRestoreOriginalSolidusChokingLife)

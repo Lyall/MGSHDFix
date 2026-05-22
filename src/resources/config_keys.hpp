@@ -436,6 +436,16 @@ namespace ConfigKeys
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both = "Full Restoration";
 
 
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting = "Enable Grenade Cooking";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help = "";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip = "Enables the original PS2 grenade cooking mechanic, allowing players to cook grenades while still being held.\n";
+    
+        
+
+
+
+
     // Tweaks
     constexpr const char* SkipIntroLogos_Section = "Skip Logo Screens";
     constexpr const char* SkipIntroLogos_Setting = "Skip In-Game Splashscreens";

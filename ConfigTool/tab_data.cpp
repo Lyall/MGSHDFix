@@ -230,9 +230,14 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, ConfigKeys::MGS2_PhoneJingle_Help, ConfigKeys::MGS2_PhoneJingle_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+                { ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+
 
         { ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled, {ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled,  ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both, } },
+
 
     } },
 

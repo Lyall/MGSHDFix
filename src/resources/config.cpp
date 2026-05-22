@@ -750,6 +750,9 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
 
 
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
+
     std::string sHostageType;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
     if (sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Normal &&
