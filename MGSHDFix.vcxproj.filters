@@ -215,6 +215,9 @@
     <ClCompile Include="src\features\adjustable_captions.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\cutscene_pausing.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -430,6 +433,10 @@
     <ClInclude Include="src\features\adjustable_captions.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\features\cutscene_pausing.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs2_status_flags.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">
