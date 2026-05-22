@@ -752,6 +752,11 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
     LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
+    if (MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting, MGS2_RestoreOriginalDifficulty::vkToggleGrenadeCooking);
+
+    }
 
     std::string sHostageType;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);

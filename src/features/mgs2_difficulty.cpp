@@ -2,6 +2,7 @@
 
 #include "mgs2_difficulty.hpp"
 #include "common.hpp"
+#include "input_handler.hpp"
 #include "logging.hpp"
 
 namespace
@@ -23,7 +24,7 @@ namespace
     constexpr int PS2_DIFFICULTY_SOLIDUS_CHOKING_LIFE_EXTREME           =   50;     //HDC = 136
     constexpr int PS2_DIFFICULTY_SOLIDUS_CHOKING_LIFE_EUROPEAN_EXTREME  =   30;     //HDC = 120*/
 
-
+    std::int32_t* gBP_Game_GrenadeExplodeInHand_Enable = nullptr;
     //gBP_Game_GrenadeBlast_OuterRange
 
 
@@ -50,8 +51,13 @@ void MGS2_RestoreOriginalDifficulty::Apply()
             spdlog::error("MGS2_RestoreOriginalDifficulty: gBP_Game_GrenadeExplodeInHand_Enable - failed to find");
             return;
         }
-        std::int32_t* gBP_Game_GrenadeExplodeInHand_Enable = reinterpret_cast<std::int32_t*>(Memory::GetRipRelativeAddress(grenade_c__Act_987, 2, 7));
+        gBP_Game_GrenadeExplodeInHand_Enable = reinterpret_cast<std::int32_t*>(Memory::GetRipRelativeAddress(grenade_c__Act_987, 2, 7));
         *gBP_Game_GrenadeExplodeInHand_Enable = 1;
+
+        g_InputHandler.RegisterHotkey(vkToggleGrenadeCooking, "Toggle grenade cooking", []() {
+            *gBP_Game_GrenadeExplodeInHand_Enable = !*gBP_Game_GrenadeExplodeInHand_Enable;
+        });
+
     }
 
     if (bRestoreOriginalSolidusChokingLife)

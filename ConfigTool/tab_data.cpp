@@ -234,6 +234,11 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, false },
 
 
+            {ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Tooltip,
+        std::make_pair(ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting), false, Field::Hotkey, 0, 0, 0, "Num9" },
+
+
+
 
         { ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled, {ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Disabled,  ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both, } },
