@@ -283,18 +283,23 @@ namespace ConfigKeys
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_Always_Setting = "Always Keep Aiming";
-    constexpr const char* KeepAimingAfterFiring_Always_Help = "";
+    constexpr const char* KeepAimingAfterFiring_Always_Help = "(MGS2 support is limited to rifles.)\n"
+                                                              "    (All guns supported in MGS3.)";
     constexpr const char* KeepAimingAfterFiring_Always_Tooltip = "Keeps aiming after firing, always.\n"
                                                                  "\n"
                                                                  "Matches the older KeepAiming mod behavior. Can be awkward to play with.\n"
-                                                                 "Suggestion: leave this off and use the First-Person and Lock-On options instead.\n"
-                                                                 "\n"
-                                                                 "(MGS2 support is limited to rifles. All guns supported in MGS3.)";
+                                                                 "Suggestion: leave this off and use the First-Person and Lock-On options instead.\n";
 
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Setting = "While in First Person";
-    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Help = "";
+    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Help = "(Excludes FPS mode)";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Tooltip = "Keeps aiming after firing while in first-person view.";
+
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Section = "Keep Aiming After Firing";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Setting = "MGS2 - While in FPS Mode";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Help = "";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in MGS2's FPS mode.";
+
 
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Setting = "While Holding Lock On";
@@ -385,8 +390,15 @@ namespace ConfigKeys
 
     constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Setting = "Enable First Person Shooter Mode";
-    constexpr const char* MGS2_First_Person_View_Enabled_Help = "";
-    constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "";
+    constexpr const char* MGS2_First_Person_View_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)";
+    constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "Enables the First Person Shooter mode.\n"
+                                                                    "\n"
+                                                                    "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
+                                                                    "\n"
+                                                                    "This feature was cut around 7/7/2011 per a leftover note found in the source code.\n"
+                                                                    "\n"
+                                                                    "Functionality is a bit glitchy, as this feature was not fully completed.\n"
+                                                                    "Things are still being patched up by hand with love. <3\n";
 
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Section = MGS2_First_Person_View_Enabled_Section;
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person Shooter - Movement Enabled By Default";

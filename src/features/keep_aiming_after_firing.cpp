@@ -5,14 +5,23 @@
 
 #include "gamevars.hpp"
 #include "logging.hpp"
-#include "steamworks_api.hpp"
+#include "mgs2_first_person_view_mode.hpp"
 
 /// Originally made by Zenf as part of the Keep Aiming mod for MGS3.
 
+namespace
+{
+    bool is_first_person_vr = false;
+}
+
+void KeepAimingAfterFiring::HandleLevelTransition()
+{
+    is_first_person_vr = (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::VRFirstPerson);
+}
 
 void KeepAimingAfterFiring::Initialize()
 {
-    if (!(eGameType & (MGS2|MGS3)) || !(g_KeepAimingAfterFiring.bAlwaysKeepAiming || g_KeepAimingAfterFiring.bKeepAimingInFirstPerson || g_KeepAimingAfterFiring.bKeepAimingOnLockOn))
+    if (!(eGameType & (MGS2|MGS3)) || !(g_KeepAimingAfterFiring.bAlwaysKeepAiming || g_KeepAimingAfterFiring.bKeepAimingInFirstPerson || g_KeepAimingAfterFiring.bKeepAimingOnLockOn || g_KeepAimingAfterFiring.bKeepAimingInFPSMode))
     {
         return;
     }
@@ -33,9 +42,16 @@ void KeepAimingAfterFiring::Initialize()
                 ctx.r12 = g_GameVars.GetAimingState();
                 return;
             }
-            if (g_KeepAimingAfterFiring.bKeepAimingInFirstPerson && g_GameVars.MGS2IsHoldingFirstPerson())
+            //spdlog::info("MGS 2: Keep Aiming After Firing: is_first_person_vr {}, bKeepAimingInFirstPerson {}, PL_Status {:X}", is_first_person_vr, g_KeepAimingAfterFiring.bKeepAimingInFirstPerson, g_GameVars.Get_PL_Status());
+            if (g_KeepAimingAfterFiring.bKeepAimingInFirstPerson && (g_GameVars.Get_PL_Status() & (PLAYER_INTRUDE | PLAYER_WATCH)))
             {
                 ctx.r12 = g_GameVars.GetAimingState();
+                return;
+            }
+            if (g_KeepAimingAfterFiring.bKeepAimingInFPSMode && (MGS2_First_Person_View::IsActive() || is_first_person_vr))
+            {
+                ctx.r12 = g_GameVars.GetAimingState();
+                //spdlog::info("MGS 2: Keep Aiming After Firing: keeping aiming in FPS mode");
                 return;
             }
             if (g_KeepAimingAfterFiring.bKeepAimingOnLockOn && g_GameVars.MGS2IsHoldingLockOn())

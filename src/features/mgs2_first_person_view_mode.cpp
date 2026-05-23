@@ -59,7 +59,7 @@ namespace
         //spdlog::info("MGS2: First Person View Mode: Camera state released. Override: {}, Hold Toggle: {}, Movement: {}", *gBP_1stPersonCamera_Override, *gBP_1stPersonCamera_Hold_Toggle, *gBP_1stPersonCamera_Move);
     }
 
-    
+    bool bLevelForcedOff = false;
 }
 
 bool MGS2_First_Person_View::IsActive()
@@ -68,7 +68,20 @@ bool MGS2_First_Person_View::IsActive()
     {
         return false;
     }
+    //spdlog::info("did the thing");
     return *gBP_1stPersonCamera_Active;
+}
+
+void MGS2_First_Person_View::HandleLevelTransition()
+{
+    if(g_GameVars.MGS2_GetGameMode() == MGS2GameMode::VRFirstPerson)
+    {
+        bLevelForcedOff = true;
+        ForceCameraDisabled();
+        return;
+    }
+    
+    bLevelForcedOff = false;
 }
 
 
@@ -76,6 +89,11 @@ void MGS2_First_Person_View::Tick()
 {
     if (skip_tick)
     {
+        return;
+    }
+    if (bLevelForcedOff)
+    {
+        ForceCameraDisabled();
         return;
     }
     if (g_GameVars.InScriptedSequence()) //pad demos break when movement & hold toggle are enabled for obvious reasons.

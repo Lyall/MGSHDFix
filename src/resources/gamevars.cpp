@@ -2,8 +2,10 @@
 #include "common.hpp"
 #include "gamevars.hpp"
 #include "effect_speeds.hpp"
+#include "keep_aiming_after_firing.hpp"
 #include "logging.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
+#include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "stat_persistence.hpp"
 
@@ -175,6 +177,9 @@ void GameVars::OnLevelTransition()
     g_EffectSpeedFix.Reset();
     g_StatPersistence.SaveStats();
     
+    KeepAimingAfterFiring::HandleLevelTransition();
+
+    MGS2_First_Person_View::HandleLevelTransition();
     MGS2_ThirdPersonFreecam::HandleLevelTransition();
     MGS2Sunglasses::CheckOnTransition();
 }
