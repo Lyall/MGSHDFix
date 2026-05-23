@@ -644,9 +644,35 @@ public:
         SetMaxSize(wxSize(iWindowSizeX, iWindowSizeY));
 
         HWND hwnd = (HWND)GetHWND();
-        HICON hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));
-        SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        HINSTANCE instance = GetModuleHandleW(nullptr);
+
+        m_iconSmall = (HICON)LoadImageW(
+            instance,
+            MAKEINTRESOURCEW(IDI_ICON1),
+            IMAGE_ICON,
+            GetSystemMetrics(SM_CXSMICON),
+            GetSystemMetrics(SM_CYSMICON),
+            LR_DEFAULTCOLOR
+        );
+
+        m_iconBig = (HICON)LoadImageW(
+            instance,
+            MAKEINTRESOURCEW(IDI_ICON1),
+            IMAGE_ICON,
+            GetSystemMetrics(SM_CXICON),
+            GetSystemMetrics(SM_CYICON),
+            LR_DEFAULTCOLOR
+        );
+
+        if (m_iconSmall)
+        {
+            SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)m_iconSmall);
+        }
+
+        if (m_iconBig)
+        {
+            SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)m_iconBig);
+        }
 
         if (!std::filesystem::exists(std::filesystem::path(m_iniPath.ToStdWstring())))
         {
@@ -1196,6 +1222,21 @@ public:
         SnapshotCurrentValues();
     }
 
+    ~ConfigFrame() override
+    {
+        if (m_iconSmall)
+        {
+            DestroyIcon(m_iconSmall);
+            m_iconSmall = nullptr;
+        }
+
+        if (m_iconBig)
+        {
+            DestroyIcon(m_iconBig);
+            m_iconBig = nullptr;
+        }
+    }
+
     void HandleUpdateCheckPreference()
     {
         const wxString section = ConfigKeys::CheckForUpdates_Section;
@@ -1268,6 +1309,8 @@ private:
     };
 
     wxStaticText* m_bugfixStatus = nullptr;
+    HICON m_iconSmall = nullptr;
+    HICON m_iconBig = nullptr;
     bool m_dirty = false;
     bool m_firstRun = false;
     bool m_missingKeys = false;
