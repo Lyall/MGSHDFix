@@ -43,13 +43,17 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Skip intro logos (MGS2/MGS3).
 - Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
 - Option to adjust scale and opacity of cutscene captions.
+- Option to disable Steam Achievement unlocking. (For speedrunners.)
 
 #### MGS2 Specific Features:
 - Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
+- Option to enable Bluepoint's cancelled First Person Shooter camera.
 - Option to restore 2001 Japanese Sons of Liberty phone ringtone.
 - Option to restore PlayStation 2 Solidus choking durations & health reduction (rebalanced in the HDC.)
 - Option to force Snake / Raiden to wear their sunglasses (and outright disable their sunglasses.)
 - Option to force Real Time Clock based hostage Easter Egg.
+- Option to restore grenade cooking (having detonation timer start while the grenade is still held.)
+- Option to Swap X/O (OK / CANCEL inputs) in Menus.
 
 #### MGS3 Specific Features:
 - Option to force grass to render at all distances.
@@ -58,26 +62,33 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ## Bug Fixes
 #### Shared Engine Bugs:
-- Fix idle wait issue, dramatically reducing CPU usage - increasing game performance.
+- Fix idle wait issue, dramatically reducing CPU usage - increasing game performance. [PR#225]
 - Fixes the collection's games sometimes defaulting to integrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
 - Fixes gameplay/cutscene aspect ratio for ultrawide resolutions (MGS2/MGS3).
 - Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/ShizCalev/MGSHDFix/pull/127)
 - Fixes the monitor going to sleep during long cutscenes (for Windows only, Linux needs to be [fixed by Valve](https://github.com/ValveSoftware/Proton/issues/8881).
 - Fixes the bug where your character would start aiming right away after re-equipping a gun that was drawn when you put it away. 
-- Restores numerous particle and visual effects to proper PS2 timing, fixing effects that ran at double speed and ended too early in the HD Collection and Master Collection versions.
 - Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/ShizCalev/MGSHDFix/pull/140)
 - Fixes UI scaling. [PR #181](github.com/ShizCalev/MGSHDFix/pull/181)
 - Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/ShizCalev/MGSHDFix/pull/162)
 
 
 #### MGS2 Specific Bug Fixes:
+- Restores numerous particle and visual effects to proper PS2 timing, fixing effects that ran at double speed and ended too early in the HD Collection and Master Collection versions.
 - Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
 - Fixes bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
 - Fixes typos in several Snake Tales missions, and in the in-game novel "In The Darkness of Shadow Moses". [PR#201](https://github.com/ShizCalev/MGSHDFix/pull/201)
-- Fixes optical camouflage refraction effects.
-- Fixes unique Metal Gear Ray unit numbers not properly updating.
-- Fixes Harrier not properly updating damaged state textures.
+- Fixes optical camouflage refraction effects. [PR#228]
+- Fixes unique Metal Gear Ray unit numbers not properly updating. [PR#229]
+- Fixes Harrier not properly updating damaged state textures. [PR#229]
+- Fixes coolant not fogging up breakable mirrors / glass. [PR#231]
+- Fixes coolant glass fog appearing as hot in thermal goggles. [PR#232]
+- Fixes sensor-A Bomb radar overlay moving as the player moves.
+- Fixes broken sun reflections / sparkles during a lategame cutscene. [Spoilers](https://imgur.com/a/YSQR3xh)
+- Fixes broken Colonel MGS1/Ghost Babel sprites. [Example](https://i.imgur.com/w5khi5r.jpeg)
+- Fixes incorrect audio location when Solidus strikes Raiden with his tentacle arms. [PR#227]
+- Restores dogtag viewer information.
 
 
 #### MGS3 Specific Bug Fixes:
@@ -191,7 +202,7 @@ This list will contain bugs which may or may not be fixed.
 - MGS2 / MGS3 - Correct Display Gamma & RGB Levels (2011 HDC)
 - MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
 - MGS2 / MGS3 - Fix Depth of Field Scaling Strength (2002 Xbox / 2011 HDC)
-- MGS2 / MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
+- MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
 
 ## Building
 ```bash
@@ -218,5 +229,5 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
-[safetyhook](https://github.com/cursey/safetyhook) for hooking.
-Universal Config Tool (made by ShizCalev/Afevis).
+[safetyhook](https://github.com/cursey/safetyhook) for hooking.  <br />
+Universal Config Tool (made by ShizCalev/Afevis. Powered by SDL3.)
