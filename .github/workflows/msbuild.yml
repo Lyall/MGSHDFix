@@ -41,6 +41,20 @@ jobs:
         path: external/wxWidgets/lib/vc_x64_lib
         key: wxwidgets-${{ runner.os }}-${{ steps.wxhash.outputs.hash }}
 
+    # SDL3 cache setup
+    - name: Get SDL3 submodule hash
+      id: sdlhash
+      run: |
+        cd external/SDL
+        $hash = git rev-parse HEAD
+        "hash=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+    - name: Cache SDL3
+      uses: actions/cache@v4
+      with:
+        path: external/SDL/build/msvc-x64-static
+        key: sdl3-${{ runner.os }}-${{ steps.sdlhash.outputs.hash }}
+
     # Zydis cache setup
     - name: Get Zydis submodule hash
       id: zydishash
