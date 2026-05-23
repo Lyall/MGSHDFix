@@ -34,8 +34,7 @@
 #include <wx/choice.h>
 #include <wx/stdpaths.h>
 #include <wx/mstream.h>
-#include <Xinput.h>
-#pragma comment(lib, "Xinput.lib")
+#include <SDL3/SDL.h>
 
 #include "helper.hpp"
 #include "version.h"
@@ -114,41 +113,120 @@ static wxString Unquote(const wxString& value)
 
 namespace
 {
-    constexpr BYTE kPadTriggerThreshold = 30;
-    constexpr SHORT kPadStickThreshold = 12000;
+    constexpr int kPadTriggerThreshold = 8192;
+    constexpr int kPadStickThreshold = 12000;
 
-    bool TryGetGamepadButtonInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    bool g_SDLGamepadInitialized = false;
+    std::vector<SDL_Gamepad*> g_OpenGamepads;
+
+    bool EnsureSDLGamepadInitialized()
     {
-        if ((pad.wButtons & XINPUT_GAMEPAD_A) != 0) { outName = "Pad_A"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_B) != 0) { outName = "Pad_B"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_X) != 0) { outName = "Pad_X"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_Y) != 0) { outName = "Pad_Y"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0) { outName = "Pad_LB"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0) { outName = "Pad_RB"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_BACK) != 0) { outName = "Pad_Back"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_START) != 0) { outName = "Pad_Start"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0) { outName = "Pad_LStick"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0) { outName = "Pad_RStick"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0) { outName = "Pad_DPad_Up"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0) { outName = "Pad_DPad_Down"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0) { outName = "Pad_DPad_Left"; return true; }
-        if ((pad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0) { outName = "Pad_DPad_Right"; return true; }
-        if (pad.bLeftTrigger >= kPadTriggerThreshold) { outName = "Pad_LT"; return true; }
-        if (pad.bRightTrigger >= kPadTriggerThreshold) { outName = "Pad_RT"; return true; }
+        if (g_SDLGamepadInitialized)
+        {
+            return true;
+        }
+
+        g_SDLGamepadInitialized = SDL_InitSubSystem(SDL_INIT_GAMEPAD);
+        if (!g_SDLGamepadInitialized)
+        {
+            wxLogError("Failed to initialize SDL Gamepad support:\n\n%s", SDL_GetError());
+            return false;
+        }
+
+        return true;
+    }
+
+    void CloseOpenGamepads()
+    {
+        for (SDL_Gamepad* gamepad : g_OpenGamepads)
+        {
+            if (gamepad != nullptr)
+            {
+                SDL_CloseGamepad(gamepad);
+            }
+        }
+
+        g_OpenGamepads.clear();
+    }
+
+    void RefreshOpenGamepads()
+    {
+        if (!EnsureSDLGamepadInitialized())
+        {
+            return;
+        }
+
+        CloseOpenGamepads();
+
+        SDL_PumpEvents();
+        SDL_UpdateGamepads();
+
+        int gamepadCount = 0;
+        SDL_JoystickID* gamepadIds = SDL_GetGamepads(&gamepadCount);
+        if (gamepadIds == nullptr)
+        {
+            return;
+        }
+
+        for (int i = 0; i < gamepadCount; ++i)
+        {
+            SDL_Gamepad* gamepad = SDL_OpenGamepad(gamepadIds[i]);
+            if (gamepad != nullptr)
+            {
+                g_OpenGamepads.push_back(gamepad);
+            }
+        }
+
+        SDL_free(gamepadIds);
+    }
+
+    bool TryGetGamepadButtonInputName(SDL_Gamepad* gamepad, wxString& outName)
+    {
+        if (gamepad == nullptr)
+        {
+            return false;
+        }
+
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_SOUTH)) { outName = "Pad_A"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_EAST)) { outName = "Pad_B"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_WEST)) { outName = "Pad_X"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_NORTH)) { outName = "Pad_Y"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)) { outName = "Pad_LB"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) { outName = "Pad_RB"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_BACK)) { outName = "Pad_Back"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_START)) { outName = "Pad_Start"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_LEFT_STICK)) { outName = "Pad_LStick"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_RIGHT_STICK)) { outName = "Pad_RStick"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_UP)) { outName = "Pad_DPad_Up"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_DOWN)) { outName = "Pad_DPad_Down"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_LEFT)) { outName = "Pad_DPad_Left"; return true; }
+        if (SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT)) { outName = "Pad_DPad_Right"; return true; }
+        if (SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) >= kPadTriggerThreshold) { outName = "Pad_LT"; return true; }
+        if (SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) >= kPadTriggerThreshold) { outName = "Pad_RT"; return true; }
 
         return false;
     }
 
-    bool TryGetGamepadStickInputName(const XINPUT_GAMEPAD& pad, wxString& outName)
+    bool TryGetGamepadStickInputName(SDL_Gamepad* gamepad, wxString& outName)
     {
-        if (pad.sThumbLY >= kPadStickThreshold) { outName = "Pad_LThumb_Up"; return true; }
-        if (pad.sThumbLY <= -kPadStickThreshold) { outName = "Pad_LThumb_Down"; return true; }
-        if (pad.sThumbLX <= -kPadStickThreshold) { outName = "Pad_LThumb_Left"; return true; }
-        if (pad.sThumbLX >= kPadStickThreshold) { outName = "Pad_LThumb_Right"; return true; }
-        if (pad.sThumbRY >= kPadStickThreshold) { outName = "Pad_RThumb_Up"; return true; }
-        if (pad.sThumbRY <= -kPadStickThreshold) { outName = "Pad_RThumb_Down"; return true; }
-        if (pad.sThumbRX <= -kPadStickThreshold) { outName = "Pad_RThumb_Left"; return true; }
-        if (pad.sThumbRX >= kPadStickThreshold) { outName = "Pad_RThumb_Right"; return true; }
+        if (gamepad == nullptr)
+        {
+            return false;
+        }
+
+        const int leftX = SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTX);
+        const int leftY = SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_LEFTY);
+        const int rightX = SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTX);
+        const int rightY = SDL_GetGamepadAxis(gamepad, SDL_GAMEPAD_AXIS_RIGHTY);
+
+        if (leftY <= -kPadStickThreshold) { outName = "Pad_LThumb_Up"; return true; }
+        if (leftY >= kPadStickThreshold) { outName = "Pad_LThumb_Down"; return true; }
+        if (leftX <= -kPadStickThreshold) { outName = "Pad_LThumb_Left"; return true; }
+        if (leftX >= kPadStickThreshold) { outName = "Pad_LThumb_Right"; return true; }
+        if (rightY <= -kPadStickThreshold) { outName = "Pad_RThumb_Up"; return true; }
+        if (rightY >= kPadStickThreshold) { outName = "Pad_RThumb_Down"; return true; }
+        if (rightX <= -kPadStickThreshold) { outName = "Pad_RThumb_Left"; return true; }
+        if (rightX >= kPadStickThreshold) { outName = "Pad_RThumb_Right"; return true; }
 
         return false;
     }
@@ -173,36 +251,84 @@ public:
         Bind(wxEVT_TIMER, &HotkeyCaptureCtrl::OnGamepadTimer, this, m_gamepadCaptureTimer.GetId());
     }
 
+    ~HotkeyCaptureCtrl() override
+    {
+        StopGamepadCapture();
+    }
+
+    void StopGamepadCapture()
+    {
+        if (m_gamepadCaptureTimer.IsRunning())
+        {
+            m_gamepadCaptureTimer.Stop();
+        }
+    }
+
+    void CancelGamepadCaptureFocus()
+    {
+        StopGamepadCapture();
+        SetInsertionPointEnd();
+        SetSelection(GetLastPosition(), GetLastPosition());
+    }
+
 private:
     wxTimer m_gamepadCaptureTimer;
     bool m_captureStickInputs = false;
 
     void OnFocus(wxFocusEvent& event)
     {
-        m_gamepadCaptureTimer.Start(16);
+        if (EnsureSDLGamepadInitialized())
+        {
+            if (g_OpenGamepads.empty())
+            {
+                RefreshOpenGamepads();
+            }
+
+            m_gamepadCaptureTimer.Start(16);
+        }
+
         event.Skip();
     }
 
     void OnKillFocus(wxFocusEvent& event)
     {
-        m_gamepadCaptureTimer.Stop();
+        StopGamepadCapture();
         event.Skip();
     }
 
     void OnGamepadTimer(wxTimerEvent&)
     {
-        for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i)
+        if (!EnsureSDLGamepadInitialized())
         {
-            XINPUT_STATE state = {};
-            if (XInputGetState(i, &state) != ERROR_SUCCESS)
+            return;
+        }
+
+        if (g_OpenGamepads.empty())
+        {
+            RefreshOpenGamepads();
+            if (g_OpenGamepads.empty())
             {
+                return;
+            }
+        }
+
+        SDL_PumpEvents();
+        SDL_UpdateGamepads();
+
+        bool hasDisconnectedGamepad = false;
+
+        for (SDL_Gamepad* gamepad : g_OpenGamepads)
+        {
+            if (gamepad == nullptr || !SDL_GamepadConnected(gamepad))
+            {
+                hasDisconnectedGamepad = true;
                 continue;
             }
 
             wxString name;
             const bool hasInput = m_captureStickInputs
-                ? TryGetGamepadStickInputName(state.Gamepad, name)
-                : TryGetGamepadButtonInputName(state.Gamepad, name);
+                ? TryGetGamepadStickInputName(gamepad, name)
+                : TryGetGamepadButtonInputName(gamepad, name);
 
             if (!hasInput)
             {
@@ -211,6 +337,11 @@ private:
 
             SetValue(name);
             return;
+        }
+
+        if (hasDisconnectedGamepad)
+        {
+            RefreshOpenGamepads();
         }
     }
 
@@ -523,7 +654,19 @@ public:
         }
         m_conf = new wxFileConfig("", "", m_iniPath, "", wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_NO_ESCAPE_CHARACTERS);
 
+        m_focusSink = new wxTextCtrl(this, wxID_ANY, "", wxPoint(-10000, -10000), wxSize(1, 1), wxTE_READONLY | wxBORDER_NONE);
+
         m_tabs = new wxNotebook(this, wxID_ANY);
+        m_tabs->Bind(wxEVT_NOTEBOOK_PAGE_CHANGING, [this](wxBookCtrlEvent& event)
+                     {
+                         ClearHotkeyCaptureFocus();
+                         event.Skip();
+                     });
+        m_tabs->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, [this](wxBookCtrlEvent& event)
+                     {
+                         ClearHotkeyCaptureFocus();
+                         event.Skip();
+                     });
 
         for (auto& tab : kTabs)
         {
@@ -555,6 +698,7 @@ public:
                         wxID_ANY,
                         "Universal Config Tool, licensed under MIT.\n" //Do not remove this notice.
                         "     Created by Afevis.\n"                            //Do not remove this notice.
+                        "     Gamepad support powered by SDL3, licensed under zlib.\n" //Do not remove this notice.
                         "\n"
                         "MGSHDFix, licensed under MIT.\n"
                         "     Maintained by Afevis (aka ShizCalev.)\n"
@@ -1130,6 +1274,7 @@ private:
     std::vector<Key> m_missingKeyList;
 
     wxNotebook* m_tabs = nullptr;
+    wxTextCtrl* m_focusSink = nullptr;
 
     wxChoice* m_regionChoice = nullptr;
     wxChoice* m_languageChoice = nullptr;
@@ -1138,6 +1283,33 @@ private:
     {
         m_dirty = true;
         e.Skip();
+    }
+
+    void StopAllHotkeyCaptures()
+    {
+        for (const auto& kv : m_controls)
+        {
+            if (auto* hotkey = dynamic_cast<HotkeyCaptureCtrl*>(kv.second))
+            {
+                hotkey->StopGamepadCapture();
+            }
+        }
+    }
+
+    void ClearHotkeyCaptureFocus()
+    {
+        for (const auto& kv : m_controls)
+        {
+            if (auto* hotkey = dynamic_cast<HotkeyCaptureCtrl*>(kv.second))
+            {
+                hotkey->CancelGamepadCaptureFocus();
+            }
+        }
+
+        if (m_focusSink != nullptr)
+        {
+            m_focusSink->SetFocus();
+        }
     }
 
     void MarkMissingKey(const wxString& section, const wxString& key)
@@ -2259,6 +2431,20 @@ public:
         ConfigFrame* frame = new ConfigFrame();
         frame->Show();
         return true;
+    }
+
+    int OnExit() override
+    {
+        CloseOpenGamepads();
+
+        if (g_SDLGamepadInitialized)
+        {
+            SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
+            SDL_Quit();
+            g_SDLGamepadInitialized = false;
+        }
+
+        return wxApp::OnExit();
     }
 };
 
