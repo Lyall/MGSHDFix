@@ -51,7 +51,7 @@ if "%NEED_RELEASE_BUILD%"=="1" (
     echo [SDL3] Configuring Release...
     cmake -S "%SDL_DIR%" -B "%SDL_BUILD_DIR%" ^
         -A x64 ^
-        -T v145 ^
+        -T v143 ^
         -DSDL_SHARED=OFF ^
         -DSDL_STATIC=ON ^
         -DSDL_TESTS=OFF ^
