@@ -293,13 +293,20 @@ namespace ConfigKeys
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Setting = "While in First Person";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Help = "(Excludes FPS mode)";
-    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Tooltip = "Keeps aiming after firing while in first-person view.";
+    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Tooltip = "Keeps aiming after firing while in first-person view.\n"
+                                                                        "\n"
+                                                                        "This does not force aiming when the joystick is at full tilt, matching PS2 behavior.\n"
+                                                                        "\n"
+                                                                        "For full tilt, enable \"Fix Aiming On Full Tilt\" under the bugfixes panel.";
 
     constexpr const char* KeepAimingAfterFiring_InFPSMode_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFPSMode_Setting = "MGS2 - While in FPS Mode";
     constexpr const char* KeepAimingAfterFiring_InFPSMode_Help = "";
-    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in MGS2's FPS mode.";
-
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in MGS2's FPS mode."
+                                                                    "\n"
+                                                                    "This does not force aiming when the joystick is at full tilt, matching PS2 behavior.\n"
+                                                                    "\n"
+                                                                    "For full tilt, enable \"Fix Aiming On Full Tilt\" under the bugfixes panel.";
 
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Setting = "While Holding Lock On";
