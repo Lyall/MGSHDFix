@@ -63,12 +63,12 @@ void OriginalCameraPositions::Activate()
             }
                       });
                       */
-        MAKE_HOOK_MID(baseModule, "48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 25", "MGS2: codec computer offsets before", {
+        MAKE_HOOK_MID(baseModule, "48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 25", "MGS2: BP_Camera_Init() -> codec compute offsets before", {
             codec_camera_init = true;
                       });
 
 
-        MAKE_HOOK_MID(baseModule, "F3 0F 10 25 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? 48 89 05", "MGS2: codec computer offsets after", {
+        MAKE_HOOK_MID(baseModule, "F3 0F 10 25 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? 48 89 05", "MGS2: BP_Camera_Init() -> codec compute offsets after", {
             codec_camera_init = false;
                       });
 

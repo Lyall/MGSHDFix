@@ -108,7 +108,7 @@ namespace ConfigKeys
 
     constexpr const char* Caption_Background_Opacity_Section = "Caption Settings";
     constexpr const char* Caption_Background_Opacity_Setting = "Caption Outline Opacity (%)";
-    constexpr const char* Caption_Background_Opacity_Help = "";
+    constexpr const char* Caption_Background_Opacity_Help = "30% Recommended";
     constexpr const char* Caption_Background_Opacity_Tooltip = "";
 
     constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
