@@ -104,12 +104,16 @@ namespace
 /// Called every frame during Present()
 void EffectSpeedFix::Tick()
 {
-    CUTSCENE_FRAMESKIP_TICK(rain_slow);
-    //CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
-    CUTSCENE_FRAMESKIP_TICK(MGS2_SPH_ActBrkVol1);
-    CUTSCENE_FRAMESKIP_TICK(NewSplushSurfaceMan);
-    CUTSCENE_FRAMESKIP_TICK(NewSplushSurface2Man);
-    CUTSCENE_FRAMESKIP_TICK(NewDebris_Tex);
+    if (eGameType & MGS2)
+    {
+        CUTSCENE_FRAMESKIP_TICK(rain_slow);
+        //CUTSCENE_FRAMESKIP_TICK(NewSplashPartsSlow_Demo);
+        CUTSCENE_FRAMESKIP_TICK(MGS2_SPH_ActBrkVol1);
+        CUTSCENE_FRAMESKIP_TICK(NewSplushSurfaceMan);
+        CUTSCENE_FRAMESKIP_TICK(NewSplushSurface2Man);
+        CUTSCENE_FRAMESKIP_TICK(NewDebris_Tex);
+    }
+
 
 
 }
@@ -118,12 +122,16 @@ void EffectSpeedFix::Tick()
 ///Called on GameVars::OnLevelTransition() to reset counters between cutscenes/levels.
 void EffectSpeedFix::Reset()
 {
-    CUTSCENE_FRAMESKIP_RESET(rain_slow);
-    //CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
-    CUTSCENE_FRAMESKIP_RESET(MGS2_SPH_ActBrkVol1);
-    CUTSCENE_FRAMESKIP_RESET(NewSplushSurfaceMan);
-    CUTSCENE_FRAMESKIP_RESET(NewSplushSurface2Man);
-    CUTSCENE_FRAMESKIP_RESET(NewDebris_Tex);
+    if (eGameType & MGS2)
+    {
+        CUTSCENE_FRAMESKIP_RESET(rain_slow);
+        //CUTSCENE_FRAMESKIP_RESET(NewSplashPartsSlow_Demo);
+        CUTSCENE_FRAMESKIP_RESET(MGS2_SPH_ActBrkVol1);
+        CUTSCENE_FRAMESKIP_RESET(NewSplushSurfaceMan);
+        CUTSCENE_FRAMESKIP_RESET(NewSplushSurface2Man);
+        CUTSCENE_FRAMESKIP_RESET(NewDebris_Tex);
+    }
+
 
 }
 
