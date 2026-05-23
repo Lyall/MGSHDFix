@@ -24,13 +24,31 @@ jobs:
     needs: sync-repo
 
     steps:
+      - name: Get GitHub release
+        id: github_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          release_json=$(gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json tagName,name,body)
+
+          echo "tag=$(echo "$release_json" | jq -r '.tagName')" >> $GITHUB_OUTPUT
+          echo "name=$(echo "$release_json" | jq -r '.name')" >> $GITHUB_OUTPUT
+
+          {
+            echo 'body<<EOF'
+            echo "$release_json" | jq -r '.body'
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
       - name: Create GitLab release
         env:
           GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_NAME: ${{ github.event.release.name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_TAG: ${{ steps.github_release.outputs.tag }}
+          RELEASE_NAME: ${{ steps.github_release.outputs.name }}
+          RELEASE_BODY: ${{ steps.github_release.outputs.body }}
         run: |
           curl --request POST \
             --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \

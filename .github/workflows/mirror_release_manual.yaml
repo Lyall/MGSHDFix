@@ -25,8 +25,9 @@ jobs:
         id: latest_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          release_json=$(gh release view --json tagName,name,body)
+          release_json=$(gh release view --repo "$GH_REPO" --json tagName,name,body)
 
           echo "tag=$(echo "$release_json" | jq -r '.tagName')" >> $GITHUB_OUTPUT
           echo "name=$(echo "$release_json" | jq -r '.name')" >> $GITHUB_OUTPUT
@@ -51,4 +52,3 @@ jobs:
             --data-urlencode "tag_name=${RELEASE_TAG}" \
             --data-urlencode "description=${RELEASE_BODY}" \
             "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"
-            
