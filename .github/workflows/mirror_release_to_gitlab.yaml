@@ -24,35 +24,77 @@ jobs:
     needs: sync-repo
 
     steps:
-      - name: Get GitHub release
-        id: github_release
+      - name: Mirror GitHub release to GitLab
         env:
+          GITLAB_URL: ${{ secrets.GITLAB_URL }}
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          release_json=$(gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json tagName,name,body)
+          GITLAB_URL="${GITLAB_URL%/}"
 
-          echo "tag=$(echo "$release_json" | jq -r '.tagName')" >> $GITHUB_OUTPUT
-          echo "name=$(echo "$release_json" | jq -r '.name')" >> $GITHUB_OUTPUT
+          release_json=$(gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json tagName,name,body,assets)
 
-          {
-            echo 'body<<EOF'
-            echo "$release_json" | jq -r '.body'
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
+          RELEASE_NAME=$(echo "$release_json" | jq -r '.name')
+          RELEASE_BODY=$(echo "$release_json" | jq -r '.body')
+          asset_count=$(echo "$release_json" | jq '.assets | length')
 
-      - name: Create GitLab release
-        env:
-          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
-          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
-          RELEASE_TAG: ${{ steps.github_release.outputs.tag }}
-          RELEASE_NAME: ${{ steps.github_release.outputs.name }}
-          RELEASE_BODY: ${{ steps.github_release.outputs.body }}
-        run: |
-          curl --request POST \
+          rm -rf release_assets
+          mkdir -p release_assets
+
+          if [ "$asset_count" -gt 0 ]; then
+            gh release download "$RELEASE_TAG" --repo "$GH_REPO" --dir release_assets
+          fi
+
+          args=()
+          args+=(--request POST)
+          args+=(--header "PRIVATE-TOKEN: ${GITLAB_PAT}")
+          args+=(--data-urlencode "name=${RELEASE_NAME}")
+          args+=(--data-urlencode "tag_name=${RELEASE_TAG}")
+          args+=(--data-urlencode "description=${RELEASE_BODY}")
+
+          index=0
+
+          for file in release_assets/*; do
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+
+            filename=$(basename "$file")
+
+            upload_json=$(curl --fail-with-body --silent --show-error --request POST \
+              --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+              --form "file=@${file}" \
+              "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/uploads")
+
+            uploaded_path=$(echo "$upload_json" | jq -r '.full_path // .url // empty')
+
+            if [ -z "$uploaded_path" ]; then
+              echo "GitLab upload did not return a usable path for ${filename}:"
+              echo "$upload_json"
+              exit 1
+            fi
+
+            if [[ "$uploaded_path" == http://* || "$uploaded_path" == https://* ]]; then
+              uploaded_url="$uploaded_path"
+            else
+              uploaded_url="${GITLAB_URL}${uploaded_path}"
+            fi
+
+            args+=(--data-urlencode "assets[links][$index][name]=${filename}")
+            args+=(--data-urlencode "assets[links][$index][url]=${uploaded_url}")
+            args+=(--data-urlencode "assets[links][$index][link_type]=package")
+
+            index=$((index + 1))
+          done
+
+          encoded_tag=$(jq -rn --arg v "$RELEASE_TAG" '$v|@uri')
+
+          curl --silent --output /dev/null --request DELETE \
             --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
-            --data-urlencode "name=${RELEASE_NAME}" \
-            --data-urlencode "tag_name=${RELEASE_TAG}" \
-            --data-urlencode "description=${RELEASE_BODY}" \
-            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"
+            "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${encoded_tag}"
+
+          curl --fail-with-body --silent --show-error "${args[@]}" \
+            "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/releases"

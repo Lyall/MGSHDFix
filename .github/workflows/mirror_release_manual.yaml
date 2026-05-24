@@ -38,6 +38,15 @@ jobs:
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
+      - name: Download GitHub release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.latest_release.outputs.tag }}
+        run: |
+          mkdir -p release_assets
+          gh release download "$RELEASE_TAG" --repo "$GH_REPO" --dir release_assets --clobber
+
       - name: Create GitLab release
         env:
           GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
@@ -46,9 +55,41 @@ jobs:
           RELEASE_NAME: ${{ steps.latest_release.outputs.name }}
           RELEASE_BODY: ${{ steps.latest_release.outputs.body }}
         run: |
-          curl --request POST \
+          project_json=$(curl --silent --show-error --fail \
             --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
-            --data-urlencode "name=${RELEASE_NAME}" \
-            --data-urlencode "tag_name=${RELEASE_TAG}" \
-            --data-urlencode "description=${RELEASE_BODY}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}")
+
+          project_web_url=$(echo "$project_json" | jq -r '.web_url')
+
+          args=()
+          args+=(--request POST)
+          args+=(--header "PRIVATE-TOKEN: ${GITLAB_PAT}")
+          args+=(--data-urlencode "name=${RELEASE_NAME}")
+          args+=(--data-urlencode "tag_name=${RELEASE_TAG}")
+          args+=(--data-urlencode "description=${RELEASE_BODY}")
+
+          index=0
+
+          for file in release_assets/*; do
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+
+            filename=$(basename "$file")
+
+            upload_json=$(curl --silent --show-error --fail --request POST \
+              --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+              --form "file=@${file}" \
+              "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/uploads")
+
+            uploaded_url=$(echo "$upload_json" | jq -r '.url')
+
+            args+=(--data-urlencode "assets[links][$index][name]=${filename}")
+            args+=(--data-urlencode "assets[links][$index][url]=${project_web_url}${uploaded_url}")
+            args+=(--data-urlencode "assets[links][$index][link_type]=package")
+
+            index=$((index + 1))
+          done
+
+          curl --show-error --fail "${args[@]}" \
             "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"
