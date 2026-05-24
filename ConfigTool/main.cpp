@@ -600,7 +600,8 @@ class BannerPanel : public wxPanel
 {
 public:
     BannerPanel(wxWindow* parent, int bannerResId)
-        : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(700, 100), wxBORDER_NONE)
+        : wxPanel(parent, wxID_ANY, wxDefaultPosition,
+                  parent->FromDIP(wxSize(700, 100)), wxBORDER_NONE)
     {
         wxImage img;
         wxMemoryInputStream memStream(
@@ -609,25 +610,40 @@ public:
         );
         if (img.LoadFile(memStream, wxBITMAP_TYPE_PNG) && img.IsOk())
         {
+            m_image = img;            // keep the source image for rescaling
             m_bitmap = wxBitmap(img);
         }
 
-        SetMinSize(wxSize(700, 100));
-        SetMaxSize(wxSize(700, 100));
+        const wxSize banner = FromDIP(wxSize(700, 100));
+        SetMinSize(banner);
+        SetMaxSize(banner);
         Bind(wxEVT_PAINT, &BannerPanel::OnPaint, this);
         SetBackgroundStyle(wxBG_STYLE_PAINT); // Needed for buffered paint
     }
 
 private:
-    wxBitmap m_bitmap;
+    wxImage  m_image;   // unscaled source
+    wxBitmap m_bitmap;  // cached bitmap scaled to the current client size
+    wxSize   m_cachedFor = wxSize(-1, -1);
 
     void OnPaint(wxPaintEvent&)
     {
         wxAutoBufferedPaintDC dc(this);
         dc.Clear();
-        if (m_bitmap.IsOk())
+
+        const wxSize sz = GetClientSize();
+        if (m_image.IsOk() && sz.x > 0 && sz.y > 0)
         {
-            dc.DrawBitmap(m_bitmap, 0, 0, false); // Draw at native size
+            if (sz != m_cachedFor)
+            {
+                m_bitmap = wxBitmap(
+                    m_image.Scale(sz.x, sz.y, wxIMAGE_QUALITY_HIGH));
+                m_cachedFor = sz;
+            }
+            if (m_bitmap.IsOk())
+            {
+                dc.DrawBitmap(m_bitmap, 0, 0, false);
+            }
         }
     }
 };
@@ -637,11 +653,13 @@ class ConfigFrame : public wxFrame
 public:
     ConfigFrame()
         : wxFrame(nullptr, wxID_ANY, FIX_NAME " v" VERSION_STRING " - Universal Config Tool",
-                  wxDefaultPosition, wxSize(iWindowSizeX, iWindowSizeY),
+                  wxDefaultPosition, wxDefaultSize,
                   wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
     {
-        SetMinSize(wxSize(iWindowSizeX, iWindowSizeY));
-        SetMaxSize(wxSize(iWindowSizeX, iWindowSizeY));
+        const wxSize clientSize = FromDIP(wxSize(iWindowSizeX, iWindowSizeY));
+        SetClientSize(clientSize);
+        SetMinClientSize(clientSize);
+        SetMaxClientSize(clientSize);
 
         HWND hwnd = (HWND)GetHWND();
         HINSTANCE instance = GetModuleHandleW(nullptr);
@@ -937,7 +955,7 @@ public:
                 case Field::Spacer:
                 {
                     auto* spacer = new wxPanel(sectionSizer->GetStaticBox(), wxID_ANY);
-                    spacer->SetMinSize(wxSize(0, 10));
+                    spacer->SetMinSize(FromDIP(wxSize(0, 10)));
                     grid->Add(spacer, 0, wxEXPAND);
                     continue;
                 }
@@ -967,8 +985,8 @@ public:
                     );
 
                     ctrl = sp;
-                    sp->SetMinSize(wxSize(90, -1));
-                    sp->SetSizeHints(90, -1);
+                    sp->SetMinSize(FromDIP(wxSize(90, -1)));
+                    sp->SetSizeHints(FromDIP(wxSize(90, -1)));
                     ctrl->Bind(wxEVT_ANY, &ConfigFrame::MarkDirty, this);
                     break;
                 }
@@ -1549,8 +1567,9 @@ private:
         }
 
         wxDialog dlg(this, wxID_ANY, "Unsaved Changes",
-                     wxDefaultPosition, wxSize(560, 420),
+                     wxDefaultPosition, wxDefaultSize,
                      wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        dlg.SetClientSize(dlg.FromDIP(wxSize(560, 420)));
 
         auto* sizer = new wxBoxSizer(wxVERTICAL);
 
