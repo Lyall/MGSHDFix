@@ -218,8 +218,11 @@
     <ClCompile Include="src\features\cutscene_pausing.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="mgs2_thermal_goggles.cpp">
+    <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp">
       <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -442,7 +445,12 @@
     <ClInclude Include="src\resources\mgs2_status_flags.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="mgs2_thermal_goggles.hpp" />
+    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

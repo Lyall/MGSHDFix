@@ -19,7 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mgs2_thermal_goggles.cpp" />
+    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
+    <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp" />
     <ClCompile Include="src\features\cutscene_pausing.cpp" />
     <ClCompile Include="src\features\adjustable_captions.cpp" />
     <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp" />
@@ -140,7 +141,8 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mgs2_thermal_goggles.hpp" />
+    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
+    <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp" />
     <ClInclude Include="src\features\cutscene_pausing.hpp" />
     <ClInclude Include="src\resources\mgs2_status_flags.hpp" />
     <ClInclude Include="src\features\adjustable_captions.hpp" />

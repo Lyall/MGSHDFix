@@ -157,3 +157,43 @@ enum MGS2_PlayerStatusFlags : uint64_t
 
     //PLAYER_STATUS_EX = (1ull << 63)              /// GM_PlayerStatus2
 };
+
+enum MGS2_MenuStatusFlags : uint32_t
+{
+    MENU_NORMAL = 0,
+
+    /* Visibility */
+    MENU_WEAPON_OFF = (1u << 0),  /// Weapon menu hidden
+    MENU_ITEM_OFF = (1u << 1),  /// Item menu hidden
+    MENU_RADAR_OFF = (1u << 2),  /// Radar hidden
+    MENU_GAGE_OFF = (1u << 3),  /// Gauge hidden
+    MENU_CAPTION_OFF = (1u << 4),  /// Captions hidden
+    MENU_SUBWIN_OFF = (1u << 5),  /// Sub-window hidden
+
+    /* Runtime state */
+    MENU_WEAPON_OPEN = (1u << 8),  /// Weapon menu open
+    MENU_ITEM_OPEN = (1u << 9),  /// Item menu open
+    MENU_RADIO_ON = (1u << 10), /// Codec/radio active
+    MENU_RADAR_ON = (1u << 11), /// Radar visible
+    MENU_GAGE_ON = (1u << 12), /// Gauge visible
+    MENU_SUBWIN_ON = (1u << 13), /// Sub-window visible
+    MENU_NODE_ACCESSED = (1u << 14), /// Node accessed
+    MENU_NODE_ON = (1u << 15), /// Node visible
+
+    /* Access restricted */
+    MENU_WEAPON_DISABLE = (1u << 16), /// Weapon menu disabled
+    MENU_ITEM_DISABLE = (1u << 17), /// Item menu disabled
+    MENU_RADIO_DISABLE = (1u << 18), /// Codec/radio disabled
+    MENU_VIBRATE_DISABLE = (1u << 19), /// Vibration disabled
+
+    /* Menu-affecting state */
+    MENU_STREAM_CH_0 = (1u << 20), /// STREAM ch0
+    MENU_STREAM_CH_1 = (1u << 21), /// STREAM ch1
+
+    /* Misc */
+    MENU_MENU_NEWPRESS = (1u << 24), /// Menu button re-press required
+
+    MENU_MENU_OFF = MENU_WEAPON_OFF | MENU_ITEM_OFF,
+    MENU_MENU_OPEN = MENU_WEAPON_OPEN | MENU_ITEM_OPEN,
+    MENU_MENU_DISABLE = MENU_WEAPON_DISABLE | MENU_ITEM_DISABLE,
+};

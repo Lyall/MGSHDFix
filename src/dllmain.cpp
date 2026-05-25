@@ -66,6 +66,7 @@
 #include "adjustable_captions.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
+#include "mgs2_contrast_fix.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -429,7 +430,8 @@ void afterPresent()
     g_VectorScalingFix.LoadCompiledShader();
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
-
+    MGS2_ContrastShader::Init();
+    
 
     spdlog::info("afterPresent() completed");
 }
