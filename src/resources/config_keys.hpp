@@ -201,6 +201,18 @@ namespace ConfigKeys
     constexpr const char* FixOpticalCamo_Help = "";
     constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
 
+    constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
+    constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
+    constexpr const char* FixMGS2DepthOfField_Help = "";
+    constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 far-focus depth of field blur at higher resolutions.";
+
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur UV Multiplier";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(6.0 recommended for 1440p)";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's far-focus depth of field blur.\n"
+                                                                     "\n"
+                                                                     "Higher values increase blur radius but can expose sampling artifacts.";
+
     constexpr const char* FixVectorUI_Section = "Bugfixes";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
     constexpr const char* FixVectorUI_Help = "";
@@ -838,5 +850,4 @@ constexpr int k3rdPersonMinCameraDistance = 100;
 constexpr int k3rdPersonFreecamDefaultMaxCameraDistance = 4000;
 constexpr float k3rdPersonFreecamDefaultHorizontalSensitivity = 0.6f;
 constexpr float k3rdPersonFreecamDefaultVerticalSensitivity = 0.4f;
-
 

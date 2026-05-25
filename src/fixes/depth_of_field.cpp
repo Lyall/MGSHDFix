@@ -1,17 +1,166 @@
 #include "stdafx.h"
-#include "depth_of_field.hpp"
 
 #include "common.hpp"
+#include "depth_of_field.hpp"
+#include "helper.hpp"
 #include "logging.hpp"
-#include "custom_resolution_and_borderless.hpp"
 
+namespace
+{
+    constexpr int kRegUvOffset0 = 96;
+    constexpr int kRegUvOffset3 = 99;
 
+    SafetyHookInline SetVertexRegistersHook {};
+    SafetyHookMid FarFocusBlurBeginHook {};
+    SafetyHookMid FarFocusBlurEndHook {};
+    thread_local bool gInsideFarFocusBlur = false;
 
+    bool LooksLikeBlurUvOffset(const float* regs)
+    {
+        if (!regs)
+        {
+            return false;
+        }
 
+        float maxAbs = 0.0f;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (!std::isfinite(regs[i]))
+            {
+                return false;
+            }
 
+            maxAbs = std::max(maxAbs, std::abs(regs[i]));
+        }
 
+        return maxAbs > 0.000001f && maxAbs <= 0.08f;
+    }
 
+    void __fastcall SetVertexRegisters_Hook(void* backend, int startRegister, int numVectors, const float* regs)
+    {
+        thread_local float scaledRegs[4];
+        static bool loggedFirstHit = false;
 
+        if (gInsideFarFocusBlur &&
+            startRegister >= kRegUvOffset0 &&
+            startRegister <= kRegUvOffset3 &&
+            numVectors == 1 &&
+            LooksLikeBlurUvOffset(regs))
+        {
+            std::copy(regs, regs + 4, scaledRegs);
+            for (float& value : scaledRegs)
+            {
+                value *= g_DepthOfFieldFixes.fBlurUvMultiplier;
+            }
+
+            if (!loggedFirstHit)
+            {
+                loggedFirstHit = true;
+                spdlog::info("MGS 2: Depth of Field: far-focus blur UV register upload intercepted. reg={}, in=({}, {}, {}, {}), out=({}, {}, {}, {}).",
+                             startRegister,
+                             regs[0], regs[1], regs[2], regs[3],
+                             scaledRegs[0], scaledRegs[1], scaledRegs[2], scaledRegs[3]);
+            }
+
+            SetVertexRegistersHook.fastcall<void>(backend, startRegister, numVectors, scaledRegs);
+            return;
+        }
+
+        SetVertexRegistersHook.fastcall<void>(backend, startRegister, numVectors, regs);
+    }
+
+    void InstallFarFocusBlurScopeHooks()
+    {
+        uint8_t* farFocusBlurCallSetup = Memory::PatternScan(
+            baseModule,
+            "F3 44 0F 11 44 24 ?? E8 ?? ?? ?? ?? 48 8B 0D",
+            "MGS 2: Depth of Field: far focus blur scope");
+
+        if (!farFocusBlurCallSetup)
+        {
+            return;
+        }
+
+        FarFocusBlurBeginHook = safetyhook::create_mid(farFocusBlurCallSetup, [](SafetyHookContext&) {
+            gInsideFarFocusBlur = true;
+        });
+        LOG_HOOK(FarFocusBlurBeginHook, "MGS 2: Depth of Field: far focus blur scope begin")
+
+        FarFocusBlurEndHook = safetyhook::create_mid(farFocusBlurCallSetup + 0x0C, [](SafetyHookContext&) {
+            gInsideFarFocusBlur = false;
+        });
+        LOG_HOOK(FarFocusBlurEndHook, "MGS 2: Depth of Field: far focus blur scope end")
+    }
+
+    void ForceFarFocusBlurEnabled()
+    {
+        uint8_t* blurGate = Memory::PatternScan(
+            baseModule,
+            "83 3D ?? ?? ?? ?? 00 0F 84 ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? 45 0F 28 D4",
+            "MGS 2: Depth of Field: far focus blur enable gate");
+
+        if (!blurGate)
+        {
+            return;
+        }
+
+        uintptr_t blurEnableAddress = Memory::GetRipRelativeAddress(blurGate, 0x02, 0x07);
+        Memory::Write<int>(blurEnableAddress, 1);
+
+        spdlog::info("MGS 2: Depth of Field: far focus blur enabled at {:s}+{:X}.",
+                     sExeName.c_str(),
+                     blurEnableAddress - reinterpret_cast<uintptr_t>(baseModule));
+    }
+
+    void ForceFarFocusMaxPlaneCount()
+    {
+        uint8_t* maxPlaneClamp = Memory::PatternScan(
+            baseModule,
+            "39 1D ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 0F 4C 1D ?? ?? ?? ?? 89 9D",
+            "MGS 2: Depth of Field: far focus max plane count");
+
+        if (!maxPlaneClamp)
+        {
+            return;
+        }
+
+        uintptr_t maxPlaneCountAddress = Memory::GetRipRelativeAddress(maxPlaneClamp, 0x02, 0x06);
+        Memory::Write<int>(maxPlaneCountAddress, 16);
+        Memory::Write<float>(maxPlaneCountAddress + 0x04, 4.0f);
+        Memory::Write<float>(maxPlaneCountAddress + 0x08, 0.175f);
+        Memory::Write<float>(maxPlaneCountAddress + 0x0C, 0.025f);
+        Memory::Write<float>(maxPlaneCountAddress + 0x10, 0.0f);
+
+        spdlog::info("MGS 2: Depth of Field: far focus max plane count set to 16 at {:s}+{:X}.",
+                     sExeName.c_str(),
+                     maxPlaneCountAddress - reinterpret_cast<uintptr_t>(baseModule));
+        spdlog::info("MGS 2: Depth of Field: far focus blur weights set to 4.0, 0.175, 0.025, 0.0.");
+    }
+
+    void InstallBlurUvScaleHook()
+    {
+        uint8_t* blurUvRegisterUpload = Memory::PatternScan(
+            baseModule,
+            "48 8B 0D ?? ?? ?? ?? 4C 8D 4D ?? 8D 57 60 44 8D 47 01 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 4C 24 ?? 8D 57 61 44 8D 47 01 E8",
+            "MGS 2: Depth of Field: blur UV register upload");
+
+        if (!blurUvRegisterUpload)
+        {
+            return;
+        }
+
+        uint8_t* setVertexRegistersCall = blurUvRegisterUpload + 0x12;
+        if (*setVertexRegistersCall != 0xE8)
+        {
+            spdlog::error("MGS 2: Depth of Field: expected SetVertexRegisters call was not found; blur UV scale disabled.");
+            return;
+        }
+
+        const uintptr_t setVertexRegisters = Memory::GetRelativeOffset(setVertexRegistersCall + 1);
+        SetVertexRegistersHook = safetyhook::create_inline(reinterpret_cast<void*>(setVertexRegisters), reinterpret_cast<void*>(SetVertexRegisters_Hook));
+        LOG_HOOK(SetVertexRegistersHook, "MGS 2: Depth of Field: blur UV register scale")
+    }
+}
 
 void DepthOfFieldFixes::Initialize()
 {
@@ -20,148 +169,17 @@ void DepthOfFieldFixes::Initialize()
         return;
     }
 
-    /*
-    MAKE_HOOK_MID(baseModule,
-                  "F3 44 0F 11 44 24 ?? E8 ?? ?? ?? ?? 48 8B 0D",
-                  "MGS2: FarFocus DOF blur scale",
-                  {
-                      constexpr float kReferenceWidth = 512.0f;
-                      constexpr float kReferenceHeight = 448.0f;
-
-                      const float scaleX =
-                          static_cast<float>(CustomResolutionAndBorderless::iInternalResX) / kReferenceWidth;
-
-                      const float scaleY =
-                          static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / kReferenceHeight;
-
-                      const float scale = std::max(scaleX, scaleY);
-
-                      if (scale > 1.0f)
-                      {
-                          auto* srcRectX2 = reinterpret_cast<int*>(ctx.rsp + 0x78);
-                          auto* srcRectY2 = reinterpret_cast<int*>(ctx.rsp + 0x7C);
-
-                          *srcRectX2 = std::max(
-                              1,
-                              static_cast<int>(std::round(static_cast<float>(*srcRectX2) / scale)));
-
-                          *srcRectY2 = std::max(
-                              1,
-                              static_cast<int>(std::round(static_cast<float>(*srcRectY2) / scale)));
-                      }
-                  });
-
-    MAKE_HOOK_MID(baseModule,
-                  "C7 44 24 ?? ?? ?? ?? ?? F3 0F 58 C2 F3 0F 58 CB 48 8D 4F ?? F3 0F 11 44 24 ?? F3 0F 11 4C 24 ?? 0F 28 CF F3 44 0F 11 6C 24 ?? F3 44 0F 11 74 24 ?? F3 0F 11 54 24 ?? 0F 28 D7 E8 ?? ?? ?? ?? 48 81 C7",
-                  "MGS2: NearFocus UV scale",
-                  {
-                      constexpr float kReferenceWidth = 512.0f;
-                      constexpr float kReferenceHeight = 448.0f;
-
-                      const float scaleX = static_cast<float>(CustomResolutionAndBorderless::iInternalResX) / kReferenceWidth;
-                      const float scaleY = static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / kReferenceHeight;
-
-                      const float shiftU = scaleX / kReferenceWidth;
-                      const float shiftV = scaleY / kReferenceHeight;
-
-                      if ((ctx.rbx & 1) != 0)
-                      {
-                          ctx.xmm3.f32[0] = shiftU;
-                          ctx.xmm1.f32[0] = 1.0f + shiftU;
-                      }
-
-                      if ((ctx.rbx & 2) != 0)
-                      {
-                          ctx.xmm2.f32[0] = shiftV;
-                          ctx.xmm0.f32[0] = 1.0f + shiftV;
-                      }
-                  });
-
-    /*
-    if (!CustomResolutionAndBorderless::bOutputResolution) //remove if you fix a vanilla bug. 
+    if (!bEnabled)
     {
+        spdlog::info("MGS 2: Depth of Field: disabled by config.");
         return;
     }
 
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? F6 C3 ?? 74 ?? 41 0F 28 D9 41 0F 28 CA EB ?? 0F 28 DF 41 0F 28 C8 F6 C3 ?? 74 ?? 41 0F 28 D3 41 0F 28 C4 EB ?? 0F 28 D7 41 0F 28 C0 C7 44 24 ?? ?? ?? ?? ?? F3 0F 58 C2 F3 0F 58 CB 48 8D 4F ?? F3 0F 11 44 24 ?? F3 0F 11 4C 24 ?? 0F 28 CF F3 44 0F 11 6C 24 ?? F3 44 0F 11 74 24 ?? F3 0F 11 54 24 ?? 0F 28 D7 E8 ?? ?? ?? ?? 48 81 C7", "dof test near", {
-        spdlog::info("ctx.xmm1.f32[0] before = {:.6g}", ctx.xmm1.f32[0]);
-        ctx.xmm1.f32[0] *= (float)CustomResolutionAndBorderless::iInternalResY / 448.0f;
-        spdlog::info("ctx.xmm1.f32[0] after = {:.6g}", ctx.xmm1.f32[0]);
-        })
+    fBlurUvMultiplier = std::clamp(fBlurUvMultiplier, 0.0f, 20.0f);
+    spdlog::info("MGS 2: Depth of Field: blur UV multiplier set to {}.", fBlurUvMultiplier);
 
-        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? F6 C3 ?? 74 ?? 41 0F 28 D9 41 0F 28 CA EB ?? 0F 28 DF 41 0F 28 C8 F6 C3 ?? 74 ?? 41 0F 28 D3 41 0F 28 C4 EB ?? 0F 28 D7 41 0F 28 C0 C7 44 24 ?? ?? ?? ?? ?? F3 0F 58 C2 F3 0F 58 CB 48 8D 4F ?? F3 0F 11 44 24 ?? F3 0F 11 4C 24 ?? 0F 28 CF F3 44 0F 11 6C 24 ?? F3 44 0F 11 74 24 ?? F3 0F 11 54 24 ?? 0F 28 D7 E8 ?? ?? ?? ?? 48 83 C7", "dof test far", {
-        ctx.xmm1.f32[0] *= (float)CustomResolutionAndBorderless::iInternalResY / 448.0f;
-            })
-
-   /* uintptr_t testXres = Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 10 35 ?? ?? ?? ?? 0F 57 D2 F3 0F 10 3D ?? ?? ?? ?? 0F 28 DE C1 E3", "MGS 2: GameVars: 1280 resolution") + 4);
-    Memory::PatchBytes(testXres, "\x00\x00\x70\x45", sizeof(float));
-    uintptr_t testYrex = Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 10 3D ?? ?? ?? ?? 0F 28 DE C1 E3", "MGS 2: GameVars: 720 resolution") + 4);
-    Memory::PatchBytes(testYrex, "\x00\x00\x07\x45", sizeof(float));
-    spdlog::info("testXres = {}", *reinterpret_cast<float*>(testXres));
-    spdlog::info("testYrex = {}", *reinterpret_cast<float*>(testYrex));*/
-
-    /*
-    MAKE_HOOK_MID(baseModule, "66 0F 1F 84 00 ?? ?? ?? ?? 8B 4E ?? 41 0F 28 F0 F3 0F 10 5E ?? 66 0F 6E C3 F3 0F 5C 5E ?? 8D 41 ?? 66 0F 6E C8 0F 5B C0 0F 5B C9 F3 0F 59 D8 0F 28 C7 F3 0F 5E D9 F3 0F 58 5E ?? F3 0F 5F C3 F3 0F 5D F0 3B D9 0F 8D ?? ?? ?? ?? 41 0F 2E F0 7A ?? 0F 84 ?? ?? ?? ?? 0F 2E F7 7A ?? 0F 84 ?? ?? ?? ?? BA", "dof test near", {
-        ctx.xmm9.f32[0] = 1.0f / static_cast<float>(iInternalResX);
-        //ctx.xmm10.f32[0] = 1.0f + (1.0f / static_cast<float>(iInternalResX));
-        ctx.xmm11.f32[0] = 1.0f / static_cast<float>(iInternalResY);
-        //ctx.xmm12.f32[0] = 1.0f + (1.0f / static_cast<float>(iInternalResY));
-        //ctx.xmm13.f32[0] = static_cast<float>(iInternalResY);
-        //ctx.xmm14.f32[0] = static_cast<float>(iInternalResX);
-    })
-
-    MAKE_HOOK_MID(baseModule, "66 0F 1F 84 00 ?? ?? ?? ?? 8B 4E ?? 41 0F 28 F0 F3 0F 10 5E ?? 66 0F 6E C3 F3 0F 5C 5E ?? 8D 41 ?? 66 0F 6E C8 0F 5B C0 0F 5B C9 F3 0F 59 D8 0F 28 C7 F3 0F 5E D9 F3 0F 58 5E ?? F3 0F 5F C3 F3 0F 5D F0 3B D9 0F 8D ?? ?? ?? ?? 41 0F 2E F0 7A ?? 0F 84 ?? ?? ?? ?? 0F 2E F7 7A ?? 0F 84 ?? ?? ?? ?? 48 8D 4F", "dof test far", {
-        ctx.xmm9.f32[0] = 1.0f / static_cast<float>(iInternalResX);
-        //ctx.xmm10.f32[0] = 1.0f + (1.0f / static_cast<float>(iInternalResX));
-        ctx.xmm11.f32[0] = 1.0f / static_cast<float>(iInternalResY);
-        //ctx.xmm12.f32[0] = 1.0f + (1.0f / static_cast<float>(iInternalResY));
-        //ctx.xmm13.f32[0] = static_cast<float>(iInternalResY);
-        //ctx.xmm14.f32[0] = static_cast<float>(iInternalResX);
-        })
-    /*
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 83 C7 ?? FF C3", "MGS2: Depth of Field loc 1", {
-        spdlog::info("dof loc 1");
-        ctx.xmm14.f32[0] = 3840.0f; // 3840.0f
-        ctx.xmm13.f32[0] = 2160.0f; // 2160.0f
-    });
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 81 C7 ?? ?? ?? ?? FF C3 83 FB", "MGS2: Depth of Field loc 2", {
-        spdlog::info("dof loc 2");
-        ctx.xmm14.f32[0] = 3840.0f; // 3840.0f
-        ctx.xmm13.f32[0] = 2160.0f; // 2160.0f
-        });
-
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? BA ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 48 8B C8", "MGS2: blur 1", {
-    //spdlog::info("blur 1");
-        ctx.xmm6.f32[0] = 3840.0f; // 3840.0f
-        ctx.xmm7.f32[0] = 2160.0f; // 2160.0f
-        });
-
-
-    MAKE_HOOK_MID(baseModule, "76 ?? 89 93 ?? ?? ?? ?? EB ?? 0F 2F F0", "MGS2: MGS2_Resolution_Conversion", {
-        spdlog::info("MGS2_Resolution_Conversion");
-        Util::DumpContext(ctx);
-        });
-        */
-    /*
-    MAKE_HOOK_MID(baseModule, "66 41 89 42 ?? F3 0F 2C 44 24 ?? F3 0F 59 DA 66 41 89 42 ?? F3 0F 59 CA F3 0F 2C C3 66 41 89 42 ?? F3 0F 2C C0 F3 0F 10 44 24 ?? 66 41 89 42 ?? F3 0F 2C C1 F3 0F 59 C2 66 41 89 42 ?? F3 0F 2C C0 66 41 89 42 ?? 49 8D 42 ?? C3 CC 8B 44 24 ?? 4C 8B D1 F3 0F 10 44 24 ?? 8B D0 C1 EA", "MGS3: Depth of Field loc 1", {
-       // spdlog::info("x axis {}", ctx.rax);
-        if (ctx.rax == 512)// || ctx.rax == 1280)
-        {
-            ctx.rax = iInternalResX;
-            spdlog::info("MGS3: Depth of Field - X axis set to {}", iInternalResX);
-        }
-
-    });
-    MAKE_HOOK_MID(baseModule, "66 41 89 42 ?? F3 0F 59 CA F3 0F 2C C3 66 41 89 42 ?? F3 0F 2C C0 F3 0F 10 44 24 ?? 66 41 89 42 ?? F3 0F 2C C1 F3 0F 59 C2 66 41 89 42 ?? F3 0F 2C C0 66 41 89 42 ?? 49 8D 42 ?? C3 CC 8B 44 24 ?? 4C 8B D1 F3 0F 10 44 24 ?? 8B D0 C1 EA", "MGS3: Depth of Field loc 1", {
-        if (ctx.rax == 448)// || ctx.rax == 720)
-        {
-            ctx.rax = iInternalResY;
-            spdlog::info("MGS3: Depth of Field - Y axis set to {}", iInternalResY);
-        }
-
-        });
-        */
+    ForceFarFocusBlurEnabled();
+    ForceFarFocusMaxPlaneCount();
+    InstallFarFocusBlurScopeHooks();
+    InstallBlurUvScaleHook();
 }
-
-
-
