@@ -9,6 +9,11 @@ namespace
 {
     constexpr int kRegUvOffset0 = 96;
     constexpr int kRegUvOffset3 = 99;
+    constexpr int kFarFocusMaxPlaneCount = 16;
+    constexpr float kFarFocusBlurWeight0 = 4.0f;
+    constexpr float kFarFocusBlurWeight12 = 0.2f;
+    constexpr float kFarFocusBlurWeight34 = 0.03125f;
+    constexpr float kFarFocusBlurWeight56 = 0.00625f;
 
     SafetyHookInline SetVertexRegistersHook {};
     SafetyHookMid FarFocusBlurBeginHook {};
@@ -36,22 +41,45 @@ namespace
         return maxAbs > 0.000001f && maxAbs <= 0.08f;
     }
 
+    void ScaleActiveBlurAxis(float* regs)
+    {
+        const float multiplier = g_DepthOfFieldFixes.fBlurUvMultiplier;
+        const bool horizontalPass = (std::abs(regs[0]) > std::abs(regs[1])) || (std::abs(regs[2]) > std::abs(regs[3]));
+        const bool verticalPass = (std::abs(regs[1]) > std::abs(regs[0])) || (std::abs(regs[3]) > std::abs(regs[2]));
+
+        if (horizontalPass && !verticalPass)
+        {
+            regs[0] *= multiplier;
+            regs[2] *= multiplier;
+            return;
+        }
+
+        if (verticalPass && !horizontalPass)
+        {
+            regs[1] *= multiplier;
+            regs[3] *= multiplier;
+            return;
+        }
+
+        for (int i = 0; i < 4; ++i)
+        {
+            regs[i] *= multiplier;
+        }
+    }
+
     void __fastcall SetVertexRegisters_Hook(void* backend, int startRegister, int numVectors, const float* regs)
     {
         thread_local float scaledRegs[4];
         static bool loggedFirstHit = false;
 
         if (gInsideFarFocusBlur &&
-            startRegister >= kRegUvOffset0 &&
+            startRegister > kRegUvOffset0 &&
             startRegister <= kRegUvOffset3 &&
             numVectors == 1 &&
             LooksLikeBlurUvOffset(regs))
         {
             std::copy(regs, regs + 4, scaledRegs);
-            for (float& value : scaledRegs)
-            {
-                value *= g_DepthOfFieldFixes.fBlurUvMultiplier;
-            }
+            ScaleActiveBlurAxis(scaledRegs);
 
             if (!loggedFirstHit)
             {
@@ -125,16 +153,21 @@ namespace
         }
 
         uintptr_t maxPlaneCountAddress = Memory::GetRipRelativeAddress(maxPlaneClamp, 0x02, 0x06);
-        Memory::Write<int>(maxPlaneCountAddress, 16);
-        Memory::Write<float>(maxPlaneCountAddress + 0x04, 4.0f);
-        Memory::Write<float>(maxPlaneCountAddress + 0x08, 0.175f);
-        Memory::Write<float>(maxPlaneCountAddress + 0x0C, 0.025f);
-        Memory::Write<float>(maxPlaneCountAddress + 0x10, 0.0f);
+        Memory::Write<int>(maxPlaneCountAddress, kFarFocusMaxPlaneCount);
+        Memory::Write<float>(maxPlaneCountAddress + 0x04, kFarFocusBlurWeight0);
+        Memory::Write<float>(maxPlaneCountAddress + 0x08, kFarFocusBlurWeight12);
+        Memory::Write<float>(maxPlaneCountAddress + 0x0C, kFarFocusBlurWeight34);
+        Memory::Write<float>(maxPlaneCountAddress + 0x10, kFarFocusBlurWeight56);
 
-        spdlog::info("MGS 2: Depth of Field: far focus max plane count set to 16 at {:s}+{:X}.",
+        spdlog::info("MGS 2: Depth of Field: far focus max plane count set to {} at {:s}+{:X}.",
+                     kFarFocusMaxPlaneCount,
                      sExeName.c_str(),
                      maxPlaneCountAddress - reinterpret_cast<uintptr_t>(baseModule));
-        spdlog::info("MGS 2: Depth of Field: far focus blur weights set to 4.0, 0.175, 0.025, 0.0.");
+        spdlog::info("MGS 2: Depth of Field: far focus blur weights set to {}, {}, {}, {}.",
+                     kFarFocusBlurWeight0,
+                     kFarFocusBlurWeight12,
+                     kFarFocusBlurWeight34,
+                     kFarFocusBlurWeight56);
     }
 
     void InstallBlurUvScaleHook()

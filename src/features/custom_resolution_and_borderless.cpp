@@ -1030,19 +1030,6 @@ namespace CustomResolutionAndBorderless
                 spdlog::error("MGS 2: Codec Portraits: Pattern scan failed.");
             }
 
-            // MGS 2: Disable motion blur. 
-            uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScanSilent(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??");
-            if (MGS2_MotionBlurScanResult)
-            {
-                spdlog::info("MGS 2: Motion Blur: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_MotionBlurScanResult - (uintptr_t)baseModule);
-
-                Memory::PatchBytes((uintptr_t)MGS2_MotionBlurScanResult, "\x48\x31\xDB\x90\x90\x90", 6);
-                spdlog::info("MGS 2: Motion Blur: Patched instruction.");
-            }
-            else if (!MGS2_MotionBlurScanResult)
-            {
-                spdlog::error("MGS 2: Motion Blur: Pattern scan failed.");
-            }
         }
         else if (eGameType & MGS3 && bHUDFix || eGameType & MG && fAspectRatio != fNativeAspect)
         {

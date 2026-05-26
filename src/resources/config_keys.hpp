@@ -850,4 +850,3 @@ constexpr int k3rdPersonMinCameraDistance = 100;
 constexpr int k3rdPersonFreecamDefaultMaxCameraDistance = 4000;
 constexpr float k3rdPersonFreecamDefaultHorizontalSensitivity = 0.6f;
 constexpr float k3rdPersonFreecamDefaultVerticalSensitivity = 0.4f;
-
