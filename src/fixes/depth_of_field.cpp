@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "common.hpp"
+#include "features/custom_resolution_and_borderless.hpp"
 #include "depth_of_field.hpp"
 #include "helper.hpp"
 #include "logging.hpp"
@@ -19,6 +20,18 @@ namespace
     SafetyHookMid FarFocusBlurBeginHook {};
     SafetyHookMid FarFocusBlurEndHook {};
     thread_local bool gInsideFarFocusBlur = false;
+
+    bool IsUltrawide()
+    {
+        if (CustomResolutionAndBorderless::iInternalResX <= 0 || CustomResolutionAndBorderless::iInternalResY <= 0)
+        {
+            return false;
+        }
+
+        constexpr float nativeAspect = 16.0f / 9.0f;
+        const float aspect = static_cast<float>(CustomResolutionAndBorderless::iInternalResX) / static_cast<float>(CustomResolutionAndBorderless::iInternalResY);
+        return aspect > nativeAspect;
+    }
 
     bool LooksLikeBlurUvOffset(const float* regs)
     {
@@ -205,6 +218,12 @@ void DepthOfFieldFixes::Initialize()
     if (!bEnabled)
     {
         spdlog::info("MGS 2: Depth of Field: disabled by config.");
+        return;
+    }
+
+    if (IsUltrawide())
+    {
+        spdlog::info("MGS 2: Depth of Field: disabled for ultrawide aspect ratio.");
         return;
     }
 

@@ -1030,6 +1030,14 @@ namespace CustomResolutionAndBorderless
                 spdlog::error("MGS 2: Codec Portraits: Pattern scan failed.");
             }
 
+            if (fAspectRatio > fNativeAspect)
+            {
+                if (uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScanSilent(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??"))
+                {
+                    Memory::PatchBytes((uintptr_t)MGS2_MotionBlurScanResult, "\x48\x31\xDB\x90\x90\x90", 6);
+                }
+            }
+
         }
         else if (eGameType & MGS3 && bHUDFix || eGameType & MG && fAspectRatio != fNativeAspect)
         {
