@@ -464,46 +464,55 @@ static void InitializeSubsystems()
 
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
+    if (eGameType & MGS2)
+    {
+        INITIALIZE(g_MGS2Sunglasses.Initialize());
+        INITIALIZE(MGS2_RestoreDogtags::Initialize());
+        INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
+        INITIALIZE(MGS2_RestorePhoneJingle::Apply());
+        INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
+        INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
+        INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
+        INITIALIZE(MGS2_First_Person_View::Activate());
+    }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());
     INITIALIZE(g_KeepAimingAfterFiring.Initialize());
-    INITIALIZE(g_MGS2Sunglasses.Initialize());
     INITIALIZE(g_DistanceCulling.Initialize());
-    INITIALIZE(MGS2_RestoreDogtags::Initialize());
-    INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
-    INITIALIZE(MGS2_RestorePhoneJingle::Apply());
-    INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
-    INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
     INITIALIZE(OriginalCameraPositions::Activate());
-    INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
     INITIALIZE(AdjustableCaptions::Apply());
-    INITIALIZE(MGS2_First_Person_View::Activate());
 
 
 
 
         //Fixes
+    if (eGameType & MGS2)
+    {
+        INITIALIZE(g_OpticalCamoFix.Initialize());
+        INITIALIZE(FixAimingFullTilt::Initialize());
+        INITIALIZE(CoolantMirrorFix::ApplyFix());
+        INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
+        INITIALIZE(TextureLiveSwaps::ApplyFixes());
+        INITIALIZE(SnakeArmFixes::ApplyFixes());
+        INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+        INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
+        INITIALIZE(g_DepthOfFieldFixes.Initialize());
+    }
+    else if (eGameType & MGS3)
+    {
+        INITIALIZE(g_WaterReflectionFix.Initialize());
+        INITIALIZE(MGS3HudFixes::Initialize());
+        INITIALIZE(MGS3FixCameraOffset::Activate());
+            
+    }
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
-    INITIALIZE(g_OpticalCamoFix.Initialize());
-    INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize()); //todo - fix more effects, ie rain speed, bullet trails, helicopter rotors
     INITIALIZE(g_StereoAudioFix.Initialize());
     INITIALIZE(DamagedSaveFix::Initialize());
     INITIALIZE(g_FixAimAfterEquip.Initialize());
-    INITIALIZE(FixAimingFullTilt::Initialize());
-    INITIALIZE(MGS3HudFixes::Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
-    INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
-    INITIALIZE(CoolantMirrorFix::ApplyFix());
-
     INITIALIZE(g_BusyLoopFix.Initialize());
-    INITIALIZE(TextureLiveSwaps::ApplyFixes());
-    INITIALIZE(SnakeArmFixes::ApplyFixes());
-    INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
-    INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
-    INITIALIZE(MGS3FixCameraOffset::Activate());
-    INITIALIZE(g_DepthOfFieldFixes.Initialize());
 
 
 #if !defined(RELEASE_BUILD) //todo category

@@ -7,6 +7,21 @@
 
 #include "logging.hpp"
 
+//p001_03_p02 -> P001_03_P02 Opening Infiltration 3, Polygon Demo 2 (NM Skull Suit)
+//p004_01_p01 -> P004_01_P01 First access to the node 1 Polygon Demo 1 (MC)
+//p005_01_p01 -> P005_01_P01 Raiden elevator ascent 1 Polygon Demo 1 (MC)
+//p012_01_p01 -> P012_01_P01 Fortune encounter 1 polygon demo 1 (MC)
+//p068_01_p01 -> P068_01_P01 Prior to sniping Vamp 1 polygon demo 1
+//p070_07_p06 -> P070_07_P06 AG launch 7 polygon demo 6 (KF+MC) | Shell 1 Core, level B2, Computer Room
+//p070_09_p08 -> P070_09_P08 AG launch 9 polygon demo 8 | Shell 1 core, level B2, In front of the AG Entrance 
+//p080_11_p06 -> P080_11_M05 AG Ascent 11 movie demo 5 (MC) | Fortune Miracle
+//t00a2d      -> T00a2D Tanker Opening Demo
+//t12a3d      -> The Seizure of Metal gear Demo | Ocelot blows the bomb
+//t12a4d      -> The Seizure of Metal gear Demo | Grulukovich body floating in water, marines shooting RAY.
+
+//w32a        -> Vamp at Emma ?? Or does the sun have contrast when climbing down the oil fence? or is it the missing orange ambient?
+//w32b        -> Vamp at Emma ??
+
 
 namespace
 {
@@ -45,6 +60,10 @@ namespace
 
 void MGS2_ContrastShader::Init()
 {
+    if (!(eGameType & MGS2))
+    {
+        return;
+    }
     HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
     if (!d3dcompiler)
     {

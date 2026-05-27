@@ -7,7 +7,7 @@ public:
 
     bool bMGS2_MarineForceLOD = true;
     bool bMGS2_ForcePlayerLOD = true;
-    bool bMGS2_ForceHostageLOD = true;
+    bool bMGS2_ForceNPCLOD = true;
 
 
     bool bForceGrassAlways;

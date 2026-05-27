@@ -178,7 +178,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
 
 
-        { ConfigKeys::LOD_MGS2_Hostage_Section, ConfigKeys::LOD_MGS2_Hostage_Setting, ConfigKeys::LOD_MGS2_Hostage_Help, ConfigKeys::LOD_MGS2_Hostage_Tooltip,
+        { ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, ConfigKeys::LOD_MGS2_NPC_Help, ConfigKeys::LOD_MGS2_NPC_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
 

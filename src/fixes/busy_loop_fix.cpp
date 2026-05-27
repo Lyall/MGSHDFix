@@ -88,6 +88,10 @@ void BusyLoopFix::Initialize()
 
 void BusyLoopFix::Shutdown()
 {
+    if (!iOption)
+    {
+        return;
+    }
     m_peekMessageHook = {};
     m_actorWaitHook = {};
     g_instance = nullptr;

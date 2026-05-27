@@ -30,18 +30,26 @@ void DistanceCulling::Initialize() const
                           });
         }
 
-        if (bMGS2_ForceHostageLOD)
+        if (bMGS2_ForceNPCLOD)
         {
+            //hostages
             MAKE_HOOK_MID(baseModule, "8B D0 3D ?? ?? ?? ?? 7E", "MGS2: LodHostage()", {
                 ctx.rax = 0.0f;
                           });
+
+            //evm models, ie snake, pres, parrot, vamp, emma
+            MAKE_HOOK_MID(baseModule, "40 53 48 83 EC ?? 44 89 41", "MGS2: _NPC_InitMWObject()", {
+                ctx.r8 = std::numeric_limits<int>::max();
+                          });
         }
+
 
     }
     else if (eGameType & MGS3)
     {
         if (bForceGrassAlways || fGrassDistanceScalar != 1.0f)
         {
+            //todo - disable automatically if Util::IsSteamOS() in the boss's arena.
             MAKE_HOOK_MID(baseModule, "F3 0F 11 83 ?? ?? ?? ?? 41 8B FC", "MGS3: Grass Farclip", {
                ctx.xmm0.f32[0] = g_DistanceCulling.bForceGrassAlways ? std::numeric_limits<float>::max() : ctx.xmm0.f32[0] * g_DistanceCulling.fGrassDistanceScalar;
                 })

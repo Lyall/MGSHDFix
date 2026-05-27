@@ -123,10 +123,10 @@ namespace ConfigKeys
     constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
 
 
-    constexpr const char* LOD_MGS2_Hostage_Section = "MGS2 - Model Options";
-    constexpr const char* LOD_MGS2_Hostage_Setting = "Force High Quality Hostages";
-    constexpr const char* LOD_MGS2_Hostage_Help = "";
-    constexpr const char* LOD_MGS2_Hostage_Tooltip = "When enabled, Hostage models always use their high polygon model.";
+    constexpr const char* LOD_MGS2_NPC_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_NPC_Setting = "Force High Quality NPCs";
+    constexpr const char* LOD_MGS2_NPC_Help = "";
+    constexpr const char* LOD_MGS2_NPC_Tooltip = "When enabled, NPC models (Hostages, Snake, Emma, President, Parrot, Fatman, Vamp) models always use their high polygon model.";
 
     constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
     constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
