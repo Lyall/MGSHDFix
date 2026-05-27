@@ -3,7 +3,10 @@
 class DepthOfFieldFixes final
 {
 public:
-    static void Initialize();
+    bool bEnabled = true;
+    float fBlurUvMultiplier = 6.0f;
+
+    void Initialize();
 };
 
 inline DepthOfFieldFixes g_DepthOfFieldFixes;

@@ -11,6 +11,7 @@
 *.sln.docstates
 *.lnk
 .obsidian/*
+mgs2_live_dump.bin
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

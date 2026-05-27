@@ -503,6 +503,7 @@ static void InitializeSubsystems()
     INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
     INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
     INITIALIZE(MGS3FixCameraOffset::Activate());
+    INITIALIZE(g_DepthOfFieldFixes.Initialize());
 
 
 #if !defined(RELEASE_BUILD) //todo category
@@ -510,7 +511,6 @@ static void InitializeSubsystems()
     INITIALIZE(CutscenePausing::Setup());
 
     //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());

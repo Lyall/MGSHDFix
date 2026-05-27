@@ -22,6 +22,7 @@
 #include "check_gamesave_folder.hpp"
 #include "cpu_core_limit.hpp"
 #include "distance_culling.hpp"
+#include "depth_of_field.hpp"
 #include "version_checking.hpp"
 #include "stat_persistence.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -605,6 +606,12 @@ void Config::Read()
         {
             ConfigHelper::getValue(ini, ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
             LOG_CONFIG(ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+
+            LOG_CONFIG(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
         }
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
