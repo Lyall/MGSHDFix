@@ -228,12 +228,6 @@ enum MGS2_Config2Masks : uint32_t
     GM_CONFIG_DOGTAGS_2002 = (1u << 15),  /// New dog tags
 };
 
-enum MGS2_ConfigPlatform : uint32_t
-{
-    GM_CONFIG_PLATFORM_PS2 = 0,
-    GM_CONFIG_PLATFORM_XBOX = 1,
-    GM_CONFIG_PLATFORM_PC = 2,
-};
 
 enum MGS2_ConfigRegion : uint32_t
 {
@@ -241,7 +235,3 @@ enum MGS2_ConfigRegion : uint32_t
     GM_CONFIG_REGION_US = 1,
     GM_CONFIG_REGION_EU = 2,
 };
-
-constexpr uint32_t GM_CONFIG_CONTROLS_SHIFT = 8;
-constexpr uint32_t GM_CONFIG_PLATFORM_SHIFT = 10;
-constexpr uint32_t GM_CONFIG_REGION_SHIFT = 12;

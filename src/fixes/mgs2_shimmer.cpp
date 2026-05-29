@@ -121,6 +121,7 @@ void MGS2_ShimmerEffect::SetupHooks()
     {
         return;
     }
+    bNeedsCompiler = true;
 
     MAKE_HOOK_MID(baseModule, "4C 8B 7C 24 ?? 48 8B 5C 24 ?? 48 83 C4 ?? 5F 5E C3", "MGS2_ShimmerEffect: Act", {
         bIsActive = true;
