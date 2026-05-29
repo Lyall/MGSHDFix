@@ -230,4 +230,5 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
 [safetyhook](https://github.com/cursey/safetyhook) for hooking.  <br />
+[stb](https://github.com/nothings/stb) for png decoding.
 Universal Config Tool (made by ShizCalev/Afevis. Powered by SDL3.)

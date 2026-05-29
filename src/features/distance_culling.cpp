@@ -43,6 +43,11 @@ void DistanceCulling::Initialize() const
                           });
         }
 
+        /*
+        MAKE_HOOK_MID(baseModule, "8B 83 ?? ?? ?? ?? 85 C0 75 ?? 8B 83", "MGS2: Parrot Fix", {
+                *reinterpret_cast<int16_t*>(ctx.rbx + 0x3B4) = static_cast<int16_t>(*reinterpret_cast<int32_t*>(ctx.rbx + 0xA14));
+                      });
+                      */
 
     }
     else if (eGameType & MGS3)

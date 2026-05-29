@@ -16,6 +16,7 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_first_person_view_mode.hpp"
+#include "mgs2_shimmer.hpp"
 void afterPresent();
 
 namespace
@@ -164,6 +165,7 @@ namespace
             {
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
+            MGS2_ShimmerEffect::Draw(pSwapChain);
         }
 
 
@@ -246,7 +248,7 @@ void D3D11Hooks::Initialize()
 
 void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
 {
-    if (!g_VectorScalingFix.bNeedsCompiler && !MGS2_ContrastShader::bNeedsCompiler)
+    if (!g_VectorScalingFix.bNeedsCompiler && !MGS2_ContrastShader::bNeedsCompiler && !MGS2_ShimmerEffect::bNeedsCompiler)
     {
         FreeLibrary(d3dcompiler);
         spdlog::info("D3D11Hooks: Released d3dcompiler_43.dll as it is no longer needed.");

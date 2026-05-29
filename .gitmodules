@@ -23,3 +23,6 @@
 [submodule "external/SDL"]
 	path = external/SDL
 	url = https://github.com/libsdl-org/SDL
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb

@@ -224,6 +224,9 @@
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -451,6 +454,10 @@
     <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

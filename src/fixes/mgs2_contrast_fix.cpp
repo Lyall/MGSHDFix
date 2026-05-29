@@ -132,8 +132,8 @@ void MGS2_ContrastShader::Init()
 
     bShaderLoaded = true;
     bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
     spdlog::info("MGS2_ContrastShader initialized.");
+    D3D11Hooks::UnloadCompiler(d3dcompiler);
 }
 
 

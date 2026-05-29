@@ -67,6 +67,7 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_shimmer.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -431,6 +432,7 @@ void afterPresent()
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
     MGS2_ContrastShader::Init();
+    MGS2_ShimmerEffect::Init();
     
 
     spdlog::info("afterPresent() completed");
@@ -497,6 +499,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
         INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
+        INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
     }
     else if (eGameType & MGS3)
     {
