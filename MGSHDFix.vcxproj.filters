@@ -227,6 +227,9 @@
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="playtime_fixes.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -457,7 +460,12 @@
     <ClInclude Include="src\fixes\mgs2_shimmer.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
+    <ClInclude Include="playtime_fixes.hpp">
+      <Filter>Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

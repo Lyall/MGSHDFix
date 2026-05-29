@@ -197,3 +197,51 @@ enum MGS2_MenuStatusFlags : uint32_t
     MENU_MENU_OPEN = MENU_WEAPON_OPEN | MENU_ITEM_OPEN,
     MENU_MENU_DISABLE = MENU_WEAPON_DISABLE | MENU_ITEM_DISABLE,
 };
+
+enum MGS2_ConfigFlags : uint32_t
+{
+    GM_CONFIG_VIBRATION_OFF = (1u << 0),
+    GM_CONFIG_CAPTION_OFF = (1u << 1),
+    GM_CONFIG_RADAR_OFF = (1u << 2),
+    GM_CONFIG_BLOOD_OFF = (1u << 3),
+    GM_CONFIG_CUTSCENES_LETTERBOXED = (1u << 4),
+    GM_CONFIG_RADAR_OFF_INTRUDE = (1u << 5),
+    GM_CONFIG_SHUKAN_REVERSE = (1u << 6),   /// First-person controls inverted
+    GM_CONFIG_OLD_TYPE_MENU = (1u << 7),
+    GM_CONFIG_WATERUD_REVERSE = (1u << 8),   /// Underwater up/down inverted
+    GM_CONFIG_MENU_QCHANGE_EX = (1u << 9),
+    GM_CONFIG_SOUND_5_1CHANL = (1u << 10),  /// 5.1ch surround sound
+    GM_CONFIG_END_IF_FOUND = (1u << 11),  /// Game over if discovered
+
+    GM_CONFIG_STORY_TANKER = (1u << 12),  /// Tanker chapter; if unset, Plant chapter
+    GM_CONFIG_TANKER_CLEARED = (1u << 13),  /// Tanker chapter cleared this playthrough
+    GM_CONFIG_PLAYTIME_STOP = (1u << 14),  /// Playtime counter stopped
+};
+
+enum MGS2_Config2Masks : uint32_t
+{
+    GM_CONFIG_SE_VOLUME = 0x0000000F,  /// SE volume (4-bit, 16 levels, 0=max 15=min, Xbox only)
+    GM_CONFIG_MUSIC_VOLUME = 0x000000F0,  /// Music volume (4-bit, 16 levels, 0=max 15=min, Xbox only)
+    GM_CONFIG_CONTROLS = 0x00000300,  /// Controller layout (2-bit, 4 types, Xbox only)
+    GM_CONFIG_PLATFORM = 0x00000C00,  /// Platform (2-bit, 4 types)
+    GM_CONFIG_REGION = 0x00007000,  /// Release region (3-bit, 8 regions)
+    GM_CONFIG_DOGTAGS_2002 = (1u << 15),  /// New dog tags
+};
+
+enum MGS2_ConfigPlatform : uint32_t
+{
+    GM_CONFIG_PLATFORM_PS2 = 0,
+    GM_CONFIG_PLATFORM_XBOX = 1,
+    GM_CONFIG_PLATFORM_PC = 2,
+};
+
+enum MGS2_ConfigRegion : uint32_t
+{
+    GM_CONFIG_REGION_JAPAN = 0,
+    GM_CONFIG_REGION_US = 1,
+    GM_CONFIG_REGION_EU = 2,
+};
+
+constexpr uint32_t GM_CONFIG_CONTROLS_SHIFT = 8;
+constexpr uint32_t GM_CONFIG_PLATFORM_SHIFT = 10;
+constexpr uint32_t GM_CONFIG_REGION_SHIFT = 12;

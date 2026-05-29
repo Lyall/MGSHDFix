@@ -7,7 +7,7 @@
 #include "d3d11_api.hpp"
 #include "common.hpp"
 #include "gamevars.hpp"
-#include "input_handler.hpp"
+//#include "input_handler.hpp"
 #include "logging.hpp"
 
 namespace
@@ -214,10 +214,7 @@ void MGS2_ShimmerEffect::Init()
     dev->CreateSamplerState(&psd, samplerPoint.GetAddressOf());
 
     int tw, th, tc;
-    unsigned char* pixels = stbi_load_from_memory(
-        mgs2_shimmer_noise_map::PngBlob.data(),
-        (int)mgs2_shimmer_noise_map::PngBlobSize,
-        &tw, &th, &tc, 4);
+    unsigned char* pixels = stbi_load_from_memory(mgs2_shimmer_noise_map::PngBlob.data(), (int)mgs2_shimmer_noise_map::PngBlobSize, &tw, &th, &tc, 4);
     if (pixels)
     {
         for (int i = 3; i < tw * th * 4; i += 4)
@@ -240,7 +237,11 @@ void MGS2_ShimmerEffect::Init()
         dev->CreateShaderResourceView(noiseTex.Get(), nullptr, noiseSRV.GetAddressOf());
         stbi_image_free(pixels);
     }
-    else spdlog::error("MGS2_ShimmerEffect: Failed to decode noise texture");
+    else
+    {
+        spdlog::error("MGS2_ShimmerEffect: Failed to decode noise texture");
+        return;
+    }
 
     D3D11_BLEND_DESC bd = {};
     auto& rt = bd.RenderTarget[0];

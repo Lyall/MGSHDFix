@@ -68,6 +68,7 @@
 #include "cutscene_pausing.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_shimmer.hpp"
+#include "../playtime_fixes.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -516,6 +517,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_FixAimAfterEquip.Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
     INITIALIZE(g_BusyLoopFix.Initialize());
+    INITIALIZE(FixPlaytime::Apply());
 
 
 #if !defined(RELEASE_BUILD) //todo category
