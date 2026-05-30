@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="playtime_fixes.cpp" />
+    <ClCompile Include="src\fixes\playtime_fixes.cpp" />
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
     <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp" />
@@ -143,7 +143,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="playtime_fixes.hpp" />
+    <ClInclude Include="src\fixes\playtime_fixes.hpp" />
     <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
