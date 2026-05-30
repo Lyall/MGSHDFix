@@ -187,48 +187,47 @@ jobs:
         draft: true
         generateReleaseNotes: true
         artifactErrorsFailBuild: true
-#
-#    - name: Upload to NexusMods - MG1 + MG2
-#      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
-#      with:
-#        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-#        file_group_id: 107230
-#        display_name: "MGSHDFix"
-#        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MG1.zip
-#        version: "${{ steps.extract_version.outputs.version }}"
-#        file_category: main
-#        archive_existing_file: true
-#        description: Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
-#            
-#    - name: Upload to NexusMods - MGS2
-#      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
-#      with:
-#        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-#        file_group_id: 462574
-#        display_name: "MGSHDFix"
-#        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip
-#        version: "${{ steps.extract_version.outputs.version }}"
-#        file_category: main
-#        archive_existing_file: true
-#        description: |
-#            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
-#
-#            Texture / Movie resolution is not affected / can be set however desired.
-#
-#
-#    - name: Upload to NexusMods - Upload to NexusMods - MGS3
-#      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
-#      with:
-#        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-#        file_group_id: 541612
-#        display_name: "MGSHDFix"
-#        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MGS3.zip
-#        version: "${{ steps.extract_version.outputs.version }}"
-#        file_category: main
-#        archive_existing_file: true
-#        description: |
-#            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
-#
-#            Texture / Movie resolution is not affected / can be set however desired.
-#
-#
+
+    - name: Upload to NexusMods - MG1 + MG2
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.6
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 107230
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MG1.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+            
+    - name: Upload to NexusMods - MGS2
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.6
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 462574
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: |
+            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+
+            Texture / Movie resolution is not affected / can be set however desired.
+
+
+    - name: Upload to NexusMods - Upload to NexusMods - MGS3
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.6
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: 541612
+        display_name: "MGSHDFix"
+        filename: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}_MGS3.zip
+        version: "${{ steps.extract_version.outputs.version }}"
+        file_category: main
+        archive_existing_file: true
+        description: |
+            Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
+
+            Texture / Movie resolution is not affected / can be set however desired.
+

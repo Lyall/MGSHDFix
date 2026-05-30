@@ -3,10 +3,19 @@
 #include "common.hpp"
 #include "distance_culling.hpp"
 
+#include "gamevars.hpp"
 #include "input_handler.hpp"
 #include "logging.hpp"
 
-
+namespace
+{
+    constexpr uint32_t PARROT_MODEL_STRCODE = GameVars::GV_StrCode("par_def_mh");
+#if defined(RELEASE_BUILD)
+    bool log_bird = false;
+#else
+    bool log_bird = true;
+#endif
+}
 
 void DistanceCulling::Initialize() const
 {
@@ -39,15 +48,18 @@ void DistanceCulling::Initialize() const
 
             //evm models, ie snake, pres, parrot, vamp, emma
             MAKE_HOOK_MID(baseModule, "40 53 48 83 EC ?? 44 89 41", "MGS2: _NPC_InitMWObject()", {
-                ctx.r8 = std::numeric_limits<int>::max();
-                          });
-        }
+            if (ctx.rdx != PARROT_MODEL_STRCODE)
+            {
+                spdlog::info("hit");
 
-        /*
-        MAKE_HOOK_MID(baseModule, "8B 83 ?? ?? ?? ?? 85 C0 75 ?? 8B 83", "MGS2: Parrot Fix", {
-                *reinterpret_cast<int16_t*>(ctx.rbx + 0x3B4) = static_cast<int16_t>(*reinterpret_cast<int32_t*>(ctx.rbx + 0xA14));
-                      });
-                      */
+                ctx.r8 = std::numeric_limits<int>::max();
+            }
+            else if (log_bird)
+            {
+                spdlog::info("BIRD BIRD BIRD, BIRD IS THE WORD");
+            }
+                });
+        }
 
     }
     else if (eGameType & MGS3)

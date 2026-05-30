@@ -330,7 +330,8 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
-                                                                 "(MOUSE SUPPORT STILL W.I.P.)";
+                                                                 "(MOUSE SUPPORT STILL W.I.P.)\n"
+                                                                 "(!!! MAY CAUSE CRASHING !!!)\n";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Enables the third person freecam.\n"
                                                                     "\n"
                                                                     "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
@@ -410,7 +411,8 @@ namespace ConfigKeys
     constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Setting = "Enable First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
-                                                                "(SOME EFFECTS WILL BE MISSING)";
+                                                                "(SOME EFFECTS WILL BE MISSING)\n"
+                                                                "(!!! MAY CAUSE CRASHING !!!)";
     constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "Enables the First Person Shooter mode.\n"
                                                                     "\n"
                                                                     "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
