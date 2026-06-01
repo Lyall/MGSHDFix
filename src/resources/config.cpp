@@ -39,6 +39,7 @@
 #include "swap_menu_buttons.hpp"
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
+#include "mgs2_underwater_filter.hpp"
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
 #include "mgs2_first_person_view_mode.hpp"
@@ -606,6 +607,9 @@ void Config::Read()
         {
             ConfigHelper::getValue(ini, ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
             LOG_CONFIG(ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
+            LOG_CONFIG(ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             ConfigHelper::getValue(ini, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);

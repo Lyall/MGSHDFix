@@ -224,6 +224,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, ConfigKeys::FixOpticalCamo_Help, ConfigKeys::FixOpticalCamo_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, ConfigKeys::FixMGS2UnderwaterFilter_Help, ConfigKeys::FixMGS2UnderwaterFilter_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         { ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, ConfigKeys::FixMGS2DepthOfField_Help, ConfigKeys::FixMGS2DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
