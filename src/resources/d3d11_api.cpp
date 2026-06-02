@@ -17,6 +17,7 @@
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_shimmer.hpp"
+#include "mgs2_underwater_filter.hpp"
 void afterPresent();
 
 namespace
@@ -166,6 +167,7 @@ namespace
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
             MGS2_ShimmerEffect::Draw(pSwapChain);
+            g_MGS2UnderwaterFilterFix.BeforePresent();
         }
 
 

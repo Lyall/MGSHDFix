@@ -49,6 +49,7 @@
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp" />
     <ClCompile Include="src\fixes\cpu_core_limit.cpp" />
     <ClCompile Include="src\fixes\depth_of_field.cpp" />
+    <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp" />
     <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp" />
     <ClCompile Include="src\fixes\optical_camo.cpp" />
     <ClCompile Include="src\fixes\windows_fullscreen_optimization.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\fixes\windows_fullscreen_optimization.hpp" />
     <ClInclude Include="src\resources\config_keys.hpp" />
     <ClInclude Include="src\fixes\depth_of_field.hpp" />
+    <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp" />
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
     <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />

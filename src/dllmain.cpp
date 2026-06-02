@@ -45,6 +45,7 @@
 #include "texture_live_swaps.hpp"
 #include "mgs2_coolant_mirror.hpp"
 #include "mgs2_restore_dogtag_viewer.hpp"
+#include "mgs2_underwater_filter.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -501,6 +502,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
         INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
+        INITIALIZE(g_MGS2UnderwaterFilterFix.Initialize());
         INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
     }

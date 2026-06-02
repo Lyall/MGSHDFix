@@ -201,6 +201,11 @@ namespace ConfigKeys
     constexpr const char* FixOpticalCamo_Help = "";
     constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
 
+    constexpr const char* FixMGS2UnderwaterFilter_Section = "Bugfixes";
+    constexpr const char* FixMGS2UnderwaterFilter_Setting = "MGS2 - Fix Underwater Filter";
+    constexpr const char* FixMGS2UnderwaterFilter_Help = "";
+    constexpr const char* FixMGS2UnderwaterFilter_Tooltip = "Restores MGS2 underwater screen and HUD distortion while keeping subtitle demos readable.";
+
     constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
     constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
     constexpr const char* FixMGS2DepthOfField_Help = "";
