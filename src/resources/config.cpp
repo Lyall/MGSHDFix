@@ -621,7 +621,6 @@ void Config::Read()
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {
             InputHandler::GetKeybind(ini, ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, g_VectorScalingFix.vkRainShaderToggle);
-            InputHandler::GetKeybind(ini, ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, g_VectorScalingFix.vkUIShaderToggle);
             InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
 
             g_VectorScalingFix.bNeedsCompiler = true;

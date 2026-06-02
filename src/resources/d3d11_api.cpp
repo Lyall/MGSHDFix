@@ -162,7 +162,7 @@ namespace
             MGS2_ThirdPersonFreecam::Tick();
             MGS2_First_Person_View::Tick();
 
-            if (auto* work = *MGS2_ContrastShader::pContrastWork)
+            if (auto* work = *MGS2_ContrastShader::pContrastWork; MGS2_ContrastShader::bShaderLoaded && work)
             {
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }

@@ -196,6 +196,11 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, ConfigKeys::DistanceCullingGrassScalar_Help, ConfigKeys::DistanceCullingGrassScalar_Tooltip,
           std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), true, Field::Float, 0 , 0, 0, "", {}, 1.0, 0},
 
+
+        { ConfigKeys::ToggleDistanceCullingGrass_Section, ConfigKeys::ToggleDistanceCullingGrass_Setting, ConfigKeys::ToggleDistanceCullingGrass_Help, ConfigKeys::ToggleDistanceCullingGrass_Tooltip,
+          std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), false, Field::Hotkey, 0, 0, 0, "Page Up" },
+
+
         { ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, ConfigKeys::Disable_HDC_Camera_Positions_Help, ConfigKeys::Disable_HDC_Camera_Positions_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
@@ -231,7 +236,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Tooltip,
-          std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 6.0, 0.0, 20.0 },
+          std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 3.0, 0.0, 20.0 },
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -344,12 +349,6 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, ConfigKeys::CycleWireframeMode_Help, ConfigKeys::CycleWireframeMode_Tooltip,
           std::make_pair(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting), false, Field::Hotkey, 0, 0, 0, "End"},
-
-        { ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, ConfigKeys::ToggleUIShader_Help, ConfigKeys::ToggleUIShader_Tooltip,
-          std::make_pair(ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting), false, Field::Hotkey, 0, 0, 0, "Delete" },
-
-        { ConfigKeys::ToggleDistanceCullingGrass_Section, ConfigKeys::ToggleDistanceCullingGrass_Setting, ConfigKeys::ToggleDistanceCullingGrass_Help, ConfigKeys::ToggleDistanceCullingGrass_Tooltip,
-          std::make_pair(ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting), false, Field::Hotkey, 0, 0, 0, "Page Up" },
 
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },

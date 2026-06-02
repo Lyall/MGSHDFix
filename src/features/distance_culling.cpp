@@ -48,18 +48,27 @@ void DistanceCulling::Initialize() const
 
             //evm models, ie snake, pres, parrot, vamp, emma
             MAKE_HOOK_MID(baseModule, "40 53 48 83 EC ?? 44 89 41", "MGS2: _NPC_InitMWObject()", {
-            if (ctx.rdx != PARROT_MODEL_STRCODE)
-            {
-                spdlog::info("hit");
-
-                ctx.r8 = std::numeric_limits<int>::max();
-            }
-            else if (log_bird)
-            {
-                spdlog::info("BIRD BIRD BIRD, BIRD IS THE WORD");
-            }
+                if (ctx.rdx != PARROT_MODEL_STRCODE)  //emma's parrot (shell 1 core) is unique in that its evm is its cage. if we force its lod, the parrot will magically turn into its own cage when PL_Status & (PLAYER_WATCH|PLAYER_INTRUDE)
+                {
+                    if (log_bird)
+                    {
+                        spdlog::info("_NPC_InitMWObject -> bird not matched");
+                    }
+                    ctx.r8 = std::numeric_limits<int>::max();
+                }
+                else if (log_bird)
+                {
+                    spdlog::info("BIRD BIRD BIRD, BIRD IS THE WORD");
+                }
                 });
         }
+
+        MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "m4 demo fix", {
+            if (g_GameVars.InCutscene())
+            {
+                reghelpers::SetCF(ctx, true);
+            }
+            })
 
     }
     else if (eGameType & MGS3)

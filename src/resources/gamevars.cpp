@@ -30,18 +30,19 @@ void GameVars::Initialize()
         p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: p_GV_PauseLevel") + 2));
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
 
-        spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
-        spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
-        spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
-        spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
-        spdlog::info("GameVars: currentStage address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)currentStage - (uintptr_t)baseModule);
-        spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
-        spdlog::info("GameVars: GM_WaterLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_WaterLevel - (uintptr_t)baseModule);
-        spdlog::info("GameVars: GM_PlayerStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_PlayerStatus - (uintptr_t)baseModule);
-        spdlog::info("GameVars: p_GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
-        spdlog::info("GameVars: p_GV_PauseLeveladdress is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel- (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_PlayerStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_PlayerStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_VRStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_VRStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_WaterLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_WaterLevel - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GV_PauseLeveladdress is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel - (uintptr_t)baseModule);
+        spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
+        spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
+        spdlog::info("GameVars: currentStage address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)currentStage - (uintptr_t)baseModule);
+        spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
+        spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
+        spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
+        spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
         
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
         {

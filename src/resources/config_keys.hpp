@@ -154,12 +154,20 @@ namespace ConfigKeys
                                                                "\n"
                                                                "When enabled, grass always remains visible regardless of distance.";
 
-    constexpr const char* DistanceCullingGrassScalar_Section = "MGS3 - Override Render Distance";
+    constexpr const char* DistanceCullingGrassScalar_Section = DistanceCullingGrassAlways_Section;
     constexpr const char* DistanceCullingGrassScalar_Setting = "Custom Grass Distance Multiplier";
     constexpr const char* DistanceCullingGrassScalar_Help = "";
     constexpr const char* DistanceCullingGrassScalar_Tooltip = "Multiplies the grass render distance by this factor for finer control.\n"
                                                                "\n"
                                                                "1.0 is the unmodified distance.";
+
+    constexpr const char* ToggleDistanceCullingGrass_Section = DistanceCullingGrassAlways_Section;
+    constexpr const char* ToggleDistanceCullingGrass_Setting = "Toggle Always Show Grass";
+    constexpr const char* ToggleDistanceCullingGrass_Help = "";
+    constexpr const char* ToggleDistanceCullingGrass_Tooltip = "Toggles the Always Show Grass option on/off in real-time, for those who want comparison shots.\n"
+        "\n"
+        "You may have to exit and reenter an area for the change to take effect.";
+
 
     // Ultrawide
     constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";
@@ -196,6 +204,11 @@ namespace ConfigKeys
         "\n"
         "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
 
+    constexpr const char* ToggleRainShader_Section = "Bugfixes";
+    constexpr const char* ToggleRainShader_Setting = "Toggle UI/Rain Fix";
+    constexpr const char* ToggleRainShader_Help = "";
+    constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time for comparison shots.";
+
     constexpr const char* FixOpticalCamo_Section = "Bugfixes";
     constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo Refraction";
     constexpr const char* FixOpticalCamo_Help = "";
@@ -212,8 +225,8 @@ namespace ConfigKeys
     constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 far-focus depth of field blur at higher resolutions.";
 
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
-    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur UV Multiplier";
-    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(6.0 recommended for 1440p)";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur Strength";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(1.0 = Accurate to PCSX2)";
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's far-focus depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
@@ -636,28 +649,11 @@ namespace ConfigKeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Help = "";
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Tooltip = "Capture hotkeys even when the window is not focused or is alt-tabbed.";
 
-    constexpr const char* ToggleRainShader_Section = "Hotkeys";
-    constexpr const char* ToggleRainShader_Setting = "Toggle Rain Shader";
-    constexpr const char* ToggleRainShader_Help = "";
-    constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time.";
-
-    constexpr const char* ToggleUIShader_Section = "Hotkeys";
-    constexpr const char* ToggleUIShader_Setting = "Toggle UI Shader";
-    constexpr const char* ToggleUIShader_Help = "";
-    constexpr const char* ToggleUIShader_Tooltip = "Toggles the UI line width fix on/off in real-time.";
-
     constexpr const char* CycleWireframeMode_Section = "Hotkeys";
     constexpr const char* CycleWireframeMode_Setting = "Cycle Wireframe Mode";
     constexpr const char* CycleWireframeMode_Help = "";
     constexpr const char* CycleWireframeMode_Tooltip = "Cycle between wireframe rendering modes (available when Rain Width Fix is enabled).";
 
-
-    constexpr const char* ToggleDistanceCullingGrass_Section = "Hotkeys";
-    constexpr const char* ToggleDistanceCullingGrass_Setting = "Toggle Always Show Grass";
-    constexpr const char* ToggleDistanceCullingGrass_Help = "";
-    constexpr const char* ToggleDistanceCullingGrass_Tooltip = "Toggles the Always Show Grass option on/off in real-time, for those who want comparison shots.\n"
-                                                               "\n"
-                                                               "You may have to exit and reenter an area for the change to take effect.";
 
     // Achievements
 

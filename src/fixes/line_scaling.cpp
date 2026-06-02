@@ -87,7 +87,7 @@ namespace
         D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
         context->IAGetPrimitiveTopology(&topology);
 
-        if (g_VectorScalingFix.bToggleUIShader && (topology == D3D11_PRIMITIVE_TOPOLOGY_LINELIST || topology == D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP))
+        if (g_VectorScalingFix.bToggleRainShader && (topology == D3D11_PRIMITIVE_TOPOLOGY_LINELIST || topology == D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP))
         {
             ID3D11GeometryShader* currentGS = nullptr;
             context->GSGetShader(&currentGS, nullptr, nullptr);
@@ -197,11 +197,6 @@ void VectorScalingFix::LoadCompiledShader() const
     LOG_HOOK(D3D11_Draw_Hook, "ID3D11DeviceContext::Draw");
 
     spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
-
-    g_InputHandler.RegisterHotkey(vkUIShaderToggle, "UI Shader Toggle", []()
-        {
-            g_VectorScalingFix.bToggleUIShader = !g_VectorScalingFix.bToggleUIShader;
-        });
 }
 
 bool VectorScalingFix::CompileGeometryShader()
