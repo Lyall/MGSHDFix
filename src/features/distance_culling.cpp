@@ -63,12 +63,22 @@ void DistanceCulling::Initialize() const
                 });
         }
 
-        MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "m4 demo fix", {
-            if (g_GameVars.InCutscene())
-            {
+        if (bAlwaysRenderShellCasings)
+        {
+            MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act() @ L406", {
                 reghelpers::SetCF(ctx, true);
-            }
-            })
+                        });
+        }
+        else
+        {
+            //force shell casing to always appear during cutscenes regardless of height difference/distance from camera.
+            MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act()  @ L406 #2", {
+                if (g_GameVars.InCutscene())
+                {
+                    reghelpers::SetCF(ctx, true);
+                }
+                        });
+        }
 
     }
     else if (eGameType & MGS3)

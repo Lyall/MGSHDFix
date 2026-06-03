@@ -8,7 +8,7 @@ public:
     bool bMGS2_MarineForceLOD = true;
     bool bMGS2_ForcePlayerLOD = true;
     bool bMGS2_ForceNPCLOD = true;
-
+    bool bAlwaysRenderShellCasings = true;
 
     bool bForceGrassAlways;
     int vkForceGrassAlwaysToggle = 0;

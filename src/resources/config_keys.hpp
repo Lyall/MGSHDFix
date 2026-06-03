@@ -111,6 +111,15 @@ namespace ConfigKeys
     constexpr const char* Caption_Background_Opacity_Help = "30% Recommended";
     constexpr const char* Caption_Background_Opacity_Tooltip = "";
 
+
+    constexpr const char* LOD_MGS2_ShellCasings_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_ShellCasings_Setting = "Always Show Weapon Shell Casings";
+    constexpr const char* LOD_MGS2_ShellCasings_Help = "";
+    constexpr const char* LOD_MGS2_ShellCasings_Tooltip = "Shell casings normally get culled if height is > 3500 units from the camera.\n"
+                                                          "\n"
+                                                          "When enabled, shell casings will be rendered at all distances.\n";
+
+
     constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
     constexpr const char* LOD_MGS2_Marines_Help = "";

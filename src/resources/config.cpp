@@ -545,6 +545,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
     LOG_CONFIG(ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
 
+    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
+    LOG_CONFIG(ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
+
 
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
