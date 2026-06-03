@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "snakearm_voice.hpp"
+#include "mgs2_snakearm_voice.hpp"
 
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"

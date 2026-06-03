@@ -179,7 +179,7 @@
     <ClCompile Include="src\fixes\texture_live_swaps.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\snakearm_voice.cpp">
+    <ClCompile Include="src\fixes\mgs2_snakearm_voice.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp">
@@ -237,6 +237,9 @@
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_hostage_model.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -412,7 +415,7 @@
     <ClInclude Include="src\fixes\texture_live_swaps.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\snakearm_voice.hpp">
+    <ClInclude Include="src\fixes\mgs2_snakearm_voice.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp">
@@ -482,6 +485,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\playtime_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_hostage_model.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>

@@ -40,12 +40,13 @@
 #include "mgs3_hud_fixes.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
-#include "snakearm_voice.hpp"
+#include "mgs2_snakearm_voice.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_coolant_mirror.hpp"
 #include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs2_underwater_filter.hpp"
+#include "mgs2_hostage_model.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -507,6 +508,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_MGS2UnderwaterFilterFix.Initialize());
         INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
+        INITIALIZE(HostageModel::ApplyFix());
     }
     else if (eGameType & MGS3)
     {
