@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
     <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp" />
     <ClCompile Include="src\fixes\playtime_fixes.cpp" />
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mgs2_msx_colonel.hpp" />
     <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp" />
     <ClInclude Include="src\fixes\playtime_fixes.hpp" />
     <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />

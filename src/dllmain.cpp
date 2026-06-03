@@ -64,6 +64,7 @@
 #include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
+#include "mgs2_msx_colonel.hpp"
 #include "adjustable_captions.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
@@ -479,6 +480,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
         INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
         INITIALIZE(MGS2_First_Person_View::Activate());
+        INITIALIZE(MGS2RetroColonel::Initialize());
     }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());

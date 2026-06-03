@@ -250,14 +250,15 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, ConfigKeys::MGS2_PhoneJingle_Help, ConfigKeys::MGS2_PhoneJingle_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-                { ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip,
+        { ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, ConfigKeys::UnusedRetroColonel_Help, ConfigKeys::UnusedRetroColonel_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::UnusedRetroColonel_Option_Normal, { ConfigKeys::UnusedRetroColonel_Option_Normal, ConfigKeys::UnusedRetroColonel_Option_MSX, ConfigKeys::UnusedRetroColonel_Option_Subsistence } },
+
+      { ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
 
             {ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Tooltip,
         std::make_pair(ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting), false, Field::Hotkey, 0, 0, 0, "Num9" },
-
-
 
 
         { ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip,

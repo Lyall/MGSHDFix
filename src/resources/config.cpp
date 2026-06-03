@@ -37,6 +37,7 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
+#include "mgs2_msx_colonel.hpp"
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
 #include "mgs2_underwater_filter.hpp"
@@ -829,6 +830,31 @@ void Config::Read()
     {
         InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_Hold_First_Person_View);
     }
+
+    std::string sColonelMsxSprite;
+    ConfigHelper::getValue(ini, ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);
+    if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_Subsistence)
+    {
+        g_MGS2RetroColonel.bEnabled = true;
+        g_MGS2RetroColonel.bUseNewSprite = true;
+    }
+    else if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_MSX)
+    {
+        g_MGS2RetroColonel.bEnabled = true;
+        g_MGS2RetroColonel.bUseNewSprite = false;
+    }
+    else if (sColonelMsxSprite == ConfigKeys::UnusedRetroColonel_Option_Normal)
+    {
+        g_MGS2RetroColonel.bEnabled = false;
+    }
+    else
+    {
+        spdlog::error("Invalid config value for MGS2 Colonel Sprite: {}", sColonelMsxSprite);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for MGS2 Colonel Sprite: " << sColonelMsxSprite << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    LOG_CONFIG(ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);
 
 
     ConfigLogger::Flush();
