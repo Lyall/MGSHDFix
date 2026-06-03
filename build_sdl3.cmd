@@ -27,19 +27,26 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- Check Visual Studio / CMake compatibility ---
-set "HAS_SUPPORTED_VS=0"
-set "HAS_VS2026=0"
-set "HAS_VS2022=0"
-set "CMAKE_HAS_VS2026=0"
-set "CMAKE_HAS_VS2022=0"
-set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+REM --- Locate vswhere ---
+set "VSWHERE=vswhere.exe"
+
+where vswhere >nul 2>nul
+if errorlevel 1 (
+    set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+)
 
 if not exist "%VSWHERE%" (
     echo ERROR: vswhere.exe was not found.
     echo Make sure Visual Studio 2026 or Visual Studio 2022 is installed.
     exit /b 1
 )
+
+REM --- Check Visual Studio / CMake compatibility ---
+set "HAS_SUPPORTED_VS=0"
+set "HAS_VS2026=0"
+set "HAS_VS2022=0"
+set "CMAKE_HAS_VS2026=0"
+set "CMAKE_HAS_VS2022=0"
 
 "%VSWHERE%" -version "[18.0,19.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
 if not errorlevel 1 set "HAS_VS2026=1"

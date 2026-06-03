@@ -18,6 +18,10 @@ namespace
     constexpr unsigned int STRCODE_REV_DISP = 0x4c4dfd;
     constexpr unsigned int STRCODE_BDU_DISP = 0x20158d;
 
+    constexpr unsigned int STRCODE_NODE_TITLE_TEX_TRI = 0xbbe697;
+    constexpr unsigned int STRCODE_TITLE_LOGO = 0x07bc34;
+    constexpr unsigned int STRCODE_TITLE_NUMBAH_TWO = 0xc1181b;
+
     FASTCALL_2IN1OUT GetCtxrHandle;
     FASTCALL_2IN1OUT CopyCtxr;
     FASTCALL_3IN1OUT AllocTexture;
@@ -131,6 +135,17 @@ void TextureLiveSwaps::ApplyFixes()
                 GetAndCopyCtxr(STRCODE_W24C1, STRCODE_REV_DISP, STRCODE_BDU_DISP, false);
             }
         });
+
+    }
+    
+    if (bRestoreTitleScreenSwapping && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")))
+    {
+        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 45 33 C9 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 74 24 ?? 4C 8D 05 ?? ?? ?? ?? 33 F6 89 78 ?? 48 8D 15 ?? ?? ?? ?? 89 B0", "NewTitleScrMan", {
+            if ((MGS2_LinkVarBuf::GM_GameClearCount.get() & 1) != 0)
+            {
+                GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO, false);
+            }
+            });
 
     }
 

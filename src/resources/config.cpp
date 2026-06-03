@@ -44,6 +44,7 @@
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
 #include "mgs2_first_person_view_mode.hpp"
+#include "texture_live_swaps.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -855,6 +856,10 @@ void Config::Read()
         return FreeLibraryAndExitThread(baseModule, 1);
     }
     LOG_CONFIG(ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::Restore_Title_Screen_Swapping_Section, ConfigKeys::Restore_Title_Screen_Swapping_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
+    LOG_CONFIG(ConfigKeys::Restore_Title_Screen_Swapping_Section, ConfigKeys::Restore_Title_Screen_Swapping_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
 
 
     ConfigLogger::Flush();

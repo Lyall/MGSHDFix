@@ -782,6 +782,16 @@ namespace ConfigKeys
     constexpr const char* VerboseLogging_Help = "";
     constexpr const char* VerboseLogging_Tooltip = "Enables verbose logging for debugging purposes.";
 
+    constexpr const char* Restore_Title_Screen_Swapping_Section = "Various";
+    constexpr const char* Restore_Title_Screen_Swapping_Setting = "MGS2 - Restore Title Screen 2 Color Swapping";
+    constexpr const char* Restore_Title_Screen_Swapping_Help = "";
+    constexpr const char* Restore_Title_Screen_Swapping_Tooltip = "Makes the title screen's 2 change color upon each game completion.";
+
+    
+        
+
+
+
 }
 
 
