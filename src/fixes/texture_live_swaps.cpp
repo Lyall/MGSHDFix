@@ -11,10 +11,6 @@ typedef uintptr_t (__fastcall* FASTCALL_3IN1OUT)(long long, long long, int);
 #define STRCODE_PDRAY_OTHER 2151908
 #define STRCODE_HAR01 11685431
 
-typedef struct _dontknowdontcare {
-    char data[0x90];
-} dontknowdontcare;
-
 namespace
 {
     FASTCALL_2IN1OUT GetCtxrHandle;

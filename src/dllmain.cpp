@@ -40,7 +40,7 @@
 #include "mgs3_hud_fixes.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
-#include "snakearm_voice.hpp"
+#include "mgs2_snakearm_voice.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_coolant_mirror.hpp"
