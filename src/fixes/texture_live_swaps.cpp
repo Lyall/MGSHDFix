@@ -3,16 +3,21 @@
 #include "texture_live_swaps.hpp"
 
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "logging.hpp"
 
 typedef uintptr_t* (__fastcall* FASTCALL_1IN1OUT)(long long);
 typedef uintptr_t* (__fastcall* FASTCALL_2IN1OUT)(long long, long long);
 typedef uintptr_t (__fastcall* FASTCALL_3IN1OUT)(long long, long long, int);
-#define STRCODE_PDRAY_OTHER 2151908
-#define STRCODE_HAR01 11685431
 
 namespace
 {
+    constexpr unsigned int STRCODE_PDRAY_OTHER = 2151908;
+    constexpr unsigned int STRCODE_HAR01 = 11685431;
+    constexpr unsigned int STRCODE_W24C1 = 0x89dc98;
+    constexpr unsigned int STRCODE_REV_DISP = 0x4c4dfd;
+    constexpr unsigned int STRCODE_BDU_DISP = 0x20158d;
+
     FASTCALL_2IN1OUT GetCtxrHandle;
     FASTCALL_2IN1OUT CopyCtxr;
     FASTCALL_3IN1OUT AllocTexture;
@@ -22,13 +27,12 @@ namespace
 }
 
 
-static void GetAndCopyCtxr(int tricode, int dst, int src) {
+static void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true) {
     if (!GetCtxrHandle || !CopyCtxr || !AllocTexture)
         return;
     uintptr_t srcHandle = GetCtxrHandle(tricode, src)[4];
     uintptr_t dstHandle = GetCtxrHandle(tricode, dst)[4];
     // Need to save handles to restore on stage reset
-    bool shouldSave = true;
     for (auto it = SwapMap.begin(); it != SwapMap.end(); it++) {
         if (it->second == dstHandle) {
             // Texture already swapped, do not add to map
@@ -111,6 +115,23 @@ void TextureLiveSwaps::ApplyFixes()
         MAKE_HOOK_MID(baseModule, "48 8D 8E ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 4E ?? E8 ?? ?? ?? ?? 33 ED", "Texture Swaps (Harrier Cleanup)", {
             RestoreCtxrs();
         });
+    }
+
+
+    // There is another texture to swap, this one not a restoration.
+    // In the Ames cutscene, Ocelot can be seen watching Raiden and Ames talk on a camera.
+    // However, this texture always shows Raiden in his Sneaking Suit. This should change.
+
+    // Requires a custom texture (should be bundled with community bugfix compilation)
+    // TODO: manifest check (similar to mgs2_hostage_model and mgs2_msx_colonel)
+    if (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")) {
+        // user/mode/demo/demod.c -> StartDemo()
+        MAKE_HOOK_MID(baseModule, "48 83 EC 28 48 8B 15 ?? ?? ?? ?? 48 85 D2 74 53", "Texture Swaps (Ocelot Spying)", {
+            if (g_GameVars.IsStage(MGS2Stages::D036P03) && MGS2_LinkVarBuf::GM_Item == MGS2_ITEM_INDEX_UNIFORM) {
+                GetAndCopyCtxr(STRCODE_W24C1, STRCODE_REV_DISP, STRCODE_BDU_DISP, false);
+            }
+        });
+
     }
 
 }
