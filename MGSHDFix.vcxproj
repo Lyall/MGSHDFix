@@ -20,6 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
+    <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp" />
+    <ClCompile Include="src\fixes\playtime_fixes.cpp" />
+    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
+    <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
+    <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp" />
+    <ClCompile Include="src\features\cutscene_pausing.cpp" />
+    <ClCompile Include="src\features\adjustable_captions.cpp" />
+    <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp" />
     <ClCompile Include="src\features\mgs2_3rd_person_freecam.cpp" />
     <ClCompile Include="src\features\mgs2_difficulty.cpp" />
     <ClCompile Include="src\features\mgs2_first_person_view_mode.cpp" />
@@ -42,6 +50,7 @@
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp" />
     <ClCompile Include="src\fixes\cpu_core_limit.cpp" />
     <ClCompile Include="src\fixes\depth_of_field.cpp" />
+    <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp" />
     <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp" />
     <ClCompile Include="src\fixes\optical_camo.cpp" />
     <ClCompile Include="src\fixes\windows_fullscreen_optimization.cpp" />
@@ -138,6 +147,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\features\mgs2_msx_colonel.hpp" />
+    <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp" />
+    <ClInclude Include="src\fixes\playtime_fixes.hpp" />
+    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
+    <ClInclude Include="src\fixes\mgs2_shimmer.hpp" />
+    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
+    <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp" />
+    <ClInclude Include="src\features\cutscene_pausing.hpp" />
+    <ClInclude Include="src\resources\mgs2_status_flags.hpp" />
+    <ClInclude Include="src\features\adjustable_captions.hpp" />
+    <ClInclude Include="src\features\mgs2_hostage_type_easter_egg.hpp" />
     <ClInclude Include="src\resources\game_stages.hpp" />
     <ClInclude Include="src\resources\mgs2_equipment_enums.hpp" />
     <ClInclude Include="src\features\mgs2_3rd_person_freecam.hpp" />
@@ -167,6 +186,7 @@
     <ClInclude Include="src\fixes\windows_fullscreen_optimization.hpp" />
     <ClInclude Include="src\resources\config_keys.hpp" />
     <ClInclude Include="src\fixes\depth_of_field.hpp" />
+    <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp" />
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
     <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
@@ -284,7 +304,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
     <IntDir>Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <CustomBuildAfterTargets />
   </PropertyGroup>

@@ -3,10 +3,19 @@
 #include "common.hpp"
 #include "distance_culling.hpp"
 
+#include "gamevars.hpp"
 #include "input_handler.hpp"
 #include "logging.hpp"
 
-
+namespace
+{
+    constexpr uint32_t PARROT_MODEL_STRCODE = GameVars::GV_StrCode("par_def_mh");
+#if defined(RELEASE_BUILD)
+    bool log_bird = false;
+#else
+    bool log_bird = true;
+#endif
+}
 
 void DistanceCulling::Initialize() const
 {
@@ -30,12 +39,60 @@ void DistanceCulling::Initialize() const
                           });
         }
 
+        if (bMGS2_ForceNPCLOD)
+        {
+            //hostages
+            MAKE_HOOK_MID(baseModule, "8B D0 3D ?? ?? ?? ?? 7E", "MGS2: LodHostage()", {
+                ctx.rax = 0.0f;
+                          });
+
+            //evm models, ie snake, pres, parrot, vamp, emma
+            MAKE_HOOK_MID(baseModule, "40 53 48 83 EC ?? 44 89 41", "MGS2: _NPC_InitMWObject()", {
+                if (ctx.rdx != PARROT_MODEL_STRCODE)  //emma's parrot (shell 1 core) is unique in that its evm is its cage. if we force its lod, the parrot will magically turn into its own cage when PL_Status & (PLAYER_WATCH|PLAYER_INTRUDE)
+                {
+                    if (log_bird)
+                    {
+                        spdlog::info("_NPC_InitMWObject -> bird not matched");
+                    }
+                    ctx.r8 = std::numeric_limits<int>::max();
+                }
+                else if (log_bird)
+                {
+                    spdlog::info("BIRD BIRD BIRD, BIRD IS THE WORD");
+                }
+                });
+        }
+
+        if (bAlwaysRenderShellCasings)
+        {
+            MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act() @ L406", {
+                reghelpers::SetCF(ctx, true);
+                        });
+        }
+        else
+        {
+        //Fixes rogue distance check that was causing shell casing to not appear in some cases, ie Harrier/Solidus intro cutscene.
+        //GM_PlayerPosition.vy was being checked instead of GM_CameraY. Appears to have been a Substance regression, as the old version properly checked against DG_Chanls->eye.m[3] (cam_pos.vy).
+            MAKE_HOOK_MID(baseModule, "F3 0F 58 0D ?? ?? ?? ?? F3 0F 10 43", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act() @ L406 #1", {
+               ctx.xmm1.f32[0] = (float)MGS2_LinkVarBuf::GM_CameraY.get();
+                        });
+
+            //Small behavior change: while the bug is ultimately fixed by the hook above, we're at higher resolution now, and memory alloc isn't a concern anymore.
+            //force shell casing to always appear during cutscenes regardless of height difference/distance from camera.
+            MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act()  @ L406 #2", {
+                if (g_GameVars.InCutscene())
+                {
+                    reghelpers::SetCF(ctx, true);
+                }
+                        });
+        }
 
     }
     else if (eGameType & MGS3)
     {
         if (bForceGrassAlways || fGrassDistanceScalar != 1.0f)
         {
+            //todo - disable automatically if Util::IsSteamOS() in the boss's arena.
             MAKE_HOOK_MID(baseModule, "F3 0F 11 83 ?? ?? ?? ?? 41 8B FC", "MGS3: Grass Farclip", {
                ctx.xmm0.f32[0] = g_DistanceCulling.bForceGrassAlways ? std::numeric_limits<float>::max() : ctx.xmm0.f32[0] * g_DistanceCulling.fGrassDistanceScalar;
                 })

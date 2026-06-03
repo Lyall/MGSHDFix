@@ -53,7 +53,7 @@ void BusyLoopFix::Initialize()
 
     if (!target)
     {
-        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find PeekMessageW!");
+        spdlog::error("MG | MGS 2 | MGS 3: BusyLoopFix - Failed to find PeekMessageW!");
         return;
     }
 
@@ -67,19 +67,19 @@ void BusyLoopFix::Initialize()
     timeBeginPeriod(1);
 
     // MGSFPSUnlock hooks this function, so we pattern scan after the hook
-    GetElapsedTime = (GetElapsedTime_t*)(Memory::PatternScan(baseModule, "FF 15 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 0F 57 C0", "MGS 2 | MGS 3: GetElapsedTime") - 0xB);
+    GetElapsedTime = (GetElapsedTime_t*)(Memory::PatternScan(baseModule, "FF 15 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 0F 57 C0", "MG | MGS 2 | MGS 3: GetElapsedTime") - 0xB);
 
     if (!GetElapsedTime)
     {
-        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find GetElapsedTime!");
+        spdlog::error("MG | MGS 2 | MGS 3: BusyLoopFix - Failed to find GetElapsedTime!");
         return;
     }
     
-    auto targetActorWait = Memory::PatternScan(baseModule, "48 83 EC ?? E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 74", "MGS 2 | MGS 3: ActorWait");
+    auto targetActorWait = Memory::PatternScan(baseModule, "48 83 EC ?? E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 74", "MG | MGS 2 | MGS 3: ActorWait");
 
     if (!targetActorWait)
     {
-        spdlog::error("MGS 2 | MGS 3: BusyLoopFix - Failed to find ActorWait!");
+        spdlog::error("MG | MGS 2 | MGS 3: BusyLoopFix - Failed to find ActorWait!");
         return;
     }
 
@@ -88,6 +88,10 @@ void BusyLoopFix::Initialize()
 
 void BusyLoopFix::Shutdown()
 {
+    if (!iOption)
+    {
+        return;
+    }
     m_peekMessageHook = {};
     m_actorWaitHook = {};
     g_instance = nullptr;

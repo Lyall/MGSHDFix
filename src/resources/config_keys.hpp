@@ -96,16 +96,64 @@ namespace ConfigKeys
                                                             "This will give the game a pixelated / Minecraft-esque appearance.";
 
 
-    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Override Render Distance";
+    constexpr const char* Caption_Scale_Section = "Caption Settings";
+    constexpr const char* Caption_Scale_Setting = "Caption Size (%)";
+    constexpr const char* Caption_Scale_Help = "";
+    constexpr const char* Caption_Scale_Tooltip = "";
+
+    constexpr const char* Caption_Opacity_Section = "Caption Settings";
+    constexpr const char* Caption_Opacity_Setting = "Caption Opacity (%)";
+    constexpr const char* Caption_Opacity_Help = "";
+    constexpr const char* Caption_Opacity_Tooltip = "";
+
+    constexpr const char* Caption_Background_Opacity_Section = "Caption Settings";
+    constexpr const char* Caption_Background_Opacity_Setting = "Caption Outline Opacity (%)";
+    constexpr const char* Caption_Background_Opacity_Help = "30% Recommended";
+    constexpr const char* Caption_Background_Opacity_Tooltip = "";
+
+
+    constexpr const char* LOD_MGS2_ShellCasings_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_ShellCasings_Setting = "Always Show Weapon Shell Casings";
+    constexpr const char* LOD_MGS2_ShellCasings_Help = "";
+    constexpr const char* LOD_MGS2_ShellCasings_Tooltip = "Shell casings normally get culled if height is > 3500 units from the camera.\n"
+                                                          "\n"
+                                                          "When enabled, shell casings will be rendered at all distances.\n";
+
+
+    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
     constexpr const char* LOD_MGS2_Marines_Help = "";
     constexpr const char* LOD_MGS2_Marines_Tooltip = "When enabled, Marines always use their high polygon model.";
 
 
-    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Override Render Distance";
+    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_Player_Setting = "Force High Quality Player Models";
     constexpr const char* LOD_MGS2_Player_Help = "";
     constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
+
+
+    constexpr const char* LOD_MGS2_NPC_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_NPC_Setting = "Force High Quality NPCs";
+    constexpr const char* LOD_MGS2_NPC_Help = "";
+    constexpr const char* LOD_MGS2_NPC_Tooltip = "When enabled, NPC models (Hostages, Snake, Emma, President, Parrot, Fatman, Vamp) models always use their high polygon model.";
+
+    constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
+    constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
+    constexpr const char* MGS2_Hostage_Type_Help = "";
+    constexpr const char* MGS2_Hostage_Type_Tooltip = "The game swaps which hostages are in Shell 1 core based off your system's real time clock in New Game+ playthroughs.\n"
+                                                      "\n"
+                                                      "Normal = use normal RTC hostages.\n"
+                                                      "\n"
+                                                      "1:00 PM = All hostages are Kato-chan (Japanese comedian.)\n"
+                                                      "\n"
+                                                      "10:00 PM = All hostages are Cathy.\n"
+                                                      "\n"
+                                                      "Midnight = All hostages are Jennifer Love Hewitt.\n";
+    constexpr const char* MGS2_Hostage_Type_Option_Normal = "Normal";
+    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "1:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
+
 
 
     constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";
@@ -115,12 +163,20 @@ namespace ConfigKeys
                                                                "\n"
                                                                "When enabled, grass always remains visible regardless of distance.";
 
-    constexpr const char* DistanceCullingGrassScalar_Section = "MGS3 - Override Render Distance";
+    constexpr const char* DistanceCullingGrassScalar_Section = DistanceCullingGrassAlways_Section;
     constexpr const char* DistanceCullingGrassScalar_Setting = "Custom Grass Distance Multiplier";
     constexpr const char* DistanceCullingGrassScalar_Help = "";
     constexpr const char* DistanceCullingGrassScalar_Tooltip = "Multiplies the grass render distance by this factor for finer control.\n"
                                                                "\n"
                                                                "1.0 is the unmodified distance.";
+
+    constexpr const char* ToggleDistanceCullingGrass_Section = DistanceCullingGrassAlways_Section;
+    constexpr const char* ToggleDistanceCullingGrass_Setting = "Toggle Always Show Grass";
+    constexpr const char* ToggleDistanceCullingGrass_Help = "";
+    constexpr const char* ToggleDistanceCullingGrass_Tooltip = "Toggles the Always Show Grass option on/off in real-time, for those who want comparison shots.\n"
+        "\n"
+        "You may have to exit and reenter an area for the change to take effect.";
+
 
     // Ultrawide
     constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";
@@ -157,10 +213,32 @@ namespace ConfigKeys
         "\n"
         "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
 
+    constexpr const char* ToggleRainShader_Section = "Bugfixes";
+    constexpr const char* ToggleRainShader_Setting = "Toggle UI/Rain Fix";
+    constexpr const char* ToggleRainShader_Help = "";
+    constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time for comparison shots.";
+
     constexpr const char* FixOpticalCamo_Section = "Bugfixes";
     constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo Refraction";
     constexpr const char* FixOpticalCamo_Help = "";
     constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
+
+    constexpr const char* FixMGS2UnderwaterFilter_Section = "Bugfixes";
+    constexpr const char* FixMGS2UnderwaterFilter_Setting = "MGS2 - Fix Underwater Filter";
+    constexpr const char* FixMGS2UnderwaterFilter_Help = "";
+    constexpr const char* FixMGS2UnderwaterFilter_Tooltip = "Restores MGS2 underwater screen and HUD distortion while keeping subtitle demos readable.";
+
+    constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
+    constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
+    constexpr const char* FixMGS2DepthOfField_Help = "";
+    constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 far-focus depth of field blur at higher resolutions.";
+
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur Strength";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(1.0 = Accurate to PCSX2)";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's far-focus depth of field blur.\n"
+                                                                     "\n"
+                                                                     "Higher values increase blur radius but can expose sampling artifacts.";
 
     constexpr const char* FixVectorUI_Section = "Bugfixes";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
@@ -227,7 +305,7 @@ namespace ConfigKeys
                                                                   "\n"
                                                                   "Equivalent to: Right-click the game's .exe -> Properties -> Compatibility -> check \"Disable Fullscreen Optimizations\"";
     constexpr const char* BusyLoopFix_Section = "Bugfixes";
-    constexpr const char* BusyLoopFix_Enabled = "Fix High CPU Usage";
+    constexpr const char* BusyLoopFix_Setting = "Fix  High  CPU  Usage";
     constexpr const char* BusyLoopFix_Help = "(Also fixes TWD usage on handheld.)";
     constexpr const char* BusyLoopFix_Tooltip = "Fixes High CPU & TWD usage.\n"
                                              "\n"
@@ -237,22 +315,37 @@ namespace ConfigKeys
                                              "\n"
                                              "Fixing this restores normal behavior and improves GPU utilization.";
 
+    constexpr const char* BusyLoopFix_Option_Disabled = "Disabled";
+    constexpr const char* BusyLoopFix_Option_Half = "Half";
+    constexpr const char* BusyLoopFix_Option_Full = "Full";
 
     // Gameplay
     constexpr const char* KeepAimingAfterFiring_Always_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_Always_Setting = "Always Keep Aiming";
-    constexpr const char* KeepAimingAfterFiring_Always_Help = "";
+    constexpr const char* KeepAimingAfterFiring_Always_Help = "(MGS2 support is limited to rifles.)\n"
+                                                              "    (All guns supported in MGS3.)";
     constexpr const char* KeepAimingAfterFiring_Always_Tooltip = "Keeps aiming after firing, always.\n"
                                                                  "\n"
                                                                  "Matches the older KeepAiming mod behavior. Can be awkward to play with.\n"
-                                                                 "Suggestion: leave this off and use the First-Person and Lock-On options instead.\n"
-                                                                 "\n"
-                                                                 "(MGS2 support is limited to rifles. All guns supported in MGS3.)";
+                                                                 "Suggestion: leave this off and use the First-Person and Lock-On options instead.\n";
 
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_InFirstPerson_Setting = "While in First Person";
-    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Help = "";
-    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Tooltip = "Keeps aiming after firing while in first-person view.";
+    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Help = "(Excludes FPS mode)";
+    constexpr const char* KeepAimingAfterFiring_InFirstPerson_Tooltip = "Keeps aiming after firing while in first-person view.\n"
+                                                                        "\n"
+                                                                        "This does not force aiming when the joystick is at full tilt, matching PS2 behavior.\n"
+                                                                        "\n"
+                                                                        "For full tilt, enable \"Fix Aiming On Full Tilt\" under the bugfixes panel.";
+
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Section = "Keep Aiming After Firing";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Setting = "MGS2 - While in FPS Mode";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Help = "";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in MGS2's FPS mode."
+                                                                    "\n"
+                                                                    "This does not force aiming when the joystick is at full tilt, matching PS2 behavior.\n"
+                                                                    "\n"
+                                                                    "For full tilt, enable \"Fix Aiming On Full Tilt\" under the bugfixes panel.";
 
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Section = "Keep Aiming After Firing";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Setting = "While Holding Lock On";
@@ -264,7 +357,8 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
-                                                                 "(MOUSE SUPPORT STILL W.I.P.)";
+                                                                 "(MOUSE SUPPORT STILL W.I.P.)\n"
+                                                                 "(!!! MAY CAUSE CRASHING !!!)\n";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Tooltip = "Enables the third person freecam.\n"
                                                                     "\n"
                                                                     "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
@@ -274,17 +368,19 @@ namespace ConfigKeys
                                                                     "Functionality is a bit glitchy, as this feature was not fully completed.\n"
                                                                     "Things are still being patched up by hand with love. <3\n"
                                                                     "\n"
-                                                                    "If the camera gets stuck at a weird angle; enter First Person View, or toggle the third person camera a few times to reset it.";
+                                                                    "If the camera gets stuck at a weird angle; tap First Person View, or toggle the third person camera a few times to reset it.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Setting = "Third Person View Toggle";
     constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Help = "(Controller inputs accepted)\n(Utilizes your Steam Input binds)";
-    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Tooltip = "Toggles the third person view on/off.";
+    constexpr const char* MGS2_ThirdPersonFreecam_ToggleKey_Tooltip = "Toggles the third person view on/off.\n"
+                                                                      "\n"
+                                                                      "R3 / Right Analog Stick Click suggested.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Setting = "Inherit Camera Rotation";
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_Tooltip = "Functionality unknown - seems related to lockers & elevators.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Inherit_Camera_Rotation_ToggleKey_Setting = "Inherit Camera Rotation Toggle";
@@ -294,7 +390,7 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Setting = "Max Camera Distance";
     constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Max_Camera_Distance_Tooltip = "How far the camera should zoom out from the player.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Horizontal_Sensitivity_Setting = "Horizontal Camera Sensitivity";
@@ -309,50 +405,78 @@ namespace ConfigKeys
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Setting = "Camera - Zoom In Hotkey";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Decrease_Hotkey_Tooltip = "Zooms the camera towards the player.\n"
+                                                                                            "\n"
+                                                                                            "D-Pad Up suggested.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Setting = "Camera - Zoom Out Hotkey";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Increase_Hotkey_Tooltip = "Zooms the camera away from the player.\n"
+                                                                                            "\n"
+                                                                                            "D-Pad Down suggested.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Setting = "Camera - Zoom Reset Hotkey";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Reset_Hotkey_Tooltip = "Resets the camera zoom to the default distance.\n"
+                                                                                            "\n"
+                                                                                            "D-Pad Left suggested.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Setting = "Camera - Zoom Step Amount";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Help = "";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Step_Amount_Tooltip = "How much the camera should move when zooming.";
 
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Section = MGS2_ThirdPersonFreecam_Enabled_Section;
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Setting = "Camera - Zoom Speed";
     constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Help = "(In microseconds)";
-    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Tooltip = "";
+    constexpr const char* MGS2_ThirdPersonFreecam_Camera_Distance_Change_Speed_Tooltip = "How quickly the camera should zoom.";
 
 
 
-    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person View Mode";
-    constexpr const char* MGS2_First_Person_View_Enabled_Setting = "First Person View Mode Enabled";
-    constexpr const char* MGS2_First_Person_View_Enabled_Help = "";
-    constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "";
+    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person Shooter Mode";
+    constexpr const char* MGS2_First_Person_View_Enabled_Setting = "Enable First Person Shooter Mode";
+    constexpr const char* MGS2_First_Person_View_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
+                                                                "(SOME EFFECTS WILL BE MISSING)\n"
+                                                                "(!!! MAY CAUSE CRASHING !!!)";
+    constexpr const char* MGS2_First_Person_View_Enabled_Tooltip = "Enables the First Person Shooter mode.\n"
+                                                                    "\n"
+                                                                    "This was a cut-feature originally developed by Bluepoint for the 2011 HD Collection.\n"
+                                                                    "\n"
+                                                                    "This feature was cut around 7/7/2011 per a leftover note found in the source code.\n"
+                                                                    "\n"
+                                                                    "Functionality is a bit glitchy, as this feature was not fully completed.\n"
+                                                                    "Some effects and enemy logic -will- be different/missing compared to regular first person view.\n"
+                                                                    "\n"
+                                                                    "Things are still being patched up by hand with love. <3";
 
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person View Movement Enabled By Default";
+    constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Setting = "First Person Shooter - Movement Enabled By Default";
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Help = "";
     constexpr const char* MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip = "";
 
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Setting = "First Person View Movement Toggle";
+    constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Setting = "Toggle First Person Shooter Movement";
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Help = "";
     constexpr const char* MGS2_First_Person_View_Movement_ToggleKey_Tooltip = "";
 
     constexpr const char* MGS2_First_Person_View_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
-    constexpr const char* MGS2_First_Person_View_ToggleKey_Setting = "First Person View Toggle";
+    constexpr const char* MGS2_First_Person_View_ToggleKey_Setting = "Toggle First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_ToggleKey_Help = "";
     constexpr const char* MGS2_First_Person_View_ToggleKey_Tooltip = "";
 
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Setting = "Tap to Keep First Person View Active";
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Help = "";
+    constexpr const char* MGS2_First_Person_View_Hold_Button_Tooltip = "";
+
+
+
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Setting = "Toggle Tap for First Person View";
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Help = "";
+    constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Tooltip = "";
 
 
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "MGS2 - Difficulty Restoration";
@@ -373,6 +497,21 @@ namespace ConfigKeys
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_LifeReductionOnly = "Life Reduction Only";
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_DurationIncreaseOnly = "Duration Increase Only";
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both = "Full Restoration";
+
+
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting = "Enable Grenade Cooking";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help = "";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip = "Restores the original PS2 grenade cooking behavior, where time spent holding an armed grenade counts toward its detonation timer.";
+    
+
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting = "Toggle Grenade Cooking";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Help = "";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Tooltip = "Toggles grenade cooking on/off.";
+
+
+
 
 
     // Tweaks
@@ -532,30 +671,19 @@ namespace ConfigKeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Help = "";
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Tooltip = "Capture hotkeys even when the window is not focused or is alt-tabbed.";
 
-    constexpr const char* ToggleRainShader_Section = "Hotkeys";
-    constexpr const char* ToggleRainShader_Setting = "Toggle Rain Shader";
-    constexpr const char* ToggleRainShader_Help = "";
-    constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time.";
-
-    constexpr const char* ToggleUIShader_Section = "Hotkeys";
-    constexpr const char* ToggleUIShader_Setting = "Toggle UI Shader";
-    constexpr const char* ToggleUIShader_Help = "";
-    constexpr const char* ToggleUIShader_Tooltip = "Toggles the UI line width fix on/off in real-time.";
-
     constexpr const char* CycleWireframeMode_Section = "Hotkeys";
     constexpr const char* CycleWireframeMode_Setting = "Cycle Wireframe Mode";
     constexpr const char* CycleWireframeMode_Help = "";
     constexpr const char* CycleWireframeMode_Tooltip = "Cycle between wireframe rendering modes (available when Rain Width Fix is enabled).";
 
 
-    constexpr const char* ToggleDistanceCullingGrass_Section = "Hotkeys";
-    constexpr const char* ToggleDistanceCullingGrass_Setting = "Toggle Always Show Grass";
-    constexpr const char* ToggleDistanceCullingGrass_Help = "";
-    constexpr const char* ToggleDistanceCullingGrass_Tooltip = "Toggles the Always Show Grass option on/off in real-time, for those who want comparison shots.\n"
-                                                               "\n"
-                                                               "You may have to exit and reenter an area for the change to take effect.";
-
     // Achievements
+
+    constexpr const char* DisableSteamAchievements_Section = "DISABLE STEAM ACHIEVEMENTS";
+    constexpr const char* DisableSteamAchievements_Setting = "Disable Unlocking Steam Achievements";
+    constexpr const char* DisableSteamAchievements_Help = "";
+    constexpr const char* DisableSteamAchievements_Tooltip = "Disables Steam achievements for the game.";
+
     constexpr const char* AchievementPersistence_Section = "Bugfixes";
     constexpr const char* AchievementPersistence_Setting = "Fix Achievement Stat Tracking";
     constexpr const char* AchievementPersistence_Help = "";

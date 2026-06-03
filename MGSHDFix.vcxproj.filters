@@ -119,6 +119,9 @@
     <ClCompile Include="src\fixes\depth_of_field.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\optical_camo.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -141,9 +144,6 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg1_crop_borders.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp">
@@ -211,6 +211,33 @@
     </ClCompile>
     <ClCompile Include="src\features\mgs2_restore_dogtag_viewer.cpp">
       <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mgs2_hostage_type_easter_egg.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\adjustable_captions.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\cutscene_pausing.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\playtime_fixes.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -328,6 +355,9 @@
     <ClInclude Include="src\fixes\depth_of_field.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
@@ -423,6 +453,36 @@
     </ClInclude>
     <ClInclude Include="src\resources\game_stages.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_hostage_type_easter_egg.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\adjustable_captions.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\cutscene_pausing.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs2_status_flags.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\playtime_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

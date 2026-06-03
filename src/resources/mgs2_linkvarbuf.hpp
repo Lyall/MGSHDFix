@@ -116,9 +116,12 @@ namespace MGS2_LinkVarBuf
     inline LinkVarPointer<short, 924>   GM_ItemsMaxR;
     inline LinkVarPointer<short, 1020>  GM_WeaponsSaved;
     inline LinkVarPointer<short, 1092>  GM_ItemsSaved;
-    inline LinkVarValue<int, 1188>      GM_CameraX;
+    /// east / west
+    inline LinkVarValue<int, 1188>      GM_CameraX; 
+    /// height
     inline LinkVarValue<int, 1192>      GM_CameraY;
-    inline LinkVarValue<int, 1196>      GM_CameraZ;
+    /// north / south
+    inline LinkVarValue<int, 1196>      GM_CameraZ; 
     inline LinkVarValue<int, 1200>      GM_CamTargX;
     inline LinkVarValue<int, 1204>      GM_CamTargY;
     inline LinkVarValue<int, 1208>      GM_CamTargZ;

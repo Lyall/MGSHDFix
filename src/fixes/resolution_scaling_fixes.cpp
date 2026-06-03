@@ -4,7 +4,9 @@
 
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"
+#include "gamevars.hpp"
 #include "logging.hpp"
+#include "mgs2_linkvarbuf.hpp"
 
 namespace
 {
@@ -24,7 +26,7 @@ void ResolutionScalingFixes::ApplyFixes()
     }
 
     scaleX_fromPs2 = CustomResolutionAndBorderless::iInternalResX / 512.0;
-    scaleX_fromPs2_4by3 = CustomResolutionAndBorderless::iInternalResX / 512.0;
+    scaleX_fromPs2_4by3 = ((double)CustomResolutionAndBorderless::iInternalResX) / (double)(CustomResolutionAndBorderless::iInternalResY) / (4.0 / 3.0);
     scaleY_fromPs2 = CustomResolutionAndBorderless::iInternalResY / 448.0;
 
     SPDLOG_INFO("Resolution Scaling Fixes: Internal Width = {}, Internal Height = {}", CustomResolutionAndBorderless::iInternalResX, CustomResolutionAndBorderless::iInternalResY);
@@ -43,6 +45,23 @@ void ResolutionScalingFixes::ApplyFixes()
 
                   });
 
+    MAKE_HOOK_MID(baseModule, "81 E7 ?? ?? ?? ?? BE ?? ?? ?? ?? BA", "NewLinerGunPlasma demo check", {
+        ctx.rdi = 0;  // force demo check false for more nodes
+                  });
+
+
+    
+    MAKE_HOOK_MID(baseModule, "?? ?? ?? ?? F3 0F 11 48 ?? E8 ?? ?? ?? ?? 8B C6 8B D3 2B C3 83 F8 ?? 7F ?? 0F 28 74 24 ?? 48 8B 5C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 15", "MGS2: Resolution Scaling Fixes : user\\okajima\\effect2\\liner_gun_plasma.c -> CalcNextNode()", {
+            if (g_GameVars.InCutscene())
+            {
+                ctx.xmm0.f32[0] *= (float)(2.0 * scaleX_fromPs2_4by3);
+                ctx.xmm1.f32[0] *= 2.0f;
+            }
+
+                  });
+
+
 }
+
 
 

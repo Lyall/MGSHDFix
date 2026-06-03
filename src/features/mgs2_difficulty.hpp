@@ -6,5 +6,8 @@ namespace MGS2_RestoreOriginalDifficulty
 	
     inline bool bRestoreOriginalSolidusChokingDuration = false;
     inline bool bRestoreOriginalSolidusChokingLife = false;
+    inline bool bEnableGrenadeCooking = false;
+
+    inline int vkToggleGrenadeCooking = 0;
 }
 

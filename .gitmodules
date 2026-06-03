@@ -20,3 +20,9 @@
 [submodule "external/mgs_gcx_editor"]
 	path = external/mgs_gcx_editor
 	url = https://github.com/Giza/mgs_gcx_editor
+[submodule "external/SDL"]
+	path = external/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb

@@ -5,7 +5,7 @@ class EffectSpeedFix final
 {
 public:
     static void Initialize();
-    void Reset();
+    static void Reset();
     static void Tick();
     bool isEnabled = true;
 

@@ -26,6 +26,8 @@
 #include "mgs2_restore_phone_jingle.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
+#include "mgs2_hostage_type_easter_egg.hpp"
+#include "original_camera_positions.hpp"
 
 ///Fixes
 #include "aiming_full_tilt.hpp"
@@ -42,6 +44,8 @@
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_coolant_mirror.hpp"
+#include "mgs2_restore_dogtag_viewer.hpp"
+#include "mgs2_underwater_filter.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -58,11 +62,16 @@
 #include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
-#include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "mgs2_msx_colonel.hpp"
-#include "original_camera_positions.hpp"
+#include "adjustable_captions.hpp"
+#include "mgs2_first_person_view_mode.hpp"
+#include "cutscene_pausing.hpp"
+#include "mgs2_contrast_fix.hpp"
+#include "mgs2_parrot_radar_fix.hpp"
+#include "mgs2_shimmer.hpp"
+#include "playtime_fixes.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -426,7 +435,9 @@ void afterPresent()
     g_VectorScalingFix.LoadCompiledShader();
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
-
+    MGS2_ContrastShader::Init();
+    MGS2_ShimmerEffect::Init();
+    
 
     spdlog::info("afterPresent() completed");
 }
@@ -459,49 +470,69 @@ static void InitializeSubsystems()
 
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
+    if (eGameType & MGS2)
+    {
+        INITIALIZE(g_MGS2Sunglasses.Initialize());
+        INITIALIZE(MGS2_RestoreDogtags::Initialize());
+        INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
+        INITIALIZE(MGS2_RestorePhoneJingle::Apply());
+        INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
+        INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
+        INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
+        INITIALIZE(MGS2_First_Person_View::Activate());
+        INITIALIZE(MGS2RetroColonel::Initialize());
+    }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());
     INITIALIZE(g_KeepAimingAfterFiring.Initialize());
-    INITIALIZE(g_MGS2Sunglasses.Initialize());
     INITIALIZE(g_DistanceCulling.Initialize());
-    INITIALIZE(MGS2_RestoreDogtags::Initialize());
-    INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
-    INITIALIZE(MGS2_RestorePhoneJingle::Apply());
-    INITIALIZE(MGS2RetroColonel::Initialize());
-    INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
-    INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
     INITIALIZE(OriginalCameraPositions::Activate());
+    INITIALIZE(AdjustableCaptions::Apply());
+
 
 
 
         //Fixes
+    if (eGameType & MGS2)
+    {
+        INITIALIZE(g_OpticalCamoFix.Initialize());
+        INITIALIZE(FixAimingFullTilt::Initialize());
+        INITIALIZE(CoolantMirrorFix::ApplyFix());
+        INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
+        INITIALIZE(TextureLiveSwaps::ApplyFixes());
+        INITIALIZE(SnakeArmFixes::ApplyFixes());
+        INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+        INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
+        INITIALIZE(g_DepthOfFieldFixes.Initialize());
+        INITIALIZE(g_MGS2UnderwaterFilterFix.Initialize());
+        INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
+        INITIALIZE(MGS2_ParrotRadarFix::Apply());
+    }
+    else if (eGameType & MGS3)
+    {
+        INITIALIZE(g_WaterReflectionFix.Initialize());
+        INITIALIZE(MGS3HudFixes::Initialize());
+        INITIALIZE(MGS3FixCameraOffset::Activate());
+            
+    }
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
-    INITIALIZE(g_OpticalCamoFix.Initialize());
-    INITIALIZE(g_WaterReflectionFix.Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize()); //todo - fix more effects, ie rain speed, bullet trails, helicopter rotors
     INITIALIZE(g_StereoAudioFix.Initialize());
     INITIALIZE(DamagedSaveFix::Initialize());
     INITIALIZE(g_FixAimAfterEquip.Initialize());
-    INITIALIZE(FixAimingFullTilt::Initialize());
-    INITIALIZE(MGS3HudFixes::Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
-    INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
-    INITIALIZE(CoolantMirrorFix::ApplyFix());
-
     INITIALIZE(g_BusyLoopFix.Initialize());
-    INITIALIZE(TextureLiveSwaps::ApplyFixes());
-    INITIALIZE(SnakeArmFixes::ApplyFixes());
-    INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
-    INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
+    INITIALIZE(FixPlaytime::Apply());
 
 
 #if !defined(RELEASE_BUILD) //todo category
+
+    INITIALIZE(CutscenePausing::Setup());
+
     //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(g_DepthOfFieldFixes.Initialize());
     //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
-    //INITIALIZE(MGS3FixCameraOffsets::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());
     //INITIALIZE(MG1CropBorders::Initialize());
     //INITIALIZE(MG1CustomLoadingScreens::Initialize());

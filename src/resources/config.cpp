@@ -22,6 +22,7 @@
 #include "check_gamesave_folder.hpp"
 #include "cpu_core_limit.hpp"
 #include "distance_culling.hpp"
+#include "depth_of_field.hpp"
 #include "version_checking.hpp"
 #include "stat_persistence.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -37,9 +38,12 @@
 #include "mgs2_restore_phone_jingle.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_msx_colonel.hpp"
-#include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
+#include "mgs2_hostage_type_easter_egg.hpp"
+#include "mgs2_underwater_filter.hpp"
 #include "original_camera_positions.hpp"
+#include "adjustable_captions.hpp"
+#include "mgs2_first_person_view_mode.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -459,8 +463,18 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::CheckForUpdates_Section, ConfigKeys::CheckForUpdates_Setting, bShouldCheckForUpdates);
     LOG_CONFIG(ConfigKeys::UpdateConsoleNotifications_Section, ConfigKeys::UpdateConsoleNotifications_Setting, bConsoleUpdateNotifications);
 
-    ConfigHelper::getValue(ini, ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, g_StatPersistence.bAchievementPersistenceEnabled);
-    LOG_CONFIG(ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, g_StatPersistence.bAchievementPersistenceEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::DisableSteamAchievements_Section, ConfigKeys::DisableSteamAchievements_Setting, g_SteamAPI.bDisableSteamAchievementUnlocking);
+    LOG_CONFIG(ConfigKeys::DisableSteamAchievements_Section, ConfigKeys::DisableSteamAchievements_Setting, g_SteamAPI.bDisableSteamAchievementUnlocking);
+    if (g_SteamAPI.bDisableSteamAchievementUnlocking)
+    {
+        g_StatPersistence.bAchievementPersistenceEnabled = false;
+    }
+    else
+    {
+        ConfigHelper::getValue(ini, ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, g_StatPersistence.bAchievementPersistenceEnabled);
+        LOG_CONFIG(ConfigKeys::AchievementPersistence_Section, ConfigKeys::AchievementPersistence_Setting, g_StatPersistence.bAchievementPersistenceEnabled);
+    }
 
     ConfigHelper::getValue(ini, ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, g_SteamAPI.bResetAchievements);
     LOG_CONFIG(ConfigKeys::ResetAllAchievements_Section, ConfigKeys::ResetAllAchievements_Setting, g_SteamAPI.bResetAchievements);
@@ -468,9 +482,11 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, g_KeepAimingAfterFiring.bAlwaysKeepAiming);
     ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, g_KeepAimingAfterFiring.bKeepAimingInFirstPerson);
     ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, g_KeepAimingAfterFiring.bKeepAimingOnLockOn);
+    ConfigHelper::getValue(ini, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Section, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Setting, g_KeepAimingAfterFiring.bKeepAimingInFPSMode);
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_Always_Section, ConfigKeys::KeepAimingAfterFiring_Always_Setting, g_KeepAimingAfterFiring.bAlwaysKeepAiming);
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Section, ConfigKeys::KeepAimingAfterFiring_InFirstPerson_Setting, g_KeepAimingAfterFiring.bKeepAimingInFirstPerson);
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_OnLockOn_Section, ConfigKeys::KeepAimingAfterFiring_OnLockOn_Setting, g_KeepAimingAfterFiring.bKeepAimingOnLockOn);
+    LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_InFPSMode_Section, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Setting, g_KeepAimingAfterFiring.bKeepAimingInFPSMode);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
@@ -530,12 +546,19 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
     LOG_CONFIG(ConfigKeys::DistanceCullingGrassScalar_Section, ConfigKeys::DistanceCullingGrassScalar_Setting, g_DistanceCulling.fGrassDistanceScalar);
 
+    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
+    LOG_CONFIG(ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
+
 
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
 
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
+    LOG_CONFIG(ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
 
         
 
@@ -588,12 +611,20 @@ void Config::Read()
         {
             ConfigHelper::getValue(ini, ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
             LOG_CONFIG(ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
+            LOG_CONFIG(ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+
+            LOG_CONFIG(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
         }
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {
             InputHandler::GetKeybind(ini, ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, g_VectorScalingFix.vkRainShaderToggle);
-            InputHandler::GetKeybind(ini, ConfigKeys::ToggleUIShader_Section, ConfigKeys::ToggleUIShader_Setting, g_VectorScalingFix.vkUIShaderToggle);
             InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
 
             g_VectorScalingFix.bNeedsCompiler = true;
@@ -635,9 +666,28 @@ void Config::Read()
     // Busy Loop Fix
     if (eGameType & (MG | MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
-
-        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Enabled, g_BusyLoopFix.iOption);
+        std::string sBusyLoopFix;
+        ConfigHelper::getValue(ini, ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
+        if (sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Disabled && sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Half && sBusyLoopFix != ConfigKeys::BusyLoopFix_Option_Full)
+        {
+            spdlog::error("Invalid config value for {}: {}", ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
+            Logging::ShowConsole();
+            std::cout << "Invalid config value for " << ConfigKeys::BusyLoopFix_Setting << ": " << sBusyLoopFix << std::endl;
+            return FreeLibraryAndExitThread(baseModule, 1);
+        }
+        if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Disabled)
+        {
+            g_BusyLoopFix.iOption = 0;
+        }
+        else if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Half)
+        {
+            g_BusyLoopFix.iOption = 1;
+        }
+        else if (sBusyLoopFix == ConfigKeys::BusyLoopFix_Option_Full)
+        {
+            g_BusyLoopFix.iOption = 2;
+        }
+        LOG_CONFIG(ConfigKeys::BusyLoopFix_Section, ConfigKeys::BusyLoopFix_Setting, sBusyLoopFix);
     }
 
 
@@ -715,19 +765,71 @@ void Config::Read()
     }
     LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting, sSolidusChokingRestoration);
 
-    
 
-    /*
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
-    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled);
-    if (MGS2_ThirdPersonFreecam::bFirst_Person_View_Enabled)
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting, MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking);
+    if (MGS2_RestoreOriginalDifficulty::bEnableGrenadeCooking)
     {
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View);
-        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, MGS2_ThirdPersonFreecam::vkToggle_First_Person_View_Movement);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section, ConfigKeys::MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting, MGS2_RestoreOriginalDifficulty::vkToggleGrenadeCooking);
 
-        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
-        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_ThirdPersonFreecam::bFirst_Person_View_Movement_Enabled_By_Default);
-    }*/
+    }
+
+    std::string sHostageType;
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+    if (sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Normal &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_OnePM &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_TenPM &&
+        sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Midnight)
+    {
+        spdlog::error("Invalid config value for {}: {}", ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+        Logging::ShowConsole();
+        std::cout << "Invalid config value for " << ConfigKeys::MGS2_Hostage_Type_Setting << ": " << sHostageType << std::endl;
+        return FreeLibraryAndExitThread(baseModule, 1);
+    }
+    if (sHostageType != ConfigKeys::MGS2_Hostage_Type_Option_Normal)
+    {
+        if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_OnePM)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_KATOCHAN;
+        }
+        else if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_TenPM)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_CATHY;
+        }
+        else if (sHostageType == ConfigKeys::MGS2_Hostage_Type_Option_Midnight)
+        {
+            MGS2_Hostage_Type_Easter_Egg::hostageMode = MGS2_Hostage_Type_Easter_Egg::HostageMode::RTC_JENNIFER;
+        }
+    }
+    LOG_CONFIG(ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, sHostageType);
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Scale_Section, ConfigKeys::Caption_Scale_Setting, AdjustableCaptions::fSubtitleScale);
+    LOG_CONFIG(ConfigKeys::Caption_Scale_Section, ConfigKeys::Caption_Scale_Setting, AdjustableCaptions::fSubtitleScale);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Opacity_Section, ConfigKeys::Caption_Opacity_Setting, AdjustableCaptions::iSubtitleAlpha);
+    LOG_CONFIG(ConfigKeys::Caption_Opacity_Section, ConfigKeys::Caption_Opacity_Setting, AdjustableCaptions::iSubtitleAlpha);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
+    LOG_CONFIG(ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, AdjustableCaptions::iOutlineOpacity);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_First_Person_View::bFirst_Person_View_Enabled);
+    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, MGS2_First_Person_View::bFirst_Person_View_Enabled);
+    if (MGS2_First_Person_View::bFirst_Person_View_Enabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_First_Person_Override);
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_First_Person_View_Movement);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_First_Person_View::bFirst_Person_View_Movement_Enabled_By_Default);
+        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, MGS2_First_Person_View::bFirst_Person_View_Movement_Enabled_By_Default);
+    }
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold);
+    LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold);
+    if (MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_Hold_First_Person_View);
+    }
 
     std::string sColonelMsxSprite;
     ConfigHelper::getValue(ini, ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, sColonelMsxSprite);

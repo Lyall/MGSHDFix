@@ -11,6 +11,7 @@ struct Stage
 
 #define MGS2_STAGE_LIST \
     /* Menus                 */ \
+    X(INIT,      "init",      "Menu", "Game Initialization") \
     X(N_TITLE,   "n_title",   "Menu", "Title Screen") \
     X(SELECT,    "select",    "Menu", "Main Menu") \
     X(MSELECT,   "mselect",   "Menu", "VR Missions Menu") \

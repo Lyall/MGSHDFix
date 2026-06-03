@@ -1,5 +1,10 @@
 # Contributing Guidelines
 
+Please make all pull requests towards the GitHub repo located at https://github.com/ShizCalev/MGSHDFix.git
+
+Pull requests made to the GitLab mirror will not be watched unless the main repository is offline.
+
+
 ## `PatternScan(void* module, const char* signature, const char* prefix)`
 Memory patterns should be found via x64Dbg style unique memory pattern signatures as opposed to hardcoded memory locations when possible.
 

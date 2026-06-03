@@ -1,0 +1,17 @@
+name: Sync to GitLab
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync to GitLab
+        uses: kujov/gitlab-sync@main
+        with:
+          gitlab_url: ${{ secrets.GITLAB_URL }}
+          username: ${{ secrets.GITLAB_USERNAME }}
+          gitlab_pat: ${{ secrets.GITLAB_PAT }}
+          force_push: true

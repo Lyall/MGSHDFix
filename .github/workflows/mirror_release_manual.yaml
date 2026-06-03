@@ -1,0 +1,95 @@
+name: Sync Releases to GitLab
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync repository to GitLab
+        uses: kujov/gitlab-sync@main
+        with:
+          gitlab_url: ${{ secrets.GITLAB_URL }}
+          username: ${{ secrets.GITLAB_USERNAME }}
+          gitlab_pat: ${{ secrets.GITLAB_PAT }}
+          git_lfs: true
+
+  sync-release:
+    runs-on: ubuntu-latest
+    needs: sync-repo
+
+    steps:
+      - name: Get latest GitHub release
+        id: latest_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          release_json=$(gh release view --repo "$GH_REPO" --json tagName,name,body)
+
+          echo "tag=$(echo "$release_json" | jq -r '.tagName')" >> $GITHUB_OUTPUT
+          echo "name=$(echo "$release_json" | jq -r '.name')" >> $GITHUB_OUTPUT
+
+          {
+            echo 'body<<EOF'
+            echo "$release_json" | jq -r '.body'
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Download GitHub release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.latest_release.outputs.tag }}
+        run: |
+          mkdir -p release_assets
+          gh release download "$RELEASE_TAG" --repo "$GH_REPO" --dir release_assets --clobber
+
+      - name: Create GitLab release
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+          GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
+          RELEASE_TAG: ${{ steps.latest_release.outputs.tag }}
+          RELEASE_NAME: ${{ steps.latest_release.outputs.name }}
+          RELEASE_BODY: ${{ steps.latest_release.outputs.body }}
+        run: |
+          project_json=$(curl --silent --show-error --fail \
+            --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}")
+
+          project_web_url=$(echo "$project_json" | jq -r '.web_url')
+
+          args=()
+          args+=(--request POST)
+          args+=(--header "PRIVATE-TOKEN: ${GITLAB_PAT}")
+          args+=(--data-urlencode "name=${RELEASE_NAME}")
+          args+=(--data-urlencode "tag_name=${RELEASE_TAG}")
+          args+=(--data-urlencode "description=${RELEASE_BODY}")
+
+          index=0
+
+          for file in release_assets/*; do
+            if [ ! -f "$file" ]; then
+              continue
+            fi
+
+            filename=$(basename "$file")
+
+            upload_json=$(curl --silent --show-error --fail --request POST \
+              --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
+              --form "file=@${file}" \
+              "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/uploads")
+
+            uploaded_url=$(echo "$upload_json" | jq -r '.url')
+
+            args+=(--data-urlencode "assets[links][$index][name]=${filename}")
+            args+=(--data-urlencode "assets[links][$index][url]=${project_web_url}${uploaded_url}")
+            args+=(--data-urlencode "assets[links][$index][link_type]=package")
+
+            index=$((index + 1))
+          done
+
+          curl --show-error --fail "${args[@]}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"

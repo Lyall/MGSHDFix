@@ -6,9 +6,11 @@
 
 #pragma warning(push)
 #pragma warning(disable:4828)
+#include "config_keys.hpp"
 #include "isteamuser.h"
 #include "isteamuserstats.h"
 #include "isteaminput.h"
+#include "swap_menu_buttons.hpp"
 #include "version.h"
 
 #pragma warning(pop)
@@ -204,6 +206,17 @@ void SteamAPI::Setup() const
                 FetchAndCacheSteamID();
             });
         LOG_HOOK(SteamMidhook, "SteamAPI Initialization")
+    }
+
+    if (bDisableSteamAchievementUnlocking)
+    {
+        uint8_t* SteamUnlockAchievementsScanResult = Memory::PatternScan(baseModule, eGameType & MGS2 ? "41 43 48 5F 30 30 32 5F 25 30 33 64 00" : eGameType & MGS3 ? "41 43 48 5F 30 30 33 5F 25 30 33 64 00" : "41 43 48 5F 31 41 32 5F 25 30 33 64 00", "SteamAPI: Disable Achievement Unlocking");
+        if (SteamUnlockAchievementsScanResult)
+        {
+            Memory::PatchBytes((uintptr_t)SteamUnlockAchievementsScanResult, "\x44", 1);
+            spdlog::info("SteamAPI: Disabled achievement unlocking.");
+            return;
+        }
     }
 
 }
@@ -488,13 +501,32 @@ void SteamAPI::OnSteamInputLoaded()
             InputDigitalActionHandle_t actionHandle = steamInput->GetDigitalActionHandle(actionName.c_str());
             if (actionHandle == 0)
             {
-                spdlog::error("SteamInput: Game Action '{}' not bound for Controller #{}", actionName, i + 1);
+                spdlog::error("SteamInput: Controller #{} | Game Action '{}' does not exist in the Steam Input manifest", i + 1, actionName);
+
                 bHasUnboundButtons = true;
                 continue;
             }
 
             EInputActionOrigin origins[STEAM_INPUT_MAX_ORIGINS] = {};
             int originCount = steamInput->GetDigitalActionOrigins(handle, activeActionSet, actionHandle, origins);
+
+            if (originCount <= 0)
+            {
+                spdlog::error("SteamInput: Controller #{} | Game Action (0x{:X}) '{}' is UNBOUND in the active action set", i + 1, actionHandle, actionName);
+
+                if ((SwapMenuButtons::force_menu_buttons != ConfigKeys::MenuButton_Option_Default) && ((actionName == "ingame_cmn_punch") || (actionName == "ingame_cmn_sneaking")))
+                {
+                    spdlog::error("-------------------    ERROR     ----------------------");
+                    spdlog::error("SteamInput: '{}' is not bound in Steam Input.", actionName);
+                    spdlog::error("SteamInput: This is typically caused by using an outdated community-made controller layout/profile that swapped the binds to keyboard inputs.");
+                    spdlog::error("SteamInput: MGSHDFix's swapped menu buttons may not function correctly.");
+                    spdlog::error("SteamInput: Rebind this Steam Input Game Action or switch Menu Buttons back to Default for proper functionality.");
+                    spdlog::error("-------------------    ERROR     ----------------------");
+                }
+
+                bHasUnboundButtons = true;
+                continue;
+            }
 
             for (int j = 0; j < originCount; ++j)
             {
