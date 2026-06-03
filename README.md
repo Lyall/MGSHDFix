@@ -216,10 +216,17 @@ git config submodule.recurse true
 
 wxWidgets has nested Git submodules; `git config submodule.recurse true` ensures they are automatically updated to the correct commits when pulling.
 
-wxWidgets & Zydis are both built automatically as part of the build change. They can also be manually rebuilt using build_wx.cmd or build_zydis.cmd respectively.
+wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio build process. They can also be manually rebuilt from a Visual Studio Developer Command Prompt using `build_wx.cmd`, `build_sdl3.cmd`, or `build_zydis.cmd` respectively.
 
-* Zydis does not yet support the v145 toolset, the project currently requires the Visual Studio v143 build tools. This will be changed once v145 support is added.
+### Requirements
 
+- Visual Studio 2022 or Visual Studio 2026
+- Desktop development with C++
+- MSVC v143 - VS 2022 C++ x64/x86 build tools
+- Windows 10/11 SDK
+- A recent CMake version that supports your installed Visual Studio version
+
+* Zydis does not yet support the v145 toolset, so the project currently requires the Visual Studio v143 build tools. Visual Studio 2026 can still be used as long as the v143 toolset is installed. This will be changed once v145 support is added.
  
 ### Windows
 Open MGSHDFix.sln in Visual Studio (2026) and build.

@@ -10,6 +10,91 @@ if not exist "%SDL_DIR%\CMakeLists.txt" (
     exit /b 1
 )
 
+REM --- Check CMake ---
+where cmake >nul 2>nul
+if errorlevel 1 (
+    echo ERROR: CMake was not found.
+    echo Install a recent CMake version or add it to PATH.
+    exit /b 1
+)
+
+REM --- Check MSVC environment ---
+where cl >nul 2>nul
+if errorlevel 1 (
+    echo ERROR: cl.exe was not found.
+    echo Run this from a Visual Studio Developer Command Prompt.
+    echo For example: x64 Native Tools Command Prompt for VS 2022
+    exit /b 1
+)
+
+REM --- Check Visual Studio / CMake compatibility ---
+set "HAS_SUPPORTED_VS=0"
+set "HAS_VS2026=0"
+set "HAS_VS2022=0"
+set "CMAKE_HAS_VS2026=0"
+set "CMAKE_HAS_VS2022=0"
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+
+if not exist "%VSWHERE%" (
+    echo ERROR: vswhere.exe was not found.
+    echo Make sure Visual Studio 2026 or Visual Studio 2022 is installed.
+    exit /b 1
+)
+
+"%VSWHERE%" -version "[18.0,19.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
+if not errorlevel 1 set "HAS_VS2026=1"
+
+"%VSWHERE%" -version "[17.0,18.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
+if not errorlevel 1 set "HAS_VS2022=1"
+
+cmake --help | findstr /C:"Visual Studio 18 2026" >nul 2>nul
+if not errorlevel 1 set "CMAKE_HAS_VS2026=1"
+
+cmake --help | findstr /C:"Visual Studio 17 2022" >nul 2>nul
+if not errorlevel 1 set "CMAKE_HAS_VS2022=1"
+
+if "%HAS_VS2026%"=="1" if "%CMAKE_HAS_VS2026%"=="1" set "HAS_SUPPORTED_VS=1"
+if "%HAS_VS2022%"=="1" if "%CMAKE_HAS_VS2022%"=="1" set "HAS_SUPPORTED_VS=1"
+
+if "%HAS_SUPPORTED_VS%"=="0" (
+    echo ERROR: Installed CMake version does not support any installed Visual Studio version.
+    echo.
+    echo Detected:
+    if "%HAS_VS2026%"=="1" (
+        echo - Visual Studio 2026 is installed.
+    ) else (
+        echo - Visual Studio 2026 is not installed.
+    )
+    if "%HAS_VS2022%"=="1" (
+        echo - Visual Studio 2022 is installed.
+    ) else (
+        echo - Visual Studio 2022 is not installed.
+    )
+    if "%CMAKE_HAS_VS2026%"=="1" (
+        echo - Installed CMake version supports the Visual Studio 18 2026 generator.
+    ) else (
+        echo - Installed CMake version does not support the Visual Studio 18 2026 generator.
+    )
+    if "%CMAKE_HAS_VS2022%"=="1" (
+        echo - Installed CMake version supports the Visual Studio 17 2022 generator.
+    ) else (
+        echo - Installed CMake version does not support the Visual Studio 17 2022 generator.
+    )
+    echo.
+    echo The installed CMake version must support the generator for one of your installed Visual Studio versions.
+    echo.
+    echo Fix:
+    echo - Update CMake, or install a Visual Studio version supported by your installed CMake version.
+    echo - If using Visual Studio 2026, make sure your installed CMake version supports the Visual Studio 18 2026 generator.
+    echo.
+    echo Required:
+    echo - Visual Studio 2026 or Visual Studio 2022
+    echo - Desktop development with C++
+    echo - MSVC v143 - VS 2022 C++ x64/x86 build tools
+    echo - Windows 10/11 SDK
+    exit /b 1
+)
+
 REM --- Get current submodule commit hash ---
 pushd "%SDL_DIR%" >nul
 for /f %%H in ('git rev-parse HEAD') do set "SDL_HASH=%%H"
@@ -49,6 +134,7 @@ if "%NEED_RELEASE_BUILD%"=="1" (
 REM --- Configure and build Release ---
 if "%NEED_RELEASE_BUILD%"=="1" (
     echo [SDL3] Configuring Release...
+
     cmake -S "%SDL_DIR%" -B "%SDL_BUILD_DIR%" ^
         -A x64 ^
         -T v143 ^
@@ -59,14 +145,23 @@ if "%NEED_RELEASE_BUILD%"=="1" (
 
     if errorlevel 1 (
         echo ERROR: SDL3 configure failed.
+        echo.
+        echo Make sure you have:
+        echo - Visual Studio 2026 or Visual Studio 2022
+        echo - Desktop development with C++
+        echo - MSVC v143 - VS 2022 C++ x64/x86 build tools
+        echo - Windows 10/11 SDK
+        echo - A recent CMake version that supports your installed Visual Studio version
         exit /b 1
     )
 
     echo [SDL3] Building Release...
+
     cmake --build "%SDL_BUILD_DIR%" --config Release --parallel
 
     if errorlevel 1 (
         echo ERROR: SDL3 Release build failed.
+        echo Make sure MSVC v143 and the Windows SDK are installed.
         exit /b 1
     )
 
