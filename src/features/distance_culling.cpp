@@ -71,6 +71,13 @@ void DistanceCulling::Initialize() const
         }
         else
         {
+        //Fixes rogue distance check that was causing shell casing to not appear in some cases, ie Harrier/Solidus intro cutscene.
+        //GM_PlayerPosition.vy was being checked instead of GM_CameraY. Appears to have been a Substance regression, as the old version properly checked against DG_Chanls->eye.m[3] (cam_pos.vy).
+            MAKE_HOOK_MID(baseModule, "F3 0F 58 0D ?? ?? ?? ?? F3 0F 10 43", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act() @ L406 #1", {
+               ctx.xmm1.f32[0] = (float)MGS2_LinkVarBuf::GM_CameraY.get();
+                        });
+
+            //Small behavior change: while the bug is ultimately fixed by the hook above, we're at higher resolution now, and memory alloc isn't a concern anymore.
             //force shell casing to always appear during cutscenes regardless of height difference/distance from camera.
             MAKE_HOOK_MID(baseModule, "76 ?? 80 E1 ?? 88 4B ?? 41 FF 8F", "MGS2: skoba\\weapon_old\\emb_control.c -> NewEnbControl() -> Act()  @ L406 #2", {
                 if (g_GameVars.InCutscene())
