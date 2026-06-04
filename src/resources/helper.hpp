@@ -22,6 +22,28 @@ namespace Memory
 
     std::uint8_t* PatternScan(void* module, const char* signature, const char* prefix);
 
+    std::vector<std::uint8_t*> FindMultiplePatternMatches(void* module, const char* signature);
+
+    bool IsReadable(const void* ptr, size_t size);
+
+    bool IsWritable(const void* ptr, size_t size);
+
+    bool IsExecutable(const void* ptr);
+
+    size_t ReadableBytes(const void* ptr);
+
+    template<typename T>
+    T ReadField(uintptr_t base, ptrdiff_t offset, T fallback = {})
+    {
+        const auto* field = reinterpret_cast<const T*>(base + offset);
+        if (!IsReadable(field, sizeof(*field)))
+        {
+            return fallback;
+        }
+
+        return *field;
+    }
+
     uintptr_t GetAbsolute(uintptr_t address) noexcept;
 
     uintptr_t GetRelativeOffset(uint8_t* addr) noexcept;

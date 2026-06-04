@@ -231,12 +231,12 @@ namespace ConfigKeys
     constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
     constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
     constexpr const char* FixMGS2DepthOfField_Help = "";
-    constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 far-focus depth of field blur at higher resolutions.";
+    constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 depth of field blur at higher resolutions.";
 
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur Strength";
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(1.0 = Accurate to PCSX2)";
-    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's far-focus depth of field blur.\n"
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
