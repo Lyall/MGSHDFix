@@ -179,52 +179,8 @@ namespace
     bool IsDemo();
     bool UseCurrentFrameBackup();
 
-    bool IsReadable(const void* ptr, size_t size)
-    {
-        if (!ptr || size == 0)
-        {
-            return false;
-        }
-
-        MEMORY_BASIC_INFORMATION mbi {};
-        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
-        {
-            return false;
-        }
-
-        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
-        {
-            return false;
-        }
-
-        const uintptr_t begin = reinterpret_cast<uintptr_t>(ptr);
-        const uintptr_t end = begin + size;
-        const uintptr_t regionEnd = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
-        return end >= begin && end <= regionEnd;
-    }
-
-    size_t ReadableBytes(const void* ptr)
-    {
-        if (!ptr)
-        {
-            return 0;
-        }
-
-        MEMORY_BASIC_INFORMATION mbi {};
-        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
-        {
-            return 0;
-        }
-
-        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
-        {
-            return 0;
-        }
-
-        const uintptr_t begin = reinterpret_cast<uintptr_t>(ptr);
-        const uintptr_t regionEnd = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
-        return regionEnd > begin ? regionEnd - begin : 0;
-    }
+    using Memory::IsReadable;
+    using Memory::ReadableBytes;
 
     bool LooksLikeScrWaterDmapack(const RuntimeDmapack* dmapack)
     {
@@ -305,27 +261,6 @@ namespace
         return *reinterpret_cast<int*>(reinterpret_cast<uint8_t*>(dmapack) + offset);
     }
 
-    bool IsExecutableAddress(const void* ptr)
-    {
-        if (!ptr)
-        {
-            return false;
-        }
-
-        MEMORY_BASIC_INFORMATION mbi {};
-        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)) || mbi.State != MEM_COMMIT ||
-            (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
-        {
-            return false;
-        }
-
-        const DWORD protect = mbi.Protect & 0xff;
-        return protect == PAGE_EXECUTE ||
-            protect == PAGE_EXECUTE_READ ||
-            protect == PAGE_EXECUTE_READWRITE ||
-            protect == PAGE_EXECUTE_WRITECOPY;
-    }
-
     bool IsStaticGameAddress(const void* ptr)
     {
         if (!ptr)
@@ -398,7 +333,7 @@ namespace
 
         void* callback = ReadDmapackPointer(dmapack, kDmapackBuildCallbackOffset);
         void* param = ReadDmapackPointer(dmapack, kDmapackBuildParamOffset);
-        if (param != dmapack || !IsExecutableAddress(callback))
+        if (param != dmapack || !Memory::IsExecutable(callback))
         {
             return false;
         }
@@ -469,7 +404,7 @@ namespace
     {
         if (!IsReadable(dmapack, sizeof(RuntimeDmapack)) ||
             param != dmapack ||
-            !IsExecutableAddress(callback) ||
+            !Memory::IsExecutable(callback) ||
             (dmapack->flag & kDmapackMenu) == 0 ||
             dmapack->phase != kDmapackPhaseAfter ||
             dmapack->priority <= kScrWaterPriority)
@@ -1045,7 +980,7 @@ namespace
             param->dmapack == dmapack &&
             chanl >= 0 &&
             chanl <= 4 &&
-            IsExecutableAddress(callback) &&
+            Memory::IsExecutable(callback) &&
             dmapack->phase == kDmapackPhaseAfter &&
             (dmapack->flag & (kDmapackNormal | kDmapackMenu)) != 0 &&
             !IsOwnedMenuMirror(dmapack);

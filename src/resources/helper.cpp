@@ -11,6 +11,137 @@
 
 namespace Memory
 {
+    std::vector<int> PatternToBytes(const char* pattern)
+    {
+        std::vector<int> bytes {};
+        const char* current = pattern;
+        const char* end = pattern + strlen(pattern);
+
+        while (current < end)
+        {
+            if (*current == ' ')
+            {
+                ++current;
+                continue;
+            }
+
+            if (*current == '?')
+            {
+                ++current;
+                if (current < end && *current == '?')
+                {
+                    ++current;
+                }
+                bytes.push_back(-1);
+                continue;
+            }
+
+            bytes.push_back(static_cast<int>(strtoul(current, const_cast<char**>(&current), 16)));
+        }
+
+        return bytes;
+    }
+
+    bool IsReadable(const void* ptr, size_t size)
+    {
+        if (!ptr || size == 0)
+        {
+            return false;
+        }
+
+        MEMORY_BASIC_INFORMATION mbi {};
+        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
+        {
+            return false;
+        }
+
+        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
+        {
+            return false;
+        }
+
+        const uintptr_t begin = reinterpret_cast<uintptr_t>(ptr);
+        const uintptr_t end = begin + size;
+        const uintptr_t regionEnd = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
+        return end >= begin && end <= regionEnd;
+    }
+
+    bool IsWritable(const void* ptr, size_t size)
+    {
+        if (!ptr || size == 0)
+        {
+            return false;
+        }
+
+        MEMORY_BASIC_INFORMATION mbi {};
+        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
+        {
+            return false;
+        }
+
+        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
+        {
+            return false;
+        }
+
+        constexpr DWORD writable =
+            PAGE_READWRITE |
+            PAGE_WRITECOPY |
+            PAGE_EXECUTE_READWRITE |
+            PAGE_EXECUTE_WRITECOPY;
+
+        const uintptr_t begin = reinterpret_cast<uintptr_t>(ptr);
+        const uintptr_t end = begin + size;
+        const uintptr_t regionEnd = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
+        return end >= begin && end <= regionEnd && (mbi.Protect & writable);
+    }
+
+    bool IsExecutable(const void* ptr)
+    {
+        if (!ptr)
+        {
+            return false;
+        }
+
+        MEMORY_BASIC_INFORMATION mbi {};
+        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
+        {
+            return false;
+        }
+
+        constexpr DWORD executable =
+            PAGE_EXECUTE |
+            PAGE_EXECUTE_READ |
+            PAGE_EXECUTE_READWRITE |
+            PAGE_EXECUTE_WRITECOPY;
+
+        return mbi.State == MEM_COMMIT &&
+               !(mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
+               (mbi.Protect & executable);
+    }
+
+    size_t ReadableBytes(const void* ptr)
+    {
+        if (!ptr)
+        {
+            return 0;
+        }
+
+        MEMORY_BASIC_INFORMATION mbi {};
+        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
+        {
+            return 0;
+        }
+
+        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
+        {
+            return 0;
+        }
+
+        const uintptr_t begin = reinterpret_cast<uintptr_t>(ptr);
+        const uintptr_t regionEnd = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
+        return regionEnd > begin ? regionEnd - begin : 0;
+    }
 
     void PatchBytes(uintptr_t address, const char* pattern, unsigned int numBytes)
     {
@@ -93,6 +224,36 @@ namespace Memory
             spdlog::error("{}: Pattern scan failed.", prefix);
         }
         return foundPattern;
+    }
+
+    std::vector<std::uint8_t*> FindMultiplePatternMatches(void* module, const char* signature)
+    {
+        std::vector<std::uint8_t*> matches {};
+        auto* dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto* ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(module) + dosHeader->e_lfanew);
+        const size_t sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        const std::vector<int> patternBytes = PatternToBytes(signature);
+        auto* scanBytes = reinterpret_cast<std::uint8_t*>(module);
+
+        for (size_t i = 0; i + patternBytes.size() <= sizeOfImage; ++i)
+        {
+            bool found = true;
+            for (size_t j = 0; j < patternBytes.size(); ++j)
+            {
+                if (patternBytes[j] != -1 && scanBytes[i + j] != static_cast<std::uint8_t>(patternBytes[j]))
+                {
+                    found = false;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                matches.push_back(scanBytes + i);
+            }
+        }
+
+        return matches;
     }
 
     uintptr_t GetAbsolute(uintptr_t address) noexcept
