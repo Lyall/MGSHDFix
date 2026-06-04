@@ -28,17 +28,15 @@ if errorlevel 1 (
 )
 
 REM --- Locate vswhere ---
-set "VSWHERE=vswhere.exe"
+set "VSWHERE="
 
 where vswhere >nul 2>nul
-if errorlevel 1 (
-    set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-)
-
-if not exist "%VSWHERE%" (
-    echo ERROR: vswhere.exe was not found.
-    echo Make sure Visual Studio 2026 or Visual Studio 2022 is installed.
-    exit /b 1
+if not errorlevel 1 (
+    set "VSWHERE=vswhere.exe"
+) else (
+    if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" (
+        set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+    )
 )
 
 REM --- Check Visual Studio / CMake compatibility ---
@@ -48,58 +46,54 @@ set "HAS_VS2022=0"
 set "CMAKE_HAS_VS2026=0"
 set "CMAKE_HAS_VS2022=0"
 
-"%VSWHERE%" -version "[18.0,19.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
-if not errorlevel 1 set "HAS_VS2026=1"
-
-"%VSWHERE%" -version "[17.0,18.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
-if not errorlevel 1 set "HAS_VS2022=1"
-
 cmake --help | findstr /C:"Visual Studio 18 2026" >nul 2>nul
 if not errorlevel 1 set "CMAKE_HAS_VS2026=1"
 
 cmake --help | findstr /C:"Visual Studio 17 2022" >nul 2>nul
 if not errorlevel 1 set "CMAKE_HAS_VS2022=1"
 
-if "%HAS_VS2026%"=="1" if "%CMAKE_HAS_VS2026%"=="1" set "HAS_SUPPORTED_VS=1"
-if "%HAS_VS2022%"=="1" if "%CMAKE_HAS_VS2022%"=="1" set "HAS_SUPPORTED_VS=1"
+if defined VSWHERE (
+    "%VSWHERE%" -version "[18.0,19.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
+    if not errorlevel 1 set "HAS_VS2026=1"
 
-if "%HAS_SUPPORTED_VS%"=="0" (
-    echo ERROR: Installed CMake version does not support any installed Visual Studio version.
-    echo.
-    echo Detected:
-    if "%HAS_VS2026%"=="1" (
-        echo - Visual Studio 2026 is installed.
-    ) else (
-        echo - Visual Studio 2026 is not installed.
+    "%VSWHERE%" -version "[17.0,18.0)" -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath >nul 2>nul
+    if not errorlevel 1 set "HAS_VS2022=1"
+
+    if "!HAS_VS2026!"=="1" if "!CMAKE_HAS_VS2026!"=="1" set "HAS_SUPPORTED_VS=1"
+    if "!HAS_VS2022!"=="1" if "!CMAKE_HAS_VS2022!"=="1" set "HAS_SUPPORTED_VS=1"
+
+    if "!HAS_SUPPORTED_VS!"=="0" (
+        echo WARNING: Installed CMake version may not support any installed Visual Studio version.
+        echo.
+        echo Detected:
+        if "!HAS_VS2026!"=="1" (
+            echo - Visual Studio 2026 is installed.
+        ) else (
+            echo - Visual Studio 2026 is not installed.
+        )
+        if "!HAS_VS2022!"=="1" (
+            echo - Visual Studio 2022 is installed.
+        ) else (
+            echo - Visual Studio 2022 is not installed.
+        )
+        if "!CMAKE_HAS_VS2026!"=="1" (
+            echo - Installed CMake version supports the Visual Studio 18 2026 generator.
+        ) else (
+            echo - Installed CMake version does not support the Visual Studio 18 2026 generator.
+        )
+        if "!CMAKE_HAS_VS2022!"=="1" (
+            echo - Installed CMake version supports the Visual Studio 17 2022 generator.
+        ) else (
+            echo - Installed CMake version does not support the Visual Studio 17 2022 generator.
+        )
+        echo.
+        echo The installed CMake version must support the generator for one of your installed Visual Studio versions.
+        echo Continuing anyway. CMake configure will report the final error if this is actually invalid.
+        echo.
     )
-    if "%HAS_VS2022%"=="1" (
-        echo - Visual Studio 2022 is installed.
-    ) else (
-        echo - Visual Studio 2022 is not installed.
-    )
-    if "%CMAKE_HAS_VS2026%"=="1" (
-        echo - Installed CMake version supports the Visual Studio 18 2026 generator.
-    ) else (
-        echo - Installed CMake version does not support the Visual Studio 18 2026 generator.
-    )
-    if "%CMAKE_HAS_VS2022%"=="1" (
-        echo - Installed CMake version supports the Visual Studio 17 2022 generator.
-    ) else (
-        echo - Installed CMake version does not support the Visual Studio 17 2022 generator.
-    )
-    echo.
-    echo The installed CMake version must support the generator for one of your installed Visual Studio versions.
-    echo.
-    echo Fix:
-    echo - Update CMake, or install a Visual Studio version supported by your installed CMake version.
-    echo - If using Visual Studio 2026, make sure your installed CMake version supports the Visual Studio 18 2026 generator.
-    echo.
-    echo Required:
-    echo - Visual Studio 2026 or Visual Studio 2022
-    echo - Desktop development with C++
-    echo - MSVC v143 - VS 2022 C++ x64/x86 build tools
-    echo - Windows 10/11 SDK
-    exit /b 1
+) else (
+    echo WARNING: vswhere.exe was not found. Skipping Visual Studio/CMake compatibility precheck.
+    echo CMake configure will report the final error if Visual Studio cannot be found.
 )
 
 REM --- Get current submodule commit hash ---
