@@ -8,6 +8,7 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "stat_persistence.hpp"
+#include "texture_live_swaps.hpp"
 
 
 void GameVars::Initialize()
@@ -180,9 +181,13 @@ void GameVars::OnLevelTransition()
     
     KeepAimingAfterFiring::HandleLevelTransition();
 
-    MGS2_First_Person_View::HandleLevelTransition();
-    MGS2_ThirdPersonFreecam::HandleLevelTransition();
-    MGS2Sunglasses::CheckOnTransition();
+    if (eGameType & MGS2)
+    {
+        MGS2_First_Person_View::HandleLevelTransition();
+        MGS2_ThirdPersonFreecam::HandleLevelTransition();
+        MGS2Sunglasses::CheckOnTransition();
+        TextureLiveSwaps::HandleLevelTransition();
+    }
 }
 
 

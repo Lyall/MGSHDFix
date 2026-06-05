@@ -28,39 +28,61 @@ namespace
     FASTCALL_1IN1OUT FreeTexture;
 
     std::list<std::pair<uintptr_t, uintptr_t>> SwapMap;
-}
 
 
-static void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true) {
-    if (!GetCtxrHandle || !CopyCtxr || !AllocTexture)
-        return;
-    uintptr_t srcHandle = GetCtxrHandle(tricode, src)[4];
-    uintptr_t dstHandle = GetCtxrHandle(tricode, dst)[4];
-    // Need to save handles to restore on stage reset
-    for (auto it = SwapMap.begin(); it != SwapMap.end(); it++) {
-        if (it->second == dstHandle) {
-            // Texture already swapped, do not add to map
-            shouldSave = false;
-            break;
+    void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true)
+    {
+        if (!GetCtxrHandle || !CopyCtxr || !AllocTexture)
+            return;
+        uintptr_t srcHandle = GetCtxrHandle(tricode, src)[4];
+        uintptr_t dstHandle = GetCtxrHandle(tricode, dst)[4];
+        // Need to save handles to restore on stage reset
+        for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
+        {
+            if (it->second == dstHandle)
+            {
+                // Texture already swapped, do not add to map
+                shouldSave = false;
+                break;
+            }
         }
+        if (shouldSave)
+        {
+            // Arguments are width, height, clut, but apparently don't matter?
+            uintptr_t saveHandle = AllocTexture(16, 16, 0);
+            CopyCtxr(dstHandle, saveHandle);
+            SwapMap.push_back({ saveHandle, dstHandle });
+        }
+        CopyCtxr(srcHandle, dstHandle);
     }
-    if (shouldSave) {
-        // Arguments are width, height, clut, but apparently don't matter?
-        uintptr_t saveHandle = AllocTexture(16, 16, 0);
-        CopyCtxr(dstHandle, saveHandle);
-        SwapMap.push_back({ saveHandle, dstHandle });
+
+    void RestoreCtxrs()
+    {
+        if (!CopyCtxr || !FreeTexture)
+            return;
+        for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
+        {
+            CopyCtxr(it->first, it->second);
+            FreeTexture(it->first);
+        }
+        SwapMap.clear();
     }
-    CopyCtxr(srcHandle, dstHandle);
+
+
+    int menu_view_count = 0;
 }
 
-static void RestoreCtxrs() {
-    if (!CopyCtxr || !FreeTexture)
-        return;
-    for (auto it = SwapMap.begin(); it != SwapMap.end(); it++) {
-        CopyCtxr(it->first, it->second);
-        FreeTexture(it->first);
+
+
+
+void TextureLiveSwaps::HandleLevelTransition()
+{
+    if (!g_GameVars.IsStage(MGS2Stages::N_TITLE))
+    {
+        menu_view_count = 0;
+        //spdlog::info("reset count");
     }
-    SwapMap.clear();
+    
 }
 
 
@@ -138,13 +160,22 @@ void TextureLiveSwaps::ApplyFixes()
 
     }
     
-    if (bRestoreTitleScreenSwapping && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")))
+    if (bRestoreTitleScreenSwapping
+        && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")) //blue 2
+        && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "0007bc34.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "0007bc34.ctxr"))) //red 2
     {
+        //spdlog::info("good anakin, good");
         MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 45 33 C9 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 74 24 ?? 4C 8D 05 ?? ?? ?? ?? 33 F6 89 78 ?? 48 8D 15 ?? ?? ?? ?? 89 B0", "NewTitleScrMan", {
-            if ((MGS2_LinkVarBuf::GM_GameClearCount.get() & 1) != 0)
+            if (((MGS2_LinkVarBuf::GM_GameClearCount.get() & 1) != 0) && !(menu_view_count & 1))
             {
-                GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO, false);
+                GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO);
+                //spdlog::info("Title screen texture swap applied. Menu view count: {}", menu_view_count);
             }
+            else
+            {
+                RestoreCtxrs();
+            }
+            ++menu_view_count;
             });
 
     }
