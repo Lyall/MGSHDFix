@@ -97,6 +97,13 @@ namespace
    // CUTSCENE_FRAMESKIP_VARS(NewFortSplineBulletCalled);
    // CUTSCENE_FRAMESKIP_VARS(NewFortBulletCalled);
 
+    uintptr_t cigaretteMouthSmokeSpawnAfterLoad = 0;
+    uintptr_t cigaretteMouthSmokeSpawnAfterInit = 0;
+
+    constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_RISE = 0x3D000000; // 0.03125f
+    constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_FALL = 0xBC2AAAAB; // -0.010416667f
+    constexpr uint32_t CIGARETTE_MOUTH_SMOKE_EMIT_FADE = 0xBB888889;  // -0.004166667f
+
 
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(MGS2_SPH_ActBrkVol1);
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewSplushSurfaceMan);
@@ -106,7 +113,6 @@ namespace
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortSplineBulletDemo);
    //DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortSplineBulletCalled);
    //DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortBulletCalled);
-
 
 
 }
@@ -296,6 +302,81 @@ void EffectSpeedFix::Initialize()
 #endif
             });
         LOG_HOOK(flyingSmokeSlow_MidHook, "MGS 2: Effect Speed Fix: effect3\\flying_smoke_slow.c")
+    }
+
+    Memory::PatchFloatImmediate(
+        baseModule,
+        "49 C7 46 FC ?? ?? ?? ?? 41 89 4C 3F F8",
+        4,
+        CIGARETTE_MOUTH_SMOKE_ALPHA_RISE,
+        "MGS 2: Effect Speed Fix: Cigarette mouth smoke alpha rise");
+
+    Memory::PatchFloatImmediate(
+        baseModule,
+        "C7 83 00 18 00 00 ?? ?? ?? ?? EB ?? 44 0F 2F E8",
+        6,
+        CIGARETTE_MOUTH_SMOKE_ALPHA_FALL,
+        "MGS 2: Effect Speed Fix: Cigarette mouth smoke alpha fall");
+
+    Memory::PatchFloatImmediate(
+        baseModule,
+        "C7 83 6C 28 00 00 ?? ?? ?? ?? 8B 8B 04 28 00 00",
+        6,
+        CIGARETTE_MOUTH_SMOKE_EMIT_FADE,
+        "MGS 2: Effect Speed Fix: Cigarette mouth smoke emit fade");
+
+    if (uint8_t* cigaretteMouthSmokeEmitTimer = Memory::PatternScan(baseModule, "C7 83 6C 28 00 00 ?? ?? ?? ?? 8B 8B 04 28 00 00", "MGS 2: Effect Speed Fix: Cigarette mouth smoke emit lifetime"))
+    {
+        static SafetyHookMid cigaretteMouthSmokeEmitTimerHook {};
+        cigaretteMouthSmokeEmitTimerHook = safetyhook::create_mid(cigaretteMouthSmokeEmitTimer + 10,
+            [](SafetyHookContext& ctx)
+            {
+                auto* timer = reinterpret_cast<int32_t*>(ctx.rbx + 0x2804);
+                const auto localTimer = *reinterpret_cast<uint32_t*>(ctx.rbx + 0x2808);
+
+                if (*timer >= 0 && (localTimer & 1) == 0)
+                {
+                    ++*timer;
+                }
+            });
+        LOG_HOOK(cigaretteMouthSmokeEmitTimerHook, "MGS 2: Effect Speed Fix: Cigarette mouth smoke emit lifetime")
+    }
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 4C 24 ?? F3 0F 11 43 ??", "MGS 2: Effect Speed Fix: Cigarette mouth smoke X movement", {
+            ctx.xmm0.f32[0] *= 0.5f;
+        });
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 58 64 24 ?? F3 0F 11 03", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Y movement", {
+            ctx.xmm0.f32[0] *= 0.5f;
+        });
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 6C 24 ?? F3 0F 11 43 ??", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Z movement", {
+            ctx.xmm0.f32[0] *= 0.5f;
+        });
+
+    if (uint8_t* cigaretteMouthSmokeSpawn = Memory::PatternScan(baseModule, "41 8B 86 08 28 00 00 25 3F 00 00 80 7D 07 FF C8 83 C8 C0 FF C0 03 C0 48 8D 0D ?? ?? ?? ?? 48 63 F0", "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence"))
+    {
+        cigaretteMouthSmokeSpawnAfterLoad = reinterpret_cast<uintptr_t>(cigaretteMouthSmokeSpawn) + 7;
+        cigaretteMouthSmokeSpawnAfterInit = reinterpret_cast<uintptr_t>(cigaretteMouthSmokeSpawn) + 0x1CA;
+
+        static SafetyHookMid cigaretteMouthSmokeSpawnHook {};
+        cigaretteMouthSmokeSpawnHook = safetyhook::create_mid(cigaretteMouthSmokeSpawn,
+            [](SafetyHookContext& ctx)
+            {
+                const uint32_t timer = *reinterpret_cast<uint32_t*>(ctx.r14 + 0x2808);
+
+                if ((timer & 1) == 0)
+                {
+                    ctx.rbx = 0;
+                    ctx.rcx = 0;
+                    ctx.rip = cigaretteMouthSmokeSpawnAfterInit;
+                    return;
+                }
+
+                ctx.rax = timer >> 1;
+                ctx.rip = cigaretteMouthSmokeSpawnAfterLoad;
+            });
+        LOG_HOOK(cigaretteMouthSmokeSpawnHook, "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence")
     }
 
     if (Util::CheckForASIFiles("MGSFPSUnlock", false, false, "2025-05-25"))

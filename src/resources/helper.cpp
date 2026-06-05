@@ -150,6 +150,17 @@ namespace Memory
         memcpy((LPVOID)address, pattern, numBytes);
         VirtualProtect((LPVOID)address, numBytes, oldProtect, &oldProtect);
     }
+
+    bool PatchFloatImmediate(void* module, const char* signature, ptrdiff_t immediateOffset, uint32_t value, const char* prefix)
+    {
+        if (uint8_t* address = PatternScan(module, signature, prefix))
+        {
+            Write<uint32_t>(reinterpret_cast<uintptr_t>(address) + immediateOffset, value);
+            return true;
+        }
+
+        return false;
+    }
    
     static HMODULE GetThisDllHandle()
     {

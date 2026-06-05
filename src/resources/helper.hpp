@@ -16,6 +16,8 @@ namespace Memory
 
     void PatchBytes(uintptr_t address, const char* pattern, unsigned int numBytes);
 
+    bool PatchFloatImmediate(void* module, const char* signature, ptrdiff_t immediateOffset, uint32_t value, const char* prefix);
+
     static HMODULE GetThisDllHandle();
 
     std::uint8_t* PatternScanSilent(void* module, const char* signature);
