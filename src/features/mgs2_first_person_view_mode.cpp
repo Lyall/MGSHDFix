@@ -213,6 +213,14 @@ void MGS2_First_Person_View::Activate()
         }
         });
 
+    MAKE_HOOK_MID(baseModule, "F3 0F 11 2D ?? ?? ?? ?? F7 83", "CheckSubjectMoveCamera: Fix FPV aimpoint height", {
+        if (*gBP_1stPersonCamera_Active)
+        {
+            auto bodyObjs = *reinterpret_cast<uintptr_t*>(ctx.rbx + 0x290);
+            ctx.xmm5.f32[0] = *reinterpret_cast<float*>(bodyObjs + 0x1344);
+        }
+            });
+
     /*
     MAKE_HOOK_MID(baseModule, "75 ?? 48 BA ?? ?? ?? ?? ?? ?? ?? ?? 49 8B CE", "mgs2x\\source\\user\\sonoyama\\raiden\\attack.c -> Combo() | +666", {
         if (*gBP_1stPersonCamera_Active)
