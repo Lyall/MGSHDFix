@@ -94,6 +94,8 @@ namespace
     CUTSCENE_FRAMESKIP_VARS(NewDebris_Tex);
     CUTSCENE_FRAMESKIP_VARS(NewLinerGunPlasma);
     CUTSCENE_FRAMESKIP_VARS(NewFortSplineBulletDemo);
+    CUTSCENE_FRAMESKIP_VARS(NewTraffic_Demo);
+    CUTSCENE_FRAMESKIP_VARS(NewTraffic_Flush);
    // CUTSCENE_FRAMESKIP_VARS(NewFortSplineBulletCalled);
    // CUTSCENE_FRAMESKIP_VARS(NewFortBulletCalled);
 
@@ -111,6 +113,8 @@ namespace
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewDebris_Tex);
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewLinerGunPlasma);
     DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortSplineBulletDemo);
+    DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewTraffic_Demo);
+    DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewTraffic_Flush);
    //DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortSplineBulletCalled);
    //DEFINE_CUTSCENE_FRAMESKIP_HOOK(NewFortBulletCalled);
 
@@ -130,6 +134,8 @@ void EffectSpeedFix::Tick()
         CUTSCENE_FRAMESKIP_TICK(NewDebris_Tex);
         CUTSCENE_FRAMESKIP_TICK(NewLinerGunPlasma);
         CUTSCENE_FRAMESKIP_TICK(NewFortSplineBulletDemo);
+        CUTSCENE_FRAMESKIP_TICK(NewTraffic_Demo);
+        CUTSCENE_FRAMESKIP_TICK(NewTraffic_Flush);
 
     }
 
@@ -151,6 +157,8 @@ void EffectSpeedFix::Reset()
         CUTSCENE_FRAMESKIP_RESET(NewDebris_Tex);
         CUTSCENE_FRAMESKIP_RESET(NewLinerGunPlasma);
         CUTSCENE_FRAMESKIP_RESET(NewFortSplineBulletDemo);
+        CUTSCENE_FRAMESKIP_RESET(NewTraffic_Demo);
+        CUTSCENE_FRAMESKIP_RESET(NewTraffic_Flush);
     }
 
 
@@ -253,6 +261,9 @@ void EffectSpeedFix::Initialize()
 
     CREATE_CUTSCENE_FRAMESKIP_HOOK(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()");
 
+    CREATE_CUTSCENE_FRAMESKIP_HOOK(NewTraffic_Demo, "40 53 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ?? 85 C0 0F 85", "MGS 2: Effect Speed Fix : NewTraffic_Demo");
+
+    CREATE_CUTSCENE_FRAMESKIP_HOOK(NewTraffic_Flush, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 41 56 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : NewTraffic_Flush");
 
 
         //todo - ripple man - 55 8B EC 56 57 6A 00 6A ?? 68 ?? ?? ?? ?? 6A ?? E8 ?? ?? ?? ?? 8B F0 83 C4 ?? 85 F6 0F 84 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 68 ?? ?? ?? ?? 56 E8 ?? ?? ?? ?? 8B 45 ?? 81 4E ?? ?? ?? ?? ?? 89 46 ?? 8B 45 ?? 68 ?? ?? ?? ?? C7 46 ?? 00 00 00 00 C7 46 ?? 00 00 00 00 C7 46 ?? 00 00 00 00 C7 46 ?? ?? ?? ?? ?? 89 46 ?? E8
@@ -303,6 +314,8 @@ void EffectSpeedFix::Initialize()
             });
         LOG_HOOK(flyingSmokeSlow_MidHook, "MGS 2: Effect Speed Fix: effect3\\flying_smoke_slow.c")
     }
+
+#pragma region demo_cigarette_smoke
 
     Memory::PatchFloatImmediate(
         baseModule,
@@ -379,6 +392,8 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(cigaretteMouthSmokeSpawnHook, "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence")
     }
 
+#pragma endregion
+
     if (Util::CheckForASIFiles("MGSFPSUnlock", false, false, "2025-05-25"))
     {
         spdlog::info("MGS 2: Effect Speed Fix: Outdated version of MGSFPSUnlock detected, Large explosion & Solidus's Firedash fixes are disabled.");
@@ -399,14 +414,6 @@ void EffectSpeedFix::Initialize()
 ///     old tests on broken shit. need to redo these properly. :3
 /*
 #ifdef _MGSDEBUGGING
-    /*
-    if (uint8_t* MGS2_traffic_c_Result = Memory::PatternScan(baseModule, "89 53 ?? 33 C9", "MGS 2: Effect Speed Fix : demo\\traffic.c"))
-    {
-
-    /*
-    if (uint8_t* MGS2_traffic_c_2_Result = Memory::PatternScan(baseModule, "41 8B F9 0F 29 74 24 ?? 45 33 C9 45 8B F0", "MGS 2: Effect Speed Fix : demo\\traffic.c #2"))
-    {
-
 
     *//*
     if (uint8_t* MGS2_crosfade_c_Result = Memory::PatternScan(baseModule, "89 5F ?? 79 ?? 89 77", "MGS 2: Effect Speed Fix : effect1\\crosfade.c"))
