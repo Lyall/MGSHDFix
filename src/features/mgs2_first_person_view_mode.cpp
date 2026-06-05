@@ -102,6 +102,12 @@ void MGS2_First_Person_View::Tick()
         return;
     }
 
+    if (MGS2_LinkVarBuf::GM_Weapon == MGS2WeaponIndex::MGS2_WEAPON_INDEX_STINGER)
+    {
+        ForceCameraDisabled();
+        return;
+    }
+
     if (bCameraForcedDisabled)
     {
         ReleaseCameraState();
@@ -203,10 +209,24 @@ void MGS2_First_Person_View::Activate()
     MAKE_HOOK_MID(baseModule, "0F 84 ?? ?? ?? ?? 33 C9 E8 ?? ?? ?? ?? 39 6F", "NewDivingGoggles -> act()", {
         if (*gBP_1stPersonCamera_Active)
         {
-            reghelpers::SetFlag(ctx, reghelpers::FLAG_ZF, false);
+            reghelpers::SetZF(ctx, false);
         }
         });
 
+    /*
+    MAKE_HOOK_MID(baseModule, "75 ?? 48 BA ?? ?? ?? ?? ?? ?? ?? ?? 49 8B CE", "mgs2x\\source\\user\\sonoyama\\raiden\\attack.c -> Combo() | +666", {
+        if (*gBP_1stPersonCamera_Active)
+        {
+            reghelpers::SetZF(ctx, false);
+        }
+        });
 
+    MAKE_HOOK_MID(baseModule, "0F 85 ?? ?? ?? ?? 48 BA ?? ?? ?? ?? ?? ?? ?? ?? 49 8B CE", "mgs2x\\source\\user\\sonoyama\\raiden\\attack.c -> Combo() | +761", {
+    if (*gBP_1stPersonCamera_Active)
+    {
+        reghelpers::SetZF(ctx, false);
+    }
+                  });
+                  */
 
 }
