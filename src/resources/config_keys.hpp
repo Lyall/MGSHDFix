@@ -81,6 +81,8 @@ namespace ConfigKeys
                                                        "\n"
                                                        "Original PS2 4:3 resolution was 512x448 for reference.";
 
+
+
     constexpr const char* AnisotropicFiltering_Section = "Texture Filtering";
     constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
     constexpr const char* AnisotropicFiltering_Help = "";
@@ -214,7 +216,7 @@ namespace ConfigKeys
         "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
 
     constexpr const char* ToggleRainShader_Section = "Bugfixes";
-    constexpr const char* ToggleRainShader_Setting = "Toggle UI/Rain Fix";
+    constexpr const char* ToggleRainShader_Setting = "Toggle Vector Line Fixes";
     constexpr const char* ToggleRainShader_Help = "";
     constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time for comparison shots.";
 
@@ -239,6 +241,14 @@ namespace ConfigKeys
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
+
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Section = FixMGS2DepthOfField_Section;
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "MGS2 - Fix Shadow Resolution Scaling";
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Help = "";
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Tooltip = "The game's realtime shadows are hardcoded to 256x256 resolution.\n"
+        "\n"
+        "This option makes shadow resolution scale dynamically with the game's internal resolution.";
+
 
     constexpr const char* FixVectorUI_Section = "Bugfixes";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";

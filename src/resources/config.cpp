@@ -44,6 +44,7 @@
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
 #include "mgs2_first_person_view_mode.hpp"
+#include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 
 // -----------------------------------------------------------------------------
@@ -397,6 +398,11 @@ void Config::Read()
 
     LOG_CONFIG(ConfigKeys::RenderScaleWidth_Section, ConfigKeys::RenderScaleWidth_Setting, CustomResolutionAndBorderless::iInternalResX);
     LOG_CONFIG(ConfigKeys::RenderScaleHeight_Section, ConfigKeys::RenderScaleHeight_Setting, CustomResolutionAndBorderless::iInternalResY);
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
+    LOG_CONFIG(ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
+
 
     ConfigHelper::getValue(ini, ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, iAnisotropicFiltering);
     if (iAnisotropicFiltering < 0 || iAnisotropicFiltering > 16)

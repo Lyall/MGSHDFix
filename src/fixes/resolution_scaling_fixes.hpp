@@ -4,5 +4,6 @@ namespace ResolutionScalingFixes
 {
     void ApplyFixes();
 
+    inline bool bIncreaseShadowResolution = true;
 
 }

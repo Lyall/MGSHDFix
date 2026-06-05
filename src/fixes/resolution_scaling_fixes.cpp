@@ -86,7 +86,36 @@ void ResolutionScalingFixes::ApplyFixes()
                           
                   });
 
+    if (bIncreaseShadowResolution)
+    {
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 84 FE ?? ?? ?? ?? 48 FF C7", "MGS2: shadow res", {
+                if (ctx.rdi == 0x16 || ctx.rdi == 0x17 || ctx.rdi == 0x18)
+                {
+                    int shadowRes;
+                    int resY = CustomResolutionAndBorderless::iInternalResY;
+                    if (resY > 1440)
+                    {
+                        shadowRes = 4096;
+                    }
+                    else if (resY > 1080)
+                    {
+                        shadowRes = 2048;
+                    }
+                    else if (resY > 720)
+                    {
+                        shadowRes = 1024;
+                    }
+                    else
+                    {
+                        shadowRes = 512;
+                    }
 
+                    ctx.rcx = shadowRes;
+                    ctx.rdx = shadowRes;
+                }
+
+                      });
+    }
 
 
 

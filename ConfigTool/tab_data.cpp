@@ -238,11 +238,18 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, ConfigKeys::FixMGS2UnderwaterFilter_Help, ConfigKeys::FixMGS2UnderwaterFilter_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+
+                { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
         { ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, ConfigKeys::FixMGS2DepthOfField_Help, ConfigKeys::FixMGS2DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Tooltip,
           std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 3.0, 0.0, 20.0 },
+
+
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
