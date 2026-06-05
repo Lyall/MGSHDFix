@@ -46,6 +46,7 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
+#include "mgs2_restore_sol_radar.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -648,6 +649,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
     LOG_CONFIG(ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2RestoreSoLRadar::bEnabled);
+    LOG_CONFIG(ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2RestoreSoLRadar::bEnabled);
 
     std::string sOutdatedSaveDataSetting;
     ConfigHelper::getValue(ini, ConfigKeys::RenameOrRemoveCorruptSaveData_Section, ConfigKeys::RenameOrRemoveCorruptSaveData_Setting, sOutdatedSaveDataSetting);

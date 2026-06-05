@@ -637,6 +637,16 @@ namespace ConfigKeys
     constexpr const char* RestoreDogtagNames_Help = "";
     constexpr const char* RestoreDogtagNames_Tooltip = "Restores the names of dogtags that were edited for copyright/legal reasons (ie Gackt -> Gekko.)";
 
+
+
+    constexpr const char* RestoreSoLRadarRotation_Section = "Various";
+    constexpr const char* RestoreSoLRadarRotation_Setting = "MGS2 - Restore SoL Radar Rotation";
+    constexpr const char* RestoreSoLRadarRotation_Help = "";
+    constexpr const char* RestoreSoLRadarRotation_Tooltip = "The radar in Sons of Liberty had a flag East -> West rotation during plant.\n"
+                                                            "\n"
+                                                            "Substance modified the rotation to align closer to the actual orientation of the struts.";
+
+
     constexpr const char* MGS2_PhoneJingle_Section = "Various";
     constexpr const char* MGS2_PhoneJingle_Setting = "MGS2 - Restore Japanese Phone Ringtone";
     constexpr const char* MGS2_PhoneJingle_Help = "";

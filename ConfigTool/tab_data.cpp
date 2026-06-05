@@ -260,6 +260,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::Restore_Title_Screen_Swapping_Section, ConfigKeys::Restore_Title_Screen_Swapping_Setting, ConfigKeys::Restore_Title_Screen_Swapping_Help, ConfigKeys::Restore_Title_Screen_Swapping_Tooltip,
           std::nullopt, false, Field::Bool, true },
         
+                { ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, ConfigKeys::RestoreSoLRadarRotation_Help, ConfigKeys::RestoreSoLRadarRotation_Tooltip,
+          std::nullopt, false, Field::Bool, false },
         
         
         

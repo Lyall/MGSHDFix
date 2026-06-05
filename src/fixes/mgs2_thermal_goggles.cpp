@@ -80,7 +80,7 @@ namespace
 
     const uint32_t* g_irTables[] = { irSubstance, irRedHot, irSplinterCell, irWhiteHot, irBlackHot };
     int g_irTableIndex = 0;
-    static int s_lastTableIndex = -1;
+    int s_lastTableIndex = -1;
 
 }
 

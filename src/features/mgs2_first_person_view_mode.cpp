@@ -213,11 +213,11 @@ void MGS2_First_Person_View::Activate()
         }
         });
 
-    MAKE_HOOK_MID(baseModule, "F3 0F 11 2D ?? ?? ?? ?? F7 83", "CheckSubjectMoveCamera: Fix FPV aimpoint height", {
+    MAKE_HOOK_MID(baseModule, "F3 0F 11 2D ?? ?? ?? ?? F7 83", "sonoyama\\raiden\\routine.c -> CheckSubjectMoveCamera() @ l933/937: Fix FPV aimpoint height", {
         if (*gBP_1stPersonCamera_Active)
         {
-            auto bodyObjs = *reinterpret_cast<uintptr_t*>(ctx.rbx + 0x290);
-            ctx.xmm5.f32[0] = *reinterpret_cast<float*>(bodyObjs + 0x1344);
+            auto bodyObjs = *reinterpret_cast<uintptr_t*>(ctx.rbx + 0x290); // normally calcs camera height as a fixed 1500/1000 offset from the bottom of the player's hitbox (hzx_base). 
+            ctx.xmm5.f32[0] = *reinterpret_cast<float*>(bodyObjs + 0x1344);         // swap it to use player's head bone y instead, matching pl_status & PLAYER_WATCH behavior.
         }
             });
 
