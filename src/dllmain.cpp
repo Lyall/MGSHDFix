@@ -28,6 +28,7 @@
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
 #include "original_camera_positions.hpp"
+#include "expand_bp_assets.hpp"
 
 ///Fixes
 #include "aiming_full_tilt.hpp"
@@ -489,6 +490,7 @@ static void InitializeSubsystems()
     INITIALIZE(g_DistanceCulling.Initialize());
     INITIALIZE(OriginalCameraPositions::Activate());
     INITIALIZE(AdjustableCaptions::Apply());
+    INITIALIZE(BP_FilesysChanges::Initialize());
 
 
 
