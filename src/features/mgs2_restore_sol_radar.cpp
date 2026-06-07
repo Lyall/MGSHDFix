@@ -4,7 +4,7 @@
 #include "common.hpp"
 #include "logging.hpp"
 
-void MGS2RestoreSoLRadar::Apply()
+void MGS2_RestoreSoLRadar::Apply()
 {
     if (!(eGameType & MGS2))
     {

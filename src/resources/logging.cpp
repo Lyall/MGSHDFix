@@ -254,9 +254,13 @@ void Logging::LogSysInfo()
         }
     }
 
-    if (uniqueGpus.size() == 1)
+    if ((uniqueGpus.size() == 1))
     {
         CheckMinimumGPU(uniqueGpus[0], false, 0, 0, 0, 0);
+    }
+    else if (Util::IsSteamOS())
+    {
+        spdlog::info("System Details - SteamOS / Wine.");
     }
     else if (uniqueGpus.size() == 0)
     {

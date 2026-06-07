@@ -27,6 +27,7 @@ void MGS2RetroColonel::Initialize()
 
     if (g_MGS2RetroColonel.bUseNewSprite
         && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
+        && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
         && true) // TODO: Manifest verification
     {
         // Swap sprite and coordinates

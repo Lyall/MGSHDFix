@@ -1,6 +1,6 @@
 #pragma once 
 
-namespace MGS2RestoreSoLRadar
+namespace MGS2_RestoreSoLRadar
 {
     void Apply();
 

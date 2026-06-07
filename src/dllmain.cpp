@@ -71,6 +71,7 @@
 #include "cutscene_pausing.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
+#include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_shimmer.hpp"
 #include "playtime_fixes.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
@@ -477,6 +478,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_RestoreDogtags::Initialize());
         INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
         INITIALIZE(MGS2_RestorePhoneJingle::Apply());
+        INITIALIZE(MGS2_RestoreSoLRadar::Apply());
         INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
         INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
         INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());

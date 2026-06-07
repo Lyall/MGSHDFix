@@ -29,11 +29,14 @@ void HostageModel::ApplyFix()
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_def.cmdl")
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_mid.cmdl")
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_low.cmdl")
-        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_hos_arm02.bmp.ctxr")) {
+        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_hos_arm02.bmp.ctxr")
+        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_hos_arm02.bmp.ctxr"))
+    {
         spdlog::warn("Missing one or more assets for hostage hand color fix. Do you have the latest version of the Community Bugfix Pack?");
         return;
     }
 
+    spdlog::info("MGS 2: Hostage Model Swap: Fixing hostage models.");
     // There are three hostage functions (LODs), all basically identical. They're also basically identical to two other head swap functions.
     // We can filter by reading which model is used at runtime, but we do need to hook five times instead of three to be sure.
 #define REP5(X) X X X X X

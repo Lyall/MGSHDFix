@@ -100,7 +100,8 @@ void TextureLiveSwaps::ApplyFixes()
     // All three of these are broken in the HD Collection, but Shaved Snake was fixed in the Master Collection...
     // with a function Bluepoint already developed for wig textures (thanks Gaming With Portals for the find).
     uint8_t* ShavedSnakeCode = Memory::PatternScan(baseModule, "?? ?? ?? ?? 48 8B CD E8 ?? ?? ?? ?? ?? ?? ?? 48 8B CD 48 8B D8", "Texture Swaps (Shaved Snake)");
-    if (!ShavedSnakeCode) {
+    if (!ShavedSnakeCode) 
+    {
         spdlog::error("Texture Swaps: Failed to match Shaved Snake reference location. Aborting.");
         return;
     }
@@ -110,13 +111,15 @@ void TextureLiveSwaps::ApplyFixes()
     // user/takabe/object/eddogtag.c -> CreateDogTagTexture() uses the same copy function, as well as necessary allocation/freeing for additional texture handles.
     // (technically Shaved Snake should have done this too, but it's a non-issue since he never needs to be reset to un-shaved within the stage)
     uint8_t* DogTagCode = Memory::PatternScan(baseModule, "48 8B CF E8 ?? ?? ?? ?? 8B 57 ?? 45 33 C0", "Texture Swaps (Dog Tags)");
-    if (!DogTagCode) {
+    if (!DogTagCode) 
+    {
         spdlog::error("Texture Swaps: Failed to match dog tag reference location. Aborting.");
         return;
     }
     AllocTexture = (FASTCALL_3IN1OUT)Memory::GetRelativeOffset(DogTagCode + 18);
     FreeTexture = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(DogTagCode + 64);
-    if ((uintptr_t)CopyCtxr != Memory::GetRelativeOffset(DogTagCode + 56)) {
+    if ((uintptr_t)CopyCtxr != Memory::GetRelativeOffset(DogTagCode + 56)) 
+    {
         spdlog::warn("Texture Swaps: Mismatched texture copy function - false positive match?");
     }
 
@@ -150,7 +153,10 @@ void TextureLiveSwaps::ApplyFixes()
 
     // Requires a custom texture (should be bundled with community bugfix compilation)
     // TODO: manifest check (similar to mgs2_hostage_model and mgs2_msx_colonel)
-    if (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")) {
+    if (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr") 
+        && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")) 
+    {
+        spdlog::info("MGS 2 - Texture Swaps: w24c screen texture fix enabled.");
         // user/mode/demo/demod.c -> StartDemo()
         MAKE_HOOK_MID(baseModule, "48 83 EC 28 48 8B 15 ?? ?? ?? ?? 48 85 D2 74 53", "Texture Swaps (Ocelot Spying)", {
             if (g_GameVars.IsStage(MGS2Stages::D036P03) && MGS2_LinkVarBuf::GM_Item == MGS2_ITEM_INDEX_UNIFORM) {
@@ -164,7 +170,7 @@ void TextureLiveSwaps::ApplyFixes()
         && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")) //blue 2
         && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "0007bc34.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "0007bc34.ctxr"))) //red 2
     {
-        //spdlog::info("good anakin, good");
+        spdlog::info("MGS 2 - Texture Swaps: Title screen fix enabled.");
         MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 45 33 C9 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 74 24 ?? 4C 8D 05 ?? ?? ?? ?? 33 F6 89 78 ?? 48 8D 15 ?? ?? ?? ?? 89 B0", "NewTitleScrMan", {
             if (((MGS2_LinkVarBuf::GM_GameClearCount.get() & 1) != 0) && !(menu_view_count & 1))
             {
