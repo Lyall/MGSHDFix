@@ -245,6 +245,9 @@
     <ClCompile Include="src\features\mgs2_restore_sol_radar.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\expand_bp_assets.cpp" />
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -494,6 +497,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_restore_sol_radar.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\expand_bp_assets.hpp" />
       <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
