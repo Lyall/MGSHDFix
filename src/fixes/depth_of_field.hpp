@@ -4,7 +4,7 @@ class DepthOfFieldFixes final
 {
 public:
     bool bEnabled = true;
-    float fBlurUvMultiplier = 6.0f;
+    float fBlurUvMultiplier = 3.0f;
 
     void Initialize();
 };

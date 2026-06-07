@@ -237,7 +237,7 @@ namespace ConfigKeys
 
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Setting = "MGS2 - Depth of Field Blur Strength";
-    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(1.0 = Accurate to PCSX2)";
+    constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Help = "(3.0 = Accurate to PCSX2)";
     constexpr const char* MGS2DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS2's depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";

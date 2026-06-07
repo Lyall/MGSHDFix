@@ -1,16 +1,10 @@
 #include "stdafx.h"
+#include "depth_of_field.hpp"
 
 #include "common.hpp"
-#include "features/custom_resolution_and_borderless.hpp"
-#include "depth_of_field.hpp"
+#include "custom_resolution_and_borderless.hpp"
 #include "helper.hpp"
 #include "logging.hpp"
-
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <vector>
 
 namespace
 {
