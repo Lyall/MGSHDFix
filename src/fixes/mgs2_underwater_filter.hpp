@@ -8,6 +8,7 @@ public:
     void Initialize();
     void PatchWork(void* work) const;
     void BeforePresent();
+    void InstallD3D11StateHooks();
 };
 
 inline MGS2UnderwaterFilterFix g_MGS2UnderwaterFilterFix;

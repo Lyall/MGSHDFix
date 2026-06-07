@@ -440,7 +440,7 @@ void afterPresent()
     g_SteamAPI.OnSteamInputLoaded();
     MGS2_ContrastShader::Init();
     MGS2_ShimmerEffect::Init();
-    
+    g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
 
     spdlog::info("afterPresent() completed");
 }

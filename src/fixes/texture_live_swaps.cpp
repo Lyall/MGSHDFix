@@ -165,6 +165,10 @@ void TextureLiveSwaps::ApplyFixes()
         });
 
     }
+    else
+    {
+        spdlog::warn("MGS 2 - Texture Swaps: MGS2 Community Bugfix Compilation files missing. Skipping w24c screen texture fix.");
+    }
     
     if (bRestoreTitleScreenSwapping
         && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")) //blue 2
@@ -184,6 +188,17 @@ void TextureLiveSwaps::ApplyFixes()
             ++menu_view_count;
             });
 
+    }
+    else
+    {
+        if (bRestoreTitleScreenSwapping)
+        {
+            spdlog::warn("MGS 2 - Texture Swaps: Title screen fix enabled but MGS2 Community Bugfix Compilation not installed. Skipping title screen fix.");
+        }
+        else
+        {
+            spdlog::warn("MGS 2 - Texture Swaps: MGS2 Community Bugfix Compilation files missing. Skipping title screen fix.");
+        }
     }
 
 }

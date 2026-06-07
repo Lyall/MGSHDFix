@@ -992,5 +992,9 @@ void DepthOfFieldFixes::Initialize()
         InstallFarFocusCommandHook();
         InstallNearFocusCreationHooks();
     }
+    else
+    {
+        spdlog::warn("MGS 2: Depth of Field: failed to resolve necessary functions for near focus fixes; near focus adjustments disabled.");
+    }
     InstallBlurUvScaleHook();
 }

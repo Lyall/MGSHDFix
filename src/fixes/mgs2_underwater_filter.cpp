@@ -1,10 +1,6 @@
 #include "stdafx.h"
 
-#include <cmath>
-#include <array>
-#include <cstring>
-#include <intrin.h>
-#include <mutex>
+
 
 #include "common.hpp"
 #include "d3d11_api.hpp"
@@ -164,7 +160,6 @@ namespace
     int CallQueueDmapack(RuntimeDmapack* dmapack);
     void UpdateLateHudVisibility();
     void UpdateMenuPrimMirrors(RuntimeDmapack* waterDmapack);
-    void InstallD3D11StateHooks();
     void RememberWaterFeedbackSource(UINT vertexCount);
     bool TryBindOwnedWaterFeedback(ID3D11DeviceContext* context, UINT vertexCount, ComPtr<ID3D11ShaderResourceView>& originalPs0View);
     void RestorePixelShaderSlot0(ID3D11DeviceContext* context, ID3D11ShaderResourceView* view);
@@ -682,33 +677,7 @@ namespace
         }
     }
 
-    void InstallD3D11StateHooks()
-    {
-        if (!g_D3D11Hooks.d3dDeviceContext)
-        {
-            return;
-        }
-
-        void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
-
-        if (!PSSetShaderResources_hook)
-        {
-            PSSetShaderResources_hook = safetyhook::create_inline(vtable[8], reinterpret_cast<void*>(PSSetShaderResources_Hook));
-            LOG_HOOK(PSSetShaderResources_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::PSSetShaderResources");
-        }
-
-        if (!Draw_hook)
-        {
-            Draw_hook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(Draw_Hook));
-            LOG_HOOK(Draw_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::Draw");
-        }
-
-        if (!OMSetRenderTargets_hook)
-        {
-            OMSetRenderTargets_hook = safetyhook::create_inline(vtable[33], reinterpret_cast<void*>(OMSetRenderTargets_Hook));
-            LOG_HOOK(OMSetRenderTargets_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::OMSetRenderTargets");
-        }
-    }
+    
 
     void SyncMenuPrimMirror(MenuPrimMirror& mirror)
     {
@@ -1562,6 +1531,37 @@ namespace
     }
 }
 
+void MGS2UnderwaterFilterFix::InstallD3D11StateHooks()
+{
+    if (!g_D3D11Hooks.d3dDeviceContext)
+    {
+        return;
+    }
+
+    spdlog::info("MGS2 Underwater Filter Fix: Installing D3D11 state hooks.");
+
+    if (!PSSetShaderResources_hook)
+    {
+        void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
+        PSSetShaderResources_hook = safetyhook::create_inline(vtable[8], reinterpret_cast<void*>(PSSetShaderResources_Hook));
+        LOG_HOOK(PSSetShaderResources_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::PSSetShaderResources");
+    }
+
+    if (!Draw_hook)
+    {
+        void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
+        Draw_hook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(Draw_Hook));
+        LOG_HOOK(Draw_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::Draw");
+    }
+
+    if (!OMSetRenderTargets_hook)
+    {
+        void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
+        OMSetRenderTargets_hook = safetyhook::create_inline(vtable[33], reinterpret_cast<void*>(OMSetRenderTargets_Hook));
+        LOG_HOOK(OMSetRenderTargets_hook, "MGS 2: Underwater Filter Fix: ID3D11DeviceContext::OMSetRenderTargets");
+    }
+}
+
 void MGS2UnderwaterFilterFix::Initialize()
 {
     if (!(eGameType & MGS2))
@@ -1597,7 +1597,6 @@ void MGS2UnderwaterFilterFix::Initialize()
     LOG_HOOK(NewScrWater_hook, "MGS 2: Underwater Filter Fix: NewScrWater");
     spdlog::info("MGS 2: Underwater Filter Fix: NewScrWater hook target {}.", fmt::ptr(newScrWater));
     HookScrWaterDmapackCreateCalls(newScrWater);
-    InstallD3D11StateHooks();
 }
 
 void MGS2UnderwaterFilterFix::PatchWork(void* work) const
@@ -1630,7 +1629,6 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
     const bool codecFallback = step == 0 && !gScrWaterSawUnderwaterStep && IsUnderwaterCodecSequence();
     const bool active = ((step >= 1 && step <= 2) || codecFallback) && IsWaterVisible();
     gScrWaterActive = active;
-    InstallD3D11StateHooks();
 
     dmapack->flag |= kDmapackMenu;
     dmapack->priority = kScrWaterPriority;

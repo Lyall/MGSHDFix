@@ -104,20 +104,17 @@ namespace Memory
         }
 
         MEMORY_BASIC_INFORMATION mbi {};
-        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)))
+        if (!VirtualQuery(ptr, &mbi, sizeof(mbi)) || mbi.State != MEM_COMMIT ||
+            (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)))
         {
             return false;
         }
 
-        constexpr DWORD executable =
-            PAGE_EXECUTE |
-            PAGE_EXECUTE_READ |
-            PAGE_EXECUTE_READWRITE |
-            PAGE_EXECUTE_WRITECOPY;
-
-        return mbi.State == MEM_COMMIT &&
-               !(mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
-               (mbi.Protect & executable);
+        const DWORD protect = mbi.Protect & 0xff;
+        return protect == PAGE_EXECUTE ||
+            protect == PAGE_EXECUTE_READ ||
+            protect == PAGE_EXECUTE_READWRITE ||
+            protect == PAGE_EXECUTE_WRITECOPY;
     }
 
     size_t ReadableBytes(const void* ptr)

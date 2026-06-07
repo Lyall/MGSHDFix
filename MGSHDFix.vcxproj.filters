@@ -242,6 +242,9 @@
     <ClCompile Include="src\fixes\mgs2_hostage_model.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\custom_player_name.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mgs2_restore_sol_radar.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -495,6 +498,9 @@
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_hostage_model.hpp">
       <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\custom_player_name.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_restore_sol_radar.hpp">
       <Filter>Features\Headers</Filter>
