@@ -47,20 +47,11 @@ void DistanceCulling::Initialize() const
                           });
 
             //evm models, ie snake, pres, parrot, vamp, emma
-            MAKE_HOOK_MID(baseModule, "40 53 48 83 EC ?? 44 89 41", "MGS2: _NPC_InitMWObject()", {
-                if (ctx.rdx != PARROT_MODEL_STRCODE)  //emma's parrot (shell 1 core) is unique in that its evm is its cage. if we force its lod, the parrot will magically turn into its own cage when PL_Status & (PLAYER_WATCH|PLAYER_INTRUDE)
-                {
-                    if (log_bird)
-                    {
-                        spdlog::info("_NPC_InitMWObject -> bird not matched");
-                    }
-                    ctx.r8 = std::numeric_limits<int>::max();
-                }
-                else if (log_bird)
-                {
-                    spdlog::info("BIRD BIRD BIRD, BIRD IS THE WORD");
-                }
-                });
+            if (uint8_t* NPC_LODscan = Memory::PatternScan(baseModule, "3B C1 7E ?? 41 81 E0 ?? ?? ?? ?? 45 89 41 ?? 81 4F ?? ?? ?? ?? ?? EB ?? 41 81 C8 ?? ?? ?? ?? 45 89 41 ?? 81 67 ?? ?? ?? ?? ?? 8B 8B ?? ?? ?? ?? 85 C9 74 ?? 48 8B D7 E8 ?? ?? ?? ?? 48 8B 5C 24", "MGS2: _NPC_InitMWObject()"))
+            {
+                Memory::PatchBytes((uintptr_t)NPC_LODscan, "\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90", 24);
+                //Util::DumpBytes((uintptr_t)NPC_LODscan, 0x40);
+            }
         }
 
         if (bAlwaysRenderShellCasings)
