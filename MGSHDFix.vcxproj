@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\features\expand_bp_assets.cpp" />
+    <ClCompile Include="src\features\mgs2_restore_sol_radar.cpp" />
     <ClCompile Include="src\features\custom_player_name.cpp" />
     <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
     <ClCompile Include="src\fixes\mgs2_hostage_model.cpp" />
