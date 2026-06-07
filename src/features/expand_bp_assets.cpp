@@ -32,8 +32,6 @@ namespace {
 	FASTCALL_1IN1OUT BPGetFileSize;
 	FASTCALL_3IN1OUT BPReadFile;
 	FASTCALL_1IN1OUT BPCloseFile;
-	FASTCALL_1IN1OUT MGSMalloc;
-	FASTCALL_1IN1OUT MGSFree;
 }
 
 // Helper for optimized file buffer allocation
@@ -41,14 +39,6 @@ static inline size_t RoundUp(size_t size) {
 	int ret = 1;
 	while (ret < size)
 		ret <<= 1;
-	return ret;
-}
-
-// realloc() implementation using the game's allocation lists (coooould replace with a pattern match I guess)
-static void* MGSRealloc(void* old, size_t size, size_t old_size) {
-	void* ret = (void*)MGSMalloc((void*)size);
-	memcpy(ret, old, old_size);
-	MGSFree(old);
 	return ret;
 }
 
@@ -78,7 +68,7 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			size_t newFileSize = BPGetFileSize(state->currentFileHandle);
 			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1);
 			if (newBufferSize > prevBufferSize) {
-				*buffer = (char*)MGSRealloc(*buffer, newBufferSize, prevBufferSize);
+				*buffer = (char*)realloc(*buffer, newBufferSize);
 				(*buffer)[state->currentFileSize + newFileSize] = '\0';
 			}
 			prevBufferSize = newBufferSize;
@@ -113,13 +103,7 @@ void BP_FilesysChanges::Initialize() {
 	BPCloseFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x67);
 	BPOpenFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x91);
 	BPGetFileSize = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0xa6);
-	//auto wut = (long long)Memory::GetRelativeOffset(BPAssetsLoader + 0xe3);
-	//spdlog::info("{}", wut);
-	//MGSMalloc = (FASTCALL_1IN1OUT)wut;
-	//spdlog::info("not dead?");
-	MGSMalloc = *(FASTCALL_1IN1OUT*)Memory::GetRelativeOffset(BPAssetsLoader + 0xe3);
 	BPReadFile = (FASTCALL_3IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x10f);
-	MGSFree = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x1e1);
 
 
 	// Both these injections are immediately after the file is read in; we can close the handle and open new ones as needed.
