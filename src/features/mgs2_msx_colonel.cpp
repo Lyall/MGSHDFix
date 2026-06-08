@@ -4,7 +4,12 @@
 #include "logging.hpp"
 
 namespace {
-    int faceIdList[3] = { 0x5c68db, 0x3914b1, 0x8fc20d };
+    constexpr unsigned int STRCODE_ROYMGS = 0x5c68db; // MGS (PlayStation)
+    constexpr unsigned int STRCODE_ROYMSX = 0x3914b1; // MG2:SS (MSX2)
+    constexpr unsigned int STRCODE_ROYGBC = 0x8fc20d; // MGS/GB (GameBoy)
+    constexpr unsigned int STRCODE_ROYSUB = 0xd8bf7e; // MG2:SS (PlayStation/etc)
+
+    int faceIdList[3] = { STRCODE_ROYMGS, STRCODE_ROYMSX, STRCODE_ROYGBC };
     int camPosList[3][6] = {
         { 1000000, 10565, -18, -1477, -2, 9897 }, // MGS
         { 1000000, 12890, 176, -36977, 5, -503 }, // MG2 (coordinates commented in face_bug.c)
@@ -25,13 +30,18 @@ void MGS2RetroColonel::Initialize()
         return;
     }
 
+#define EU_JP(X) (exists(sExePath / "eu" / X) && exists(sExePath / "jp" / X))
+
+#define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
+                          && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
+
     if (g_MGS2RetroColonel.bUseNewSprite
-        && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
-        && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
-        && true) // TODO: Manifest verification
+        && TEXTURE_EU_JP("_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
+        && EU_JP("face" / "f01e" / "bp_assets_cbfc_spacecore_msx_subsis.txt")
+        && EU_JP("face" / "f01f" / "bp_assets_cbfc_spacecore_msx_subsis.txt"))
     {
         // Swap sprite and coordinates
-        faceIdList[1] = 0xd8bf7e;
+        faceIdList[1] = STRCODE_ROYSUB;
         // Coordinates based on GB sprite since they're practically the same art
         camPosList[1][0] = 601793;
         camPosList[1][1] = 7250;
@@ -39,6 +49,10 @@ void MGS2RetroColonel::Initialize()
         camPosList[1][3] = -14421; // Pan also mirrored
         camPosList[1][4] = 6;
         camPosList[1][5] = 10796;
+    }
+    else if (g_MGS2RetroColonel.bUseNewSprite)
+    {
+        spdlog::warn("MGS2: MG2 Colonel Sprite: MGS2 Community Bugfix Compilation files missing. Using original sprite and position.");
     }
 
     // user/mode/codec/face_bug.c -> Act() - see also resolution_scaling_fixes.cpp
