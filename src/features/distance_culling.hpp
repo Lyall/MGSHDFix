@@ -5,8 +5,6 @@ class DistanceCulling final
 public:
     void Initialize() const;
 
-    bool bMGS2_MarineForceLOD = true;
-    bool bMGS2_ForcePlayerLOD = true;
     bool bMGS2_ForceNPCLOD = true;
     bool bAlwaysRenderShellCasings = true;
 

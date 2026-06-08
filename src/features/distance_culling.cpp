@@ -24,23 +24,23 @@ void DistanceCulling::Initialize() const
         //todo - test birds nLod in mgs2x\source\user\okuta\kamome\kmtest.c. 
         //  disabling their LOD will enable their animation skeletion, need to verify no performance impact.
 
-        if (bMGS2_MarineForceLOD)
-        {
-            if (uint8_t* MGS2_Marine_LOD = Memory::PatternScan(baseModule, "66 45 85 C0 44 0F 44 C9", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD()"))
-            {
-                Memory::PatchBytes((uintptr_t)MGS2_Marine_LOD, "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
-            }
-        }
-
-        if (bMGS2_ForcePlayerLOD)
-        {
-            MAKE_HOOK_MID(baseModule, "8B 8E ?? ?? ?? ?? 8B EF", "MGS2: NewLoDControl()", {
-                ctx.xmm0.f32[0] = 0.0f;
-                          });
-        }
-
         if (bMGS2_ForceNPCLOD)
         {
+            //if (bMGS2_MarineForceLOD)
+            {
+                if (uint8_t* MGS2_Marine_LOD = Memory::PatternScan(baseModule, "66 45 85 C0 44 0F 44 C9", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD()"))
+                {
+                    Memory::PatchBytes((uintptr_t)MGS2_Marine_LOD, "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
+                }
+            }
+
+           // if (bMGS2_ForcePlayerLOD)
+            {
+                MAKE_HOOK_MID(baseModule, "8B 8E ?? ?? ?? ?? 8B EF", "MGS2: NewLoDControl()", {
+                    ctx.xmm0.f32[0] = 0.0f;
+                              });
+            }
+
             //hostages
             MAKE_HOOK_MID(baseModule, "8B D0 3D ?? ?? ?? ?? 7E", "MGS2: LodHostage()", {
                 ctx.rax = 0.0f;

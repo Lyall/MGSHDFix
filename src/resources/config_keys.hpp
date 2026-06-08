@@ -114,6 +114,13 @@ namespace ConfigKeys
     constexpr const char* Caption_Background_Opacity_Tooltip = "";
 
 
+
+    constexpr const char* MGS2_SnakeTales_Radar_Section = "Various";
+    constexpr const char* MGS2_SnakeTales_Radar_Setting = "MGS2 - Enable Radar in Snake Tales";
+    constexpr const char* MGS2_SnakeTales_Radar_Help = "";
+    constexpr const char* MGS2_SnakeTales_Radar_Tooltip = "Enables Radar in Snake Tales / Alternative missions.";
+
+
     constexpr const char* LOD_MGS2_ShellCasings_Section = "MGS2 - Model Options";
     constexpr const char* LOD_MGS2_ShellCasings_Setting = "Always Show Weapon Shell Casings";
     constexpr const char* LOD_MGS2_ShellCasings_Help = "";
@@ -122,22 +129,10 @@ namespace ConfigKeys
                                                           "When enabled, shell casings will be rendered at all distances.\n";
 
 
-    constexpr const char* LOD_MGS2_Marines_Section = "MGS2 - Model Options";
-    constexpr const char* LOD_MGS2_Marines_Setting = "Force High Quality Marines";
-    constexpr const char* LOD_MGS2_Marines_Help = "";
-    constexpr const char* LOD_MGS2_Marines_Tooltip = "When enabled, Marines always use their high polygon model.";
-
-
-    constexpr const char* LOD_MGS2_Player_Section = "MGS2 - Model Options";
-    constexpr const char* LOD_MGS2_Player_Setting = "Force High Quality Player Models";
-    constexpr const char* LOD_MGS2_Player_Help = "";
-    constexpr const char* LOD_MGS2_Player_Tooltip = "When enabled, Player models always use their high polygon model.";
-
-
     constexpr const char* LOD_MGS2_NPC_Section = "MGS2 - Model Options";
-    constexpr const char* LOD_MGS2_NPC_Setting = "Force High Quality NPCs";
+    constexpr const char* LOD_MGS2_NPC_Setting = "Force High Quality Characters";
     constexpr const char* LOD_MGS2_NPC_Help = "";
-    constexpr const char* LOD_MGS2_NPC_Tooltip = "When enabled, NPC models (Hostages, Snake, Emma, President, Parrot, Fatman, Vamp) models always use their high polygon model.";
+    constexpr const char* LOD_MGS2_NPC_Tooltip = "When enabled, all character models always use their high polygon model.";
 
     constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
     constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";

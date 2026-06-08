@@ -173,27 +173,19 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } },
 
 
-        { ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, ConfigKeys::LOD_MGS2_Player_Help, ConfigKeys::LOD_MGS2_Player_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+        {ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, ConfigKeys::MGS2_SnakeTales_Radar_Help, ConfigKeys::MGS2_SnakeTales_Radar_Tooltip,
+            std::nullopt, false, Field::Bool, false},
 
 
         { ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, ConfigKeys::LOD_MGS2_NPC_Help, ConfigKeys::LOD_MGS2_NPC_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-        { ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, ConfigKeys::LOD_MGS2_Marines_Help, ConfigKeys::LOD_MGS2_Marines_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-
-
-        { ConfigKeys::LOD_MGS2_ShellCasings_Section, "","", "",std::nullopt, false, Field::Spacer },
-
-
-        { ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, ConfigKeys::LOD_MGS2_ShellCasings_Help, ConfigKeys::LOD_MGS2_ShellCasings_Tooltip,
-          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2_Hostage_Type_Section, ConfigKeys::MGS2_Hostage_Type_Setting, ConfigKeys::MGS2_Hostage_Type_Help, ConfigKeys::MGS2_Hostage_Type_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_Hostage_Type_Option_Normal, {ConfigKeys::MGS2_Hostage_Type_Option_Normal, ConfigKeys::MGS2_Hostage_Type_Option_OnePM, ConfigKeys::MGS2_Hostage_Type_Option_TenPM, ConfigKeys::MGS2_Hostage_Type_Option_Midnight,} },
 
+        { ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, ConfigKeys::LOD_MGS2_ShellCasings_Help, ConfigKeys::LOD_MGS2_ShellCasings_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
 
         { ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, ConfigKeys::DistanceCullingGrassAlways_Help, ConfigKeys::DistanceCullingGrassAlways_Tooltip,

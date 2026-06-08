@@ -557,14 +557,6 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_ShellCasings_Section, ConfigKeys::LOD_MGS2_ShellCasings_Setting, g_DistanceCulling.bAlwaysRenderShellCasings);
 
-
-    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
-    LOG_CONFIG(ConfigKeys::LOD_MGS2_Marines_Section, ConfigKeys::LOD_MGS2_Marines_Setting, g_DistanceCulling.bMGS2_MarineForceLOD);
-
-    ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
-    LOG_CONFIG(ConfigKeys::LOD_MGS2_Player_Section, ConfigKeys::LOD_MGS2_Player_Setting, g_DistanceCulling.bMGS2_ForcePlayerLOD);
-
-
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
 
