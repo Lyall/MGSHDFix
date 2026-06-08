@@ -52,6 +52,8 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 
 	// Avoid realloc when reasonable
 	size_t prevBufferSize = state->currentFileSize + 1;
+	// For after the loop
+	size_t originalFileSize = state->currentFileSize;
 
 	for (auto const& dir_entry : std::filesystem::directory_iterator(directory)) {
 		if (!dir_entry.is_regular_file()) {
@@ -76,6 +78,21 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
 			state->currentFileSize += newFileSize;
 		}
+	}
+	
+	// Put the vanilla data last, to ensure the modded data takes priority
+	size_t newFilesSize = state->currentFileSize - originalFileSize;
+	if (newFilesSize) {
+		char* originalFileBuffer = (char*)malloc(originalFileSize);
+		char* newFilesBuffer = (char*)malloc(newFilesSize);
+		memcpy(originalFileBuffer, *buffer, originalFileSize);
+		memcpy(newFilesBuffer, &(*buffer)[originalFileSize], newFilesSize);
+		
+		memcpy(*buffer, newFilesBuffer, newFilesSize);
+		memcpy(&(*buffer)[newFilesSize], originalFileBuffer, originalFileSize);
+
+		free(originalFileBuffer);
+		free(newFilesBuffer);
 	}
 
 	return state->currentFileHandle;
