@@ -75,7 +75,7 @@
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_shimmer.hpp"
 #include "playtime_fixes.hpp"
-#include "../mgs2_snake_tales_radar.hpp"
+#include "mgs2_snake_tales_radar.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
