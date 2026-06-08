@@ -158,7 +158,9 @@ void TextureLiveSwaps::ApplyFixes()
 #define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
                           && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
 
-    if (TEXTURE_EU_JP("_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")
+    if (exists(sExePath / "assets" / "tri" / "us" / "spacecore_w24c1.tri")
+        && TEXTURE_EU_JP("_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")
+        && EU_JP("stage" / "d036p03" / "manifest_cbfc_hostage_fixes.txt")
         && EU_JP("stage" / "d036p03" / "bp_assets_cbfc_hostage_fixes.txt"))
     {
         spdlog::info("MGS 2 - Texture Swaps: w24c screen texture fix enabled.");
