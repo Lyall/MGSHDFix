@@ -50,6 +50,8 @@ namespace Memory
 
     uintptr_t GetRelativeOffset(uint8_t* addr) noexcept;
 
+    uint8_t* ResolveCall(uint8_t* callInsn);
+
     uintptr_t GetRipRelativeAddress(std::uint8_t* instruction, std::size_t displacementOffset, std::size_t instructionLength) noexcept;
 
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction);

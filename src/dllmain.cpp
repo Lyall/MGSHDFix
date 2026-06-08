@@ -76,6 +76,7 @@
 #include "mgs2_shimmer.hpp"
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
+#include "mgs2_thermal_goggles.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -487,6 +488,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_First_Person_View::Activate());
         INITIALIZE(MGS2RetroColonel::Initialize());
         INITIALIZE(MGS2_SnakeTalesRadar::Apply());
+        INITIALIZE(MGS2ThermalGoggles::Setup());
     }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());

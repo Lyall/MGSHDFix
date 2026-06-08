@@ -280,6 +280,13 @@ namespace Memory
         return reinterpret_cast<uintptr_t>(instruction) + instructionLength + displacement;
     }
 
+    uint8_t* ResolveCall(uint8_t* callInsn)
+    {
+        int32_t rel = *reinterpret_cast<int32_t*>(callInsn + 1);
+        return callInsn + 5 + rel;
+    }
+
+
     BOOL HookIAT(HMODULE callerModule, char const* targetModule, const void* targetFunction, void* detourFunction)
     {
         auto* base = (uint8_t*)callerModule;

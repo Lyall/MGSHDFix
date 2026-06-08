@@ -151,6 +151,29 @@ namespace ConfigKeys
     constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
     constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
 
+    constexpr const char* MGS2_Thermal_Mode_Section = "Various";
+    constexpr const char* MGS2_Thermal_Mode_Setting = "MGS2 - Thermal Goggle Palette Swapping";
+    constexpr const char* MGS2_Thermal_Mode_Help = "";
+    constexpr const char* MGS2_Thermal_Mode_Tooltip = "Enable swapping what color palettes are used by the thermal goggles. Cycle in-game with the hotkey.";
+
+    constexpr const char* MGS2_Thermal_Default_Mode_Section = "Various";
+    constexpr const char* MGS2_Thermal_Default_Mode_Setting = "MGS2 - T.Goggle Default Palette";
+    constexpr const char* MGS2_Thermal_Default_Mode_Help = "";
+    constexpr const char* MGS2_Thermal_Default_Mode_Tooltip = "Default color palette used by the thermal goggles when the game starts.\n"
+                                                                "\n"
+                                                                "Substance = Vanilla / Unmodified Substance Colors\n"
+                                                                "Sons of Liberty = Red Hot / Terminator Vision\n"
+                                                                "Splinter Cell (Blacklist) = Modernized Red Hot -> Purple Cold";
+    constexpr const char* MGS2_Thermal_Default_Mode_Option_Substance = "Substance";
+    constexpr const char* MGS2_Thermal_Default_Mode_Option_RedHot = "Sons of Liberty";
+    constexpr const char* MGS2_Thermal_Default_Mode_Option_SplinterCell = "Splinter Cell";
+    constexpr const char* MGS2_Thermal_Default_Mode_Option_WhiteHot = "White Hot";
+    constexpr const char* MGS2_Thermal_Default_Mode_Option_BlackHot = "Black Hot";
+
+    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Section = "Various";
+    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Setting = "MGS2 - T.Goggle Color Cycle Hotkey";
+    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Help = "";
+    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Tooltip = "Hotkey to cycle through color palettes in realtime.";
 
 
     constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";

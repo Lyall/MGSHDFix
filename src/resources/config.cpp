@@ -48,6 +48,7 @@
 #include "texture_live_swaps.hpp"
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_snake_tales_radar.hpp"
+#include "mgs2_thermal_goggles.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -326,8 +327,45 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, CustomResolutionAndBorderless::bOutputResolution);
     LOG_CONFIG(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting, CustomResolutionAndBorderless::bOutputResolution);
 
-    
-        
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, MGS2ThermalGoggles::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, MGS2ThermalGoggles::bEnabled);
+    if (MGS2ThermalGoggles::bEnabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, MGS2ThermalGoggles::vk_ToggleThermalGoggleColor);
+
+        std::string sIRMode;
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_Thermal_Default_Mode_Section, ConfigKeys::MGS2_Thermal_Default_Mode_Setting, sIRMode);
+        if (sIRMode != ConfigKeys::MGS2_Thermal_Default_Mode_Option_Substance &&
+            sIRMode != ConfigKeys::MGS2_Thermal_Default_Mode_Option_RedHot &&
+            sIRMode != ConfigKeys::MGS2_Thermal_Default_Mode_Option_SplinterCell &&
+            sIRMode != ConfigKeys::MGS2_Thermal_Default_Mode_Option_WhiteHot &&
+            sIRMode != ConfigKeys::MGS2_Thermal_Default_Mode_Option_BlackHot)
+        {
+            spdlog::error("Invalid config value for {}: {}", ConfigKeys::MGS2_Thermal_Default_Mode_Setting, sIRMode);
+            Logging::ShowConsole();
+            std::cout << "Invalid config value for " << ConfigKeys::MGS2_Thermal_Default_Mode_Setting << ": " << sIRMode << std::endl;
+            return FreeLibraryAndExitThread(baseModule, 1);
+        }
+        if (sIRMode == ConfigKeys::MGS2_Thermal_Default_Mode_Option_RedHot)
+        {
+            MGS2ThermalGoggles::g_irMode = MGS2ThermalGoggles::IRMode::RedHot;
+        }
+        else if (sIRMode == ConfigKeys::MGS2_Thermal_Default_Mode_Option_SplinterCell)
+        {
+            MGS2ThermalGoggles::g_irMode = MGS2ThermalGoggles::IRMode::SplinterCell;
+        }
+        else if (sIRMode == ConfigKeys::MGS2_Thermal_Default_Mode_Option_WhiteHot)
+        {
+            MGS2ThermalGoggles::g_irMode = MGS2ThermalGoggles::IRMode::WhiteHot;
+        }
+        else if (sIRMode == ConfigKeys::MGS2_Thermal_Default_Mode_Option_BlackHot)
+        {
+            MGS2ThermalGoggles::g_irMode = MGS2ThermalGoggles::IRMode::BlackHot;
+        }
+        // else Substance
+        LOG_CONFIG(ConfigKeys::MGS2_Thermal_Default_Mode_Section, ConfigKeys::MGS2_Thermal_Default_Mode_Setting, sIRMode);
+    }
         
     ConfigHelper::getValue(ini, ConfigKeys::WindowWidth_Section, ConfigKeys::WindowWidth_Setting, CustomResolutionAndBorderless::iOutputResX);
     ConfigHelper::getValue(ini, ConfigKeys::WindowHeight_Section, ConfigKeys::WindowHeight_Setting, CustomResolutionAndBorderless::iOutputResY);

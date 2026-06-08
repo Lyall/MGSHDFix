@@ -254,6 +254,9 @@
     <ClCompile Include="src\features\mgs2_snake_tales_radar.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\game_funcs.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -513,6 +516,12 @@
     </ClInclude>
     <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp">
       <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\game_funcs.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\game_defines.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

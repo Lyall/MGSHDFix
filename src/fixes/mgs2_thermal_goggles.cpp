@@ -2,8 +2,18 @@
 
 #include "mgs2_thermal_goggles.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
+#include "input_handler.hpp"
 #include "logging.hpp"
+#include "mgs2_equipment_enums.hpp"
+#include "mgs2_linkvarbuf.hpp"
+#include "mgs2_status_flags.hpp"
 
+#include "game_funcs.hpp"
+#include "game_defines.hpp"
+using namespace MGS2_GameFuncs;
+using namespace MGS2_Defines;
+using namespace MGS2_LinkVarBuf;
 
 namespace
 {
@@ -78,12 +88,45 @@ namespace
     };
 
 
-    const uint32_t* g_irTables[] = { irSubstance, irRedHot, irSplinterCell, irWhiteHot, irBlackHot };
-    int g_irTableIndex = 0;
-    int s_lastTableIndex = -1;
+    const uint32_t* g_irTables[] = { irSubstance, irSplinterCell, irRedHot, irWhiteHot, irBlackHot };
+    static_assert(std::size(g_irTables) == (size_t)MGS2ThermalGoggles::IRMode::Count);
 
+    uint8_t* g_irColorTable = nullptr;
+
+    bool deequipped_this_frame = false;
+    bool deequipped_last_frame = false;
+    bool processing_reequip = false;
 }
 
+void MGS2ThermalGoggles::Tick()
+{
+    if (!processing_reequip)
+    {
+        return;
+    }
+    if (g_GameVars.Get_GM_GameStatus() & (STATE_GAMEOVER | STATE_PLAY_DEMO))
+    {
+        deequipped_this_frame = false;
+        deequipped_last_frame = false;
+        processing_reequip = false;
+        return;
+    }
+    if (deequipped_this_frame)
+    {
+        deequipped_this_frame = false;
+        deequipped_last_frame = true;
+        return;
+    }
+
+    if (deequipped_last_frame)
+    {
+        GM_Item = MGS2_ITEM_INDEX_THERMAL_GOGGLES;
+        deequipped_last_frame = false;
+        return;
+    }
+    processing_reequip = false;
+
+}
 
 void MGS2ThermalGoggles::Setup()
 {
@@ -91,26 +134,50 @@ void MGS2ThermalGoggles::Setup()
     {
         return;
     }
+
     if (!bEnabled)
     {
-        spdlog::info("Config disabled, skipping");
+        return;
+    }
+    
+    spdlog::info("MGS2ThermalGoggles: Setting up thermal goggle color cycling.");
+    if (uint8_t* irColorTable = Memory::PatternScan(baseModule, "00 80 FF 80 00 FF FF 80 00 FF 80 80 00 FF 00 80 80 FF 00 80 FF FF 00 80 FF 80 00 80 FF 00 00 80", "IR color table"))
+    {
+        spdlog::info("MGS2ThermalGoggles: IR color table found at {:s}+{:X}", sExeName.c_str(), (uintptr_t)irColorTable - (uintptr_t)baseModule);
+        g_irColorTable = irColorTable;
+        if (g_irMode != IRMode::Substance)
+        {
+            Memory::PatchBytes((uintptr_t)irColorTable, reinterpret_cast<const char*>(g_irTables[(int)g_irMode]), 32);
+            spdlog::info("MGS2ThermalGoggles: Applying IR mode {}.", (int)g_irMode);
+        }
+    }
+    else
+    {
         return;
     }
 
-    if (uint8_t* irColorTable = Memory::PatternScan(baseModule, "00 80 FF 80 00 FF FF 80 00 FF 80 80 00 FF 00 80 80 FF 00 80 FF FF 00 80 FF 80 00 80 FF 00 00 80", "IR color table"))
-    {
-        Memory::PatchBytes((uintptr_t)irColorTable, reinterpret_cast<const char*>(irRedHot), sizeof(irRedHot));
 
-        /* experimental - swap tables via item menu.
-        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 57 41 56 41 57 48 81 EC ?? ?? ?? ?? 0F 29 B4 24", "ir_mode.c -> GetResources() - ir table replace", {
-             if (ctx.rdx == 0 && g_irTableIndex != s_lastTableIndex)
-             {
-                  memcpy(reinterpret_cast<void*>(irColorTable), g_irTables[g_irTableIndex], 32);
-                  s_lastTableIndex = g_irTableIndex;
-             }
-            });
-            */
-    }
+    g_InputHandler.RegisterHotkey(vk_ToggleThermalGoggleColor, "MGS2 - Thermal Goggle Cycle Mode", []() {
+        if (processing_reequip)
+        {
+            return;
+        }
+        if (GM_Item != MGS2_ITEM_INDEX_THERMAL_GOGGLES)
+        {
+            return;
+        }
+        if (g_GameVars.Get_GM_GameStatus() & (STATE_GAMEOVER | STATE_PLAY_DEMO))
+        {
+            return;
+        }
+
+        processing_reequip = deequipped_this_frame = true;
+        g_irMode = (IRMode)(((int)g_irMode + 1) % (int)IRMode::Count);
+        memcpy(g_irColorTable, g_irTables[(int)g_irMode], 32);
+        GM_Item = 0;
+        GM_SeSet(GM_PAN_CENTER, GM_MAX_VOL, SD_S_TYPING03);
+        });
+
 
 
 }

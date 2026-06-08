@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "gamevars.hpp"
 #include "effect_speeds.hpp"
+#include "game_funcs.hpp"
 #include "keep_aiming_after_firing.hpp"
 #include "logging.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
@@ -55,6 +56,7 @@ void GameVars::Initialize()
                 });
             LOG_HOOK(levelTransitionMidHook, "GameVars: Level Transition")
         }
+        MGS2_GameFuncs::HookFuncs();
     }
     else if (eGameType & MGS3)
     {

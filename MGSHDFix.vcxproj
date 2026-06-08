@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\resources\game_funcs.cpp" />
     <ClCompile Include="src\features\mgs2_snake_tales_radar.cpp" />
     <ClCompile Include="src\features\expand_bp_assets.cpp" />
     <ClCompile Include="src\features\mgs2_restore_sol_radar.cpp" />
@@ -151,6 +152,8 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\game_defines.hpp" />
+    <ClInclude Include="src\resources\game_funcs.hpp" />
     <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp" />
     <ClInclude Include="src\features\expand_bp_assets.hpp" />
     <ClInclude Include="src\features\mgs2_restore_sol_radar.hpp" />

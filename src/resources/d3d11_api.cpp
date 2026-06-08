@@ -17,6 +17,7 @@
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_shimmer.hpp"
+#include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
 void afterPresent();
 
@@ -161,6 +162,7 @@ namespace
         {
             MGS2_ThirdPersonFreecam::Tick();
             MGS2_First_Person_View::Tick();
+            MGS2ThermalGoggles::Tick();
 
             if (auto* work = *MGS2_ContrastShader::pContrastWork; MGS2_ContrastShader::bShaderLoaded && work)
             {
