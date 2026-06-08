@@ -152,7 +152,6 @@ void TextureLiveSwaps::ApplyFixes()
     // However, this texture always shows Raiden in his Sneaking Suit. This should change.
 
     // Requires a custom texture (should be bundled with community bugfix compilation)
-    // Note: possible issues if vanilla tri restored. If so, consider renaming the new w24c1.tri and adding it to the manifest.
 #define EU_JP(X) (exists(sExePath / "eu" / X) && exists(sExePath / "jp" / X))
 
 #define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
