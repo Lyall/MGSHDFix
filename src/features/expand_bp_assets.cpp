@@ -32,6 +32,7 @@ namespace {
 	FASTCALL_1IN1OUT BPGetFileSize;
 	FASTCALL_3IN1OUT BPReadFile;
 	FASTCALL_1IN1OUT BPCloseFile;
+	//FASTCALL_1IN1OUT BPIsReadDone;
 }
 
 // Helper for optimized file buffer allocation
@@ -70,12 +71,23 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			size_t newFileSize = BPGetFileSize(state->currentFileHandle);
 			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1);
 			if (newBufferSize > prevBufferSize) {
-				*buffer = (char*)realloc(*buffer, newBufferSize);
+				char* oldBuf = *buffer;
+				*buffer = (char*)realloc(oldBuf, newBufferSize);
+				spdlog::info("buffer for {} was at {}, now {}", filePath, (long long)oldBuf, (long long)*buffer);
 				(*buffer)[state->currentFileSize + newFileSize] = '\0';
 			}
 			prevBufferSize = newBufferSize;
 			// Oh, and read the new file, of course.
-			state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
+			//state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
+			FILE* fp = fopen(entry_path.string().c_str(), "r");
+			fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
+			fclose(fp);
+			if ((*buffer)[state->currentFileSize] == '\0')
+			{
+				// ??? mission failed? what?
+				spdlog::info("failed to load a text file ({} supplementing {}), the simplest file load possible?", entry_path.string(), filePath);
+				continue;
+			}
 			state->currentFileSize += newFileSize;
 		}
 	}
@@ -117,6 +129,7 @@ void BP_FilesysChanges::Initialize() {
 		return;
 	}
 
+	//BPIsReadDone = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x57);
 	BPCloseFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x67);
 	BPOpenFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x91);
 	BPGetFileSize = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0xa6);
