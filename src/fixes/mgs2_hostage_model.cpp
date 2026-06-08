@@ -22,15 +22,27 @@ void HostageModel::ApplyFix()
         return;
     }
     // Depends on custom models (provided by community bugfix pack)
-    // Note: no easy way to check for manifest and tri edits? Try it without checking, assume the models come with the manifest.
+#define EU_JP(X) (exists(sExePath / "eu" / X) && exists(sExePath / "jp" / X))
+
+#define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
+                          && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
+    
     if (!exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_def.kms")
         || !exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_mid.kms")
         || !exists(sExePath / "assets" / "kms" / "us" / "spacecore_hos_maleb_low.kms")
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_def.cmdl")
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_mid.cmdl")
         || !exists(sExePath / "assets" / "kms" / "us" / "_win" / "spacecore_hos_maleb_low.cmdl")
-        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_hos_arm02.bmp.ctxr")
-        || !exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_hos_arm02.bmp.ctxr"))
+        || !exists(sExePath / "assets" / "tri" / "us" / "spacecore_hos_all_def.tri")
+        || !TEXTURE_EU_JP("_win" / "spacecore_hos_arm02.bmp.ctxr")
+        || !EU_JP("stage" / "a24c" / "manifest_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "d036p03" / "manifest_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "w24c" / "manifest_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "w24e" / "manifest_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "a24c" / "bp_assets_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "d036p03" / "bp_assets_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "w24c" / "bp_assets_cbfc_hostage_fixes.txt")
+        || !EU_JP("stage" / "w24e" / "bp_assets_cbfc_hostage_fixes.txt"))
     {
         spdlog::warn("Missing one or more assets for hostage hand color fix. Do you have the latest version of the Community Bugfix Pack?");
         return;

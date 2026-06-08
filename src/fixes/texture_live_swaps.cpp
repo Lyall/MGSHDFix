@@ -152,9 +152,15 @@ void TextureLiveSwaps::ApplyFixes()
     // However, this texture always shows Raiden in his Sneaking Suit. This should change.
 
     // Requires a custom texture (should be bundled with community bugfix compilation)
-    // TODO: manifest check (similar to mgs2_hostage_model and mgs2_msx_colonel)
-    if (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr") 
-        && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")) 
+#define EU_JP(X) (exists(sExePath / "eu" / X) && exists(sExePath / "jp" / X))
+
+#define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
+                          && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
+
+    if (exists(sExePath / "assets" / "tri" / "us" / "spacecore_w24c1.tri")
+        && TEXTURE_EU_JP("_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")
+        && EU_JP("stage" / "d036p03" / "manifest_cbfc_hostage_fixes.txt")
+        && EU_JP("stage" / "d036p03" / "bp_assets_cbfc_hostage_fixes.txt"))
     {
         spdlog::info("MGS 2 - Texture Swaps: w24c screen texture fix enabled.");
         // user/mode/demo/demod.c -> StartDemo()
@@ -171,8 +177,8 @@ void TextureLiveSwaps::ApplyFixes()
     }
     
     if (bRestoreTitleScreenSwapping
-        && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "00c1181b.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "00c1181b.ctxr")) //blue 2
-        && (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / "_win" / "0007bc34.ctxr") && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / "_win" / "0007bc34.ctxr"))) //red 2
+        && TEXTURE_EU_JP("_win" / "00c1181b.ctxr") //blue 2
+        && TEXTURE_EU_JP("_win" / "0007bc34.ctxr")) //red 2
     {
         spdlog::info("MGS 2 - Texture Swaps: Title screen fix enabled.");
         MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 45 33 C9 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 74 24 ?? 4C 8D 05 ?? ?? ?? ?? 33 F6 89 78 ?? 48 8D 15 ?? ?? ?? ?? 89 B0", "NewTitleScrMan", {
