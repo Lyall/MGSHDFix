@@ -30,8 +30,9 @@ typedef struct {
 namespace {
 	FASTCALL_1IN1OUT BPOpenFile;
 	FASTCALL_1IN1OUT BPGetFileSize;
-	FASTCALL_3IN1OUT BPReadFile;
+	//FASTCALL_3IN1OUT BPReadFile;
 	FASTCALL_1IN1OUT BPCloseFile;
+	//FASTCALL_1IN1OUT BPIsReadDone;
 }
 
 // Helper for optimized file buffer allocation
@@ -52,6 +53,8 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 
 	// Avoid realloc when reasonable
 	size_t prevBufferSize = state->currentFileSize + 1;
+	// For after the loop
+	size_t originalFileSize = state->currentFileSize;
 
 	for (auto const& dir_entry : std::filesystem::directory_iterator(directory)) {
 		if (!dir_entry.is_regular_file()) {
@@ -68,14 +71,41 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			size_t newFileSize = BPGetFileSize(state->currentFileHandle);
 			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1);
 			if (newBufferSize > prevBufferSize) {
-				*buffer = (char*)realloc(*buffer, newBufferSize);
+				char* oldBuf = *buffer;
+				*buffer = (char*)realloc(oldBuf, newBufferSize);
+				//spdlog::info("buffer for {} was at {}, now {}", filePath, (long long)oldBuf, (long long)*buffer);
 				(*buffer)[state->currentFileSize + newFileSize] = '\0';
 			}
 			prevBufferSize = newBufferSize;
 			// Oh, and read the new file, of course.
-			state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
+			//state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
+			// The Master Collection file reader is asynchronous. We need more consistency than that.
+			FILE* fp = fopen(entry_path.string().c_str(), "rb");
+			fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
+			fclose(fp);
+			if ((*buffer)[state->currentFileSize] == '\0')
+			{
+				// ??? mission failed? what?
+				spdlog::warn("Failed to load a text file ({} supplementing {}), the simplest file load possible?", entry_path.string(), filePath);
+				continue;
+			}
 			state->currentFileSize += newFileSize;
 		}
+	}
+	
+	// Put the vanilla data last, to ensure the modded data takes priority
+	size_t newFilesSize = state->currentFileSize - originalFileSize;
+	if (newFilesSize) {
+		char* originalFileBuffer = (char*)malloc(originalFileSize);
+		char* newFilesBuffer = (char*)malloc(newFilesSize);
+		memcpy(originalFileBuffer, *buffer, originalFileSize);
+		memcpy(newFilesBuffer, &(*buffer)[originalFileSize], newFilesSize);
+		
+		memcpy(*buffer, newFilesBuffer, newFilesSize);
+		memcpy(&(*buffer)[newFilesSize], originalFileBuffer, originalFileSize);
+
+		free(originalFileBuffer);
+		free(newFilesBuffer);
 	}
 
 	return state->currentFileHandle;
@@ -100,10 +130,11 @@ void BP_FilesysChanges::Initialize() {
 		return;
 	}
 
+	//BPIsReadDone = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x57);
 	BPCloseFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x67);
 	BPOpenFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x91);
 	BPGetFileSize = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0xa6);
-	BPReadFile = (FASTCALL_3IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x10f);
+	//BPReadFile = (FASTCALL_3IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x10f);
 
 
 	// Both these injections are immediately after the file is read in; we can close the handle and open new ones as needed.
