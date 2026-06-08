@@ -47,6 +47,7 @@
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_restore_sol_radar.hpp"
+#include "mgs2_snake_tales_radar.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -559,6 +560,11 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
     LOG_CONFIG(ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, g_DistanceCulling.bMGS2_ForceNPCLOD);
+
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, MGS2_SnakeTalesRadar::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, MGS2_SnakeTalesRadar::bEnabled);
 
         
 

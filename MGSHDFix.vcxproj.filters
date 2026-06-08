@@ -511,7 +511,9 @@
     <ClInclude Include="src\features\expand_bp_assets.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp" />
+    <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">
