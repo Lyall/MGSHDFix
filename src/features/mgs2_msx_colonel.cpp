@@ -36,7 +36,10 @@ void MGS2RetroColonel::Initialize()
                           && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
 
     if (g_MGS2RetroColonel.bUseNewSprite
+        && exists(sExePath / "assets" / "tri" / "us" / "spacecore_taisa.tri")
         && TEXTURE_EU_JP("_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
+        && EU_JP("face" / "f01e" / "manifest_cbfc_spacecore_msx_subsis.txt")
+        && EU_JP("face" / "f01f" / "manifest_cbfc_spacecore_msx_subsis.txt")
         && EU_JP("face" / "f01e" / "bp_assets_cbfc_spacecore_msx_subsis.txt")
         && EU_JP("face" / "f01f" / "bp_assets_cbfc_spacecore_msx_subsis.txt"))
     {
