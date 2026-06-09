@@ -81,6 +81,11 @@
     }
 
 #define MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(X) \
+    X(NewLineSmoke, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B 49 ?? 48 85 C9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\line_smoke.c -> NewLineSmoke()") \
+    X(NewKamomeManager, "40 53 48 83 EC ?? 8B 41 ?? 48 8B D9 89 05", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmmng.c -> NewKamomeManager()") \
+    X(NewFogSet_Demo, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 0F 85", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_fog_set.c -> NewFogSet_Demo()") \
+    X(NewRainFogPersFast, "40 55 53 41 55 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05", "MGS 2: Effect Speed Fix: user\\okajima\\effect3\\gas_pers_fast.c -> NewRainFogPersFast()") \
+    X(NewRainFogPersDemo, "48 89 5C 24 ?? 48 89 74 24 ?? 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F9 48 8D 54 24 ?? 8B 49 ?? E8 ?? ?? ?? ?? 48 8B 54 24 ?? 45 33 FF BE ?? ?? ?? ?? 8D 58 ?? 48 63 C3 48 C1 E0 ?? 48 03 D0 48 89 54 24 ?? 85 DB 78 ?? 0F 1F 40 ?? 48 8B 42 ?? ?? ?? 83 F9 ?? 74 ?? 85 C9 74 ?? 3B CE 74 ?? 83 F9 ?? 75 ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B 54 24 ?? 48 83 EA ?? 2B DE 48 89 54 24 ?? 79 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? 25 ?? ?? ?? ?? 48 3D ?? ?? ?? ?? 75 ?? 81 89 ?? ?? ?? ?? ?? ?? ?? ?? E9 ?? ?? ?? ?? 89 77 ?? EB ?? 44 89 7F ?? EB ?? 44 39 7F ?? 74 ?? 81 A1 ?? ?? ?? ?? ?? ?? ?? ?? 4C 89 B4 24 ?? ?? ?? ?? 41 BE ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ?? 0F 29 BC 24 ?? ?? ?? ?? 44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 8C 24 ?? ?? ?? ?? 44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 9C 24 ?? ?? ?? ?? 44 0F 29 A4 24 ?? ?? ?? ?? 44 0F 29 AC 24 ?? ?? ?? ?? 44 39 7F ?? 75 ?? 39 35 ?? ?? ?? ?? 75 ?? 33 D2 41 8B CE E8 ?? ?? ?? ?? 8B 05 ?? ?? ?? ?? 0F 57 F6 F3 0F 10 0D", "MGS 2: Effect Speed Fix: user\\okajima\\effect\\rain_gas_pers_demo.c -> NewRainFogPersDemo()") \
     X(MGS2_SPH_ActBrkVol1, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()") \
     X(NewSplushSurfaceMan, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()") \
     X(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()") \
@@ -88,7 +93,7 @@
     X(NewTraffic_Flush, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 41 56 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : NewTraffic_Flush") \
     X(NewDebris_Tex, "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\debris_tex.c -> NewDebris_Tex()") \
     X(NewLinerGunPlasma, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B F1 8B 0D", "MGS 2: Effect Speed Fix : okajima\\effect2\\liner_gun_plasma.c -> NewLinerGunPlasma() -> Act()") \
-    X(NewFortSplineBulletDemo, NEW_FORT_SPLINE_BULLET_DEMO_PATTERN, "MGS 2: Effect Speed Fix : mgs2x\\source\\user\\morita\\demo_fort\\fort_b_line.c() -> Act()")
+    X(NewFortSplineBulletDemo, NEW_FORT_SPLINE_BULLET_DEMO_PATTERN, "MGS 2: Effect Speed Fix : user\\morita\\demo_fort\\fort_b_line.c() -> Act()")
 
 namespace
 {
@@ -378,6 +383,14 @@ void EffectSpeedFix::Initialize()
             });
         LOG_HOOK(cigaretteMouthSmokeSpawnHook, "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence")
     }
+
+    /*
+    MAKE_HOOK_MID(baseModule, "48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B E9 0F 29 74 24", "user\\okajima\\demo_effect\\d_fog_set.c -> NewFogSet_Demo()", {
+        if (g_GameVars.InCutscene())
+        {
+            *reinterpret_cast<int*>(ctx.rsp + 0x30) *= 2;
+        }
+    })*/
 
 #pragma endregion
 
