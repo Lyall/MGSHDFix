@@ -69,21 +69,8 @@ namespace
     }
 
 
-    int menu_view_count = 0;
 }
 
-
-
-
-void TextureLiveSwaps::HandleLevelTransition()
-{
-    if (!g_GameVars.IsStage(MGS2Stages::N_TITLE))
-    {
-        menu_view_count = 0;
-        //spdlog::info("reset count");
-    }
-    
-}
 
 
 void TextureLiveSwaps::ApplyFixes()
@@ -181,17 +168,8 @@ void TextureLiveSwaps::ApplyFixes()
         && TEXTURE_EU_JP("_win" / "0007bc34.ctxr")) //red 2
     {
         spdlog::info("MGS 2 - Texture Swaps: Title screen fix enabled.");
-        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 45 33 C9 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 48 89 74 24 ?? 4C 8D 05 ?? ?? ?? ?? 33 F6 89 78 ?? 48 8D 15 ?? ?? ?? ?? 89 B0", "NewTitleScrMan", {
-            if (((MGS2_LinkVarBuf::GM_GameClearCount.get() & 1) != 0) && !(menu_view_count & 1))
-            {
-                GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO);
-                //spdlog::info("Title screen texture swap applied. Menu view count: {}", menu_view_count);
-            }
-            else
-            {
-                RestoreCtxrs();
-            }
-            ++menu_view_count;
+        MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 8B 4B ?? 45 33 C9 45 33 C0 41 8D 51 ?? E8 ?? ?? ?? ?? 89 43 ?? 48 8D 3D", "NewTitleScrMan", {
+            ctx.rax ? GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO) : RestoreCtxrs();
             });
 
     }

@@ -188,7 +188,6 @@ void GameVars::OnLevelTransition()
         MGS2_First_Person_View::HandleLevelTransition();
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
-        TextureLiveSwaps::HandleLevelTransition();
     }
 }
 
