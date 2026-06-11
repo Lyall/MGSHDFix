@@ -11,6 +11,7 @@
 #define VERSION_MAJOR 3
 #define VERSION_MINOR 1
 #define VERSION_PATCH 0
+#define VERSION_CI_BUILD 0
 
 /// Current release version of MGSHDFix at time of compile.
 /// This is automatically set by CI and should be left at 0.0.0.
@@ -21,7 +22,7 @@ inline constexpr const char* kAsiLoaderDescription = "Ultimate-ASI-Loader-x64";
 
 #define STRINGIFY_HELPER(x) #x
 #define STRINGIFY(x) STRINGIFY_HELPER(x)
-#define VERSION_STRING STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
+#define VERSION_STRING STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH) "." STRINGIFY(VERSION_CI_BUILD)
 inline const std::string sFixVersion = VERSION_STRING;
 inline const std::string sFixName = FIX_NAME;
 
