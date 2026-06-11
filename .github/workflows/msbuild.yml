@@ -100,6 +100,31 @@ jobs:
     # -------------------------
     # Build
     # -------------------------
+    - name: Set CI build number in version.h
+      shell: bash
+      run: |
+        VERSION_FILE="src/resources/version.h"
+        echo "Setting VERSION_CI_BUILD in $VERSION_FILE to $GITHUB_RUN_NUMBER"
+
+        sed -i "s/^#define VERSION_CI_BUILD .*/#define VERSION_CI_BUILD $GITHUB_RUN_NUMBER/" "$VERSION_FILE"
+
+    - name: Extract version from version.h
+      id: extract_version
+      shell: bash
+      run: |
+        VERSION_FILE="src/resources/version.h"
+        echo "Reading version from $VERSION_FILE"
+
+        VERSION_MAJOR=$(grep '#define VERSION_MAJOR' "$VERSION_FILE" | awk '{print $3}')
+        VERSION_MINOR=$(grep '#define VERSION_MINOR' "$VERSION_FILE" | awk '{print $3}')
+        VERSION_PATCH=$(grep '#define VERSION_PATCH' "$VERSION_FILE" | awk '{print $3}')
+        VERSION_CI_BUILD=$(grep '#define VERSION_CI_BUILD' "$VERSION_FILE" | awk '{print $3}')
+
+        version="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_CI_BUILD}"
+        echo "Parsed version: $version"
+
+        echo "version=$version" >> $GITHUB_OUTPUT
+
     - name: Build
       run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64 -property:PlatformToolset=v143
 
@@ -116,10 +141,10 @@ jobs:
     # Package everything
     - name: Create release zip
       working-directory: dist
-      run: 7z a -tzip "../${{ github.event.repository.name }}-run-${{ github.run_number }}.zip" *
+      run: 7z a -tzip "../${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip" *
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}-run-${{ github.run_number }}
+        name: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}
         path: dist/
