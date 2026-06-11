@@ -91,7 +91,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: external/SDL/build/msvc-x64-static
-        key: sdl3-${{ runner.os }}-${{ steps.sdlhash.outputs.hash }}
+        key: sdl3-${{ runner.os }}-vs2022-v143-x64-static-v3-${{ steps.sdlhash.outputs.hash }}
 
     # Zydis cache setup
     - name: Get Zydis submodule hash
