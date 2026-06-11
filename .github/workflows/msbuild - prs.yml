@@ -1,15 +1,14 @@
-name: MGSHDFix CI Nightly Builds
+name: MGSHDFix CI Builds
 
 env:
   CI: true
 
 on:
-  push:
-    branches:
-        - master
+  pull_request:
+    branches: ["**"]
 
 permissions:
-  contents: write
+  contents: read
 
 defaults:
   run:
@@ -147,18 +146,3 @@ jobs:
       with:
         name: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}
         path: dist/
-
-    - uses: ncipollo/release-action@v1
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      with:
-        tag: nightly
-        commit: ${{ github.sha }}
-        artifacts: "${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        name: "MGSHDFix Nightly Builds"
-        prerelease: true
-        artifactErrorsFailBuild: true
-        allowUpdates: true
-        removeArtifacts: true
-        replacesArtifacts: true
-        bodyFile: "nightly_build_body.txt"
