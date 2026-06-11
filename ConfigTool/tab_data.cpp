@@ -373,7 +373,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
     { wxString("Controls | Hotkeys"), {
         { ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Help, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Tooltip,
-          std::nullopt, false, Field::Bool, false},
+          std::nullopt, false, Field::Bool, true},
 
         { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, ConfigKeys::ToggleRainShader_Help, ConfigKeys::ToggleRainShader_Tooltip,
           std::make_pair(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },

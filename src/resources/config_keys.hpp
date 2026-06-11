@@ -705,7 +705,7 @@ namespace ConfigKeys
 
     // Hotkeys
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Section = "Hotkeys";
-    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Setting = "Capture Hotkeys While Alt-Tabbed";
+    constexpr const char* CaptureInputsWhileAltTabbedHotkey_Setting = "Capture Hotkeys While Alt Tabbed";
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Help = "";
     constexpr const char* CaptureInputsWhileAltTabbedHotkey_Tooltip = "Capture hotkeys even when the window is not focused or is alt-tabbed.";
 
