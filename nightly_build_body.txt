@@ -1,0 +1,7 @@
+Nightly builds of the latest MGSHDFix commit.
+
+These builds are to be considered an Alpha test of upcoming fixes and features. Please report any issues on Discord or our Github issue tracker.
+
+Crashing and instability may occur when using nightly builds.
+
+For a stable experience, use the latest proper release instead. :)
