@@ -74,6 +74,14 @@ bool MGS2_First_Person_View::IsActive()
 
 void MGS2_First_Person_View::HandleLevelTransition()
 {
+    if (!bFirst_Person_View_Enabled)
+    {
+        return;
+    }
+    if (gBP_1stPersonCamera_Override == nullptr)
+    {
+        return;
+    }
     if(g_GameVars.MGS2_GetGameMode() == MGS2GameMode::VRFirstPerson)
     {
         bLevelForcedOff = true;
@@ -88,6 +96,10 @@ void MGS2_First_Person_View::HandleLevelTransition()
 void MGS2_First_Person_View::Tick()
 {
     if (skip_tick)
+    {
+        return;
+    }
+    if (gBP_1stPersonCamera_Override == nullptr)
     {
         return;
     }

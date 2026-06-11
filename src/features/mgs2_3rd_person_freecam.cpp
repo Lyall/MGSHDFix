@@ -154,6 +154,10 @@ void MGS2_ThirdPersonFreecam::Tick()
     {
         return;
     }
+    if (gBP_3rdPersonCamera_Override == nullptr)
+    {
+        return;
+    }
 
     if (g_leavingSubjectFrames > 0)
         g_leavingSubjectFrames--;
@@ -201,6 +205,14 @@ void MGS2_ThirdPersonFreecam::Tick()
 
 void MGS2_ThirdPersonFreecam::HandleLevelTransition()
 {
+    if (!bEnabled)
+    {
+        return;
+    }
+    if (gBP_3rdPersonCamera_Override == nullptr)
+    {
+        return;
+    }
 
     isMainGameOrAlternate = ((g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Plant) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Tanker) || (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Alternate));
 

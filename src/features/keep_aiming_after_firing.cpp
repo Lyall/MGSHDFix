@@ -11,18 +11,29 @@
 
 namespace
 {
+    bool disabled = false;
     bool is_first_person_vr = false;
 }
 
 void KeepAimingAfterFiring::HandleLevelTransition()
 {
+    if (disabled)
+    {
+        return;
+    }
     is_first_person_vr = (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::VRFirstPerson);
 }
 
 void KeepAimingAfterFiring::Initialize()
 {
-    if (!(eGameType & (MGS2|MGS3)) || !(g_KeepAimingAfterFiring.bAlwaysKeepAiming || g_KeepAimingAfterFiring.bKeepAimingInFirstPerson || g_KeepAimingAfterFiring.bKeepAimingOnLockOn || g_KeepAimingAfterFiring.bKeepAimingInFPSMode))
+    if (!(eGameType & (MGS2|MGS3)))
     {
+        return;
+    }
+
+    if (!(g_KeepAimingAfterFiring.bAlwaysKeepAiming || g_KeepAimingAfterFiring.bKeepAimingInFirstPerson || g_KeepAimingAfterFiring.bKeepAimingOnLockOn || g_KeepAimingAfterFiring.bKeepAimingInFPSMode))
+    {
+        disabled = true;
         return;
     }
 
