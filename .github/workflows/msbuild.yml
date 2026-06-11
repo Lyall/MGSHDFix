@@ -151,6 +151,8 @@ jobs:
 
     - uses: ncipollo/release-action@v1
       with:
+        tag: "nightly"
+        commit: ${{ github.sha }}
         artifacts: "${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         name: "MGSHDFix Nightly Builds"
