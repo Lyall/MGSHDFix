@@ -224,7 +224,7 @@ wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio 
 - Desktop development with C++
 - MSVC v143 - VS 2022 C++ x64/x86 build tools
 - Windows 10/11 SDK
-- CMake 3.21 or newer
+- A recent CMake version that supports your installed Visual Studio version
 
 * Zydis does not yet support the v145 toolset, so the project currently requires the Visual Studio v143 build tools. Visual Studio 2026 can still be used as long as the v143 toolset is installed. This will be changed once v145 support is added.
  
