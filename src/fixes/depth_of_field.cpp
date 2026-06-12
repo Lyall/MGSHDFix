@@ -3,7 +3,11 @@
 
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"
+#include "gamevars.hpp"
 #include "helper.hpp"
+#ifndef RELEASE_BUILD
+#include "input_handler.hpp"
+#endif 
 #include "logging.hpp"
 
 namespace
@@ -39,6 +43,11 @@ namespace
     using BpRbAddCommandFn = void(__fastcall*)(unsigned int, void*);
     using DmapackRenderCallbackFn = void(__fastcall*)(void*);
     using SetDepthFuncFn = void(__fastcall*)(void*, uint64_t);
+
+    bool bCutsceneNeedsSpecialHandling = false; //for per-cutscene effect skip handling.
+    bool bIsD12T3 = false;
+    int iNearEffectCount = 0;
+
 
     struct FocusSourcePacket
     {
@@ -611,6 +620,18 @@ namespace
         {
             return false;
         }
+    //    if (bCutsceneNeedsSpecialHandling)
+        {
+            if (bIsD12T3)
+            {
+                iNearEffectCount++;
+                if (iNearEffectCount >= 80 && iNearEffectCount < 440)
+                {
+                    spdlog::info("MGS 2: Depth of Field: skipping near focus packet {:d} for cutscene special handling.", iNearEffectCount);
+                    return false;
+                }
+            }
+        }
 
         if (!PrepareFocusSource(source))
         {
@@ -956,6 +977,16 @@ namespace
     }
 }
 
+void DepthOfFieldFixes::HandleLevelTransition()
+{
+    if (!bEnabled)
+    {
+        return;
+    }
+    iNearEffectCount = 0;
+    bIsD12T3 = g_GameVars.IsStage(MGS2Stages::D12T3);
+}
+
 void DepthOfFieldFixes::Initialize()
 {
     if (!(eGameType & MGS2))
@@ -971,6 +1002,7 @@ void DepthOfFieldFixes::Initialize()
 
     if (IsUltrawide())
     {
+        bEnabled = false;
         spdlog::info("MGS 2: Depth of Field: disabled for ultrawide aspect ratio.");
         return;
     }
@@ -991,4 +1023,20 @@ void DepthOfFieldFixes::Initialize()
         spdlog::warn("MGS 2: Depth of Field: failed to resolve necessary functions for near focus fixes; near focus adjustments disabled.");
     }
     InstallBlurUvScaleHook();
+
+#ifndef RELEASE_BUILD
+    g_InputHandler.RegisterHotkey(VK_ADD, "print", []
+                                  {
+                                      spdlog::info("iNearEffectCount = {}, bIsD12T3 = {}", iNearEffectCount, bIsD12T3);
+                                  });
+
+    /*
+    MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 41 8B F9 41 8B F0 45 33 C9 8B EA 44 8B F1 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 A4 1C B2 FF", "NewNearFocusEffect -> Focal Points", {
+    spdlog::info("ctx.r8 = {}, ctx.r9 = {}", ctx.r8, ctx.r9);
+    ctx.r9 = 0;
+    ctx.r8 = 4000;
+    //r8 = var_near
+    //r9 = var_far
+    })*/
+#endif
 }

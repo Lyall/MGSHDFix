@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "common.hpp"
 #include "gamevars.hpp"
+
+#include "depth_of_field.hpp"
 #include "effect_speeds.hpp"
 #include "game_funcs.hpp"
 #include "keep_aiming_after_firing.hpp"
@@ -188,6 +190,7 @@ void GameVars::OnLevelTransition()
         MGS2_First_Person_View::HandleLevelTransition();
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
+        g_DepthOfFieldFixes.HandleLevelTransition();
     }
 }
 

@@ -54,10 +54,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to force Real Time Clock based hostage Easter Egg.
 - Option to restore grenade cooking (having detonation timer start while the grenade is still held.)
 - Option to swap X/O (OK / CANCEL inputs) in Menus.
-- Option to swap thermal goggle color palettes in realtime (Substance/vanilla, red hot / Sons of Liberty, Splinter Cell Blacklist, black hot, white hot.)
+- Option to swap thermal goggle color palettes in realtime (Substance/vanilla, red hot / Sons of Liberty, Splinter Cell Blacklist, black hot, white hot.) [Examples](https://imgur.com/a/ThRpIbj)
 - Option to enable cut Metal Gear 2: Solid Snake Colonel sprites during some late-game Codec calls. [PR #234](https://github.com/ShizCalev/MGSHDFix/pull/234)
-- Option to restore original 2001 Sons of Liberty radar rotation.
-
+- Option to restore original 2001 Sons of Liberty radar rotation. [Example](https://imgur.com/a/QNDTgrO)
 - BP_Asset / Manifest file modloader support. [PR #251](https://github.com/ShizCalev/MGSHDFix/pull/251)
 
 
@@ -80,15 +79,16 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 
 #### MGS2 Specific Bug Fixes:
-- Restores contrast / color filter post processing effects in numerous cutscenes, which have been broken/missing since the 2011 HD Collection.
+- Restores contrast / color filter post processing effects in numerous cutscenes, which have been broken/missing since the 2011 HD Collection. [Examples (SPOILER WARNING)](https://imgur.com/a/pJAc8H1)
 - Restore broken heat haze post processing effect on roof of Strut A.
 - Restore underwater UI swimming post processing effect. [PR #245](https://github.com/ShizCalev/MGSHDFix/pull/245)
 - Restores numerous particle and visual effects to proper PS2 timing, fixing effects that ran at double speed and ended too early in the HD Collection and Master Collection versions.
 - Restores dogtag viewer information.
 - Restores color swapping Red / Blue "2" on the title screen after game completions. (Requires MGS2 Community Bugfix Compilation)
+- Fixes in-game timer not pausing during loading times. (This was a HD Collection regression. IGT behavior now matches with Substance.)
 - Fixes Depth of Field / blur post processing effects not scaling with resolution. [PR #248](https://github.com/ShizCalev/MGSHDFix/pull/248)
 - Fixes shadow resolution not scaling with game resolution. (It was hard-coded to 256x256 / PS2 resolution.)
-- Fixes incorrectly positioning "Metal Gear Solid 2" title card during the start of Tanker when playing in Letterbox mode.
+- Fixes incorrectly positioning "Metal Gear Solid 2" title card during the start of Tanker when playing in Letterbox mode. [Example](https://imgur.com/a/bGkGwJ9)
 - Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
 - Fixes bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
