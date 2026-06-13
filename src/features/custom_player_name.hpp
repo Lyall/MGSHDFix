@@ -4,7 +4,7 @@ namespace CustomPlayerName
 {
     void Apply();
 
-    inline bool bUseStoryName = false;
+    inline bool bUseCharacterNames = false;
     
     inline bool bUseCustomName = false;
     inline std::string sCustomName = "LIFE";

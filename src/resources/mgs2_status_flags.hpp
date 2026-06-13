@@ -1,5 +1,120 @@
 #pragma once 
 
+namespace MGS2_Characters
+{
+    enum class PlayerCharacter
+    {
+        Unknown,
+
+        NormalRaiden,
+        NakedRaiden,
+        NinjaRaiden,
+
+        NormalSnake,
+        TuxedoSnake,
+        MGS1Snake,
+
+        Pliskin,
+    };
+
+    enum class PlayerCharacterFamily
+    {
+        Unknown,
+        Raiden,
+        Snake,
+        Pliskin,
+    };
+
+    struct PlayerResidentEntry
+    {
+        std::string_view residentDirectory;
+        PlayerCharacter character;
+    };
+
+    inline constexpr std::array PlayerResidentEntries {
+        PlayerResidentEntry { "r_plt0",     PlayerCharacter::NormalRaiden },
+        PlayerResidentEntry { "r_plt1",     PlayerCharacter::NormalRaiden }, //dive-suit
+        PlayerResidentEntry { "r_plt3",     PlayerCharacter::NormalRaiden },
+        PlayerResidentEntry { "r_plt4",     PlayerCharacter::NormalRaiden }, //poly demo only - Gurlukovich soldier equipment/loadout (with cap)
+        PlayerResidentEntry { "r_plt5",     PlayerCharacter::NormalRaiden }, //poly demo only - Gurlukovich soldier equipment/loadout (with cap)
+        PlayerResidentEntry { "r_plt6",     PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt7",     PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt8",     PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt9",     PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt10",    PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt11",    PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt12",    PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_plt13",    PlayerCharacter::NormalRaiden }, //low-poly demo resident
+        PlayerResidentEntry { "r_rai_b",    PlayerCharacter::NormalRaiden }, //boss rush resident scenario
+        PlayerResidentEntry { "r_vr_r",     PlayerCharacter::NormalRaiden },
+        PlayerResidentEntry { "r_vr_rp",    PlayerCharacter::NormalRaiden }, //photo mode
+
+        PlayerResidentEntry { "r_plt2",     PlayerCharacter::NakedRaiden },
+        PlayerResidentEntry { "r_vr_x",     PlayerCharacter::NakedRaiden },
+
+        PlayerResidentEntry { "r_vr_b",     PlayerCharacter::NinjaRaiden },
+
+        PlayerResidentEntry { "r_sna_b",    PlayerCharacter::NormalSnake }, //Snake / boss rush resident scenario
+        PlayerResidentEntry { "r_tnk0",     PlayerCharacter::NormalSnake }, //Tanker
+        PlayerResidentEntry { "r_tnk_r",    PlayerCharacter::NormalSnake }, //Tanker - digital camera resident scenario
+        PlayerResidentEntry { "r_plt_s",    PlayerCharacter::NormalSnake }, //Snake Tales
+        PlayerResidentEntry { "r_vr_s",     PlayerCharacter::NormalSnake },
+        PlayerResidentEntry { "r_vr_sp",    PlayerCharacter::NormalSnake },
+
+        PlayerResidentEntry { "r_vr_t",     PlayerCharacter::TuxedoSnake },
+        PlayerResidentEntry { "r_vr_1",     PlayerCharacter::MGS1Snake },
+
+        PlayerResidentEntry { "r_vr_p",     PlayerCharacter::Pliskin },
+    };
+
+    /// Please cache the current character when performing multiple checks to avoid repeated resident derefs. <3
+    ///
+    /// Example:
+    ///
+    ///      using namespace MGS2_Characters;
+    ///     
+    ///      if (IsCurrentlyCharacter(PlayerCharacter::TuxedoSnake))
+    ///       {
+    ///           doNeediful()
+    ///       }
+    ///     
+    /// ---------------------------------------------
+    /// or:
+    ///     
+    ///      using namespace MGS2_Characters;
+    ///     
+    ///      const PlayerCharacter currentCharacter = GetCurrentPlayerCharacter();
+    ///     
+    ///      if (currentCharacter == PlayerCharacter::TuxedoSnake)
+    ///      {
+    ///          doOtherThing();
+    ///      }
+    ///      else if (currentCharacter == PlayerCharacter::MGS1Snake)
+    ///      {
+    ///          doThing();
+    ///      }
+    ///
+    [[nodiscard]] PlayerCharacter GetCurrentPlayerCharacter();
+
+    [[nodiscard]] constexpr PlayerCharacterFamily GetPlayerCharacterFamily(const PlayerCharacter character);
+
+    [[nodiscard]] PlayerCharacterFamily GetCurrentCharacterFamily();
+
+    [[nodiscard]] bool IsCurrentlyCharacter(const PlayerCharacter character);
+
+    [[nodiscard]] bool IsRaiden();
+
+    [[nodiscard]] bool IsSnake();
+
+    [[nodiscard]] bool IsPliskin();
+
+    [[nodiscard]] constexpr std::string_view GetPlayerCharacterName(const PlayerCharacter character);
+
+    [[nodiscard]] std::string_view GetCurrentCharacterName();
+
+    [[nodiscard]] bool IsCurrentResident(const std::string_view residentDirectory);
+
+}
 
 enum MGS2PauseLevelFlags : int
 {

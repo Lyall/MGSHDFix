@@ -257,6 +257,9 @@
     <ClCompile Include="src\resources\game_funcs.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\mgs2_status_flags.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">

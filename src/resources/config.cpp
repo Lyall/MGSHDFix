@@ -49,6 +49,7 @@
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
+#include "custom_player_name.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -906,6 +907,21 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::Restore_Title_Screen_Swapping_Section, ConfigKeys::Restore_Title_Screen_Swapping_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
     LOG_CONFIG(ConfigKeys::Restore_Title_Screen_Swapping_Section, ConfigKeys::Restore_Title_Screen_Swapping_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
+
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Setting, CustomPlayerName::bUseCharacterNames);
+    LOG_CONFIG(ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Setting, CustomPlayerName::bUseCharacterNames);
+    if (!CustomPlayerName::bUseCharacterNames)
+    {
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Setting, CustomPlayerName::bUseCustomName);
+        LOG_CONFIG(ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Setting, CustomPlayerName::bUseCustomName);
+        if (CustomPlayerName::bUseCustomName)
+        {
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_Lifebar_Name_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Custom_Setting, CustomPlayerName::sCustomName);
+            LOG_CONFIG(ConfigKeys::MGS2_Lifebar_Name_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Custom_Setting, CustomPlayerName::sCustomName);
+        }
+    }
 
 
     ConfigLogger::Flush();

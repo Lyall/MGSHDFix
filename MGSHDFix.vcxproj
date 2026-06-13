@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\resources\mgs2_status_flags.cpp" />
     <ClCompile Include="src\resources\game_funcs.cpp" />
     <ClCompile Include="src\features\mgs2_snake_tales_radar.cpp" />
     <ClCompile Include="src\features\expand_bp_assets.cpp" />

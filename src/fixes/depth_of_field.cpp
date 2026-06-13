@@ -222,7 +222,13 @@ namespace
         {
             return false;
         }
-
+#ifndef RELEASE_BUILD
+        spdlog::info("Original focus source: maxPlane = {}, focusNear = {}, focusFar = {}", source.maxPlane, source.focusNear, source.focusFar);
+       // if (source.maxPlane == 8)
+       // {
+       //     return false;
+       // }
+#endif
         source.maxPlane = std::max(source.maxPlane, kNearFocusMinPlaneCount);
         source.focusNear = NormalizeDepthValue(source.focusNear);
         source.focusFar = NormalizeDepthValue(source.focusFar);
@@ -627,7 +633,9 @@ namespace
                 iNearEffectCount++;
                 if (iNearEffectCount >= 80 && iNearEffectCount < 440)
                 {
+#ifndef RELEASE_BUILD
                     spdlog::info("MGS 2: Depth of Field: skipping near focus packet {:d} for cutscene special handling.", iNearEffectCount);
+#endif
                     return false;
                 }
             }
@@ -977,7 +985,7 @@ namespace
     }
 }
 
-void DepthOfFieldFixes::HandleLevelTransition()
+void DepthOfFieldFixes::HandleLevelTransition() const
 {
     if (!bEnabled)
     {
@@ -1025,7 +1033,7 @@ void DepthOfFieldFixes::Initialize()
     InstallBlurUvScaleHook();
 
 #ifndef RELEASE_BUILD
-    g_InputHandler.RegisterHotkey(VK_ADD, "print", []
+    g_InputHandler.RegisterHotkey(VK_ADD, "print iNearEffectCount", []
                                   {
                                       spdlog::info("iNearEffectCount = {}, bIsD12T3 = {}", iNearEffectCount, bIsD12T3);
                                   });

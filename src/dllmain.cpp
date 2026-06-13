@@ -68,6 +68,7 @@
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "mgs2_msx_colonel.hpp"
 #include "adjustable_captions.hpp"
+#include "custom_player_name.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -489,6 +490,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RetroColonel::Initialize());
         INITIALIZE(MGS2_SnakeTalesRadar::Apply());
         INITIALIZE(MGS2ThermalGoggles::Setup());
+        INITIALIZE(CustomPlayerName::Apply());
     }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());

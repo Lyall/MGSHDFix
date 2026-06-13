@@ -197,6 +197,22 @@ namespace ConfigKeys
         "\n"
         "You may have to exit and reenter an area for the change to take effect.";
 
+    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Section = "Various";
+    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Setting = "MGS2 - Use Custom Lifebar Name";
+    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Help = "";
+    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Tooltip = "When enabled, the game will use the custom name below for the lifebar";
+
+    constexpr const char* MGS2_Lifebar_Name_Custom_Section = "Various";
+    constexpr const char* MGS2_Lifebar_Name_Custom_Setting = "MGS2 - Custom Lifebar Name";
+    constexpr const char* MGS2_Lifebar_Name_Custom_Help = "";
+    constexpr const char* MGS2_Lifebar_Name_Custom_Tooltip = "Custom name to use for the lifebar.";
+    
+    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Section = "Various";
+    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Setting = "MGS2 - Use Character Names for Lifebar";
+    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Help = "";
+    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Tooltip = "When enabled, the game will use actual character names (ie \"Raiden\" / \"Snake\") for the lifebar instead of saying \"LIFE\", matching later entries in the MGS series.";
+
+
 
     // Ultrawide
     constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";

@@ -7,7 +7,7 @@ public:
     float fBlurUvMultiplier = 3.0f;
 
     void Initialize();
-    void HandleLevelTransition();
+    void HandleLevelTransition() const;
 };
 
 inline DepthOfFieldFixes g_DepthOfFieldFixes;

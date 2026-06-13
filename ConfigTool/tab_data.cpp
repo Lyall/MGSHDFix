@@ -177,6 +177,18 @@ std::nullopt, false, Field::Int, 100, 1, 100},
             std::nullopt, false, Field::Bool, false},
 
 
+
+        { ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Setting, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Help, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Tooltip,
+          std::make_pair(ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Setting), true, Field::Bool, false },
+
+        { ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Setting, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Help, ConfigKeys::MGS2_Lifebar_Name_Use_Character_Names_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+          {ConfigKeys::MGS2_Lifebar_Name_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Custom_Setting, ConfigKeys::MGS2_Lifebar_Name_Custom_Help, ConfigKeys::MGS2_Lifebar_Name_Custom_Tooltip,
+            std::make_pair(ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Setting), false, Field::Str, 0, 0, 0, "LIFE" },
+
+
+
         { ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, ConfigKeys::LOD_MGS2_NPC_Help, ConfigKeys::LOD_MGS2_NPC_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -205,7 +217,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Section, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Setting, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Help, ConfigKeys::Disable_HDC_Camera_Positions_ToggleKey_Tooltip,
             std::make_pair(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting), false, Field::Hotkey, 0, 0, 0, "F6" },
 
-    
+
     }},
     { wxString("Restoration"), {
 
