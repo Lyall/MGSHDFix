@@ -519,6 +519,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
         INITIALIZE(HostageModel::ApplyFix());
+        INITIALIZE(MGS2_ContrastShader::Setup());
         
     }
     else if (eGameType & MGS3)

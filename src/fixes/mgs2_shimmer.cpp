@@ -80,6 +80,8 @@ namespace
     }
     )";
 
+    ComPtr<ID3DBlob>                 vsBlob;
+    ComPtr<ID3DBlob>                 psBlob;
     ComPtr<ID3D11VertexShader>       vs;
     ComPtr<ID3D11PixelShader>        ps;
     ComPtr<ID3D11Buffer>             cb;
@@ -119,9 +121,9 @@ void MGS2_ShimmerEffect::SetupHooks()
 {
     if (!(eGameType & MGS2))
     {
+        bNeedsCompiler = false;
         return;
     }
-    bNeedsCompiler = true;
 
     MAKE_HOOK_MID(baseModule, "4C 8B 7C 24 ?? 48 8B 5C 24 ?? 48 83 C4 ?? 5F 5E C3", "MGS2_ShimmerEffect: Act", {
         bIsActive = true;
@@ -139,7 +141,52 @@ void MGS2_ShimmerEffect::SetupHooks()
                                       spdlog::info("linkvar - camera x {}, camera y {}, camera z {}", MGS2_LinkVarBuf::GM_CameraX.get(), MGS2_LinkVarBuf::GM_CameraY.get(), MGS2_LinkVarBuf::GM_CameraZ.get());
                                   });
                                   */
+
+    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
+    if (!d3dcompiler)
+    {
+        spdlog::error("MGS2_ShimmerEffect: Failed to load d3dcompiler_43.dll");
+        bNeedsCompiler = false;
+        return;
+    }
+
+    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
+    if (!D3DCompileFunc)
+    {
+        spdlog::error("MGS2_ShimmerEffect: Failed to get D3DCompile");
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    ComPtr<ID3DBlob> err;
+
+    HRESULT hr = D3DCompileFunc(kShimmerShader, strlen(kShimmerShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        spdlog::error("MGS2_ShimmerEffect: Failed to compile vertex shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    err.Reset();
+
+    hr = D3DCompileFunc(kShimmerShader, strlen(kShimmerShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        spdlog::error("MGS2_ShimmerEffect: Failed to compile pixel shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
+        vsBlob.Reset();
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    bNeedsCompiler = false;
+    D3D11Hooks::UnloadCompiler(d3dcompiler);
+
     bHooksSet = true;
+
     spdlog::info("MGS2_ShimmerEffect: Hooks set.");
 }
 
@@ -149,40 +196,22 @@ void MGS2_ShimmerEffect::Init()
     {
         return;
     }
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
-    {
-        spdlog::error("MGS2_ShimmerEffect: Failed to load d3dcompiler_43.dll");
-        return;
-    }
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
+    if (bShaderLoaded)
     {
-        spdlog::error("MGS2_ShimmerEffect: Failed to get D3DCompile");
         return;
     }
 
     ID3D11Device* dev = g_D3D11Hooks.d3dDevice.Get();
-
-    ComPtr<ID3DBlob> vsBlob, psBlob, err;
-    D3DCompileFunc(kShimmerShader, strlen(kShimmerShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.GetAddressOf(), err.GetAddressOf());
-    if (err)
+    if (!dev)
     {
-        spdlog::error("Shimmer VS: {}", (char*)err->GetBufferPointer()); 
-        err.Reset();
-    }
-
-    D3DCompileFunc(kShimmerShader, strlen(kShimmerShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.GetAddressOf(), err.GetAddressOf());
-    if (err)
-    {
-        spdlog::error("Shimmer PS: {}", (char*)err->GetBufferPointer()); 
-        err.Reset();
+        spdlog::error("MGS2_ShimmerEffect: D3D11 device is not initialized");
+        return;
     }
 
     if (!vsBlob || !psBlob)
     {
-        spdlog::error("Shimmer shader compile failed, aborting."); 
+        spdlog::error("MGS2_ShimmerEffect: Shader bytecode was not compiled");
         return;
     }
 
@@ -215,11 +244,13 @@ void MGS2_ShimmerEffect::Init()
     dev->CreateSamplerState(&psd, samplerPoint.GetAddressOf());
 
     int tw, th, tc;
-    unsigned char* pixels = stbi_load_from_memory(mgs2_shimmer_noise_map::PngBlob.data(), (int)mgs2_shimmer_noise_map::PngBlobSize, &tw, &th, &tc, 4);
+    unsigned char* pixels = stbi_load_from_memory(mgs2_shimmer_noise_map::PngBlob.data(), static_cast<int>(mgs2_shimmer_noise_map::PngBlobSize), &tw, &th, &tc, 4);
     if (pixels)
     {
         for (int i = 3; i < tw * th * 4; i += 4)
-            pixels[i] = (uint8_t)std::min(255, pixels[i] * 2);
+        {
+            pixels[i] = static_cast<uint8_t>(std::min(255, pixels[i] * 2));
+        }
 
         D3D11_TEXTURE2D_DESC td = {};
         td.Width = tw;
@@ -266,10 +297,12 @@ void MGS2_ShimmerEffect::Init()
     dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     dev->CreateDepthStencilState(&dsd, dss.GetAddressOf());
 
+    vsBlob.Reset();
+    psBlob.Reset();
+
     bShaderLoaded = true;
-    bNeedsCompiler = false;
+
     spdlog::info("MGS2_ShimmerEffect initialized.");
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 }
 
 void MGS2_ShimmerEffect::Draw(IDXGISwapChain* swap)

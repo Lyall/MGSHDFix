@@ -164,7 +164,7 @@ namespace
             MGS2_First_Person_View::Tick();
             MGS2ThermalGoggles::Tick();
 
-            if (auto* work = *MGS2_ContrastShader::pContrastWork; MGS2_ContrastShader::bShaderLoaded && work)
+            if (auto* work = MGS2_ContrastShader::GetActiveWork(); MGS2_ContrastShader::bShaderLoaded && work)
             {
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
@@ -252,7 +252,7 @@ void D3D11Hooks::Initialize()
 
 void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
 {
-    if (!g_VectorScalingFix.bNeedsCompiler && !MGS2_ContrastShader::bNeedsCompiler && !MGS2_ShimmerEffect::bNeedsCompiler)
+    if (!g_VectorScalingFix.bNeedsCompiler && (!(eGameType & MGS2) || !(MGS2_ContrastShader::bNeedsCompiler && MGS2_ShimmerEffect::bNeedsCompiler)))
     {
         FreeLibrary(d3dcompiler);
         spdlog::info("D3D11Hooks: Released d3dcompiler_43.dll as it is no longer needed.");

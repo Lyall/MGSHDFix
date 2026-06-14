@@ -2,6 +2,7 @@
 
 namespace MGS2_ContrastShader
 {
+    void Setup();
     void Init();
     void Draw(IDXGISwapChain* swap, int keepR, int keepG, int keepB, int keepA, int negaFlag);
 
@@ -20,9 +21,11 @@ namespace MGS2_ContrastShader
         int nega_posi_flag;
     };
 
+    ContrastWork* GetActiveWork();
 
     inline ContrastWork** pContrastWork = nullptr;
+
+    void SetOverride(int keepR, int keepG, int keepB, int keepA, int negaFlag);
+    void ClearOverride();
+
 };
-
-
-

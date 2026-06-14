@@ -1,9 +1,11 @@
+// ReSharper disable CommentTypo
 #include "stdafx.h"
 
 #include "mgs2_contrast_fix.hpp"
 #include "d3d11_api.hpp"
 #include "common.hpp"
 #include "gamevars.hpp"
+//#include "input_handler.hpp"
 
 #include "logging.hpp"
 
@@ -34,6 +36,8 @@ namespace
     float4 PS() : SV_Target { return col; }
     )";
 
+    ComPtr<ID3DBlob>                vsBlob;
+    ComPtr<ID3DBlob>                psBlob;
     ComPtr<ID3D11VertexShader>      vs;
     ComPtr<ID3D11PixelShader>       ps;
     ComPtr<ID3D11Buffer>            cb;
@@ -54,42 +58,215 @@ namespace
         ctx->Unmap(cb.Get(), 0);
     }
 
+
+
+
+    safetyhook::InlineHook MGS2_Die512_hook;
+    /// user\\skoba\\weapon\\ai_ray_layout.c -> NewAiRaySight() -> Die()
+    int64_t __fastcall MGS2_Die512(int64_t a1)
+    {
+        MGS2_ContrastShader::ClearOverride();
+        //  spdlog::info("user\skoba\weapon\ai_ray_layout.c -> NewAiRaySight() -> Die(): clearing contrast shader override.");
+
+        return MGS2_Die512_hook.call<int64_t>(a1);
+    }
+
+
+    MGS2_ContrastShader::ContrastWork overrideContrastWork = {};
+    bool bOverrideActive = false;
 };
 
+void MGS2_ContrastShader::SetOverride(int keepR, int keepG, int keepB, int keepA, int negaFlag)
+{
+    overrideContrastWork = {};
+
+    overrideContrastWork.keep_r_plus = keepR;
+    overrideContrastWork.keep_g_plus = keepG;
+    overrideContrastWork.keep_b_plus = keepB;
+    overrideContrastWork.keep_a_plus = keepA;
+    overrideContrastWork.nega_posi_flag = negaFlag;
+
+    bOverrideActive = true;
+}
+
+void MGS2_ContrastShader::ClearOverride()
+{
+    bOverrideActive = false;
+    overrideContrastWork = {};
+}
+
+MGS2_ContrastShader::ContrastWork* MGS2_ContrastShader::GetActiveWork()
+{
+    if (bOverrideActive)
+    {
+        return &overrideContrastWork;
+    }
+
+    if (!pContrastWork)
+    {
+        return nullptr;
+    }
+
+    return *pContrastWork;
+}
+
+void MGS2_ContrastShader::Setup()
+{
+    if (!(eGameType & MGS2))
+    {
+        bNeedsCompiler = false;
+        return;
+    }
+
+    if (uint8_t* MGS2_ContrastWorkScanResult = Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 83 F8 ?? 41 8B F1 41 8B E8 44 8B F2 8D 78 ?? 0F 4E F8 48 85 C9 0F 85 ?? ?? ?? ?? 45 33 C9 48 89 5C 24 ?? BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 33 C0 48 89 43 ?? 48 8B CB 48 89 43 ?? 48 89 43 ?? 48 8D 05 ?? ?? ?? ?? 48 89 43 ?? E8 ?? ?? ?? ?? 48 8B CB 85 C0 79 ?? E8 ?? ?? ?? ?? 33 C0 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 41 5F 41 5E 5F C3 8B 84 24 ?? ?? ?? ?? 44 8B 8C 24 ?? ?? ?? ?? 44 8B 84 24", "OK_FADE_IO_WORK_1"))
+    {
+        pContrastWork = reinterpret_cast<ContrastWork**>(Memory::GetRelativeOffset(MGS2_ContrastWorkScanResult + 3));
+    }
+    else
+    {
+        spdlog::error("MGS2_ContrastShader: Failed to locate OK_FADE_IO_WORK_1 structure");
+        bNeedsCompiler = false;
+        return;
+    }
+
+    spdlog::info("MGS2_ContrastShader: Located OK_FADE_IO_WORK_1 structure successfully");
+    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
+    if (!d3dcompiler)
+    {
+        spdlog::error("MGS2_ContrastShader: Failed to load d3dcompiler_43.dll");
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+    spdlog::info("MGS2_ContrastShader: Loaded d3dcompiler_43.dll successfully");
+
+    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
+    if (!D3DCompileFunc)
+    {
+        spdlog::error("MGS2_ContrastShader: Failed to get D3DCompile");
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    ComPtr<ID3DBlob> err;
+
+    HRESULT hr = D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        spdlog::error("MGS2_ContrastShader: Failed to compile vertex shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    err.Reset();
+
+    hr = D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        spdlog::error("MGS2_ContrastShader: Failed to compile pixel shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
+        vsBlob.Reset();
+        bNeedsCompiler = false;
+        D3D11Hooks::UnloadCompiler(d3dcompiler);
+        return;
+    }
+
+    spdlog::info("MGS2_ContrastShader: Compiled contrast shader successfully");
+
+    bNeedsCompiler = false;
+    D3D11Hooks::UnloadCompiler(d3dcompiler);
+
+    MAKE_HOOK_MID(baseModule, "48 89 B3 ?? ?? ?? ?? 89 83", "NewAiRaySight -> Act -> MsgDie()", {
+            MGS2_ContrastShader::SetOverride(6, 15, 15, 189, 0);
+                  });
+
+    if (uint8_t* MGS2_Die512ScanResult = Memory::PatternScan(baseModule, "4C 8D 05 ?? ?? ?? ?? 89 B8 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? C7 80 ?? ?? ?? ?? ?? ?? ?? ?? 48 8B CB", "MGS 2: user\\skoba\\weapon\\ai_ray_layout.c -> NewAiRaySight() -> Die()"))
+    {
+        const uintptr_t MGS2_Die512Address = Memory::GetRipRelativeAddress(MGS2_Die512ScanResult, 3, 7);
+
+        MGS2_Die512_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_Die512Address), reinterpret_cast<void*>(MGS2_Die512));
+        LOG_HOOK(MGS2_Die512_hook, "MGS 2: Clear Contrast Shader Override : Die_512")
+    }
 
 
+      /*
+    MAKE_HOOK_MID(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 85 C0 75 ?? B8", "L2D_ReleaseLayout", {
+    spdlog::info("ctx.rcx {}", ctx.rcx);
+        if (ctx.rcx == 0 && g_GameVars.IsStage(MGS2Stages::D080P01))
+        {
+            MGS2_ContrastShader::ClearOverride();
+        }
+        spdlog::info("hit");
+        });
+        */
+
+
+        /*
+
+        static int contrastR = 64;
+    static int contrastG = 112;
+    static int contrastB = 112;
+    static int contrastA = 176;
+    static int contrastNega = 0;
+    static int contrastStep = 1;
+
+    const auto applyContrast = []()
+        {
+            contrastR = std::clamp(contrastR, 0, 255);
+            contrastG = std::clamp(contrastG, 0, 255);
+            contrastB = std::clamp(contrastB, 0, 255);
+            contrastA = std::clamp(contrastA, 0, 255);
+            contrastNega = std::clamp(contrastNega, 0, 1);
+
+            MGS2_ContrastShader::SetOverride(contrastR, contrastG, contrastB, contrastA, contrastNega);
+
+            spdlog::info(
+                "Contrast override: R={} G={} B={} A={} Nega={}",
+                contrastR,
+                contrastG,
+                contrastB,
+                contrastA,
+                contrastNega
+            );
+        };
+
+    g_InputHandler.RegisterHeldHotkey('1', "contrast r+", [applyContrast]() { contrastR += contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('2', "contrast r-", [applyContrast]() { contrastR -= contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('3', "contrast g+", [applyContrast]() { contrastG += contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('4', "contrast g-", [applyContrast]() { contrastG -= contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('5', "contrast b+", [applyContrast]() { contrastB += contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('6', "contrast b-", [applyContrast]() { contrastB -= contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('7', "contrast a+", [applyContrast]() { contrastA += contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('8', "contrast a-", [applyContrast]() { contrastA -= contrastStep; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('9', "contrast nega on", [applyContrast]() { contrastNega = 1; applyContrast(); });
+    g_InputHandler.RegisterHeldHotkey('0', "contrast nega off", [applyContrast]() { contrastNega = 0; applyContrast(); });
+    */
+}
 void MGS2_ContrastShader::Init()
 {
     if (!(eGameType & MGS2))
     {
         return;
     }
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
+
+    if (bShaderLoaded)
     {
-        spdlog::error("MGS2_ContrastShader: Failed to load d3dcompiler_43.dll");
         return;
     }
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
-    {
-        spdlog::error("MGS2_ContrastShader: Failed to get D3DCompile");
-        return;
-    }
     ID3D11Device* dev = g_D3D11Hooks.d3dDevice.Get();
-
-    pContrastWork = reinterpret_cast<ContrastWork**>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 83 F8 ?? 41 8B F1 41 8B E8 44 8B F2 8D 78 ?? 0F 4E F8 48 85 C9 0F 85 ?? ?? ?? ?? 45 33 C9 48 89 5C 24 ?? BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 33 C0 48 89 43 ?? 48 8B CB 48 89 43 ?? 48 89 43 ?? 48 8D 05 ?? ?? ?? ?? 48 89 43 ?? E8 ?? ?? ?? ?? 48 8B CB 85 C0 79 ?? E8 ?? ?? ?? ?? 33 C0 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 41 5F 41 5E 5F C3 8B 84 24 ?? ?? ?? ?? 44 8B 8C 24 ?? ?? ?? ?? 44 8B 84 24", "OK_FADE_IO_WORK_1") + 3));
-    if (pContrastWork == nullptr)
+    if (!dev)
     {
-        spdlog::error("MGS2_ContrastShader: Failed to locate OK_FADE_IO_WORK_1 structure");
+        spdlog::error("MGS2_ContrastShader: D3D11 device is not initialized");
         return;
     }
-    ComPtr<ID3DBlob> vsBlob, psBlob, err;
-    D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr,
-                   "VS", "vs_5_0", 0, 0, vsBlob.GetAddressOf(), err.GetAddressOf());
-    D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr,
-                   "PS", "ps_5_0", 0, 0, psBlob.GetAddressOf(), err.GetAddressOf());
+
+    if (!vsBlob || !psBlob)
+    {
+        spdlog::error("MGS2_ContrastShader: Shader bytecode was not compiled");
+        return;
+    }
 
     dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vs.GetAddressOf());
     dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, ps.GetAddressOf());
@@ -130,13 +307,12 @@ void MGS2_ContrastShader::Init()
     dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     dev->CreateDepthStencilState(&dsd, dss.GetAddressOf());
 
+    vsBlob.Reset();
+    psBlob.Reset();
+
     bShaderLoaded = true;
-    bNeedsCompiler = false;
     spdlog::info("MGS2_ContrastShader initialized.");
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 }
-
-
 
 void MGS2_ContrastShader::Draw(IDXGISwapChain* swap, int keepR, int keepG, int keepB, int keepA, int negaFlag)
 {

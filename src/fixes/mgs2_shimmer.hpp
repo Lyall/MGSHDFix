@@ -6,6 +6,6 @@ namespace MGS2_ShimmerEffect
     void Draw(IDXGISwapChain* swap);
     void SetupHooks();
 
-    inline bool bNeedsCompiler = false;
+    inline bool bNeedsCompiler = true;
     inline bool bShaderLoaded  = false;
 }
