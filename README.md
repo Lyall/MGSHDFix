@@ -187,6 +187,7 @@ This list will contain bugs which may or may not be fixed.
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w32a%20-%20scope.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w32a%20-%20scope.png" />            |
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20codec.png" />                       | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20codec.png" />                       |
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w00a%20-%20aiming.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w00a%20-%20aiming.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/solidus%20-%20d080p01.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/solidus%20-%20d080p01.png" />            |
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
 
 | ![MGS3 widescreen gameplay preview](screenshots/after/mgs3%20-%20widescreen.gif) |

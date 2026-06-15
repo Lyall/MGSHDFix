@@ -5,6 +5,7 @@
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "gamevars.hpp"
+#include "input_handler.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
@@ -12,11 +13,54 @@ namespace
 {
     double scaleX_fromPs2 = 1.0;
     double scaleX_fromPs2_4by3 = 1.0;
-
     double scaleY_fromPs2 = 1.0;
+
+    FVECTOR* g_laserPoints = nullptr;
+    //int g_laserEditIndex = 2;
+    //float g_laserStep = 0.5f;
+    //FVECTOR g_laserPointsBackup[20];
+
+    FVECTOR raiden_laserpoints[20] = {
+        { 16.5F,     -259.0F,   28.70F, 0.0F },     //  [0]  m92
+        { 17.5F,     -370.0F,   69.7F,  0.0F },     //  [1]  m92_sub    //fpv
+        { 17.0F,     -271.0F,   8.0F,   0.0F },     //  [2]  usp
+        { 17.0F,     -250.0F,   67.0F,  0.0F },     //  [3]  usp_sub    //fpv
+        { 24.5F,     -267.5F,   50.2F,  0.0F },     //  [4]  scm
+        { 17.5F,     -274.0F,   78.7F,  0.0F },     //  [5]  scm_sub    //fpv
+        { 17.0F,     -500.0F,   57.0F,  0.0F },     //  [6]  fms
+        { 17.0F,     -500.0F,   17.0F,  0.0F },     //  [7]  fms_sub    //fpv
+        { 17.5F,     -280.0F,   44.7F,  0.0F },     //  [8]  spp
+        { 17.5F,     -280.0F,   70.7F,  0.0F },     //  [9]  spp_sub    //fpv
+        { 20.0F,     -438.0F,   70.5F,  0.0F },     //  [10] aks_sp
+        { 20.0F,     -538.0F,   57.0F,  0.0F },     //  [11] aks_sp_sub //fpv
+        { 46.5F,     -538.0F,   92.0F,  0.0F },     //  [12] m4
+        { 47.0F,     -538.0F,   92.0F,  0.0F },     //  [13] m4_sub     //fpv
+        { 19.0F,     -719.0F,   41.0F,  0.0F },     //  [14] aks_sp
+        { 20.0F,     -538.0F,   57.0F,  0.0F },     //  [15] aks_sp_sub //fpv
+        { 24.5F,     -269.5F,   49.2F,  0.0F },     //  [16] scm_sp
+        { 17.5F,     -481.0F,   78.7F,  0.0F },     //  [17] scm_sp_sub //fpv
+        { 17.0F,     -271.0F,   8.0F,   0.0F },     //  [18] usp_sp
+        { 17.0F,     -250.0F,   67.0F,  0.0F },     //  [19] usp_sp_sub //fpv
+    };
+
+    constexpr FVECTOR m92_snake_override = { 17.5F, -291.5F, 29.7F, 0.0F }; // m92 3rd person w/ snake
+    constexpr FVECTOR m92_sub_corrected = { 19.5F, -222.0F, 31.7F, 0.0F }; //  m92 fpv
+
+    void UpdateCharacterLaserPoints()
+    {
+        if (!g_laserPoints)
+        {
+            return;
+        }
+        g_laserPoints[0] = MGS2_Characters::IsRaiden() ? raiden_laserpoints[0] : m92_snake_override;
+    }
 }
 
 
+void ResolutionScalingFixes::HandleLevelTransition()
+{
+    UpdateCharacterLaserPoints();
+}
 
 void ResolutionScalingFixes::ApplyFixes()
 {
@@ -50,7 +94,7 @@ void ResolutionScalingFixes::ApplyFixes()
                   });
 
 
-    
+
     MAKE_HOOK_MID(baseModule, "?? ?? ?? ?? F3 0F 11 48 ?? E8 ?? ?? ?? ?? 8B C6 8B D3 2B C3 83 F8 ?? 7F ?? 0F 28 74 24 ?? 48 8B 5C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 15", "MGS2: Resolution Scaling Fixes : user\\okajima\\effect2\\liner_gun_plasma.c -> CalcNextNode()", {
             if (g_GameVars.InCutscene())
             {
@@ -61,7 +105,7 @@ void ResolutionScalingFixes::ApplyFixes()
                   });
 
 
-    MAKE_HOOK_MID(baseModule, "66 0F 6E F1 48 8B 4E", "MGS2: user\\shibata\\effect\\2d_sprt.c -> New2dSprt() -> GetResources() @l252 | tanker MGS2 logo", {
+    MAKE_HOOK_MID(baseModule, "66 0F 6E F1 48 8B 4E", "MGS2: user\\shibata\\effect\\2d_sprt.c -> New2dSprite() -> GetResources() @l252 | tanker MGS2 logo", {
             if (ctx.rdi != 0xA57131 || ctx.rcx != 519 || ctx.rax != 125)
             {
                 //spdlog::info("rdi {}, rcx {}, rax {}", ctx.rdi, ctx.rcx, ctx.rax);
@@ -117,9 +161,84 @@ void ResolutionScalingFixes::ApplyFixes()
                       });
     }
 
+    if (uint8_t* scan = Memory::PatternScan(baseModule, "41 0F 28 84 CC ?? ?? ?? ?? F3 0F 10 2D", "LaserPoints"))
+    {
+        uint32_t rva = *reinterpret_cast<uint32_t*>(scan + 5);
+        g_laserPoints = reinterpret_cast<FVECTOR*>((uintptr_t)baseModule + rva);
+        spdlog::info("MGS2_LaserPoints: Weapon LaserPoints table found at {:s}+{:X}", sExeName.c_str(), rva);
+        memcpy(g_laserPoints, raiden_laserpoints, sizeof(raiden_laserpoints));
+        spdlog::info("MGS2_LaserPoints: Weapon laser point origins corrected.");
+        if (bFixM92FPV)
+        {
+            spdlog::info("MGS2_LaserPoints: M92 FPV laser point fix enabled in config - applying.");
+            g_laserPoints[1] = m92_sub_corrected;
+        }
+        //memcpy(g_laserPointsBackup, g_laserPoints, sizeof(g_laserPointsBackup));
+        //spdlog::info("MGS2_LaserPoints: Backed up {} entries.", 20);
+    }
+    else
+    {
+        spdlog::error("MGS2_LaserPoints: Weapon LaserPoints table not found.");
+    }
 
 
+
+    //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
+        #define	SHIFT3_X			(17.5f)
+        #define	SHIFT4_X			(0.0f)
 }
 
 
+
+#pragma region UnusedLaserDebuggingCode
+
+    /*
+    const char* kLaserPointNames[20] = {
+    "m92",
+    "m92_sub",
+    "usp",  //x=17.00 y=-271.00 z=8.00
+    "usp_sub", //fpv
+    "scm", //[Laser][4 | scm] x=24.50 y=-267.50 z=50.20
+    "scm_sub", //fpv
+    "fms",
+    "fms_sub", //fpv
+    "spp",
+    "spp_sub", //fpv
+    "aks_sp", //[10 | aks_sp] -> rai unsup | x=20.00 y=-438.00 z=70.50
+    "aks_sp_sub", //fpv
+    "m4", //x=46.50 y=-538.00 z=92.00
+    "m4_sub", //fpv
+    "aks_sp", //[14 | aks_sp] rai sub x=19.00 y=-719.00 z=41.00
+    "aks_sp_sub", //fpv
+    "scm_sp",  //[16 | scm_sp] x=24.50 y=-269.50 z=49.20
+    "scm_sp_sub", //fpv
+    "usp_sp",                       ///todo
+    "usp_sp_sub", //fpv
+    };
+    */
+
+
+
+        /*
+    auto logLaser = []()
+        {
+            if (!g_laserPoints) return;
+            auto& e = g_laserPoints[g_laserEditIndex];
+            const char* name = (g_laserEditIndex >= 0 && g_laserEditIndex < 20) ? kLaserPointNames[g_laserEditIndex] : "???";
+            spdlog::info("[Laser][{} | {}] x={:.2f} y={:.2f} z={:.2f}", g_laserEditIndex, name, e.x, e.y, e.z);
+        };
+
+    g_InputHandler.RegisterHeldHotkey(VK_UP, "laser z+", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].z += g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHeldHotkey(VK_DOWN, "laser z-", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].z -= g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD1, "laser y+", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].y += g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD2, "laser y-", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].y -= g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHeldHotkey(VK_RIGHT, "laser x+", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].x += g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHeldHotkey(VK_LEFT, "laser x-", [logLaser]() { if (g_laserPoints) { g_laserPoints[g_laserEditIndex].x -= g_laserStep; logLaser(); } });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD3, "laser idx+", [logLaser]() { ++g_laserEditIndex; logLaser(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD4, "laser idx-", [logLaser]() { --g_laserEditIndex; logLaser(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD5, "laser reset", [logLaser]() {
+        if (g_laserPoints) { g_laserPoints[g_laserEditIndex] = g_laserPointsBackup[g_laserEditIndex]; logLaser(); }
+                                  });
+                                  */
+#pragma endregion
 

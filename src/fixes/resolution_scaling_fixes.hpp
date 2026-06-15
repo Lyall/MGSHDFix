@@ -3,7 +3,10 @@
 namespace ResolutionScalingFixes
 {
     void ApplyFixes();
+    void HandleLevelTransition();
 
     inline bool bIncreaseShadowResolution = true;
+
+    inline bool bFixM92FPV = false;
 
 }

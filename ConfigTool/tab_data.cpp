@@ -243,9 +243,11 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true },
 
 
-                { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
+        { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Help, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, ConfigKeys::FixMGS2DepthOfField_Help, ConfigKeys::FixMGS2DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },

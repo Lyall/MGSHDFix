@@ -10,8 +10,8 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_sunglasses.hpp"
+#include "resolution_scaling_fixes.hpp"
 #include "stat_persistence.hpp"
-#include "texture_live_swaps.hpp"
 
 
 void GameVars::Initialize()
@@ -191,6 +191,7 @@ void GameVars::OnLevelTransition()
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
         g_DepthOfFieldFixes.HandleLevelTransition();
+        ResolutionScalingFixes::HandleLevelTransition();
     }
 }
 

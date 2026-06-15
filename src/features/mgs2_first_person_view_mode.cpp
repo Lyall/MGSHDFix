@@ -68,6 +68,10 @@ bool MGS2_First_Person_View::IsActive()
     {
         return false;
     }
+    if (gBP_1stPersonCamera_Override == nullptr)
+    {
+        return false;
+    }
     //spdlog::info("did the thing");
     return *gBP_1stPersonCamera_Active;
 }
@@ -114,7 +118,8 @@ void MGS2_First_Person_View::Tick()
         return;
     }
 
-    if (MGS2_LinkVarBuf::GM_Weapon == MGS2WeaponIndex::MGS2_WEAPON_INDEX_STINGER)
+    auto current_weapon = MGS2_LinkVarBuf::GM_Weapon;
+    if (current_weapon == MGS2_WEAPON_INDEX_STINGER || current_weapon == MGS2_WEAPON_INDEX_D_MIC)
     {
         ForceCameraDisabled();
         return;

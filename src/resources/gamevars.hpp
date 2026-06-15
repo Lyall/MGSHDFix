@@ -6,6 +6,8 @@
 #include "game_stages.hpp"
 #include "mgs2_status_flags.hpp"
 
+struct FVECTOR { float x, y, z, pad; };
+
 enum class MGS2GameMode
 {
     Unknown,
