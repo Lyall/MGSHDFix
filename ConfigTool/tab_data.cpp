@@ -242,6 +242,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, ConfigKeys::FixMGS2UnderwaterFilter_Help, ConfigKeys::FixMGS2UnderwaterFilter_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, ConfigKeys::MGS2BloodStains_Help, ConfigKeys::MGS2BloodStains_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
 
         { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },
