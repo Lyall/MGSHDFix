@@ -32,8 +32,6 @@ namespace
 
     bool bCameraForcedDisabled = false;
     bool bPreviousOverrideState = false;
-    bool bPreviousHoldToggleState = false;
-    bool bPreviousMoveState = false;
 
     void ForceCameraDisabled()
     {
@@ -41,21 +39,15 @@ namespace
         {
             bCameraForcedDisabled = true;
             bPreviousOverrideState = *gBP_1stPersonCamera_Override;
-            bPreviousHoldToggleState = *gBP_1stPersonCamera_Hold_Toggle;
-            bPreviousMoveState = *gBP_1stPersonCamera_Move;
             //spdlog::info("MGS2: First Person View Mode: Forcing camera disabled. Override: {}, Hold Toggle: {}, Movement: {}", bPreviousOverrideState, bPreviousHoldToggleState, bPreviousMoveState);
         }
         *gBP_1stPersonCamera_Override = false;
-        *gBP_1stPersonCamera_Hold_Toggle = false;
-        *gBP_1stPersonCamera_Move = false;
     }
 
     void ReleaseCameraState()
     {
         bCameraForcedDisabled = false;
         *gBP_1stPersonCamera_Override = bPreviousOverrideState;
-        *gBP_1stPersonCamera_Hold_Toggle = bPreviousHoldToggleState;
-        *gBP_1stPersonCamera_Move = bPreviousMoveState;
         //spdlog::info("MGS2: First Person View Mode: Camera state released. Override: {}, Hold Toggle: {}, Movement: {}", *gBP_1stPersonCamera_Override, *gBP_1stPersonCamera_Hold_Toggle, *gBP_1stPersonCamera_Move);
     }
 
@@ -157,10 +149,14 @@ void MGS2_First_Person_View::Activate()
             gBP_1stPersonCamera_Hold_Toggle = reinterpret_cast<int*>(Memory::GetRelativeOffset(gBP_1stPersonCamera_Toggle_scan + 2));
             *gBP_1stPersonCamera_Hold_Toggle = true;
             g_InputHandler.RegisterHotkey(vkToggle_Hold_First_Person_View, "Toggle Hold first person view", []()
-                                          {
-                                              *gBP_1stPersonCamera_Hold_Toggle = !*gBP_1stPersonCamera_Hold_Toggle;
-                                              //spdlog::info("MGS 2: First Person View Mode: gBP_1stPersonCamera_Hold_Toggle toggled to {}", *gBP_1stPersonCamera_Hold_Toggle);
-                                          });
+                {
+                    if (bCameraForcedDisabled)
+                    {
+                        return;
+                    }
+                    *gBP_1stPersonCamera_Hold_Toggle = !*gBP_1stPersonCamera_Hold_Toggle;
+                    //spdlog::info("MGS 2: First Person View Mode: gBP_1stPersonCamera_Hold_Toggle toggled to {}", *gBP_1stPersonCamera_Hold_Toggle);
+                });
             //spdlog::info("MGS 2: First Person View Mode: Toggle Hold hotkey applied.");
         }
     }
@@ -215,6 +211,10 @@ void MGS2_First_Person_View::Activate()
     }
     g_InputHandler.RegisterHotkey(vkToggle_First_Person_View_Movement, "Toggle first person view movement", []()
     {
+        if (bCameraForcedDisabled)
+        {
+            return;
+        }
         *gBP_1stPersonCamera_Move = !*gBP_1stPersonCamera_Move;
         //spdlog::info("MGS 2: First Person View Mode: gBP_1stPersonCamera_Move toggled to {}", *gBP_1stPersonCamera_Move);
     });
