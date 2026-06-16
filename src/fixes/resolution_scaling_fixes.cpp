@@ -5,7 +5,7 @@
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "gamevars.hpp"
-#include "input_handler.hpp"
+//#include "input_handler.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
@@ -180,7 +180,6 @@ void ResolutionScalingFixes::ApplyFixes()
     {
         spdlog::error("MGS2_LaserPoints: Weapon LaserPoints table not found.");
     }
-
 
 
     //todo: NewUSPLight -> light_offset: convert to per-weapon offset.

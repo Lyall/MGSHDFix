@@ -284,9 +284,9 @@ namespace ConfigKeys
         "This option makes shadow resolution scale dynamically with the game's internal resolution.";
 
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Section = FixMGS2DepthOfField_Section;
-    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "MGS2 - Fix FPV M9 Laser Position";
+    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "MGS2 - Fix FPV M92 Laser Position";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
-    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Tooltip = "Fixes the M9's laser sight origin point when aiming in first-person view, which is aligned with the barrel instead of the laser.";
+    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Tooltip = "Fixes the M92's laser sight origin point when aiming in first-person view, which is aligned with the gun's barrel instead of the attached laser aiming module.";
 
     constexpr const char* FixVectorUI_Section = "Bugfixes";
     constexpr const char* FixVectorUI_Setting = "Fix UI Width";
