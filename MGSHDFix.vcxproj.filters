@@ -107,6 +107,9 @@
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_blood_stains.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\fix_default_gpu.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -362,6 +365,9 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_blood_stains.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\input_handler.hpp">

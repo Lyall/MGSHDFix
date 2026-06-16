@@ -333,6 +333,11 @@ namespace ConfigKeys
     constexpr const char* FixAimingFullTilt_Help = "";
     constexpr const char* FixAimingFullTilt_Tooltip = "In MGS2, prevents aiming from dropping when tilting the analog stick fully while holding Lock-On / L1.";
 
+    constexpr const char* MGS2BloodStains_Section = "Bugfixes";
+    constexpr const char* MGS2BloodStains_Setting = "MGS2 - Restore Blood Stains";
+    constexpr const char* MGS2BloodStains_Help = "";
+    constexpr const char* MGS2BloodStains_Tooltip = "Restores the PS2 blood stains that seep into enemies' clothing when they are shot.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";
