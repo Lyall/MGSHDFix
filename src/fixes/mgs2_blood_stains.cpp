@@ -33,17 +33,22 @@ namespace
     constexpr ptrdiff_t kLP_DgObjs       = 0x08;
 
     constexpr const char* kOozeAddSig =
-        "4C 8B DC 55 57 41 57 48 8D 6C 24 90 48 81 EC ?? ?? 00 00 45 0F 29 BB 28 FF FF FF";
+        "4C 8B DC 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? 00 00 45 0F 29 BB ?? ?? FF FF";
     constexpr const char* kLocalParamSig =
-        "40 53 48 83 EC 20 33 D2 4C 8D 0D ?? ?? ?? ?? 48 8B D9 48 8B 0D ?? ?? ?? ?? 44 8D 42 01 E8 ?? ?? ?? ?? "
+        "40 53 48 83 EC ?? 33 D2 4C 8D 0D ?? ?? ?? ?? 48 8B D9 48 8B 0D ?? ?? ?? ?? 44 8D 42 01 E8 ?? ?? ?? ?? "
         "48 8B 0D ?? ?? ?? ?? 4C 8D 4B 10 BA 01 00 00 00 44 8B C2 E8 ?? ?? ?? ?? 48 C7 05";
     constexpr const char* kDispatchSig =
-        "4C 8B DC 55 41 57 49 8D AB E8 FE FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ??";
+        "4C 8B DC 55 41 57 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? "
+        "48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 4C 8B F9";
     constexpr const char* kDispatch2Sig =
-        "4C 8B DC 55 53 49 8D AB 38 FF FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ??";
+        "4C 8B DC 55 53 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? "
+        "48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 48 8B D9";
+    constexpr const char* kChangeObjsSig =
+        "48 83 EC ?? 44 0F BF 52 64 4C 8B D9 48 8B 41 60 45 85 D2 7E ?? 48 89 1C 24 4C 8D 80 28 02 00 00 33 DB 4C 8D 8A 28 02 00";
 
     SafetyHookMid    g_oozeAddHook{};
     SafetyHookMid    g_localParamHook{};
+    SafetyHookMid    g_changeObjsHook{};
     SafetyHookInline g_dispatchHook{};
     SafetyHookInline g_dispatch2Hook{};
     SafetyHookInline g_drawIndexedHook{};
@@ -59,11 +64,20 @@ namespace
 
     std::once_flag           g_initOnce;
     bool                     g_ready    = false;
-    ID3D11VertexShader*      g_bloodVS  = nullptr;
+    ID3D11VertexShader*      g_bloodVS  = nullptr;   // rigid: float4 @ slot0
+    ID3D11VertexShader*      g_bloodVS_S = nullptr;  // skinned: int16 @ slot2
     ID3D11PixelShader*       g_bloodPS  = nullptr;
-    ID3D11InputLayout*       g_layout   = nullptr;
+    ID3D11InputLayout*       g_layoutF  = nullptr;
+    ID3D11InputLayout*       g_layoutS  = nullptr;
     ID3D11BlendState*        g_blendMul = nullptr;
     ID3D11DepthStencilState* g_depthState = nullptr;
+    SafetyHookInline         g_createILHook{};
+
+    constexpr UINT kBloodSlot = 7;                   // free slot; game uses 0-2
+
+    // layout -> 0 = float4 @ slot0, 1 = int16 @ slot2
+    std::mutex                       g_ilMutex;
+    std::unordered_map<void*, int>   g_ilClass;
 
     struct MeshBlood { ID3D11Buffer* vb = nullptr; UINT verts = 0; uint64_t lastTick = 0; };
     std::unordered_map<uintptr_t, MeshBlood> g_meshBlood;
@@ -76,7 +90,10 @@ namespace
     }
 
     void __stdcall DrawIndexed_Detour(ID3D11DeviceContext* ctx, UINT indexCount, UINT startIndex, INT baseVertex);
+    HRESULT __stdcall CreateInputLayout_Detour(ID3D11Device* dev, const D3D11_INPUT_ELEMENT_DESC* descs, UINT num,
+                                               const void* bc, SIZE_T bcLen, ID3D11InputLayout** out);
 
+    // rigid: POSITION float4 @ slot0
     const char* kVS =
         "cbuffer Globals : register(b0) {\n"
         "  row_major float4x4 gVS_Mat0 : packoffset(c16);\n"
@@ -89,6 +106,24 @@ namespace
         "  VOut o;\n"
         "  float3 p = (gVS_IsShort == 1u) ? (float3)asint(i.pos.xyz) : i.pos.xyz;\n"
         "  float4 wp = mul(gVS_Mat0, float4(p, 1.0));\n"
+        "  o.pos = mul(gVS_Pers, wp);\n"
+        "  o.blood = i.blood;\n"
+        "  return o;\n"
+        "}\n";
+    // skinned: POSITION int16 @ slot2, xyz fixed-point, w = bone weight (/4096)
+    const char* kVS_S =
+        "cbuffer Globals : register(b0) {\n"
+        "  row_major float4x4 gVS_Mat0 : packoffset(c16);\n"
+        "  row_major float4x4 gVS_Pers : packoffset(c20);\n"
+        "  row_major float4x4 gVS_Corr : packoffset(c24);\n"
+        "};\n"
+        "struct VInS { int4 pos:POSITION; float4 blood:TEXCOORD7; };\n"
+        "struct VOut { float4 pos:SV_Position; float4 blood:TEXCOORD0; };\n"
+        "VOut main(VInS i){\n"
+        "  VOut o;\n"
+        "  float4 p = float4((float3)i.pos.xyz, 1.0);\n"
+        "  float  w = (float)i.pos.w * (1.0/4096.0);\n"
+        "  float4 wp = lerp(mul(gVS_Corr, p), mul(gVS_Mat0, p), w);\n"
         "  o.pos = mul(gVS_Pers, wp);\n"
         "  o.blood = i.blood;\n"
         "  return o;\n"
@@ -115,7 +150,7 @@ namespace
             auto compileFn = reinterpret_cast<pD3DCompile>(GetProcAddress(comp, "D3DCompile"));
             if (!compileFn) { spdlog::error("MGS 2: Blood Stains: D3DCompile not found."); return; }
 
-            ID3DBlob *vsb = nullptr, *psb = nullptr, *err = nullptr;
+            ID3DBlob *vsb = nullptr, *vsbS = nullptr, *psb = nullptr, *err = nullptr;
             if (FAILED(compileFn(kVS, strlen(kVS), "blood_vs", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsb, &err)))
             {
                 spdlog::error("MGS 2: Blood Stains: vertex shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
@@ -123,24 +158,40 @@ namespace
                 return;
             }
             if (err) { err->Release(); err = nullptr; }
-            if (FAILED(compileFn(kPS, strlen(kPS), "blood_ps", nullptr, nullptr, "main", "ps_4_0", 0, 0, &psb, &err)))
+            if (FAILED(compileFn(kVS_S, strlen(kVS_S), "blood_vs_s", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsbS, &err)))
             {
-                spdlog::error("MGS 2: Blood Stains: pixel shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
+                spdlog::error("MGS 2: Blood Stains: skinned vertex shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
                 if (err) err->Release();
                 vsb->Release();
                 return;
             }
             if (err) { err->Release(); err = nullptr; }
+            if (FAILED(compileFn(kPS, strlen(kPS), "blood_ps", nullptr, nullptr, "main", "ps_4_0", 0, 0, &psb, &err)))
+            {
+                spdlog::error("MGS 2: Blood Stains: pixel shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
+                if (err) err->Release();
+                vsb->Release(); vsbS->Release();
+                return;
+            }
+            if (err) { err->Release(); err = nullptr; }
 
             dev->CreateVertexShader(vsb->GetBufferPointer(), vsb->GetBufferSize(), nullptr, &g_bloodVS);
+            dev->CreateVertexShader(vsbS->GetBufferPointer(), vsbS->GetBufferSize(), nullptr, &g_bloodVS_S);
             dev->CreatePixelShader(psb->GetBufferPointer(), psb->GetBufferSize(), nullptr, &g_bloodPS);
 
-            const D3D11_INPUT_ELEMENT_DESC il[] = {
-                { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-                { "TEXCOORD", 7, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            const D3D11_INPUT_ELEMENT_DESC ilF[] = {
+                { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,         0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+                { "TEXCOORD", 7, DXGI_FORMAT_R32G32B32A32_FLOAT, kBloodSlot, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             };
-            dev->CreateInputLayout(il, 2, vsb->GetBufferPointer(), vsb->GetBufferSize(), &g_layout);
+            dev->CreateInputLayout(ilF, 2, vsb->GetBufferPointer(), vsb->GetBufferSize(), &g_layoutF);
+
+            const D3D11_INPUT_ELEMENT_DESC ilS[] = {
+                { "POSITION", 0, DXGI_FORMAT_R16G16B16A16_SINT,  2,         0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+                { "TEXCOORD", 7, DXGI_FORMAT_R32G32B32A32_FLOAT, kBloodSlot, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            };
+            dev->CreateInputLayout(ilS, 2, vsbS->GetBufferPointer(), vsbS->GetBufferSize(), &g_layoutS);
             vsb->Release();
+            vsbS->Release();
             psb->Release();
 
             D3D11_BLEND_DESC bd = {};
@@ -163,7 +214,10 @@ namespace
             void** vtable = *reinterpret_cast<void***>(ctx);
             g_drawIndexedHook = safetyhook::create_inline(vtable[12], reinterpret_cast<void*>(DrawIndexed_Detour));
 
-            g_ready = g_bloodVS && g_bloodPS && g_layout && g_blendMul && g_depthState && g_drawIndexedHook;
+            void** dvt = *reinterpret_cast<void***>(dev);
+            g_createILHook = safetyhook::create_inline(dvt[11], reinterpret_cast<void*>(CreateInputLayout_Detour));
+
+            g_ready = g_bloodVS && g_bloodVS_S && g_bloodPS && g_layoutF && g_layoutS && g_blendMul && g_depthState && g_drawIndexedHook;
             if (g_ready)
                 spdlog::info("MGS 2: Blood Stains: render resources initialised.");
             else
@@ -270,26 +324,26 @@ namespace
         return true;
     }
 
-    void SecondPassSEH(ID3D11DeviceContext* ctx, ID3D11Buffer* bloodVB, UINT ic, UINT si, INT bv) noexcept
+    void SecondPassSEH(ID3D11DeviceContext* ctx, ID3D11Buffer* bloodVB, UINT ic, UINT si, INT bv, bool isSint) noexcept
     {
         __try
         {
             ID3D11VertexShader*      oVS = nullptr; ID3D11PixelShader* oPS = nullptr;
             ID3D11InputLayout*       oIL = nullptr;
             ID3D11BlendState*        oBlend = nullptr; ID3D11DepthStencilState* oDepth = nullptr;
-            ID3D11Buffer*            oVB[2] = {}; UINT oStr[2] = {}, oOf[2] = {};
+            ID3D11Buffer*            oVB = nullptr; UINT oStr = 0, oOf = 0;
             float oBF[4] = {}; UINT oMask = 0, oStencil = 0;
             ctx->VSGetShader(&oVS, nullptr, nullptr);
             ctx->PSGetShader(&oPS, nullptr, nullptr);
             ctx->IAGetInputLayout(&oIL);
             ctx->OMGetBlendState(&oBlend, oBF, &oMask);
             ctx->OMGetDepthStencilState(&oDepth, &oStencil);
-            ctx->IAGetVertexBuffers(0, 2, oVB, oStr, oOf);
+            ctx->IAGetVertexBuffers(kBloodSlot, 1, &oVB, &oStr, &oOf);
 
-            UINT stride1 = 16, off1 = 0;
-            ctx->IASetInputLayout(g_layout);
-            ctx->IASetVertexBuffers(1, 1, &bloodVB, &stride1, &off1);
-            ctx->VSSetShader(g_bloodVS, nullptr, 0);
+            UINT strideB = 16, offB = 0;
+            ctx->IASetInputLayout(isSint ? g_layoutS : g_layoutF);
+            ctx->IASetVertexBuffers(kBloodSlot, 1, &bloodVB, &strideB, &offB);
+            ctx->VSSetShader(isSint ? g_bloodVS_S : g_bloodVS, nullptr, 0);
             ctx->PSSetShader(g_bloodPS, nullptr, 0);
             const float bf[4] = { 0, 0, 0, 0 };
             ctx->OMSetBlendState(g_blendMul, bf, 0xFFFFFFFF);
@@ -301,12 +355,44 @@ namespace
             ctx->IASetInputLayout(oIL);
             ctx->OMSetBlendState(oBlend, oBF, oMask);
             ctx->OMSetDepthStencilState(oDepth, oStencil);
-            ctx->IASetVertexBuffers(0, 2, oVB, oStr, oOf);
-            if (oVB[0]) oVB[0]->Release(); if (oVB[1]) oVB[1]->Release();
+            ctx->IASetVertexBuffers(kBloodSlot, 1, &oVB, &oStr, &oOf);
+            if (oVB) oVB->Release();
             if (oVS) oVS->Release(); if (oPS) oPS->Release(); if (oIL) oIL->Release();
             if (oBlend) oBlend->Release(); if (oDepth) oDepth->Release();
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {}
+    }
+
+    // 0 = float4 @ slot0, 1 = int16 @ slot2, -1 = unknown
+    int ClassifyPosLayout(const D3D11_INPUT_ELEMENT_DESC* descs, UINT num) noexcept
+    {
+        __try
+        {
+            for (UINT i = 0; i < num; ++i)
+            {
+                if (descs[i].SemanticName && descs[i].SemanticIndex == 0 &&
+                    strcmp(descs[i].SemanticName, "POSITION") == 0)
+                    return (descs[i].Format == DXGI_FORMAT_R16G16B16A16_SINT) ? 1 : 0;
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {}
+        return -1;
+    }
+
+    HRESULT __stdcall CreateInputLayout_Detour(ID3D11Device* dev, const D3D11_INPUT_ELEMENT_DESC* descs, UINT num,
+                                               const void* bc, SIZE_T bcLen, ID3D11InputLayout** out)
+    {
+        HRESULT hr = g_createILHook.stdcall<HRESULT>(dev, descs, num, bc, bcLen, out);
+        if (SUCCEEDED(hr) && out && *out && descs)
+        {
+            const int cls = ClassifyPosLayout(descs, num);
+            if (cls >= 0)
+            {
+                std::lock_guard<std::mutex> lk(g_ilMutex);
+                g_ilClass[*out] = cls;
+            }
+        }
+        return hr;
     }
 
     void __stdcall DrawIndexed_Detour(ID3D11DeviceContext* ctx, UINT indexCount, UINT startIndex, INT baseVertex)
@@ -324,8 +410,19 @@ namespace
         }
         if (!mb.vb) return;
 
+        bool isSint = false;
+        ID3D11InputLayout* il = nullptr;
+        ctx->IAGetInputLayout(&il);
+        if (il)
+        {
+            std::lock_guard<std::mutex> lk(g_ilMutex);
+            auto it = g_ilClass.find(il);
+            if (it != g_ilClass.end()) isSint = (it->second == 1);
+        }
+        if (il) il->Release();
+
         g_inMyDraw = true;
-        SecondPassSEH(ctx, mb.vb, indexCount, startIndex, baseVertex);
+        SecondPassSEH(ctx, mb.vb, indexCount, startIndex, baseVertex, isSint);
         g_inMyDraw = false;
     }
 
@@ -373,6 +470,17 @@ namespace
         std::lock_guard<std::mutex> lk(g_regMutex);
         g_bloodObjs.insert(objs);
     }
+
+    // follow the blood onto the new objs when a body ragdolls
+    void ChangeObjs_Hook(SafetyHookContext& ctx)
+    {
+        const uintptr_t oldObjs = Memory::ReadField<uintptr_t>(ctx.rcx, kWork_Objs, 0);
+        const uintptr_t newObjs = ctx.rdx;
+        if (!HeapPtr(newObjs)) return;
+        std::lock_guard<std::mutex> lk(g_regMutex);
+        g_bloodObjs.erase(oldObjs);
+        g_bloodObjs.insert(newObjs);
+    }
 }
 
 void MGS2BloodStains::Initialize()
@@ -391,6 +499,11 @@ void MGS2BloodStains::Initialize()
     {
         g_localParamHook = safetyhook::create_mid(address, LocalParam_Hook);
         LOG_HOOK(g_localParamHook, "MGS 2: Blood Stains - LocalParam");
+    }
+    if (uint8_t* address = Memory::PatternScan(baseModule, kChangeObjsSig, "MGS 2: Blood Stains - ChangeObjs"))
+    {
+        g_changeObjsHook = safetyhook::create_mid(address, ChangeObjs_Hook);
+        LOG_HOOK(g_changeObjsHook, "MGS 2: Blood Stains - ChangeObjs");
     }
     if (uint8_t* address = Memory::PatternScan(baseModule, kDispatchSig, "MGS 2: Blood Stains - Dispatch"))
     {
