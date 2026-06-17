@@ -19,6 +19,7 @@
 #include "mgs2_shimmer.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
+#include "../../ConfigTool/helper.hpp"
 void afterPresent();
 
 namespace
@@ -127,7 +128,14 @@ namespace
                             UINT subVersion = HIWORD(driverVersion.LowPart);
                             UINT build = LOWORD(driverVersion.LowPart);
 
-                            CheckMinimumGPU(gpuName, true, product, version, subVersion, build);
+                            if (!Util::IsSteamOS())
+                            {
+                                CheckMinimumGPU(gpuName, true, product, version, subVersion, build);
+                            }
+                            else
+                            {
+                                spdlog::info("Running on SteamOS with GPU: {}. Driver version: {}.{}.{}.{}", gpuName, product, version, subVersion, build);
+                            }
                         }
                         else
                         {
