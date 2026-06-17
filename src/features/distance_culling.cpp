@@ -28,10 +28,13 @@ void DistanceCulling::Initialize() const
         {
             //if (bMGS2_MarineForceLOD)
             {
-                if (uint8_t* MGS2_Marine_LOD = Memory::PatternScan(baseModule, "66 45 85 C0 44 0F 44 C9", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD()"))
-                {
-                    Memory::PatchBytes((uintptr_t)MGS2_Marine_LOD, "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
-                }
+                MAKE_HOOK_MID(baseModule, "44 0F 44 C9 41 3B C1", "MGS2: Marine LOD | korekado/hold/holdene.c -> SetLOD() @ L2484", {
+                    ctx.rcx = 0;
+                              });
+
+                MAKE_HOOK_MID(baseModule, "0F 44 E9 8B 4A", "MGS2: Marine LOD | korekado/hold/holdene.c -> ChangeActive() @ L766", {
+                    ctx.rcx = 0;
+                              });
             }
 
            // if (bMGS2_ForcePlayerLOD)
