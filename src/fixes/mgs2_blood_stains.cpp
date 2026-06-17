@@ -72,7 +72,8 @@ namespace
 
     inline bool HeapPtr(uintptr_t v)
     {
-        return v > 0x10000000000ull && v < 0x7FFFFFFFFFFFull && (v & 7) == 0;
+        // accept any aligned canonical user pointer (Proton/Wine allocates below the old 1 TB bound)
+        return v >= 0x10000ull && v < 0x800000000000ull && (v & 7) == 0;
     }
 
     void __stdcall DrawIndexed_Detour(ID3D11DeviceContext* ctx, UINT indexCount, UINT startIndex, INT baseVertex);
