@@ -8,6 +8,7 @@
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
 #include "mgs2_blood_stains.hpp"
+#include "mgs2_scope_warp.hpp"
 #include "input_handler.hpp"
 #include "intro_skip.hpp"
 #include "line_scaling.hpp"
@@ -544,9 +545,11 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     ConfigHelper::getValue(ini, ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     LOG_CONFIG(ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);

@@ -65,6 +65,7 @@
     <ClCompile Include="src\fixes\fix_default_gpu.cpp" />
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp" />
     <ClCompile Include="src\fixes\mgs2_blood_stains.cpp" />
+    <ClCompile Include="src\fixes\mgs2_scope_warp.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
     <ClCompile Include="src\resources\config.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
     <ClInclude Include="src\fixes\mgs2_blood_stains.hpp" />
+    <ClInclude Include="src\fixes\mgs2_scope_warp.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
     <ClInclude Include="src\resources\config.hpp" />
