@@ -338,6 +338,11 @@ namespace ConfigKeys
     constexpr const char* MGS2BloodStains_Help = "";
     constexpr const char* MGS2BloodStains_Tooltip = "Restores the PS2 blood stains that seep into enemies' clothing when they are shot.";
 
+    constexpr const char* MGS2ScopeWarp_Section = "Bugfixes";
+    constexpr const char* MGS2ScopeWarp_Setting = "MGS2 - Restore Scope Lens Distortion";
+    constexpr const char* MGS2ScopeWarp_Help = "";
+    constexpr const char* MGS2ScopeWarp_Tooltip = "Restores the PS2 sniper scope (PSG-1) fish-eye lens distortion, which is built but never drawn in the Master Collection.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";

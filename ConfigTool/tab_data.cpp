@@ -245,6 +245,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, ConfigKeys::MGS2BloodStains_Help, ConfigKeys::MGS2BloodStains_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, ConfigKeys::MGS2ScopeWarp_Help, ConfigKeys::MGS2ScopeWarp_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
 
         { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },

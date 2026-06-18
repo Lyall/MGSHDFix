@@ -33,6 +33,7 @@
 ///Fixes
 #include "aiming_full_tilt.hpp"
 #include "mgs2_blood_stains.hpp"
+#include "mgs2_scope_warp.hpp"
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
@@ -510,6 +511,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_OpticalCamoFix.Initialize());
         INITIALIZE(FixAimingFullTilt::Initialize());
         INITIALIZE(MGS2BloodStains::Initialize());
+        INITIALIZE(MGS2ScopeWarp::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
         INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
         INITIALIZE(TextureLiveSwaps::ApplyFixes());
