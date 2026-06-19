@@ -272,6 +272,9 @@
     <ClCompile Include="src\resources\mgs2_status_flags.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\d3d11_text_overlay.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -551,6 +554,9 @@
       <Filter>APIs\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\game_defines.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\d3d11_text_overlay.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>

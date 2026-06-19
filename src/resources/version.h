@@ -25,6 +25,7 @@ inline constexpr const char* kAsiLoaderDescription = "Ultimate-ASI-Loader-x64";
 #define VERSION_STRING STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH) "." STRINGIFY(VERSION_CI_BUILD)
 inline const std::string sFixVersion = VERSION_STRING;
 inline const std::string sFixName = FIX_NAME;
+inline const std::string sFixNameAndVersion = FIX_NAME " " VERSION_STRING;
 
 // Metadata
 #define COMPANY_NAME      "Lyall, Afevis, & Contributors"

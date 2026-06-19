@@ -75,6 +75,7 @@
 #include "custom_player_name.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
+#include "d3d11_text_overlay.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
@@ -448,7 +449,7 @@ void afterPresent()
     MGS2_ContrastShader::Init();
     MGS2_ShimmerEffect::Init();
     g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
-
+    D3D11TextOverlay::Init();
     spdlog::info("afterPresent() completed");
 }
 
@@ -546,6 +547,7 @@ static void InitializeSubsystems()
     INITIALIZE(FixFullscreenOptimization::Fix());
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(FixPlaytime::Apply());
+    INITIALIZE(D3D11TextOverlay::Setup());
 
 
 #if !defined(RELEASE_BUILD) //todo category

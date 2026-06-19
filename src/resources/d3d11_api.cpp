@@ -19,7 +19,7 @@
 #include "mgs2_shimmer.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
-#include "../../ConfigTool/helper.hpp"
+#include "d3d11_text_overlay.hpp"
 void afterPresent();
 
 namespace
@@ -180,22 +180,21 @@ namespace
             g_MGS2UnderwaterFilterFix.BeforePresent();
         }
 
-
-
+        D3D11TextOverlay::Tick(); //keep last.
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 
 
-    HRESULT __stdcall HookedResizeBuffers(
-        IDXGISwapChain* pSwapChain,
-        UINT BufferCount,
-        UINT Width,
-        UINT Height,
-        DXGI_FORMAT NewFormat,
-        UINT SwapChainFlags)
+    HRESULT __stdcall HookedResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
     {
-        RefreshDeviceAndContext(pSwapChain);
-        return ResizeBuffersHook.call<HRESULT>(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+        HRESULT result = ResizeBuffersHook.call<HRESULT>(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+
+        if (SUCCEEDED(result))
+        {
+            RefreshDeviceAndContext(pSwapChain);
+        }
+
+        return result;
     }
 
     void HookSwapChainPresent(IDXGISwapChain* swapChain)
@@ -260,7 +259,7 @@ void D3D11Hooks::Initialize()
 
 void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
 {
-    if (!g_VectorScalingFix.bNeedsCompiler && (!(eGameType & MGS2) || !(MGS2_ContrastShader::bNeedsCompiler && MGS2_ShimmerEffect::bNeedsCompiler)))
+    if (!g_VectorScalingFix.bNeedsCompiler && !D3D11TextOverlay::bNeedsCompiler && (!(eGameType & MGS2) || !(MGS2_ContrastShader::bNeedsCompiler && MGS2_ShimmerEffect::bNeedsCompiler)))
     {
         FreeLibrary(d3dcompiler);
         spdlog::info("D3D11Hooks: Released d3dcompiler_43.dll as it is no longer needed.");
