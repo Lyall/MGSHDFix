@@ -176,6 +176,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         {ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, ConfigKeys::MGS2_SnakeTales_Radar_Help, ConfigKeys::MGS2_SnakeTales_Radar_Tooltip,
             std::nullopt, false, Field::Bool, false},
 
+        {ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, ConfigKeys::MGS2_FixDamageType_Help, ConfigKeys::MGS2_FixDamageType_Tooltip,
+            std::nullopt, false, Field::Bool, true},
+
 
 
         { ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Setting, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Help, ConfigKeys::MGS2_Lifebar_Name_Use_Custom_Tooltip,

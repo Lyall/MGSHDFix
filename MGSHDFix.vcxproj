@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp" />
     <ClCompile Include="src\resources\mgs2_status_flags.cpp" />
     <ClCompile Include="src\resources\game_funcs.cpp" />
     <ClCompile Include="src\features\mgs2_snake_tales_radar.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />
     <ClInclude Include="src\resources\game_defines.hpp" />
     <ClInclude Include="src\resources\game_funcs.hpp" />
     <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp" />
@@ -325,6 +327,7 @@
     <ExternalIncludePath>external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
     <IntDir>Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <CustomBuildAfterTargets />
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\MGS2\plugins\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.asi</TargetExt>

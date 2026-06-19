@@ -266,6 +266,9 @@
     <ClCompile Include="src\resources\mgs2_status_flags.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -537,6 +540,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\game_defines.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

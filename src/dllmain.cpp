@@ -29,6 +29,7 @@
 #include "mgs2_hostage_type_easter_egg.hpp"
 #include "original_camera_positions.hpp"
 #include "expand_bp_assets.hpp"
+#include "mgs2_vamp_punch_fix.hpp"
 
 ///Fixes
 #include "aiming_full_tilt.hpp"
@@ -493,6 +494,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_SnakeTalesRadar::Apply());
         INITIALIZE(MGS2ThermalGoggles::Setup());
         INITIALIZE(CustomPlayerName::Apply());
+        INITIALIZE(MGS2VampFPVPunch::Apply());
     }
     INITIALIZE(g_PauseOnFocusLoss.Initialize());
     INITIALIZE(g_IntroSkip.Initialize());

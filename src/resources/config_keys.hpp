@@ -410,6 +410,12 @@ namespace ConfigKeys
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Help = "";
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Tooltip = "Keeps aiming after firing while holding Lock-On (L1).";
 
+    constexpr const char* MGS2_FixDamageType_Section = "Various";
+    constexpr const char* MGS2_FixDamageType_Setting = "MGS2 - Fix Vamp Punch Damage Type";
+    constexpr const char* MGS2_FixDamageType_Help = "";
+    constexpr const char* MGS2_FixDamageType_Tooltip = "Punching Vamp while in first-person-view erroneously does lethal damage.\n"
+                                                       "Fixes to deal non-lethal damage like normal hand-to-hand attacks.";
+
 
 
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
