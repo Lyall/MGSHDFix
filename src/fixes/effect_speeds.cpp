@@ -90,7 +90,6 @@
     X(MGS2_SPH_ActBrkVol1, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1()") \
     X(NewSplushSurfaceMan, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan()") \
     X(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()") \
-    X(NewTraffic_Demo, "40 53 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B D9 E8 ?? ?? ?? ?? 85 C0 0F 85", "MGS 2: Effect Speed Fix : NewTraffic_Demo") \
     X(NewTraffic_Flush, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 41 56 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : NewTraffic_Flush") \
     X(NewDebris_Tex, "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\debris_tex.c -> NewDebris_Tex()") \
     X(NewLinerGunPlasma, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B F1 8B 0D", "MGS 2: Effect Speed Fix : okajima\\effect2\\liner_gun_plasma.c -> NewLinerGunPlasma() -> Act()") \
