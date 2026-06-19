@@ -15,6 +15,7 @@ namespace
     double scaleX_fromPs2_4by3 = 1.0;
     double scaleY_fromPs2 = 1.0;
 
+
     FVECTOR* g_laserPoints = nullptr;
     //int g_laserEditIndex = 2;
     //float g_laserStep = 0.5f;
@@ -54,6 +55,34 @@ namespace
         }
         g_laserPoints[0] = MGS2_Characters::IsRaiden() ? raiden_laserpoints[0] : m92_snake_override;
     }
+
+#define RAYEYE_TAILSSHIFT_Y_OFFSET 900.0f
+#define RAYEYE_TAILSSHIFT_X_OFFSET 3800.0f
+
+    constexpr FVECTOR rayEyeTailsShift_Original[8] = {
+        {  511.0F, 1039.0F, 2485.0F, 1.0F },
+        {  571.0F, 1073.0F, 2335.0F, 1.0F },
+        {  571.0F, 1073.0F, 2335.0F, 1.0F },
+        {  713.0F, 1152.0F, 1970.0F, 1.0F },
+        { -511.0F, 1039.0F, 2485.0F, 1.0F },
+        { -571.0F, 1073.0F, 2335.0F, 1.0F },
+        { -571.0F, 1073.0F, 2335.0F, 1.0F },
+        { -713.0F, 1152.0F, 1970.0F, 1.0F },
+    };
+
+    constexpr FVECTOR rayEyeTailsShift_Corrected[8] = {
+        {  511.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1039.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2485.0F, 1.0F },
+        {  571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
+        {  571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
+        {  713.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1152.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 1970.0F, 1.0F },
+        { -511.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1039.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2485.0F, 1.0F },
+        { -571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
+        { -571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
+        { -713.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1152.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 1970.0F, 1.0F },
+    };
+
+    FVECTOR* g_rayEyeTailsShift = nullptr;
+
 }
 
 
@@ -82,6 +111,7 @@ void ResolutionScalingFixes::ApplyFixes()
             ctx.xmm1.f32[0] = 3018.0f; //width | 512.0f original
             ctx.xmm2.f32[0] = 860.4896f;    //height | 384.0f original | 872.0f was a little over in case there's some effect i missed at the bottom of the sprite. 860.4896f = pixel perfect in photoshop
         });
+                      });
     }
 
     MAKE_HOOK_MID(baseModule, "F3 0F 11 74 24 ?? E8 ?? ?? ?? ?? 81 67", "MGS2: Resolution Scaling Fixes : user\\kira\\radar\\bomb_sensor.c -> setup_bomb_object() - Scale y", {
@@ -128,6 +158,7 @@ void ResolutionScalingFixes::ApplyFixes()
             *reinterpret_cast<float*>(ctx.rsp + 0x30) = 83.0f;    // pos.x
             *reinterpret_cast<float*>(ctx.rsp + 0x34) = 40.0f;   // pos.y
                           
+
                   });
 
     if (bIncreaseShadowResolution)
@@ -179,6 +210,29 @@ void ResolutionScalingFixes::ApplyFixes()
     else
     {
         spdlog::error("MGS2_LaserPoints: Weapon LaserPoints table not found.");
+    }
+
+    if (uint8_t* scan = Memory::PatternScan(baseModule, "00 80 FF 43 00 E0 81 44 00 50 1B 45 00 00 80 3F 00 C0 0E 44 00 20 86 44 00 F0 11 45 00 00 80 3F", "RayEyeTailsShift"))
+    {
+        g_rayEyeTailsShift = reinterpret_cast<FVECTOR*>(scan);
+        spdlog::info("MGS2_RayEyeTailsShift: TailsShift table found at {:s}+{:X}", sExeName.c_str(), scan - (uint8_t*)baseModule);
+
+        MAKE_HOOK_MID(baseModule, "48 8B C4 48 89 58 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 44 0F 29 54 24", "MGS2: ray_eye.c -> InitTailsData()", {
+            if (!(MGS2_LinkVarBuf::GM_Configuration & GM_CONFIG_CUTSCENES_LETTERBOXED))
+            {
+                memcpy(g_rayEyeTailsShift, rayEyeTailsShift_Corrected, sizeof(rayEyeTailsShift_Corrected));
+                //spdlog::info("MGS2_RayEyeTailsShift: Ray eye tail height corrected.");
+            }
+            else
+            {
+                memcpy(g_rayEyeTailsShift, rayEyeTailsShift_Original, sizeof(rayEyeTailsShift_Original));
+                //spdlog::info("MGS2_RayEyeTailsShift: Ray eye tail height restored.");
+            }
+                      });
+    }
+    else
+    {
+        spdlog::error("MGS2_RayEyeTailsShift: TailsShift table not found. Ray cutscene eye fix not applied.");
     }
 
 
