@@ -346,7 +346,7 @@ namespace ConfigKeys
     constexpr const char* MGS2WaterEffects_Section = "Bugfixes";
     constexpr const char* MGS2WaterEffects_Setting = "MGS2 - Restore Surfacing Water Splash";
     constexpr const char* MGS2WaterEffects_Help = "";
-    constexpr const char* MGS2WaterEffects_Tooltip = "Restores the water splash thrown off a character's body when breaking/treading the water surface (e.g. Raiden surfacing), which is broken in the Master Collection.";
+    constexpr const char* MGS2WaterEffects_Tooltip = "Restores water surface effects broken in the Master Collection";
 
     constexpr const char* MGS2LensDroplets_Section = "Bugfixes";
     constexpr const char* MGS2LensDroplets_Setting = "MGS2 - Restore Lens Water Droplets";
