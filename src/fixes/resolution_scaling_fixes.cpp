@@ -110,7 +110,6 @@ void ResolutionScalingFixes::ApplyFixes()
         MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? BA", "NewBugFace", {
             ctx.xmm1.f32[0] = 3018.0f; //width | 512.0f original
             ctx.xmm2.f32[0] = 860.4896f;    //height | 384.0f original | 872.0f was a little over in case there's some effect i missed at the bottom of the sprite. 860.4896f = pixel perfect in photoshop
-        });
                       });
     }
 
