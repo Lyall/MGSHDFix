@@ -29,13 +29,25 @@ namespace
 
     std::list<std::pair<uintptr_t, uintptr_t>> SwapMap;
 
+    bool bRestoringCtxrs = false;
 
     void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true)
     {
         if (!GetCtxrHandle || !CopyCtxr || !AllocTexture)
             return;
-        uintptr_t srcHandle = GetCtxrHandle(tricode, src)[4];
-        uintptr_t dstHandle = GetCtxrHandle(tricode, dst)[4];
+
+        uintptr_t* srcCtxr = GetCtxrHandle(tricode, src);
+        uintptr_t* dstCtxr = GetCtxrHandle(tricode, dst);
+
+        if (!srcCtxr || !dstCtxr)
+            return;
+
+        uintptr_t srcHandle = srcCtxr[4];
+        uintptr_t dstHandle = dstCtxr[4];
+
+        if (!srcHandle || !dstHandle)
+            return;
+
         // Need to save handles to restore on stage reset
         for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
         {
@@ -46,31 +58,50 @@ namespace
                 break;
             }
         }
+
         if (shouldSave)
         {
             // Arguments are width, height, clut, but apparently don't matter?
             uintptr_t saveHandle = AllocTexture(16, 16, 0);
+
+            if (!saveHandle)
+                return;
+
             CopyCtxr(dstHandle, saveHandle);
             SwapMap.push_back({ saveHandle, dstHandle });
         }
+
         CopyCtxr(srcHandle, dstHandle);
     }
 
     void RestoreCtxrs()
     {
-        if (!CopyCtxr || !FreeTexture)
+        if (!CopyCtxr || !FreeTexture || bRestoringCtxrs || SwapMap.empty())
             return;
-        for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
+
+        bRestoringCtxrs = true;
+
+        struct RestoreGuard
         {
-            CopyCtxr(it->first, it->second);
-            FreeTexture(it->first);
-        }
+            ~RestoreGuard()
+            {
+                bRestoringCtxrs = false;
+            }
+        } guard;
+
+        auto swaps = std::move(SwapMap);
         SwapMap.clear();
+
+        for (const auto& [saveHandle, dstHandle] : swaps)
+        {
+            if (!saveHandle || !dstHandle)
+                continue;
+
+            CopyCtxr(saveHandle, dstHandle);
+            FreeTexture(saveHandle);
+        }
     }
-
-
 }
-
 
 
 void TextureLiveSwaps::ApplyFixes()

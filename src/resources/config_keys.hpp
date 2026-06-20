@@ -343,6 +343,16 @@ namespace ConfigKeys
     constexpr const char* MGS2ScopeWarp_Help = "";
     constexpr const char* MGS2ScopeWarp_Tooltip = "Restores the PS2 sniper scope (PSG-1) fish-eye lens distortion, which is built but never drawn in the Master Collection.";
 
+    constexpr const char* MGS2WaterEffects_Section = "Bugfixes";
+    constexpr const char* MGS2WaterEffects_Setting = "MGS2 - Restore Surfacing Water Splash";
+    constexpr const char* MGS2WaterEffects_Help = "";
+    constexpr const char* MGS2WaterEffects_Tooltip = "Restores water surface effects broken in the Master Collection";
+
+    constexpr const char* MGS2LensDroplets_Section = "Bugfixes";
+    constexpr const char* MGS2LensDroplets_Setting = "MGS2 - Restore Lens Water Droplets";
+    constexpr const char* MGS2LensDroplets_Help = "";
+    constexpr const char* MGS2LensDroplets_Tooltip = "Restores the refracting water droplets on the camera lens when surfacing, which are built but never drawn in the Master Collection.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";

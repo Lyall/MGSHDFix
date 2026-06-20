@@ -351,10 +351,15 @@ bool LatestVersionChecker::checkForUpdates()
     case VersionCheck::CompareResult::Newer:
         spdlog::info("Version Check: Welcome back, Commander! You are running a development build of {}!", FIX_NAME);
         spdlog::info("Version Check - Current Version: {}, Latest Release: {}", VERSION_STRING, cachedLatest);
+        bDebugBuild = true;
         return false;
     case VersionCheck::CompareResult::Older:
         spdlog::warn("Version Check: A new version of {} is available.", FIX_NAME);
         spdlog::warn("Version Check - Current Version: {}, Latest Version: {}", VERSION_STRING, cachedLatest);
+        if (!(eGameType & LAUNCHER))
+        {
+            bNewUpdateAvailable = true;
+        }
 
         if (warnedVersion != cachedLatest)
         {

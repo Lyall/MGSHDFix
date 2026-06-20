@@ -113,6 +113,12 @@
     <ClCompile Include="src\fixes\mgs2_scope_warp.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_water_effects.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_lens_droplets.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\fix_default_gpu.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -269,6 +275,9 @@
     <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\resources\d3d11_text_overlay.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -377,6 +386,15 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_water_effects.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_lens_droplets.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_autopacket.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\input_handler.hpp">
@@ -543,6 +561,9 @@
     </ClInclude>
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp">
       <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\d3d11_text_overlay.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

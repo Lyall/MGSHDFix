@@ -34,7 +34,6 @@ public:
     explicit LatestVersionChecker(const std::filesystem::path& cacheFile = "version_cache.txt");
 
     bool checkForUpdates();
-
 private:
     std::filesystem::path m_cacheFile;
 
@@ -62,5 +61,7 @@ private:
 
 inline bool bShouldCheckForUpdates;
 inline bool bConsoleUpdateNotifications;
+inline bool bNewUpdateAvailable = false;
+inline bool bDebugBuild = false;
 
 void CheckForUpdates();
