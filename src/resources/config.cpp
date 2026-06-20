@@ -54,6 +54,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
+#include "mgs2_vamp_punch_fix.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -621,7 +622,10 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, MGS2_SnakeTalesRadar::bEnabled);
     LOG_CONFIG(ConfigKeys::MGS2_SnakeTales_Radar_Section, ConfigKeys::MGS2_SnakeTales_Radar_Setting, MGS2_SnakeTalesRadar::bEnabled);
 
-        
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, MGS2VampFPVPunch::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, MGS2VampFPVPunch::bEnabled);
+    
 
     ConfigHelper::getValue(ini, ConfigKeys::Region_Section, ConfigKeys::Region_Setting, sSkipLauncherRegion);
     ConfigHelper::getValue(ini, ConfigKeys::Language_Section, ConfigKeys::Language_Setting, sSkipLauncherLanguage);
