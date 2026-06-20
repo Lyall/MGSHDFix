@@ -6,6 +6,7 @@
 #include "custom_resolution_and_borderless.hpp"
 #include "gamevars.hpp"
 //#include "input_handler.hpp"
+#include "game_funcs.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
@@ -234,6 +235,32 @@ void ResolutionScalingFixes::ApplyFixes()
         spdlog::error("MGS2_RayEyeTailsShift: TailsShift table not found. Ray cutscene eye fix not applied.");
     }
 
+
+    struct RouteVoiceEntry {
+        short route;
+        short point;
+        int strm_code;
+        int strm_time;
+    };
+
+
+    MAKE_HOOK_MID(baseModule, "0F 8D ?? ?? ?? ?? 0F 57 C0 48 63 C6", "GetRouteVoice()", {
+        if (!(g_GameVars.IsStage(MGS2Stages::W03A) || g_GameVars.IsStage(MGS2Stages::A03A)))
+        {
+            return;
+        }
+        auto* arr = reinterpret_cast<RouteVoiceEntry*>(ctx.r14 - 4);
+        int count = static_cast<int>(ctx.rsi);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (arr[i].route == 15 && arr[i].point == 3)
+            {
+                //spdlog::info("corrected COM_CallRouteVoice: Changing route 15 point 3 (vc045003) to point 4");
+                arr[i].point = 4;
+            }
+        }
+                  });
 
     //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
         #define	SHIFT3_X			(17.5f)
