@@ -2,19 +2,13 @@
 #include "common.hpp"
 #include "mgs2_water_effects.hpp"
 
-#include "helper.hpp"
 #include "logging.hpp"
 #include "mgs2_autopacket.hpp"
 #include "gamevars.hpp"
 
-#include <cstdint>
-#include <cstring>
-
 namespace
 {
     using namespace MGS2Autopacket;
-
-    constexpr ptrdiff_t kClockRva     = 0x15521BC;
 
     constexpr ptrdiff_t kWork_Mverts  = 0x978;
     constexpr ptrdiff_t kWork_Dmapack = 0x988;
@@ -31,16 +25,6 @@ namespace
     constexpr uint64_t kMdlAlpha = 0x800000002aULL;
     constexpr uint64_t kMdlPrim  = 0x11cULL;
 
-    constexpr const char* kActSig =
-        "40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 48 8B CB 66 0F 6E C0 0F 5B C0 "
-        "F3 0F 59 83 A8 09 00 00 F3 0F 5E 05 ?? ?? ?? ?? F3 0F 58 83 A4 09 00 00";
-
-    // On PS2 this splash manager can't allocate in d001p01 (effect memory full) so it never appears;
-    // the MC's larger pool spawns it. Block the spawn in d001p01 to match PS2; d001p02 is untouched.
-    constexpr const char* kMgrSpawnSig =
-        "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 20 45 33 C9 8B FA 8B F1 "
-        "BA 00 10 00 00 41 B8 90 00 01 00";
-    using MgrSpawnFn = void*(__fastcall*)(int, int);
     SafetyHookInline g_mgrSpawnHook{};
 
     SafetyHookInline g_actHook{};
@@ -55,7 +39,7 @@ namespace
             const uintptr_t dmapack = Memory::ReadField<uintptr_t>(work, kWork_Dmapack);
             if (!dmapack) return;
 
-            const int clock = *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(baseModule) + kClockRva) & 1;
+            const int clock = g_GameVars.DG_Clock() & 1;
             const uintptr_t buffer = Memory::ReadField<uintptr_t>(work, kWork_Mverts + (ptrdiff_t)clock * 8);
             if (!buffer) return;
 
@@ -109,10 +93,11 @@ namespace
         }
     }
 
+    // On PS2 this splash manager can't allocate in d001p01 (effect memory full) so it never appears;
+    // the MC's larger pool spawns it. Block the spawn in d001p01 to match PS2
     void* __fastcall MgrSpawn_Detour(int name, int map)
     {
-        const char* stage = g_GameVars.GetCurrentStage();
-        if (stage && std::strcmp(stage, "d001p01") == 0)
+        if (g_GameVars.IsStage(MGS2Stages::D001P01))
         {
             return nullptr;   // PS2 hits EFFECT MEMORY LIMIT here; keep the manager null so the splash stays suppressed
         }
@@ -128,30 +113,28 @@ void MGS2WaterEffects::Initialize()
     }
 
     spdlog::info("MGS 2 - Water Effects: Initializing...");
-    if (uint8_t* address = Memory::PatternScan(baseModule,
-            "C6 44 ?? 06 00 ?? C6 44 ?? 16 00 ?? C6 44 ?? 26 00 ?? C6 44 ?? 36 00",
-            "MGS 2: Water Effects - Surface Splash Alpha"))
+	
+    if (uint8_t* address = Memory::PatternScan(baseModule, "41 C6 44 03 ?? 00 41 C6 44 03 ?? 00 41 C6 44 03 ?? 00 41 C6 44 03 ?? 00", "MGS 2: Water Effects - Surface Splash Alpha | okajima\\effect2\\splush_surface_man.c -> CulcVector()"))
     {
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 4,  "\xFF", 1);
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 10, "\xFF", 1);
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 16, "\xFF", 1);
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 22, "\xFF", 1);
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 5,  "\xFF", 1);
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 11, "\xFF", 1);
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 17, "\xFF", 1);
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address) + 23, "\xFF", 1);
         spdlog::info("MGS 2: Water Effects - Surface splash alpha restored.");
     }
 
-    uint8_t* mdlDraw = Memory::PatternScan(baseModule, kInitMdlDrawSig, "MGS 2: Water Effects - InitMdlDraw");
-    if (mdlDraw)
+    if (uint8_t* mdlDraw = Memory::PatternScan(baseModule, kInitMdlDrawSig, "MGS 2: Water Effects - InitMdlDraw"))
     {
         g_initMdlDraw = reinterpret_cast<InitMdlDrawFn>(mdlDraw);
 
-        if (uint8_t* address = Memory::PatternScan(baseModule, kActSig, "MGS 2: Water Effects - Underwater Warp Act"))
+        if (uint8_t* address = Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B CB 66 0F 6E C0", "MGS 2: Water Effects - Underwater Warp Act (shibata\\demo\\scr_water_demo.c -> NewScrWater_Demo() -> Act())"))
         {
             g_actHook = safetyhook::create_inline(address, reinterpret_cast<void*>(Act_Detour));
             LOG_HOOK(g_actHook, "MGS 2: Water Effects - Underwater Warp Act");
         }
     }
 
-    if (uint8_t* address = Memory::PatternScan(baseModule, kMgrSpawnSig, "MGS 2: Water Effects - Suppress p01 body splash"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 45 33 C9 8B FA 8B F1 BA 00 10 00 00 41 B8 90 00 01 00", "MGS 2: Water Effects - Suppress p01 body splash (NewSplushSurfaceMan())"))
     {
         g_mgrSpawnHook = safetyhook::create_inline(address, reinterpret_cast<void*>(MgrSpawn_Detour));
         LOG_HOOK(g_mgrSpawnHook, "MGS 2: Water Effects - Suppress p01 body splash");

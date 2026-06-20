@@ -37,10 +37,6 @@ namespace
     constexpr int      kBunkatsu   = 2;
     constexpr uint32_t kLensColor  = 0x80808080u;
 
-    constexpr const char* kGetResSig =
-        "48 89 5C 24 10 48 89 6C 24 18 56 57 41 54 41 56 41 57 48 83 EC 20 "
-        "48 8B D9 89 51 5C 44 89 41 58 33 C9 E8 ?? ?? ?? ??";
-
     SafetyHookInline g_getResHook{};
     InitMdlDrawFn    g_initMdlDraw = nullptr;
 
@@ -164,7 +160,7 @@ void MGS2ScopeWarp::Initialize()
     }
     g_initMdlDraw = reinterpret_cast<InitMdlDrawFn>(mdlDraw);
 
-    if (uint8_t* address = Memory::PatternScan(baseModule, kGetResSig, "MGS 2: Scope Warp - GetResources"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 54 41 56 41 57 48 83 EC ?? 48 8B D9", "MGS 2: Scope Warp - shibata\\effect\\scr_sight.c -> NewScrSightMorph() -> GetResources()"))
     {
         g_getResHook = safetyhook::create_inline(address, reinterpret_cast<void*>(GetResources_Detour));
         LOG_HOOK(g_getResHook, "MGS 2: Scope Warp - GetResources");

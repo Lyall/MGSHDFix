@@ -5,7 +5,6 @@
 #include "common.hpp"
 #include "d3d11_api.hpp"
 #include "gamevars.hpp"
-#include "helper.hpp"
 #include "logging.hpp"
 #include "mgs2_status_flags.hpp"
 #include "mgs2_underwater_filter.hpp"
@@ -1575,28 +1574,14 @@ void MGS2UnderwaterFilterFix::Initialize()
         return;
     }
 
-    uint8_t* tableEntry = Memory::PatternScan(
-        baseModule,
-        "76 6C D1 00 00 00 00 00 ?? ?? ?? ?? ?? ?? ?? ??",
-        "MGS 2: Underwater Filter Fix: NewScrWater table entry");
-
-    if (!tableEntry)
+    if (uint8_t* NewScrWater_scan = Memory::PatternScan( baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8", "MGS 2: Underwater Filter Fix: shibata\\effect\\scr_water.c -> NewScrWater()"))
     {
-        spdlog::error("MGS 2: Underwater Filter Fix: failed to locate NewScrWater table entry; fix disabled.");
-        return;
+        NewScrWater_hook = safetyhook::create_inline(NewScrWater_scan, reinterpret_cast<void*>(NewScrWater_Hook));
+        LOG_HOOK(NewScrWater_hook, "MGS 2: Underwater Filter Fix: NewScrWater");
+        spdlog::info("MGS 2: Underwater Filter Fix: NewScrWater hook target {}.", fmt::ptr(NewScrWater_scan));
+        HookScrWaterDmapackCreateCalls(NewScrWater_scan);
     }
 
-    void* newScrWater = *reinterpret_cast<void**>(tableEntry + 8);
-    if (!newScrWater)
-    {
-        spdlog::error("MGS 2: Underwater Filter Fix: NewScrWater pointer was null; fix disabled.");
-        return;
-    }
-
-    NewScrWater_hook = safetyhook::create_inline(newScrWater, reinterpret_cast<void*>(NewScrWater_Hook));
-    LOG_HOOK(NewScrWater_hook, "MGS 2: Underwater Filter Fix: NewScrWater");
-    spdlog::info("MGS 2: Underwater Filter Fix: NewScrWater hook target {}.", fmt::ptr(newScrWater));
-    HookScrWaterDmapackCreateCalls(newScrWater);
 }
 
 void MGS2UnderwaterFilterFix::PatchWork(void* work) const

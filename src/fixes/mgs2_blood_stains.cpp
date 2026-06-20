@@ -2,17 +2,9 @@
 #include "common.hpp"
 #include "mgs2_blood_stains.hpp"
 
-#include "helper.hpp"
 #include "logging.hpp"
 #include "d3d11_api.hpp"
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <atomic>
-#include <mutex>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 namespace
 {
@@ -31,20 +23,6 @@ namespace
     constexpr ptrdiff_t kCMB_OrigIndices = 0x1e8;
     constexpr ptrdiff_t kParam_Mesh      = 0x188;
     constexpr ptrdiff_t kLP_DgObjs       = 0x08;
-
-    constexpr const char* kOozeAddSig =
-        "4C 8B DC 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? 00 00 45 0F 29 BB ?? ?? FF FF";
-    constexpr const char* kLocalParamSig =
-        "40 53 48 83 EC ?? 33 D2 4C 8D 0D ?? ?? ?? ?? 48 8B D9 48 8B 0D ?? ?? ?? ?? 44 8D 42 01 E8 ?? ?? ?? ?? "
-        "48 8B 0D ?? ?? ?? ?? 4C 8D 4B 10 BA 01 00 00 00 44 8B C2 E8 ?? ?? ?? ?? 48 C7 05";
-    constexpr const char* kDispatchSig =
-        "4C 8B DC 55 41 57 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? "
-        "48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 4C 8B F9";
-    constexpr const char* kDispatch2Sig =
-        "4C 8B DC 55 53 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? "
-        "48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 48 8B D9";
-    constexpr const char* kChangeObjsSig =
-        "48 83 EC ?? 44 0F BF 52 64 4C 8B D9 48 8B 41 60 45 85 D2 7E ?? 48 89 1C 24 4C 8D 80 28 02 00 00 33 DB 4C 8D 8A 28 02 00";
 
     SafetyHookMid    g_oozeAddHook{};
     SafetyHookMid    g_localParamHook{};
@@ -493,27 +471,27 @@ void MGS2BloodStains::Initialize()
 
     spdlog::info("MGS 2 - Blood stain fixes: Initializing...");
 
-    if (uint8_t* address = Memory::PatternScan(baseModule, kOozeAddSig, "MGS 2: Blood Stains - OozeAdd"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "4C 8B DC 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? 00 00 45 0F 29 BB ?? ?? FF FF", "MGS 2: Blood Stains - OozeAdd"))
     {
         g_oozeAddHook = safetyhook::create_mid(address, OozeAdd_Hook);
         LOG_HOOK(g_oozeAddHook, "MGS 2: Blood Stains - OozeAdd");
     }
-    if (uint8_t* address = Memory::PatternScan(baseModule, kLocalParamSig, "MGS 2: Blood Stains - LocalParam"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 33 D2 4C 8D 0D ?? ?? ?? ?? 48 8B D9 48 8B 0D ?? ?? ?? ?? 44 8D 42 01 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 4B 10 BA 01 00 00 00 44 8B C2 E8 ?? ?? ?? ?? 48 C7 05", "MGS 2: Blood Stains - LocalParam"))
     {
         g_localParamHook = safetyhook::create_mid(address, LocalParam_Hook);
         LOG_HOOK(g_localParamHook, "MGS 2: Blood Stains - LocalParam");
     }
-    if (uint8_t* address = Memory::PatternScan(baseModule, kChangeObjsSig, "MGS 2: Blood Stains - ChangeObjs"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "48 83 EC ?? 44 0F BF 52 64 4C 8B D9 48 8B 41 60 45 85 D2 7E ?? 48 89 1C 24 4C 8D 80 28 02 00 00 33 DB 4C 8D 8A 28 02 00", "MGS 2: Blood Stains - ChangeObjs"))
     {
         g_changeObjsHook = safetyhook::create_mid(address, ChangeObjs_Hook);
         LOG_HOOK(g_changeObjsHook, "MGS 2: Blood Stains - ChangeObjs");
     }
-    if (uint8_t* address = Memory::PatternScan(baseModule, kDispatchSig, "MGS 2: Blood Stains - Dispatch"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "4C 8B DC 55 41 57 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 4C 8B F9", "MGS 2: Blood Stains - Dispatch"))
     {
         g_dispatchHook = safetyhook::create_inline(address, reinterpret_cast<void*>(Dispatch_Detour));
         LOG_HOOK(g_dispatchHook, "MGS 2: Blood Stains - Dispatch");
     }
-    if (uint8_t* address = Memory::PatternScan(baseModule, kDispatch2Sig, "MGS 2: Blood Stains - Dispatch2"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "4C 8B DC 55 53 49 8D AB ?? ?? FF FF 48 81 EC ?? ?? 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 48 8B D9", "MGS 2: Blood Stains - Dispatch2"))
     {
         g_dispatch2Hook = safetyhook::create_inline(address, reinterpret_cast<void*>(Dispatch2_Detour));
         LOG_HOOK(g_dispatch2Hook, "MGS 2: Blood Stains - Dispatch2");

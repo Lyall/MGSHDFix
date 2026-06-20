@@ -2,18 +2,15 @@
 #include "common.hpp"
 #include "mgs2_lens_droplets.hpp"
 
-#include "helper.hpp"
 #include "logging.hpp"
 #include "mgs2_autopacket.hpp"
 
-#include <cstdint>
-#include <cstring>
+#include "gamevars.hpp"
 
 namespace
 {
     using namespace MGS2Autopacket;
 
-    constexpr ptrdiff_t kClockRva        = 0x15521BC;
 
     constexpr ptrdiff_t kWork_DrowVerts  = 0x70;
     constexpr ptrdiff_t kWork_DrowMVerts = 0x80;
@@ -31,9 +28,6 @@ namespace
     constexpr uint64_t kMdlTest  = 0x3000eULL;
     constexpr uint64_t kMdlAlpha = 0x8000000044ULL;
     constexpr uint64_t kMdlPrim  = 0x15cULL;
-
-    constexpr const char* kActSig =
-        "48 89 5C 24 18 48 89 6C 24 20 56 57 41 54 41 56 41 57 48 83 EC 30 48 8B 81 98 10 00 00";
 
     SafetyHookInline g_actHook{};
     InitMdlDrawFn    g_initMdlDraw = nullptr;
@@ -80,7 +74,7 @@ namespace
             const uintptr_t cv2     = Memory::ReadField<uintptr_t>(work, kWork_Cv2);
             if (!dmapack || !cv2) return;
 
-            const int clock   = *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(baseModule) + kClockRva) & 1;
+            const int clock = g_GameVars.DG_Clock() & 1;
             const int nVerts  = Memory::ReadField<int>(cv2, kCv2_NVertsIndex);
             const int nMin    = Memory::ReadField<int>(work, kWork_ActMDrops);
             const uintptr_t mainBuf = Memory::ReadField<uintptr_t>(work, kWork_DrowVerts  + (ptrdiff_t)clock * 8);
@@ -130,7 +124,7 @@ void MGS2LensDroplets::Initialize()
     }
     g_initMdlDraw = reinterpret_cast<InitMdlDrawFn>(mdlDraw);
 
-    if (uint8_t* address = Memory::PatternScan(baseModule, kActSig, "MGS 2: Lens Droplets - Act"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 54 41 56 41 57 48 83 EC ?? 48 8B 81", "MGS 2: Lens Droplets - shibata\\demo\\scr_drop_demo.c -> NewScrDrop_demo() -> Act()"))
     {
         g_actHook = safetyhook::create_inline(address, reinterpret_cast<void*>(Act_Detour));
         LOG_HOOK(g_actHook, "MGS 2: Lens Droplets - Act");

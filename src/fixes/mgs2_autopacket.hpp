@@ -1,9 +1,5 @@
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
-
 // Shared DG_SetDmapack autopacket tag builders, used by the MGS2 effects that rebuild a PS2
 // crack_pack into an autopacket the D3D backend draws (scope warp, lens droplets).
 namespace MGS2Autopacket
@@ -26,9 +22,7 @@ namespace MGS2Autopacket
 
     using InitMdlDrawFn = void*(__fastcall*)(void* prim, uint64_t test, uint64_t alpha, uint64_t primReg);
 
-    inline constexpr const char* kInitMdlDrawSig =
-        "40 53 48 83 EC 30 F3 0F 10 05 ?? ?? ?? ?? 0F 57 D2 F3 0F 10 1D ?? ?? ?? ?? "
-        "0F 57 C9 F3 0F 11 44 24 20 49 8B D8 E8 ?? ?? ?? ??";
+    inline constexpr const char* kInitMdlDrawSig = "40 53 48 83 EC ?? F3 0F 10 05 ?? ?? ?? ?? 0F 57 D2";
 
     inline uint8_t* WriteTrBuffer(uint8_t* p)
     {

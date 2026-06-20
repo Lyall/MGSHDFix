@@ -34,6 +34,7 @@ void GameVars::Initialize()
         GM_VRStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B DA 83 E0", "MGS2: GM_VRStatus") + 2));
         p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: p_GV_PauseLevel") + 2));
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
+        p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 0D ?? ?? ?? ?? E8", "MGS2: DG_Clock") + 2));
 
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
@@ -48,6 +49,7 @@ void GameVars::Initialize()
         spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
         spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_Clock address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Clock - (uintptr_t)baseModule);
         
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
         {
@@ -424,4 +426,14 @@ int& GameVars::GM_MenuStatus() const
         return dummyGM_MenuStatus;
     }
     return *p_GM_MenuStatus;
+}
+
+int& GameVars::DG_Clock() const
+{
+    static int dummyDG_Clock = 0;
+    if (p_DG_Clock == nullptr)
+    {
+        return dummyDG_Clock;
+    }
+    return *p_DG_Clock;
 }

@@ -77,6 +77,7 @@ public:
 
     [[nodiscard]] int& GV_PauseLevel() const;
     [[nodiscard]] int& GM_MenuStatus() const;
+    [[nodiscard]] int& DG_Clock() const;
 
     [[nodiscard]] static constexpr uint32_t GV_StrCode(const char* inputString)
     {
@@ -113,7 +114,7 @@ private:
     int* GM_GameStatus = nullptr;
     int* GM_VRStatus = nullptr;
     int* p_GV_PauseLevel = nullptr;
-
+    int* p_DG_Clock = nullptr;
 };
 
 inline GameVars g_GameVars;
