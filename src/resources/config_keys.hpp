@@ -353,6 +353,11 @@ namespace ConfigKeys
     constexpr const char* MGS2LensDroplets_Help = "";
     constexpr const char* MGS2LensDroplets_Tooltip = "Restores the refracting water droplets on the camera lens when surfacing, which are built but never drawn in the Master Collection.";
 
+    constexpr const char* MGS2GasHaze_Section = "Bugfixes";
+    constexpr const char* MGS2GasHaze_Setting = "MGS2 - Restore Gas Haze";
+    constexpr const char* MGS2GasHaze_Help = "";
+    constexpr const char* MGS2GasHaze_Tooltip = "Restores the smoke-shaped heat-haze distortion (e.g. the helicopter exhaust gas in the Plant intro), which is NaN'd out and invisible in the Master Collection.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";
