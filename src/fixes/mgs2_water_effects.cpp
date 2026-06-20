@@ -127,6 +127,7 @@ void MGS2WaterEffects::Initialize()
         return;
     }
 
+    spdlog::info("MGS 2 - Water Effects: Initializing...");
     if (uint8_t* address = Memory::PatternScan(baseModule,
             "C6 44 ?? 06 00 ?? C6 44 ?? 16 00 ?? C6 44 ?? 26 00 ?? C6 44 ?? 36 00",
             "MGS 2: Water Effects - Surface Splash Alpha"))

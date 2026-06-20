@@ -179,6 +179,8 @@ void OpticalCamoFix::Initialize() const
         return;
     }
 
+    spdlog::info("MGS 2 - Optical Camo Fix: Initializing...");
+
     constexpr ptrdiff_t kRegisterUploadCallOffset = 0x118;
     uint8_t* refractionRegisterUploadBlock = Memory::PatternScan(
         baseModule,

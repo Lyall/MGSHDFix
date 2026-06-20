@@ -555,7 +555,6 @@ static void InitializeSubsystems()
     INITIALIZE(CutscenePausing::Setup());
 
     //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(MGS2ColorFilterFix::Initialize());
     //INITIALIZE(GammaCorrection::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());
     //INITIALIZE(MG1CropBorders::Initialize());

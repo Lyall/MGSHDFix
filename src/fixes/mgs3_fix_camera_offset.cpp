@@ -35,6 +35,7 @@ void MGS3FixCameraOffset::Activate()
         return;
     }
 
+    spdlog::info("MGS 3: Cutscene camera Y offset: Initializing...");
 
     uint8_t* MGS3_BP_GetScreenOffsetYScanResult = Memory::PatternScanSilent(baseModule, "E8 ?? ?? ?? ?? F3 44 ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? 00 00");
     uintptr_t MGS3_BP_GetScreenOffsetYScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_BP_GetScreenOffsetYScanResult + 0xB);

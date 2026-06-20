@@ -242,27 +242,11 @@ namespace ConfigKeys
                                                    "Disable if you prefer pillarboxing or letterboxing with a custom resolution.";
 
     // Bugfixes
-    constexpr const char* FixVectorRain_Section = "Bugfixes";
-    constexpr const char* FixVectorRain_Setting = "Fix Rain Width";
-    constexpr const char* FixVectorRain_Help = "";
-    constexpr const char* FixVectorRain_Tooltip = "Fixes Rain/Lasers/Bullet Trails width, which is not scaled up properly from the original PS2 size (always appearing at only 1 pixel width regardless of game resolutions)\n"
-        "\n"
-        "When Fix Rain Width is enabled, an optional wireframe rendering mode becomes available - toggled by hotkey.";
-
     constexpr const char* ToggleRainShader_Section = "Bugfixes";
     constexpr const char* ToggleRainShader_Setting = "Toggle Vector Line Fixes";
     constexpr const char* ToggleRainShader_Help = "";
     constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time for comparison shots.";
 
-    constexpr const char* FixOpticalCamo_Section = "Bugfixes";
-    constexpr const char* FixOpticalCamo_Setting = "MGS2 - Fix Optical Camo Refraction";
-    constexpr const char* FixOpticalCamo_Help = "";
-    constexpr const char* FixOpticalCamo_Tooltip = "Improves MGS2 optical camouflage refraction and camo-failure visibility at higher resolutions.";
-
-    constexpr const char* FixMGS2UnderwaterFilter_Section = "Bugfixes";
-    constexpr const char* FixMGS2UnderwaterFilter_Setting = "MGS2 - Fix Underwater Filter";
-    constexpr const char* FixMGS2UnderwaterFilter_Help = "";
-    constexpr const char* FixMGS2UnderwaterFilter_Tooltip = "Restores MGS2 underwater screen and HUD distortion while keeping subtitle demos readable.";
 
     constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
     constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
@@ -287,22 +271,6 @@ namespace ConfigKeys
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "MGS2 - Fix FPV M92 Laser Position";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Tooltip = "Fixes the M92's laser sight origin point when aiming in first-person view, which is aligned with the gun's barrel instead of the attached laser aiming module.";
-
-    constexpr const char* FixVectorUI_Section = "Bugfixes";
-    constexpr const char* FixVectorUI_Setting = "Fix UI Width";
-    constexpr const char* FixVectorUI_Help = "";
-    constexpr const char* FixVectorUI_Tooltip = "Fixes UI line widths that were not scaled up from the original PS2 size.";
-
-    constexpr const char* VectorLineScale_Section = "Bugfixes";
-    constexpr const char* VectorLineScale_Setting = "Line Scale Size";
-    constexpr const char* VectorLineScale_Help = "(360 = Accurate to PCSX2)";
-    constexpr const char* VectorLineScale_Tooltip = "Lower numbers increase the width of vector/line effects.\n"
-                                                    "\n"
-                                                    "You can calculate the scale as Screen Height / Desired Pixel Width, ie (1080 Resolution / 4 Pixel Width = 270 Scale).\n"
-                                                    "\n"
-                                                    "The number will be automatically adjusted to the nearest whole pixel, don't worry about decimals.\n"
-                                                    "\n"
-                                                    "360 scale is pixel-accurate to PCSX2's corrected line widths across all resolutions - 1 pixel @ 448/OG PS2 Res, 2 @ 720p, 3 @ 1080p, 4 @ 1440, 6 @ 2160.";
 
     constexpr const char* EffectSpeedFixes_Section = "Bugfixes";
     constexpr const char* EffectSpeedFixes_Setting = "Fix Effect Speeds";
@@ -333,25 +301,12 @@ namespace ConfigKeys
     constexpr const char* FixAimingFullTilt_Help = "";
     constexpr const char* FixAimingFullTilt_Tooltip = "In MGS2, prevents aiming from dropping when tilting the analog stick fully while holding Lock-On / L1.";
 
-    constexpr const char* MGS2BloodStains_Section = "Bugfixes";
-    constexpr const char* MGS2BloodStains_Setting = "MGS2 - Restore Blood Stains";
-    constexpr const char* MGS2BloodStains_Help = "";
-    constexpr const char* MGS2BloodStains_Tooltip = "Restores the PS2 blood stains that seep into enemies' clothing when they are shot.";
-
-    constexpr const char* MGS2ScopeWarp_Section = "Bugfixes";
-    constexpr const char* MGS2ScopeWarp_Setting = "MGS2 - Restore Scope Lens Distortion";
-    constexpr const char* MGS2ScopeWarp_Help = "";
-    constexpr const char* MGS2ScopeWarp_Tooltip = "Restores the PS2 sniper scope (PSG-1) fish-eye lens distortion, which is built but never drawn in the Master Collection.";
-
-    constexpr const char* MGS2WaterEffects_Section = "Bugfixes";
-    constexpr const char* MGS2WaterEffects_Setting = "MGS2 - Restore Surfacing Water Splash";
-    constexpr const char* MGS2WaterEffects_Help = "";
-    constexpr const char* MGS2WaterEffects_Tooltip = "Restores water surface effects broken in the Master Collection";
-
-    constexpr const char* MGS2LensDroplets_Section = "Bugfixes";
-    constexpr const char* MGS2LensDroplets_Setting = "MGS2 - Restore Lens Water Droplets";
-    constexpr const char* MGS2LensDroplets_Help = "";
-    constexpr const char* MGS2LensDroplets_Tooltip = "Restores the refracting water droplets on the camera lens when surfacing, which are built but never drawn in the Master Collection.";
+    constexpr const char* MGS2_Restore_VFX_Section = "Bugfixes";
+    constexpr const char* MGS2_Restore_VFX_Setting = "Fix Broken PS2 Visual Effects";
+    constexpr const char* MGS2_Restore_VFX_Help = "";
+    constexpr const char* MGS2_Restore_VFX_Tooltip = "Restores numerous broken visual effects that were broken by the HD Collection / Master Collection.\n"
+                                                     "\n"
+                                                     "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";

@@ -41,4 +41,5 @@ void FixAimAfterEquip::Initialize()
             });
 
     }
+    spdlog::info("FixAimAfterEquip: Hooks installed.");
 }

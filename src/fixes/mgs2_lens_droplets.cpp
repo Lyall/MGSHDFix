@@ -121,6 +121,8 @@ void MGS2LensDroplets::Initialize()
         return;
     }
 
+    spdlog::info("MGS 2: Lens Droplets - Initializing...");
+
     uint8_t* mdlDraw = Memory::PatternScan(baseModule, kInitMdlDrawSig, "MGS 2: Lens Droplets - InitMdlDraw");
     if (!mdlDraw)
     {

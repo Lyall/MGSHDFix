@@ -545,17 +545,10 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_InFPSMode_Section, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Setting, g_KeepAimingAfterFiring.bKeepAimingInFPSMode);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
@@ -659,22 +652,17 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, g_InputHandler.bCaptureInputsWhileAltTabbed);
     LOG_CONFIG(ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Section, ConfigKeys::CaptureInputsWhileAltTabbedHotkey_Setting, g_InputHandler.bCaptureInputsWhileAltTabbed);
 
-    // Vector Line Fix
     if (eGameType & (MGS2 | MGS3))
     {
-        ConfigHelper::getValue(ini, ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, g_VectorScalingFix.bFixRain);
-        ConfigHelper::getValue(ini, ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, g_VectorScalingFix.bFixUI);
 
-        LOG_CONFIG(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, g_VectorScalingFix.bFixRain);
-        LOG_CONFIG(ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, g_VectorScalingFix.bFixUI);
-
+        bool bRestoreVFX = true;
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
+        LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
+        g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = bRestoreVFX;
         if (eGameType & MGS2)
         {
-            ConfigHelper::getValue(ini, ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
-            LOG_CONFIG(ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, g_OpticalCamoFix.bEnabled);
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = bRestoreVFX;
 
-            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
-            LOG_CONFIG(ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, g_MGS2UnderwaterFilterFix.bEnabled);
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             ConfigHelper::getValue(ini, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
@@ -687,10 +675,8 @@ void Config::Read()
         {
             InputHandler::GetKeybind(ini, ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, g_VectorScalingFix.vkRainShaderToggle);
             InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
-
+            g_VectorScalingFix.iVectorLineScale = 360;
             g_VectorScalingFix.bNeedsCompiler = true;
-            inipp::get_value(ini.sections[ConfigKeys::VectorLineScale_Section], ConfigKeys::VectorLineScale_Setting, g_VectorScalingFix.iVectorLineScale);
-            LOG_CONFIG(ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, g_VectorScalingFix.iVectorLineScale);
         }
     }
 

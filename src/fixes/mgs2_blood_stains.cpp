@@ -491,6 +491,8 @@ void MGS2BloodStains::Initialize()
         return;
     }
 
+    spdlog::info("MGS 2 - Blood stain fixes: Initializing...");
+
     if (uint8_t* address = Memory::PatternScan(baseModule, kOozeAddSig, "MGS 2: Blood Stains - OozeAdd"))
     {
         g_oozeAddHook = safetyhook::create_mid(address, OozeAdd_Hook);

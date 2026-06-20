@@ -221,52 +221,26 @@ std::nullopt, false, Field::Int, 100, 1, 100},
     }},
     { wxString("Restoration"), {
 
-        { ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting, ConfigKeys::FixVectorRain_Help, ConfigKeys::FixVectorRain_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::VectorLineScale_Section, ConfigKeys::VectorLineScale_Setting, ConfigKeys::VectorLineScale_Help, ConfigKeys::VectorLineScale_Tooltip,
-          std::nullopt, false, Field::Int, 360, 1, (1 << 12) },
-
-        { ConfigKeys::FixVectorUI_Section, ConfigKeys::FixVectorUI_Setting, ConfigKeys::FixVectorUI_Help, ConfigKeys::FixVectorUI_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        {"Bugfixes", "", "", "", std::nullopt, false, Field::Spacer},
-
         { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-
-        { ConfigKeys::FixOpticalCamo_Section, ConfigKeys::FixOpticalCamo_Setting, ConfigKeys::FixOpticalCamo_Help, ConfigKeys::FixOpticalCamo_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::FixMGS2UnderwaterFilter_Section, ConfigKeys::FixMGS2UnderwaterFilter_Setting, ConfigKeys::FixMGS2UnderwaterFilter_Help, ConfigKeys::FixMGS2UnderwaterFilter_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, ConfigKeys::MGS2BloodStains_Help, ConfigKeys::MGS2BloodStains_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, ConfigKeys::MGS2ScopeWarp_Help, ConfigKeys::MGS2ScopeWarp_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, ConfigKeys::MGS2WaterEffects_Help, ConfigKeys::MGS2WaterEffects_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, ConfigKeys::MGS2LensDroplets_Help, ConfigKeys::MGS2LensDroplets_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
 
-        { ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Tooltip,
-          std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 3.0, 0.0, 20.0 },
+        { ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, ConfigKeys::MGS2_Restore_VFX_Help, ConfigKeys::MGS2_Restore_VFX_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
+        { ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Help, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
 
         { ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, ConfigKeys::FixMGS2DepthOfField_Help, ConfigKeys::FixMGS2DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-        { ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Help, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+        { ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Tooltip,
+          std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 3.0, 0.0, 20.0 },
 
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
@@ -402,10 +376,10 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true},
 
         { ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, ConfigKeys::ToggleRainShader_Help, ConfigKeys::ToggleRainShader_Tooltip,
-          std::make_pair(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
+          std::make_pair(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting), false, Field::Hotkey, 0, 0, 0, "Insert" },
 
         { ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, ConfigKeys::CycleWireframeMode_Help, ConfigKeys::CycleWireframeMode_Tooltip,
-          std::make_pair(ConfigKeys::FixVectorRain_Section, ConfigKeys::FixVectorRain_Setting), false, Field::Hotkey, 0, 0, 0, "End"},
+          std::make_pair(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting), false, Field::Hotkey, 0, 0, 0, "End"},
 
         { ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },

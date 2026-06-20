@@ -20,6 +20,8 @@ void CoolantMirrorFix::ApplyFix()
         return;
     }
 
+    spdlog::info("MGS2 - Fixing coolant mirror effects.");
+
     // The function for creating the mist-receiving object uses incorrect offsets for breakable glass.
     // This seems to be an issue with calculating an average of two vectors, so dividing each component works.
 

@@ -39,6 +39,7 @@ void MuteWarning::Setup()
         return;
     }
 
+    spdlog::info("MG-MG2 | MGS 2 | MGS3: Mute Warning: Setting up mute warning...");
     if (uint8_t* muteWarningResult = Memory::PatternScan(baseModule, "66 0F 7F 0D ?? ?? ?? ?? 66 0F 6F 0D ?? ?? ?? ?? 66 0F 7F 05 ?? ?? ?? ?? 66 0F 7F 0D", "MG-MG2 | MGS 2 | MGS 3: Mute Warning"))
     {
         muteWarningAddress = reinterpret_cast<int*>(Memory::GetAbsolute(reinterpret_cast<uintptr_t>(muteWarningResult) + 0x4) + (eGameType & MGS2 ? 0x4 : 0xC));

@@ -155,6 +155,8 @@ void MGS2ScopeWarp::Initialize()
         return;
     }
 
+    spdlog::info("MGS 2: Scope Warp fix: Initializing...");
+
     uint8_t* mdlDraw = Memory::PatternScan(baseModule, kInitMdlDrawSig, "MGS 2: Scope Warp - InitMdlDraw");
     if (!mdlDraw)
     {

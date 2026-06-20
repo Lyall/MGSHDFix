@@ -351,6 +351,7 @@ void VectorScalingFix::Initialize()
         spdlog::info("MGS 2 | MGS 3: Vector Line Fix: Config disabled. Skipping");
         return;
     }
+    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Initialize: Initializing vector line fix...");
 
     if (!CompileGeometryShader())
     {

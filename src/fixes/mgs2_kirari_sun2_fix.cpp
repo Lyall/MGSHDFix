@@ -39,7 +39,7 @@ void MGS2_Kirari_Sun2Fix::ApplyFix()
         return;
     }
 
-
+    spdlog::info("MGS2 Kirari Sun Sparkle Fix: Initializing...");
 
     MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 55 ?? 33 C0 4C 8B 45 ?? 0F 28 CE", "MGS2: Sun Sparkle Fix: okajima\\effect3\\kirari_water_sun2.c -> NewKirariWaterSun2() : ", {
         float* sparkle_effect_root_pos = reinterpret_cast<float*>(ctx.rcx);
