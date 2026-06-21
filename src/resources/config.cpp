@@ -547,27 +547,10 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_InFPSMode_Section, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Setting, g_KeepAimingAfterFiring.bKeepAimingInFPSMode);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
-<<<<<<< HEAD
-=======
-    ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2GasHaze_Section, ConfigKeys::MGS2GasHaze_Setting, MGS2GasHaze::bEnabled);
->>>>>>> origin/master
     LOG_CONFIG(ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
-<<<<<<< HEAD
-=======
-    LOG_CONFIG(ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
-    LOG_CONFIG(ConfigKeys::MGS2GasHaze_Section, ConfigKeys::MGS2GasHaze_Setting, MGS2GasHaze::bEnabled);
->>>>>>> origin/master
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
@@ -683,7 +666,7 @@ void Config::Read()
         g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = bRestoreVFX;
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = bRestoreVFX;
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);

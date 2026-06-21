@@ -8,6 +8,47 @@
 
 struct FVECTOR { float x, y, z, pad; };
 
+struct FMATRIX { float m[4][4]; };
+
+struct alignas(16) DG_CHANL
+{
+    FMATRIX eye_pers;               // 0x000
+    FMATRIX eye_inv;                // 0x040
+    FMATRIX eye;                    // 0x080
+    FMATRIX pers;                   // 0x0C0
+    FMATRIX eye_pers2;              // 0x100
+    FMATRIX pers2;                  // 0x140
+    FMATRIX raise_pers;             // 0x180
+    FMATRIX raise_pers2;            // 0x1C0
+    FMATRIX raise_eye_pers;         // 0x200
+    FMATRIX raise_eye_pers2;        // 0x240
+    FMATRIX pers_no_offset;         // 0x280
+    FMATRIX eye_pers_no_offset;     // 0x2C0
+    float   screen;                 // 0x300
+    int     flag;                   // 0x304
+    int     group_id;               // 0x308
+    int     _pad0;                  // 0x30C
+    void* obj_queue;              // 0x310
+    int     n_stage;                // 0x318
+    int     _pad1;                  // 0x31C
+    void* stage_list;             // 0x320
+    int     width;                  // 0x328
+    int     height;                 // 0x32C
+    int     offset_x;               // 0x330
+    int     offset_y;               // 0x334
+    uint8_t _draw_env_align[8];     // 0x338
+    uint8_t _draw_env[416];         // 0x340  draw_env[2]
+    uint8_t _draw_offset[64];       // 0x4E0  draw_offset[2]
+    int     bg_clear_flag;          // 0x520
+    int     chanl_num;              // 0x524
+    int     high_reso;              // 0x528
+    int     _pad_end;               // 0x52C
+};
+static_assert(sizeof(DG_CHANL) == 0x530);
+static_assert(offsetof(DG_CHANL, eye_pers) == 0x000);
+static_assert(offsetof(DG_CHANL, chanl_num) == 0x524);
+
+
 enum class MGS2GameMode
 {
     Unknown,
@@ -98,6 +139,8 @@ public:
         return (hashValue == 0) ? 1 : hashValue;
     }
 
+    [[nodiscard]] DG_CHANL* DG_Chanl(int i) const { return dg_chanls ? dg_chanls + i : nullptr; }
+    
 private:
     static void OnLevelTransition();
 
@@ -115,6 +158,8 @@ private:
     int* GM_VRStatus = nullptr;
     int* p_GV_PauseLevel = nullptr;
     int* p_DG_Clock = nullptr;
+    DG_CHANL* dg_chanls = nullptr;
+
 };
 
 inline GameVars g_GameVars;

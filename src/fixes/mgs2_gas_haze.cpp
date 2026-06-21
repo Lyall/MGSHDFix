@@ -2,14 +2,11 @@
 #include "common.hpp"
 #include "mgs2_gas_haze.hpp"
 
-#include "helper.hpp"
 #include "logging.hpp"
 #include "d3d11_api.hpp"
 #include "scene_depth.hpp"
 
-#include <cstdint>
-#include <vector>
-#include <mutex>
+#include "gamevars.hpp"
 
 namespace
 {
@@ -45,7 +42,6 @@ namespace
     constexpr uint16_t  kInvisible0    = 0x1000;
     constexpr int       kNVerts        = 17;
 
-    constexpr ptrdiff_t kClockRva   = 0x15521BC;       // global DG_Clock, for frame-change detection
     constexpr ptrdiff_t kEyePersRva = 0x15522A0;       // DG_Chanl(0)->eye_pers (view-projection, 16 floats)
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
     constexpr float     kWarp      = 0.98f;            // PS2 ADDRESS_SCALE magnify
@@ -70,7 +66,7 @@ namespace
 
     std::mutex            g_vmtx;
     std::vector<GasVertex> g_verts;       // this frame's smoke triangles (filled by Act, drawn end-of-3D)
-    float g_eyePers[16] = {};             // camera view-projection snapshot (read each frame)
+    FMATRIX g_eyePers = {}; // camera view-projection snapshot (read each frame)
 
     // ---- D3D11 resources -------------------------------------------------------------------------
     const char* kShader = R"(
@@ -140,7 +136,7 @@ namespace
         uintptr_t posBuf  = *reinterpret_cast<uintptr_t*>(prim + kPrim_PosBuf);
         uintptr_t flagBuf = *reinterpret_cast<uintptr_t*>(prim + kPrim_FlagBuf);
         if (!uvBuf) return;
-        const float* M = g_eyePers;
+        const float* M = g_eyePers.m[0];
 
         for (int j = 0; j < nprims; ++j)
         {
@@ -199,12 +195,10 @@ namespace
 
     void BuildSmoke(uintptr_t work)
     {
-        uintptr_t base = reinterpret_cast<uintptr_t>(baseModule);
-        int clock = *reinterpret_cast<int*>(base + kClockRva);
-        if (clock != g_lastClock)
+        if (const int clock = g_GameVars.DG_Clock(); clock != g_lastClock)
         {
             g_lastClock = clock;
-            memcpy(g_eyePers, reinterpret_cast<const void*>(base + kEyePersRva), sizeof(g_eyePers));
+            memcpy(&g_eyePers, &g_GameVars.DG_Chanl(0)->eye_pers, sizeof(FMATRIX));
             std::lock_guard<std::mutex> lk(g_vmtx);
             g_verts.clear();
         }
@@ -434,6 +428,12 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
 void MGS2GasHaze::Initialize()
 {
     if (!(eGameType & MGS2) || !bEnabled) return;
+
+    if (g_GameVars.DG_Chanl(0) == nullptr)
+    {
+        spdlog::info("MGS 2: Gas Haze - DG_Chanl gamevars patternscan failure; haze fix disabled.");
+        return;
+    }
 
     if (uint8_t* address = Memory::PatternScan(baseModule, kSig, "MGS 2: Gas Haze - NewSmokeBlurEffect"))
     {
