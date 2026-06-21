@@ -257,6 +257,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, ConfigKeys::MGS2LensDroplets_Help, ConfigKeys::MGS2LensDroplets_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MGS2GasHaze_Section, ConfigKeys::MGS2GasHaze_Setting, ConfigKeys::MGS2GasHaze_Help, ConfigKeys::MGS2GasHaze_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
