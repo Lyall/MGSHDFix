@@ -308,6 +308,11 @@ namespace ConfigKeys
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
 
+    constexpr const char* MGS2GasHaze_Section = "Bugfixes";
+    constexpr const char* MGS2GasHaze_Setting = "MGS2 - Restore Gas Haze";
+    constexpr const char* MGS2GasHaze_Help = "";
+    constexpr const char* MGS2GasHaze_Tooltip = "Restores the smoke-shaped heat-haze distortion (e.g. the helicopter exhaust gas in the Plant intro), which is NaN'd out and invisible in the Master Collection.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";

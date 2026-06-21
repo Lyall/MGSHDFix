@@ -20,6 +20,8 @@
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
+#include "scene_depth.hpp"
+#include "mgs2_gas_haze.hpp"
 void afterPresent();
 
 namespace
@@ -146,6 +148,7 @@ namespace
                 }
                 dxgiDevice->Release();
             }
+            SceneDepth::Initialize();   // hook OMSetRenderTargets now that the context exists
             afterPresent();
         }
 
@@ -165,6 +168,8 @@ namespace
 
         g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
+
+        SceneDepth::CaptureForFrame();   // snapshot this frame's scene depth for effects to sample
 
         if (eGameType & MGS2)
         {

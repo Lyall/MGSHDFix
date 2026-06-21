@@ -70,6 +70,7 @@
     <ClCompile Include="src\fixes\mgs2_scope_warp.cpp" />
     <ClCompile Include="src\fixes\mgs2_water_effects.cpp" />
     <ClCompile Include="src\fixes\mgs2_lens_droplets.cpp" />
+    <ClCompile Include="src\fixes\mgs2_gas_haze.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
     <ClCompile Include="src\resources\config.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="src\fixes\pause_on_focus_loss.cpp" />
     <ClCompile Include="src\fixes\stereo_audio.cpp" />
     <ClCompile Include="src\resources\d3d11_api.cpp" />
+    <ClCompile Include="src\resources\scene_depth.cpp" />
     <ClCompile Include="src\resources\gamevars.cpp" />
     <ClCompile Include="src\resources\helper.cpp" />
     <ClCompile Include="src\fixes\water_reflections.cpp" />
@@ -216,6 +218,7 @@
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp" />
     <ClInclude Include="src\fixes\mgs2_water_effects.hpp" />
     <ClInclude Include="src\fixes\mgs2_lens_droplets.hpp" />
+    <ClInclude Include="src\fixes\mgs2_gas_haze.hpp" />
     <ClInclude Include="src\fixes\mgs2_autopacket.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
@@ -244,6 +247,7 @@
     <ClInclude Include="src\fixes\pause_on_focus_loss.hpp" />
     <ClInclude Include="src\fixes\stereo_audio.hpp" />
     <ClInclude Include="src\resources\d3d11_api.hpp" />
+    <ClInclude Include="src\resources\scene_depth.hpp" />
     <ClInclude Include="src\resources\helper.hpp" />
     <ClInclude Include="src\warnings\reshade_compatibility_checks.hpp" />
     <ClInclude Include="src\resources\stdafx.h" />

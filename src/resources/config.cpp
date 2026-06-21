@@ -11,6 +11,7 @@
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
 #include "mgs2_lens_droplets.hpp"
+#include "mgs2_gas_haze.hpp"
 #include "input_handler.hpp"
 #include "intro_skip.hpp"
 #include "line_scaling.hpp"
@@ -546,10 +547,27 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::KeepAimingAfterFiring_InFPSMode_Section, ConfigKeys::KeepAimingAfterFiring_InFPSMode_Setting, g_KeepAimingAfterFiring.bKeepAimingInFPSMode);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
+<<<<<<< HEAD
+=======
+    ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2GasHaze_Section, ConfigKeys::MGS2GasHaze_Setting, MGS2GasHaze::bEnabled);
+>>>>>>> origin/master
     LOG_CONFIG(ConfigKeys::FixAimingAfterEquip_Section, ConfigKeys::FixAimingAfterEquip_Setting, g_FixAimAfterEquip.bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
+<<<<<<< HEAD
+=======
+    LOG_CONFIG(ConfigKeys::MGS2BloodStains_Section, ConfigKeys::MGS2BloodStains_Setting, MGS2BloodStains::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2ScopeWarp_Section, ConfigKeys::MGS2ScopeWarp_Setting, MGS2ScopeWarp::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2WaterEffects_Section, ConfigKeys::MGS2WaterEffects_Setting, MGS2WaterEffects::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2LensDroplets_Section, ConfigKeys::MGS2LensDroplets_Setting, MGS2LensDroplets::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2GasHaze_Section, ConfigKeys::MGS2GasHaze_Setting, MGS2GasHaze::bEnabled);
+>>>>>>> origin/master
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);
