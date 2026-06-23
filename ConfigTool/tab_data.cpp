@@ -177,7 +177,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
             std::nullopt, false, Field::Bool, false},
 
         {ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, ConfigKeys::MGS2_FixDamageType_Help, ConfigKeys::MGS2_FixDamageType_Tooltip,
-            std::nullopt, false, Field::Bool, true},
+            std::nullopt, false, Field::Bool, false},
 
 
 
