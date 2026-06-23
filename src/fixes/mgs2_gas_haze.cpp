@@ -23,7 +23,10 @@ namespace
     constexpr ptrdiff_t   kAlphaHookOffset  = 8;
     constexpr float       kAlphaScale       = 120.0f;   // centre-vert alpha = pos.vw * this (byte-capped)
     constexpr int         kAlphaFloor       = 0;        // keep 0 so rim verts stay transparent (soft edge)
-    constexpr float       kTintScale        = 1.5f;     // PS2 colour 0-128 -> MC 0-255; scale 0x81 grey up
+    constexpr float       kTintScale        = 1.0f;     // raw PS2 colour byte; the shader does GS modulate
+    constexpr float       kAlphaGain        = 1.99f;    // PS2 blends at As/128; D3D uses byte/255 -> 255/128
+    constexpr float       kAlphaCap         = 0.5f;     // PS2 blend ceiling; bounds the feedback
+    constexpr float       kFeedbackGain     = 1.02f;    // PS2 GS overbright the Win32 renderer clamped away
 
     constexpr const char* kDieSig =
         "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
@@ -44,9 +47,8 @@ namespace
 
     constexpr ptrdiff_t kEyePersRva = 0x15522A0;       // DG_Chanl(0)->eye_pers (view-projection, 16 floats)
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
-    constexpr float     kWarp      = 0.98f;            // PS2 ADDRESS_SCALE magnify
-    constexpr float     kBlurOff   = 0.016f;           // PS blur kernel radius (normalised UV); wider = softer
-                                                        // puff edges (fades the per-polygon seams)
+    constexpr float     kWarp      = 0.982f;           // PS2 ADDRESS_SCALE: per-puff lens magnify (the warp)
+    constexpr float     kSoften    = 0.00176f;         // whisper seam-hiding blur (tiny; not the old smear)
     constexpr float     kDepthBias = 0.0002f;          // reversed-Z occlusion epsilon (tuned)
 
     // smk_blur is a framebuffer-sampling prim2 that MC's D3D11 backend never draws, so we draw it
@@ -78,8 +80,9 @@ namespace
         float2 invDraw;      // 1/512, 1/448
         float2 screenSize;   // backbuffer w,h
         float  depthBias;
-        float  blurOff;
-        float2 _pad;
+        float  feedbackGain; // overbright ramp (>1) compounded through the previous-frame feedback
+        float  soften;       // whisper 4-tap radius to hide circle-fan polygon seams (normalised UV)
+        float  _pad;
     };
     struct VSIn  { float2 pos:POSITION; float2 uv:TEXCOORD0; float z:TEXCOORD1; float4 col:COLOR0; };
     struct VSOut { float4 pos:SV_Position; float2 uv:TEXCOORD0; float z:TEXCOORD1; float4 col:COLOR0; };
@@ -88,22 +91,16 @@ namespace
         float2 ndc = float2(i.pos.x*invDraw.x*2.0-1.0, 1.0 - i.pos.y*invDraw.y*2.0);
         o.pos = float4(ndc, 0.0, 1.0); o.uv = i.uv; o.z = i.z; o.col = i.col; return o;
     }
-    static const float2 K[16] = {
-        float2(1,0), float2(-1,0), float2(0,1), float2(0,-1),
-        float2(0.7,0.7), float2(-0.7,0.7), float2(0.7,-0.7), float2(-0.7,-0.7),
-        float2(0.45,0), float2(-0.45,0), float2(0,0.45), float2(0,-0.45),
-        float2(0.32,0.32), float2(-0.32,0.32), float2(0.32,-0.32), float2(-0.32,-0.32) };
+    static const float2 K4[4] = { float2(1,1), float2(-1,1), float2(1,-1), float2(-1,-1) };
     float4 PS(VSOut i):SV_Target {
-        // Warp: sample the scene at the puff's displaced UV (~2% zoom), blurred over 16 taps.
-        float3 c = 0;
-        [unroll] for (int k=0;k<16;k++) c += sceneTex.Sample(sampLin, i.uv + K[k]*blurOff).rgb;
-        c /= 16.0;
-        // light-grey tint; keep low or it turns into a flat grey blob and loses the warp
-        const float  kGreyMix   = 0.12;
-        const float3 kSmokeGrey = float3(0.82, 0.82, 0.85);
-        c = lerp(c, kSmokeGrey, kGreyMix);
-        float2 sUV   = i.pos.xy / screenSize;
-        float  sceneZ = depthTex.Sample(sampPt, sUV).r;
+        // Each puff is a lens: i.uv samples the framebuffer at the projected pos scaled by ADDRESS_SCALE
+        // (~2% magnify) -> refraction. Whisper 4-tap hides the fan seams.
+        float3 c = sceneTex.Sample(sampLin, i.uv).rgb * 0.6;
+        [unroll] for (int k = 0; k < 4; k++) c += sceneTex.Sample(sampLin, i.uv + K4[k]*soften).rgb * 0.1;
+        c *= i.col.rgb * 1.9921875;   // GS modulate (vertex colour; 0x80 = neutral, 255/128 = 1.9921875)
+        c *= feedbackGain;            // PS2 GS overbright, compounded via the previous-frame feedback
+        float2 screenUV = i.pos.xy / screenSize;
+        float  sceneZ = depthTex.Sample(sampPt, screenUV).r;
         // reversed-Z (far=0, nearer=larger): hide where scene geometry is nearer than this puff
         if (sceneZ > i.z + depthBias) discard;
         return float4(c, i.col.a);
@@ -162,7 +159,9 @@ namespace
                     if (ui < 0 || ui > 4096 || vi < 0 || vi > 4096) { offscreen = true; break; }
                     float un = ui * kUv2Norm;
                     float vn = vi * kUv2Norm;
-                    int a = uv[6] + kAlphaFloor; if (a > 255) a = 255;
+                    int a = (int)(uv[6] * kAlphaGain) + kAlphaFloor;
+                    int cap = (int)(kAlphaCap * 255.0f);
+                    if (a > cap) a = cap;
                     int tr = (int)(uv[0] * kTintScale); if (tr > 255) tr = 255;
                     int tg = (int)(uv[2] * kTintScale); if (tg > 255) tg = 255;
                     int tb = (int)(uv[4] * kTintScale); if (tb > 255) tb = 255;
@@ -324,7 +323,8 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     D3D11_TEXTURE2D_DESC bb; backbuf->GetDesc(&bb);
     if (bb.SampleDesc.Count != 1) return;   // MSAA scene RT not supported by the plain copy/SRV
 
-    // Capture the (clean - no smoke/UI) scene colour as the warp source.
+    // Warp source = previous frame's result (PS2 BP_PreviousFrameTexture); fed back for accumulation.
+    bool justCreated = false;
     if (!g_capTex || g_capW != bb.Width || g_capH != bb.Height)
     {
         g_capSRV.Reset(); g_capTex.Reset();
@@ -336,8 +336,9 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
         sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; sv.Texture2D.MipLevels = 1;
         dev->CreateShaderResourceView(g_capTex.Get(), &sv, g_capSRV.GetAddressOf());
         g_capW = bb.Width; g_capH = bb.Height;
+        justCreated = true;
     }
-    ctx->CopyResource(g_capTex.Get(), backbuf.Get());
+    if (justCreated) ctx->CopyResource(g_capTex.Get(), backbuf.Get());   // seed clean
 
     // Grow the dynamic vertex buffer if needed.
     UINT need = (UINT)verts.size();
@@ -360,7 +361,7 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
         D3D11_MAPPED_SUBRESOURCE m;
         ctx->Map(g_cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m);
         float cb[8] = { 1.0f / kDrawW, 1.0f / kDrawH, (float)bb.Width, (float)bb.Height,
-                        kDepthBias, kBlurOff, 0.0f, 0.0f };
+                        kDepthBias, kFeedbackGain, kSoften, 0.0f };
         memcpy(m.pData, cb, sizeof(cb));
         ctx->Unmap(g_cb.Get(), 0);
     }
@@ -423,6 +424,9 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     if (oVB) oVB->Release(); if (oCB) oCB->Release(); if (oVCB) oVCB->Release();
     for (auto* s : oSRV) if (s) s->Release();
     for (auto* s : oSamp) if (s) s->Release();
+
+    // Persist this frame (scene + haze) as next frame's warp source -> feedback.
+    ctx->CopyResource(g_capTex.Get(), backbuf.Get());
 }
 
 void MGS2GasHaze::Initialize()
