@@ -280,6 +280,9 @@
     <ClCompile Include="src\fixes\optical_camo.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs_smaa.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -561,6 +564,9 @@
       <Filter>Shaders\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\optical_camo.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs_smaa.hpp">
       <Filter>Shaders\Headers</Filter>
     </ClInclude>
   </ItemGroup>

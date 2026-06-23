@@ -26,3 +26,6 @@
 [submodule "external/stb"]
 	path = external/stb
 	url = https://github.com/nothings/stb
+[submodule "external/smaa"]
+	path = external/smaa
+	url = https://github.com/iryoku/smaa

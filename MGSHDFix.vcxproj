@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mgs_smaa.cpp" />
     <ClCompile Include="src\fixes\color_correction.cpp" />
     <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp" />
     <ClCompile Include="src\resources\d3d11_text_overlay.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mgs_smaa.hpp" />
     <ClInclude Include="src\fixes\color_correction.hpp" />
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp" />
@@ -333,7 +335,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>external\smaa;external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
     <IntDir>Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <CustomBuildAfterTargets />
   </PropertyGroup>
