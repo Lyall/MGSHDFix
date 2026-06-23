@@ -136,6 +136,9 @@ jobs:
     - run: Copy-Item README.md "dist/plugins/${{ github.event.repository.name }}_README.md"
     - run: Copy-Item LICENSE.md "dist/plugins/${{ github.event.repository.name }}_LICENSE.md"
 
+    - run: Copy-Item "external\SMAA\LICENSE.txt" "dist/plugins/SMAA_LICENSE.md"
+    - run: Copy-Item "external\SMAA\SMAA.hlsl" "dist/plugins/SMAA.hlsl"
+
     # Package everything
     - name: Create release zip
       working-directory: dist

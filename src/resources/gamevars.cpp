@@ -11,6 +11,7 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_sunglasses.hpp"
+#include "mgs2_vamp_punch_fix.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "stat_persistence.hpp"
 
@@ -35,6 +36,7 @@ void GameVars::Initialize()
         p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: p_GV_PauseLevel") + 2));
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 0D ?? ?? ?? ?? E8", "MGS2: DG_Clock") + 2));
+        p_DG_Chanls = reinterpret_cast<DG_CHANL*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CB", "MGS2: DG_Chanls") + 3));
 
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
@@ -50,6 +52,7 @@ void GameVars::Initialize()
         spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: DG_Clock address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Clock - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_Chanls address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Chanls - (uintptr_t)baseModule);
         
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
         {
@@ -194,8 +197,10 @@ void GameVars::OnLevelTransition()
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
         g_DepthOfFieldFixes.HandleLevelTransition();
+        MGS2VampFPVPunch::HandleLevelTransition();
         ResolutionScalingFixes::HandleLevelTransition();
         D3D11TextOverlay::HandleLevelTransition();
+
     }
 }
 

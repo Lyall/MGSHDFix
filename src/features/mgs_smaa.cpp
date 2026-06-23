@@ -141,7 +141,14 @@ namespace
 // ---------------------------------------------------------------------------
 void SMAA_AA::Init()
 {
-    return;
+    if (!(eGameType & (MGS2|MGS3)))
+    {
+        return;
+    }
+    if (!bEnabled)
+    {
+        return;
+    }
     HMODULE d3dcomp = LoadLibraryA("d3dcompiler_43.dll");
     if (!d3dcomp) { spdlog::error("SMAA: failed to load d3dcompiler_43.dll"); return; }
 
@@ -351,7 +358,7 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
         ctx->Draw(3, 0);
     }
 
-    // ---- Pass 3: neighborhood blending → backbuffer ----
+    // ---- Pass 3: neighborhood blending -> backbuffer ----
     {
         ctx->OMSetRenderTargets(1, &sceneColor, nullptr);
         ctx->VSSetShader(vsNeighbor.Get(), nullptr, 0);
