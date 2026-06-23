@@ -10,8 +10,8 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#include "color_correction.hpp"
 #include "effect_speeds.hpp"
-#include "gamma_correction.hpp"
 #include "input_handler.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -21,7 +21,6 @@
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "scene_depth.hpp"
-#include "mgs2_gas_haze.hpp"
 void afterPresent();
 
 namespace
@@ -185,6 +184,7 @@ namespace
             g_MGS2UnderwaterFilterFix.BeforePresent();
         }
 
+        ColorCorrection::Draw(pSwapChain);
         D3D11TextOverlay::Tick(); //keep last.
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }

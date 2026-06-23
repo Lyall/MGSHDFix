@@ -66,14 +66,13 @@
 
 ///WIP
 #include "depth_of_field.hpp"
-#include "color_filters.hpp"
-#include "gamma_correction.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "mgs2_msx_colonel.hpp"
 #include "adjustable_captions.hpp"
+#include "color_correction.hpp"
 #include "custom_player_name.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
@@ -451,6 +450,7 @@ void afterPresent()
     MGS2_ContrastShader::Init();
     MGS2_ShimmerEffect::Init();
     g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+    ColorCorrection::Init();
     D3D11TextOverlay::Init();
     spdlog::info("afterPresent() completed");
 }
@@ -509,7 +509,7 @@ static void InitializeSubsystems()
     INITIALIZE(BP_FilesysChanges::Initialize());
 
 
-
+    INITIALIZE(ColorCorrection::Setup());
 
         //Fixes
     if (eGameType & MGS2)
@@ -559,7 +559,6 @@ static void InitializeSubsystems()
     INITIALIZE(CutscenePausing::Setup());
 
     //todo: Make ultrawide & 4:3 reposition HUD elements correctly instead of stretching them
-    //INITIALIZE(GammaCorrection::Initialize());
     //INITIALIZE(MGS3FixHolster::Initialize());
     //INITIALIZE(MG1CropBorders::Initialize());
     //INITIALIZE(MG1CustomLoadingScreens::Initialize());

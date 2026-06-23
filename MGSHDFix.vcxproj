@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\color_correction.cpp" />
     <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp" />
     <ClCompile Include="src\resources\d3d11_text_overlay.cpp" />
     <ClCompile Include="src\resources\mgs2_status_flags.cpp" />
@@ -142,7 +143,6 @@
     <ClCompile Include="src\warnings\reshade_compatibility_checks.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\features\intro_skip.cpp" />
-    <ClCompile Include="src\fixes\color_filters.cpp" />
     <ClCompile Include="src\fixes\effect_speeds.cpp" />
     <ClCompile Include="src\fixes\line_scaling.cpp" />
     <ClCompile Include="src\warnings\mute_warning.cpp" />
@@ -161,6 +161,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\color_correction.hpp" />
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp" />
     <ClInclude Include="src\resources\game_defines.hpp" />
@@ -212,7 +213,6 @@
     <ClInclude Include="src\fixes\depth_of_field.hpp" />
     <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp" />
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
-    <ClInclude Include="src\features\postfx.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
     <ClInclude Include="src\fixes\mgs2_blood_stains.hpp" />
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp" />
@@ -228,7 +228,6 @@
     <ClInclude Include="src\resources\input_handler.hpp" />
     <ClInclude Include="src\resources\logging.hpp" />
     <ClInclude Include="src\fixes\aiming_after_equip.hpp" />
-    <ClInclude Include="src\fixes\color_filters.hpp" />
     <ClInclude Include="src\resources\RegStateHelpers.hpp" />
     <ClInclude Include="src\resources\version_checking.hpp" />
     <ClInclude Include="src\resources\version.h" />
@@ -240,7 +239,6 @@
     <ClInclude Include="src\warnings\asi_loader_checks.hpp" />
     <ClInclude Include="src\resources\gamevars.hpp" />
     <ClInclude Include="src\resources\common.hpp" />
-    <ClInclude Include="src\features\gamma_correction.hpp" />
     <ClInclude Include="src\features\intro_skip.hpp" />
     <ClInclude Include="src\fixes\effect_speeds.hpp" />
     <ClInclude Include="src\fixes\line_scaling.hpp" />

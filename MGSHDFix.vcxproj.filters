@@ -19,9 +19,6 @@
     <ClCompile Include="src\features\intro_skip.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\color_filters.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\features\mg1_custom_loading_screens.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
@@ -107,9 +104,6 @@
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\mgs2_blood_stains.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\mgs2_scope_warp.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -132,9 +126,6 @@
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fixes\optical_camo.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\resources\probe.cpp">
@@ -239,12 +230,6 @@
     <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\playtime_fixes.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -278,6 +263,23 @@
     <ClCompile Include="src\resources\d3d11_text_overlay.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_gas_haze.cpp" />
+    <ClCompile Include="src\resources\scene_depth.cpp" />
+    <ClCompile Include="src\fixes\mgs2_blood_stains.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\color_correction.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\optical_camo.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -292,13 +294,7 @@
     <ClInclude Include="src\fixes\aiming_after_equip.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\color_filters.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\features\distance_culling.hpp">
-      <Filter>Features\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\features\gamma_correction.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_custom_loading_screens.hpp">
@@ -382,9 +378,6 @@
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_blood_stains.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
@@ -409,13 +402,7 @@
     <ClInclude Include="src\fixes\depth_of_field.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixes\optical_camo.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\unit_tests.hpp">
@@ -437,9 +424,6 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_crop_borders.hpp">
-      <Filter>Features\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\features\postfx.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp">
@@ -520,17 +504,8 @@
     <ClInclude Include="src\resources\mgs2_status_flags.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp">
       <Filter>Features\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_shimmer.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp">
-      <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp">
       <Filter>Fixes\Headers</Filter>
@@ -564,6 +539,29 @@
     </ClInclude>
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_gas_haze.hpp" />
+    <ClInclude Include="src\resources\scene_depth.hpp" />
+    <ClInclude Include="src\fixes\color_correction.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_blood_stains.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_underwater_filter.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\optical_camo.hpp">
+      <Filter>Shaders\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -621,6 +619,12 @@
     </Filter>
     <Filter Include="Config">
       <UniqueIdentifier>{cd1768eb-087f-41c0-a320-8702dca4749f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{69e22145-5e0d-43e7-9e9f-34e7016229ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Headers">
+      <UniqueIdentifier>{ef16eb0f-133c-4433-af73-3112a22c750d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
