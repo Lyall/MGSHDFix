@@ -7,6 +7,8 @@
 #include "gamevars.hpp"
 #include "logging.hpp"
 
+#include <cmath>
+
 
 /////////////////////////////////////////////////////////////////
 /// Corrects various visual effects in MGS2 which were
@@ -396,6 +398,28 @@ void EffectSpeedFix::Initialize()
         }
     })*/
 
+#pragma endregion
+
+#pragma region demo_lens_flare
+    // lens_flare.c Act(): MC runs the sun flare dim and culls its halation off-screen, so the PS2 soft
+    // bloom (underwater Plant intro) collapses to a glint. Lift alpha, relax the off-screen cull + edge-fade.
+    if (uint8_t* lensFlareRamp = Memory::PatternScan(baseModule,
+            "8B 05 ?? ?? ?? ?? FF C0 66 0F 6E C0 0F 5B C0 F3 0F 59 83 3C 01 00 00 44 39 93 34 01 00 00",
+            "MGS 2: Effect Speed Fix: user\\shibata\\demo\\lens_flare.c -> Act()"))
+    {
+        static SafetyHookMid lensFlareAlphaHook{};
+        lensFlareAlphaHook = safetyhook::create_mid(lensFlareRamp + 0x65,    // after the alpha_ratio clamp
+            [](SafetyHookContext& ctx) { *reinterpret_cast<float*>(ctx.rbx + 0x138) = 1.6f; });
+        LOG_HOOK(lensFlareAlphaHook, "MGS 2: Effect Speed Fix: lens flare intensity")
+        static SafetyHookMid lensFlareCullHook{};
+        lensFlareCullHook = safetyhook::create_mid(lensFlareRamp + 0x106,    // off-screen cull threshold (1.4)
+            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] = 5.0f; });
+        LOG_HOOK(lensFlareCullHook, "MGS 2: Effect Speed Fix: lens flare cull")
+        static SafetyHookMid lensFlareEdgeHook{};
+        lensFlareEdgeHook = safetyhook::create_mid(lensFlareRamp + 0x180,    // edge-fade divisor (0.3)
+            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] = 3.0f; });
+        LOG_HOOK(lensFlareEdgeHook, "MGS 2: Effect Speed Fix: lens flare edge-fade")
+    }
 #pragma endregion
 
     if (Util::CheckForASIFiles("MGSFPSUnlock", false, false, "2025-05-25"))
