@@ -45,7 +45,6 @@ namespace
     constexpr uint16_t  kInvisible0    = 0x1000;
     constexpr int       kNVerts        = 17;
 
-    constexpr ptrdiff_t kEyePersRva = 0x15522A0;       // DG_Chanl(0)->eye_pers (view-projection, 16 floats)
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
     constexpr float     kWarp      = 0.982f;           // PS2 ADDRESS_SCALE: per-puff lens magnify (the warp)
     constexpr float     kSoften    = 0.00176f;         // whisper seam-hiding blur (tiny; not the old smear)

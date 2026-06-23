@@ -139,7 +139,7 @@ public:
         return (hashValue == 0) ? 1 : hashValue;
     }
 
-    [[nodiscard]] DG_CHANL* DG_Chanl(int i) const { return dg_chanls ? dg_chanls + i : nullptr; }
+    [[nodiscard]] DG_CHANL* DG_Chanl(int i) const { return p_DG_Chanls ? p_DG_Chanls + i : nullptr; }
     
 private:
     static void OnLevelTransition();
@@ -158,7 +158,7 @@ private:
     int* GM_VRStatus = nullptr;
     int* p_GV_PauseLevel = nullptr;
     int* p_DG_Clock = nullptr;
-    DG_CHANL* dg_chanls = nullptr;
+    DG_CHANL* p_DG_Chanls = nullptr;
 
 };
 
