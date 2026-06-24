@@ -673,6 +673,13 @@ namespace ConfigKeys
                                                             "\n"
                                                             "Substance modified the rotation to align closer to the actual orientation of the struts.";
 
+    constexpr const char* MGS2_RestoreElevatorGlitch_Section = "Various";
+    constexpr const char* MGS2_RestoreElevatorGlitch_Setting = "MGS2 - Restore SoL Elevator Glitch";
+    constexpr const char* MGS2_RestoreElevatorGlitch_Help = "";
+    constexpr const char* MGS2_RestoreElevatorGlitch_Tooltip = "Speedrun opt-in. Re-enables the Sons of Liberty floor-clip: going prone at an elevator call button and operating it forces a stand-up with the player's origin left on the floor, clipping through it.\n"
+                                                               "\n"
+                                                               "Substance gated elevator operation to standing/squat to patch this out. Off by default.";
+
 
     constexpr const char* MGS2_PhoneJingle_Section = "Various";
     constexpr const char* MGS2_PhoneJingle_Setting = "MGS2 - Restore Japanese Phone Ringtone";

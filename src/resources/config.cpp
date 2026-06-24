@@ -53,6 +53,7 @@
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
 #include "mgs2_restore_sol_radar.hpp"
+#include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
@@ -697,6 +698,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2_RestoreSoLRadar::bEnabled);
     LOG_CONFIG(ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2_RestoreSoLRadar::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreElevatorGlitch_Section, ConfigKeys::MGS2_RestoreElevatorGlitch_Setting, MGS2_RestoreElevatorGlitch::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreElevatorGlitch_Section, ConfigKeys::MGS2_RestoreElevatorGlitch_Setting, MGS2_RestoreElevatorGlitch::bEnabled);
 
     std::string sOutdatedSaveDataSetting;
     ConfigHelper::getValue(ini, ConfigKeys::RenameOrRemoveCorruptSaveData_Section, ConfigKeys::RenameOrRemoveCorruptSaveData_Setting, sOutdatedSaveDataSetting);
