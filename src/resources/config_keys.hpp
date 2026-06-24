@@ -110,8 +110,8 @@ namespace ConfigKeys
 
 
     constexpr const char* MG1_Crop_Overscan_Enabled_Section = "Enhancements and Tweaks";
-    constexpr const char* MG1_Crop_Overscan_Enabled_Setting = "Crop Overscan Area";
-    constexpr const char* MG1_Crop_Overscan_Enabled_Help = "(For MG1 / MG2)";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Setting = "MG1 && MG2 - Crop Overscan Area";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Help = "";
     constexpr const char* MG1_Crop_Overscan_Enabled_Tooltip = "Enables cropping of overscan areas in MG1.";
 
     constexpr const char* Caption_Scale_Section = "Caption Settings";
@@ -274,7 +274,7 @@ namespace ConfigKeys
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
-    constexpr const char* MGS2_Increase_Shadow_Resolution_Section = FixMGS2DepthOfField_Section;
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Section = "Enhancements and Tweaks";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "MGS2 - Fix Shadow Resolution Scaling";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Help = "";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Tooltip = "The game's realtime shadows are hardcoded to 256x256 resolution.\n"
@@ -285,12 +285,6 @@ namespace ConfigKeys
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "MGS2 - Fix FPV M92 Laser Position";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Tooltip = "Fixes the M92's laser sight origin point when aiming in first-person view, which is aligned with the gun's barrel instead of the attached laser aiming module.";
-
-    constexpr const char* EffectSpeedFixes_Section = "Bugfixes";
-    constexpr const char* EffectSpeedFixes_Setting = "Fix Effect Speeds";
-    constexpr const char* EffectSpeedFixes_Help = "";
-    constexpr const char* EffectSpeedFixes_Tooltip = "Fixes various effects throughout MGS2 & MGS3 which originally had their durations tuned for the PS2's FPS slowdowns during intense cutscenes, "
-                                                     "resulting in them running at double (or higher) their intended speed & ending early on modern / more powerful hardware.";
 
     constexpr const char* EnablePauseOnFocusLoss_Section = "Various";
     constexpr const char* EnablePauseOnFocusLoss_Setting = "Pause On Focus Loss";

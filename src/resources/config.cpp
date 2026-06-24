@@ -57,6 +57,7 @@
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
 #include "mg1_display_scaling.hpp"
+#include "mgs2_contrast_fix.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
 #include "mgs_smaa.hpp"
 
@@ -666,10 +667,11 @@ void Config::Read()
         bool bRestoreVFX = true;
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
-        g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = bRestoreVFX;
+        g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = g_EffectSpeedFix.isEnabled = bRestoreVFX;
+
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled =bRestoreVFX;
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
@@ -689,9 +691,6 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);
     LOG_CONFIG(ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, g_EffectSpeedFix.isEnabled);
-    LOG_CONFIG(ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, g_EffectSpeedFix.isEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
     LOG_CONFIG(ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);

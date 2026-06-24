@@ -126,10 +126,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ConfigKeys::ColorCorrection_Enabled_Help, ConfigKeys::ColorCorrection_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-                  { ConfigKeys::EnableSMAA_Section, "",
-          "", "",
-          std::nullopt, false, Field::Spacer },
 
+        { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
 
         { ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, ConfigKeys::AnisotropicFiltering_Help, ConfigKeys::AnisotropicFiltering_Tooltip,
@@ -238,12 +237,6 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
     }},
     { wxString("Restoration"), {
-
-        { ConfigKeys::EffectSpeedFixes_Section, ConfigKeys::EffectSpeedFixes_Setting, ConfigKeys::EffectSpeedFixes_Help, ConfigKeys::EffectSpeedFixes_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
-          std::nullopt, false, Field::Bool, true },
 
 
         { ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, ConfigKeys::MGS2_Restore_VFX_Help, ConfigKeys::MGS2_Restore_VFX_Tooltip,

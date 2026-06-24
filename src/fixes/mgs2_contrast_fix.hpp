@@ -7,7 +7,7 @@ namespace MGS2_ContrastShader
     void Draw(IDXGISwapChain* swap, int keepR, int keepG, int keepB, int keepA, int negaFlag);
 
     inline bool bShaderLoaded = false;
-
+    inline bool bEnabled = true;
 
     struct ContrastWork {
         uint8_t _pad[152];
