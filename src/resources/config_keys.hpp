@@ -83,20 +83,36 @@ namespace ConfigKeys
 
 
 
-    constexpr const char* AnisotropicFiltering_Section = "Texture Filtering";
+    constexpr const char* AnisotropicFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
     constexpr const char* AnisotropicFiltering_Help = "";
     constexpr const char* AnisotropicFiltering_Tooltip = "Controls the level of anisotropic filtering applied to textures.\n"
                                                          "\n"
                                                          "Higher values improve texture detail while far away or at oblique angles.";
 
-    constexpr const char* DisableTextureFiltering_Section = "Texture Filtering";
+    constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
     constexpr const char* DisableTextureFiltering_Help = "";
     constexpr const char* DisableTextureFiltering_Tooltip = "Disables all texture filtering to use nearest neighbor sampling.\n"
                                                             "\n"
                                                             "This will give the game a pixelated / Minecraft-esque appearance.";
 
+
+    constexpr const char* EnableSMAA_Section = "Enhancements and Tweaks";
+    constexpr const char* EnableSMAA_Setting = "Enable SMAA Anti-Aliasing";
+    constexpr const char* EnableSMAA_Help = "";
+    constexpr const char* EnableSMAA_Tooltip = "";
+
+    constexpr const char* ColorCorrection_Enabled_Section = "Enhancements and Tweaks";
+    constexpr const char* ColorCorrection_Enabled_Setting = "Boost Color Levels";
+    constexpr const char* ColorCorrection_Enabled_Help = "";
+    constexpr const char* ColorCorrection_Enabled_Tooltip = "Boosts color levels to simulate a more vibrant CRT screen.";
+
+
+    constexpr const char* MG1_Crop_Overscan_Enabled_Section = "Enhancements and Tweaks";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Setting = "Crop Overscan Area";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Help = "(For MG1 / MG2)";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Tooltip = "Enables cropping of overscan areas in MG1.";
 
     constexpr const char* Caption_Scale_Section = "Caption Settings";
     constexpr const char* Caption_Scale_Setting = "Caption Size (%)";
@@ -211,8 +227,6 @@ namespace ConfigKeys
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Setting = "MGS2 - Use Character Names for Lifebar";
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Help = "";
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Tooltip = "When enabled, the game will use actual character names (ie \"Raiden\" / \"Snake\") for the lifebar instead of saying \"LIFE\", matching later entries in the MGS series.";
-
-
 
     // Ultrawide
     constexpr const char* FixAspectRatio_Section = "Ultra-Wide / 16:10+";

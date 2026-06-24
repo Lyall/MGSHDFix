@@ -48,6 +48,7 @@
 #include "mgs2_underwater_filter.hpp"
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
+#include "color_correction.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "resolution_scaling_fixes.hpp"
 #include "texture_live_swaps.hpp"
@@ -55,7 +56,9 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
+#include "mg1_display_scaling.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
+#include "mgs_smaa.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -928,6 +931,27 @@ void Config::Read()
             LOG_CONFIG(ConfigKeys::MGS2_Lifebar_Name_Custom_Section, ConfigKeys::MGS2_Lifebar_Name_Custom_Setting, CustomPlayerName::sCustomName);
         }
     }
+
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
+    LOG_CONFIG(ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
+
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
+    LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bEnabled);
+
+
+
+    /*
+
+    ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
+    LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
+    */
 
 
     ConfigLogger::Flush();
