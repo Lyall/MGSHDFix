@@ -178,11 +178,13 @@ void MGS2_ShimmerEffect::Init()
 {
     if (!bHooksSet)
     {
+        spdlog::error("MGS2_ShimmerEffect: Hooks not set!");
         return;
     }
 
     if (bShaderLoaded)
     {
+        spdlog::error("MGS2_ShimmerEffect: Shader already loaded");
         return;
     }
 
@@ -286,7 +288,7 @@ void MGS2_ShimmerEffect::Init()
 
     bShaderLoaded = true;
 
-    SceneDepth::SetEndOf3DCallback(&Draw);
+    SceneDepth::SetEndOf3DCallback(&MGS2_ShimmerEffect::Draw);
 
     spdlog::info("MGS2_ShimmerEffect initialized.");
 }

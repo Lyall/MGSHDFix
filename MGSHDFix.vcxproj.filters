@@ -128,9 +128,6 @@
     <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\resources\probe.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\cpu_core_limit.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -147,9 +144,6 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
-    <ClCompile Include="src\features\settings_pesistence.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
     <ClCompile Include="src\warnings\bugfix_mod_checks.cpp">
@@ -260,8 +254,6 @@
     <ClCompile Include="src\resources\d3d11_text_overlay.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\mgs2_gas_haze.cpp" />
-    <ClCompile Include="src\resources\scene_depth.cpp" />
     <ClCompile Include="src\fixes\mgs2_blood_stains.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
@@ -285,6 +277,15 @@
     </ClCompile>
     <ClCompile Include="src\features\mg1_display_scaling.cpp">
       <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\settings_pesistence.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_gas_haze.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\scene_depth.cpp">
+      <Filter>APIs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -543,8 +544,6 @@
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\mgs2_gas_haze.hpp" />
-    <ClInclude Include="src\resources\scene_depth.hpp" />
     <ClInclude Include="src\fixes\color_correction.hpp">
       <Filter>Shaders\Headers</Filter>
     </ClInclude>
@@ -577,6 +576,12 @@
     </ClInclude>
     <ClInclude Include="src\features\mg1_display_scaling.hpp">
       <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_gas_haze.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\scene_depth.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

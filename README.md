@@ -45,6 +45,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to adjust scale and opacity of cutscene captions.
 - Option to disable Steam Achievement unlocking. (For speedrunners.)
 
+#### MG / MG2 Specific Features
+- Option to crop overscan borders on the top/bottom of the screen.
+
 #### MGS2 Specific Features:
 - Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
 - Option to enable Bluepoint's cancelled First Person Shooter camera.
@@ -213,15 +216,11 @@ This list will contain bugs which may or may not be fixed.
 
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
-- MG1 / MG2 - Crop Screen Borders (2011 HDC)
-- MGS2 - Fix Broken Cutscene Color Filters (2002 Xbox)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
 - MGS3 - Fix Angle of Attack Indicator in FPV with NVG & Thermals (2011 HDC)
 - MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
-- MGS2 / MGS3 - Add Custom Anti-Aliasing Solution (2023 MC)
-- MGS2 / MGS3 - Correct Display Gamma & RGB Levels (2011 HDC)
 - MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
-- MGS2 / MGS3 - Fix Depth of Field Scaling Strength (2002 Xbox / 2011 HDC)
+- MGS3 - Fix Depth of Field Scaling Strength (2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
 
 ## Building

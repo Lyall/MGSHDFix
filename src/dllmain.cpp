@@ -603,7 +603,6 @@ static void InitializeSubsystems()
 
 #if !defined(RELEASE_BUILD)
     INITIALIZE(UnitTests::runAllTests());
-    ScanAndPatchSkybox();
 
 #endif
 }

@@ -117,6 +117,21 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::RenderScaleHeight_Section, ConfigKeys::RenderScaleHeight_Setting, ConfigKeys::RenderScaleHeight_Help, ConfigKeys::RenderScaleHeight_Tooltip,
           std::make_pair(ConfigKeys::ForceWindowSize_Section, ConfigKeys::ForceWindowSize_Setting), false, Field::Int, 0, 0, D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION },
 
+        { ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, ConfigKeys::EnableSMAA_Help, ConfigKeys::EnableSMAA_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, ConfigKeys::MG1_Crop_Overscan_Enabled_Help, ConfigKeys::MG1_Crop_Overscan_Enabled_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+        { ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ConfigKeys::ColorCorrection_Enabled_Help, ConfigKeys::ColorCorrection_Enabled_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+                  { ConfigKeys::EnableSMAA_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+
+
         { ConfigKeys::AnisotropicFiltering_Section, ConfigKeys::AnisotropicFiltering_Setting, ConfigKeys::AnisotropicFiltering_Help, ConfigKeys::AnisotropicFiltering_Tooltip,
           std::make_pair(ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting), true, Field::Int, 16, 0, D3D11_DEFAULT_MAX_ANISOTROPY},
 

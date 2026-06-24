@@ -129,7 +129,6 @@
     <ClCompile Include="src\features\mg1_custom_loading_screens.cpp" />
     <ClCompile Include="src\features\distance_culling.cpp" />
     <ClCompile Include="src\fixes\aiming_after_equip.cpp" />
-    <ClCompile Include="src\resources\probe.cpp" />
     <ClCompile Include="src\resources\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

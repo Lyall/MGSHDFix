@@ -298,8 +298,14 @@ namespace
 
 void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth)
 {
-    if (!(eGameType & MGS2) || !bEnabled || !sceneColor) return;
-    if (!EnsureD3D()) return;
+    if (!(eGameType & MGS2) || !bEnabled || !sceneColor)
+    {
+        return;
+    }
+    if (!EnsureD3D())
+    {
+        return;
+    }
 
     // Snapshot this frame's geometry.
     std::vector<GasVertex> verts;
@@ -429,7 +435,16 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
 
 void MGS2GasHaze::Initialize()
 {
-    if (!(eGameType & MGS2) || !bEnabled) return;
+    if (!(eGameType & MGS2))
+    {
+        return;
+    }
+
+    if (!bEnabled)
+    {
+        spdlog::info("MGS 2: Gas Haze - disabled by config; haze fix disabled.");
+        return;
+    }
 
     if (g_GameVars.DG_Chanl(0) == nullptr)
     {
@@ -464,4 +479,5 @@ void MGS2GasHaze::Initialize()
 
     // Draw the smoke at the end of the 3D pass (before UI/titles/credits) instead of at Present.
     SceneDepth::SetEndOf3DCallback(&MGS2GasHaze::DrawInto);
+    spdlog::info("MGS 2: Gas Haze - haze fix initialized.");
 }
