@@ -160,6 +160,7 @@
     <ClCompile Include="src\features\stat_persistence.cpp" />
     <ClCompile Include="src\resources\unit_tests.cpp" />
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
+    <ClCompile Include="src\windows_multiplane_overlay_warning.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\features\mgs_smaa.hpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="src\features\stat_persistence.hpp" />
     <ClInclude Include="src\resources\unit_tests.hpp" />
     <ClInclude Include="src\features\swap_menu_buttons.hpp" />
+    <ClInclude Include="src\windows_multiplane_overlay_warning.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MGSHDFix.ini" />

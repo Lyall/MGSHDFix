@@ -283,6 +283,9 @@
     <ClCompile Include="src\features\mgs_smaa.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="src\windows_multiplane_overlay_warning.cpp">
+      <Filter>Warnings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -432,9 +435,6 @@
     <ClInclude Include="src\warnings\bugfix_mod_checks.hpp">
       <Filter>Warnings\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\warnings\background_shuffle_warning.hpp">
-      <Filter>Warnings</Filter>
-    </ClInclude>
     <ClInclude Include="src\warnings\check_gamesave_folder.hpp">
       <Filter>Warnings\Headers</Filter>
     </ClInclude>
@@ -568,6 +568,12 @@
     </ClInclude>
     <ClInclude Include="src\features\mgs_smaa.hpp">
       <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\warnings\background_shuffle_warning.hpp">
+      <Filter>Warnings\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\windows_multiplane_overlay_warning.hpp">
+      <Filter>Warnings\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
