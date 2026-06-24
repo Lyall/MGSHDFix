@@ -251,7 +251,6 @@ fail:
     spdlog::info("SMAA: shader compilation failed");
 }
 
-// ---------------------------------------------------------------------------
 void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* /*depth*/)
 {
     if (!bInitialized) return;
@@ -270,7 +269,8 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
 
     if (bbDesc.Width != g_width || bbDesc.Height != g_height)
     {
-        if (!CreateRTs(dev, bbDesc.Width, bbDesc.Height, bbDesc.Format)) {
+        if (!CreateRTs(dev, bbDesc.Width, bbDesc.Height, bbDesc.Format))
+        {
             spdlog::error("SMAA: RT resize failed {}x{}", bbDesc.Width, bbDesc.Height);
             return;
         }
@@ -280,8 +280,13 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     {
         D3D11_MAPPED_SUBRESOURCE m;
         ctx->Map(cbSMAA.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m);
-        float data[4] = { 1.f / bbDesc.Width, 1.f / bbDesc.Height,
-                          static_cast<float>(bbDesc.Width), static_cast<float>(bbDesc.Height) };
+        float data[4] =
+        {
+            1.f / bbDesc.Width,
+            1.f / bbDesc.Height,
+            static_cast<float>(bbDesc.Width),
+            static_cast<float>(bbDesc.Height)
+        };
         memcpy(m.pData, data, 16);
         ctx->Unmap(cbSMAA.Get(), 0);
     }
@@ -289,24 +294,35 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     // Flip-model workaround: copy backbuffer to SRV-able texture
     ctx->CopyResource(texColorCopy.Get(), bb.Get());
 
-
-    D3D11_VIEWPORT vp = { 0, 0, static_cast<float>(bbDesc.Width), static_cast<float>(bbDesc.Height), 0, 1 };
+    D3D11_VIEWPORT vp =
+    {
+        0,
+        0,
+        static_cast<float>(bbDesc.Width),
+        static_cast<float>(bbDesc.Height),
+        0,
+        1
+    };
 
     // ---- Save state ----
-    ID3D11RenderTargetView*  oldRTV[8] = {};
-    ID3D11DepthStencilView*  oldDSV    = nullptr;
-    ID3D11BlendState*        oldBS     = nullptr;
-    ID3D11DepthStencilState* oldDSS    = nullptr;
-    ID3D11RasterizerState*   oldRS     = nullptr;
-    ID3D11VertexShader*      oldVS     = nullptr;
-    ID3D11PixelShader*       oldPS     = nullptr;
-    ID3D11InputLayout*       oldIL     = nullptr;
-    ID3D11Buffer*            oldCB[1]  = {};
+    ID3D11RenderTargetView* oldRTV[8] = {};
+    ID3D11DepthStencilView* oldDSV = nullptr;
+    ID3D11BlendState* oldBS = nullptr;
+    ID3D11DepthStencilState* oldDSS = nullptr;
+    ID3D11RasterizerState* oldRS = nullptr;
+    ID3D11VertexShader* oldVS = nullptr;
+    ID3D11PixelShader* oldPS = nullptr;
+    ID3D11InputLayout* oldIL = nullptr;
+    ID3D11Buffer* oldVSCB[1] = {};
+    ID3D11Buffer* oldPSCB[1] = {};
     ID3D11ShaderResourceView* oldSRV[5] = {};
-    ID3D11SamplerState*      oldSamp[2] = {};
+    ID3D11SamplerState* oldSamp[2] = {};
     D3D11_PRIMITIVE_TOPOLOGY oldTopo;
-    D3D11_VIEWPORT           oldVP[1]; UINT numVP = 1;
-    float oldBF[4]; UINT oldBMask, oldStRef;
+    D3D11_VIEWPORT oldVP[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE] = {};
+    UINT numVP = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
+    float oldBF[4];
+    UINT oldBMask;
+    UINT oldStRef;
 
     ctx->OMGetRenderTargets(8, oldRTV, &oldDSV);
     ctx->OMGetBlendState(&oldBS, oldBF, &oldBMask);
@@ -317,7 +333,8 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     ctx->PSGetShader(&oldPS, nullptr, nullptr);
     ctx->IAGetInputLayout(&oldIL);
     ctx->IAGetPrimitiveTopology(&oldTopo);
-    ctx->VSGetConstantBuffers(0, 1, oldCB);
+    ctx->VSGetConstantBuffers(0, 1, oldVSCB);
+    ctx->PSGetConstantBuffers(0, 1, oldPSCB);
     ctx->PSGetShaderResources(0, 5, oldSRV);
     ctx->PSGetSamplers(0, 2, oldSamp);
 
@@ -330,7 +347,12 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     ctx->OMSetBlendState(bsOpaque.Get(), nullptr, 0xFFFFFFFF);
     ctx->VSSetConstantBuffers(0, 1, cbSMAA.GetAddressOf());
     ctx->PSSetConstantBuffers(0, 1, cbSMAA.GetAddressOf());
-    ID3D11SamplerState* samplers[2] = { sampLinear.Get(), sampPoint.Get() };
+
+    ID3D11SamplerState* samplers[2] =
+    {
+        sampLinear.Get(),
+        sampPoint.Get()
+    };
     ctx->PSSetSamplers(0, 2, samplers);
 
     // ---- Pass 1: edge detection ----
@@ -351,7 +373,16 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
         ctx->OMSetRenderTargets(1, rtvBlend.GetAddressOf(), nullptr);
         ctx->VSSetShader(vsBlend.Get(), nullptr, 0);
         ctx->PSSetShader(psBlend.Get(), nullptr, 0);
-        ID3D11ShaderResourceView* srvs[5] = { nullptr, srvEdges.Get(), nullptr, srvArea.Get(), srvSearch.Get() };
+
+        ID3D11ShaderResourceView* srvs[5] =
+        {
+            nullptr,
+            srvEdges.Get(),
+            nullptr,
+            srvArea.Get(),
+            srvSearch.Get()
+        };
+
         ctx->PSSetShaderResources(0, 5, srvs);
         ctx->Draw(3, 0);
     }
@@ -361,10 +392,21 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
         ctx->OMSetRenderTargets(1, &sceneColor, nullptr);
         ctx->VSSetShader(vsNeighbor.Get(), nullptr, 0);
         ctx->PSSetShader(psNeighbor.Get(), nullptr, 0);
-        ID3D11ShaderResourceView* srvs[3] = { srvColor.Get(), srvEdges.Get(), srvBlend.Get() };
+
+        ID3D11ShaderResourceView* srvs[3] =
+        {
+            srvColor.Get(),
+            srvEdges.Get(),
+            srvBlend.Get()
+        };
+
         ctx->PSSetShaderResources(0, 3, srvs);
         ctx->Draw(3, 0);
     }
+
+    // Unbind SMAA resources before restoring render targets/state
+    ID3D11ShaderResourceView* nullSRVs[5] = {};
+    ctx->PSSetShaderResources(0, 5, nullSRVs);
 
     // ---- Restore state ----
     ctx->OMSetRenderTargets(8, oldRTV, oldDSV);
@@ -376,19 +418,33 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     ctx->PSSetShader(oldPS, nullptr, 0);
     ctx->IASetInputLayout(oldIL);
     ctx->IASetPrimitiveTopology(oldTopo);
-    ctx->VSSetConstantBuffers(0, 1, oldCB);
+    ctx->VSSetConstantBuffers(0, 1, oldVSCB);
+    ctx->PSSetConstantBuffers(0, 1, oldPSCB);
     ctx->PSSetShaderResources(0, 5, oldSRV);
     ctx->PSSetSamplers(0, 2, oldSamp);
 
-    for (auto* r : oldRTV)  if (r) r->Release();
-    if (oldDSV)  oldDSV->Release();
-    if (oldBS)   oldBS->Release();
-    if (oldDSS)  oldDSS->Release();
-    if (oldRS)   oldRS->Release();
-    if (oldVS)   oldVS->Release();
-    if (oldPS)   oldPS->Release();
-    if (oldIL)   oldIL->Release();
-    if (oldCB[0])  oldCB[0]->Release();
-    for (auto* r : oldSRV)  if (r) r->Release();
-    for (auto* r : oldSamp) if (r) r->Release();
+    for (auto* r : oldRTV)
+    {
+        if (r) r->Release();
+    }
+
+    if (oldDSV) oldDSV->Release();
+    if (oldBS) oldBS->Release();
+    if (oldDSS) oldDSS->Release();
+    if (oldRS) oldRS->Release();
+    if (oldVS) oldVS->Release();
+    if (oldPS) oldPS->Release();
+    if (oldIL) oldIL->Release();
+    if (oldVSCB[0]) oldVSCB[0]->Release();
+    if (oldPSCB[0]) oldPSCB[0]->Release();
+
+    for (auto* r : oldSRV)
+    {
+        if (r) r->Release();
+    }
+
+    for (auto* r : oldSamp)
+    {
+        if (r) r->Release();
+    }
 }
