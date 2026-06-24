@@ -4,7 +4,6 @@
 #include "d3d11_api.hpp"
 
 #include "gpu_check.hpp"
-#include "line_scaling.hpp"
 #include "logging.hpp"
 
 #pragma comment(lib, "d3d11.lib")
@@ -16,7 +15,6 @@
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_first_person_view_mode.hpp"
-#include "mgs2_shimmer.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
@@ -180,7 +178,6 @@ namespace
             {
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
-            MGS2_ShimmerEffect::Draw(pSwapChain);
             g_MGS2UnderwaterFilterFix.BeforePresent();
         }
 
@@ -254,19 +251,21 @@ namespace
 
         return result;
     }
+
 }
 
 void D3D11Hooks::Initialize()
 {
+    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
+    if (d3dcompiler)
+    {
+        g_D3D11Hooks.D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
+    }
+    else
+    {
+        spdlog::error("D3D11Hooks: failed to load d3dcompiler_43.dll"); 
+    }
+
     CreateDXGIFactory_hook = safetyhook::create_inline(CreateDXGIFactory, reinterpret_cast<void*>(CreateDXGIFactory_hooked));
     LOG_HOOK(CreateDXGIFactory_hook, "CreateDXGIFactory");
-}
-
-void D3D11Hooks::UnloadCompiler(const HMODULE d3dcompiler)
-{
-    if (!g_VectorScalingFix.bNeedsCompiler && !D3D11TextOverlay::bNeedsCompiler && (!(eGameType & MGS2) || !(MGS2_ContrastShader::bNeedsCompiler && MGS2_ShimmerEffect::bNeedsCompiler)))
-    {
-        FreeLibrary(d3dcompiler);
-        spdlog::info("D3D11Hooks: Released d3dcompiler_43.dll as it is no longer needed.");
-    }
 }

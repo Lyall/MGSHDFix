@@ -350,3 +350,20 @@ enum MGS2_ConfigRegion : uint32_t
     GM_CONFIG_REGION_US = 1,
     GM_CONFIG_REGION_EU = 2,
 };
+
+enum : uint32_t
+{
+    GM_CLEAR_GET_MUGENBANDANA = 1u << 0,	/* Obtained Infinite Bandana */
+    GM_CLEAR_GET_MUGENWIG = 1u << 1,	/* Obtained Infinite Wig */
+    GM_CLEAR_GET_DGCAMERA = 1u << 2,	/* Obtained Digital Camera */
+    GM_CLEAR_GET_O2WIG = 1u << 3,	/* Obtained Infinite O2 Wig */
+    GM_CLEAR_GET_ELUDEWIG = 1u << 4,	/* Obtained Infinite Grip Wig */
+    GM_CLEAR_SPECIAL_ITEM_USED = 1u << 5,	/* Cleared the game using a special item */
+
+    GM_CLEAR_MUGENBANDANA_USED = 1u << 8,	/* Used Infinite Bandana */
+    GM_CLEAR_MUGENWIG_USED = 1u << 9,	/* Used Infinite Wig */
+    GM_CLEAR_WIG_A_USED = 1u << 10,	/* Used O2 Wig */
+    GM_CLEAR_WIG_B_USED = 1u << 11,	/* Used Grip Wig */
+    GM_CLEAR_STEALTH_USED = 1u << 12,	/* Used Stealth */
+    GM_CLEAR_RADAR_USED = 1u << 13,	/* Used Radar */
+};

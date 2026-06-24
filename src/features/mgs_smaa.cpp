@@ -149,11 +149,12 @@ void SMAA_AA::Init()
     {
         return;
     }
-    HMODULE d3dcomp = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcomp) { spdlog::error("SMAA: failed to load d3dcompiler_43.dll"); return; }
 
-    auto D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcomp, "D3DCompile"));
-    if (!D3DCompileFunc) { spdlog::error("SMAA: D3DCompile not found"); D3D11Hooks::UnloadCompiler(d3dcomp); return; }
+    if (!g_D3D11Hooks.D3DCompileFunc)
+    {
+        spdlog::error("SMAA: D3DCompile not found"); 
+        return;
+    }
 
     FileInclude inc;
 
@@ -162,7 +163,7 @@ void SMAA_AA::Init()
     auto compile = [&](const char* entry, const char* target, auto& out) -> bool
     {
         ComPtr<ID3DBlob> blob, err;
-        HRESULT hr = D3DCompileFunc(kSMAAShader, strlen(kSMAAShader), "smaa_wrapper.hlsl",
+        HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kSMAAShader, strlen(kSMAAShader), "smaa_wrapper.hlsl",
                                     nullptr, &inc, entry, target, 0, 0,
                                     blob.GetAddressOf(), err.GetAddressOf());
         if (FAILED(hr)) {
@@ -241,16 +242,13 @@ void SMAA_AA::Init()
     }
 
     bInitialized   = true;
-    bNeedsCompiler = false;
     spdlog::info("SMAA initialized.");
-    D3D11Hooks::UnloadCompiler(d3dcomp);
 
     SceneDepth::SetEndOf3DCallback(&SMAA_AA::Draw);
     return;
 
 fail:
-    bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcomp);
+    spdlog::info("SMAA: shader compilation failed");
 }
 
 // ---------------------------------------------------------------------------

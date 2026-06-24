@@ -123,21 +123,17 @@ namespace
             ID3D11DeviceContext* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
             if (!dev || !ctx) { spdlog::error("MGS 2: Blood Stains: D3D device not ready."); return; }
 
-            HMODULE comp = LoadLibraryA("d3dcompiler_47.dll");
-            if (!comp) comp = LoadLibraryA("d3dcompiler_43.dll");
-            if (!comp) { spdlog::error("MGS 2: Blood Stains: failed to load d3dcompiler."); return; }
-            auto compileFn = reinterpret_cast<pD3DCompile>(GetProcAddress(comp, "D3DCompile"));
-            if (!compileFn) { spdlog::error("MGS 2: Blood Stains: D3DCompile not found."); return; }
+            if (!g_D3D11Hooks.D3DCompileFunc) { spdlog::error("MGS 2: Blood Stains: D3DCompile not found."); return; }
 
             ID3DBlob *vsb = nullptr, *vsbS = nullptr, *psb = nullptr, *err = nullptr;
-            if (FAILED(compileFn(kVS, strlen(kVS), "blood_vs", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsb, &err)))
+            if (FAILED(g_D3D11Hooks.D3DCompileFunc(kVS, strlen(kVS), "blood_vs", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsb, &err)))
             {
                 spdlog::error("MGS 2: Blood Stains: vertex shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
                 if (err) err->Release();
                 return;
             }
             if (err) { err->Release(); err = nullptr; }
-            if (FAILED(compileFn(kVS_S, strlen(kVS_S), "blood_vs_s", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsbS, &err)))
+            if (FAILED(g_D3D11Hooks.D3DCompileFunc(kVS_S, strlen(kVS_S), "blood_vs_s", nullptr, nullptr, "main", "vs_4_0", 0, 0, &vsbS, &err)))
             {
                 spdlog::error("MGS 2: Blood Stains: skinned vertex shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
                 if (err) err->Release();
@@ -145,7 +141,7 @@ namespace
                 return;
             }
             if (err) { err->Release(); err = nullptr; }
-            if (FAILED(compileFn(kPS, strlen(kPS), "blood_ps", nullptr, nullptr, "main", "ps_4_0", 0, 0, &psb, &err)))
+            if (FAILED(g_D3D11Hooks.D3DCompileFunc(kPS, strlen(kPS), "blood_ps", nullptr, nullptr, "main", "ps_4_0", 0, 0, &psb, &err)))
             {
                 spdlog::error("MGS 2: Blood Stains: pixel shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
                 if (err) err->Release();

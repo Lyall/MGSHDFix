@@ -3,9 +3,8 @@
 namespace MGS2_ShimmerEffect
 {
     void Init();
-    void Draw(IDXGISwapChain* swap);
+    void Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
     void SetupHooks();
 
-    inline bool bNeedsCompiler = true;
     inline bool bShaderLoaded  = false;
 }

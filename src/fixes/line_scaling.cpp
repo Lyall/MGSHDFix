@@ -201,15 +201,8 @@ void VectorScalingFix::LoadCompiledShader() const
 
 bool VectorScalingFix::CompileGeometryShader()
 {
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
-    {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Failed to load d3dcompiler_43.dll");
-        return false;
-    }
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
+    if (!g_D3D11Hooks.D3DCompileFunc)
     {
         spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Failed to get address for D3DCompile");
         return false;
@@ -303,7 +296,7 @@ bool VectorScalingFix::CompileGeometryShader()
 
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errorMsgs;
-    HRESULT hr = D3DCompileFunc(
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(
         shaderString.c_str(),
         shaderString.size(),
         "geometry_shader",
@@ -316,9 +309,6 @@ bool VectorScalingFix::CompileGeometryShader()
         compiledShader.GetAddressOf(),
         errorMsgs.GetAddressOf()
     );
-
-    bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 
     if (FAILED(hr))
     {

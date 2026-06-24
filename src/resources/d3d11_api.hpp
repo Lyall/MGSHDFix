@@ -6,7 +6,6 @@ class D3D11Hooks final
 {
 public:
     static void Initialize();
-    static void UnloadCompiler(HMODULE d3dcompiler);
 
     HWND MainHwnd = nullptr;
 
@@ -18,6 +17,8 @@ public:
     ComPtr<IDXGIAdapter> dxgiAdapter;
     ComPtr<IDXGIFactory> dxgiFactory;
     ComPtr<IDXGISwapChain> swapChain;
+
+    pD3DCompile D3DCompileFunc;
 };
 
 inline D3D11Hooks g_D3D11Hooks;

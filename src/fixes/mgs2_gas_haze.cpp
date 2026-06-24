@@ -241,19 +241,19 @@ namespace
         ID3D11Device* dev = g_D3D11Hooks.d3dDevice.Get();
         if (!dev) return false;
 
-        HMODULE comp = LoadLibraryA("d3dcompiler_43.dll");
-        if (!comp) { g_d3dFailed = true; spdlog::error("GasHaze: no d3dcompiler_43.dll"); return false; }
-        auto D3DCompileFn = reinterpret_cast<pD3DCompile>(GetProcAddress(comp, "D3DCompile"));
+        if (!g_D3D11Hooks.D3DCompileFunc) { g_d3dFailed = true; spdlog::error("GasHaze: no d3dcompiler_43.dll"); return false; }
 
         ComPtr<ID3DBlob> vsb, psb, err;
-        bool ok = D3DCompileFn && SUCCEEDED(D3DCompileFn(kShader, strlen(kShader), nullptr, nullptr, nullptr,
+        bool ok = g_D3D11Hooks.D3DCompileFunc && SUCCEEDED(g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr,
                         "VS", "vs_5_0", 0, 0, vsb.GetAddressOf(), err.ReleaseAndGetAddressOf()));
-        if (ok) ok = SUCCEEDED(D3DCompileFn(kShader, strlen(kShader), nullptr, nullptr, nullptr,
+        if (ok) 
+            ok = SUCCEEDED(g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr,
                         "PS", "ps_5_0", 0, 0, psb.GetAddressOf(), err.ReleaseAndGetAddressOf()));
         if (!ok)
         {
             spdlog::error("GasHaze: shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
-            FreeLibrary(comp); g_d3dFailed = true; return false;
+            g_d3dFailed = true; 
+            return false;
         }
 
         dev->CreateVertexShader(vsb->GetBufferPointer(), vsb->GetBufferSize(), nullptr, g_vs.GetAddressOf());
@@ -290,7 +290,6 @@ namespace
         sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
         dev->CreateSamplerState(&sd, g_sampPt.GetAddressOf());
 
-        FreeLibrary(comp);
         g_d3dInit = true;
         spdlog::info("GasHaze: D3D11 smoke pass initialised.");
         return true;

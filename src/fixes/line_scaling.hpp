@@ -20,7 +20,6 @@ public:
     int vkRainShaderToggle = 0;
     int vkWireframeToggle = 0;
 
-    bool bNeedsCompiler = false;
     double iVectorLineScale = 360;
 };
 

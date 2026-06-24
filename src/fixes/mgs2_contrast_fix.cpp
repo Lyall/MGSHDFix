@@ -114,7 +114,6 @@ void MGS2_ContrastShader::Setup()
 {
     if (!(eGameType & MGS2))
     {
-        bNeedsCompiler = false;
         return;
     }
 
@@ -127,57 +126,37 @@ void MGS2_ContrastShader::Setup()
     else
     {
         spdlog::error("MGS2_ContrastShader: Failed to locate OK_FADE_IO_WORK_1 structure");
-        bNeedsCompiler = false;
         return;
     }
 
     spdlog::info("MGS2_ContrastShader: Located OK_FADE_IO_WORK_1 structure successfully");
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
-    {
-        spdlog::error("MGS2_ContrastShader: Failed to load d3dcompiler_43.dll");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
-        return;
-    }
-    spdlog::info("MGS2_ContrastShader: Loaded d3dcompiler_43.dll successfully");
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
+    if (!g_D3D11Hooks.D3DCompileFunc)
     {
         spdlog::error("MGS2_ContrastShader: Failed to get D3DCompile");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     ComPtr<ID3DBlob> err;
 
-    HRESULT hr = D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("MGS2_ContrastShader: Failed to compile vertex shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     err.Reset();
 
-    hr = D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    hr = g_D3D11Hooks.D3DCompileFunc(kContrastShader, strlen(kContrastShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("MGS2_ContrastShader: Failed to compile pixel shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
         vsBlob.Reset();
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     spdlog::info("MGS2_ContrastShader: Compiled contrast shader successfully");
-
-    bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 
     MAKE_HOOK_MID(baseModule, "48 89 B3 ?? ?? ?? ?? 89 83", "NewAiRaySight -> Act -> MsgDie()", {
             MGS2_ContrastShader::SetOverride(6, 15, 15, 189, 0);

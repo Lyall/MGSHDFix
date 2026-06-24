@@ -67,63 +67,44 @@ void ColorCorrection::Setup()
 {
     if (!(eGameType & (MG | MGS2 | MGS3)))
     {
-        bNeedsCompiler = false;
         return;
     }
 
     if (!bEnabled)
     {
         spdlog::info("Color Correction: Disabled in config, skipping shader compilation.");
-        bNeedsCompiler = false;
         return;
     }
 
     spdlog::info("Color Correction: Compiling shaders...");
 
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
-    {
-        spdlog::error("Color Correction: Failed to load d3dcompiler_43.dll");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
-        return;
-    }
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
+    if (!g_D3D11Hooks.D3DCompileFunc)
     {
         spdlog::error("Color Correction: Failed to get D3DCompile");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     ComPtr<ID3DBlob> err;
 
-    HRESULT hr = D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("Color Correction: VS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     err.Reset();
 
-    hr = D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("Color Correction: PS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
         vsBlob.Reset();
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     spdlog::info("Color Correction: Shaders compiled successfully");
-    bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 }
 
 void ColorCorrection::Init()

@@ -7,6 +7,5 @@ namespace D3D11TextOverlay
     void Tick();
     void HandleLevelTransition();
 
-    inline bool bNeedsCompiler = true;
     inline bool bShaderLoaded = false;
 }

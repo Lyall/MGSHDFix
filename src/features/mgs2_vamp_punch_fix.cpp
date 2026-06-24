@@ -1,7 +1,22 @@
 #include "stdafx.h"
 #include "mgs2_vamp_punch_fix.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "logging.hpp"
+
+namespace
+{
+    bool bIsW31c = false;
+}
+
+void MGS2VampFPVPunch::HandleLevelTransition()
+{
+	if (!bEnabled)
+	{
+	    return;
+	}
+	bIsW31c = (g_GameVars.IsStage(MGS2Stages::W31C) || g_GameVars.IsStage(MGS2Stages::A31C));
+}
 
 void MGS2VampFPVPunch::Apply()
 {
@@ -23,4 +38,6 @@ void MGS2VampFPVPunch::Apply()
     {
         Memory::PatchBytes((uintptr_t)vmp_shl, "\x0f", 1);
     }
+
+	///todo - speedrunner HUD should indicate that this is enabled in w31c
 }

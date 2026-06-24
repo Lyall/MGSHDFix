@@ -6,8 +6,6 @@ namespace MGS2_ContrastShader
     void Init();
     void Draw(IDXGISwapChain* swap, int keepR, int keepG, int keepB, int keepA, int negaFlag);
 
-    inline bool bNeedsCompiler = true;
-
     inline bool bShaderLoaded = false;
 
 

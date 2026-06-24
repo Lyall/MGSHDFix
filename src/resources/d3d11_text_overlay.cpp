@@ -10,6 +10,8 @@
 #include "stb_easy_font.h"
 #include "version.h"
 #include "common.hpp"
+#include "mgs2_linkvarbuf.hpp"
+#include "mgs2_status_flags.hpp"
 #include "version_checking.hpp"
 
 namespace
@@ -427,51 +429,34 @@ namespace
 
 void D3D11TextOverlay::Setup()
 {
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (!d3dcompiler)
-    {
-        spdlog::error("D3D11TextOverlay: Failed to load d3dcompiler_43.dll");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
-        return;
-    }
 
-    pD3DCompile D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
-    if (!D3DCompileFunc)
+    if (!g_D3D11Hooks.D3DCompileFunc)
     {
         spdlog::error("D3D11TextOverlay: Failed to get D3DCompile");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     ComPtr<ID3DBlob> err;
 
-    HRESULT hr = D3DCompileFunc(kTextShader, strlen(kTextShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kTextShader, strlen(kTextShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("D3D11TextOverlay: Failed to compile vertex shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     err.Reset();
 
-    hr = D3DCompileFunc(kTextShader, strlen(kTextShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    hr = g_D3D11Hooks.D3DCompileFunc(kTextShader, strlen(kTextShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("D3D11TextOverlay: Failed to compile pixel shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
         vsBlob.Reset();
-        bNeedsCompiler = false;
-        D3D11Hooks::UnloadCompiler(d3dcompiler);
         return;
     }
 
     spdlog::info("D3D11TextOverlay: Compiled text shader successfully");
 
-    bNeedsCompiler = false;
-    D3D11Hooks::UnloadCompiler(d3dcompiler);
 }
 
 void D3D11TextOverlay::Init()

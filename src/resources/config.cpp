@@ -681,7 +681,6 @@ void Config::Read()
             InputHandler::GetKeybind(ini, ConfigKeys::ToggleRainShader_Section, ConfigKeys::ToggleRainShader_Setting, g_VectorScalingFix.vkRainShaderToggle);
             InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
             g_VectorScalingFix.iVectorLineScale = 360;
-            g_VectorScalingFix.bNeedsCompiler = true;
         }
     }
 

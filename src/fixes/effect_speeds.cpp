@@ -245,6 +245,7 @@ void EffectSpeedFix::Initialize()
         return;
     }
 
+    spdlog::info("MGS2: Effect Speed Fix - Initializing...");
 
 #pragma region D00A
 
@@ -263,6 +264,7 @@ void EffectSpeedFix::Initialize()
     {
         spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
     }
+    
 
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \

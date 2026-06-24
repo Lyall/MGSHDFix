@@ -57,8 +57,8 @@ namespace
         g_laserPoints[0] = MGS2_Characters::IsRaiden() ? raiden_laserpoints[0] : m92_snake_override;
     }
 
-#define RAYEYE_TAILSSHIFT_Y_OFFSET 900.0f
-#define RAYEYE_TAILSSHIFT_X_OFFSET 3800.0f
+    constexpr float RAYEYE_TAILSSHIFT_Y_OFFSET = 900.0f;
+    constexpr float RAYEYE_TAILSSHIFT_X_OFFSET = 3800.0f;
 
     constexpr FVECTOR rayEyeTailsShift_Original[8] = {
         {  511.0F, 1039.0F, 2485.0F, 1.0F },
