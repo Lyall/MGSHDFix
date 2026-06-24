@@ -18,6 +18,7 @@
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
+#include "mg1_display_scaling.hpp"
 #include "scene_depth.hpp"
 void afterPresent();
 
@@ -179,6 +180,10 @@ namespace
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
+        }
+        else if (eGameType & MG)
+        {
+            MG1_DisplayScaling::Draw(pSwapChain);
         }
 
         ColorCorrection::Draw(pSwapChain);

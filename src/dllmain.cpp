@@ -77,6 +77,7 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "cutscene_pausing.hpp"
 #include "d3d11_text_overlay.hpp"
+#include "mg1_display_scaling.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
@@ -445,12 +446,22 @@ void afterPresent()
     }
     bInitialized = true;
     spdlog::info("afterPresent() started");
-    g_VectorScalingFix.LoadCompiledShader();
+    if (!(eGameType & MG))
+    {
+        g_VectorScalingFix.LoadCompiledShader();
+    }
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
-    MGS2_ContrastShader::Init();
-    MGS2_ShimmerEffect::Init();
-    g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+    if (eGameType & MGS2)
+    {
+        MGS2_ContrastShader::Init();
+        MGS2_ShimmerEffect::Init();
+        g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+    }
+    else if (eGameType & MG)
+    {
+        MG1_DisplayScaling::Init();
+    }
     ColorCorrection::Init();
     SMAA_AA::Init();
     D3D11TextOverlay::Init();
@@ -543,6 +554,10 @@ static void InitializeSubsystems()
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
             
+    }
+    else if (eGameType & MG)
+    {
+        INITIALIZE(MG1_DisplayScaling::Setup());
     }
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());

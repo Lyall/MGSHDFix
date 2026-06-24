@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mg1_display_scaling.cpp" />
     <ClCompile Include="src\features\mgs_smaa.cpp" />
     <ClCompile Include="src\fixes\color_correction.cpp" />
     <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp" />
@@ -56,7 +57,6 @@
     <ClCompile Include="src\warnings\background_shuffle_warning.cpp" />
     <ClCompile Include="src\warnings\bugfix_mod_checks.cpp" />
     <ClCompile Include="src\features\settings_pesistence.cpp" />
-    <ClCompile Include="src\features\mg1_crop_borders.cpp" />
     <ClCompile Include="src\fixes\mgs3_fix_camera_offset.cpp" />
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp" />
     <ClCompile Include="src\fixes\cpu_core_limit.cpp" />
@@ -163,6 +163,7 @@
     <ClCompile Include="src\windows_multiplane_overlay_warning.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg1_display_scaling.hpp" />
     <ClInclude Include="src\features\mgs_smaa.hpp" />
     <ClInclude Include="src\fixes\color_correction.hpp" />
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />

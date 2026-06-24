@@ -146,9 +146,6 @@
     <ClCompile Include="src\resources\stdafx.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg1_crop_borders.cpp">
-      <Filter>WIP</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\mgs3_fix_holster_after_torture.cpp">
       <Filter>WIP</Filter>
     </ClCompile>
@@ -285,6 +282,9 @@
     </ClCompile>
     <ClCompile Include="src\windows_multiplane_overlay_warning.cpp">
       <Filter>Warnings</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mg1_display_scaling.cpp">
+      <Filter>Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -574,6 +574,9 @@
     </ClInclude>
     <ClInclude Include="src\windows_multiplane_overlay_warning.hpp">
       <Filter>Warnings\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_display_scaling.hpp">
+      <Filter>Shaders\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
