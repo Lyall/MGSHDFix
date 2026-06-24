@@ -288,12 +288,10 @@ void MGS2_ShimmerEffect::Init()
 
     bShaderLoaded = true;
 
-    SceneDepth::SetEndOf3DCallback(&MGS2_ShimmerEffect::Draw);
-
     spdlog::info("MGS2_ShimmerEffect initialized.");
 }
 
-void MGS2_ShimmerEffect::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth)
+void MGS2_ShimmerEffect::Draw()
 {
     if (!bIsActive)
     {
@@ -310,7 +308,8 @@ void MGS2_ShimmerEffect::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderRe
         return;
     }
 
-    //if (MGS2_LinkVarBuf::GM_CameraY)
+//    spdlog::info("tried to draw shimmer, camera y: {}", MGS2_LinkVarBuf::GM_CameraY.get()); 
+    
 
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
