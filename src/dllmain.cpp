@@ -463,7 +463,10 @@ void afterPresent()
         MG1_DisplayScaling::Init();
     }
     ColorCorrection::Init();
-    SMAA_AA::Init();
+    if (!(eGameType & MG))
+    {
+        SMAA_AA::Init();
+    }
     D3D11TextOverlay::Init();
     spdlog::info("afterPresent() completed");
 }
