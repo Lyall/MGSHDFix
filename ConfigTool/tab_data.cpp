@@ -265,6 +265,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         
         { ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, ConfigKeys::RestoreSoLRadarRotation_Help, ConfigKeys::RestoreSoLRadarRotation_Tooltip,
           std::nullopt, false, Field::Bool, false },
+
+        { ConfigKeys::MGS2_RestoreElevatorGlitch_Section, ConfigKeys::MGS2_RestoreElevatorGlitch_Setting, ConfigKeys::MGS2_RestoreElevatorGlitch_Help, ConfigKeys::MGS2_RestoreElevatorGlitch_Tooltip,
+          std::nullopt, false, Field::Bool, false },
         
         
         

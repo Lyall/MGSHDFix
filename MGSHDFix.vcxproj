@@ -29,6 +29,7 @@
     <ClCompile Include="src\features\mgs2_snake_tales_radar.cpp" />
     <ClCompile Include="src\features\expand_bp_assets.cpp" />
     <ClCompile Include="src\features\mgs2_restore_sol_radar.cpp" />
+    <ClCompile Include="src\features\mgs2_restore_elevator_glitch.cpp" />
     <ClCompile Include="src\features\custom_player_name.cpp" />
     <ClCompile Include="src\features\mgs2_msx_colonel.cpp" />
     <ClCompile Include="src\fixes\mgs2_hostage_model.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="src\features\mgs2_snake_tales_radar.hpp" />
     <ClInclude Include="src\features\expand_bp_assets.hpp" />
     <ClInclude Include="src\features\mgs2_restore_sol_radar.hpp" />
+    <ClInclude Include="src\features\mgs2_restore_elevator_glitch.hpp" />
     <ClInclude Include="src\features\custom_player_name.hpp" />
     <ClInclude Include="src\features\mgs2_msx_colonel.hpp" />
     <ClInclude Include="src\fixes\mgs2_hostage_model.hpp" />
