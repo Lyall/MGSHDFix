@@ -10,6 +10,13 @@ namespace MGS2_GameFuncs
     using GM_ItemNum_t = int(__fastcall*)(int a1);
     inline GM_ItemNum_t GM_ItemNum = nullptr;
 
+    using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);
+    inline GM_SetArea_t GM_SetArea = nullptr;
+
+    using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
+    inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
+
+    inline bool StartInDebugMode = false;
 }
 
 

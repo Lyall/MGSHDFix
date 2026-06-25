@@ -831,10 +831,15 @@ namespace ConfigKeys
     constexpr const char* SaveFileReadOnlyWarning_Help = "";
     constexpr const char* SaveFileReadOnlyWarning_Tooltip = "Warn the user when individual save files are set to read only, which breaks the game's ability to save.";
 
-    constexpr const char* VerboseLogging_Section = "Internal Settings";
+    constexpr const char* VerboseLogging_Section = "Debugging";
     constexpr const char* VerboseLogging_Setting = "Debug Logging";
     constexpr const char* VerboseLogging_Help = "";
     constexpr const char* VerboseLogging_Tooltip = "Enables verbose logging for debugging purposes.";
+
+    constexpr const char* Debugging_Start_In_Dev_Menu_Section = "Debugging";
+    constexpr const char* Debugging_Start_In_Dev_Menu_Setting = "Start Game in Developer Menu";
+    constexpr const char* Debugging_Start_In_Dev_Menu_Help = "(MGS2 ONLY ATM)";
+    constexpr const char* Debugging_Start_In_Dev_Menu_Tooltip = "Starts the game in the developer menu for debugging.";
 
     constexpr const char* Restore_Title_Screen_Swapping_Section = "Various";
     constexpr const char* Restore_Title_Screen_Swapping_Setting = "MGS2 - Restore Title Screen 2 Color Swapping";

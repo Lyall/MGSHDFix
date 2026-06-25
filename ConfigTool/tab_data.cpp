@@ -472,6 +472,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, ConfigKeys::VerboseLogging_Help, ConfigKeys::VerboseLogging_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
+        { ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, ConfigKeys::Debugging_Start_In_Dev_Menu_Help, ConfigKeys::Debugging_Start_In_Dev_Menu_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
         {"About", "", "", "", std::nullopt, false, Field::Spacer},
 
     }}

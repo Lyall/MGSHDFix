@@ -57,6 +57,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
+#include "game_funcs.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
@@ -950,11 +951,9 @@ void Config::Read()
 
 
 
-    /*
+    ConfigHelper::getValue(ini, ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
+    LOG_CONFIG(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
 
-    ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
-    LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, TextureLiveSwaps::bRestoreTitleScreenSwapping);
-    */
 
 
     ConfigLogger::Flush();
