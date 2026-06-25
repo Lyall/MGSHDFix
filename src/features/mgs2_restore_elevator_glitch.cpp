@@ -32,14 +32,4 @@ void MGS2_RestoreElevatorGlitch::Initialize()
                 }
             }
         });
-
-    // extent 0 protection for d3d11
-    MAKE_HOOK_MID(baseModule,
-        "41 F7 FF 8B D8 89 84 24 90 00 00 00",
-        "MGS2: OOB divide-by-zero guard (idiv r15d)", {
-            if ((ctx.r15 & 0xFFFFFFFFull) == 0)
-            {
-                ctx.rax = 0; ctx.rdx = 0; ctx.r15 = 1;
-            }
-        });
 }
