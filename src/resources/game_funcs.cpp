@@ -69,6 +69,8 @@ void MGS2_GameFuncs::HookFuncs()
             *GM_LoadRequest = 0x0002 | 0x1;
                       });
     }
+
+    /*
     */
 }
 
