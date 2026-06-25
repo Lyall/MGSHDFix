@@ -61,4 +61,18 @@ void MGS2_RestoreDogtagViewer::Restore()
             ctx.rdx = reinterpret_cast<uintptr_t>(&"%02d/%02d");
                   });
                   */
+
+    MAKE_HOOK_MID(baseModule, "C6 43 ?? ?? EB ?? E8", "Node Staff Names", {
+            auto* node = reinterpret_cast<char*>(ctx.rbx);
+            auto* pWork = reinterpret_cast<char*>(ctx.r15);
+
+            *reinterpret_cast<int*>(pWork + 0x114) = *reinterpret_cast<int*>(node + 0x38); // sex
+            *reinterpret_cast<int*>(pWork + 0x148) = *reinterpret_cast<int*>(node + 0x3C); // year
+            *reinterpret_cast<int*>(pWork + 0x14C) = *reinterpret_cast<int*>(node + 0x40); // month
+            *reinterpret_cast<int*>(pWork + 0x150) = *reinterpret_cast<int*>(node + 0x44); // day
+            *reinterpret_cast<int*>(pWork + 0x1C0) = *reinterpret_cast<int*>(node + 0x48); // blood
+            *reinterpret_cast<int*>(pWork + 0x1E8) = *reinterpret_cast<int*>(node + 0x4C); // nation
+                  });
+
+
 }
