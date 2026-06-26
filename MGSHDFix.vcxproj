@@ -37,6 +37,7 @@
     <ClCompile Include="src\fixes\playtime_fixes.cpp" />
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
+    <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
     <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp" />
     <ClCompile Include="src\features\cutscene_pausing.cpp" />
     <ClCompile Include="src\features\adjustable_captions.cpp" />
