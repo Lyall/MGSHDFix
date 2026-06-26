@@ -20,6 +20,7 @@
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_shimmer.hpp"
+#include "mgs2_crossfade.hpp"
 #include "scene_depth.hpp"
 void afterPresent();
 
@@ -182,6 +183,7 @@ namespace
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
             MGS2_ShimmerEffect::Draw();
+            MGS2_Crossfade::OnPresent(pSwapChain);
         }
         else if (eGameType & MG)
         {

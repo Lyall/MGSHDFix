@@ -83,6 +83,7 @@
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_shimmer.hpp"
+#include "mgs2_crossfade.hpp"
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
@@ -457,6 +458,7 @@ void afterPresent()
     {
         MGS2_ContrastShader::Init();
         MGS2_ShimmerEffect::Init();
+        MGS2_Crossfade::Initialize();
         g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
     }
     else if (eGameType & MG)
