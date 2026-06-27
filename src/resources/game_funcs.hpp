@@ -16,6 +16,17 @@ namespace MGS2_GameFuncs
     using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
     inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
 
+    using L2D_GetObject_t = void* (__fastcall*)(int handle, int strcode);
+    inline L2D_GetObject_t L2D_GetObject = nullptr;
+
+
+    using L2D_GetParts_t = void* (__fastcall*)(int, int);
+    inline L2D_GetParts_t L2D_GetParts = nullptr;
+
+    using WriteString_t = void(__fastcall*)(void*, const char*, int);
+    inline WriteString_t WriteString = nullptr;
+
+
     inline bool StartInDebugMode = false;
 }
 
