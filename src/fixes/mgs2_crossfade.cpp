@@ -3,7 +3,9 @@
 
 #include "d3d11_api.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "logging.hpp"
+#include "scene_depth.hpp"
 
 // Demo camera crossfade: freeze the last frame on GetResources, fade it over the new one in Present.
 namespace
@@ -42,6 +44,7 @@ namespace
     float     fadeTotal = 0.f, fadeCount = 0.f;   // seconds
     ULONGLONG lastTick = 0;
     bool      havePrev = false;
+    bool      capturedCleanFrame = false;
 
     SafetyHookMid getResourcesHook{};
 
@@ -98,8 +101,10 @@ void MGS2_Crossfade::Initialize()
 
     D3D11_RASTERIZER_DESC rd = {}; rd.FillMode = D3D11_FILL_SOLID; rd.CullMode = D3D11_CULL_NONE;
     dev->CreateRasterizerState(&rd, rs.GetAddressOf());
+
     D3D11_DEPTH_STENCIL_DESC dsd = {}; dsd.DepthEnable = FALSE; dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     dev->CreateDepthStencilState(&dsd, noDepth.GetAddressOf());
+
     D3D11_SAMPLER_DESC sd = {};
     sd.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -107,13 +112,17 @@ void MGS2_Crossfade::Initialize()
     dev->CreateSamplerState(&sd, sampler.GetAddressOf());
 
     // GetResources is shared by both crossfade entries; time is in edx (1/300 s units).
-    if (uint8_t* addr = Memory::PatternScan(baseModule,
-        "40 53 55 56 57 41 56 48 83 EC ?? 41 8B C0 89 51 ?? 83 E0 01 89 51 ??",
-        "MGS2: Crossfade GetResources"))
+    if (uint8_t* addr = Memory::PatternScan(baseModule, "40 53 55 56 57 41 56 48 83 EC ?? 41 8B C0 89 51 ?? 83 E0 01 89 51 ??", "MGS2: Crossfade GetResources"))
     {
         getResourcesHook = safetyhook::create_mid(addr, [](SafetyHookContext& ctx)
         {
             if (!ready || !havePrev) return;
+            //if (g_GameVars.IsStage(MGS2Stages::D010P01))
+            {
+                // plant opening had a crossfade at the start when the hh60's went under the bridge, but it occured 1 frame too late on the ps2 to actually grab the previous frame.
+                // we end up showing it, which is 
+                //return;
+            }
             auto* c = g_D3D11Hooks.d3dDeviceContext.Get();
             if (!c) return;
             c->CopyResource(snapTex.Get(), prevTex.Get());     // freeze the old frame
@@ -126,42 +135,59 @@ void MGS2_Crossfade::Initialize()
         LOG_HOOK(getResourcesHook, "MGS2: Crossfade GetResources");
     }
 
+    SceneDepth::SetEndOf3DCallback(&OnPreMenuRender, SceneDepth::PRIORITY_CROSSFADE);
+
     ready = true;
     spdlog::info("MGS2_Crossfade initialized.");
 }
 
-void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
+void MGS2_Crossfade::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth)
 {
-    if (!ready || !swap || !bEnabled) return;
-    auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
-    auto* dev = g_D3D11Hooks.d3dDevice.Get();
-    if (!ctx || !dev) return;
+    if (!ready || !bEnabled || capturedCleanFrame) return;
+    if (!g_GameVars.InCutscene()) return;
 
-    ComPtr<ID3D11Texture2D> bb;
-    if (FAILED(swap->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)bb.GetAddressOf())) || !bb) return;
-    D3D11_TEXTURE2D_DESC bd; bb->GetDesc(&bd);
-    if (!EnsureTextures(dev, bd)) return;
+    auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+    if (!ctx) return;
+
+    ID3D11RenderTargetView* rtv = nullptr;
+    ctx->OMGetRenderTargets(1, &rtv, nullptr);
+    if (!rtv) return;
+
+    ComPtr<ID3D11Resource> res;
+    rtv->GetResource(res.GetAddressOf());
+    ComPtr<ID3D11Texture2D> tex;
+    if (FAILED(res.As(&tex))) { rtv->Release(); return; }
+
+    D3D11_TEXTURE2D_DESC td;
+    tex->GetDesc(&td);
+    const bool sizeMatch = (td.Width == texW && td.Height == texH);
+
+    // timing
+    ULONGLONG now = GetTickCount64();
+    float dt = (lastTick != 0) ? (now - lastTick) / 1000.0f : 0.f;
+    lastTick = now;
+
+    if (active && fadeCount > 0.f)
+    {
+        fadeCount -= dt;
+        if (fadeCount <= 0.f) { fadeCount = 0.f; active = false; }
+    }
 
     // composite the active fade: old (frozen) frame over the live new angle
-    if (active)
+    if (active && snapSRV && sizeMatch)
     {
-        ULONGLONG now = GetTickCount64();
-        if (lastTick != 0) fadeCount -= (now - lastTick) / 1000.0f;
-        lastTick = now;
         float alpha = (fadeTotal > 0.f) ? (fadeCount / fadeTotal) : 0.f;
-        if (alpha <= 0.f) { active = false; }
-        else
+        if (alpha > 1.f) alpha = 1.f;
+
+        if (alpha > 0.f)
         {
-            if (alpha > 1.f) alpha = 1.f;
-
-            ComPtr<ID3D11RenderTargetView> rtv;
-            dev->CreateRenderTargetView(bb.Get(), nullptr, rtv.GetAddressOf());
-
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
-            { float d[4] = { alpha, 0, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0); }
+            {
+                float d[4] = { alpha, 0, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0);
+            }
 
-            // save the pipeline state we touch, draw the fade, then restore it
+// save the pipeline state we touch, draw the fade, then restore it
             ID3D11RenderTargetView* oRTV[8] = {}; ID3D11DepthStencilView* oDSV = nullptr;
             ID3D11BlendState* oBlend = nullptr; UINT oMask = 0; float oFac[4] = {};
             ID3D11DepthStencilState* oDSS = nullptr; UINT oRef = 0;
@@ -177,7 +203,7 @@ void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
             ctx->IAGetInputLayout(&oIL); ctx->IAGetPrimitiveTopology(&oTopo);
             ctx->PSGetShaderResources(0, 1, &oSRV); ctx->PSGetSamplers(0, 1, &oSamp); ctx->PSGetConstantBuffers(0, 1, &oCB);
 
-            D3D11_VIEWPORT vp = { 0, 0, (float)bd.Width, (float)bd.Height, 0.f, 1.f };
+            D3D11_VIEWPORT vp = { 0, 0, (float)td.Width, (float)td.Height, 0.f, 1.f };
             ctx->IASetInputLayout(nullptr);
             ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             ctx->VSSetShader(vs.Get(), nullptr, 0);
@@ -188,7 +214,7 @@ void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
             ctx->OMSetBlendState(blend.Get(), nullptr, 0xFFFFFFFF);
             ctx->OMSetDepthStencilState(noDepth.Get(), 0);
             ctx->RSSetState(rs.Get()); ctx->RSSetViewports(1, &vp);
-            ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
+            ctx->OMSetRenderTargets(1, &rtv, nullptr);
             ctx->Draw(3, 0);
 
             ctx->OMSetRenderTargets(8, oRTV, oDSV);
@@ -205,7 +231,38 @@ void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
         }
     }
 
-    // roll the prev-frame copy (the next cut freezes this)
-    ctx->CopyResource(prevTex.Get(), bb.Get());
-    havePrev = true;
+    // capture clean 3D frame for next crossfade
+    if (prevTex && sizeMatch)
+    {
+        ctx->CopyResource(prevTex.Get(), tex.Get());
+        havePrev = true;
+        capturedCleanFrame = true;
+    }
+
+    rtv->Release();
+}
+
+void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
+{
+    if (!ready || !bEnabled || !swap) return;
+    if (!g_GameVars.InCutscene()) return;
+
+    auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+    auto* dev = g_D3D11Hooks.d3dDevice.Get();
+    if (!ctx || !dev) return;
+
+    ComPtr<ID3D11Texture2D> bb;
+    if (FAILED(swap->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)bb.GetAddressOf())) || !bb) return;
+    D3D11_TEXTURE2D_DESC bd; bb->GetDesc(&bd);
+
+    if (!EnsureTextures(dev, bd)) return;
+
+    // fallback: fires if DmaPack hook RT wasn't the backbuffer
+    if (!capturedCleanFrame)
+    {
+        ctx->CopyResource(prevTex.Get(), bb.Get());
+        havePrev = true;
+    }
+
+    capturedCleanFrame = false;
 }

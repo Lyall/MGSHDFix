@@ -244,7 +244,10 @@ void SMAA_AA::Init()
     bInitialized   = true;
     spdlog::info("SMAA initialized.");
 
-    SceneDepth::SetEndOf3DCallback(&SMAA_AA::Draw);
+    if (eGameType & MGS2)
+    {
+        SceneDepth::SetEndOf3DCallback(&SMAA_AA::Draw, SceneDepth::PRIORITY_SMAA);
+    }
     return;
 
 fail:
@@ -254,7 +257,14 @@ fail:
 void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* /*depth*/)
 {
     if (!bInitialized) return;
-
+    /*
+    static int timer = 0;
+    if (timer <= 120)
+    {
+        spdlog::info("ran smaa");
+        timer = 0;
+    }
+        timer++;*/
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
 

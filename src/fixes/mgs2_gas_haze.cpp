@@ -12,10 +12,6 @@ namespace
 {
     // NewSmokeBlurEffect (smk_blur.c) - the heli smoke. start_speed 0 -> x64 0/0 = NaN (PS2 clamped it)
     // so nothing draws; we clamp it to 1.
-    constexpr const char* kSig =
-        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? "
-        "8B 7C 24 ?? 41 8B E8 41 8B F1 44 8B F2 45 33 C9 4C 8B F9 BA 00 20 00 00 "
-        "44 8D 04 7F 41 C1 E0 04 41 81 C0 00 02 00 00 41 8D 49 0A";
 
     // The Act sets vertex alpha = pos.vw * XMM7 (loaded once from a shared 64.0 constant); override XMM7
     // right after the load to set opacity. Centre verts get alpha, rim verts stay 0 (soft puff).
@@ -452,7 +448,7 @@ void MGS2GasHaze::Initialize()
         return;
     }
 
-    if (uint8_t* address = Memory::PatternScan(baseModule, kSig, "MGS 2: Gas Haze - NewSmokeBlurEffect"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC 20 8B 7C 24 ?? 41 8B E8 41 8B F1 44 8B F2 45 33 C9 4C 8B F9 BA 00 20 00 00", "MGS 2: Gas Haze - NewSmokeBlurEffect"))
     {
         g_hook = safetyhook::create_inline(address, reinterpret_cast<void*>(NewSmokeBlur_Detour));
         LOG_HOOK(g_hook, "MGS 2: Gas Haze - NewSmokeBlurEffect");
@@ -478,6 +474,6 @@ void MGS2GasHaze::Initialize()
     }
 
     // Draw the smoke at the end of the 3D pass (before UI/titles/credits) instead of at Present.
-    SceneDepth::SetEndOf3DCallback(&MGS2GasHaze::DrawInto);
+    SceneDepth::SetEndOf3DCallback(&MGS2GasHaze::DrawInto, SceneDepth::PRIORITY_HAZE);
     spdlog::info("MGS 2: Gas Haze - haze fix initialized.");
 }

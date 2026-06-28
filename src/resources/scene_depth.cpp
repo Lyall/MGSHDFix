@@ -24,7 +24,13 @@ namespace
     bool g_fired = false;
     UINT g_bbArea = 0;
 
-    std::vector<SceneDepth::EndOf3DCallback> g_callbacks;
+    struct CallbackEntry
+    {
+        SceneDepth::EndOf3DCallback callback;
+        int priority;
+    };
+
+    std::vector<CallbackEntry> g_callbacks;
 
     bool MapDepthFormat(DXGI_FORMAT texFmt, DXGI_FORMAT& typeless, DXGI_FORMAT& srv)
     {
@@ -113,66 +119,30 @@ namespace
         ID3D11RenderTargetView* const* rtvs,
         ID3D11DepthStencilView* dsv)
     {
-        bool sceneDepthBound = false;
-
         if (dsv)
         {
             ComPtr<ID3D11Resource> res;
             dsv->GetResource(res.GetAddressOf());
-
             ComPtr<ID3D11Texture2D> tex;
-            if (res && SUCCEEDED(res.As(&tex)) && tex)
+            if (res && SUCCEEDED(res.As(&tex)))
             {
                 D3D11_TEXTURE2D_DESC d {};
                 tex->GetDesc(&d);
-
                 DXGI_FORMAT a, b;
                 UINT bb = BackbufferArea();
-
-                if (d.SampleDesc.Count == 1 &&
-                    MapDepthFormat(d.Format, a, b) &&
-                    bb &&
+                if (d.SampleDesc.Count == 1 && MapDepthFormat(d.Format, a, b) && bb &&
                     static_cast<uint64_t>(d.Width) * d.Height >= static_cast<uint64_t>(bb * 0.6f))
                 {
-                    sceneDepthBound = true;
                     g_sceneDepth = tex;
-
                     if (numViews > 0 && rtvs && rtvs[0])
-                    {
                         g_sceneColorRTV = rtvs[0];
-                    }
-                }
-            }
-        }
-
-        if (sceneDepthBound)
-        {
-            g_in3D = true;
-        }
-        else if (g_in3D && !g_fired)   // first transition out of the 3D pass this frame
-        {
-            g_fired = true;
-            g_in3D = false;
-
-            CopyDepth(g_sceneDepth.Get());
-
-            if (g_sceneColorRTV)
-            {
-                const auto callbacks = g_callbacks;
-                ID3D11ShaderResourceView* depthSRV = g_available ? g_copySRV.Get() : nullptr;
-
-                for (const auto callback : callbacks)
-                {
-                    if (callback)
-                    {
-                        callback(g_sceneColorRTV.Get(), depthSRV);
-                    }
                 }
             }
         }
 
         g_omSetRTHook.stdcall<void>(ctx, numViews, rtvs, dsv);
     }
+
 }
 
 void SceneDepth::Initialize()
@@ -191,7 +161,23 @@ void SceneDepth::Initialize()
     LOG_HOOK(g_omSetRTHook, "SceneDepth: OMSetRenderTargets");
 }
 
-void SceneDepth::CaptureForFrame()
+void SceneDepth::OnPreMenuRender()
+{
+    if (g_fired) return;
+    g_fired = true;
+
+    CopyDepth(g_sceneDepth.Get());
+
+    if (g_sceneColorRTV)
+    {
+        ID3D11ShaderResourceView* depthSRV = g_available ? g_copySRV.Get() : nullptr;
+        for (const auto& entry : g_callbacks)
+            if (entry.callback) entry.callback(g_sceneColorRTV.Get(), depthSRV);
+    }
+}
+
+
+void SceneDepth::ResetStatus()
 {
     // Reset per-frame transition state (the depth copy + callbacks happen mid-frame at the 3D->UI edge).
     g_fired = false;
@@ -200,17 +186,37 @@ void SceneDepth::CaptureForFrame()
     g_sceneDepth.Reset();
 }
 
-void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb)
+void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb, int priority)
 {
     if (!cb)
     {
         return;
     }
 
-    if (std::find(g_callbacks.begin(), g_callbacks.end(), cb) == g_callbacks.end())
+    const auto it = std::find_if(
+        g_callbacks.begin(),
+        g_callbacks.end(),
+        [cb](const CallbackEntry& entry)
+        {
+            return entry.callback == cb;
+        });
+
+    if (it == g_callbacks.end())
     {
-        g_callbacks.push_back(cb);
+        g_callbacks.push_back({ cb, priority });
     }
+    else
+    {
+        it->priority = priority;
+    }
+
+    std::stable_sort(
+        g_callbacks.begin(),
+        g_callbacks.end(),
+        [](const CallbackEntry& lhs, const CallbackEntry& rhs)
+        {
+            return lhs.priority < rhs.priority;
+        });
 }
 
 ID3D11ShaderResourceView* SceneDepth::GetSRV()

@@ -21,11 +21,14 @@
 #include "mg1_display_scaling.hpp"
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
+#include "mgs_smaa.hpp"
 #include "scene_depth.hpp"
 void afterPresent();
 
 namespace
 {
+    bool g_preMenuFired = false;
+
     // Hooks
     SafetyHookInline CreateDXGIFactory_hook {};
     SafetyHookInline CreateSwapChain_hook {};
@@ -169,10 +172,10 @@ namespace
         g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
 
-        SceneDepth::CaptureForFrame();   // snapshot this frame's scene depth for effects to sample
 
         if (eGameType & MGS2)
         {
+            SceneDepth::ResetStatus();
             MGS2_ThirdPersonFreecam::Tick();
             MGS2_First_Person_View::Tick();
             MGS2ThermalGoggles::Tick();
@@ -182,8 +185,19 @@ namespace
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
-            MGS2_ShimmerEffect::Draw();
             MGS2_Crossfade::OnPresent(pSwapChain);
+        }
+        else if (eGameType & MGS3)
+        {
+            ComPtr<ID3D11Texture2D> bb;
+            pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(bb.GetAddressOf()));
+            if (bb)
+            {
+                ComPtr<ID3D11RenderTargetView> bbRTV;
+                g_D3D11Hooks.d3dDevice->CreateRenderTargetView(bb.Get(), nullptr, bbRTV.GetAddressOf());
+                if (bbRTV)
+                    SMAA_AA::Draw(bbRTV.Get(), nullptr);
+            }
         }
         else if (eGameType & MG)
         {
@@ -192,6 +206,7 @@ namespace
 
         ColorCorrection::Draw(pSwapChain);
         D3D11TextOverlay::Tick(); //keep last.
+        g_preMenuFired = false;
         return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 
@@ -277,4 +292,33 @@ void D3D11Hooks::Initialize()
 
     CreateDXGIFactory_hook = safetyhook::create_inline(CreateDXGIFactory, reinterpret_cast<void*>(CreateDXGIFactory_hooked));
     LOG_HOOK(CreateDXGIFactory_hook, "CreateDXGIFactory");
+
+    if (eGameType & MGS2)
+    {
+        constexpr uint32_t kDG_DMAPACK_MENU = 0x0002;
+        MAKE_HOOK_MID(baseModule, "40 55 57 41 56 48 8D AC 24 40 FC FF FF 48 81 EC C0 04 00 00 48 8B F9", "D3D11 Hooks: BP_RenderDmaPack_AutoPacket", {
+                auto* dmapack = *reinterpret_cast<const uintptr_t* const*>(ctx.rcx);
+                if (!dmapack)
+                {
+                    return;
+                }
+                if (!(*reinterpret_cast<const uint32_t*>(dmapack) & kDG_DMAPACK_MENU))
+                {
+                    return;
+                }
+                if (g_preMenuFired)
+                {
+                    return;
+                }
+                g_preMenuFired = true;
+                SceneDepth::OnPreMenuRender();
+                });
+    }
+
+    // dmapack hook disabled for mgs3 atm. it seems to be a bit too early in the render 
+    /*mgs3:  "48 8B C4 55 53 56 57 41 54 41 55 41 56 41 57 48 8D A8 ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9")
+    if (!(*reinterpret_cast<const uint32_t*>(dmapack + 24) & kDG_DMAPACK_MENU))
+    {
+        return;
+    }*/
 }

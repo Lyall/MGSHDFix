@@ -9,4 +9,5 @@ namespace MGS2_Crossfade
 
     void Initialize();
     void OnPresent(IDXGISwapChain* swap);
+    void OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
 }

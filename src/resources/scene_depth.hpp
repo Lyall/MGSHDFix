@@ -12,16 +12,29 @@
 //   - SetEndOf3DCallback(cb): to draw under the UI. cb fires after the 3D pass with the scene colour
 //     RT and depth SRV (this is how the smk_blur smoke draws + gets occluded).
 //
-// Initialize() once the device exists; CaptureForFrame() once per frame from Present.
+// Initialize() once the device exists; ResetStatus() once per frame from Present.
 namespace SceneDepth
 {
+    enum CALLBACK_PRIORITY :std::uint16_t
+    {
+        PRIORITY_DEFAULT = 1, 
+        PRIORITY_HAZE = 10,
+        
+        PRIORITY_SMAA = 998,
+        PRIORITY_CROSSFADE = 999, //capture after SMAA pass
+    };
+
     void Initialize();
-    void CaptureForFrame();
+    void ResetStatus();
     ID3D11ShaderResourceView* GetSRV();
     bool IsAvailable();
 
     // Fires at the end of the 3D pass (after the scene, before UI). Gives the scene colour RT to draw
     // into and the depth SRV for occlusion.
     using EndOf3DCallback = void(*)(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
-    void SetEndOf3DCallback(EndOf3DCallback cb);
+    void SetEndOf3DCallback(EndOf3DCallback cb, int priority = PRIORITY_DEFAULT);
+    
+    void OnPreMenuRender();
+
+
 }

@@ -287,11 +287,12 @@ void MGS2_ShimmerEffect::Init()
     psBlob.Reset();
 
     bShaderLoaded = true;
+    SceneDepth::SetEndOf3DCallback(&MGS2_ShimmerEffect::Draw, SceneDepth::PRIORITY_HAZE);
 
     spdlog::info("MGS2_ShimmerEffect initialized.");
 }
 
-void MGS2_ShimmerEffect::Draw()
+void MGS2_ShimmerEffect::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* /*depth*/)
 {
     if (!bIsActive)
     {
@@ -309,11 +310,10 @@ void MGS2_ShimmerEffect::Draw()
     }
 
 //    spdlog::info("tried to draw shimmer, camera y: {}", MGS2_LinkVarBuf::GM_CameraY.get()); 
-    
+
 
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
-    auto* swap = g_D3D11Hooks.swapChain.Get();
 
     static ULONGLONG lastTick = GetTickCount64();
     ULONGLONG nowTick = GetTickCount64();
@@ -335,11 +335,14 @@ void MGS2_ShimmerEffect::Draw()
     driftX += sinf(camRotY) * dt * 60.0f;
     driftY += sinf(camRotX) * dt * 60.0f;
 
-    ComPtr<ID3D11Texture2D> backbuf;
-    swap->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backbuf.GetAddressOf());
+    ComPtr<ID3D11Resource> sceneRes;
+    sceneColor->GetResource(sceneRes.GetAddressOf());
+    ComPtr<ID3D11Texture2D> sceneTex;
+    if (FAILED(sceneRes.As(&sceneTex)))
+        return;
 
     D3D11_TEXTURE2D_DESC bbDesc;
-    backbuf->GetDesc(&bbDesc);
+    sceneTex->GetDesc(&bbDesc);
 
     if (!captureTex || captureW != bbDesc.Width || captureH != bbDesc.Height)
     {
@@ -364,10 +367,7 @@ void MGS2_ShimmerEffect::Draw()
         captureH = bbDesc.Height;
     }
 
-    ctx->CopyResource(captureTex.Get(), backbuf.Get());
-
-    ComPtr<ID3D11RenderTargetView> rtv;
-    dev->CreateRenderTargetView(backbuf.Get(), nullptr, rtv.GetAddressOf());
+    ctx->CopyResource(captureTex.Get(), sceneTex.Get());
 
     D3D11_VIEWPORT vp = { 0, 0, (float)bbDesc.Width, (float)bbDesc.Height, 0.f, 1.f };
 
@@ -413,7 +413,7 @@ void MGS2_ShimmerEffect::Draw()
     ctx->OMSetDepthStencilState(dss.Get(), 0);
     ctx->RSSetState(rs.Get());
     ctx->RSSetViewports(1, &vp);
-    ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
+    ctx->OMSetRenderTargets(1, &sceneColor, nullptr);
 
     SetParams(ctx, t, (float)bbDesc.Width, (float)bbDesc.Height, topAlpha, bottomAlpha, driftX, driftY);
     ctx->Draw(3, 0);
