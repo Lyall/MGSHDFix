@@ -8,23 +8,13 @@
 
 namespace
 {
-    // Vibrance algo ported from CeeJayDK's SweetFX Vibrance shader.
+    // Vibrance + Curves based off CeeJayDK's SweetFX shaders.
     // Intelligently boosts saturation: undersaturated pixels get a larger boost
     // than pixels that are already vivid, avoiding oversaturation.
-    constexpr float kVibrance = 0.25f;
-    constexpr float kVibranceRBalance = 1.0f;
-    constexpr float kVibranceGBalance = 1.0f;
-    constexpr float kVibranceBBalance = 1.0f;
-
+    // then apply a gentle S-curve to luma for a touch more contrast without clipping.
     const char* kShader = R"(
     Texture2D    backBuffer : register(t0);
     SamplerState smpl       : register(s0);
-
-    cbuffer CB : register(b0)
-    {
-        float  Vibrance;
-        float3 VibranceRGBBalance;
-    }
 
     void VS(uint id : SV_VertexID, out float4 pos : SV_Position, out float2 uv : TexCoord)
     {
@@ -36,31 +26,40 @@ namespace
     {
         float3 color = backBuffer.Sample(smpl, uv).rgb;
 
-        float3 coefLuma = float3(0.212656, 0.715158, 0.072186);
-        float  luma     = dot(coefLuma, color);
+        static const float3 coefLuma = float3(0.212656, 0.715158, 0.072186);
 
-        float max_color       = max(color.r, max(color.g, color.b));
-        float min_color       = min(color.r, min(color.g, color.b));
+        // Vibrance
+        const float kVibrance = 0.15;
+        float luma             = dot(coefLuma, color);
+        float max_color        = max(color.r, max(color.g, color.b));
+        float min_color        = min(color.r, min(color.g, color.b));
         float color_saturation = max_color - min_color;
 
-        float3 coeffVibrance = VibranceRGBBalance * Vibrance;
-        color = lerp(luma, color, 1.0 + (coeffVibrance * (1.0 - (sign(coeffVibrance) * color_saturation))));
+        color = lerp(luma, color, 1.0 + (kVibrance * (1.0 - (sign(kVibrance) * color_saturation))));
+
+        // Gamma Curve
+        const float kContrast = 0.225;
+        luma = dot(coefLuma, color);                    // recompute post-vibrance
+        float3 chroma = color - luma;
+        float s = luma;
+        s = s * s * s * (s * (s * 6.0 - 15.0) + 10.0);  // Perlin's smootherstep
+        luma  = lerp(luma, s, kContrast);               // blend by contrast
+        color = luma + chroma;
 
         return float4(color, 1.0);
     }
     )";
 
-    ComPtr<ID3DBlob>                vsBlob;
-    ComPtr<ID3DBlob>                psBlob;
-    ComPtr<ID3D11VertexShader>      vs;
-    ComPtr<ID3D11PixelShader>       ps;
-    ComPtr<ID3D11Buffer>            cb;
-    ComPtr<ID3D11SamplerState>      smpl;
-    ComPtr<ID3D11Texture2D>         tempTex;
+    ComPtr<ID3DBlob>                 vsBlob;
+    ComPtr<ID3DBlob>                 psBlob;
+    ComPtr<ID3D11VertexShader>       vs;
+    ComPtr<ID3D11PixelShader>        ps;
+    ComPtr<ID3D11SamplerState>       smpl;
+    ComPtr<ID3D11Texture2D>          tempTex;
     ComPtr<ID3D11ShaderResourceView> tempSRV;
-    ComPtr<ID3D11RasterizerState>   rs;
-    ComPtr<ID3D11DepthStencilState> dss;
-    D3D11_TEXTURE2D_DESC            tempDesc = {};
+    ComPtr<ID3D11RasterizerState>    rs;
+    ComPtr<ID3D11DepthStencilState>  dss;
+    D3D11_TEXTURE2D_DESC             tempDesc = {};
 }
 
 void ColorCorrection::Setup()
@@ -72,16 +71,16 @@ void ColorCorrection::Setup()
 
     if (!bEnabled)
     {
-        spdlog::info("Color Correction: Disabled in config, skipping shader compilation.");
+        spdlog::info("Gamma Correction: Disabled in config, skipping shader compilation.");
         return;
     }
 
-    spdlog::info("Color Correction: Compiling shaders...");
+    spdlog::info("Gamma Correction: Compiling shaders...");
 
 
     if (!g_D3D11Hooks.D3DCompileFunc)
     {
-        spdlog::error("Color Correction: Failed to get D3DCompile");
+        spdlog::error("Gamma Correction: Failed to get D3DCompile");
         return;
     }
 
@@ -90,7 +89,7 @@ void ColorCorrection::Setup()
     HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
-        spdlog::error("Color Correction: VS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
+        spdlog::error("Gamma Correction: VS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
         return;
     }
 
@@ -99,12 +98,12 @@ void ColorCorrection::Setup()
     hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
-        spdlog::error("Color Correction: PS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
+        spdlog::error("Gamma Correction: PS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
         vsBlob.Reset();
         return;
     }
 
-    spdlog::info("Color Correction: Shaders compiled successfully");
+    spdlog::info("Gamma Correction: Shaders compiled successfully");
 }
 
 void ColorCorrection::Init()
@@ -127,30 +126,18 @@ void ColorCorrection::Init()
     ID3D11Device* dev = g_D3D11Hooks.d3dDevice.Get();
     if (!dev)
     {
-        spdlog::error("Color Correction: D3D11 device not initialized");
+        spdlog::error("Gamma Correction: D3D11 device not initialized");
         return;
     }
 
     if (!vsBlob || !psBlob)
     {
-        spdlog::error("Color Correction: Shader bytecode missing");
+        spdlog::error("Gamma Correction: Shader bytecode missing");
         return;
     }
 
     dev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vs.GetAddressOf());
     dev->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, ps.GetAddressOf());
-
-    // cbuffer layout matches HLSL: float Vibrance; float3 VibranceRGBBalance; = 16 bytes
-    struct CB { float vibrance; float rgb[3]; };
-    CB cbData = { kVibrance, { kVibranceRBalance, kVibranceGBalance, kVibranceBBalance } };
-
-    D3D11_BUFFER_DESC cbd = {};
-    cbd.ByteWidth = sizeof(CB);
-    cbd.Usage = D3D11_USAGE_IMMUTABLE;
-    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA cbInit = { &cbData };
-    dev->CreateBuffer(&cbd, &cbInit, cb.GetAddressOf());
 
     D3D11_SAMPLER_DESC sd = {};
     sd.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -171,7 +158,7 @@ void ColorCorrection::Init()
     psBlob.Reset();
 
     bShaderLoaded = true;
-    spdlog::info("Color Correction: Initialized (vibrance {:.2f})", kVibrance);
+    spdlog::info("Gamma Correction: Initialized");
 }
 
 void ColorCorrection::Draw(IDXGISwapChain* swap)
@@ -220,7 +207,6 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     ID3D11VertexShader* oldVS = nullptr;
     ID3D11PixelShader* oldPS = nullptr;
     ID3D11InputLayout* oldIL = nullptr;
-    ID3D11Buffer* oldPSCB[1] = {};
     ID3D11Buffer* oldVB[1] = {};
     ID3D11ShaderResourceView* oldSRV[1] = {};
     ID3D11SamplerState* oldSmpl[1] = {};
@@ -239,7 +225,6 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     ctx->IAGetInputLayout(&oldIL);
     ctx->IAGetPrimitiveTopology(&oldTopology);
     ctx->IAGetVertexBuffers(0, 1, oldVB, &oldStride, &oldOffset);
-    ctx->PSGetConstantBuffers(0, 1, oldPSCB);
     ctx->PSGetShaderResources(0, 1, oldSRV);
     ctx->PSGetSamplers(0, 1, oldSmpl);
 
@@ -248,7 +233,6 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     ctx->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
     ctx->VSSetShader(vs.Get(), nullptr, 0);
     ctx->PSSetShader(ps.Get(), nullptr, 0);
-    ctx->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
     ctx->PSSetShaderResources(0, 1, tempSRV.GetAddressOf());
     ctx->PSSetSamplers(0, 1, smpl.GetAddressOf());
     ctx->RSSetState(rs.Get());
@@ -270,7 +254,6 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     ctx->IASetInputLayout(oldIL);
     ctx->IASetPrimitiveTopology(oldTopology);
     ctx->IASetVertexBuffers(0, 1, oldVB, &oldStride, &oldOffset);
-    ctx->PSSetConstantBuffers(0, 1, oldPSCB);
     ctx->PSSetShaderResources(0, 1, oldSRV);
     ctx->PSSetSamplers(0, 1, oldSmpl);
 
@@ -283,7 +266,6 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     if (oldPS)      oldPS->Release();
     if (oldIL)      oldIL->Release();
     if (oldVB[0])   oldVB[0]->Release();
-    if (oldPSCB[0]) oldPSCB[0]->Release();
     if (oldSRV[0])  oldSRV[0]->Release();
     if (oldSmpl[0]) oldSmpl[0]->Release();
 }

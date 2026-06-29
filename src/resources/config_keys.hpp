@@ -104,9 +104,9 @@ namespace ConfigKeys
     constexpr const char* EnableSMAA_Tooltip = "";
 
     constexpr const char* ColorCorrection_Enabled_Section = "Enhancements and Tweaks";
-    constexpr const char* ColorCorrection_Enabled_Setting = "Boost Color Levels";
+    constexpr const char* ColorCorrection_Enabled_Setting = "Correct Gamma Levels";
     constexpr const char* ColorCorrection_Enabled_Help = "";
-    constexpr const char* ColorCorrection_Enabled_Tooltip = "Boosts color levels to simulate a more vibrant CRT screen.";
+    constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
 
 
     constexpr const char* MG1_Crop_Overscan_Enabled_Section = "Enhancements and Tweaks";

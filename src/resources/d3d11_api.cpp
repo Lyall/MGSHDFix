@@ -19,7 +19,6 @@
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
-#include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
 #include "mgs_smaa.hpp"
 #include "scene_depth.hpp"
@@ -34,42 +33,12 @@ namespace
     SafetyHookInline CreateSwapChain_hook {};
     SafetyHookInline PresentHook {};
     SafetyHookInline ResizeBuffersHook {};
-    SafetyHookInline CreateTexture2DHook {};
 
     using PresentFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT);
     PresentFn oPresent = nullptr;
 
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
-    /*
-    using CreateTexture2DFn = HRESULT(__stdcall*)(
-        ID3D11Device*,
-        const D3D11_TEXTURE2D_DESC*,
-        const D3D11_SUBRESOURCE_DATA*,
-        ID3D11Texture2D**);
-
-    HRESULT __stdcall HookedCreateTexture2D(
-        ID3D11Device* device,
-        const D3D11_TEXTURE2D_DESC* pDesc,
-        const D3D11_SUBRESOURCE_DATA* pInitialData,
-        ID3D11Texture2D** ppTexture2D)
-    {
-        return CreateTexture2DHook.stdcall<HRESULT>(device, pDesc, pInitialData, ppTexture2D);
-    }
-
-    void HookDevice(ID3D11Device* device)
-    {
-        if (!device || CreateTexture2DHook)
-            return;
-
-        void** vtable = *reinterpret_cast<void***>(device);
-        CreateTexture2DHook = safetyhook::create_inline(
-            vtable[5],
-            reinterpret_cast<void*>(HookedCreateTexture2D)
-        );
-
-        LOG_HOOK(CreateTexture2DHook, "CreateTexture2D");
-    }*/
 
     void RefreshDeviceAndContext(IDXGISwapChain* swap)
     {

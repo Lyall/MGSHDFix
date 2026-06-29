@@ -43,7 +43,7 @@ void GameVars::Initialize()
         spdlog::info("GameVars: GM_PlayerStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_PlayerStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_VRStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_VRStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_WaterLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_WaterLevel - (uintptr_t)baseModule);
-        spdlog::info("GameVars: GV_PauseLeveladdress is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GV_PauseLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel - (uintptr_t)baseModule);
         spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
         spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
         spdlog::info("GameVars: currentStage address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)currentStage - (uintptr_t)baseModule);
