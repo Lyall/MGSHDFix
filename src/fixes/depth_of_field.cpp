@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "custom_resolution_and_borderless.hpp"
+#include "d3d11_api.hpp"
 #include "gamevars.hpp"
 #include "helper.hpp"
 #ifndef RELEASE_BUILD
@@ -17,6 +18,8 @@ namespace
     constexpr int kMgs3RegUvOffset0 = 0x1E;
     constexpr int kMgs3RegUvOffset3 = 0x21;
     constexpr int kFarFocusMaxPlaneCount = 16;
+    constexpr int kMGS3FocusMaxPlaneCount = 4;
+    constexpr float kMGS3FocusSpreadBoost = 2.35f;
     constexpr float kFarFocusBlurWeight0 = 4.0f;
     constexpr float kFarFocusBlurWeight12 = 0.2f;
     constexpr float kFarFocusBlurWeight34 = 0.03125f;
@@ -25,9 +28,6 @@ namespace
     constexpr ptrdiff_t kMgs3BlurUvRegisterUploadCallOffset = 0x13;
     constexpr ptrdiff_t kMgs3RenderBufferAddCommandCallOffset = 0x35;
     constexpr ptrdiff_t kMgs3FarFocusSetDepthFuncCallOffset = 0x0C;
-    constexpr ptrdiff_t kMgs3CurrentTargetCallOffset = 0x11;
-    constexpr ptrdiff_t kMgs3AfterCurrentTargetCallOffset = 0x16;
-    constexpr ptrdiff_t kMgs3CopyTextureSRectCallOffset = 0x4E;
     constexpr float kNearFocusMinDepthSpan = 0.00025f;
     constexpr int kNearFocusMinPlaneCount = 6;
     constexpr uint64_t kDepthFuncLEqual = 3;
@@ -54,8 +54,6 @@ namespace
     using BpRbAddCommandFn = void(__fastcall*)(unsigned int, void*);
     using DmapackRenderCallbackFn = void(__fastcall*)(void*);
     using SetDepthFuncFn = void(__fastcall*)(void*, uint64_t);
-    using BpGetRenderTargetFn = void*(__fastcall*)(int);
-    constexpr int kMGS3TempBufferNoMSAARenderTarget = 0x05;
 
     bool bCutsceneNeedsSpecialHandling = false; //for per-cutscene effect skip handling.
     bool bIsD12T3 = false;
@@ -85,14 +83,6 @@ namespace
         int y2;
     };
 
-    struct MGS3Vector4
-    {
-        float x;
-        float y;
-        float z;
-        float w;
-    };
-
     enum class MGS3FocusSide
     {
         Far,
@@ -104,9 +94,6 @@ namespace
         Unknown,
         Near,
     };
-
-    using MGS3DrawFullscreenTextureModulateSRectFn = void(__fastcall*)(void*, const MGS3Vector4*, int, int, const MGS3SRect*, float);
-    using MGS3CopyTextureSRectFn = void(__fastcall*)(void*, void*, const MGS3SRect*, const MGS3SRect*);
 
     struct TrackedFocusPacket
     {
@@ -143,7 +130,6 @@ namespace
     SafetyHookMid MGS3BpRbAddCommandHook {};
     SafetyHookMid MGS3FarFocusDispatchHook {};
     SafetyHookMid MGS3FarFocusDepthFuncHook {};
-    SafetyHookMid MGS3FarFocusFeedbackCopyHook {};
     SafetyHookMid MGS3FarFocusCompositeDrawHook {};
     SafetyHookMid MGS3FocusCallbackCommandHook {};
     SafetyHookMid MGS3NearFocusWorkLinkHook {};
@@ -164,12 +150,30 @@ namespace
     BpRbAllocFn gMGS3RbAlloc = nullptr;
     DmapackRenderCallbackFn gNearFocusOriginalRender = nullptr;
     SetDepthFuncFn gSetDepthFunc = nullptr;
-    BpGetRenderTargetFn gMGS3GetRenderTarget = nullptr;
-    MGS3CopyTextureSRectFn gMGS3CopyTextureSRect = nullptr;
-    MGS3DrawFullscreenTextureModulateSRectFn gMGS3DrawFullscreenTextureModulateSRect = nullptr;
-    void* gMGS3FeedbackTexture = nullptr;
     uintptr_t gMGS3RenderBufferAddCommand = 0;
     void* gDepthFuncBackend = nullptr;
+    ComPtr<ID3D11VertexShader> gMGS3DofFocusVS;
+    ComPtr<ID3D11PixelShader> gMGS3DofFocusPS;
+    ComPtr<ID3D11Buffer> gMGS3DofFocusConstants;
+    ComPtr<ID3D11Texture2D> gMGS3DofFocusSourceTexture;
+    ComPtr<ID3D11ShaderResourceView> gMGS3DofFocusSourceSRV;
+    ComPtr<ID3D11SamplerState> gMGS3DofFocusSampler;
+    ComPtr<ID3D11RasterizerState> gMGS3DofFocusRasterizerState;
+    ComPtr<ID3D11DepthStencilState> gMGS3DofFocusDepthLEqualState;
+    ComPtr<ID3D11DepthStencilState> gMGS3DofFocusDepthGEqualState;
+    ComPtr<ID3D11BlendState> gMGS3DofFocusBlendState;
+    D3D11_TEXTURE2D_DESC gMGS3DofFocusSourceDesc {};
+    ID3D11Device* gMGS3DofFocusDevice = nullptr;
+    bool gMGS3DofFocusReady = false;
+    bool gMGS3DofFocusFailed = false;
+
+    struct MGS3DofFocusConstants
+    {
+        float sourceRect[4] {};
+        float sourceSizeAndSpread[4] {};
+        float color[4] {};
+    };
+
     thread_local bool gInsideFarFocusBlur = false;
     thread_local bool gInsideNearFocusComposite = false;
     thread_local bool gExecutingNearFocusCommand = false;
@@ -182,6 +186,440 @@ namespace
     bool QueueNearFocusPacket(void* work);
     bool QueueNearFocusPacketFromSource(FocusSourcePacket source);
     bool BuildNearFocusSourceFromParam(uintptr_t paramAddress, FocusSourcePacket& source);
+    bool IsReasonableMGS3SRect(const MGS3SRect& rect);
+
+    void ResetMGS3DofDirectFocus()
+    {
+        gMGS3DofFocusVS.Reset();
+        gMGS3DofFocusPS.Reset();
+        gMGS3DofFocusConstants.Reset();
+        gMGS3DofFocusSourceTexture.Reset();
+        gMGS3DofFocusSourceSRV.Reset();
+        gMGS3DofFocusSampler.Reset();
+        gMGS3DofFocusRasterizerState.Reset();
+        gMGS3DofFocusDepthLEqualState.Reset();
+        gMGS3DofFocusDepthGEqualState.Reset();
+        gMGS3DofFocusBlendState.Reset();
+        gMGS3DofFocusSourceDesc = {};
+        gMGS3DofFocusDevice = nullptr;
+        gMGS3DofFocusReady = false;
+    }
+
+    bool EnsureMGS3DofDirectFocus()
+    {
+        ID3D11Device* device = g_D3D11Hooks.d3dDevice.Get();
+        if (!device)
+        {
+            return false;
+        }
+
+        if (gMGS3DofFocusDevice != device)
+        {
+            ResetMGS3DofDirectFocus();
+            gMGS3DofFocusDevice = device;
+            gMGS3DofFocusFailed = false;
+        }
+
+        if (gMGS3DofFocusReady)
+        {
+            return true;
+        }
+
+        if (gMGS3DofFocusFailed)
+        {
+            return false;
+        }
+
+        if (!g_D3D11Hooks.D3DCompileFunc)
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus shader unavailable; D3DCompile missing.");
+            return false;
+        }
+
+        const char* shader = R"(
+            cbuffer FocusConstants : register(b0)
+            {
+                float4 sourceRect;
+                float4 sourceSizeAndSpread;
+                float4 focusColor;
+            };
+
+            Texture2D focusSource : register(t0);
+            SamplerState focusSampler : register(s0);
+
+            struct VSOut
+            {
+                float4 pos : SV_Position;
+                float2 uv : TEXCOORD0;
+            };
+
+            VSOut FocusVS(uint id : SV_VertexID)
+            {
+                float2 uv = float2((id << 1) & 2, id & 2);
+                VSOut output;
+                output.pos = float4(uv * float2(2.0, -2.0) + float2(-1.0, 1.0), sourceSizeAndSpread.w, 1.0);
+                output.uv = uv;
+                return output;
+            }
+
+            float4 FocusPS(VSOut input) : SV_Target
+            {
+                static const float2 kernel[8] = {
+                    float2( 0.18,  0.18),
+                    float2(-0.18,  0.18),
+                    float2( 0.18, -0.18),
+                    float2(-0.18, -0.18),
+                    float2( 0.33,  0.00),
+                    float2(-0.33,  0.00),
+                    float2( 0.00,  0.33),
+                    float2( 0.00, -0.33)
+                };
+
+                float2 basePixel = sourceRect.xy + input.uv * sourceRect.zw;
+                float2 sourceSize = max(sourceSizeAndSpread.xy, float2(1.0, 1.0));
+                float spread = sourceSizeAndSpread.z;
+                float3 color = 0.0;
+
+                [unroll]
+                for (int i = 0; i < 8; ++i)
+                {
+                    color += focusSource.Sample(focusSampler, (basePixel + kernel[i] * spread) / sourceSize).rgb;
+                }
+
+                color *= 0.125 * focusColor.rgb;
+                return float4(color, focusColor.a);
+            }
+        )";
+
+        ComPtr<ID3DBlob> vsBlob;
+        ComPtr<ID3DBlob> psBlob;
+        ComPtr<ID3DBlob> err;
+        HRESULT hr = g_D3D11Hooks.D3DCompileFunc(shader, strlen(shader), nullptr, nullptr, nullptr, "FocusVS", "vs_5_0", 0, 0, vsBlob.GetAddressOf(), err.GetAddressOf());
+        if (FAILED(hr))
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus VS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
+            return false;
+        }
+
+        err.Reset();
+        hr = g_D3D11Hooks.D3DCompileFunc(shader, strlen(shader), nullptr, nullptr, nullptr, "FocusPS", "ps_5_0", 0, 0, psBlob.GetAddressOf(), err.GetAddressOf());
+        if (FAILED(hr))
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus PS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
+            return false;
+        }
+
+        if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, gMGS3DofFocusVS.GetAddressOf())) ||
+            FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, gMGS3DofFocusPS.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus shader creation failed.");
+            return false;
+        }
+
+        D3D11_BUFFER_DESC constantsDesc {};
+        constantsDesc.ByteWidth = sizeof(MGS3DofFocusConstants);
+        constantsDesc.Usage = D3D11_USAGE_DEFAULT;
+        constantsDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(device->CreateBuffer(&constantsDesc, nullptr, gMGS3DofFocusConstants.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus constants creation failed.");
+            return false;
+        }
+
+        D3D11_SAMPLER_DESC samplerDesc {};
+        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+        if (FAILED(device->CreateSamplerState(&samplerDesc, gMGS3DofFocusSampler.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            spdlog::warn("MGS 3: Depth of Field: direct focus sampler creation failed.");
+            return false;
+        }
+
+        D3D11_RASTERIZER_DESC rasterizerDesc {};
+        rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+        rasterizerDesc.CullMode = D3D11_CULL_NONE;
+        if (FAILED(device->CreateRasterizerState(&rasterizerDesc, gMGS3DofFocusRasterizerState.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            return false;
+        }
+
+        D3D11_DEPTH_STENCIL_DESC depthDesc {};
+        depthDesc.DepthEnable = TRUE;
+        depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+        if (FAILED(device->CreateDepthStencilState(&depthDesc, gMGS3DofFocusDepthLEqualState.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            return false;
+        }
+
+        depthDesc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
+        if (FAILED(device->CreateDepthStencilState(&depthDesc, gMGS3DofFocusDepthGEqualState.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            return false;
+        }
+
+        D3D11_BLEND_DESC blendDesc {};
+        auto& blendTarget = blendDesc.RenderTarget[0];
+        blendTarget.BlendEnable = TRUE;
+        blendTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        blendTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        blendTarget.BlendOp = D3D11_BLEND_OP_ADD;
+        blendTarget.SrcBlendAlpha = D3D11_BLEND_ZERO;
+        blendTarget.DestBlendAlpha = D3D11_BLEND_ONE;
+        blendTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blendTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        if (FAILED(device->CreateBlendState(&blendDesc, gMGS3DofFocusBlendState.GetAddressOf())))
+        {
+            gMGS3DofFocusFailed = true;
+            return false;
+        }
+
+        gMGS3DofFocusReady = true;
+        spdlog::info("MGS 3: Depth of Field: direct focus shader initialized.");
+        return true;
+    }
+
+    bool SameMGS3DofFocusSourceDesc(const D3D11_TEXTURE2D_DESC& lhs, const D3D11_TEXTURE2D_DESC& rhs)
+    {
+        return lhs.Width == rhs.Width &&
+            lhs.Height == rhs.Height &&
+            lhs.MipLevels == rhs.MipLevels &&
+            lhs.ArraySize == rhs.ArraySize &&
+            lhs.Format == rhs.Format &&
+            lhs.SampleDesc.Count == rhs.SampleDesc.Count &&
+            lhs.SampleDesc.Quality == rhs.SampleDesc.Quality;
+    }
+
+    bool CopyMGS3DofFocusSourceFromCurrentTarget(ID3D11RenderTargetView* currentTarget)
+    {
+        ID3D11Device* device = g_D3D11Hooks.d3dDevice.Get();
+        ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!device || !context || !currentTarget)
+        {
+            return false;
+        }
+
+        ComPtr<ID3D11Resource> targetResource;
+        currentTarget->GetResource(targetResource.GetAddressOf());
+        ComPtr<ID3D11Texture2D> targetTexture;
+        if (!targetResource || FAILED(targetResource.As(&targetTexture)) || !targetTexture)
+        {
+            return false;
+        }
+
+        D3D11_TEXTURE2D_DESC targetDesc {};
+        targetTexture->GetDesc(&targetDesc);
+        if (targetDesc.SampleDesc.Count != 1 || targetDesc.Width == 0 || targetDesc.Height == 0)
+        {
+            return false;
+        }
+
+        D3D11_TEXTURE2D_DESC sourceDesc = targetDesc;
+        sourceDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        sourceDesc.CPUAccessFlags = 0;
+        sourceDesc.Usage = D3D11_USAGE_DEFAULT;
+        sourceDesc.MiscFlags = 0;
+
+        if (!gMGS3DofFocusSourceTexture || !SameMGS3DofFocusSourceDesc(gMGS3DofFocusSourceDesc, sourceDesc))
+        {
+            gMGS3DofFocusSourceTexture.Reset();
+            gMGS3DofFocusSourceSRV.Reset();
+            if (FAILED(device->CreateTexture2D(&sourceDesc, nullptr, gMGS3DofFocusSourceTexture.GetAddressOf())) ||
+                FAILED(device->CreateShaderResourceView(gMGS3DofFocusSourceTexture.Get(), nullptr, gMGS3DofFocusSourceSRV.GetAddressOf())))
+            {
+                gMGS3DofFocusSourceTexture.Reset();
+                gMGS3DofFocusSourceSRV.Reset();
+                gMGS3DofFocusSourceDesc = {};
+                return false;
+            }
+            gMGS3DofFocusSourceDesc = sourceDesc;
+        }
+
+        context->CopyResource(gMGS3DofFocusSourceTexture.Get(), targetTexture.Get());
+        return true;
+    }
+
+    bool CopyMGS3DofDirectFocusSource()
+    {
+        ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!context || !EnsureMGS3DofDirectFocus())
+        {
+            return false;
+        }
+
+        ID3D11RenderTargetView* currentRTV = nullptr;
+        ID3D11DepthStencilView* currentDSV = nullptr;
+        context->OMGetRenderTargets(1, &currentRTV, &currentDSV);
+
+        const bool copied = currentRTV && currentDSV && CopyMGS3DofFocusSourceFromCurrentTarget(currentRTV);
+        if (currentRTV) currentRTV->Release();
+        if (currentDSV) currentDSV->Release();
+        return copied;
+    }
+
+    bool DrawMGS3DofDirectFocus(
+        const MGS3SRect& fullRect,
+        int spreadPixels,
+        float alpha,
+        float sampleZ,
+        MGS3FocusSide focusSide,
+        bool copySource = true)
+    {
+        ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!context ||
+            !EnsureMGS3DofDirectFocus() ||
+            !IsReasonableMGS3SRect(fullRect) ||
+            alpha < 0.001f ||
+            sampleZ <= 0.0f ||
+            sampleZ >= 1.0f)
+        {
+            return false;
+        }
+
+        ID3D11RenderTargetView* oldRTV[8] = {};
+        ID3D11DepthStencilView* oldDSV = nullptr;
+        ID3D11BlendState* oldBlendState = nullptr;
+        ID3D11DepthStencilState* oldDepthState = nullptr;
+        ID3D11RasterizerState* oldRasterizerState = nullptr;
+        ID3D11VertexShader* oldVS = nullptr;
+        ID3D11GeometryShader* oldGS = nullptr;
+        ID3D11PixelShader* oldPS = nullptr;
+        ID3D11InputLayout* oldInputLayout = nullptr;
+        ID3D11Buffer* oldVertexBuffer = nullptr;
+        ID3D11Buffer* oldVSConstants = nullptr;
+        ID3D11Buffer* oldPSConstants = nullptr;
+        ID3D11ShaderResourceView* oldSRV = nullptr;
+        ID3D11SamplerState* oldSampler = nullptr;
+        D3D11_PRIMITIVE_TOPOLOGY oldTopology {};
+        D3D11_VIEWPORT oldViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE] = {};
+        UINT oldViewportCount = std::size(oldViewports);
+        UINT oldBlendMask = 0;
+        UINT oldStencilRef = 0;
+        UINT oldStride = 0;
+        UINT oldOffset = 0;
+        float oldBlendFactor[4] = {};
+
+        context->OMGetRenderTargets(8, oldRTV, &oldDSV);
+        context->OMGetBlendState(&oldBlendState, oldBlendFactor, &oldBlendMask);
+        context->OMGetDepthStencilState(&oldDepthState, &oldStencilRef);
+        context->RSGetState(&oldRasterizerState);
+        context->RSGetViewports(&oldViewportCount, oldViewports);
+        context->VSGetShader(&oldVS, nullptr, nullptr);
+        context->GSGetShader(&oldGS, nullptr, nullptr);
+        context->PSGetShader(&oldPS, nullptr, nullptr);
+        context->VSGetConstantBuffers(0, 1, &oldVSConstants);
+        context->PSGetConstantBuffers(0, 1, &oldPSConstants);
+        context->PSGetShaderResources(0, 1, &oldSRV);
+        context->PSGetSamplers(0, 1, &oldSampler);
+        context->IAGetInputLayout(&oldInputLayout);
+        context->IAGetPrimitiveTopology(&oldTopology);
+        context->IAGetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+
+        const auto releaseSavedState = [&]() {
+            for (auto* rtv : oldRTV)
+            {
+                if (rtv)
+                {
+                    rtv->Release();
+                }
+            }
+            if (oldDSV) oldDSV->Release();
+            if (oldBlendState) oldBlendState->Release();
+            if (oldDepthState) oldDepthState->Release();
+            if (oldRasterizerState) oldRasterizerState->Release();
+            if (oldVS) oldVS->Release();
+            if (oldGS) oldGS->Release();
+            if (oldPS) oldPS->Release();
+            if (oldInputLayout) oldInputLayout->Release();
+            if (oldVertexBuffer) oldVertexBuffer->Release();
+            if (oldVSConstants) oldVSConstants->Release();
+            if (oldPSConstants) oldPSConstants->Release();
+            if (oldSRV) oldSRV->Release();
+            if (oldSampler) oldSampler->Release();
+        };
+
+        if (!oldRTV[0] ||
+            !oldDSV ||
+            oldViewportCount == 0 ||
+            (copySource && !CopyMGS3DofFocusSourceFromCurrentTarget(oldRTV[0])) ||
+            !gMGS3DofFocusSourceSRV)
+        {
+            releaseSavedState();
+            return false;
+        }
+
+        const int width = fullRect.x2 - fullRect.x1;
+        const int height = fullRect.y2 - fullRect.y1;
+        MGS3DofFocusConstants constants {};
+        constants.sourceRect[0] = static_cast<float>(fullRect.x1);
+        constants.sourceRect[1] = static_cast<float>(fullRect.y1);
+        constants.sourceRect[2] = static_cast<float>(width);
+        constants.sourceRect[3] = static_cast<float>(height);
+        constants.sourceSizeAndSpread[0] = static_cast<float>(gMGS3DofFocusSourceDesc.Width);
+        constants.sourceSizeAndSpread[1] = static_cast<float>(gMGS3DofFocusSourceDesc.Height);
+        constants.sourceSizeAndSpread[2] = static_cast<float>(spreadPixels);
+        constants.sourceSizeAndSpread[3] = sampleZ;
+        constants.color[0] = 1.0f;
+        constants.color[1] = 1.0f;
+        constants.color[2] = 1.0f;
+        constants.color[3] = std::clamp(alpha, 0.0f, 1.0f);
+        context->UpdateSubresource(gMGS3DofFocusConstants.Get(), 0, nullptr, &constants, 0, 0);
+
+        ID3D11RenderTargetView* currentRTV = oldRTV[0];
+        ID3D11ShaderResourceView* sourceSRV = gMGS3DofFocusSourceSRV.Get();
+        ID3D11SamplerState* sampler = gMGS3DofFocusSampler.Get();
+        ID3D11Buffer* constantBuffer = gMGS3DofFocusConstants.Get();
+        ID3D11DepthStencilState* depthState =
+            focusSide == MGS3FocusSide::Near ? gMGS3DofFocusDepthLEqualState.Get() : gMGS3DofFocusDepthGEqualState.Get();
+
+        context->IASetInputLayout(nullptr);
+        context->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context->VSSetShader(gMGS3DofFocusVS.Get(), nullptr, 0);
+        context->VSSetConstantBuffers(0, 1, &constantBuffer);
+        context->GSSetShader(nullptr, nullptr, 0);
+        context->PSSetShader(gMGS3DofFocusPS.Get(), nullptr, 0);
+        context->PSSetConstantBuffers(0, 1, &constantBuffer);
+        context->PSSetShaderResources(0, 1, &sourceSRV);
+        context->PSSetSamplers(0, 1, &sampler);
+        context->RSSetState(gMGS3DofFocusRasterizerState.Get());
+        context->RSSetViewports(1, oldViewports);
+        context->OMSetRenderTargets(1, &currentRTV, oldDSV);
+        context->OMSetDepthStencilState(depthState, 0);
+        context->OMSetBlendState(gMGS3DofFocusBlendState.Get(), nullptr, 0xFFFFFFFF);
+        context->Draw(3, 0);
+
+        context->OMSetRenderTargets(8, oldRTV, oldDSV);
+        context->OMSetBlendState(oldBlendState, oldBlendFactor, oldBlendMask);
+        context->OMSetDepthStencilState(oldDepthState, oldStencilRef);
+        context->RSSetState(oldRasterizerState);
+        context->RSSetViewports(oldViewportCount, oldViewports);
+        context->VSSetShader(oldVS, nullptr, 0);
+        context->VSSetConstantBuffers(0, 1, &oldVSConstants);
+        context->GSSetShader(oldGS, nullptr, 0);
+        context->PSSetShader(oldPS, nullptr, 0);
+        context->PSSetConstantBuffers(0, 1, &oldPSConstants);
+        context->PSSetShaderResources(0, 1, &oldSRV);
+        context->PSSetSamplers(0, 1, &oldSampler);
+        context->IASetInputLayout(oldInputLayout);
+        context->IASetPrimitiveTopology(oldTopology);
+        context->IASetVertexBuffers(0, 1, &oldVertexBuffer, &oldStride, &oldOffset);
+
+        releaseSavedState();
+        return true;
+    }
 
     bool IsUltrawide()
     {
@@ -865,40 +1303,9 @@ namespace
         return true;
     }
 
-    void CopyMGS3FeedbackTexture(uintptr_t stackBase, const MGS3FarFocusPacket* packet, void* currentFrameTexture)
-    {
-        gMGS3FeedbackTexture = nullptr;
-
-        if (!gMGS3GetRenderTarget ||
-            !gMGS3CopyTextureSRect ||
-            !packet ||
-            !currentFrameTexture ||
-            !ShouldApplyTrackedMGS3FocusFix(packet))
-        {
-            return;
-        }
-
-        const MGS3SRect fullRect = Memory::ReadField<MGS3SRect>(stackBase, 0x60);
-        if (!IsReasonableMGS3SRect(fullRect))
-        {
-            return;
-        }
-
-        void* feedbackTexture = gMGS3GetRenderTarget(kMGS3TempBufferNoMSAARenderTarget);
-        if (!feedbackTexture)
-        {
-            return;
-        }
-
-        gMGS3CopyTextureSRect(currentFrameTexture, feedbackTexture, &fullRect, &fullRect);
-        gMGS3FeedbackTexture = feedbackTexture;
-    }
-
     void DrawMGS3ShiftedFocusSamples(uintptr_t stackBase, const MGS3FarFocusPacket* packet, MGS3FocusSide focusSide)
     {
-        if (!gMGS3DrawFullscreenTextureModulateSRect ||
-            !packet ||
-            !gMGS3FeedbackTexture)
+        if (!packet)
         {
             return;
         }
@@ -908,56 +1315,25 @@ namespace
         {
             return;
         }
-
-        struct BlurTap
-        {
-            float x;
-            float y;
-            float weight;
-        };
-
-        static constexpr std::array<BlurTap, 24> sampleKernel {{
-            {  0.18f,  0.18f, 1.00f },
-            { -0.18f,  0.18f, 1.00f },
-            {  0.18f, -0.18f, 1.00f },
-            { -0.18f, -0.18f, 1.00f },
-            {  0.33f,  0.00f, 1.00f },
-            { -0.33f,  0.00f, 1.00f },
-            {  0.00f,  0.33f, 1.00f },
-            {  0.00f, -0.33f, 1.00f },
-            {  0.48f,  0.34f, 0.75f },
-            { -0.48f,  0.34f, 0.75f },
-            {  0.48f, -0.34f, 0.75f },
-            { -0.48f, -0.34f, 0.75f },
-            {  0.26f,  0.58f, 0.75f },
-            { -0.26f,  0.58f, 0.75f },
-            {  0.26f, -0.58f, 0.75f },
-            { -0.26f, -0.58f, 0.75f },
-            {  0.78f,  0.20f, 0.25f },
-            { -0.78f,  0.20f, 0.25f },
-            {  0.78f, -0.20f, 0.25f },
-            { -0.78f, -0.20f, 0.25f },
-            {  0.20f,  0.78f, 0.25f },
-            { -0.20f,  0.78f, 0.25f },
-            {  0.20f, -0.78f, 0.25f },
-            { -0.20f, -0.78f, 0.25f },
-        }};
-        static constexpr float kKernelWeightTotal = 16.0f;
 
         const int height = fullRect.y2 - fullRect.y1;
         const float configuredSpread = std::clamp(g_DepthOfFieldFixes.fBlurUvMultiplier / 5.0f, 1.0f, 4.0f);
         const int baseFocusPixelScale = std::clamp(static_cast<int>((height / 480.0f + 0.5f) * configuredSpread), 2, 22);
         const bool nearSide = focusSide == MGS3FocusSide::Near;
         const float sideSpreadScale = nearSide ? 1.12f : 1.0f;
-        const int focusPixelScale = std::clamp(static_cast<int>(baseFocusPixelScale * sideSpreadScale + 0.5f), 2, 24);
-        const int planeCount = std::clamp(packet->maxPlane * 2, 2, kFarFocusMaxPlaneCount);
+        const int focusPixelScale = std::clamp(static_cast<int>(baseFocusPixelScale * sideSpreadScale * kMGS3FocusSpreadBoost + 0.5f), 2, 56);
+        const int planeCount = std::clamp(packet->maxPlane, 1, kMGS3FocusMaxPlaneCount);
         const float layerAlpha = std::clamp(packet->alpha / 128.0f, 0.0f, 1.0f);
         const float planeSubdivision = static_cast<float>(std::max(packet->maxPlane, 1)) / static_cast<float>(planeCount);
         const float planeAlpha = 1.0f - std::pow(1.0f - layerAlpha, planeSubdivision);
+        if (!CopyMGS3DofDirectFocusSource())
+        {
+            return;
+        }
 
         for (int plane = 0; plane < planeCount; ++plane)
         {
-            const float planeT = static_cast<float>(plane) / (planeCount - 1);
+            const float planeT = planeCount > 1 ? static_cast<float>(plane) / (planeCount - 1) : (nearSide ? 0.0f : 1.0f);
             const float sampleZ = packet->focusNear + (packet->focusFar - packet->focusNear) * planeT;
             if (sampleZ <= 0.0f || sampleZ >= 1.0f)
             {
@@ -969,21 +1345,7 @@ namespace
                 continue;
             }
 
-            for (const auto& tap : sampleKernel)
-            {
-                const int offsetX = static_cast<int>(tap.x * focusPixelScale + (tap.x >= 0.0f ? 0.5f : -0.5f));
-                const int offsetY = static_cast<int>(tap.y * focusPixelScale + (tap.y >= 0.0f ? 0.5f : -0.5f));
-                const MGS3SRect sourceRect = OffsetMGS3SRect(fullRect, offsetX, offsetY);
-                const float rawTapAlpha = planeAlpha * tap.weight / kKernelWeightTotal;
-                const float tapAlpha = std::min(rawTapAlpha, 0.060f);
-                if (tapAlpha < 0.0015f)
-                {
-                    continue;
-                }
-
-                const MGS3Vector4 modulateColor { 1.0f, 1.0f, 1.0f, tapAlpha };
-                gMGS3DrawFullscreenTextureModulateSRect(gMGS3FeedbackTexture, &modulateColor, 1, 0, &sourceRect, sampleZ);
-            }
+            DrawMGS3DofDirectFocus(fullRect, focusPixelScale, planeAlpha, sampleZ, focusSide, false);
         }
     }
 
@@ -1728,40 +2090,6 @@ namespace
             return;
         }
 
-        uint8_t* currentTargetSetup = Memory::PatternScan(
-            baseModule,
-            "48 8D 44 24 70 48 89 45 B0 48 8D 45 90 48 89 45 B8 E8 ?? ?? ?? ?? 41 8B 7F 04 48 8B F0",
-            "MGS 3: Depth of Field: current frame feedback target");
-
-        if (!currentTargetSetup ||
-            currentTargetSetup[kMgs3CurrentTargetCallOffset] != 0xE8 ||
-            currentTargetSetup[kMgs3CopyTextureSRectCallOffset] != 0xE8)
-        {
-            spdlog::error("MGS 3: Depth of Field: expected current-frame feedback target/copy calls were not found; composite injection disabled.");
-            return;
-        }
-
-        gMGS3GetRenderTarget = reinterpret_cast<BpGetRenderTargetFn>(Memory::ResolveCall(currentTargetSetup + kMgs3CurrentTargetCallOffset));
-        gMGS3CopyTextureSRect = reinterpret_cast<MGS3CopyTextureSRectFn>(Memory::ResolveCall(currentTargetSetup + kMgs3CopyTextureSRectCallOffset));
-        gMGS3DrawFullscreenTextureModulateSRect = reinterpret_cast<MGS3DrawFullscreenTextureModulateSRectFn>(Memory::ResolveCall(drawCall));
-
-        if (!Memory::IsExecutable(reinterpret_cast<void*>(gMGS3GetRenderTarget)) ||
-            !Memory::IsExecutable(reinterpret_cast<void*>(gMGS3CopyTextureSRect)) ||
-            !Memory::IsExecutable(reinterpret_cast<void*>(gMGS3DrawFullscreenTextureModulateSRect)))
-        {
-            spdlog::error("MGS 3: Depth of Field: composite helper functions were not executable; composite injection disabled.");
-            gMGS3GetRenderTarget = nullptr;
-            gMGS3CopyTextureSRect = nullptr;
-            gMGS3DrawFullscreenTextureModulateSRect = nullptr;
-            return;
-        }
-
-        MGS3FarFocusFeedbackCopyHook = safetyhook::create_mid(currentTargetSetup + kMgs3AfterCurrentTargetCallOffset, [](SafetyHookContext& ctx) {
-            auto* packet = reinterpret_cast<MGS3FarFocusPacket*>(ctx.r15);
-            CopyMGS3FeedbackTexture(ctx.rsp, packet, reinterpret_cast<void*>(ctx.rax));
-        });
-        LOG_HOOK(MGS3FarFocusFeedbackCopyHook, "MGS 3: Depth of Field: full-res feedback copy")
-
         MGS3FarFocusCompositeDrawHook = safetyhook::create_mid(drawCall, [](SafetyHookContext& ctx) {
             auto* packet = reinterpret_cast<MGS3FarFocusPacket*>(ctx.r15);
             const auto* tracked = FindTrackedMGS3FocusPacketConst(reinterpret_cast<uintptr_t>(packet));
@@ -1797,13 +2125,6 @@ namespace
         });
         LOG_HOOK(MGS3FarFocusCompositeDrawHook, "MGS 3: Depth of Field: far focus composite draw")
 
-        if (MGS3FarFocusFeedbackCopyHook)
-        {
-            spdlog::info("MGS 3: Depth of Field: full-res feedback copy hook installed at {:s}+{:X}.",
-                         sExeName.c_str(),
-                         currentTargetSetup + kMgs3AfterCurrentTargetCallOffset - reinterpret_cast<uint8_t*>(baseModule));
-        }
-
         if (MGS3FarFocusCompositeDrawHook)
         {
             spdlog::info("MGS 3: Depth of Field: far focus composite draw installed at {:s}+{:X}.",
@@ -1812,7 +2133,7 @@ namespace
         }
     }
 
-    void ForceMGS3FarFocusBlurEnabled()
+    void DisableMGS3FarFocusBlur()
     {
         uint8_t* blurGate = Memory::PatternScan(
             baseModule,
@@ -1825,9 +2146,9 @@ namespace
         }
 
         uintptr_t blurEnableAddress = Memory::GetRipRelativeAddress(blurGate, 0x03, 0x07);
-        Memory::Write<int>(blurEnableAddress, 1);
+        Memory::Write<int>(blurEnableAddress, 0);
 
-        spdlog::info("MGS 3: Depth of Field: far focus blur enabled at {:s}+{:X}.",
+        spdlog::info("MGS 3: Depth of Field: far focus blur disabled at {:s}+{:X}.",
                      sExeName.c_str(),
                      blurEnableAddress - reinterpret_cast<uintptr_t>(baseModule));
     }
@@ -1971,9 +2292,7 @@ void DepthOfFieldFixes::Initialize()
         return;
     }
 
-    ForceMGS3FarFocusBlurEnabled();
-    InstallMGS3FarFocusBlurScopeHooks();
-    InstallMGS3BlurUvScaleHook();
+    DisableMGS3FarFocusBlur();
     InstallMGS3FocusPacketHooks();
     InstallMGS3NearFocusWorkLinkHook();
     InstallMGS3FarFocusDispatchHook();
