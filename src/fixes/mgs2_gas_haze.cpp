@@ -22,7 +22,7 @@ namespace
     constexpr float       kTintScale        = 1.0f;     // raw PS2 colour byte; the shader does GS modulate
     constexpr float       kAlphaGain        = 1.99f;    // PS2 blends at As/128; D3D uses byte/255 -> 255/128
     constexpr float       kAlphaCap         = 0.5f;     // PS2 blend ceiling; bounds the feedback
-    constexpr float       kFeedbackGain     = 1.02f;    // PS2 GS overbright the Win32 renderer clamped away
+    constexpr float       kFeedbackGain     = 1.01f;    // PS2 GS overbright the Win32 renderer clamped away
 
     constexpr const char* kDieSig =
         "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
