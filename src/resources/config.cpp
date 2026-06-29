@@ -683,6 +683,16 @@ void Config::Read()
             LOG_CONFIG(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             LOG_CONFIG(ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
         }
+        else if (eGameType & MGS3)
+        {
+            g_DepthOfFieldFixes.fBlurUvMultiplier = 20.0f;
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+
+            LOG_CONFIG(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+        }
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {

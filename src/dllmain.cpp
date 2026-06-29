@@ -560,6 +560,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_WaterReflectionFix.Initialize());
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
+        INITIALIZE(g_DepthOfFieldFixes.Initialize());
             
     }
     else if (eGameType & MG)

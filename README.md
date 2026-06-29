@@ -114,6 +114,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 #### MGS3 Specific Bug Fixes:
 - Restores the PlayStation 2's original cutscene camera/viewport height, fixing the 2011 HD Collection bug that cropped roughly the bottom 10% of the image in all cutscenes. (Notably, this issue was officially fixed in both the 3DS remake and Delta.)
 - Fixes water reflections (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
+- Fixes Depth of Field / blur post processing effects not scaling with resolution.
 
 
 ## Logging / Warnings for Common Configuration Issues
@@ -220,7 +221,6 @@ This list will contain bugs which may or may not be fixed.
 - MGS3 - Fix Angle of Attack Indicator in FPV with NVG & Thermals (2011 HDC)
 - MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
 - MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
-- MGS3 - Fix Depth of Field Scaling Strength (2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
 
 ## Building
