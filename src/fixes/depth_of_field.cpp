@@ -12,20 +12,31 @@
 
 namespace
 {
-    constexpr int kRegUvOffset0 = 96;
-    constexpr int kRegUvOffset3 = 99;
+    constexpr int kMgs2RegUvOffset0 = 96;
+    constexpr int kMgs2RegUvOffset3 = 99;
+    constexpr int kMgs3RegUvOffset0 = 0x1E;
+    constexpr int kMgs3RegUvOffset3 = 0x21;
     constexpr int kFarFocusMaxPlaneCount = 16;
     constexpr float kFarFocusBlurWeight0 = 4.0f;
     constexpr float kFarFocusBlurWeight12 = 0.2f;
     constexpr float kFarFocusBlurWeight34 = 0.03125f;
     constexpr float kFarFocusBlurWeight56 = 0.00625f;
+    constexpr ptrdiff_t kMgs3FarFocusBlurCallOffset = 0x5F;
+    constexpr ptrdiff_t kMgs3BlurUvRegisterUploadCallOffset = 0x13;
+    constexpr ptrdiff_t kMgs3RenderBufferAddCommandCallOffset = 0x35;
+    constexpr ptrdiff_t kMgs3FarFocusSetDepthFuncCallOffset = 0x0C;
+    constexpr ptrdiff_t kMgs3CurrentTargetCallOffset = 0x11;
+    constexpr ptrdiff_t kMgs3AfterCurrentTargetCallOffset = 0x16;
+    constexpr ptrdiff_t kMgs3CopyTextureSRectCallOffset = 0x4E;
     constexpr float kNearFocusMinDepthSpan = 0.00025f;
     constexpr int kNearFocusMinPlaneCount = 6;
     constexpr uint64_t kDepthFuncLEqual = 3;
     constexpr uint64_t kDepthFuncGEqual = 6;
     constexpr size_t kTrackedNearFocusPacketCount = 16;
     constexpr size_t kTrackedNearFocusWorkCount = 16;
+    constexpr size_t kTrackedMGS3FocusPacketCount = 32;
     constexpr unsigned int kCmdPostFxFarFocus = 0x3F;
+    constexpr unsigned int kMGS3CmdPostFxFarFocus = 0x31;
     constexpr int kDmapackNormal = 0x0001;
     constexpr int kDmapackInvisible123 = 0x0020 | 0x0040 | 0x0080;
     constexpr int kDmapackPhaseAfter = 0x04;
@@ -43,6 +54,8 @@ namespace
     using BpRbAddCommandFn = void(__fastcall*)(unsigned int, void*);
     using DmapackRenderCallbackFn = void(__fastcall*)(void*);
     using SetDepthFuncFn = void(__fastcall*)(void*, uint64_t);
+    using BpGetRenderTargetFn = void*(__fastcall*)(int);
+    constexpr int kMGS3TempBufferNoMSAARenderTarget = 0x05;
 
     bool bCutsceneNeedsSpecialHandling = false; //for per-cutscene effect skip handling.
     bool bIsD12T3 = false;
@@ -55,6 +68,45 @@ namespace
         float focusNear;
         float focusFar;
     };
+
+    struct MGS3FarFocusPacket
+    {
+        int alpha;
+        int maxPlane;
+        float focusNear;
+        float focusFar;
+    };
+
+    struct MGS3SRect
+    {
+        int x1;
+        int y1;
+        int x2;
+        int y2;
+    };
+
+    struct MGS3Vector4
+    {
+        float x;
+        float y;
+        float z;
+        float w;
+    };
+
+    enum class MGS3FocusSide
+    {
+        Far,
+        Near,
+    };
+
+    enum class MGS3FocusSourceKind
+    {
+        Unknown,
+        Near,
+    };
+
+    using MGS3DrawFullscreenTextureModulateSRectFn = void(__fastcall*)(void*, const MGS3Vector4*, int, int, const MGS3SRect*, float);
+    using MGS3CopyTextureSRectFn = void(__fastcall*)(void*, void*, const MGS3SRect*, const MGS3SRect*);
 
     struct TrackedFocusPacket
     {
@@ -70,22 +122,53 @@ namespace
         DmapackRenderCallbackFn originalRender = nullptr;
     };
 
+    struct TrackedMGS3FocusPacket
+    {
+        uintptr_t address = 0;
+        MGS3FarFocusPacket packet {};
+        MGS3FocusSourceKind sourceKind = MGS3FocusSourceKind::Unknown;
+        bool applyFix = false;
+    };
+
+    struct TrackedMGS3NearFocusWork
+    {
+        uintptr_t work = 0;
+        int alpha = 0;
+    };
+
     SafetyHookInline SetVertexRegistersHook {};
     SafetyHookMid FarFocusBlurBeginHook {};
     SafetyHookMid FarFocusBlurEndHook {};
     SafetyHookMid NearFocusDepthFuncHook {};
+    SafetyHookMid MGS3BpRbAddCommandHook {};
+    SafetyHookMid MGS3FarFocusDispatchHook {};
+    SafetyHookMid MGS3FarFocusDepthFuncHook {};
+    SafetyHookMid MGS3FarFocusFeedbackCopyHook {};
+    SafetyHookMid MGS3FarFocusCompositeDrawHook {};
+    SafetyHookMid MGS3FocusCallbackCommandHook {};
+    SafetyHookMid MGS3NearFocusWorkLinkHook {};
     SafetyHookInline NearFocusSetHook {};
     SafetyHookInline NearFocusDemoHook {};
     SafetyHookInline BpRbAddCommandHook {};
     SafetyHookInline FarFocusCommandHook {};
     std::array<TrackedFocusPacket, kTrackedNearFocusPacketCount> gNearFocusPackets {};
     std::array<TrackedNearFocusWork, kTrackedNearFocusWorkCount> gNearFocusWorks {};
+    std::array<TrackedMGS3FocusPacket, kTrackedMGS3FocusPacketCount> gMGS3FocusPackets {};
+    std::array<TrackedMGS3NearFocusWork, kTrackedMGS3FocusPacketCount> gMGS3NearFocusWorks {};
     size_t gNearFocusPacketWriteIndex = 0;
     size_t gNearFocusWorkWriteIndex = 0;
+    size_t gMGS3FocusPacketWriteIndex = 0;
+    size_t gMGS3NearFocusWorkWriteIndex = 0;
     BpRbAllocFn gBpRbAlloc = nullptr;
     BpRbAddCommandFn gBpRbAddCommand = nullptr;
+    BpRbAllocFn gMGS3RbAlloc = nullptr;
     DmapackRenderCallbackFn gNearFocusOriginalRender = nullptr;
     SetDepthFuncFn gSetDepthFunc = nullptr;
+    BpGetRenderTargetFn gMGS3GetRenderTarget = nullptr;
+    MGS3CopyTextureSRectFn gMGS3CopyTextureSRect = nullptr;
+    MGS3DrawFullscreenTextureModulateSRectFn gMGS3DrawFullscreenTextureModulateSRect = nullptr;
+    void* gMGS3FeedbackTexture = nullptr;
+    uintptr_t gMGS3RenderBufferAddCommand = 0;
     void* gDepthFuncBackend = nullptr;
     thread_local bool gInsideFarFocusBlur = false;
     thread_local bool gInsideNearFocusComposite = false;
@@ -133,6 +216,16 @@ namespace
         return maxAbs > 0.000001f && maxAbs <= 0.08f;
     }
 
+    std::pair<int, int> GetBlurUvRegisterRange()
+    {
+        if (eGameType & MGS3)
+        {
+            return { kMgs3RegUvOffset0, kMgs3RegUvOffset3 };
+        }
+
+        return { kMgs2RegUvOffset0, kMgs2RegUvOffset3 };
+    }
+
     void ScaleActiveBlurAxis(float* regs, float multiplier)
     {
         const bool horizontalPass = (std::abs(regs[0]) > std::abs(regs[1])) || (std::abs(regs[2]) > std::abs(regs[3]));
@@ -170,6 +263,36 @@ namespace
                packet->focusFar > 0.0f &&
                packet->focusFar < 1.0f &&
                packet->focusNear > packet->focusFar;
+    }
+
+    bool IsReasonableMGS3FarFocusPacket(const MGS3FarFocusPacket* packet)
+    {
+        return packet &&
+               packet->alpha >= 0 &&
+               packet->alpha <= 128 &&
+               packet->maxPlane >= 0 &&
+               packet->maxPlane <= 64 &&
+               std::isfinite(packet->focusNear) &&
+               std::isfinite(packet->focusFar) &&
+               std::abs(packet->focusNear) <= 16.0f &&
+               std::abs(packet->focusFar) <= 16.0f;
+    }
+
+    bool ShouldApplyMGS3FocusFix(const MGS3FarFocusPacket& packet)
+    {
+        if (packet.alpha == 0 ||
+            packet.maxPlane <= 1 ||
+            packet.focusNear <= packet.focusFar ||
+            !std::isfinite(packet.focusNear) ||
+            !std::isfinite(packet.focusFar))
+        {
+            return false;
+        }
+
+        return packet.focusNear > 0.0f &&
+               packet.focusNear < 1.0f &&
+               packet.focusFar > 0.0f &&
+               packet.focusFar < 1.0f;
     }
 
     float NormalizeDepthValue(float depth)
@@ -459,6 +582,409 @@ namespace
         }
 
         return LooksLikeNearFocusDmapack(Memory::ReadField<uintptr_t>(workAddress, kFocusWorkDmapackOffset));
+    }
+
+    const TrackedMGS3FocusPacket* FindTrackedMGS3FocusPacketConst(uintptr_t packetAddress)
+    {
+        if (!packetAddress)
+        {
+            return nullptr;
+        }
+
+        const size_t trackedCount = std::min(gMGS3FocusPacketWriteIndex, gMGS3FocusPackets.size());
+        for (size_t i = 0; i < trackedCount; ++i)
+        {
+            const size_t index = (gMGS3FocusPacketWriteIndex + gMGS3FocusPackets.size() - 1 - i) % gMGS3FocusPackets.size();
+            const TrackedMGS3FocusPacket& tracked = gMGS3FocusPackets[index];
+            if (tracked.address == packetAddress)
+            {
+                return &tracked;
+            }
+        }
+
+        return nullptr;
+    }
+
+    char LowerAscii(char ch)
+    {
+        return (ch >= 'A' && ch <= 'Z') ? static_cast<char>(ch - 'A' + 'a') : ch;
+    }
+
+    bool ContainsAsciiCaseInsensitive(const std::string& text, const char* needle)
+    {
+        if (!needle || !*needle)
+        {
+            return true;
+        }
+
+        const size_t needleLength = std::strlen(needle);
+        if (text.size() < needleLength)
+        {
+            return false;
+        }
+
+        for (size_t offset = 0; offset + needleLength <= text.size(); ++offset)
+        {
+            bool matched = true;
+            for (size_t needleIndex = 0; needleIndex < needleLength; ++needleIndex)
+            {
+                if (LowerAscii(text[offset + needleIndex]) != LowerAscii(needle[needleIndex]))
+                {
+                    matched = false;
+                    break;
+                }
+            }
+
+            if (matched)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    std::string ReadMGS3CallbackSourceString(uintptr_t sourceString)
+    {
+        std::string result {};
+        if (!sourceString)
+        {
+            return result;
+        }
+
+        constexpr size_t maxSourceLength = 260;
+        result.reserve(96);
+        for (size_t index = 0; index < maxSourceLength; ++index)
+        {
+            const char ch = Memory::ReadField<char>(sourceString, static_cast<ptrdiff_t>(index), '\0');
+            if (ch == '\0')
+            {
+                break;
+            }
+
+            if (static_cast<unsigned char>(ch) < 0x20)
+            {
+                break;
+            }
+
+            result.push_back(ch);
+        }
+
+        return result;
+    }
+
+    bool IsMGS3NearFocusCallbackEntry(uintptr_t entry)
+    {
+        if (!Memory::IsReadable(reinterpret_cast<void*>(entry), 0x58))
+        {
+            return false;
+        }
+
+        const uintptr_t sourceString = Memory::ReadField<uintptr_t>(entry, 0x50, 0);
+        return ContainsAsciiCaseInsensitive(ReadMGS3CallbackSourceString(sourceString), "nearfocus");
+    }
+
+    bool IsMGS3NearFocusPacket(const TrackedMGS3FocusPacket* tracked)
+    {
+        return tracked && tracked->sourceKind == MGS3FocusSourceKind::Near;
+    }
+
+    void TrackMGS3NearFocusWork(uintptr_t work, int alpha)
+    {
+        if (!work)
+        {
+            return;
+        }
+
+        TrackedMGS3NearFocusWork& tracked = gMGS3NearFocusWorks[gMGS3NearFocusWorkWriteIndex++ % gMGS3NearFocusWorks.size()];
+        tracked.work = work;
+        tracked.alpha = std::clamp(alpha, 0, 128);
+    }
+
+    int FindTrackedMGS3NearFocusWorkAlpha(uintptr_t work, int fallback)
+    {
+        if (!work)
+        {
+            return fallback;
+        }
+
+        const size_t trackedCount = std::min(gMGS3NearFocusWorkWriteIndex, gMGS3NearFocusWorks.size());
+        for (size_t i = 0; i < trackedCount; ++i)
+        {
+            const size_t index = (gMGS3NearFocusWorkWriteIndex + gMGS3NearFocusWorks.size() - 1 - i) % gMGS3NearFocusWorks.size();
+            const TrackedMGS3NearFocusWork& tracked = gMGS3NearFocusWorks[index];
+            if (tracked.work == work)
+            {
+                return tracked.alpha;
+            }
+        }
+
+        return fallback;
+    }
+
+    void LinkMGS3NearFocusWorkToCallbackEntry(uintptr_t work, int currentAlpha)
+    {
+        if (!Memory::IsReadable(reinterpret_cast<void*>(work), 0x9C))
+        {
+            return;
+        }
+
+        TrackMGS3NearFocusWork(work, currentAlpha);
+
+        const uintptr_t entry = Memory::ReadField<uintptr_t>(work, 0x68, 0);
+        if (!IsMGS3NearFocusCallbackEntry(entry))
+        {
+            return;
+        }
+
+        auto* callbackParam = reinterpret_cast<uintptr_t*>(entry + 0x38);
+        if (Memory::IsWritable(callbackParam, sizeof(*callbackParam)))
+        {
+            *callbackParam = work;
+        }
+    }
+
+    void TrackMGS3FocusPacket(const MGS3FarFocusPacket* packet, MGS3FocusSourceKind sourceKind = MGS3FocusSourceKind::Unknown)
+    {
+        if (!Memory::IsReadable(packet, sizeof(MGS3FarFocusPacket)) ||
+            !IsReasonableMGS3FarFocusPacket(packet))
+        {
+            return;
+        }
+
+        const uintptr_t packetAddress = reinterpret_cast<uintptr_t>(packet);
+        const TrackedMGS3FocusPacket* previousTracked = FindTrackedMGS3FocusPacketConst(packetAddress);
+
+        TrackedMGS3FocusPacket& tracked = gMGS3FocusPackets[gMGS3FocusPacketWriteIndex++ % gMGS3FocusPackets.size()];
+        tracked = {};
+        tracked.address = packetAddress;
+        tracked.packet = *packet;
+        tracked.sourceKind = sourceKind;
+        tracked.applyFix = ShouldApplyMGS3FocusFix(tracked.packet);
+
+        if (tracked.sourceKind == MGS3FocusSourceKind::Unknown && previousTracked)
+        {
+            tracked.sourceKind = previousTracked->sourceKind;
+        }
+    }
+
+    bool TryQueueMGS3NearFocusPacketFromEntry(uintptr_t entry)
+    {
+        if (!gMGS3RbAlloc || !gMGS3RenderBufferAddCommand)
+        {
+            return false;
+        }
+
+        if (!IsMGS3NearFocusCallbackEntry(entry))
+        {
+            return false;
+        }
+
+        const uintptr_t work = Memory::ReadField<uintptr_t>(entry, 0x38, 0);
+        if (!Memory::IsReadable(reinterpret_cast<void*>(work), 0x9C))
+        {
+            return false;
+        }
+
+        const int fallbackAlpha = static_cast<int>(Memory::ReadField<int16_t>(work, 0x88, 0));
+        MGS3FarFocusPacket packet {
+            std::clamp(FindTrackedMGS3NearFocusWorkAlpha(work, fallbackAlpha), 0, 128),
+            Memory::ReadField<int>(work, 0x54, 0),
+            Memory::ReadField<float>(work, 0x58, 0.0f),
+            Memory::ReadField<float>(work, 0x5C, 0.0f),
+        };
+
+        if (!ShouldApplyMGS3FocusFix(packet))
+        {
+            return false;
+        }
+
+        auto* queuedPacket = static_cast<MGS3FarFocusPacket*>(gMGS3RbAlloc(sizeof(MGS3FarFocusPacket)));
+        if (!queuedPacket || !Memory::IsWritable(queuedPacket, sizeof(*queuedPacket)))
+        {
+            return false;
+        }
+
+        *queuedPacket = packet;
+        TrackMGS3FocusPacket(queuedPacket, MGS3FocusSourceKind::Near);
+
+        reinterpret_cast<BpRbAddCommandFn>(gMGS3RenderBufferAddCommand)(kMGS3CmdPostFxFarFocus, queuedPacket);
+
+        return true;
+    }
+
+    bool ShouldApplyTrackedMGS3FocusFix(const MGS3FarFocusPacket* packet)
+    {
+        const uintptr_t packetAddress = reinterpret_cast<uintptr_t>(packet);
+        if (const TrackedMGS3FocusPacket* tracked = FindTrackedMGS3FocusPacketConst(packetAddress))
+        {
+            return tracked->applyFix;
+        }
+
+        if (!Memory::IsReadable(packet, sizeof(MGS3FarFocusPacket)) ||
+            !IsReasonableMGS3FarFocusPacket(packet))
+        {
+            return false;
+        }
+
+        return ShouldApplyMGS3FocusFix(*packet);
+    }
+
+    bool IsReasonableMGS3SRect(const MGS3SRect& rect)
+    {
+        const int width = rect.x2 - rect.x1;
+        const int height = rect.y2 - rect.y1;
+        return width > 0 &&
+               height > 0 &&
+               width <= 8192 &&
+               height <= 8192 &&
+               std::abs(rect.x1) <= 8192 &&
+               std::abs(rect.y1) <= 8192 &&
+               std::abs(rect.x2) <= 16384 &&
+               std::abs(rect.y2) <= 16384;
+    }
+
+    MGS3SRect OffsetMGS3SRect(const MGS3SRect& rect, int offsetX, int offsetY)
+    {
+        return MGS3SRect {
+            rect.x1 + offsetX,
+            rect.y1 + offsetY,
+            rect.x2 + offsetX,
+            rect.y2 + offsetY,
+        };
+    }
+
+    bool SetMGS3DepthFunc(uint64_t depthFunc)
+    {
+        if (!gSetDepthFunc || !gDepthFuncBackend)
+        {
+            return false;
+        }
+
+        gSetDepthFunc(gDepthFuncBackend, depthFunc);
+        return true;
+    }
+
+    void CopyMGS3FeedbackTexture(uintptr_t stackBase, const MGS3FarFocusPacket* packet, void* currentFrameTexture)
+    {
+        gMGS3FeedbackTexture = nullptr;
+
+        if (!gMGS3GetRenderTarget ||
+            !gMGS3CopyTextureSRect ||
+            !packet ||
+            !currentFrameTexture ||
+            !ShouldApplyTrackedMGS3FocusFix(packet))
+        {
+            return;
+        }
+
+        const MGS3SRect fullRect = Memory::ReadField<MGS3SRect>(stackBase, 0x60);
+        if (!IsReasonableMGS3SRect(fullRect))
+        {
+            return;
+        }
+
+        void* feedbackTexture = gMGS3GetRenderTarget(kMGS3TempBufferNoMSAARenderTarget);
+        if (!feedbackTexture)
+        {
+            return;
+        }
+
+        gMGS3CopyTextureSRect(currentFrameTexture, feedbackTexture, &fullRect, &fullRect);
+        gMGS3FeedbackTexture = feedbackTexture;
+    }
+
+    void DrawMGS3ShiftedFocusSamples(uintptr_t stackBase, const MGS3FarFocusPacket* packet, MGS3FocusSide focusSide)
+    {
+        if (!gMGS3DrawFullscreenTextureModulateSRect ||
+            !packet ||
+            !gMGS3FeedbackTexture)
+        {
+            return;
+        }
+
+        const MGS3SRect fullRect = Memory::ReadField<MGS3SRect>(stackBase, 0x60);
+        if (!IsReasonableMGS3SRect(fullRect))
+        {
+            return;
+        }
+
+        struct BlurTap
+        {
+            float x;
+            float y;
+            float weight;
+        };
+
+        static constexpr std::array<BlurTap, 24> sampleKernel {{
+            {  0.18f,  0.18f, 1.00f },
+            { -0.18f,  0.18f, 1.00f },
+            {  0.18f, -0.18f, 1.00f },
+            { -0.18f, -0.18f, 1.00f },
+            {  0.33f,  0.00f, 1.00f },
+            { -0.33f,  0.00f, 1.00f },
+            {  0.00f,  0.33f, 1.00f },
+            {  0.00f, -0.33f, 1.00f },
+            {  0.48f,  0.34f, 0.75f },
+            { -0.48f,  0.34f, 0.75f },
+            {  0.48f, -0.34f, 0.75f },
+            { -0.48f, -0.34f, 0.75f },
+            {  0.26f,  0.58f, 0.75f },
+            { -0.26f,  0.58f, 0.75f },
+            {  0.26f, -0.58f, 0.75f },
+            { -0.26f, -0.58f, 0.75f },
+            {  0.78f,  0.20f, 0.25f },
+            { -0.78f,  0.20f, 0.25f },
+            {  0.78f, -0.20f, 0.25f },
+            { -0.78f, -0.20f, 0.25f },
+            {  0.20f,  0.78f, 0.25f },
+            { -0.20f,  0.78f, 0.25f },
+            {  0.20f, -0.78f, 0.25f },
+            { -0.20f, -0.78f, 0.25f },
+        }};
+        static constexpr float kKernelWeightTotal = 16.0f;
+
+        const int height = fullRect.y2 - fullRect.y1;
+        const float configuredSpread = std::clamp(g_DepthOfFieldFixes.fBlurUvMultiplier / 5.0f, 1.0f, 4.0f);
+        const int baseFocusPixelScale = std::clamp(static_cast<int>((height / 480.0f + 0.5f) * configuredSpread), 2, 22);
+        const bool nearSide = focusSide == MGS3FocusSide::Near;
+        const float sideSpreadScale = nearSide ? 1.12f : 1.0f;
+        const int focusPixelScale = std::clamp(static_cast<int>(baseFocusPixelScale * sideSpreadScale + 0.5f), 2, 24);
+        const int planeCount = std::clamp(packet->maxPlane * 2, 2, kFarFocusMaxPlaneCount);
+        const float layerAlpha = std::clamp(packet->alpha / 128.0f, 0.0f, 1.0f);
+        const float planeSubdivision = static_cast<float>(std::max(packet->maxPlane, 1)) / static_cast<float>(planeCount);
+        const float planeAlpha = 1.0f - std::pow(1.0f - layerAlpha, planeSubdivision);
+
+        for (int plane = 0; plane < planeCount; ++plane)
+        {
+            const float planeT = static_cast<float>(plane) / (planeCount - 1);
+            const float sampleZ = packet->focusNear + (packet->focusFar - packet->focusNear) * planeT;
+            if (sampleZ <= 0.0f || sampleZ >= 1.0f)
+            {
+                continue;
+            }
+
+            if (planeAlpha < 0.001f)
+            {
+                continue;
+            }
+
+            for (const auto& tap : sampleKernel)
+            {
+                const int offsetX = static_cast<int>(tap.x * focusPixelScale + (tap.x >= 0.0f ? 0.5f : -0.5f));
+                const int offsetY = static_cast<int>(tap.y * focusPixelScale + (tap.y >= 0.0f ? 0.5f : -0.5f));
+                const MGS3SRect sourceRect = OffsetMGS3SRect(fullRect, offsetX, offsetY);
+                const float rawTapAlpha = planeAlpha * tap.weight / kKernelWeightTotal;
+                const float tapAlpha = std::min(rawTapAlpha, 0.060f);
+                if (tapAlpha < 0.0015f)
+                {
+                    continue;
+                }
+
+                const MGS3Vector4 modulateColor { 1.0f, 1.0f, 1.0f, tapAlpha };
+                gMGS3DrawFullscreenTextureModulateSRect(gMGS3FeedbackTexture, &modulateColor, 1, 0, &sourceRect, sampleZ);
+            }
+        }
     }
 
     void InstallNearFocusDmapackCallback(void* work)
@@ -820,16 +1346,16 @@ namespace
 
     void __fastcall SetVertexRegisters_Hook(void* backend, int startRegister, int numVectors, const float* regs)
     {
+        const auto registerRange = GetBlurUvRegisterRange();
         thread_local float scaledRegs[4];
         if (gInsideFarFocusBlur &&
-            startRegister > kRegUvOffset0 &&
-            startRegister <= kRegUvOffset3 &&
+            startRegister > registerRange.first &&
+            startRegister <= registerRange.second &&
             numVectors == 1 &&
             LooksLikeBlurUvOffset(regs))
         {
             std::copy(regs, regs + 4, scaledRegs);
             ScaleActiveBlurAxis(scaledRegs, g_DepthOfFieldFixes.fBlurUvMultiplier);
-
             SetVertexRegistersHook.fastcall<void>(backend, startRegister, numVectors, scaledRegs);
             return;
         }
@@ -983,6 +1509,397 @@ namespace
         SetVertexRegistersHook = safetyhook::create_inline(reinterpret_cast<void*>(setVertexRegisters), reinterpret_cast<void*>(SetVertexRegisters_Hook));
         LOG_HOOK(SetVertexRegistersHook, "MGS 2: Depth of Field: blur UV register scale")
     }
+
+    void InstallMGS3FocusPacketHooks()
+    {
+        uint8_t* commandProducer = Memory::PatternScan(
+            baseModule,
+            "B9 10 00 00 00 E8 ?? ?? ?? ?? 8B 8F 10 03 00 00 48 8B D0 89 08",
+            "MGS 3: Depth of Field: render-buffer command helper");
+
+        if (!commandProducer)
+        {
+            return;
+        }
+
+        uint8_t* allocCall = commandProducer + 0x05;
+        if (*allocCall == 0xE8)
+        {
+            auto* alloc = reinterpret_cast<BpRbAllocFn>(Memory::ResolveCall(allocCall));
+            if (Memory::IsExecutable(reinterpret_cast<void*>(alloc)))
+            {
+                gMGS3RbAlloc = alloc;
+                spdlog::info("MGS 3: Depth of Field: render-buffer alloc resolved at {:s}+{:X}.",
+                             sExeName.c_str(),
+                             reinterpret_cast<uintptr_t>(alloc) - reinterpret_cast<uintptr_t>(baseModule));
+            }
+        }
+
+        uint8_t* addCommandCall = commandProducer + kMgs3RenderBufferAddCommandCallOffset;
+        if (*addCommandCall != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected render-buffer add-command call was not found; packet tracking disabled.");
+            return;
+        }
+
+        const uintptr_t addCommand = reinterpret_cast<uintptr_t>(Memory::ResolveCall(addCommandCall));
+        if (!Memory::IsExecutable(reinterpret_cast<void*>(addCommand)))
+        {
+            spdlog::error("MGS 3: Depth of Field: render-buffer add command target was not executable; packet tracking disabled.");
+            return;
+        }
+        gMGS3RenderBufferAddCommand = addCommand;
+
+        MGS3BpRbAddCommandHook = safetyhook::create_mid(reinterpret_cast<void*>(addCommand), [](SafetyHookContext& ctx) {
+            if (static_cast<unsigned int>(ctx.rcx) != kMGS3CmdPostFxFarFocus)
+            {
+                return;
+            }
+
+            TrackMGS3FocusPacket(reinterpret_cast<MGS3FarFocusPacket*>(ctx.rdx));
+        });
+        LOG_HOOK(MGS3BpRbAddCommandHook, "MGS 3: Depth of Field: render-buffer add command")
+
+        uint8_t* callbackCommandCall = Memory::PatternScan(
+            baseModule,
+            "48 8B 43 40 48 85 C0 74 0B 48 8B 4B 38 FF D0 E9",
+            "MGS 3: Depth of Field: generic focus callback command");
+
+        if (callbackCommandCall)
+        {
+            callbackCommandCall += 0x0D;
+            if (callbackCommandCall[0] == 0xFF && callbackCommandCall[1] == 0xD0)
+            {
+                MGS3FocusCallbackCommandHook = safetyhook::create_mid(callbackCommandCall, [](SafetyHookContext& ctx) {
+                    TryQueueMGS3NearFocusPacketFromEntry(ctx.rbx);
+                });
+                LOG_HOOK(MGS3FocusCallbackCommandHook, "MGS 3: Depth of Field: generic focus callback command")
+            }
+            else
+            {
+                spdlog::warn("MGS 3: Depth of Field: generic focus callback command site did not contain call rax; synthetic near focus disabled.");
+            }
+        }
+
+        if (MGS3BpRbAddCommandHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: render-buffer add command hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         addCommand - reinterpret_cast<uintptr_t>(baseModule));
+        }
+
+        if (MGS3FocusCallbackCommandHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: generic focus callback command hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         callbackCommandCall - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void InstallMGS3NearFocusWorkLinkHook()
+    {
+        uint8_t* nearFocusPacketReady = Memory::PatternScan(
+            baseModule,
+            "F3 0F 5C C6 E8 ?? ?? ?? ?? F3 0F 11 43 58 F3 0F 10 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 11 43 5C",
+            "MGS 3: Depth of Field: nearfocus work link");
+
+        if (!nearFocusPacketReady)
+        {
+            return;
+        }
+
+        uint8_t* hookSite = nearFocusPacketReady + 0x20;
+        if (hookSite[0] != 0x45 || hookSite[1] != 0x33 || hookSite[2] != 0xC0)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected nearfocus post-depth write hook site was not found; synthetic nearfocus packets disabled.");
+            return;
+        }
+
+        MGS3NearFocusWorkLinkHook = safetyhook::create_mid(hookSite, [](SafetyHookContext& ctx) {
+            LinkMGS3NearFocusWorkToCallbackEntry(ctx.rbx, static_cast<int>(ctx.rdi & 0xffffffff));
+        });
+        LOG_HOOK(MGS3NearFocusWorkLinkHook, "MGS 3: Depth of Field: nearfocus work link")
+
+        if (MGS3NearFocusWorkLinkHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: nearfocus work link hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         hookSite - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void InstallMGS3FarFocusDispatchHook()
+    {
+        uint8_t* farFocusDispatch = Memory::PatternScan(
+            baseModule,
+            "49 8B 4E 08 E8 ?? ?? ?? ?? EB 6A 49 8B 4E 08 E8 ?? ?? ?? ?? EB 5F",
+            "MGS 3: Depth of Field: far focus dispatcher");
+
+        if (!farFocusDispatch)
+        {
+            return;
+        }
+
+        MGS3FarFocusDispatchHook = safetyhook::create_mid(farFocusDispatch, [](SafetyHookContext& ctx) {
+            const uintptr_t commandNode = ctx.r14;
+            auto* packet = Memory::ReadField<MGS3FarFocusPacket*>(commandNode, 0x08, nullptr);
+            if (!Memory::IsReadable(packet, sizeof(MGS3FarFocusPacket)) ||
+                !IsReasonableMGS3FarFocusPacket(packet))
+            {
+                return;
+            }
+
+            TrackMGS3FocusPacket(packet);
+        });
+        LOG_HOOK(MGS3FarFocusDispatchHook, "MGS 3: Depth of Field: far focus dispatcher")
+
+        if (MGS3FarFocusDispatchHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: far focus dispatcher hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         farFocusDispatch - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void InstallMGS3FarFocusDepthFuncHook()
+    {
+        uint8_t* setDepthFuncSetup = Memory::PatternScan(
+            baseModule,
+            "48 8B 0D ?? ?? ?? ?? BA 06 00 00 00 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8",
+            "MGS 3: Depth of Field: far focus depth function");
+
+        if (!setDepthFuncSetup)
+        {
+            return;
+        }
+
+        uint8_t* setDepthFuncCall = setDepthFuncSetup + kMgs3FarFocusSetDepthFuncCallOffset;
+        if (*setDepthFuncCall != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected far-focus SetDepthFunc call was not found; depth compare fix disabled.");
+            return;
+        }
+
+        gSetDepthFunc = reinterpret_cast<SetDepthFuncFn>(Memory::ResolveCall(setDepthFuncCall));
+        if (!Memory::IsExecutable(reinterpret_cast<void*>(gSetDepthFunc)))
+        {
+            spdlog::error("MGS 3: Depth of Field: resolved SetDepthFunc was not executable; depth compare fix disabled.");
+            gSetDepthFunc = nullptr;
+            return;
+        }
+
+        MGS3FarFocusDepthFuncHook = safetyhook::create_mid(setDepthFuncCall, [](SafetyHookContext& ctx) {
+            auto* packet = reinterpret_cast<MGS3FarFocusPacket*>(ctx.r15);
+            const auto* tracked = FindTrackedMGS3FocusPacketConst(reinterpret_cast<uintptr_t>(packet));
+            if (tracked ? !tracked->applyFix : !ShouldApplyTrackedMGS3FocusFix(packet))
+            {
+                return;
+            }
+
+            gDepthFuncBackend = reinterpret_cast<void*>(ctx.rcx);
+            ctx.rdx = kDepthFuncGEqual;
+        });
+        LOG_HOOK(MGS3FarFocusDepthFuncHook, "MGS 3: Depth of Field: far focus depth function")
+
+        if (MGS3FarFocusDepthFuncHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: far focus depth function hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         setDepthFuncSetup - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void InstallMGS3FarFocusCompositeDrawHook()
+    {
+        uint8_t* compositeDrawSetup = Memory::PatternScan(
+            baseModule,
+            "48 8B 44 35 B0 48 8D 55 80 48 8B 4C 35 A0 0F 28 C7 F3 0F 5C C1 F3 0F 11 54 24 28 45 33 C9 48 89 44 24 20 45 8D 41 01 F3 0F 11 45 8C E8 ?? ?? ?? ??",
+            "MGS 3: Depth of Field: far focus composite draw");
+
+        if (!compositeDrawSetup)
+        {
+            return;
+        }
+
+        uint8_t* drawCall = compositeDrawSetup + 0x2C;
+        if (*drawCall != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected far-focus composite draw call was not found; composite injection disabled.");
+            return;
+        }
+
+        uint8_t* currentTargetSetup = Memory::PatternScan(
+            baseModule,
+            "48 8D 44 24 70 48 89 45 B0 48 8D 45 90 48 89 45 B8 E8 ?? ?? ?? ?? 41 8B 7F 04 48 8B F0",
+            "MGS 3: Depth of Field: current frame feedback target");
+
+        if (!currentTargetSetup ||
+            currentTargetSetup[kMgs3CurrentTargetCallOffset] != 0xE8 ||
+            currentTargetSetup[kMgs3CopyTextureSRectCallOffset] != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected current-frame feedback target/copy calls were not found; composite injection disabled.");
+            return;
+        }
+
+        gMGS3GetRenderTarget = reinterpret_cast<BpGetRenderTargetFn>(Memory::ResolveCall(currentTargetSetup + kMgs3CurrentTargetCallOffset));
+        gMGS3CopyTextureSRect = reinterpret_cast<MGS3CopyTextureSRectFn>(Memory::ResolveCall(currentTargetSetup + kMgs3CopyTextureSRectCallOffset));
+        gMGS3DrawFullscreenTextureModulateSRect = reinterpret_cast<MGS3DrawFullscreenTextureModulateSRectFn>(Memory::ResolveCall(drawCall));
+
+        if (!Memory::IsExecutable(reinterpret_cast<void*>(gMGS3GetRenderTarget)) ||
+            !Memory::IsExecutable(reinterpret_cast<void*>(gMGS3CopyTextureSRect)) ||
+            !Memory::IsExecutable(reinterpret_cast<void*>(gMGS3DrawFullscreenTextureModulateSRect)))
+        {
+            spdlog::error("MGS 3: Depth of Field: composite helper functions were not executable; composite injection disabled.");
+            gMGS3GetRenderTarget = nullptr;
+            gMGS3CopyTextureSRect = nullptr;
+            gMGS3DrawFullscreenTextureModulateSRect = nullptr;
+            return;
+        }
+
+        MGS3FarFocusFeedbackCopyHook = safetyhook::create_mid(currentTargetSetup + kMgs3AfterCurrentTargetCallOffset, [](SafetyHookContext& ctx) {
+            auto* packet = reinterpret_cast<MGS3FarFocusPacket*>(ctx.r15);
+            CopyMGS3FeedbackTexture(ctx.rsp, packet, reinterpret_cast<void*>(ctx.rax));
+        });
+        LOG_HOOK(MGS3FarFocusFeedbackCopyHook, "MGS 3: Depth of Field: full-res feedback copy")
+
+        MGS3FarFocusCompositeDrawHook = safetyhook::create_mid(drawCall, [](SafetyHookContext& ctx) {
+            auto* packet = reinterpret_cast<MGS3FarFocusPacket*>(ctx.r15);
+            const auto* tracked = FindTrackedMGS3FocusPacketConst(reinterpret_cast<uintptr_t>(packet));
+            if (tracked ? !tracked->applyFix : !ShouldApplyTrackedMGS3FocusFix(packet))
+            {
+                return;
+            }
+
+            const int sourceTexture = static_cast<int>(ctx.r14 & 0xffffffff);
+            const float z = Memory::ReadField<float>(ctx.rsp, 0x28, std::numeric_limits<float>::quiet_NaN());
+
+            auto* alphaSlot = reinterpret_cast<float*>(ctx.rbp - 0x74);
+            if (Memory::IsWritable(alphaSlot, sizeof(*alphaSlot)))
+            {
+                *alphaSlot = 0.0f;
+            }
+
+            if (sourceTexture == 0 && std::isfinite(z))
+            {
+                if (IsMGS3NearFocusPacket(tracked))
+                {
+                    if (SetMGS3DepthFunc(kDepthFuncLEqual))
+                    {
+                        DrawMGS3ShiftedFocusSamples(ctx.rsp, packet, MGS3FocusSide::Near);
+                        SetMGS3DepthFunc(kDepthFuncGEqual);
+                    }
+                }
+                else
+                {
+                    DrawMGS3ShiftedFocusSamples(ctx.rsp, packet, MGS3FocusSide::Far);
+                }
+            }
+        });
+        LOG_HOOK(MGS3FarFocusCompositeDrawHook, "MGS 3: Depth of Field: far focus composite draw")
+
+        if (MGS3FarFocusFeedbackCopyHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: full-res feedback copy hook installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         currentTargetSetup + kMgs3AfterCurrentTargetCallOffset - reinterpret_cast<uint8_t*>(baseModule));
+        }
+
+        if (MGS3FarFocusCompositeDrawHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: far focus composite draw installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         compositeDrawSetup - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void ForceMGS3FarFocusBlurEnabled()
+    {
+        uint8_t* blurGate = Memory::PatternScan(
+            baseModule,
+            "44 39 35 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? 0F 28 F7 F3 0F 10 1D ?? ?? ?? ?? B9 0B 00 00 00",
+            "MGS 3: Depth of Field: far focus blur enable gate");
+
+        if (!blurGate)
+        {
+            return;
+        }
+
+        uintptr_t blurEnableAddress = Memory::GetRipRelativeAddress(blurGate, 0x03, 0x07);
+        Memory::Write<int>(blurEnableAddress, 1);
+
+        spdlog::info("MGS 3: Depth of Field: far focus blur enabled at {:s}+{:X}.",
+                     sExeName.c_str(),
+                     blurEnableAddress - reinterpret_cast<uintptr_t>(baseModule));
+    }
+
+    void InstallMGS3FarFocusBlurScopeHooks()
+    {
+        uint8_t* farFocusBlurCallSetup = Memory::PatternScan(
+            baseModule,
+            "48 8D 4D 90 4C 8B C0 48 8B D6 48 89 4C 24 58 48 8D 4C 24 70 48 89 4C 24 50 48 8B CE C6 44 24 48 01 F3 0F 10 05 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? F3 0F 11 74 24 40 F3 0F 11 74 24 38 F3 0F 11 44 24 30 F3 0F 10 05 ?? ?? ?? ?? F3 0F 11 4C 24 28 F3 0F 11 44 24 20 E8",
+            "MGS 3: Depth of Field: far focus blur scope");
+
+        if (!farFocusBlurCallSetup)
+        {
+            return;
+        }
+
+        uint8_t* blurCall = farFocusBlurCallSetup + kMgs3FarFocusBlurCallOffset;
+        if (*blurCall != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected far-focus blur call was not found; blur UV scale disabled.");
+            return;
+        }
+
+        FarFocusBlurBeginHook = safetyhook::create_mid(farFocusBlurCallSetup, [](SafetyHookContext&) {
+            gInsideFarFocusBlur = true;
+        });
+        LOG_HOOK(FarFocusBlurBeginHook, "MGS 3: Depth of Field: far focus blur scope begin")
+
+        FarFocusBlurEndHook = safetyhook::create_mid(blurCall + 0x05, [](SafetyHookContext&) {
+            gInsideFarFocusBlur = false;
+        });
+        LOG_HOOK(FarFocusBlurEndHook, "MGS 3: Depth of Field: far focus blur scope end")
+
+        if (FarFocusBlurBeginHook && FarFocusBlurEndHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: far focus blur scope installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         farFocusBlurCallSetup - reinterpret_cast<uint8_t*>(baseModule));
+        }
+    }
+
+    void InstallMGS3BlurUvScaleHook()
+    {
+        uint8_t* blurUvRegisterUpload = Memory::PatternScan(
+            baseModule,
+            "48 8B 0D ?? ?? ?? ?? 4C 8D 4C 24 60 8D 57 1E 44 8D 47 01 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 4C 24 70 8D 57 1F 44 8D 47 01 E8",
+            "MGS 3: Depth of Field: blur UV register upload");
+
+        if (!blurUvRegisterUpload)
+        {
+            return;
+        }
+
+        uint8_t* setVertexRegistersCall = blurUvRegisterUpload + kMgs3BlurUvRegisterUploadCallOffset;
+        if (*setVertexRegistersCall != 0xE8)
+        {
+            spdlog::error("MGS 3: Depth of Field: expected SetVertexRegisters call was not found; blur UV scale disabled.");
+            return;
+        }
+
+        const uintptr_t setVertexRegisters = Memory::GetRelativeOffset(setVertexRegistersCall + 1);
+        SetVertexRegistersHook = safetyhook::create_inline(reinterpret_cast<void*>(setVertexRegisters), reinterpret_cast<void*>(SetVertexRegisters_Hook));
+        LOG_HOOK(SetVertexRegistersHook, "MGS 3: Depth of Field: blur UV register scale")
+
+        if (SetVertexRegistersHook)
+        {
+            spdlog::info("MGS 3: Depth of Field: blur UV register scale installed at {:s}+{:X}.",
+                         sExeName.c_str(),
+                         setVertexRegisters - reinterpret_cast<uintptr_t>(baseModule));
+        }
+    }
+
 }
 
 void DepthOfFieldFixes::HandleLevelTransition() const
@@ -992,59 +1909,74 @@ void DepthOfFieldFixes::HandleLevelTransition() const
         return;
     }
     iNearEffectCount = 0;
-    bIsD12T3 = g_GameVars.IsStage(MGS2Stages::D12T3);
+    bIsD12T3 = (eGameType & MGS2) && g_GameVars.IsStage(MGS2Stages::D12T3);
 }
 
 void DepthOfFieldFixes::Initialize()
 {
-    if (!(eGameType & MGS2))
+    if (!(eGameType & (MGS2 | MGS3)))
     {
         return;
     }
 
+    const char* gameLabel = (eGameType & MGS3) ? "MGS 3" : "MGS 2";
     if (!bEnabled)
     {
-        spdlog::info("MGS 2: Depth of Field: disabled by config.");
+        spdlog::info("{}: Depth of Field: disabled by config.", gameLabel);
         return;
     }
 
     if (IsUltrawide())
     {
         bEnabled = false;
-        spdlog::info("MGS 2: Depth of Field: disabled for ultrawide aspect ratio.");
+        spdlog::info("{}: Depth of Field: disabled for ultrawide aspect ratio.", gameLabel);
         return;
     }
 
     fBlurUvMultiplier = std::clamp(fBlurUvMultiplier, 0.0f, 20.0f);
-    spdlog::info("MGS 2: Depth of Field: blur UV multiplier set to {}.", fBlurUvMultiplier);
+    spdlog::info("{}: Depth of Field: blur UV multiplier set to {}.", gameLabel, fBlurUvMultiplier);
 
-    ForceFarFocusBlurEnabled();
-    ForceFarFocusMaxPlaneCount();
-    InstallFarFocusBlurScopeHooks();
-    if (ResolveRenderBufferHelpers() && InstallNearFocusDepthFuncHook())
+    if (eGameType & MGS2)
     {
-        InstallFarFocusCommandHook();
-        InstallNearFocusCreationHooks();
-    }
-    else
-    {
-        spdlog::warn("MGS 2: Depth of Field: failed to resolve necessary functions for near focus fixes; near focus adjustments disabled.");
-    }
-    InstallBlurUvScaleHook();
+        ForceFarFocusBlurEnabled();
+        ForceFarFocusMaxPlaneCount();
+        InstallFarFocusBlurScopeHooks();
+        if (ResolveRenderBufferHelpers() && InstallNearFocusDepthFuncHook())
+        {
+            InstallFarFocusCommandHook();
+            InstallNearFocusCreationHooks();
+        }
+        else
+        {
+            spdlog::warn("MGS 2: Depth of Field: failed to resolve necessary functions for near focus fixes; near focus adjustments disabled.");
+        }
+        InstallBlurUvScaleHook();
 
 #ifndef RELEASE_BUILD
-    g_InputHandler.RegisterHotkey(VK_ADD, "print iNearEffectCount", []
-                                  {
-                                      spdlog::info("iNearEffectCount = {}, bIsD12T3 = {}", iNearEffectCount, bIsD12T3);
-                                  });
+        g_InputHandler.RegisterHotkey(VK_ADD, "print iNearEffectCount", []
+                                      {
+                                          spdlog::info("iNearEffectCount = {}, bIsD12T3 = {}", iNearEffectCount, bIsD12T3);
+                                      });
 
-    /*
-    MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 41 8B F9 41 8B F0 45 33 C9 8B EA 44 8B F1 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 A4 1C B2 FF", "NewNearFocusEffect -> Focal Points", {
-    spdlog::info("ctx.r8 = {}, ctx.r9 = {}", ctx.r8, ctx.r9);
-    ctx.r9 = 0;
-    ctx.r8 = 4000;
-    //r8 = var_near
-    //r9 = var_far
-    })*/
+        /*
+        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 41 8B F9 41 8B F0 45 33 C9 8B EA 44 8B F1 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 A4 1C B2 FF", "NewNearFocusEffect -> Focal Points", {
+        spdlog::info("ctx.r8 = {}, ctx.r9 = {}", ctx.r8, ctx.r9);
+        ctx.r9 = 0;
+        ctx.r8 = 4000;
+        //r8 = var_near
+        //r9 = var_far
+        })*/
 #endif
+
+        return;
+    }
+
+    ForceMGS3FarFocusBlurEnabled();
+    InstallMGS3FarFocusBlurScopeHooks();
+    InstallMGS3BlurUvScaleHook();
+    InstallMGS3FocusPacketHooks();
+    InstallMGS3NearFocusWorkLinkHook();
+    InstallMGS3FarFocusDispatchHook();
+    InstallMGS3FarFocusDepthFuncHook();
+    InstallMGS3FarFocusCompositeDrawHook();
 }

@@ -274,6 +274,18 @@ namespace ConfigKeys
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
+    constexpr const char* FixMGS3DepthOfField_Section = "Bugfixes";
+    constexpr const char* FixMGS3DepthOfField_Setting = "MGS3 - Fix Depth of Field";
+    constexpr const char* FixMGS3DepthOfField_Help = "";
+    constexpr const char* FixMGS3DepthOfField_Tooltip = "Restores stronger MGS3 depth of field blur at higher resolutions.";
+
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Setting = "MGS3 - Depth of Field Blur Strength";
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Help = "";
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS3's depth of field blur.\n"
+                                                                     "\n"
+                                                                     "Higher values increase blur radius but can expose sampling artifacts.";
+
     constexpr const char* MGS2_Increase_Shadow_Resolution_Section = "Enhancements and Tweaks";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "MGS2 - Fix Shadow Resolution Scaling";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Help = "";
