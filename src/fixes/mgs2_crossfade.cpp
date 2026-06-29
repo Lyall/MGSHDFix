@@ -7,13 +7,13 @@
 #include "logging.hpp"
 #include "scene_depth.hpp"
 
-// Demo camera crossfade: freeze the last frame on GetResources, fade it over the new one in Present.
+// Demo camera crossfade: replay the PS2 frame-store overlay on the D3D11 path.
 namespace
 {
     const char* kShader = R"(
     Texture2D    g_tex  : register(t0);
     SamplerState g_samp : register(s0);
-    cbuffer CB : register(b0) { float gAlpha; float3 _pad; }
+    cbuffer CB : register(b0) { float gAlpha; float gBrightness; float2 _pad; }
 
     void VS(uint id : SV_VertexID, out float4 pos : SV_Position, out float2 uv : TEXCOORD0) {
         uv  = float2((id << 1) & 2, id & 2);
@@ -21,7 +21,7 @@ namespace
     }
     float4 PS(float4 p : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
         float3 c = g_tex.Sample(g_samp, uv).rgb;
-        return float4(c, gAlpha);   // src-over: old frame fades out over the new angle
+        return float4(c * gBrightness, gAlpha);
     }
     )";
 
@@ -47,6 +47,165 @@ namespace
     bool      capturedCleanFrame = false;
 
     SafetyHookMid getResourcesHook{};
+    SafetyHookInline customHook{};
+
+    enum class FadeMode
+    {
+        Normal,
+        Custom
+    };
+
+    struct CustomFadeState
+    {
+        float captureInterval = 0.f;
+        float captureCount = 0.f;
+        float alphaTime = 0.f;
+        float alphaCount = 0.f;
+        float brightTime = 0.f;
+        float brightCount = 0.f;
+    };
+
+    struct PendingCustomFade
+    {
+        bool active = false;
+        int time = 0;
+        int captureInterval = 0;
+        int brightTime = 0;
+        int alphaTime = 0;
+        int flag = 0;
+    };
+
+    FadeMode fadeMode = FadeMode::Normal;
+    CustomFadeState customFade{};
+    thread_local PendingCustomFade pendingCustomFade{};
+
+    float TicksToSeconds(int ticks)
+    {
+        return static_cast<float>(std::max(ticks, 0)) / 300.0f;
+    }
+
+    float Clamp01(float v)
+    {
+        return std::clamp(v, 0.0f, 1.0f);
+    }
+
+    bool CaptureSnap(ID3D11Resource* source)
+    {
+        auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!ctx || !snapTex || !source) return false;
+        ctx->CopyResource(snapTex.Get(), source);
+        return true;
+    }
+
+    void StartNormalFade(int time)
+    {
+        fadeTotal = fadeCount = TicksToSeconds(time);
+        if (fadeTotal <= 0.f || !CaptureSnap(prevTex.Get()))
+        {
+            active = false;
+            return;
+        }
+
+        fadeMode = FadeMode::Normal;
+        customFade = {};
+        active = true;
+        lastTick = 0;
+    }
+
+    void StartCustomFade(const PendingCustomFade& fade)
+    {
+        fadeTotal = fadeCount = TicksToSeconds(fade.time);
+        if (fadeTotal <= 0.f || !CaptureSnap(prevTex.Get()))
+        {
+            active = false;
+            return;
+        }
+
+        fadeMode = FadeMode::Custom;
+        customFade.captureInterval = TicksToSeconds(fade.captureInterval);
+        customFade.captureCount = 0.f;
+        customFade.alphaTime = TicksToSeconds(fade.alphaTime);
+        customFade.alphaCount = customFade.alphaTime;
+        customFade.brightTime = TicksToSeconds(fade.brightTime);
+        customFade.brightCount = customFade.brightTime;
+        active = true;
+        lastTick = 0;
+    }
+
+    void UpdateFade(float dt, ID3D11Resource* currentFrame)
+    {
+        if (!active || fadeCount <= 0.f) return;
+
+        fadeCount -= dt;
+        if (fadeCount <= 0.f)
+        {
+            fadeCount = 0.f;
+            active = false;
+            return;
+        }
+
+        if (fadeMode != FadeMode::Custom || dt <= 0.f) return;
+
+        customFade.captureCount += dt;
+        customFade.alphaCount -= dt;
+        customFade.brightCount -= dt;
+
+        if (customFade.captureInterval <= 0.f || customFade.captureCount > customFade.captureInterval)
+        {
+            if (customFade.captureInterval > 0.f)
+            {
+                customFade.captureCount -= customFade.captureInterval;
+                if (customFade.captureCount > customFade.captureInterval)
+                {
+                    customFade.captureCount = 0.f;
+                }
+            }
+            else
+            {
+                customFade.captureCount = 0.f;
+            }
+
+            customFade.alphaCount = customFade.alphaTime;
+            customFade.brightCount = customFade.brightTime;
+            CaptureSnap(currentFrame);
+        }
+
+        customFade.alphaCount = std::max(customFade.alphaCount, 0.f);
+        customFade.brightCount = std::max(customFade.brightCount, 0.f);
+    }
+
+    float CurrentAlpha()
+    {
+        if (!active) return 0.f;
+        if (fadeMode == FadeMode::Custom)
+        {
+            return Clamp01(customFade.alphaTime > 0.f ? customFade.alphaCount / customFade.alphaTime : 1.f);
+        }
+        return Clamp01(fadeTotal > 0.f ? fadeCount / fadeTotal : 0.f);
+    }
+
+    float CurrentBrightness()
+    {
+        if (!active || fadeMode != FadeMode::Custom) return 1.f;
+        return Clamp01(customFade.brightTime > 0.f ? customFade.brightCount / customFade.brightTime : 1.f);
+    }
+
+    void* __fastcall CrossfadeCustom_Detour(int time, int captureInterval, int brightTime, int alphaTime, int flag)
+    {
+        PendingCustomFade previous = pendingCustomFade;
+        if (brightTime != 0 || alphaTime != 0 || flag != 0)
+        {
+            pendingCustomFade = { true, time, captureInterval, brightTime, alphaTime, flag };
+        }
+        else
+        {
+            pendingCustomFade = {};
+        }
+
+        void* result = customHook.fastcall<void*>(time, captureInterval, brightTime, alphaTime, flag);
+        pendingCustomFade = previous;
+        return result;
+    }
 
     bool EnsureTextures(ID3D11Device* dev, const D3D11_TEXTURE2D_DESC& bb)
     {
@@ -111,28 +270,30 @@ void MGS2_Crossfade::Initialize()
     sd.ComparisonFunc = D3D11_COMPARISON_NEVER; sd.MaxLOD = D3D11_FLOAT32_MAX;
     dev->CreateSamplerState(&sd, sampler.GetAddressOf());
 
-    // GetResources is shared by both crossfade entries; time is in edx (1/300 s units).
+    // GetResources time is in 1/300s ticks.
     if (uint8_t* addr = Memory::PatternScan(baseModule, "40 53 55 56 57 41 56 48 83 EC ?? 41 8B C0 89 51 ?? 83 E0 01 89 51 ??", "MGS2: Crossfade GetResources"))
     {
         getResourcesHook = safetyhook::create_mid(addr, [](SafetyHookContext& ctx)
         {
             if (!ready || !havePrev) return;
-            //if (g_GameVars.IsStage(MGS2Stages::D010P01))
-            {
-                // plant opening had a crossfade at the start when the hh60's went under the bridge, but it occured 1 frame too late on the ps2 to actually grab the previous frame.
-                // we end up showing it, which is 
-                //return;
-            }
-            auto* c = g_D3D11Hooks.d3dDeviceContext.Get();
-            if (!c) return;
-            c->CopyResource(snapTex.Get(), prevTex.Get());     // freeze the old frame
+
             const uint32_t t = static_cast<uint32_t>(ctx.rdx & 0xFFFFFFFF);
-            fadeTotal = fadeCount = t / 300.0f;                // 1/300 s units -> seconds
-            if (fadeTotal <= 0.f) return;
-            active = true;
-            lastTick = 0;
+            if (pendingCustomFade.active)
+            {
+                StartCustomFade(pendingCustomFade);
+            }
+            else
+            {
+                StartNormalFade(static_cast<int>(t));
+            }
         });
         LOG_HOOK(getResourcesHook, "MGS2: Crossfade GetResources");
+    }
+
+    if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 8B 6C 24 ?? 41 8B F9 41 8B F0 44 8B F2 44 8B F9 45 85 C0", "MGS2: Crossfade Custom"))
+    {
+        customHook = safetyhook::create_inline(addr, reinterpret_cast<void*>(CrossfadeCustom_Detour));
+        LOG_HOOK(customHook, "MGS2: Crossfade Custom");
     }
 
     SceneDepth::SetEndOf3DCallback(&OnPreMenuRender, SceneDepth::PRIORITY_CROSSFADE);
@@ -167,27 +328,23 @@ void MGS2_Crossfade::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11S
     float dt = (lastTick != 0) ? (now - lastTick) / 1000.0f : 0.f;
     lastTick = now;
 
-    if (active && fadeCount > 0.f)
-    {
-        fadeCount -= dt;
-        if (fadeCount <= 0.f) { fadeCount = 0.f; active = false; }
-    }
+    UpdateFade(dt, sizeMatch ? tex.Get() : nullptr);
 
     // composite the active fade: old (frozen) frame over the live new angle
     if (active && snapSRV && sizeMatch)
     {
-        float alpha = (fadeTotal > 0.f) ? (fadeCount / fadeTotal) : 0.f;
-        if (alpha > 1.f) alpha = 1.f;
+        const float alpha = CurrentAlpha();
+        const float brightness = CurrentBrightness();
 
         if (alpha > 0.f)
         {
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
             {
-                float d[4] = { alpha, 0, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0);
+                float d[4] = { alpha, brightness, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0);
             }
 
-// save the pipeline state we touch, draw the fade, then restore it
+            // save the pipeline state we touch, draw the fade, then restore it
             ID3D11RenderTargetView* oRTV[8] = {}; ID3D11DepthStencilView* oDSV = nullptr;
             ID3D11BlendState* oBlend = nullptr; UINT oMask = 0; float oFac[4] = {};
             ID3D11DepthStencilState* oDSS = nullptr; UINT oRef = 0;
