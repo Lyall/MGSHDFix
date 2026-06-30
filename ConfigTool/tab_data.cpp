@@ -257,7 +257,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Tooltip,
-          std::make_pair(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 20.0, 0.0, 20.0 },
+          std::make_pair(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 10.0, 0.0, 20.0 },
 
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
