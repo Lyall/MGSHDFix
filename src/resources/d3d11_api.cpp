@@ -32,11 +32,8 @@ namespace
     // Hooks
     SafetyHookInline CreateDXGIFactory_hook {};
     SafetyHookInline CreateSwapChain_hook {};
-    SafetyHookInline PresentHook {};
+    SafetyHookMid PresentHook {};
     SafetyHookInline ResizeBuffersHook {};
-
-    using PresentFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT);
-    PresentFn oPresent = nullptr;
 
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
@@ -69,9 +66,10 @@ namespace
     }
 
 
-
-    HRESULT __stdcall HookedPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, UINT flags)
+    //Don't hook Present directly, as streaming software like OBS might hook before us, resulting in our Present() effects not showing up on streams / in recordings.
+    void BeforePresent(safetyhook::Context& ctx)
     {
+        IDXGISwapChain* pSwapChain = reinterpret_cast<IDXGISwapChain*>(ctx.rcx);
         static bool firstInit = false;
 
         if (!firstInit)
@@ -179,7 +177,6 @@ namespace
         ColorCorrection::Draw(pSwapChain);
         D3D11TextOverlay::Tick(); //keep last.
         g_preMenuFired = false;
-        return PresentHook.call<HRESULT>(pSwapChain, syncInterval, flags);
     }
 
 
@@ -197,15 +194,10 @@ namespace
 
     void HookSwapChainPresent(IDXGISwapChain* swapChain)
     {
-        if (!swapChain || oPresent)
+        if (!swapChain || oResizeBuffers)
             return;
 
         void** vtable = *reinterpret_cast<void***>(swapChain);
-        oPresent = reinterpret_cast<PresentFn>(vtable[8]);
-
-        PresentHook = safetyhook::create_inline(vtable[8], reinterpret_cast<void*>(HookedPresent));
-        LOG_HOOK(PresentHook, "PresentHook");
-
         oResizeBuffers = reinterpret_cast<ResizeBuffersFn>(vtable[13]);
         ResizeBuffersHook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(HookedResizeBuffers));
         LOG_HOOK(ResizeBuffersHook, "ResizeBuffersHook");
@@ -252,14 +244,30 @@ namespace
 
 void D3D11Hooks::Initialize()
 {
-    HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll");
-    if (d3dcompiler)
+    if (!(eGameType & (MG|MGS2|MGS3)))
+    {
+        return;
+    }
+
+    spdlog::info("D3D11Hooks: Initializing D3D11 hooks.");
+    uint8_t* Present_scan = Memory::PatternScan(baseModule, eGameType & MGS2 ? "FF 50 ?? 8B F0" : "FF 50 ?? 48 8D 4C 24 ?? 8B F0", "D3D11Hooks: Before present hook");
+    if (!Present_scan)
+    {
+        return;
+    }
+    
+    PresentHook = safetyhook::create_mid(Present_scan, BeforePresent);
+    spdlog::info("D3D11Hooks: BeforePresent hook installed successfully.");
+
+
+    if (const HMODULE d3dcompiler = LoadLibraryA("d3dcompiler_43.dll"))
     {
         g_D3D11Hooks.D3DCompileFunc = reinterpret_cast<pD3DCompile>(GetProcAddress(d3dcompiler, "D3DCompile"));
+        spdlog::info("D3D11Hooks: d3dcompiler_43.dll loaded successfully.");
     }
     else
     {
-        spdlog::error("D3D11Hooks: failed to load d3dcompiler_43.dll"); 
+        spdlog::error("D3D11Hooks: failed to load d3dcompiler_43.dll");
     }
 
     CreateDXGIFactory_hook = safetyhook::create_inline(CreateDXGIFactory, reinterpret_cast<void*>(CreateDXGIFactory_hooked));
