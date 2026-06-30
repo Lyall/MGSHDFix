@@ -28,6 +28,7 @@ namespace SceneDepth
     void ResetStatus();
     ID3D11ShaderResourceView* GetSRV();
     bool IsAvailable();
+    ID3D11ShaderResourceView* CaptureDepth(ID3D11DepthStencilView* depthStencil);
 
     // Fires at the end of the 3D pass (after the scene, before UI). Gives the scene colour RT to draw
     // into and the depth SRV for occlusion.

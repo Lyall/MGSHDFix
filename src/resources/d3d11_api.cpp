@@ -21,6 +21,7 @@
 #include "mg1_display_scaling.hpp"
 #include "mgs2_crossfade.hpp"
 #include "mgs_smaa.hpp"
+#include "depth_of_field.hpp"
 #include "scene_depth.hpp"
 void afterPresent();
 
@@ -158,6 +159,8 @@ namespace
         }
         else if (eGameType & MGS3)
         {
+            g_DepthOfFieldFixes.OnPresent();
+
             ComPtr<ID3D11Texture2D> bb;
             pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(bb.GetAddressOf()));
             if (bb)
