@@ -7,6 +7,7 @@ public:
     float fBlurUvMultiplier = 3.0f;
 
     void Initialize();
+    void OnPresent();
     void HandleLevelTransition() const;
 };
 

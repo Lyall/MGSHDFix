@@ -65,17 +65,27 @@ namespace
     }
 
     // Copy a DSV texture into our shader-readable depth copy (CopyResource within the same typeless family).
-    void CopyDepth(ID3D11Texture2D* src)
+    bool CopyDepth(ID3D11Texture2D* src)
     {
-        if (!src) return;
+        g_available = false;
+        if (!src)
+        {
+            return false;
+        }
         auto* dev = g_D3D11Hooks.d3dDevice.Get();
         auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
-        if (!dev || !ctx) return;
+        if (!dev || !ctx)
+        {
+            return false;
+        }
 
         D3D11_TEXTURE2D_DESC sd {};
         src->GetDesc(&sd);
         DXGI_FORMAT typeless, srvFmt;
-        if (!MapDepthFormat(sd.Format, typeless, srvFmt)) return;
+        if (!MapDepthFormat(sd.Format, typeless, srvFmt))
+        {
+            return false;
+        }
 
         if (!g_copyTex || g_copyW != sd.Width || g_copyH != sd.Height || g_copyFmt != typeless)
         {
@@ -89,7 +99,10 @@ namespace
             td.CPUAccessFlags = 0;
             td.MiscFlags = 0;
 
-            if (FAILED(dev->CreateTexture2D(&td, nullptr, g_copyTex.GetAddressOf()))) return;
+            if (FAILED(dev->CreateTexture2D(&td, nullptr, g_copyTex.GetAddressOf())))
+            {
+                return false;
+            }
 
             D3D11_SHADER_RESOURCE_VIEW_DESC srvd {};
             srvd.Format = srvFmt;
@@ -99,7 +112,7 @@ namespace
             if (FAILED(dev->CreateShaderResourceView(g_copyTex.Get(), &srvd, g_copySRV.GetAddressOf())))
             {
                 g_copyTex.Reset();
-                return;
+                return false;
             }
 
             g_copyW = sd.Width;
@@ -111,6 +124,7 @@ namespace
 
         ctx->CopyResource(g_copyTex.Get(), src);
         g_available = true;
+        return true;
     }
 
     void STDMETHODCALLTYPE HookedOMSetRenderTargets(
@@ -227,4 +241,24 @@ ID3D11ShaderResourceView* SceneDepth::GetSRV()
 bool SceneDepth::IsAvailable()
 {
     return g_available;
+}
+
+ID3D11ShaderResourceView* SceneDepth::CaptureDepth(ID3D11DepthStencilView* depthStencil)
+{
+    if (!depthStencil)
+    {
+        g_available = false;
+        return nullptr;
+    }
+
+    ComPtr<ID3D11Resource> resource;
+    depthStencil->GetResource(resource.GetAddressOf());
+    ComPtr<ID3D11Texture2D> texture;
+    if (!resource || FAILED(resource.As(&texture)) || !texture)
+    {
+        g_available = false;
+        return nullptr;
+    }
+
+    return CopyDepth(texture.Get()) ? g_copySRV.Get() : nullptr;
 }
