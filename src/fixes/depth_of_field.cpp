@@ -268,6 +268,13 @@ namespace
             Texture2D sceneDepth : register(t1);
             SamplerState focusSampler : register(s0);
 
+            static const float kNearEdgeAlphaScale = 0.58;
+            static const float kNearEdgeSpreadScale = 0.74;
+            static const float kNearEdgeRadiusScale = 0.15;
+            static const float kNearEdgeMaxRadius = 7.0;
+            static const float kNearEdgeCardinalScale = 0.62;
+            static const float kNearEdgeDiagonalScale = 0.44;
+
             struct VSOut
             {
                 float4 pos : SV_Position;
@@ -335,6 +342,36 @@ namespace
                 return saturate(1.0 - pow(max(1.0 - layerAlpha, 0.0001), amount * planeCount));
             }
 
+            float LoadNearAmount(int2 pixel, float2 sourceSize, float4 packet)
+            {
+                int2 maxPixel = int2(sourceSize) - 1;
+                pixel = clamp(pixel, int2(0, 0), maxPixel);
+                return FocusRangeAmount(sceneDepth.Load(int3(pixel, 0)).r, packet, true);
+            }
+
+            float NearEdgeAmount(int2 pixel, float2 sourceSize, float4 packet, float currentAmount, float nearSpreadPixels)
+            {
+                if (packet.z <= 0.0 || nearSpreadPixels <= 0.0)
+                {
+                    return currentAmount;
+                }
+
+                // Widen near CoC at foreground edges so silhouettes blend into the scene.
+                int radius = (int)clamp(nearSpreadPixels * kNearEdgeRadiusScale + 0.5, 1.0, kNearEdgeMaxRadius);
+                float edgeAmount = currentAmount;
+
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2( radius,      0), sourceSize, packet) * kNearEdgeCardinalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2(-radius,      0), sourceSize, packet) * kNearEdgeCardinalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2(      0,  radius), sourceSize, packet) * kNearEdgeCardinalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2(      0, -radius), sourceSize, packet) * kNearEdgeCardinalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2( radius,  radius), sourceSize, packet) * kNearEdgeDiagonalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2(-radius,  radius), sourceSize, packet) * kNearEdgeDiagonalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2( radius, -radius), sourceSize, packet) * kNearEdgeDiagonalScale);
+                edgeAmount = max(edgeAmount, LoadNearAmount(pixel + int2(-radius, -radius), sourceSize, packet) * kNearEdgeDiagonalScale);
+
+                return edgeAmount;
+            }
+
             float4 DepthFocusPS(VSOut input) : SV_Target
             {
                 float2 basePixel = sourceRect.xy + input.uv * sourceRect.zw;
@@ -345,14 +382,16 @@ namespace
 
                 float farAmount = FocusRangeAmount(depth, planeData[0], false);
                 float nearAmount = FocusRangeAmount(depth, planeData[1], true);
+                float nearEdgeAmount = NearEdgeAmount(depthPixel, sourceSize, planeData[1], nearAmount, focusColor.a);
                 float farAlpha = FocusPacketAlpha(farAmount, planeData[0]);
                 float nearAlpha = FocusPacketAlpha(nearAmount, planeData[1]);
+                float nearEdgeAlpha = FocusPacketAlpha(nearEdgeAmount, planeData[1]) * kNearEdgeAlphaScale;
 
                 float farSpread = sourceSizeAndSpread.z * farAmount;
-                float nearSpread = focusColor.a * nearAmount;
+                float nearSpread = focusColor.a * max(nearAmount, nearEdgeAmount * kNearEdgeSpreadScale);
                 float spread = max(farSpread, nearSpread);
                 float maxMip = sourceSizeAndSpread.w;
-                float alpha = max(farAlpha, nearAlpha);
+                float alpha = max(farAlpha, max(nearAlpha, nearEdgeAlpha));
                 float3 color = SampleBlurredSource(sourceUv, spread, maxMip, sourceSize) * focusColor.rgb;
                 return float4(color, alpha);
             }

@@ -685,7 +685,7 @@ void Config::Read()
         }
         else if (eGameType & MGS3)
         {
-            g_DepthOfFieldFixes.fBlurUvMultiplier = 20.0f;
+            g_DepthOfFieldFixes.fBlurUvMultiplier = 10.0f;
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
