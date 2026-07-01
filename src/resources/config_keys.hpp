@@ -295,11 +295,16 @@ namespace ConfigKeys
 
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "MGS3: Restore Film Grain";
-    constexpr const char* MGS3_Restore_Film_Grain_Help = "On (All Scenes): Ignore engine cues and keep film grain always on.";
+    constexpr const char* MGS3_Restore_Film_Grain_Help = "On (All Scenes): Always on.";
     constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used by MGS3 cutscenes.";
     constexpr const char* MGS3_Restore_Film_Grain_Option_Off = "Off";
     constexpr const char* MGS3_Restore_Film_Grain_Option_On = "On";
     constexpr const char* MGS3_Restore_Film_Grain_Option_AllScenes = "On (All Scenes)";
+
+    constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Bugfixes";
+    constexpr const char* MGS2_RestoreActionLevelSelection_Setting = "Restore Action Level Selection";
+    constexpr const char* MGS2_RestoreActionLevelSelection_Help = "";
+    constexpr const char* MGS2_RestoreActionLevelSelection_Tooltip = "Restores the original first-time action level questionnaire before difficulty selection.";
 
     constexpr const char* MGS2_Increase_Shadow_Resolution_Section = "Enhancements and Tweaks";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "MGS2 - Fix Shadow Resolution Scaling";

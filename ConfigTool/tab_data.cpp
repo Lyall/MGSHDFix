@@ -267,6 +267,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS3_Restore_Film_Grain_Option_On,
           { ConfigKeys::MGS3_Restore_Film_Grain_Option_Off, ConfigKeys::MGS3_Restore_Film_Grain_Option_On, ConfigKeys::MGS3_Restore_Film_Grain_Option_AllScenes } },
 
+        { ConfigKeys::MGS2_RestoreActionLevelSelection_Section, ConfigKeys::MGS2_RestoreActionLevelSelection_Setting, ConfigKeys::MGS2_RestoreActionLevelSelection_Help, ConfigKeys::MGS2_RestoreActionLevelSelection_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
