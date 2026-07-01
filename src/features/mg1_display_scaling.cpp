@@ -11,6 +11,16 @@
 
 namespace
 {
+
+    bool bEnabled = true;
+
+    //4:3 = scaleX = 1.10416667f x 1.0f;
+    //4:3 fullscreened = 1.25f x 1.13207547f
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    constexpr float posX = 0.5f;
+    constexpr float posY = 0.49953704f;
+
     const char* kDisplayModShader = R"(
     cbuffer CB : register(b0)
     {
@@ -95,10 +105,10 @@ namespace
         D3D11_MAPPED_SUBRESOURCE m;
         ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m);
         auto* d        = static_cast<CBLayout*>(m.pData);
-        d->scaleX      = MG1_DisplayScaling::scaleX;
-        d->scaleY      = MG1_DisplayScaling::scaleY;
-        d->posX        = MG1_DisplayScaling::posX;
-        d->posY        = MG1_DisplayScaling::posY;
+        d->scaleX      = scaleX;
+        d->scaleY      = scaleY;
+        d->posX        = posX;
+        d->posY        = posY;
         d->bufferWidth  = w;
         d->bufferHeight = h;
         d->pad0 = d->pad1 = 0.f;
@@ -146,6 +156,8 @@ namespace
         return true;
     }
 
+
+
 }
 
 void MG1_DisplayScaling::Setup()
@@ -154,12 +166,6 @@ void MG1_DisplayScaling::Setup()
     {
         return;
     }
-
-	if(!bEnabled)
-	{
-		spdlog::info("MG1_DisplayScaling: Config disabled, skipping.");
-		return;
-	}
 
     if (!g_D3D11Hooks.D3DCompileFunc)
     {
@@ -190,6 +196,26 @@ void MG1_DisplayScaling::Setup()
 
     spdlog::info("MG1_DisplayScaling: Shader compiled successfully");
 
+    if (bCropBorders && bCorrectTo4x3)
+    {
+        scaleX = 1.25f;
+        scaleY = 1.13207547f;
+        spdlog::info("MG1_DisplayScaling: Cropping borders & correcting to 4:3");
+    }
+    else if (bCropBorders)
+    {
+        scaleX = scaleY = 1.13207547f;
+        spdlog::info("MG1_DisplayScaling: Cropping borders");
+    }
+    else if (bCorrectTo4x3)
+    {
+        scaleX = 1.10416667f;
+        spdlog::info("MG1_DisplayScaling: Correcting to 4:3");
+    }
+    else
+    {
+        spdlog::info("MG1_DisplayScaling: Correcting viewport positioning");
+    }
     
 }
 
@@ -199,10 +225,6 @@ void MG1_DisplayScaling::Init()
     {
         return;
     }
-	if(!bEnabled)
-	{
-		return;
-	}
 
     if (bShaderLoaded)
         return;
@@ -260,6 +282,7 @@ void MG1_DisplayScaling::Init()
     bShaderLoaded = true;
     spdlog::info("MG1_DisplayScaling initialized.");
 
+    /*
     const auto apply = []()
         {
             scaleX = std::clamp(scaleX, 0.001f, 5.0f);
@@ -267,7 +290,7 @@ void MG1_DisplayScaling::Init()
             posX = std::clamp(posX, -2.0f, 2.0f);
             posY = std::clamp(posY, -2.0f, 2.0f);
 
-            spdlog::info("DisplayMod: scaleX={:.3f} scaleY={:.3f} posX={:.3f} posY={:.3f}",
+            spdlog::info("DisplayMod: scaleX={:.8f} scaleY={:.8f} posX={:.8f} posY={:.8f}",
                          scaleX, scaleY, posX, posY);
         };
 
@@ -280,25 +303,25 @@ void MG1_DisplayScaling::Init()
 
     static const float stepX = 1.0f / static_cast<float>(CustomResolutionAndBorderless::iOutputResX);
     static const float stepY = 1.0f / static_cast<float>(CustomResolutionAndBorderless::iOutputResY);
+    g_InputHandler.RegisterHotkey(VK_NUMPAD1, "display scaleX-", [apply]() { scaleX -= stepX; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD3, "display scaleX+", [apply]() { scaleX += stepX; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD2, "display scaleY-", [apply]() { scaleY -= stepY; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD5, "display scaleY+", [apply]() { scaleY += stepY; apply(); });
 
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD1, "display scaleX-", [apply]() { scaleX -= stepX; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD3, "display scaleX+", [apply]() { scaleX += stepX; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD2, "display scaleY-", [apply]() { scaleY -= stepY; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD5, "display scaleY+", [apply]() { scaleY += stepY; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD7, "display posX-", [apply]() { posX -= stepX; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD9, "display posX+", [apply]() { posX += stepX; apply(); });
+    g_InputHandler.RegisterHotkey(VK_DIVIDE, "display posY-", [apply]() { posY -= stepY; apply(); });
+    g_InputHandler.RegisterHotkey(VK_NUMPAD8, "display posY+", [apply]() { posY += stepY; apply(); });
 
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD7, "display posX-", [apply]() { posX -= stepX; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD9, "display posX+", [apply]() { posX += stepX; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD8, "display posY-", [apply]() { posY -= stepY; apply(); });
-    g_InputHandler.RegisterHeldHotkey(VK_DIVIDE, "display posY+", [apply]() { posY += stepY; apply(); });
-
-    g_InputHandler.RegisterHeldHotkey(VK_NUMPAD0, "display reset", [apply]()
+    g_InputHandler.RegisterHotkey(VK_NUMPAD0, "display reset", [apply]()
                                       {
                                           scaleX = 1.131f;
                                           scaleY = 1.130f;
                                           posX = 0.5f;
-                                          posY = 0.5f;
+                                          posY = 0.49953705f;
                                           apply();
                                       });
+                                      */
 }
 
 void MG1_DisplayScaling::Draw(IDXGISwapChain* swap)

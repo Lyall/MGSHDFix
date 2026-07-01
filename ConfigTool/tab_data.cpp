@@ -126,6 +126,10 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ConfigKeys::ColorCorrection_Enabled_Help, ConfigKeys::ColorCorrection_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Section, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Setting, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Help, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+
 
         { ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },

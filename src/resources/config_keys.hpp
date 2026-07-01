@@ -114,6 +114,13 @@ namespace ConfigKeys
     constexpr const char* MG1_Crop_Overscan_Enabled_Help = "";
     constexpr const char* MG1_Crop_Overscan_Enabled_Tooltip = "Enables cropping of overscan areas in MG1.";
 
+
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Section = "Enhancements and Tweaks";
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Setting = "MG1 && MG2 - Correct Aspect Ratio";
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "(Corrects to 4:3)";
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Tooltip = "Corrects the viewport's dimensions from the MSX2's raw internal aspect ratio (64:53 / 256x212) to the intended CRT aspect ratio of 4:3.";
+
+
     constexpr const char* Caption_Scale_Section = "Caption Settings";
     constexpr const char* Caption_Scale_Setting = "Caption Size (%)";
     constexpr const char* Caption_Scale_Help = "";

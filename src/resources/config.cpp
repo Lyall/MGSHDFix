@@ -957,8 +957,13 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
     LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
 
-    ConfigHelper::getValue(ini, ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bCropBorders);
+    LOG_CONFIG(ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bCropBorders);
+
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Section, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Setting, MG1_DisplayScaling::bCorrectTo4x3);
+    LOG_CONFIG(ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Section, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Setting, MG1_DisplayScaling::bCorrectTo4x3);
+
 
 
 
