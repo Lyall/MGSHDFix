@@ -128,6 +128,9 @@
     <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs3_film_grain.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\cpu_core_limit.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -407,6 +410,9 @@
       <Filter>Config</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\depth_of_field.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs3_film_grain.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
