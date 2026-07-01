@@ -179,12 +179,12 @@ namespace
             MG1_DisplayScaling::Draw(pSwapChain);
         }
 
-        ColorCorrection::Draw(pSwapChain);
-        D3D11TextOverlay::Tick(); //keep last.
+ColorCorrection::Draw(pSwapChain);
         if (eGameType & MGS3)
         {
             MGS3FilmGrain::EndPresent();
         }
+        D3D11TextOverlay::Tick(); //keep last.
         g_preMenuFired = false;
     }
 
