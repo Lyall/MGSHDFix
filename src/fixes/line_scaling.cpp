@@ -6,6 +6,7 @@
 #include "input_handler.hpp"
 #include "logging.hpp"
 #include "custom_resolution_and_borderless.hpp"
+#include "mgs3_film_grain.hpp"
 
 namespace
 {
@@ -109,10 +110,13 @@ namespace
             {
                 currentGS->Release();
             }
+
+            MGS3FilmGrain::OnAfterGameDraw(context, VertexCount);
         }
         else
         {
             D3D11_Draw_Hook.call<void>(context, VertexCount, StartVertexLocation);
+            MGS3FilmGrain::OnAfterGameDraw(context, VertexCount);
         }
     }
 

@@ -263,6 +263,10 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Tooltip,
           std::make_pair(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 10.0, 0.0, 20.0 },
 
+        { ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, ConfigKeys::MGS3_Restore_Film_Grain_Help, ConfigKeys::MGS3_Restore_Film_Grain_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS3_Restore_Film_Grain_Option_On,
+          { ConfigKeys::MGS3_Restore_Film_Grain_Option_Off, ConfigKeys::MGS3_Restore_Film_Grain_Option_On, ConfigKeys::MGS3_Restore_Film_Grain_Option_AllScenes } },
+
 
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
