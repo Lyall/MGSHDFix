@@ -22,6 +22,7 @@
 #include "mgs2_crossfade.hpp"
 #include "mgs_smaa.hpp"
 #include "depth_of_field.hpp"
+#include "mgs3_film_grain.hpp"
 #include "scene_depth.hpp"
 void afterPresent();
 
@@ -140,6 +141,10 @@ namespace
         g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
 
+        if (eGameType & MGS3)
+        {
+            MGS3FilmGrain::BeginPresent();
+        }
 
         if (eGameType & MGS2)
         {
@@ -176,6 +181,10 @@ namespace
 
         ColorCorrection::Draw(pSwapChain);
         D3D11TextOverlay::Tick(); //keep last.
+        if (eGameType & MGS3)
+        {
+            MGS3FilmGrain::EndPresent();
+        }
         g_preMenuFired = false;
     }
 
