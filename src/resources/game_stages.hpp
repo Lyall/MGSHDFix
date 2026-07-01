@@ -401,3 +401,15 @@ namespace MGS3Stages
 #undef X
 }
 
+#define MG1_STAGE_LIST \
+    X(INIT,    "init",    "Init", "Init") \
+    X(MG1,     "mg1",     "Metal Gear (MSX)", "Metal Gear") \
+    X(MG2,     "mg2",     "Metal Gear 2: Solid Snake", "Metal Gear 2: Solid Snake") \
+    X(R_SNA01, "r_sna01", "Snake", "Snake")
+
+namespace MG1Stages
+{
+#define X(name, id, mode, disp) constexpr const char* name = id;
+    MG1_STAGE_LIST
+#undef X
+}

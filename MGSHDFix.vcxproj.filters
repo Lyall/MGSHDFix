@@ -287,6 +287,8 @@
     <ClCompile Include="src\resources\scene_depth.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_restore_elevator_glitch.cpp" />
+    <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\line_scaling.hpp">
@@ -583,6 +585,7 @@
     <ClInclude Include="src\resources\scene_depth.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\features\mgs2_restore_elevator_glitch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

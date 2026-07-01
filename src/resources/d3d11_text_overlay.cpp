@@ -10,12 +10,15 @@
 #include "stb_easy_font.h"
 #include "version.h"
 #include "common.hpp"
+#include "mg1_display_scaling.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
 #include "version_checking.hpp"
 
 namespace
 {
+    float fMGCropOffset = 0.0f;
+
     const char* kTextShader = R"(
     cbuffer CB : register(b0)
     {
@@ -580,12 +583,13 @@ void D3D11TextOverlay::Init()
     bShaderLoaded = true;
     spdlog::info("D3D11TextOverlay initialized.");
 
+    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? B2 ?? 45 8D 41 ?? E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D", "BP_RenderLoadingSpinner -> l1549", {
+        bShowVersionNumber = true;
+                  });
+
+
     if (eGameType & MGS2)
     {
-        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? B2 ?? 45 8D 41 ?? E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D", "BP_RenderLoadingSpinner -> l1549", {
-            bShowVersionNumber = true;
-                      });
-        
         /*
         //die isn't really needed, it's just here as a redundant cleanup.
         MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? B2 ?? 45 8D 41 ?? E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D", "NewTitleScrMan -> Die()", {
@@ -602,7 +606,10 @@ void D3D11TextOverlay::Init()
     }
 
     
-
+    if ((eGameType & MG) && MG1_DisplayScaling::bCropBorders)
+    {
+        fMGCropOffset = -300.0f;
+    }
 }
 
 void D3D11TextOverlay::HandleLevelTransition()
@@ -622,11 +629,11 @@ void D3D11TextOverlay::Tick()
 
     if (bShowVersionNumber)
     {
-        Draw(sFixNameAndVersion.c_str(), 3167.0f, 2005.0f, 5.0f, 1.0f, {199, 199, 199, 255 }, {0,0,0,0}, TextHorizontalAlignment::Center);
+        Draw(sFixNameAndVersion.c_str(), 3167.0f, 2005.0f + fMGCropOffset, 5.0f, 1.0f, {199, 199, 199, 255 }, {0,0,0,0}, TextHorizontalAlignment::Center);
         bShowVersionNumber = false;
 		if(bDebugBuild)
 		{
-			Draw("Nightly Build", 3167.0f, 2090.0f, 5.0f, 1.0f, {199, 199, 199, 255 }, {0,0,0,0}, TextHorizontalAlignment::Center, TextVerticalAlignment::Center);
+			Draw("Nightly Build", 3167.0f, 2090.0f + fMGCropOffset, 5.0f, 1.0f, {199, 199, 199, 255 }, {0,0,0,0}, TextHorizontalAlignment::Center, TextVerticalAlignment::Center);
 		}
     }
 

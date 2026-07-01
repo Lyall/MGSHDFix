@@ -1,14 +1,25 @@
 #pragma once
 
-namespace MGS2_GameFuncs
+namespace Shared_Gamefuncs
 {
     void HookFuncs();
+
+};
+
+
+
+namespace MGS2_GameFuncs
+{
+    void HookGameFuncs();
     
     using GM_SeSet_t = int64_t(__fastcall*)(int a1, uint8_t a2, int16_t a3);
     inline GM_SeSet_t GM_SeSet = nullptr;
 
     using GM_ItemNum_t = int(__fastcall*)(int a1);
     inline GM_ItemNum_t GM_ItemNum = nullptr;
+
+    using GM_WeaponNum_t = int(__fastcall*)(int a1);
+    inline GM_WeaponNum_t GM_WeaponNum = nullptr;
 
     using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);
     inline GM_SetArea_t GM_SetArea = nullptr;
@@ -28,6 +39,22 @@ namespace MGS2_GameFuncs
 
 
     inline bool StartInDebugMode = false;
+}
+
+
+
+namespace MG1_Gamefuncs
+{
+    
+    void HookGameFuncs();
+}
+
+
+
+namespace MGS3_Gamefuncs
+{
+
+    void HookGameFuncs();
 }
 
 

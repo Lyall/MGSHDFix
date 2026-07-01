@@ -64,7 +64,6 @@ void GameVars::Initialize()
                 });
             LOG_HOOK(levelTransitionMidHook, "GameVars: Level Transition")
         }
-        MGS2_GameFuncs::HookFuncs();
     }
     else if (eGameType & MGS3)
     {
@@ -90,6 +89,11 @@ void GameVars::Initialize()
                 });
             LOG_HOOK(levelTransitionMidHook, "GameVars: Level Transition")
         }
+    }
+
+    if (eGameType & (MG|MGS2|MGS3))
+    {
+        Shared_Gamefuncs::HookFuncs();
     }
 }
 

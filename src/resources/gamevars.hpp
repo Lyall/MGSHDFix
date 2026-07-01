@@ -6,9 +6,9 @@
 #include "game_stages.hpp"
 #include "mgs2_status_flags.hpp"
 
-struct FVECTOR { float x, y, z, pad; };
+struct alignas(16) FVECTOR { float x, y, z, w; };
 
-struct FMATRIX { float m[4][4]; };
+struct alignas(16) FMATRIX { float m[4][4]; };
 
 struct alignas(16) DG_CHANL
 {
