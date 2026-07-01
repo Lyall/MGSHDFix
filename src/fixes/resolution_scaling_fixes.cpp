@@ -265,6 +265,14 @@ void ResolutionScalingFixes::ApplyFixes()
     //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
         #define	SHIFT3_X			(17.5f)
         #define	SHIFT4_X			(0.0f)
+
+    MAKE_HOOK_MID(baseModule, "75 ?? 81 4A ?? ?? ?? ?? ?? EB ?? 83 BB", "sonoyama\\raiden\\rai_equip.c -> RaiHolsterAct() -> @ l160, Raiden M9 holster fix", {
+            if (ctx.rsi == MGS2_WEAPON_INDEX_M9)
+            {
+                reghelpers::SetZF(ctx, true);
+            }
+        });
+
 }
 
 

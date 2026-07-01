@@ -47,7 +47,7 @@
 
 
 constexpr int iWindowSizeX = 716;
-constexpr int iWindowSizeY = 680;
+constexpr int iWindowSizeY = 700;
 constexpr const char* sSettingsFileName = "MGSHDFix.settings";
 constexpr bool bFullLengthFields = false; //if you want the boxes to span half the window's width.
 
