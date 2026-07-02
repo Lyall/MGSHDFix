@@ -40,7 +40,8 @@ namespace
     constexpr char kQuestionIntroVoiceName[] = "vc126101.sdt";
     constexpr char kQuestionIntroVoiceStreamLayer[] = "vox2";
     constexpr int32_t kActionLevelCaptionName = 2328243;
-    constexpr int32_t kActionLevelCaptionY = 350;
+    constexpr int32_t kActionLevelCaptionY = 337;
+    constexpr int32_t kJapaneseActionLevelCaptionYOffset = 4;
     constexpr int32_t kJapaneseQuestionTextYOffset = 4;
     constexpr int32_t kJapaneseQuestionTextWidthPad = 8;
     constexpr int32_t kJapaneseQuestionTextScreenHeightPad = 2;
@@ -230,13 +231,8 @@ namespace
         return 0;
     }
 
-    void ConvertJapaneseQuestionText(uintptr_t work)
+    void ConvertQuestionTextToBpFont(uintptr_t work)
     {
-        if (!IsJapanese())
-        {
-            return;
-        }
-
         for (size_t i = 0; i < kQuestionTextCount; i++)
         {
             auto* font = reinterpret_cast<uintptr_t*>(work + kQuestionCodeBase + (i * kQuestionCodeStride) + kQuestionCodeFont);
@@ -424,9 +420,10 @@ void MGS2_RestoreActionLevelSelection::Apply()
         static SafetyHookMid hook {};
         HookMidAtOffset(captionPosition, 0x03, hook, "MGS2: Restore Action Level Selection - action level caption position", [](SafetyHookContext& ctx)
         {
-            if (IsActionLevelCaptionActive() && static_cast<int32_t>(ctx.rcx) > kActionLevelCaptionY)
+            const int32_t captionY = kActionLevelCaptionY - (IsJapanese() ? kJapaneseActionLevelCaptionYOffset : 0);
+            if (IsActionLevelCaptionActive() && static_cast<int32_t>(ctx.rcx) > captionY)
             {
-                ctx.rcx = static_cast<uint32_t>(kActionLevelCaptionY);
+                ctx.rcx = static_cast<uint32_t>(captionY);
             }
         });
     }
@@ -503,7 +500,7 @@ void MGS2_RestoreActionLevelSelection::Apply()
     MAKE_HOOK_MID(baseModule,
         "41 B9 04 00 00 00 C6 83 D0 00 00 00 02 BA 90 01 00 00 C6 83 E8 00 00 00 02 B9 00 04 00 00",
         "MGS2: Restore Action Level Selection - questionnaire voice", {
-            ConvertJapaneseQuestionText(ctx.rbx);
+            ConvertQuestionTextToBpFont(ctx.rbx);
             SetQuestionIntroVoice(ctx.rbx);
         });
 }
