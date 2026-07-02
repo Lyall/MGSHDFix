@@ -24,6 +24,7 @@
 #include "mgs2_restore_dogtags.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
+#include "mgs2_restore_action_level_selection.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_difficulty.hpp"
 #include "mgs2_hostage_type_easter_egg.hpp"
@@ -510,6 +511,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_RestoreDogtags::Initialize());
         INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
         INITIALIZE(MGS2_RestorePhoneJingle::Apply());
+        INITIALIZE(MGS2_RestoreActionLevelSelection::Apply());
         INITIALIZE(MGS2_RestoreSoLRadar::Apply());
         INITIALIZE(MGS2_RestoreElevatorGlitch::Initialize());
         INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
