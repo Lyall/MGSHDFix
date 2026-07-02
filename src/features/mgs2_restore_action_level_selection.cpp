@@ -7,6 +7,7 @@
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <string>
 
@@ -22,12 +23,22 @@ namespace
 
     constexpr ptrdiff_t kWorkBusyFlag = 0x60;
     constexpr ptrdiff_t kWorkStep = 0x74;
+    constexpr ptrdiff_t kWorkSubStep = 0x78;
     constexpr ptrdiff_t kWorkGameCursor = 0x90;
     constexpr ptrdiff_t kWorkLevelCursor = 0x92;
     constexpr ptrdiff_t kWorkQuestionCursor = 0x96;
     constexpr ptrdiff_t kWorkDispGameItem = 0x9C;
+    constexpr ptrdiff_t kWorkCursor = 0xA8;
     constexpr ptrdiff_t kWorkGame0 = 0xB8;
+    constexpr ptrdiff_t kWorkGame1 = 0xC0;
+    constexpr ptrdiff_t kWorkGame2 = 0xC8;
+    constexpr ptrdiff_t kWorkGame3 = 0xD0;
+    constexpr ptrdiff_t kWorkTargetY = 0x154;
+    constexpr ptrdiff_t kSpriteParent = 0x00;
     constexpr ptrdiff_t kSpriteFlags = 0x30;
+    constexpr ptrdiff_t kEmptyPosY = 0x64;
+    constexpr ptrdiff_t kSpritePosY = 0x9C;
+    constexpr uint32_t kSpriteHiddenFlag = 0x8000u;
     constexpr ptrdiff_t kQuestionCodeBase = 0x70;
     constexpr ptrdiff_t kQuestionCodeStride = 0x10;
     constexpr ptrdiff_t kQuestionCodeFont = 0x08;
@@ -40,7 +51,8 @@ namespace
     constexpr char kQuestionIntroVoiceName[] = "vc126101.sdt";
     constexpr char kQuestionIntroVoiceStreamLayer[] = "vox2";
     constexpr int32_t kActionLevelCaptionName = 2328243;
-    constexpr int32_t kActionLevelCaptionY = 350;
+    constexpr int32_t kActionLevelCaptionY = 337;
+    constexpr int32_t kJapaneseActionLevelCaptionYOffset = 4;
     constexpr int32_t kJapaneseQuestionTextYOffset = 4;
     constexpr int32_t kJapaneseQuestionTextWidthPad = 8;
     constexpr int32_t kJapaneseQuestionTextScreenHeightPad = 2;
@@ -127,7 +139,8 @@ namespace
     {
         return displayMask == kDispFirstTimeOnly ||
             displayMask == kDispFirstTimeTanker ||
-            displayMask == kDispFirstTimePlant;
+            displayMask == kDispFirstTimePlant ||
+            displayMask == kDispAllStories;
     }
 
     bool IsFirstTimeDisplay(uintptr_t work)
@@ -159,18 +172,176 @@ namespace
         }
     }
 
-    void ShowFirstTimeEntry(uintptr_t work)
+    void ShowSprite(uintptr_t sprite)
     {
-        if (!IsFirstTimeDisplay(work) || Memory::ReadField<int32_t>(work, kWorkBusyFlag, 1) != 0)
+        if (!sprite)
         {
             return;
         }
 
-        const uintptr_t game0 = Memory::ReadField<uintptr_t>(work, kWorkGame0);
-        auto* flags = reinterpret_cast<uint32_t*>(game0 + kSpriteFlags);
+        auto* flags = reinterpret_cast<uint32_t*>(sprite + kSpriteFlags);
         if (Memory::IsWritable(flags, sizeof(*flags)))
         {
-            *flags &= ~0x8000u;
+            *flags &= ~kSpriteHiddenFlag;
+        }
+    }
+
+    void SetSpriteY(uintptr_t sprite, float y)
+    {
+        auto* posY = reinterpret_cast<float*>(sprite + kSpritePosY);
+        if (Memory::IsWritable(posY, sizeof(*posY)))
+        {
+            *posY = y;
+        }
+    }
+
+    void SetEmptyY(uintptr_t empty, float y)
+    {
+        auto* posY = reinterpret_cast<float*>(empty + kEmptyPosY);
+        if (Memory::IsWritable(posY, sizeof(*posY)))
+        {
+            *posY = y;
+        }
+    }
+
+    void SetWorkTargetY(uintptr_t work, float y)
+    {
+        auto* targetY = reinterpret_cast<float*>(work + kWorkTargetY);
+        if (Memory::IsWritable(targetY, sizeof(*targetY)))
+        {
+            *targetY = y;
+        }
+    }
+
+    float ReadSpriteY(uintptr_t sprite)
+    {
+        return Memory::ReadField<float>(sprite, kSpritePosY);
+    }
+
+    bool IsValidRowStep(float rowStep)
+    {
+        return rowStep > 1.0f && rowStep < 200.0f && std::isfinite(rowStep);
+    }
+
+    float GetFourthRowY(float row0Y, float row1Y, float row2Y)
+    {
+        float rowStep = row2Y - row1Y;
+        if (!IsValidRowStep(rowStep))
+        {
+            rowStep = row1Y - row0Y;
+        }
+
+        return IsValidRowStep(rowStep) ? row2Y + rowStep : 0.0f;
+    }
+
+    float ReadParentWorldY(uintptr_t sprite)
+    {
+        float y = 0.0f;
+        uintptr_t parent = Memory::ReadField<uintptr_t>(sprite, kSpriteParent);
+        for (int i = 0; i < 8 && parent; i++)
+        {
+            y += Memory::ReadField<float>(parent, kEmptyPosY);
+            parent = Memory::ReadField<uintptr_t>(parent, kSpriteParent);
+        }
+        return y;
+    }
+
+    float ReadWorldY(uintptr_t sprite)
+    {
+        return ReadSpriteY(sprite) + ReadParentWorldY(sprite);
+    }
+
+    void MoveTankerPlantToFourthRow(uintptr_t work)
+    {
+        const uintptr_t game0 = Memory::ReadField<uintptr_t>(work, kWorkGame0);
+        const uintptr_t game1 = Memory::ReadField<uintptr_t>(work, kWorkGame1);
+        const uintptr_t game2 = Memory::ReadField<uintptr_t>(work, kWorkGame2);
+        const uintptr_t game3 = Memory::ReadField<uintptr_t>(work, kWorkGame3);
+        if (!game0 || !game1 || !game2 || !game3)
+        {
+            return;
+        }
+
+        // menuT_P is under a shifted parent during the restored first-time menu.
+        const float targetWorldY = GetFourthRowY(ReadWorldY(game0), ReadWorldY(game1), ReadWorldY(game2));
+        if (targetWorldY > 0.0f)
+        {
+            SetSpriteY(game3, targetWorldY - ReadParentWorldY(game3));
+        }
+    }
+
+    float GetFourthGameRowY(uintptr_t work)
+    {
+        const uintptr_t game0 = Memory::ReadField<uintptr_t>(work, kWorkGame0);
+        const uintptr_t game1 = Memory::ReadField<uintptr_t>(work, kWorkGame1);
+        const uintptr_t game2 = Memory::ReadField<uintptr_t>(work, kWorkGame2);
+        if (!game0 || !game1 || !game2)
+        {
+            return 0.0f;
+        }
+
+        return GetFourthRowY(ReadSpriteY(game0), ReadSpriteY(game1), ReadSpriteY(game2));
+    }
+
+    void AdjustTankerPlantCursorY(uintptr_t work, bool snapCursor)
+    {
+        if (!IsWorkReadable(work) ||
+            Memory::ReadField<uint8_t>(work, kWorkDispGameItem) != kDispAllStories ||
+            Memory::ReadField<int16_t>(work, kWorkGameCursor, -1) != 3)
+        {
+            return;
+        }
+
+        const float targetY = GetFourthGameRowY(work);
+        if (targetY <= 0.0f || !std::isfinite(targetY))
+        {
+            return;
+        }
+
+        SetWorkTargetY(work, targetY);
+        if (snapCursor)
+        {
+            SetEmptyY(Memory::ReadField<uintptr_t>(work, kWorkCursor), targetY);
+        }
+    }
+
+    bool CanForceGameMenuVisibility(uintptr_t work)
+    {
+        return Memory::ReadField<int32_t>(work, kWorkSubStep, -1) != 1 ||
+            Memory::ReadField<int32_t>(work, kWorkBusyFlag, -1) == 0;
+    }
+
+    void ShowFirstTimeEntry(uintptr_t work)
+    {
+        if (!IsWorkReadable(work))
+        {
+            return;
+        }
+
+        const uint8_t displayMask = Memory::ReadField<uint8_t>(work, kWorkDispGameItem);
+        if (!IsFirstTimeDisplay(displayMask))
+        {
+            return;
+        }
+
+        const bool canForceVisible = CanForceGameMenuVisibility(work);
+        const uintptr_t game0 = Memory::ReadField<uintptr_t>(work, kWorkGame0);
+        if (canForceVisible)
+        {
+            ShowSprite(game0);
+        }
+
+        if (displayMask == kDispAllStories)
+        {
+            MoveTankerPlantToFourthRow(work);
+            AdjustTankerPlantCursorY(work, false);
+
+            if (canForceVisible)
+            {
+                ShowSprite(Memory::ReadField<uintptr_t>(work, kWorkGame1));
+                ShowSprite(Memory::ReadField<uintptr_t>(work, kWorkGame2));
+                ShowSprite(Memory::ReadField<uintptr_t>(work, kWorkGame3));
+            }
         }
     }
 
@@ -230,13 +401,8 @@ namespace
         return 0;
     }
 
-    void ConvertJapaneseQuestionText(uintptr_t work)
+    void ConvertQuestionTextToBpFont(uintptr_t work)
     {
-        if (!IsJapanese())
-        {
-            return;
-        }
-
         for (size_t i = 0; i < kQuestionTextCount; i++)
         {
             auto* font = reinterpret_cast<uintptr_t*>(work + kQuestionCodeBase + (i * kQuestionCodeStride) + kQuestionCodeFont);
@@ -358,11 +524,18 @@ void MGS2_RestoreActionLevelSelection::Apply()
             Memory::GetRipRelativeAddress(getLocalResource + 0x2B, 0x03, 0x07));
     }
 
-    MAKE_HOOK_MID(baseModule,
+    if (uint8_t* showFirstTimeMenu = Memory::PatternScan(baseModule,
         "0F B6 91 9C 00 00 00 83 EA 01 74 50 83 EA 02 74 59 83 FA 02 74 0F 48 8B 81 B8 00 00 00 81 48 30 00 80 00 00 C3",
-        "MGS2: Restore Action Level Selection - show first-time menu", {
+        "MGS2: Restore Action Level Selection - show first-time menu"))
+    {
+        static SafetyHookMid startHook {};
+        HookMidAtOffset(showFirstTimeMenu, 0x00, startHook, "MGS2: Restore Action Level Selection - show first-time menu", [](SafetyHookContext& ctx)
+        {
             ShowFirstTimeEntry(ctx.rcx);
         });
+
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(showFirstTimeMenu) + 0x1D, "\x90\x90\x90\x90\x90\x90\x90", 7);
+    }
 
     if (uint8_t* questionTextBounds = Memory::PatternScan(baseModule,
         "B8 38 00 00 00 41 0F 44 C4 83 C1 38 41 0F AF C7 0F 5B C0 03 C1 42 8B 4C 34 50 03 C7",
@@ -424,9 +597,10 @@ void MGS2_RestoreActionLevelSelection::Apply()
         static SafetyHookMid hook {};
         HookMidAtOffset(captionPosition, 0x03, hook, "MGS2: Restore Action Level Selection - action level caption position", [](SafetyHookContext& ctx)
         {
-            if (IsActionLevelCaptionActive() && static_cast<int32_t>(ctx.rcx) > kActionLevelCaptionY)
+            const int32_t captionY = kActionLevelCaptionY - (IsJapanese() ? kJapaneseActionLevelCaptionYOffset : 0);
+            if (IsActionLevelCaptionActive() && static_cast<int32_t>(ctx.rcx) > captionY)
             {
-                ctx.rcx = static_cast<uint32_t>(kActionLevelCaptionY);
+                ctx.rcx = static_cast<uint32_t>(captionY);
             }
         });
     }
@@ -463,10 +637,23 @@ void MGS2_RestoreActionLevelSelection::Apply()
         });
     }
 
+    if (uint8_t* cursorInitTarget = Memory::PatternScan(baseModule,
+        "48 8B 8C C3 B8 00 00 00 8B 81 9C 00 00 00 89 42 64 48 8B 83 A8 00 00 00 8B 48 64 49 63 C0 89 8B 54 01 00 00",
+        "MGS2: Restore Action Level Selection - cursor init target"))
+    {
+        static SafetyHookMid hook {};
+        HookMidAtOffset(cursorInitTarget, 0x24, hook, "MGS2: Restore Action Level Selection - cursor init target", [](SafetyHookContext& ctx)
+        {
+            AdjustTankerPlantCursorY(ctx.rbx, true);
+        });
+    }
+
     if (uint8_t* cursorBefore = Memory::PatternScan(baseModule,
         "0F B7 83 90 00 00 00 BF 03 00 00 00 8B F7 66 85 C0 74 03 0F BF F0 8B 8B 84 00 00 00",
         "MGS2: Restore Action Level Selection - cursor before"))
     {
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(cursorBefore) + 0x08, "\x04", 1);
+
         static SafetyHookMid hook {};
         HookMidAtOffset(cursorBefore, 0x16, hook, "MGS2: Restore Action Level Selection - cursor before", [](SafetyHookContext& ctx)
         {
@@ -474,6 +661,24 @@ void MGS2_RestoreActionLevelSelection::Apply()
             {
                 ctx.rsi = 0;
             }
+        });
+    }
+
+    if (uint8_t* cursorUpWrap = Memory::PatternScan(baseModule,
+        "44 0F B6 83 9C 00 00 00 66 90 66 83 E8 01 0F B7 C8 79 05 B9 02 00 00 00 0F B7 D1 0F B7 C1 41 0F A3 D0 73",
+        "MGS2: Restore Action Level Selection - cursor up wrap"))
+    {
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(cursorUpWrap) + 0x14, "\x03", 1);
+    }
+
+    if (uint8_t* cursorMoveTarget = Memory::PatternScan(baseModule,
+        "48 8B 8C C3 B8 00 00 00 8B 81 9C 00 00 00 89 83 54 01 00 00 48 63 C6 48 8B 8C C3 B8 00 00 00",
+        "MGS2: Restore Action Level Selection - cursor move target"))
+    {
+        static SafetyHookMid hook {};
+        HookMidAtOffset(cursorMoveTarget, 0x14, hook, "MGS2: Restore Action Level Selection - cursor move target", [](SafetyHookContext& ctx)
+        {
+            AdjustTankerPlantCursorY(ctx.rbx, false);
         });
     }
 
@@ -503,7 +708,7 @@ void MGS2_RestoreActionLevelSelection::Apply()
     MAKE_HOOK_MID(baseModule,
         "41 B9 04 00 00 00 C6 83 D0 00 00 00 02 BA 90 01 00 00 C6 83 E8 00 00 00 02 B9 00 04 00 00",
         "MGS2: Restore Action Level Selection - questionnaire voice", {
-            ConvertJapaneseQuestionText(ctx.rbx);
+            ConvertQuestionTextToBpFont(ctx.rbx);
             SetQuestionIntroVoice(ctx.rbx);
         });
 }
