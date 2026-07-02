@@ -296,12 +296,12 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, "", "", "",
         std::nullopt, false, Field::Spacer },
 
+        {ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Help, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Tooltip,
+        std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Hotkey, 0, 0, 0, "Num7"},
 
         {ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, ConfigKeys::MGS2_Thermal_Mode_Help, ConfigKeys::MGS2_Thermal_Mode_Tooltip,
         std::nullopt, false, Field::Bool, false},
 
-        {ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Help, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Tooltip,
-        std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Hotkey, 0, 0, 0, "Num7"},
 
 
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, ConfigKeys::MGS2_Thermal_Default_Mode_Setting, ConfigKeys::MGS2_Thermal_Default_Mode_Help, ConfigKeys::MGS2_Thermal_Default_Mode_Tooltip,
