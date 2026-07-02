@@ -233,6 +233,9 @@
     <ClCompile Include="src\fixes\mgs2_hostage_model.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_ray_photo_voice.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\custom_player_name.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -526,6 +529,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_hostage_model.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_ray_photo_voice.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\custom_player_name.hpp">

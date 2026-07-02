@@ -55,6 +55,7 @@
 #include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "mgs2_hostage_model.hpp"
+#include "mgs2_ray_photo_voice.hpp"
 
 //Warnings
 #include "asi_loader_checks.hpp"
@@ -553,6 +554,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ShimmerEffect::SetupHooks());
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
         INITIALIZE(HostageModel::ApplyFix());
+        INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_ContrastShader::Setup());
         
     }
