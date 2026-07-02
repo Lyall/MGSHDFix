@@ -38,6 +38,7 @@ namespace MGS2_Characters
             return PlayerCharacterFamily::Raiden;
 
         case PlayerCharacter::NormalSnake:
+        case PlayerCharacter::SpecialSnake:
         case PlayerCharacter::TuxedoSnake:
         case PlayerCharacter::MGS1Snake:
             return PlayerCharacterFamily::Snake;

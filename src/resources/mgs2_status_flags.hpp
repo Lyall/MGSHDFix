@@ -11,6 +11,7 @@ namespace MGS2_Characters
         NinjaRaiden,
 
         NormalSnake,
+        SpecialSnake,
         TuxedoSnake,
         MGS1Snake,
 
@@ -56,7 +57,6 @@ namespace MGS2_Characters
 
         PlayerResidentEntry { "r_sna_b",    PlayerCharacter::NormalSnake }, //Snake / boss rush resident scenario
         PlayerResidentEntry { "r_tnk0",     PlayerCharacter::NormalSnake }, //Tanker
-        PlayerResidentEntry { "r_tnk_r",    PlayerCharacter::NormalSnake }, //Tanker - digital camera resident scenario
         PlayerResidentEntry { "r_plt_s",    PlayerCharacter::NormalSnake }, //Snake Tales
         PlayerResidentEntry { "r_vr_s",     PlayerCharacter::NormalSnake },
         PlayerResidentEntry { "r_vr_sp",    PlayerCharacter::NormalSnake },
@@ -65,6 +65,9 @@ namespace MGS2_Characters
         PlayerResidentEntry { "r_vr_1",     PlayerCharacter::MGS1Snake },
 
         PlayerResidentEntry { "r_vr_p",     PlayerCharacter::Pliskin },
+        
+        PlayerResidentEntry { "r_tnk_r",    PlayerCharacter::SpecialSnake }, //Tanker - digital camera resident scenario
+
     };
 
     /// Please cache the current character when performing multiple checks to avoid repeated resident derefs. <3

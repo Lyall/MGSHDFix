@@ -21,8 +21,9 @@ namespace
     constexpr unsigned int STRCODE_NODE_TITLE_TEX_TRI = 0xbbe697;
     constexpr unsigned int STRCODE_TITLE_LOGO = 0x07bc34;
     constexpr unsigned int STRCODE_TITLE_NUMBAH_TWO = 0xc1181b;
-
+    /// DG_GetTexture2
     FASTCALL_2IN1OUT GetCtxrHandle;
+    /// BP_ReplaceTexture
     FASTCALL_2IN1OUT CopyCtxr;
     FASTCALL_3IN1OUT AllocTexture;
     FASTCALL_1IN1OUT FreeTexture;
@@ -31,22 +32,28 @@ namespace
 
     bool bRestoringCtxrs = false;
 
-    void GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true)
+    bool GetAndCopyCtxr(int tricode, int dst, int src, bool shouldSave = true)
     {
         if (!GetCtxrHandle || !CopyCtxr || !AllocTexture)
-            return;
+            return false;
 
         uintptr_t* srcCtxr = GetCtxrHandle(tricode, src);
         uintptr_t* dstCtxr = GetCtxrHandle(tricode, dst);
 
-        if (!srcCtxr || !dstCtxr)
-            return;
+        if (srcCtxr == nullptr || dstCtxr == nullptr)
+        {
+            //spdlog::info("GetAndCopyCtxr: Failed to get ctxr handle for tricode {:x}, src {}, dst {}", tricode, src, dst);
+            return false;
+        }
 
         uintptr_t srcHandle = srcCtxr[4];
         uintptr_t dstHandle = dstCtxr[4];
 
         if (!srcHandle || !dstHandle)
-            return;
+        {
+            //spdlog::info("GetAndCopyCtxr: Invalid ctxr handle for tricode {:x}, src {}, dst {}", tricode, src, dst);
+            return false;
+        }
 
         // Need to save handles to restore on stage reset
         for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
@@ -65,13 +72,14 @@ namespace
             uintptr_t saveHandle = AllocTexture(16, 16, 0);
 
             if (!saveHandle)
-                return;
+                return false;
 
             CopyCtxr(dstHandle, saveHandle);
             SwapMap.push_back({ saveHandle, dstHandle });
         }
 
         CopyCtxr(srcHandle, dstHandle);
+        return true;
     }
 
     void RestoreCtxrs()
@@ -101,7 +109,43 @@ namespace
             FreeTexture(saveHandle);
         }
     }
+
+
+    void RestoreCtxr(int tricode, int dst)
+    {
+        if (!GetCtxrHandle || !CopyCtxr || !FreeTexture)
+            return;
+
+        uintptr_t* dstCtxr = GetCtxrHandle(tricode, dst);
+
+        if (dstCtxr == nullptr)
+            return;
+
+        uintptr_t dstHandle = dstCtxr[4];
+
+        if (!dstHandle)
+            return;
+
+        for (auto it = SwapMap.begin(); it != SwapMap.end(); it++)
+        {
+            if (it->second != dstHandle)
+                continue;
+
+            auto swap = *it;
+            SwapMap.erase(it);
+
+            if (swap.first && swap.second)
+            {
+                CopyCtxr(swap.first, swap.second);
+                FreeTexture(swap.first);
+            }
+
+            break;
+        }
+    }
+
 }
+
 
 
 void TextureLiveSwaps::ApplyFixes()
@@ -200,7 +244,12 @@ void TextureLiveSwaps::ApplyFixes()
     {
         spdlog::info("MGS 2 - Texture Swaps: Title screen fix enabled.");
         MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 8B 4B ?? 45 33 C9 45 33 C0 41 8D 51 ?? E8 ?? ?? ?? ?? 89 43 ?? 48 8D 3D", "NewTitleScrMan", {
-            ctx.rax ? GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO) : RestoreCtxrs();
+            if(ctx.rax)
+            {
+                GetAndCopyCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO, STRCODE_TITLE_NUMBAH_TWO);
+                return;
+            }
+            RestoreCtxr(STRCODE_NODE_TITLE_TEX_TRI, STRCODE_TITLE_LOGO);
             });
 
     }
@@ -215,5 +264,75 @@ void TextureLiveSwaps::ApplyFixes()
             spdlog::warn("MGS 2 - Texture Swaps: MGS2 Community Bugfix Compilation files missing. Skipping title screen fix.");
         }
     }
+
+
+    if (EU_JP("stage" / "r_sna_b" / "bp_assets_holster_fix.txt") &&
+        EU_JP("stage" / "r_tnk0" / "bp_assets_holster_fix.txt") &&
+        EU_JP("stage" / "r_plt_s" / "bp_assets_holster_fix.txt") &&
+        EU_JP("stage" / "r_vr_s" / "bp_assets_holster_fix.txt") &&
+        EU_JP("stage" / "r_vr_sp" / "bp_assets_holster_fix.txt"))
+    {
+        using namespace MGS2_Characters;
+
+
+        constexpr uint32_t NULL_MSK_STRCODE = GameVars::GV_StrCode("null_msk.bmp");
+        constexpr uint32_t SNA_DEF_TRI_STRCODE = 0x55aab1;
+        constexpr uint32_t SNA_M9_GLIP = 0x495322;
+
+        constexpr int M92_EQUIPPED = 0;
+        constexpr int USP_EQUIPPED = 1;
+        constexpr int USP_SP_EQUIPPED = 9;
+
+        static bool bSnakeHolsterManaged = false;
+        MAKE_HOOK_MID(baseModule, "48 21 05 ?? ?? ?? ?? 48 8B 86", "mgs2x\\source\\user\\skoba\\weapon\\usp.c -> Act() -> @ l747", {
+                static bool failed = false;
+                if (failed)
+                {
+                    return;
+                }
+                if (!IsCurrentlyCharacter(PlayerCharacter::NormalSnake))
+                {
+                    return;
+                }
+                if (bSnakeHolsterManaged)
+                {
+                    if (g_GameVars.InCutscene())
+                    {
+                        bSnakeHolsterManaged = false;
+                        RestoreCtxr(SNA_DEF_TRI_STRCODE, SNA_M9_GLIP);
+                    }
+                    return;
+                }
+                if (ctx.r15 == M92_EQUIPPED || ctx.r15 == USP_EQUIPPED || ctx.r15 == USP_SP_EQUIPPED) // && (MGS2_GameFuncs::GM_WeaponNum(MGS2_WEAPON_INDEX_USP) < 1)))
+                {
+                    if (g_GameVars.InCutscene())
+                    {
+                        return;
+                    }
+                    if (!GetAndCopyCtxr(SNA_DEF_TRI_STRCODE, SNA_M9_GLIP, NULL_MSK_STRCODE))
+                    {
+                        //spdlog::error("MGS2 - Texture Swaps: Failed to swap Snake holster texture.");
+                        failed = true;
+                        return;
+                    }
+                    bSnakeHolsterManaged = true;
+                }
+                      });
+
+        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B 0D", "mgs2x\\source\\user\\skoba\\weapon\\usp.c -> Die()", {
+                if (!bSnakeHolsterManaged)
+                {
+                    return;
+                }
+                if (!IsCurrentlyCharacter(PlayerCharacter::NormalSnake))
+                {
+                    //Snake holster texture swap active but player is not Snake???????????
+                    return;
+                }
+                bSnakeHolsterManaged = false;
+                RestoreCtxr(SNA_DEF_TRI_STRCODE, SNA_M9_GLIP);
+                      });
+    }
+
 
 }
