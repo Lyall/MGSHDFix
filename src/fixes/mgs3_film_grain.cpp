@@ -22,6 +22,8 @@ namespace
     constexpr UINT kBlueNoiseSize = 256;
     constexpr UINT kBlueNoiseFrames = 32;
     constexpr int kAllScenesFallbackAlpha = 8;
+    constexpr uintptr_t kNoiseAlphaOffset = 0x80;
+    constexpr uintptr_t kNoiseActiveOffset = 0x98;
 
     const char* kFilmGrainShader = R"(
     cbuffer FilmGrainCB : register(b0)
@@ -56,8 +58,8 @@ namespace
 
     std::atomic<int> gPendingAlpha = 0;
     std::atomic<int> gLatchedAlpha = 0;
-    std::atomic<bool> gSawNativeSignal = false;
     std::atomic<bool> gNativeSignalActive = false;
+    std::atomic<uintptr_t> gNativeWork = 0;
 
     ComPtr<ID3DBlob> vsBlob;
     ComPtr<ID3DBlob> psBlob;
@@ -102,31 +104,43 @@ namespace
             return true;
         }
 
-        return !gSawNativeSignal.load(std::memory_order_relaxed) ||
-            gNativeSignalActive.load(std::memory_order_relaxed);
-    }
-
-    void DisableFilmGrainSignal()
-    {
-        if (MGS3FilmGrain::mode == MGS3FilmGrain::Mode::AllScenes)
-        {
-            return;
-        }
-
-        gNativeSignalActive.store(false, std::memory_order_relaxed);
-        gPendingAlpha.store(0, std::memory_order_relaxed);
+        return gNativeSignalActive.load(std::memory_order_relaxed);
     }
 
     void ClearFilmGrainAlpha()
     {
-        if (MGS3FilmGrain::mode == MGS3FilmGrain::Mode::AllScenes)
-        {
-            return;
-        }
-
         gPendingAlpha.store(0, std::memory_order_relaxed);
         gLatchedAlpha.store(0, std::memory_order_relaxed);
+    }
+
+    void ResetFilmGrainState()
+    {
+        ClearFilmGrainAlpha();
         gNativeSignalActive.store(false, std::memory_order_relaxed);
+        gNativeWork.store(0, std::memory_order_relaxed);
+    }
+
+    bool TryReadNativeInt(uintptr_t work, uintptr_t offset, int& value)
+    {
+        if (!work)
+        {
+            return false;
+        }
+
+        const auto* address = reinterpret_cast<const int*>(work + offset);
+        if (!Memory::IsReadable(address, sizeof(*address)))
+        {
+            return false;
+        }
+
+        value = *address;
+        return true;
+    }
+
+    bool NativeWorkIsActive(uintptr_t work)
+    {
+        int active = 0;
+        return TryReadNativeInt(work, kNoiseActiveOffset, active) && active != 0;
     }
 
     void QueueFilmGrainAlpha(int alpha)
@@ -146,55 +160,76 @@ namespace
         }
     }
 
+    void QueueFilmGrainAlphaFromNative(uintptr_t work, int alpha)
+    {
+        if (work)
+        {
+            gNativeWork.store(work, std::memory_order_relaxed);
+        }
+
+        if (MGS3FilmGrain::mode != MGS3FilmGrain::Mode::AllScenes && !NativeWorkIsActive(work))
+        {
+            ClearFilmGrainAlpha();
+            gNativeSignalActive.store(false, std::memory_order_relaxed);
+            return;
+        }
+
+        gNativeSignalActive.store(true, std::memory_order_relaxed);
+        QueueFilmGrainAlpha(alpha);
+    }
+
+    void TrackFilmGrainAlpha(SafetyHookContext& ctx)
+    {
+        QueueFilmGrainAlphaFromNative(static_cast<uintptr_t>(ctx.rcx), static_cast<int>(ctx.rdx & 0xffffffff));
+    }
+
     void TrackFilmGrainSignal(SafetyHookContext& ctx)
     {
+        const uintptr_t work = static_cast<uintptr_t>(ctx.rcx);
         const int signal = static_cast<int>(ctx.rdx);
-        gSawNativeSignal.store(true, std::memory_order_relaxed);
+
+        if (work)
+        {
+            gNativeWork.store(work, std::memory_order_relaxed);
+        }
 
         if (signal == 1)
         {
-            DisableFilmGrainSignal();
+            ResetFilmGrainState();
             return;
         }
 
         if (signal == 2)
         {
             gNativeSignalActive.store(true, std::memory_order_relaxed);
-            const int alpha = gLatchedAlpha.load(std::memory_order_relaxed);
-            if (alpha > 0)
+            int alpha = 0;
+            if (TryReadNativeInt(work, kNoiseAlphaOffset, alpha))
             {
-                gPendingAlpha.store(alpha, std::memory_order_relaxed);
+                QueueFilmGrainAlpha(alpha);
             }
             return;
         }
 
         if (signal == 3)
         {
-            const int alpha = static_cast<int>(ctx.r8 & 0xffffffff);
-            if (alpha > 0)
-            {
-                gNativeSignalActive.store(true, std::memory_order_relaxed);
-                QueueFilmGrainAlpha(alpha);
-            }
-            else
-            {
-                ClearFilmGrainAlpha();
-            }
+            QueueFilmGrainAlphaFromNative(work, static_cast<int>(ctx.r8 & 0xffffffff));
             return;
         }
 
         if (signal == 5 && Memory::IsReadable(reinterpret_cast<const void*>(ctx.r8), sizeof(int) * 2))
         {
             const int targetAlpha = *reinterpret_cast<const int*>(ctx.r8);
-            if (targetAlpha > 0)
-            {
-                gNativeSignalActive.store(true, std::memory_order_relaxed);
-                QueueFilmGrainAlpha(targetAlpha);
-            }
-            else
-            {
-                ClearFilmGrainAlpha();
-            }
+            QueueFilmGrainAlphaFromNative(work, targetAlpha);
+        }
+    }
+
+    void TrackFilmGrainCleanup(SafetyHookContext& ctx)
+    {
+        const uintptr_t work = static_cast<uintptr_t>(ctx.rcx);
+        const uintptr_t trackedWork = gNativeWork.load(std::memory_order_relaxed);
+        if (!trackedWork || trackedWork == work)
+        {
+            ResetFilmGrainState();
         }
     }
 
@@ -504,14 +539,21 @@ void MGS3FilmGrain::Initialize()
         "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC 50 48 8B 41 58",
         "MGS 3: Film Grain: noise1 alpha",
         {
-            QueueFilmGrainAlpha(static_cast<int>(ctx.rdx & 0xffffffff));
+            TrackFilmGrainAlpha(ctx);
         });
 
     MAKE_HOOK_MID(baseModule,
-        "48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 EA 01",
+        "48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 EA 01 0F 84 ?? ?? ?? ?? 48 83 FA 01 74 03 33 C0 C3",
         "MGS 3: Film Grain: noise1 signal",
         {
             TrackFilmGrainSignal(ctx);
+        });
+
+    MAKE_HOOK_MID(baseModule,
+        "40 53 48 83 EC 20 48 8B D9 48 8B 49 68 48 85 C9 74 15 48 8B 83 A8 00 00 00",
+        "MGS 3: Film Grain: noise1 cleanup",
+        {
+            TrackFilmGrainCleanup(ctx);
         });
 
 }
