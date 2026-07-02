@@ -115,24 +115,9 @@ namespace
         }
 
         const uint16_t titleMenuStatus = *reinterpret_cast<uint16_t*>(titleMenuStatusAddress);
-        uint8_t displayMask = kDispFirstTimeOnly;
-
-        if (titleMenuStatus & kTitleMenuTankerCleared)
-        {
-            displayMask |= 0x02;
-        }
-
-        if (titleMenuStatus & kTitleMenuPlantCleared)
-        {
-            displayMask |= 0x04;
-        }
-
-        if (displayMask == 0x07)
-        {
-            displayMask = kDispAllStories;
-        }
-
-        return displayMask;
+        return (titleMenuStatus & (kTitleMenuTankerCleared | kTitleMenuPlantCleared)) ?
+            kDispAllStories :
+            kDispFirstTimeOnly;
     }
 
     bool IsFirstTimeDisplay(uint8_t displayMask)
