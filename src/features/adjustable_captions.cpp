@@ -71,11 +71,16 @@ void AdjustableCaptions::Apply()
                     {
                         ctx.rcx = static_cast<uint32_t>(captionY);
                     }
+                    spdlog::info("MGS2: game\\jimaku.c -> set_pos() - Adjusted caption Y position to {}", ctx.rcx);
+                    ctx.rcx += subtitleYOffset;
                 }
                           });
         }
         else //eGameType & MGS3
         {
+            MAKE_HOOK_MID(baseModule, "99 81 E2 ?? ?? ?? ?? ?? ?? ?? ?? B8 ?? ?? ?? ?? F7 E9 41 C1 F8 ?? ?? ?? ?? C1 FB ?? 8B F3", "MGS3: game\\jimaku.c -> set_pos()", {
+                ctx.rcx += subtitleYOffset;
+                          });
         }
     }
 
