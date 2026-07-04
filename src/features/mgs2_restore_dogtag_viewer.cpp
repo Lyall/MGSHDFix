@@ -127,8 +127,8 @@ namespace
                     }
                 }
             }
-            return handle;
         }
+        return handle;
     }
 }
 

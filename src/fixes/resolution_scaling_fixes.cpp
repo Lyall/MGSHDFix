@@ -57,8 +57,8 @@ namespace
         g_laserPoints[0] = MGS2_Characters::IsRaiden() ? raiden_laserpoints[0] : m92_snake_override;
     }
 
-    constexpr float RAYEYE_TAILSSHIFT_Y_OFFSET = 900.0f;
-    constexpr float RAYEYE_TAILSSHIFT_X_OFFSET = 3800.0f;
+    constexpr float RAYEYE_TAILSSHIFT_Y_OFFSET = 1000.0f;
+    constexpr float RAYEYE_TAILSSHIFT_X_OFFSET = 3400.0f;
 
     constexpr FVECTOR rayEyeTailsShift_Original[8] = {
         {  511.0F, 1039.0F, 2485.0F, 1.0F },
@@ -83,6 +83,34 @@ namespace
     };
 
     FVECTOR* g_rayEyeTailsShift = nullptr;
+
+    inline uint8_t GS_Scale(uint8_t v, float scale)
+    {
+        int result = static_cast<int>(v * scale);
+        return static_cast<uint8_t>(result < 0 ? 0 : (result > 255 ? 255 : result));
+    }
+
+    inline void GS_ScaleRGB(uint8_t* bPos, float scale)
+    {
+        uint8_t* r = bPos - 4;
+        uint8_t* g = bPos - 2;
+        *r = GS_Scale(*r, scale);
+        *g = GS_Scale(*g, scale);
+        *bPos = GS_Scale(*bPos, scale);
+    }
+
+    inline void GS_ScaleRGBA(uint8_t* bPos, float scale)
+    {
+        GS_ScaleRGB(bPos, scale);
+        uint8_t* a = bPos + 2;
+        *a = GS_Scale(*a, scale);
+    }
+
+    inline void GS_ScaleA(uint8_t* bPos, float scale)
+    {
+        uint8_t* a = bPos + 2;
+        *a = GS_Scale(*a, scale);
+    }
 
 }
 
@@ -272,6 +300,16 @@ void ResolutionScalingFixes::ApplyFixes()
                 reghelpers::SetZF(ctx, true);
             }
         });
+
+    
+    MAKE_HOOK_MID(baseModule, "49 81 C0 00 01 00 00 48 83 E9 01 0F 85 ?? ?? ?? ?? 44 8D 49", "InitEyesData: color fix", {
+        for (int i = 0; i < 8; i++)
+        {
+            GS_ScaleRGB(reinterpret_cast<uint8_t*>(ctx.r8 + i * 0x20), 0.5f);
+            GS_ScaleA(reinterpret_cast<uint8_t*>(ctx.r8 + i * 0x20), 0.9f);
+        }
+                  });
+
 
 }
 
