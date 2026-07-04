@@ -254,9 +254,6 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, ConfigKeys::FixMGS2DepthOfField_Help, ConfigKeys::FixMGS2DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-        { ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Tooltip,
-          std::make_pair(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 3.0, 0.0, 20.0 },
-
         { ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, ConfigKeys::FixMGS3DepthOfField_Help, ConfigKeys::FixMGS3DepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -264,8 +261,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::make_pair(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 10.0, 0.0, 20.0 },
 
         { ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, ConfigKeys::MGS3_Restore_Film_Grain_Help, ConfigKeys::MGS3_Restore_Film_Grain_Tooltip,
-          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS3_Restore_Film_Grain_Option_On,
-          { ConfigKeys::MGS3_Restore_Film_Grain_Option_Off, ConfigKeys::MGS3_Restore_Film_Grain_Option_On } },
+          std::nullopt, false, Field::Bool, true },
 
         { ConfigKeys::MGS2_RestoreActionLevelSelection_Section, ConfigKeys::MGS2_RestoreActionLevelSelection_Setting, ConfigKeys::MGS2_RestoreActionLevelSelection_Help, ConfigKeys::MGS2_RestoreActionLevelSelection_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -296,12 +292,12 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, "", "", "",
         std::nullopt, false, Field::Spacer },
 
+        {ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Help, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Tooltip,
+        std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Hotkey, 0, 0, 0, "Num7"},
 
         {ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, ConfigKeys::MGS2_Thermal_Mode_Help, ConfigKeys::MGS2_Thermal_Mode_Tooltip,
         std::nullopt, false, Field::Bool, false},
 
-        {ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Help, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Tooltip,
-        std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Hotkey, 0, 0, 0, "Num7"},
 
 
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, ConfigKeys::MGS2_Thermal_Default_Mode_Setting, ConfigKeys::MGS2_Thermal_Default_Mode_Help, ConfigKeys::MGS2_Thermal_Default_Mode_Tooltip,

@@ -2,7 +2,9 @@
 
 #include "mgs2_restore_dogtag_viewer.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "game_funcs.hpp"
+#include "game_stages.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
@@ -44,82 +46,85 @@ namespace
     int hk_L2D_SetupLayout2(void* entry_ptr, int chanl, int base_pri, int add_flag, int pause_level, float safeZoneOffsetY)
     {
         int handle = hook_L2D_SetupLayout2.call<int>(entry_ptr, chanl, base_pri, add_flag, pause_level, safeZoneOffsetY);
-        if (handle >= 0)
+        if (g_GameVars.IsStage(MGS2Stages::W11A))
         {
-            auto fix_sprite = [&](int strcode) {
-                auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
-                if (!spr) return;
-                int      vnum = spr->vertex_num;
-                int16_t  snum = spr->status_num;
-                auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
-                for (int si = 0; si < snum; si++)
-                {
-                    auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
-                    if (!vptr) continue;
-                    for (int vi = 0; vi < vnum; vi++)
-                        if (vptr[vi].x >= 6000.0f) vptr[vi].x -= 6000.0f;
-                }
-                };
-
-            fix_sprite(241165);   // STR_PARTS_NAME_BLD  6058->58
-            fix_sprite(7115211);  // STR_PARTS_BLD        6250->250
-            fix_sprite(258369);   // STR_PARTS_NAME_SEX   6058->58
-            fix_sprite(7132415);  // STR_PARTS_SEX        6134->134
-
-            auto fix_y = [&](int strcode, float old_y, float new_y) {
-                auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
-                if (!spr) return;
-                int     vnum = spr->vertex_num;
-                int16_t snum = spr->status_num;
-                auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
-                for (int si = 0; si < snum; si++)
-                {
-                    auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
-                    if (!vptr) continue;
-                    for (int vi = 0; vi < vnum; vi++)
-                        if (vptr[vi].y == old_y) vptr[vi].y = new_y;
-                }
-                };
-
-            fix_y(11990742, 94.0f, 116.0f);  // STR_PARTS_NAME_BIRTH  94->116 (down to REG's current pos)
-            fix_y(257328, 116.0f, 160.0f);   // STR_PARTS_NAME_REG   116->160 (22px below BLD's y=138)
-
-            auto fix_x = [&](int strcode, float delta_x) {
-                auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
-                if (!spr) return;
-                int     vnum = spr->vertex_num;
-                int16_t snum = spr->status_num;
-                auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
-                for (int si = 0; si < snum; si++)
-                {
-                    auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
-                    if (!vptr) continue;
-                    for (int vi = 0; vi < vnum; vi++)
-                        vptr[vi].x += delta_x;
-                }
-                };
-
-            fix_x(13646838, NAME_DATA_X_OFFSET);
-
-            // cut "CODENAME" in half
-            if (auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, 8133413)))
+            if (handle >= 0)
             {
-                int16_t snum = spr->status_num;
-                auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
-                for (int si = 0; si < snum; si++)
-                {
-                    auto* s = stat0 + si * 0x58;
-                    auto& pos_u = *reinterpret_cast<float*>(s + 0x0C); // l2dStatus.pos_u
-                    auto& size_u = *reinterpret_cast<float*>(s + 0x14); // l2dStatus.size_u
-                    auto& size_w = *reinterpret_cast<float*>(s + 0x28); // l2dStatus.size_w (display width)
-
-                    if (pos_u >= 0.0f && size_u > 0.0f)
+                auto fix_sprite = [&](int strcode) {
+                    auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
+                    if (!spr) return;
+                    int      vnum = spr->vertex_num;
+                    int16_t  snum = spr->status_num;
+                    auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
+                    for (int si = 0; si < snum; si++)
                     {
-                        pos_u += size_u * NAME_LABEL_UV_TRIM;
-                        size_u *= (1.0f - NAME_LABEL_UV_TRIM);
+                        auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
+                        if (!vptr) continue;
+                        for (int vi = 0; vi < vnum; vi++)
+                            if (vptr[vi].x >= 6000.0f) vptr[vi].x -= 6000.0f;
                     }
-                    if (size_w > 0.0f)
-                        size_w *= (1.0f - NAME_LABEL_UV_TRIM);
+                };
+
+                fix_sprite(241165);   // STR_PARTS_NAME_BLD  6058->58
+                fix_sprite(7115211);  // STR_PARTS_BLD        6250->250
+                fix_sprite(258369);   // STR_PARTS_NAME_SEX   6058->58
+                fix_sprite(7132415);  // STR_PARTS_SEX        6134->134
+
+                auto fix_y = [&](int strcode, float old_y, float new_y) {
+                    auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
+                    if (!spr) return;
+                    int     vnum = spr->vertex_num;
+                    int16_t snum = spr->status_num;
+                    auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
+                    for (int si = 0; si < snum; si++)
+                    {
+                        auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
+                        if (!vptr) continue;
+                        for (int vi = 0; vi < vnum; vi++)
+                            if (vptr[vi].y == old_y) vptr[vi].y = new_y;
+                    }
+                };
+
+                fix_y(11990742, 94.0f, 116.0f);  // STR_PARTS_NAME_BIRTH  94->116 (down to REG's current pos)
+                fix_y(257328, 116.0f, 160.0f);   // STR_PARTS_NAME_REG   116->160 (22px below BLD's y=138)
+
+                auto fix_x = [&](int strcode, float delta_x) {
+                    auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, strcode));
+                    if (!spr) return;
+                    int     vnum = spr->vertex_num;
+                    int16_t snum = spr->status_num;
+                    auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
+                    for (int si = 0; si < snum; si++)
+                    {
+                        auto* vptr = *reinterpret_cast<l2dVertex**>(stat0 + si * 0x58 + 0x20);
+                        if (!vptr) continue;
+                        for (int vi = 0; vi < vnum; vi++)
+                            vptr[vi].x += delta_x;
+                    }
+                };
+
+                fix_x(13646838, NAME_DATA_X_OFFSET);
+
+                // cut "CODENAME" in half
+                if (auto* spr = static_cast<l2dSprite*>(L2D_GetParts(handle, 8133413)))
+                {
+                    int16_t snum = spr->status_num;
+                    auto* stat0 = reinterpret_cast<uint8_t*>(spr->stat);
+                    for (int si = 0; si < snum; si++)
+                    {
+                        auto* s = stat0 + si * 0x58;
+                        auto& pos_u = *reinterpret_cast<float*>(s + 0x0C); // l2dStatus.pos_u
+                        auto& size_u = *reinterpret_cast<float*>(s + 0x14); // l2dStatus.size_u
+                        auto& size_w = *reinterpret_cast<float*>(s + 0x28); // l2dStatus.size_w (display width)
+
+                        if (pos_u >= 0.0f && size_u > 0.0f)
+                        {
+                            pos_u += size_u * NAME_LABEL_UV_TRIM;
+                            size_u *= (1.0f - NAME_LABEL_UV_TRIM);
+                        }
+                        if (size_w > 0.0f)
+                            size_w *= (1.0f - NAME_LABEL_UV_TRIM);
+                    }
                 }
             }
         }

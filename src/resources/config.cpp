@@ -680,40 +680,33 @@ void Config::Read()
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
-            ConfigHelper::getValue(ini, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
-
             LOG_CONFIG(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
-            LOG_CONFIG(ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS2DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
         }
         else if (eGameType & MGS3)
         {
-            g_DepthOfFieldFixes.fBlurUvMultiplier = 10.0f;
-            std::string sFilmGrainMode = ConfigKeys::MGS3_Restore_Film_Grain_Option_On;
+            std::string sFilmGrainMode = "On";
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
             ConfigHelper::getValue(ini, ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, sFilmGrainMode);
 
-            if (sFilmGrainMode == ConfigKeys::MGS3_Restore_Film_Grain_Option_Off)
+            bool bFilmGrainEnabled = true;
+            if (!ConfigHelper::TryParse(sFilmGrainMode, bFilmGrainEnabled))
             {
-                MGS3FilmGrain::mode = MGS3FilmGrain::Mode::Off;
+                if (sFilmGrainMode == "Restored" || sFilmGrainMode == "Force Always On") // retired choice values, treat as enabled
+                {
+                    bFilmGrainEnabled = true;
+                }
+                else
+                {
+                    ConfigHelper::FatalConfigError(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, "Invalid option '" + sFilmGrainMode + "'");
+                }
             }
-            else if (sFilmGrainMode == ConfigKeys::MGS3_Restore_Film_Grain_Option_On)
-            {
-                MGS3FilmGrain::mode = MGS3FilmGrain::Mode::On;
-            }
-            else if (sFilmGrainMode == "On (All Scenes)") // retired option, treat as On
-            {
-                MGS3FilmGrain::mode = MGS3FilmGrain::Mode::On;
-            }
-            else
-            {
-                ConfigHelper::FatalConfigError(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, "Invalid option '" + sFilmGrainMode + "'");
-            }
+            MGS3FilmGrain::mode = bFilmGrainEnabled ? MGS3FilmGrain::Mode::On : MGS3FilmGrain::Mode::Off;
 
             LOG_CONFIG(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             LOG_CONFIG(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
-            LOG_CONFIG(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, sFilmGrainMode);
+            LOG_CONFIG(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, bFilmGrainEnabled);
         }
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)

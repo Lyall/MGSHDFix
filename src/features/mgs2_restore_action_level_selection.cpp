@@ -3,13 +3,8 @@
 #include "mgs2_restore_action_level_selection.hpp"
 
 #include "common.hpp"
-#include "config.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
-
-#include <cmath>
-#include <fstream>
-#include <string>
 
 namespace
 {
@@ -50,9 +45,7 @@ namespace
     constexpr int32_t kStreamSectorSize = 2048;
     constexpr char kQuestionIntroVoiceName[] = "vc126101.sdt";
     constexpr char kQuestionIntroVoiceStreamLayer[] = "vox2";
-    constexpr int32_t kActionLevelCaptionName = 2328243;
-    constexpr int32_t kActionLevelCaptionY = 337;
-    constexpr int32_t kJapaneseActionLevelCaptionYOffset = 4;
+
     constexpr int32_t kJapaneseQuestionTextYOffset = 4;
     constexpr int32_t kJapaneseQuestionTextWidthPad = 8;
     constexpr int32_t kJapaneseQuestionTextScreenHeightPad = 2;
@@ -72,12 +65,7 @@ namespace
     int32_t g_QuestionIntroVoicePos = kQuestionIntroVoiceDefaultFlags;
     bool g_QuestionIntroVoiceResolved = false;
     bool g_QuestionIntroVoiceAvailable = false;
-    int32_t* g_StreamCaptionCurrentName = nullptr;
-
-    bool IsJapanese()
-    {
-        return sSkipLauncherLanguage == "jp" || sSkipLauncherRegion == "jp";
-    }
+    int32_t* GM_StreamCaptionCurrentName = nullptr;
 
     int32_t GclGetLong(uintptr_t address)
     {
@@ -101,23 +89,7 @@ namespace
 
     uint8_t GetStoryDisplayMask()
     {
-        if (!MGS2_LinkVarBuf::linkvarbuf ||
-            !Memory::IsReadable(MGS2_LinkVarBuf::linkvarbuf, sizeof(*MGS2_LinkVarBuf::linkvarbuf)) ||
-            !*MGS2_LinkVarBuf::linkvarbuf)
-        {
-            return kDispAllStories;
-        }
-
-        const uintptr_t titleMenuStatusAddress = *MGS2_LinkVarBuf::linkvarbuf + 5514;
-        if (!Memory::IsReadable(reinterpret_cast<const void*>(titleMenuStatusAddress), sizeof(uint16_t)))
-        {
-            return kDispAllStories;
-        }
-
-        const uint16_t titleMenuStatus = *reinterpret_cast<uint16_t*>(titleMenuStatusAddress);
-        return (titleMenuStatus & (kTitleMenuTankerCleared | kTitleMenuPlantCleared)) ?
-            kDispAllStories :
-            kDispFirstTimeOnly;
+        return (MGS2_LinkVarBuf::GM_TitleMenuStatus & (kTitleMenuTankerCleared | kTitleMenuPlantCleared)) ? kDispAllStories : kDispFirstTimeOnly;
     }
 
     bool IsFirstTimeDisplay(uint8_t displayMask)
@@ -406,7 +378,7 @@ namespace
     {
         if (!g_QuestionIntroVoiceResolved)
         {
-            const bool isJapanese = IsJapanese();
+            const bool isJapanese = Util::IsJapanese();
             const auto streamList = sExePath / (isJapanese ? "jp" : "eu") / kQuestionIntroVoiceStreamLayer / "_bp" / "bp_streams.txt";
             std::ifstream file(streamList);
 
@@ -449,32 +421,20 @@ namespace
         }
     }
 
-    bool IsActionLevelCaptionActive()
-    {
-        return g_StreamCaptionCurrentName &&
-            Memory::IsReadable(reinterpret_cast<const void*>(g_StreamCaptionCurrentName), sizeof(*g_StreamCaptionCurrentName)) &&
-            *g_StreamCaptionCurrentName == kActionLevelCaptionName;
-    }
+
 
     uint32_t ShiftQuestionTextY(uint64_t y)
     {
         return static_cast<uint32_t>(static_cast<int32_t>(y) - kJapaneseQuestionTextYOffset);
     }
 
-    void AddStackInt32(uint64_t rsp, ptrdiff_t offset, int32_t amount)
-    {
-        auto* value = reinterpret_cast<int32_t*>(rsp + offset);
-        if (Memory::IsWritable(value, sizeof(*value)))
-        {
-            *value += amount;
-        }
-    }
+}
 
-    void HookMidAtOffset(uint8_t* address, ptrdiff_t offset, SafetyHookMid& hook, const char* name, void (*callback)(SafetyHookContext&))
-    {
-        hook = safetyhook::create_mid(address + offset, callback);
-        LOG_HOOK(hook, name)
-    }
+bool MGS2_RestoreActionLevelSelection::IsActionLevelCaptionActive()
+{
+    return GM_StreamCaptionCurrentName &&
+        Memory::IsReadable(reinterpret_cast<const void*>(GM_StreamCaptionCurrentName), sizeof(*GM_StreamCaptionCurrentName)) &&
+        *GM_StreamCaptionCurrentName == kActionLevelCaptionName;
 }
 
 void MGS2_RestoreActionLevelSelection::Apply()
@@ -491,30 +451,30 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     if (uint8_t* initStoryChoices = Memory::PatternScan(baseModule,
-        "C6 85 9C 00 00 00 0F E8 ?? ?? ?? ?? 48 8B F0 48 8D 9D A0 01 00 00 BF 10 00 00 00",
-        "MGS2: Restore Action Level Selection - story choices"))
+        "C6 85 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F0",
+        "MGS2: Restore Action Level Selection - story choices | L2D_GetObject()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(initStoryChoices, 0x07, hook, "MGS2: Restore Action Level Selection - story choices", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(initStoryChoices, 0x07, hook, "MGS2: Restore Action Level Selection - story choices", [](SafetyHookContext& ctx)
         {
             UpdateStoryChoices(ctx.rbp);
         });
     }
 
     if (uint8_t* getLocalResource = Memory::PatternScan(baseModule,
-        "44 8B 0D ?? ?? ?? ?? 33 C0 45 85 C9 7E 1A 4C 8D 15 ?? ?? ?? ?? 4D 8B C2 41 39 08 74 0E",
-        "MGS2: Restore Action Level Selection - local resources"))
+        "44 8B 0D ?? ?? ?? ?? 33 C0 45 85 C9 7E ?? 4C 8D 15",
+        "MGS2: Restore Action Level Selection - local resources | GM_GetResource()"))
     {
         g_GlobalResInfo = reinterpret_cast<GclStringResource**>(
             Memory::GetRipRelativeAddress(getLocalResource + 0x2B, 0x03, 0x07));
     }
 
     if (uint8_t* showFirstTimeMenu = Memory::PatternScan(baseModule,
-        "0F B6 91 9C 00 00 00 83 EA 01 74 50 83 EA 02 74 59 83 FA 02 74 0F 48 8B 81 B8 00 00 00 81 48 30 00 80 00 00 C3",
-        "MGS2: Restore Action Level Selection - show first-time menu"))
+        "0F B6 91 ?? ?? ?? ?? 83 EA",
+        "MGS2: Restore Action Level Selection - show first-time menu | kano\\titlescr\\newgame.c -> ShowGameMenu()"))
     {
         static SafetyHookMid startHook {};
-        HookMidAtOffset(showFirstTimeMenu, 0x00, startHook, "MGS2: Restore Action Level Selection - show first-time menu", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(showFirstTimeMenu, 0x00, startHook, "MGS2: Restore Action Level Selection - show first-time menu", [](SafetyHookContext& ctx)
         {
             ShowFirstTimeEntry(ctx.rcx);
         });
@@ -523,27 +483,27 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     if (uint8_t* questionTextBounds = Memory::PatternScan(baseModule,
-        "B8 38 00 00 00 41 0F 44 C4 83 C1 38 41 0F AF C7 0F 5B C0 03 C1 42 8B 4C 34 50 03 C7",
-        "MGS2: Restore Action Level Selection - question text bounds"))
+        "B8 ?? ?? ?? ?? 41 0F 44 C4 83 C1",
+        "MGS2: Restore Action Level Selection - question text bounds | skoba\\etc\\encute.c -> StringDisp()"))
     {
         Memory::PatchBytes(reinterpret_cast<uintptr_t>(questionTextBounds) + 0x0B, "\x40", 1);
     }
 
     if (uint8_t* questionTextPosition = Memory::PatternScan(baseModule,
-        "0F B6 06 B9 4C 00 00 00 44 0F B6 5E 01 BA 4C 00 00 00",
-        "MGS2: Restore Action Level Selection - question text position"))
+        "?? ?? ?? B9 ?? ?? ?? ?? 44 0F B6 5E",
+        "MGS2: Restore Action Level Selection - question text position | skoba\\etc\\encute.c -> StringDisp()"))
     {
         Memory::PatchBytes(reinterpret_cast<uintptr_t>(questionTextPosition) + 0x04, "\x44", 1);
     }
 
     if (uint8_t* japaneseQuestionTextTextureBounds = Memory::PatternScan(baseModule,
-        "41 83 C0 0C E8 ?? ?? ?? ?? FF C7 4D 8D 76 10 48 8D 76 04",
-        "MGS2: Restore Action Level Selection - Japanese question texture bounds"))
+        "41 83 C0 ?? E8 ?? ?? ?? ?? FF C7",
+        "MGS2: Restore Action Level Selection - Japanese question texture bounds | MENU_CreateTextTexture()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(japaneseQuestionTextTextureBounds, 0x04, hook, "MGS2: Restore Action Level Selection - Japanese question texture bounds", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(japaneseQuestionTextTextureBounds, 0x04, hook, "MGS2: Restore Action Level Selection - Japanese question texture bounds", [](SafetyHookContext& ctx)
         {
-            if (IsJapanese())
+            if (Util::IsJapanese())
             {
                 ctx.r9 = static_cast<uint32_t>(static_cast<int32_t>(ctx.r9) + kJapaneseQuestionTextWidthPad);
             }
@@ -551,48 +511,33 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     if (uint8_t* japaneseQuestionTextPosition = Memory::PatternScan(baseModule,
-        "F3 44 0F 2C D0 44 89 54 24 20 E8 ?? ?? ?? ?? 48 8D 76 10 44 8B FB",
-        "MGS2: Restore Action Level Selection - Japanese question text position"))
+        "F3 44 0F 2C D0 44 89 54 24 ?? E8",
+        "MGS2: Restore Action Level Selection - Japanese question text position | skoba\\etc\\encute.c -> StringDisp()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(japaneseQuestionTextPosition, 0x05, hook, "MGS2: Restore Action Level Selection - Japanese question text position", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(japaneseQuestionTextPosition, 0x05, hook, "MGS2: Restore Action Level Selection - Japanese question text position", [](SafetyHookContext& ctx)
         {
-            if (IsJapanese())
+            if (Util::IsJapanese())
             {
                 ctx.r8 = ShiftQuestionTextY(ctx.r8);
                 ctx.r9 = static_cast<uint32_t>(static_cast<int32_t>(ctx.r9) + kJapaneseQuestionTextWidthPad);
                 ctx.r10 = static_cast<uint32_t>(static_cast<int32_t>(ShiftQuestionTextY(ctx.r10)) + kJapaneseQuestionTextScreenHeightPad);
-                AddStackInt32(ctx.rsp, 0x38, kJapaneseQuestionTextWidthPad);
+                Memory::AddStackInt32(ctx.rsp, 0x38, kJapaneseQuestionTextWidthPad);
             }
         });
     }
 
     if (uint8_t* captionCurrentName = Memory::PatternScan(baseModule,
-        "8B 01 89 05 ?? ?? ?? ?? 48 8B 43 70 8B 48 08 48 8B 05 ?? ?? ?? ?? 89 0D ?? ?? ?? ?? F6 40 06 02 75",
-        "MGS2: Restore Action Level Selection - caption name"))
+        "?? ?? 89 05 ?? ?? ?? ?? 48 8B 43 ?? 8B 48",
+        "MGS2: Restore Action Level Selection - caption name | GM_StreamCaptionCurrentName"))
     {
-        g_StreamCaptionCurrentName = reinterpret_cast<int32_t*>(
+        GM_StreamCaptionCurrentName = reinterpret_cast<int32_t*>(
             Memory::GetRipRelativeAddress(captionCurrentName + 0x16, 0x02, 0x06));
     }
 
-    if (uint8_t* captionPosition = Memory::PatternScan(baseModule,
-        "8B 4E 3C C1 E0 03 99 81 E2 FF 01 00 00 03 C2 C1 F8 09 2B C8 B8 93 24 49 92",
-        "MGS2: Restore Action Level Selection - action level caption position"))
-    {
-        static SafetyHookMid hook {};
-        HookMidAtOffset(captionPosition, 0x03, hook, "MGS2: Restore Action Level Selection - action level caption position", [](SafetyHookContext& ctx)
-        {
-            const int32_t captionY = kActionLevelCaptionY - (IsJapanese() ? kJapaneseActionLevelCaptionYOffset : 0);
-            if (IsActionLevelCaptionActive() && static_cast<int32_t>(ctx.rcx) > captionY)
-            {
-                ctx.rcx = static_cast<uint32_t>(captionY);
-            }
-        });
-    }
-
     MAKE_HOOK_MID(baseModule,
-        "48 8B CB 48 89 43 74 66 89 83 92 00 00 00 48 83 C4 20 5B E9",
-        "MGS2: Restore Action Level Selection - questionnaire route", {
+        "48 8B CB 48 89 43 ?? 66 89 83",
+        "MGS2: Restore Action Level Selection - questionnaire route | kano\\titlescr\\newgame.c -> Step()", {
             if (Memory::ReadField<int32_t>(ctx.rbx, kWorkStep, -1) == 0 && IsFirstTimeQuestionPath(ctx.rbx))
             {
                 ctx.rax = 1;
@@ -600,8 +545,8 @@ void MGS2_RestoreActionLevelSelection::Apply()
         });
 
     MAKE_HOOK_MID(baseModule,
-        "48 8B CB 48 89 53 74 48 83 C4 20 5B E9",
-        "MGS2: Restore Action Level Selection - difficulty cancel route", {
+        "48 8B CB 48 89 53 ?? 48 83 C4",
+        "MGS2: Restore Action Level Selection - difficulty cancel route | kano\\titlescr\\newgame.c -> Step()", {
             if (Memory::ReadField<int32_t>(ctx.rbx, kWorkStep, -1) == 2 && IsFirstTimeQuestionPath(ctx.rbx))
             {
                 ctx.rdx = 1;
@@ -609,11 +554,11 @@ void MGS2_RestoreActionLevelSelection::Apply()
         });
 
     if (uint8_t* cursorInit = Memory::PatternScan(baseModule,
-        "44 0F BF 83 90 00 00 00 BF 03 00 00 00 48 8B 83 A8 00 00 00 45 85 C0 44 0F 44 C7 FF 43 78",
-        "MGS2: Restore Action Level Selection - cursor init"))
+        "44 0F BF 83 ?? ?? ?? ?? BF",
+        "MGS2: Restore Action Level Selection - cursor init | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(cursorInit, 0x1B, hook, "MGS2: Restore Action Level Selection - cursor init", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(cursorInit, 0x1B, hook, "MGS2: Restore Action Level Selection - cursor init", [](SafetyHookContext& ctx)
         {
             if (IsFirstTimeQuestionPath(ctx.rbx))
             {
@@ -623,24 +568,24 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     if (uint8_t* cursorInitTarget = Memory::PatternScan(baseModule,
-        "48 8B 8C C3 B8 00 00 00 8B 81 9C 00 00 00 89 42 64 48 8B 83 A8 00 00 00 8B 48 64 49 63 C0 89 8B 54 01 00 00",
-        "MGS2: Restore Action Level Selection - cursor init target"))
+        "48 8B 8C C3 ?? ?? ?? ?? 8B 81 ?? ?? ?? ?? 89 42 ?? 48 8B 83 ?? ?? ?? ?? 8B 48 ?? 49 63 C0",
+        "MGS2: Restore Action Level Selection - cursor init target | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(cursorInitTarget, 0x24, hook, "MGS2: Restore Action Level Selection - cursor init target", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(cursorInitTarget, 0x24, hook, "MGS2: Restore Action Level Selection - cursor init target", [](SafetyHookContext& ctx)
         {
             AdjustTankerPlantCursorY(ctx.rbx, true);
         });
     }
 
     if (uint8_t* cursorBefore = Memory::PatternScan(baseModule,
-        "0F B7 83 90 00 00 00 BF 03 00 00 00 8B F7 66 85 C0 74 03 0F BF F0 8B 8B 84 00 00 00",
-        "MGS2: Restore Action Level Selection - cursor before"))
+        "0F B7 83 ?? ?? ?? ?? BF ?? ?? ?? ?? 8B F7",
+        "MGS2: Restore Action Level Selection - cursor before | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         Memory::PatchBytes(reinterpret_cast<uintptr_t>(cursorBefore) + 0x08, "\x04", 1);
 
         static SafetyHookMid hook {};
-        HookMidAtOffset(cursorBefore, 0x16, hook, "MGS2: Restore Action Level Selection - cursor before", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(cursorBefore, 0x16, hook, "MGS2: Restore Action Level Selection - cursor before", [](SafetyHookContext& ctx)
         {
             if (IsFirstTimeQuestionPath(ctx.rbx))
             {
@@ -650,29 +595,29 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     if (uint8_t* cursorUpWrap = Memory::PatternScan(baseModule,
-        "44 0F B6 83 9C 00 00 00 66 90 66 83 E8 01 0F B7 C8 79 05 B9 02 00 00 00 0F B7 D1 0F B7 C1 41 0F A3 D0 73",
-        "MGS2: Restore Action Level Selection - cursor up wrap"))
+        "44 0F B6 83 ?? ?? ?? ?? 66 90",
+        "MGS2: Restore Action Level Selection - cursor up wrap | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         Memory::PatchBytes(reinterpret_cast<uintptr_t>(cursorUpWrap) + 0x14, "\x03", 1);
     }
 
     if (uint8_t* cursorMoveTarget = Memory::PatternScan(baseModule,
-        "48 8B 8C C3 B8 00 00 00 8B 81 9C 00 00 00 89 83 54 01 00 00 48 63 C6 48 8B 8C C3 B8 00 00 00",
-        "MGS2: Restore Action Level Selection - cursor move target"))
+        "48 8B 8C C3 ?? ?? ?? ?? 8B 81 ?? ?? ?? ?? 89 83 ?? ?? ?? ?? 48 63 C6",
+        "MGS2: Restore Action Level Selection - cursor move target | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(cursorMoveTarget, 0x14, hook, "MGS2: Restore Action Level Selection - cursor move target", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(cursorMoveTarget, 0x14, hook, "MGS2: Restore Action Level Selection - cursor move target", [](SafetyHookContext& ctx)
         {
             AdjustTankerPlantCursorY(ctx.rbx, false);
         });
     }
 
     if (uint8_t* cursorAfter = Memory::PatternScan(baseModule,
-        "66 89 8B 90 00 00 00 66 85 C0 74 03 0F BF F8 3B F7",
-        "MGS2: Restore Action Level Selection - cursor after"))
+        "66 89 8B ?? ?? ?? ?? 66 85 C0",
+        "MGS2: Restore Action Level Selection - cursor after | kano\\titlescr\\newgame.c -> GameSubStep()"))
     {
         static SafetyHookMid hook {};
-        HookMidAtOffset(cursorAfter, 0x0F, hook, "MGS2: Restore Action Level Selection - cursor after", [](SafetyHookContext& ctx)
+        Memory::HookMidAtOffset(cursorAfter, 0x0F, hook, "MGS2: Restore Action Level Selection - cursor after", [](SafetyHookContext& ctx)
         {
             if (IsFirstTimeQuestionPath(ctx.rbx))
             {
@@ -682,8 +627,8 @@ void MGS2_RestoreActionLevelSelection::Apply()
     }
 
     MAKE_HOOK_MID(baseModule,
-        "48 8B 05 ?? ?? ?? ?? 66 09 88 8A 15 00 00 B8 00 80 00 00",
-        "MGS2: Restore Action Level Selection - final story flag", {
+        "48 8B 05 ?? ?? ?? ?? 66 09 88 ?? ?? ?? ?? B8",
+        "MGS2: Restore Action Level Selection - final story flag | kano\titlescr\newgame.c -> NewNewGameScr() -> Die()", {
             if (IsFirstTimeQuestionPath(ctx.rdi))
             {
                 ctx.rcx = Memory::ReadField<int16_t>(ctx.rdi, kWorkQuestionCursor, -1) < 3 ? 3 : 2;
@@ -691,8 +636,8 @@ void MGS2_RestoreActionLevelSelection::Apply()
         });
 
     MAKE_HOOK_MID(baseModule,
-        "41 B9 04 00 00 00 C6 83 D0 00 00 00 02 BA 90 01 00 00 C6 83 E8 00 00 00 02 B9 00 04 00 00",
-        "MGS2: Restore Action Level Selection - questionnaire voice", {
+        "41 B9 ?? ?? ?? ?? C6 83 ?? ?? ?? ?? ?? BA",
+        "MGS2: Restore Action Level Selection - questionnaire voice | skoba\\etc\\encute.c -> GetResources()", {
             ConvertQuestionTextToBpFont(ctx.rbx);
             SetQuestionIntroVoice(ctx.rbx);
         });

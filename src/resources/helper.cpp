@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "common.hpp"
+#include "config.hpp"
 
 #include "logging.hpp"
 
@@ -390,6 +391,22 @@ namespace Memory
         }
 
         return FALSE;
+    }
+
+
+    void AddStackInt32(uint64_t rsp, ptrdiff_t offset, int32_t amount)
+    {
+        auto* value = reinterpret_cast<int32_t*>(rsp + offset);
+        if (Memory::IsWritable(value, sizeof(*value)))
+        {
+            *value += amount;
+        }
+    }
+
+    void HookMidAtOffset(uint8_t* address, ptrdiff_t offset, SafetyHookMid& hook, const char* name, void (*callback)(SafetyHookContext&))
+    {
+        hook = safetyhook::create_mid(address + offset, callback);
+        LOG_HOOK(hook, name)
     }
 
 }
@@ -962,4 +979,9 @@ namespace Util
         return (attrs & FILE_ATTRIBUTE_READONLY) != 0;
     }
 
+
+    bool IsJapanese()
+    {
+        return sSkipLauncherLanguage == "jp" || sSkipLauncherRegion == "jp";
+    }
 }

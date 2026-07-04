@@ -2,18 +2,13 @@
 #include "adjustable_captions.hpp"
 #include "common.hpp"
 #include "logging.hpp"
+#include "mgs2_restore_action_level_selection.hpp"
 
 
 void AdjustableCaptions::Apply()
 {
     if (!(eGameType & (MGS2 | MGS3)))
     {
-        return;
-    }
-
-    if ((iSubtitleAlpha == 100) && (iOutlineOpacity == 100) && (fSubtitleScale == 100))
-    {
-        spdlog::info("Adjustable captions disabled, skipping");
         return;
     }
 
@@ -59,6 +54,32 @@ void AdjustableCaptions::Apply()
         {
             MAKE_HOOK_MID(baseModule, "40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ?? 8B 41", "Adjustable Captions: Scale", {
                 *reinterpret_cast<int*>(ctx.rcx + 0x58) = static_cast<int>(256 * percentage);
+                          });
+        }
+    }
+
+    {
+        constexpr float kSubtitleYOffsetPerPercent = 8.0f / 30.0f;
+        static const int32_t subtitleYOffset = static_cast<int32_t>(std::lround((100 - fSubtitleScale) * kSubtitleYOffsetPerPercent));
+        if (eGameType & MGS2)
+        {
+            MAKE_HOOK_MID(baseModule, "C1 E0 ?? 99 81 E2 ?? ?? ?? ?? 03 C2 C1 F8 ?? 2B C8", "MGS2: game\\jimaku.c -> set_pos()", {
+                if (MGS2_RestoreActionLevelSelection::IsActionLevelCaptionActive())
+                {
+                    const int32_t captionY = MGS2_RestoreActionLevelSelection::kActionLevelCaptionY - (Util::IsJapanese() ? MGS2_RestoreActionLevelSelection::kJapaneseActionLevelCaptionYOffset : 0);
+                    if (static_cast<int32_t>(ctx.rcx) > captionY)
+                    {
+                        ctx.rcx = static_cast<uint32_t>(captionY);
+                    }
+                    spdlog::info("MGS2: game\\jimaku.c -> set_pos() - Adjusted caption Y position to {}", ctx.rcx);
+                    ctx.rcx += subtitleYOffset;
+                }
+                          });
+        }
+        else //eGameType & MGS3
+        {
+            MAKE_HOOK_MID(baseModule, "99 81 E2 ?? ?? ?? ?? ?? ?? ?? ?? B8 ?? ?? ?? ?? F7 E9 41 C1 F8 ?? ?? ?? ?? C1 FB ?? 8B F3", "MGS3: game\\jimaku.c -> set_pos()", {
+                ctx.rcx += subtitleYOffset;
                           });
         }
     }

@@ -58,6 +58,10 @@ namespace Memory
 
     void* ReadIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction);
     BOOL WriteIAT(HMODULE callerModule, const char* targetModule, const char* targetFunction, void* detourFunction);
+
+    void AddStackInt32(uint64_t rsp, ptrdiff_t offset, int32_t amount);
+
+    void HookMidAtOffset(uint8_t* address, ptrdiff_t offset, SafetyHookMid& hook, const char* name, void (*callback)(SafetyHookContext&));
 }
 
 namespace Util
@@ -107,6 +111,8 @@ namespace Util
     bool SHA1Check(const std::filesystem::path& filePath, const std::string& expected);
 
     bool IsFileReadOnly(const std::filesystem::path& path);
+
+    bool IsJapanese();
 
 }
 
