@@ -243,6 +243,11 @@ bool SceneDepth::IsAvailable()
     return g_available;
 }
 
+ID3D11ShaderResourceView* SceneDepth::CaptureSceneDepth()
+{
+    return CopyDepth(g_sceneDepth.Get()) ? g_copySRV.Get() : nullptr;
+}
+
 ID3D11ShaderResourceView* SceneDepth::CaptureDepth(ID3D11DepthStencilView* depthStencil)
 {
     if (!depthStencil)

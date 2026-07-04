@@ -30,6 +30,10 @@ namespace SceneDepth
     bool IsAvailable();
     ID3D11ShaderResourceView* CaptureDepth(ID3D11DepthStencilView* depthStencil);
 
+    // Fresh copy from the last depth texture the game bound for the 3D pass, for use at
+    // points in the frame where depth is no longer bound.
+    ID3D11ShaderResourceView* CaptureSceneDepth();
+
     // Fires at the end of the 3D pass (after the scene, before UI). Gives the scene colour RT to draw
     // into and the depth SRV for occlusion.
     using EndOf3DCallback = void(*)(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
