@@ -7,6 +7,7 @@
 #include <array>
 #include <atomic>
 #include <cmath>
+#include <cstring>
 #include <vector>
 
 namespace
@@ -21,7 +22,6 @@ namespace
 
     constexpr UINT kBlueNoiseSize = 256;
     constexpr UINT kBlueNoiseFrames = 32;
-    constexpr int kAllScenesFallbackAlpha = 8;
     constexpr uintptr_t kNoiseAlphaOffset = 0x80;
     constexpr uintptr_t kNoiseActiveOffset = 0x98;
 
@@ -82,6 +82,56 @@ namespace
     std::atomic<bool> drewBackbufferThisFrame = false;
     std::atomic<bool> insidePresent = false;
 
+    // Native noise restoration. The HD port stubbed out noise1.c's draw callback, so the
+    // game builds its noise packet every frame but never renders it. Null the callback
+    // and the engine happily converts and draws the packet again - it just can't bind
+    // the noise texture (op 0x0D is a no-op on PC), so we point each op 0x13 draw state
+    // at our own copy, rebuilt per frame from the work's random data and palette.
+    constexpr UINT kNativeNoiseSize = 128;
+    constexpr UINT kNativeNoiseIndexedBytes = (kNativeNoiseSize * kNativeNoiseSize) / 2;
+    constexpr UINT kNativeNoisePaletteBytes = 16 * 4;
+    constexpr uintptr_t kNoiseNodeOffset = 0x58;
+    constexpr uintptr_t kNoiseRandomTextureOffset = 0x68;
+    constexpr uintptr_t kNoisePaletteOffset = 0x70;
+    constexpr uintptr_t kNoisePalette2Offset = 0x78;
+    constexpr uintptr_t kNodeRenderCallbackOffset = 0x40;
+    constexpr size_t kMaxHudNoiseNodes = 16;
+
+    // Op 0x13 draw state captured from noise1's static GS state: uv offset/scale at
+    // +0x00, texture object at +0x20, TEX0 (128x128) at +0x70, blend at +0x80,
+    // sampler at +0x90.
+    alignas(16) const uint8_t kNoiseDrawStateTemplate[0xC0] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x01, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x70, 0xEE, 0xEE, 0xFE, 0x0F, 0x00, 0x00, 0x00, 0x00,
+        0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0xA0, 0x40, 0xDD, 0x05, 0x04, 0x04, 0x80, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x44, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+
+    // Stand-in texture object; the bind only reads +0x50 (resource) and +0x88 (view).
+    alignas(16) uint8_t gNoiseTextureObject[0xA0] = {};
+
+    bool nativeRestorationActive = false;
+    std::atomic<uintptr_t> gNativeNode = 0;
+    std::atomic<bool> gNativeColored = false;
+    std::array<std::atomic<uintptr_t>, kMaxHudNoiseNodes> gHudNoiseNodes = {};
+    std::atomic<size_t> gHudNoiseNodeNext = 0;
+    std::atomic<uint64_t> gFrameSerial = 1;
+
+    ComPtr<ID3D11Texture2D> noiseTexture;
+    ComPtr<ID3D11ShaderResourceView> noiseSRV;
+    bool noiseTextureFailed = false;
+    std::array<uint8_t, kNativeNoiseSize * kNativeNoiseSize * 4> noiseTextureData = {};
+    uint64_t noiseUploadFrame = 0;
+    uintptr_t noiseUploadWork = 0;
+
     uint32_t Hash32(uint32_t value)
     {
         value ^= value >> 16;
@@ -99,11 +149,6 @@ namespace
 
     bool NativeAllowsFilmGrain()
     {
-        if (MGS3FilmGrain::mode == MGS3FilmGrain::Mode::AllScenes)
-        {
-            return true;
-        }
-
         return gNativeSignalActive.load(std::memory_order_relaxed);
     }
 
@@ -118,6 +163,7 @@ namespace
         ClearFilmGrainAlpha();
         gNativeSignalActive.store(false, std::memory_order_relaxed);
         gNativeWork.store(0, std::memory_order_relaxed);
+        gNativeNode.store(0, std::memory_order_relaxed);
     }
 
     bool TryReadNativeInt(uintptr_t work, uintptr_t offset, int& value)
@@ -137,10 +183,98 @@ namespace
         return true;
     }
 
+    bool TryReadNativePtr(uintptr_t work, uintptr_t offset, uintptr_t& value)
+    {
+        if (!work)
+        {
+            return false;
+        }
+
+        const auto* address = reinterpret_cast<const uintptr_t*>(work + offset);
+        if (!Memory::IsReadable(address, sizeof(*address)))
+        {
+            return false;
+        }
+
+        value = *address;
+        return true;
+    }
+
     bool NativeWorkIsActive(uintptr_t work)
     {
         int active = 0;
         return TryReadNativeInt(work, kNoiseActiveOffset, active) && active != 0;
+    }
+
+    void TrackNativeNoiseNode(uintptr_t work)
+    {
+        if (!nativeRestorationActive)
+        {
+            return;
+        }
+
+        uintptr_t node = 0;
+        if (!TryReadNativePtr(work, kNoiseNodeOffset, node) || !node)
+        {
+            return;
+        }
+
+        gNativeNode.store(node, std::memory_order_relaxed);
+
+        // The walker skips the packet unless the callback is null.
+        auto* callback = reinterpret_cast<uintptr_t*>(node + kNodeRenderCallbackOffset);
+        if (Memory::IsWritable(callback, sizeof(*callback)) && *callback)
+        {
+            *callback = 0;
+        }
+    }
+
+    void TrackHudNoiseNode(uintptr_t work)
+    {
+        if (!nativeRestorationActive)
+        {
+            return;
+        }
+
+        uintptr_t node = 0;
+        if (!TryReadNativePtr(work, kNoiseNodeOffset, node) || !node)
+        {
+            return;
+        }
+
+        for (const auto& tracked : gHudNoiseNodes)
+        {
+            if (tracked.load(std::memory_order_relaxed) == node)
+            {
+                return;
+            }
+        }
+
+        const size_t slot = gHudNoiseNodeNext.fetch_add(1, std::memory_order_relaxed) % kMaxHudNoiseNodes;
+        gHudNoiseNodes[slot].store(node, std::memory_order_relaxed);
+    }
+
+    bool IsTrackedNoiseNode(uintptr_t node)
+    {
+        if (!node)
+        {
+            return false;
+        }
+
+        if (node == gNativeNode.load(std::memory_order_relaxed))
+        {
+            return true;
+        }
+
+        for (const auto& tracked : gHudNoiseNodes)
+        {
+            if (tracked.load(std::memory_order_relaxed) == node)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void QueueFilmGrainAlpha(int alpha)
@@ -165,9 +299,10 @@ namespace
         if (work)
         {
             gNativeWork.store(work, std::memory_order_relaxed);
+            TrackNativeNoiseNode(work);
         }
 
-        if (MGS3FilmGrain::mode != MGS3FilmGrain::Mode::AllScenes && !NativeWorkIsActive(work))
+        if (!NativeWorkIsActive(work))
         {
             ClearFilmGrainAlpha();
             gNativeSignalActive.store(false, std::memory_order_relaxed);
@@ -176,6 +311,11 @@ namespace
 
         gNativeSignalActive.store(true, std::memory_order_relaxed);
         QueueFilmGrainAlpha(alpha);
+    }
+
+    void TrackFilmGrainConstructor(SafetyHookContext& ctx)
+    {
+        gNativeColored.store((ctx.r8 & 0xffffffff) != 0, std::memory_order_relaxed);
     }
 
     void TrackFilmGrainAlpha(SafetyHookContext& ctx)
@@ -230,6 +370,235 @@ namespace
         if (!trackedWork || trackedWork == work)
         {
             ResetFilmGrainState();
+        }
+    }
+
+    bool BuildNoiseTextureData()
+    {
+        uintptr_t indexedTexture = 0;
+        uintptr_t palette = 0;
+        uintptr_t palette2 = 0;
+        const uintptr_t work = gNativeWork.load(std::memory_order_relaxed);
+        TryReadNativePtr(work, kNoiseRandomTextureOffset, indexedTexture);
+        TryReadNativePtr(work, kNoisePaletteOffset, palette);
+        TryReadNativePtr(work, kNoisePalette2Offset, palette2);
+        if (!gNativeColored.load(std::memory_order_relaxed) && palette2)
+        {
+            palette = palette2;
+        }
+
+        if (!indexedTexture ||
+            !palette ||
+            !Memory::IsReadable(reinterpret_cast<const void*>(indexedTexture), kNativeNoiseIndexedBytes) ||
+            !Memory::IsReadable(reinterpret_cast<const void*>(palette), kNativeNoisePaletteBytes))
+        {
+            // No live noise work yet (goggles/menus before any cinematic noise); fake it.
+            const auto frame = static_cast<uint32_t>(gFrameSerial.load(std::memory_order_relaxed));
+            for (UINT y = 0; y < kNativeNoiseSize; ++y)
+            {
+                for (UINT x = 0; x < kNativeNoiseSize; ++x)
+                {
+                    const auto value = static_cast<uint8_t>(Hash32((x * 1973u) ^ (y * 9277u) ^ (frame * 26699u)));
+                    uint8_t* dest = noiseTextureData.data() + (y * kNativeNoiseSize + x) * 4;
+                    dest[0] = value;
+                    dest[1] = value;
+                    dest[2] = value;
+                    dest[3] = value >> 1;
+                }
+            }
+            return true;
+        }
+
+        const auto* indices = reinterpret_cast<const uint8_t*>(indexedTexture);
+        const auto* colors = reinterpret_cast<const uint8_t*>(palette);
+        for (UINT y = 0; y < kNativeNoiseSize; ++y)
+        {
+            for (UINT x = 0; x < kNativeNoiseSize; ++x)
+            {
+                const uint8_t packed = indices[(y * kNativeNoiseSize + x) / 2];
+                const uint8_t index = (x & 1) ? (packed >> 4) : (packed & 0x0F);
+                const uint8_t* color = colors + index * 4;
+                uint8_t* dest = noiseTextureData.data() + (y * kNativeNoiseSize + x) * 4;
+                dest[0] = color[0];
+                dest[1] = color[1];
+                dest[2] = color[2];
+                dest[3] = color[3];
+            }
+        }
+
+        return true;
+    }
+
+    bool EnsureNoiseTexture(ID3D11Device* device)
+    {
+        if (noiseTexture)
+        {
+            return true;
+        }
+
+        if (noiseTextureFailed || !device)
+        {
+            return false;
+        }
+
+        D3D11_TEXTURE2D_DESC textureDesc = {};
+        textureDesc.Width = kNativeNoiseSize;
+        textureDesc.Height = kNativeNoiseSize;
+        textureDesc.MipLevels = 1;
+        textureDesc.ArraySize = 1;
+        textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        textureDesc.SampleDesc.Count = 1;
+        textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+        textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+        if (FAILED(device->CreateTexture2D(&textureDesc, nullptr, noiseTexture.GetAddressOf())) ||
+            FAILED(device->CreateShaderResourceView(noiseTexture.Get(), nullptr, noiseSRV.GetAddressOf())))
+        {
+            noiseTexture.Reset();
+            noiseSRV.Reset();
+            noiseTextureFailed = true;
+            spdlog::warn("MGS 3: Film Grain: failed to create noise texture.");
+            return false;
+        }
+
+        return true;
+    }
+
+    bool UpdateNoiseTexture(ID3D11DeviceContext* context)
+    {
+        const uintptr_t work = gNativeWork.load(std::memory_order_relaxed);
+        const uint64_t frame = gFrameSerial.load(std::memory_order_relaxed);
+        if (noiseUploadFrame == frame && noiseUploadWork == work)
+        {
+            return true;
+        }
+
+        if (!context || !noiseTexture || !BuildNoiseTextureData())
+        {
+            return false;
+        }
+
+        D3D11_MAPPED_SUBRESOURCE mapped = {};
+        if (FAILED(context->Map(noiseTexture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+        {
+            return false;
+        }
+
+        auto* dest = static_cast<uint8_t*>(mapped.pData);
+        for (UINT y = 0; y < kNativeNoiseSize; ++y)
+        {
+            memcpy(dest + y * mapped.RowPitch,
+                noiseTextureData.data() + y * kNativeNoiseSize * 4,
+                kNativeNoiseSize * 4);
+        }
+        context->Unmap(noiseTexture.Get(), 0);
+
+        noiseUploadFrame = frame;
+        noiseUploadWork = work;
+        return true;
+    }
+
+    size_t NoiseStreamCommandSize(uint8_t opcode)
+    {
+        switch (opcode)
+        {
+        case 0x01:
+        case 0x02:
+        case 0x05:
+        case 0x06:
+        case 0x0B:
+        case 0x0E:
+            return 0x20;
+        case 0x04:
+        case 0x0A:
+        case 0x0C:
+        case 0x0D:
+        case 0x0F:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x15:
+        case 0x16:
+        case 0x17:
+        case 0x18:
+        case 0x19:
+        case 0x1A:
+        case 0x1B:
+        case 0x1C:
+            return 0x10;
+        case 0x13:
+            return 0xD0;
+        default:
+            return 0;
+        }
+    }
+
+    // AutoPacket gets { node, stream }, so noise streams are matched by node - no
+    // guessing. Point every op 0x13 draw state at our texture; empty ones (the goggle
+    // and menu packets rely on the ignored op 0x0D instead) get the template first.
+    void RepairNoiseStream(SafetyHookContext& ctx)
+    {
+        const uintptr_t header = static_cast<uintptr_t>(ctx.rcx);
+        if (!header || !Memory::IsReadable(reinterpret_cast<const void*>(header), 0x10))
+        {
+            return;
+        }
+
+        const uintptr_t node = *reinterpret_cast<const uintptr_t*>(header);
+        const uintptr_t stream = *reinterpret_cast<const uintptr_t*>(header + 0x08);
+        if (!stream || !IsTrackedNoiseNode(node))
+        {
+            return;
+        }
+
+        auto* device = g_D3D11Hooks.d3dDevice.Get();
+        auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!EnsureNoiseTexture(device) || !context || !UpdateNoiseTexture(context))
+        {
+            // Nothing to bind; kill the stream rather than draw with whatever's left over.
+            if (Memory::IsWritable(reinterpret_cast<void*>(stream), sizeof(uint32_t)))
+            {
+                *reinterpret_cast<uint32_t*>(stream) = 0x22;
+            }
+            return;
+        }
+
+        *reinterpret_cast<void**>(gNoiseTextureObject + 0x50) = noiseTexture.Get();
+        *reinterpret_cast<void**>(gNoiseTextureObject + 0x88) = noiseSRV.Get();
+
+        uintptr_t command = stream;
+        for (int steps = 0; steps < 256; ++steps)
+        {
+            if (!Memory::IsReadable(reinterpret_cast<const void*>(command), 0x10))
+            {
+                break;
+            }
+
+            const uint8_t opcode = static_cast<uint8_t>(*reinterpret_cast<const uint32_t*>(command) & 0xff);
+            if (opcode == 0x22)
+            {
+                break;
+            }
+
+            const size_t size = NoiseStreamCommandSize(opcode);
+            if (!size || !Memory::IsWritable(reinterpret_cast<void*>(command), size))
+            {
+                break;
+            }
+
+            if (opcode == 0x13)
+            {
+                const uintptr_t state = command + 0x10;
+                if (*reinterpret_cast<const uint32_t*>(command + 0x04) == 0)
+                {
+                    memcpy(reinterpret_cast<void*>(state), kNoiseDrawStateTemplate, sizeof(kNoiseDrawStateTemplate));
+                    *reinterpret_cast<uint32_t*>(command + 0x04) = 1;
+                }
+                *reinterpret_cast<uintptr_t*>(state + 0x20) = reinterpret_cast<uintptr_t>(gNoiseTextureObject);
+            }
+
+            command += size;
         }
     }
 
@@ -556,6 +925,43 @@ void MGS3FilmGrain::Initialize()
             TrackFilmGrainCleanup(ctx);
         });
 
+    // Restore the native noise renderer. If the scan fails the synthetic pass takes over.
+    if (uint8_t* address = Memory::PatternScan(baseModule,
+        "48 8B C4 55 53 56 57 41 54 41 55 41 56 41 57 48 8D A8 ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9 48 8B 0D",
+        "MGS 3: Film Grain: BP_RenderDmaPack_AutoPacket"))
+    {
+        static SafetyHookMid autoPacketHook{};
+        autoPacketHook = safetyhook::create_mid(address,
+            [](SafetyHookContext& ctx) { RepairNoiseStream(ctx); });
+        LOG_HOOK(autoPacketHook, "MGS 3: Film Grain: BP_RenderDmaPack_AutoPacket")
+        nativeRestorationActive = static_cast<bool>(autoPacketHook);
+    }
+
+    if (!nativeRestorationActive)
+    {
+        return;
+    }
+
+    MAKE_HOOK_MID(baseModule,
+        "40 53 41 54 41 55 41 56 41 57 48 83 EC 40 48 8B 84 24 A0 00 00 00 41 8B D9",
+        "MGS 3: Film Grain: noise1 constructor",
+        {
+            TrackFilmGrainConstructor(ctx);
+        });
+
+    MAKE_HOOK_MID(baseModule,
+        "40 57 48 83 EC 20 48 8B 41 58 48 8B F9 48 89 74 24 38 48 8B 70 48 8B 41 68 39 41 6C 74 ?? 48 89 5C 24 30 48 8D 8E 00 02 00 00",
+        "MGS 3: Film Grain: goggle noise update",
+        {
+            TrackHudNoiseNode(static_cast<uintptr_t>(ctx.rcx));
+        });
+
+    MAKE_HOOK_MID(baseModule,
+        "40 57 48 83 EC 20 48 8B 41 58 48 8B F9 48 89 74 24 38 48 8B 70 48 8B 41 68 39 41 6C 74 ?? 99 48 89 5C 24 30 83 E2 03 48 8D 8E 60 01 00 00",
+        "MGS 3: Film Grain: menu noise update",
+        {
+            TrackHudNoiseNode(static_cast<uintptr_t>(ctx.rcx));
+        });
 }
 
 void MGS3FilmGrain::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*)
@@ -565,14 +971,15 @@ void MGS3FilmGrain::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11Sh
         return;
     }
 
+    if (nativeRestorationActive)
+    {
+        return;
+    }
+
     int alpha = gPendingAlpha.exchange(0, std::memory_order_relaxed);
     if (alpha <= 0)
     {
         alpha = gLatchedAlpha.load(std::memory_order_relaxed);
-    }
-    if (alpha <= 0 && mode == Mode::AllScenes)
-    {
-        alpha = kAllScenesFallbackAlpha;
     }
 
     const float strength = StrengthFromAlpha(alpha);
@@ -735,8 +1142,7 @@ bool MGS3FilmGrain::HasActiveGrain()
 {
     return mode != Mode::Off &&
         NativeAllowsFilmGrain() &&
-        (mode == Mode::AllScenes ||
-         gPendingAlpha.load(std::memory_order_relaxed) > 0 ||
+        (gPendingAlpha.load(std::memory_order_relaxed) > 0 ||
          gLatchedAlpha.load(std::memory_order_relaxed) > 0);
 }
 
@@ -749,12 +1155,14 @@ void MGS3FilmGrain::EndPresent()
 {
     insidePresent.store(false, std::memory_order_relaxed);
     drewBackbufferThisFrame.store(false, std::memory_order_relaxed);
+    gFrameSerial.fetch_add(1, std::memory_order_relaxed);
 }
 
 void MGS3FilmGrain::OnAfterGameDraw(ID3D11DeviceContext* context, UINT vertexCount)
 {
     if (!(eGameType & MGS3) ||
         mode == Mode::Off ||
+        nativeRestorationActive ||
         drawingGrain ||
         insidePresent.load(std::memory_order_relaxed) ||
         !HasActiveGrain() ||

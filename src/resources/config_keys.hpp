@@ -290,9 +290,6 @@ namespace ConfigKeys
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "MGS3 - Restore Film Grain";
     constexpr const char* MGS3_Restore_Film_Grain_Help = "";
     constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used by MGS3 cutscenes.";
-    constexpr const char* MGS3_Restore_Film_Grain_Option_Off = "Off";
-    constexpr const char* MGS3_Restore_Film_Grain_Option_On = "Restored";
-    constexpr const char* MGS3_Restore_Film_Grain_Option_AllScenes = "Force Always On";
 
     constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Bugfixes";
     constexpr const char* MGS2_RestoreActionLevelSelection_Setting = "MGS2 - Restore Difficulty Screens";
