@@ -22,7 +22,6 @@ namespace
 
     constexpr UINT kBlueNoiseSize = 256;
     constexpr UINT kBlueNoiseFrames = 32;
-    constexpr int kAllScenesFallbackAlpha = 8;
     constexpr uintptr_t kNoiseAlphaOffset = 0x80;
     constexpr uintptr_t kNoiseActiveOffset = 0x98;
 
@@ -150,11 +149,6 @@ namespace
 
     bool NativeAllowsFilmGrain()
     {
-        if (MGS3FilmGrain::mode == MGS3FilmGrain::Mode::AllScenes)
-        {
-            return true;
-        }
-
         return gNativeSignalActive.load(std::memory_order_relaxed);
     }
 
@@ -308,7 +302,7 @@ namespace
             TrackNativeNoiseNode(work);
         }
 
-        if (MGS3FilmGrain::mode != MGS3FilmGrain::Mode::AllScenes && !NativeWorkIsActive(work))
+        if (!NativeWorkIsActive(work))
         {
             ClearFilmGrainAlpha();
             gNativeSignalActive.store(false, std::memory_order_relaxed);
@@ -931,11 +925,6 @@ void MGS3FilmGrain::Initialize()
             TrackFilmGrainCleanup(ctx);
         });
 
-    if (mode != Mode::On)
-    {
-        return;
-    }
-
     // Restore the native noise renderer. If the scan fails the synthetic pass takes over.
     if (uint8_t* address = Memory::PatternScan(baseModule,
         "48 8B C4 55 53 56 57 41 54 41 55 41 56 41 57 48 8D A8 ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9 48 8B 0D",
@@ -982,7 +971,7 @@ void MGS3FilmGrain::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11Sh
         return;
     }
 
-    if (mode == Mode::On && nativeRestorationActive)
+    if (nativeRestorationActive)
     {
         return;
     }
@@ -991,10 +980,6 @@ void MGS3FilmGrain::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11Sh
     if (alpha <= 0)
     {
         alpha = gLatchedAlpha.load(std::memory_order_relaxed);
-    }
-    if (alpha <= 0 && mode == Mode::AllScenes)
-    {
-        alpha = kAllScenesFallbackAlpha;
     }
 
     const float strength = StrengthFromAlpha(alpha);
@@ -1157,8 +1142,7 @@ bool MGS3FilmGrain::HasActiveGrain()
 {
     return mode != Mode::Off &&
         NativeAllowsFilmGrain() &&
-        (mode == Mode::AllScenes ||
-         gPendingAlpha.load(std::memory_order_relaxed) > 0 ||
+        (gPendingAlpha.load(std::memory_order_relaxed) > 0 ||
          gLatchedAlpha.load(std::memory_order_relaxed) > 0);
 }
 
@@ -1178,7 +1162,7 @@ void MGS3FilmGrain::OnAfterGameDraw(ID3D11DeviceContext* context, UINT vertexCou
 {
     if (!(eGameType & MGS3) ||
         mode == Mode::Off ||
-        (mode == Mode::On && nativeRestorationActive) ||
+        nativeRestorationActive ||
         drawingGrain ||
         insidePresent.load(std::memory_order_relaxed) ||
         !HasActiveGrain() ||

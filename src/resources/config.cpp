@@ -702,9 +702,9 @@ void Config::Read()
             {
                 MGS3FilmGrain::mode = MGS3FilmGrain::Mode::On;
             }
-            else if (sFilmGrainMode == ConfigKeys::MGS3_Restore_Film_Grain_Option_AllScenes)
+            else if (sFilmGrainMode == "On (All Scenes)") // retired option, treat as On
             {
-                MGS3FilmGrain::mode = MGS3FilmGrain::Mode::AllScenes;
+                MGS3FilmGrain::mode = MGS3FilmGrain::Mode::On;
             }
             else
             {

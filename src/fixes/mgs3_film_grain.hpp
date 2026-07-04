@@ -12,8 +12,7 @@ namespace MGS3FilmGrain
     enum class Mode
     {
         Off,
-        On,
-        AllScenes
+        On
     };
 
     inline Mode mode = Mode::On;
