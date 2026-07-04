@@ -327,6 +327,7 @@ namespace CustomResolutionAndBorderless
     void Init_CalculateScreenSize()
     {
         // Calculate aspect ratio
+        fHeightDeltaFrom720p = static_cast<float>(iInternalResY) / 720.0f;
         fAspectRatio = (float)iInternalResX / (float)iInternalResY;
         fAspectMultiplier = fAspectRatio / fNativeAspect;
 

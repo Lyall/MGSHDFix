@@ -20,6 +20,7 @@ namespace CustomResolutionAndBorderless
     inline bool bOutputResolution;
     inline int iOutputResX;
     inline int iOutputResY;
+    inline float fHeightDeltaFrom720p;
     inline int iOriginalOutputResX; //before clamping in windowed/borderless mode
     inline int iOriginalOutputResY; //before clamping in windowed/borderless mode
     inline bool bUsingAutomaticOutputX = false;

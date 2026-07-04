@@ -2419,6 +2419,7 @@ void DepthOfFieldFixes::OnPresent()
     gMGS3DofFocusSourceFrameIndex = UINT64_MAX;
 }
 
+
 void DepthOfFieldFixes::Initialize()
 {
     if (!(eGameType & (MGS2 | MGS3)))
@@ -2440,8 +2441,10 @@ void DepthOfFieldFixes::Initialize()
         return;
     }
 
-    fBlurUvMultiplier = std::clamp(fBlurUvMultiplier, 0.0f, 20.0f);
+    fBlurUvMultiplier = eGameType & MGS2 ? CustomResolutionAndBorderless::fHeightDeltaFrom720p : std::clamp(fBlurUvMultiplier, 0.0f, 20.0f);
     spdlog::info("{}: Depth of Field: blur UV multiplier set to {}.", gameLabel, fBlurUvMultiplier);
+
+
 
     if (eGameType & MGS2)
     {
