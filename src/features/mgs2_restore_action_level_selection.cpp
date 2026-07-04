@@ -89,25 +89,7 @@ namespace
 
     uint8_t GetStoryDisplayMask()
     {
-        const uint16_t titleMenuStatus = MGS2_LinkVarBuf::GM_TitleMenuStatus;
-        uint8_t displayMask = kDispFirstTimeOnly;
-
-        if (titleMenuStatus & kTitleMenuTankerCleared)
-        {
-            displayMask |= 0x02;
-        }
-
-        if (titleMenuStatus & kTitleMenuPlantCleared)
-        {
-            displayMask |= 0x04;
-        }
-
-        if (displayMask == 0x07)
-        {
-            displayMask = kDispAllStories;
-        }
-
-        return displayMask;
+        return (MGS2_LinkVarBuf::GM_TitleMenuStatus & (kTitleMenuTankerCleared | kTitleMenuPlantCleared)) ? kDispAllStories : kDispFirstTimeOnly;
     }
 
     bool IsFirstTimeDisplay(uint8_t displayMask)
