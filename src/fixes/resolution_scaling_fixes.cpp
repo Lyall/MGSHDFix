@@ -306,7 +306,7 @@ void ResolutionScalingFixes::ApplyFixes()
         for (int i = 0; i < 8; i++)
         {
             GS_ScaleRGB(reinterpret_cast<uint8_t*>(ctx.r8 + i * 0x20), 0.5f);
-            GS_ScaleA(reinterpret_cast<uint8_t*>(ctx.r8 + i * 0x20), 0.9f);
+            GS_ScaleA(reinterpret_cast<uint8_t*>(ctx.r8 + i * 0x20), 0.8f);
         }
                   });
 
