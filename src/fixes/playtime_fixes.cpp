@@ -22,6 +22,12 @@ void FixPlaytime::Apply()
         return;
     }
 
+    if (!bEnabled)
+    {
+        spdlog::info("MGS 2 | MGS 3: Playtime Fix: Disabled via config. Skipping...");
+        return;
+    }
+
     if (eGameType & MGS2)
     {
         MAKE_HOOK_MID(baseModule, "C7 05 ?? ?? ?? ?? 00 00 00 00 48 83 C4 ?? 5F C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 40 53", "gm_startloader", {

@@ -66,6 +66,7 @@
 #include "mgs2_vamp_punch_fix.hpp"
 #include "mgs_smaa.hpp"
 #include "mgs3_film_grain.hpp"
+#include "playtime_fixes.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -680,14 +681,14 @@ void Config::Read()
             g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = bRestoreVFX;
 
 
-            ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
-            LOG_CONFIG(ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
         }
         else if (eGameType & MGS3)
         {
             std::string sFilmGrainMode = "On";
 
-            ConfigHelper::getValue(ini, ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
             ConfigHelper::getValue(ini, ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, sFilmGrainMode);
 
@@ -705,7 +706,7 @@ void Config::Read()
             }
             MGS3FilmGrain::mode = bFilmGrainEnabled ? MGS3FilmGrain::Mode::On : MGS3FilmGrain::Mode::Off;
 
-            LOG_CONFIG(ConfigKeys::FixMGS3DepthOfField_Section, ConfigKeys::FixMGS3DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             LOG_CONFIG(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
             LOG_CONFIG(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, bFilmGrainEnabled);
         }
@@ -994,6 +995,8 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
     LOG_CONFIG(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
 
+    ConfigHelper::getValue(ini, ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);
+    LOG_CONFIG(ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);
 
 
     ConfigLogger::Flush();

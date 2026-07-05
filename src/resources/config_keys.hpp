@@ -83,12 +83,11 @@ namespace ConfigKeys
 
 
 
-    constexpr const char* AnisotropicFiltering_Section = "Enhancements and Tweaks";
-    constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
-    constexpr const char* AnisotropicFiltering_Help = "";
-    constexpr const char* AnisotropicFiltering_Tooltip = "Controls the level of anisotropic filtering applied to textures.\n"
-                                                         "\n"
-                                                         "Higher values improve texture detail while far away or at oblique angles.";
+    constexpr const char* ColorCorrection_Enabled_Section = "Enhancements and Tweaks";
+    constexpr const char* ColorCorrection_Enabled_Setting = "Correct Gamma Levels";
+    constexpr const char* ColorCorrection_Enabled_Help = "";
+    constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
+
 
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
@@ -101,23 +100,25 @@ namespace ConfigKeys
     constexpr const char* EnableSMAA_Section = "Enhancements and Tweaks";
     constexpr const char* EnableSMAA_Setting = "Enable SMAA Anti-Aliasing";
     constexpr const char* EnableSMAA_Help = "";
-    constexpr const char* EnableSMAA_Tooltip = "";
+    constexpr const char* EnableSMAA_Tooltip = "Subpixel Morphological Anti-Aliasing.";
 
-    constexpr const char* ColorCorrection_Enabled_Section = "Enhancements and Tweaks";
-    constexpr const char* ColorCorrection_Enabled_Setting = "Correct Gamma Levels";
-    constexpr const char* ColorCorrection_Enabled_Help = "";
-    constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
 
+    constexpr const char* AnisotropicFiltering_Section = "Enhancements and Tweaks";
+    constexpr const char* AnisotropicFiltering_Setting = "Anisotropic Filtering Level";
+    constexpr const char* AnisotropicFiltering_Help = "";
+    constexpr const char* AnisotropicFiltering_Tooltip = "Controls the level of anisotropic filtering applied to textures.\n"
+        "\n"
+        "Higher values improve texture detail while far away or at oblique angles.";
 
     constexpr const char* MG1_Crop_Overscan_Enabled_Section = "Enhancements and Tweaks";
-    constexpr const char* MG1_Crop_Overscan_Enabled_Setting = "MG1 && MG2 - Crop Overscan Area";
+    constexpr const char* MG1_Crop_Overscan_Enabled_Setting = "Crop Overscan Area";
     constexpr const char* MG1_Crop_Overscan_Enabled_Help = "";
     constexpr const char* MG1_Crop_Overscan_Enabled_Tooltip = "Enables cropping of overscan areas in MG1.";
 
 
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Section = "Enhancements and Tweaks";
-    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Setting = "MG1 && MG2 - Correct Aspect Ratio";
-    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "(Corrects to 4:3)";
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Setting = "Correct Aspect Ratio to 4:3";
+    constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "";
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Tooltip = "Corrects the viewport's dimensions from the MSX2's raw internal aspect ratio (64:53 / 256x212) to the intended CRT aspect ratio of 4:3.";
 
 
@@ -139,12 +140,12 @@ namespace ConfigKeys
 
 
     constexpr const char* MGS2_SnakeTales_Radar_Section = "Various";
-    constexpr const char* MGS2_SnakeTales_Radar_Setting = "MGS2 - Enable Radar in Snake Tales";
+    constexpr const char* MGS2_SnakeTales_Radar_Setting = "Enable Radar in Snake Tales";
     constexpr const char* MGS2_SnakeTales_Radar_Help = "";
     constexpr const char* MGS2_SnakeTales_Radar_Tooltip = "Enables Radar in Snake Tales / Alternative missions.";
 
 
-    constexpr const char* LOD_MGS2_ShellCasings_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_ShellCasings_Section = "Model Quality && Level of Detail Enhancements";
     constexpr const char* LOD_MGS2_ShellCasings_Setting = "Always Show Weapon Shell Casings";
     constexpr const char* LOD_MGS2_ShellCasings_Help = "";
     constexpr const char* LOD_MGS2_ShellCasings_Tooltip = "Shell casings normally get culled if height is > 3500 units from the camera.\n"
@@ -152,12 +153,12 @@ namespace ConfigKeys
                                                           "When enabled, shell casings will be rendered at all distances.\n";
 
 
-    constexpr const char* LOD_MGS2_NPC_Section = "MGS2 - Model Options";
+    constexpr const char* LOD_MGS2_NPC_Section = "Model Quality && Level of Detail Enhancements";
     constexpr const char* LOD_MGS2_NPC_Setting = "Force High Quality Characters";
     constexpr const char* LOD_MGS2_NPC_Help = "";
     constexpr const char* LOD_MGS2_NPC_Tooltip = "When enabled, all character models always use their high polygon model.";
 
-    constexpr const char* MGS2_Hostage_Type_Section = "MGS2 - Model Options";
+    constexpr const char* MGS2_Hostage_Type_Section = "Speedrunner Settings";
     constexpr const char* MGS2_Hostage_Type_Setting = "Force RTC Hostage Type";
     constexpr const char* MGS2_Hostage_Type_Help = "";
     constexpr const char* MGS2_Hostage_Type_Tooltip = "The game swaps which hostages are in Shell 1 core based off your system's real time clock in New Game+ playthroughs.\n"
@@ -170,17 +171,17 @@ namespace ConfigKeys
                                                       "\n"
                                                       "Midnight = All hostages are Jennifer Love Hewitt.\n";
     constexpr const char* MGS2_Hostage_Type_Option_Normal = "Normal";
-    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "1:00 PM Hostages";
-    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "10:00 PM Hostages";
-    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Midnight Hostages";
+    constexpr const char* MGS2_Hostage_Type_Option_OnePM = "Kato-chan";
+    constexpr const char* MGS2_Hostage_Type_Option_TenPM = "Old Beauties";
+    constexpr const char* MGS2_Hostage_Type_Option_Midnight = "Jennifer";
 
     constexpr const char* MGS2_Thermal_Mode_Section = "Various";
-    constexpr const char* MGS2_Thermal_Mode_Setting = "MGS2 - Thermal Goggle Palette Swapping";
+    constexpr const char* MGS2_Thermal_Mode_Setting = "Thermal Goggle Palette Swapping";
     constexpr const char* MGS2_Thermal_Mode_Help = "";
     constexpr const char* MGS2_Thermal_Mode_Tooltip = "Enable swapping what color palettes are used by the thermal goggles. Cycle in-game with the hotkey.";
 
     constexpr const char* MGS2_Thermal_Default_Mode_Section = "Various";
-    constexpr const char* MGS2_Thermal_Default_Mode_Setting = "MGS2 - T.Goggle Default Palette";
+    constexpr const char* MGS2_Thermal_Default_Mode_Setting = "Thermal Goggle Default Palette";
     constexpr const char* MGS2_Thermal_Default_Mode_Help = "";
     constexpr const char* MGS2_Thermal_Default_Mode_Tooltip = "Default color palette used by the thermal goggles when the game starts.\n"
                                                                 "\n"
@@ -194,12 +195,12 @@ namespace ConfigKeys
     constexpr const char* MGS2_Thermal_Default_Mode_Option_BlackHot = "Black Hot";
 
     constexpr const char* MGS2_Thermal_Cycle_Hotkey_Section = "Various";
-    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Setting = "MGS2 - T.Goggle Color Cycle Hotkey";
+    constexpr const char* MGS2_Thermal_Cycle_Hotkey_Setting = "T.Goggle Color Cycle Hotkey";
     constexpr const char* MGS2_Thermal_Cycle_Hotkey_Help = "";
     constexpr const char* MGS2_Thermal_Cycle_Hotkey_Tooltip = "Hotkey to cycle through color palettes in realtime.";
 
 
-    constexpr const char* DistanceCullingGrassAlways_Section = "MGS3 - Override Render Distance";
+    constexpr const char* DistanceCullingGrassAlways_Section = "Model Quality && Level of Detail Enhancements";
     constexpr const char* DistanceCullingGrassAlways_Setting = "Always Show Grass";
     constexpr const char* DistanceCullingGrassAlways_Help = "";
     constexpr const char* DistanceCullingGrassAlways_Tooltip = "Prevents grass from disappearing at long distances (which was originally a PS2 performance optimization).\n"
@@ -221,17 +222,17 @@ namespace ConfigKeys
         "You may have to exit and reenter an area for the change to take effect.";
 
     constexpr const char* MGS2_Lifebar_Name_Use_Custom_Section = "Various";
-    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Setting = "MGS2 - Use Custom Lifebar Name";
+    constexpr const char* MGS2_Lifebar_Name_Use_Custom_Setting = "Use Custom Lifebar Name";
     constexpr const char* MGS2_Lifebar_Name_Use_Custom_Help = "";
     constexpr const char* MGS2_Lifebar_Name_Use_Custom_Tooltip = "When enabled, the game will use the custom name below for the lifebar";
 
     constexpr const char* MGS2_Lifebar_Name_Custom_Section = "Various";
-    constexpr const char* MGS2_Lifebar_Name_Custom_Setting = "MGS2 - Custom Lifebar Name";
+    constexpr const char* MGS2_Lifebar_Name_Custom_Setting = "Custom Lifebar Name";
     constexpr const char* MGS2_Lifebar_Name_Custom_Help = "";
     constexpr const char* MGS2_Lifebar_Name_Custom_Tooltip = "Custom name to use for the lifebar.";
     
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Section = "Various";
-    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Setting = "MGS2 - Use Character Names for Lifebar";
+    constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Setting = "Use Character Names for Lifebar";
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Help = "";
     constexpr const char* MGS2_Lifebar_Name_Use_Character_Names_Tooltip = "When enabled, the game will use actual character names (ie \"Raiden\" / \"Snake\") for the lifebar instead of saying \"LIFE\", matching later entries in the MGS series.";
 
@@ -263,48 +264,45 @@ namespace ConfigKeys
                                                    "Disable if you prefer pillarboxing or letterboxing with a custom resolution.";
 
     // Bugfixes
-    constexpr const char* ToggleRainShader_Section = "Bugfixes";
+    constexpr const char* ToggleRainShader_Section = "Hotkeys";
     constexpr const char* ToggleRainShader_Setting = "Toggle Vector Line Fixes";
     constexpr const char* ToggleRainShader_Help = "";
     constexpr const char* ToggleRainShader_Tooltip = "Toggles the rain/laser width fix on/off in real-time for comparison shots.";
 
 
-    constexpr const char* FixMGS2DepthOfField_Section = "Bugfixes";
-    constexpr const char* FixMGS2DepthOfField_Setting = "MGS2 - Fix Depth of Field";
-    constexpr const char* FixMGS2DepthOfField_Help = "";
-    constexpr const char* FixMGS2DepthOfField_Tooltip = "Restores stronger MGS2 depth of field blur at higher resolutions.";
+    constexpr const char* FixDepthOfField_Section = "Bugfixes";
+    constexpr const char* FixDepthOfField_Setting = "Fix Broken Depth of Field";
+    constexpr const char* FixDepthOfField_Help = "";
+    constexpr const char* FixDepthOfField_Tooltip = "Restores depth of field blur at higher resolutions.\n"
+                                                    "\n"
+                                                    "Also restores close-up depth of field / camera blur, which was outright disabled/broken by the HD Collection.";
 
-    constexpr const char* FixMGS3DepthOfField_Section = "Bugfixes";
-    constexpr const char* FixMGS3DepthOfField_Setting = "MGS3 - Fix Depth of Field";
-    constexpr const char* FixMGS3DepthOfField_Help = "";
-    constexpr const char* FixMGS3DepthOfField_Tooltip = "Restores stronger MGS3 depth of field blur at higher resolutions.";
-
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = "Bugfixes";
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Setting = "MGS3 - Depth of Field Blur Strength";
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;
+    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Setting = "Depth of Field Blur Strength";
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Help = "";
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS3's depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
-    constexpr const char* MGS3_Restore_Film_Grain_Setting = "MGS3 - Restore Film Grain";
+    constexpr const char* MGS3_Restore_Film_Grain_Setting = "Fix Film Grain";
     constexpr const char* MGS3_Restore_Film_Grain_Help = "(May Impact Performance)";
-    constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used by MGS3 cutscenes.";
+    constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used during dark cutscenes.";
 
-    constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Bugfixes";
-    constexpr const char* MGS2_RestoreActionLevelSelection_Setting = "MGS2 - Restore Difficulty Screens";
+    constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Various";
+    constexpr const char* MGS2_RestoreActionLevelSelection_Setting = "Restore Main Menu Voiceovers";
     constexpr const char* MGS2_RestoreActionLevelSelection_Help = "";
     constexpr const char* MGS2_RestoreActionLevelSelection_Tooltip = "Restores the original first-time action level questionnaire before difficulty selection.";
 
-    constexpr const char* MGS2_Increase_Shadow_Resolution_Section = "Enhancements and Tweaks";
-    constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "MGS2 - Fix Shadow Resolution Scaling";
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Section = "Model Quality && Level of Detail Enhancements";
+    constexpr const char* MGS2_Increase_Shadow_Resolution_Setting = "Increase Shadow Resolution";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Help = "";
     constexpr const char* MGS2_Increase_Shadow_Resolution_Tooltip = "The game's realtime shadows are hardcoded to 256x256 resolution.\n"
         "\n"
         "This option makes shadow resolution scale dynamically with the game's internal resolution.";
 
-    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Section = FixMGS2DepthOfField_Section;
-    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "MGS2 - Fix FPV M92 Laser Position";
+    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Section = "Bugfixes";
+    constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "Fix M92 Laser Origin in FPV";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Tooltip = "Fixes the M92's laser sight origin point when aiming in first-person view, which is aligned with the gun's barrel instead of the attached laser aiming module.";
 
@@ -392,9 +390,9 @@ namespace ConfigKeys
                                                                         "For full tilt, enable \"Fix Aiming On Full Tilt\" under the bugfixes panel.";
 
     constexpr const char* KeepAimingAfterFiring_InFPSMode_Section = "Keep Aiming After Firing";
-    constexpr const char* KeepAimingAfterFiring_InFPSMode_Setting = "MGS2 - While in FPS Mode";
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Setting = "While in FPS Mode";
     constexpr const char* KeepAimingAfterFiring_InFPSMode_Help = "";
-    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in MGS2's FPS mode."
+    constexpr const char* KeepAimingAfterFiring_InFPSMode_Tooltip = "Keeps aiming after firing while in FPS mode."
                                                                     "\n"
                                                                     "This does not force aiming when the joystick is at full tilt, matching PS2 behavior.\n"
                                                                     "\n"
@@ -406,14 +404,14 @@ namespace ConfigKeys
     constexpr const char* KeepAimingAfterFiring_OnLockOn_Tooltip = "Keeps aiming after firing while holding Lock-On (L1).";
 
     constexpr const char* MGS2_FixDamageType_Section = "Various";
-    constexpr const char* MGS2_FixDamageType_Setting = "MGS2 - Fix Vamp Punch Damage Type";
+    constexpr const char* MGS2_FixDamageType_Setting = "Fix Vamp Punch Damage Type";
     constexpr const char* MGS2_FixDamageType_Help = "";
     constexpr const char* MGS2_FixDamageType_Tooltip = "Punching Vamp while in first-person-view erroneously does lethal damage.\n"
                                                        "Fixes to deal non-lethal damage like normal hand-to-hand attacks.";
 
 
 
-    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "MGS2 - Third Person Freecam";
+    constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Section = "Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Setting = "Enable Third Person Freecam";
     constexpr const char* MGS2_ThirdPersonFreecam_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
                                                                  "(MOUSE SUPPORT STILL W.I.P.)\n"
@@ -494,7 +492,7 @@ namespace ConfigKeys
 
 
 
-    constexpr const char* MGS2_First_Person_View_Enabled_Section = "MGS2 - First Person Shooter Mode";
+    constexpr const char* MGS2_First_Person_View_Enabled_Section = "First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Setting = "Enable First Person Shooter Mode";
     constexpr const char* MGS2_First_Person_View_Enabled_Help = "(EXPERIMENTAL - SEE TOOLTIP)\n"
                                                                 "(SOME EFFECTS WILL BE MISSING)\n"
@@ -538,7 +536,7 @@ namespace ConfigKeys
     constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Tooltip = "";
 
 
-    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "Difficulty Restoration";
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Setting = "Restore PS2 Solidus Choking Difficulty";
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Help = "";
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Tooltip = "Restores the original harder PS2 durations and life reductions for Solidus's choking sequence, which were rebalanced/made easier with the HD Collection.\n"
@@ -558,35 +556,31 @@ namespace ConfigKeys
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Option_Both = "Full Restoration";
 
 
-    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Section = "Difficulty Restoration";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Setting = "Enable Grenade Cooking";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Help = "";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Tooltip = "Restores the original PS2 grenade cooking behavior, where time spent holding an armed grenade counts toward its detonation timer.";
     
 
-    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section = "MGS2 - Difficulty Restoration";
+    constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Section = "Difficulty Restoration";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Setting = "Toggle Grenade Cooking";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Help = "";
     constexpr const char* MGS2_RestoreOriginalDifficulty_EnableGrenadeCooking_Toggle_Tooltip = "Toggles grenade cooking on/off.";
 
 
 
-
-
     // Tweaks
-    constexpr const char* SkipIntroLogos_Section = "Skip Logo Screens";
+    constexpr const char* SkipIntroLogos_Section = "Launcher and Splashscreens";
     constexpr const char* SkipIntroLogos_Setting = "Skip In-Game Splashscreens";
     constexpr const char* SkipIntroLogos_Help = "";
-    constexpr const char* SkipIntroLogos_Tooltip = "Skips the unskippable \"KONAMI\" splashscreens on startup. Skippable intro videos will still be played.\n"
-                                                   "\n"
-                                                   "(Only supports MGS2 & MGS3.)";
+    constexpr const char* SkipIntroLogos_Tooltip = "Skips the unskippable \"KONAMI\" splashscreens on startup. Skippable intro videos will still be played.";
 
-    constexpr const char* LauncherJumpStart_Section = "Skip Logo Screens";
+    constexpr const char* LauncherJumpStart_Section = SkipIntroLogos_Section;
     constexpr const char* LauncherJumpStart_Setting = "Skip Launcher Splashscreens";
     constexpr const char* LauncherJumpStart_Help = "";
     constexpr const char* LauncherJumpStart_Tooltip = "Skips launcher splash screens and menus and jumps directly to the launch game screen.";
 
-    constexpr const char* SkipLauncher_Section = "Launcher Config";
+    constexpr const char* SkipLauncher_Section = SkipIntroLogos_Section;
     constexpr const char* SkipLauncher_Setting = "Skip Launcher";
     constexpr const char* SkipLauncher_Help = "";
     constexpr const char* SkipLauncher_Tooltip = "Skips the launcher app and runs the game directly.";
@@ -598,7 +592,7 @@ namespace ConfigKeys
 
     constexpr const char* MenuButton_Section = "Controller Settings";
     constexpr const char* MenuButton_Setting = "Set Menu OK && Cancel Button";
-    constexpr const char* MenuButton_Help = "(MGS2 Only)";
+    constexpr const char* MenuButton_Help = "";
     constexpr const char* MenuButton_Tooltip = "Sets which button is used for the OK action in menus.\n"
                                                "\n"
                                                "East for OK = PS2 Circle Button for Accept, X Button for Cancel\n"
@@ -621,7 +615,7 @@ namespace ConfigKeys
                                            "\n"
                                            "For MGS3: Europe has additional censorship VS North America.";
 
-    constexpr const char* SkipLauncherMSXGame_Section = "Launcher Config";
+    constexpr const char* SkipLauncherMSXGame_Section = SkipIntroLogos_Section;
     constexpr const char* SkipLauncherMSXGame_Setting = "MSX Skip Launcher Game";
     constexpr const char* SkipLauncherMSXGame_Help = "";
     constexpr const char* SkipLauncherMSXGame_Tooltip = "Which MSX game to start when Skip Launcher is enabled.";
@@ -670,7 +664,7 @@ namespace ConfigKeys
                                                                  "Higher multipliers produce more sensitivity.";
 
     constexpr const char* MGS2Sunglasses_Section = "Various";
-    constexpr const char* MGS2Sunglasses_Setting = "MGS2 - Force Sunglasses";
+    constexpr const char* MGS2Sunglasses_Setting = "Force Sunglasses";
     constexpr const char* MGS2Sunglasses_Help = "";
     constexpr const char* MGS2Sunglasses_Tooltip = "Forces Snake/Raiden to always wear their New Game+ Sunglasses.\n"
                                                    "\n"
@@ -682,46 +676,57 @@ namespace ConfigKeys
     constexpr const char* MGS2Sunglasses_Option_Never = "Never";
 
     constexpr const char* RestoreDogtagNames_Section = "Various";
-    constexpr const char* RestoreDogtagNames_Setting = "MGS2 - Restore Original Dogtag Names";
+    constexpr const char* RestoreDogtagNames_Setting = "Restore Original Dogtag Names";
     constexpr const char* RestoreDogtagNames_Help = "";
     constexpr const char* RestoreDogtagNames_Tooltip = "Restores the names of dogtags that were edited for copyright/legal reasons (ie Gackt -> Gekko.)";
 
     constexpr const char* MGS2_RestoreNodeDOBInfo_Section = "Various";
-    constexpr const char* MGS2_RestoreNodeDOBInfo_Setting = "MGS2 - Restore Node DOB/Bloodtype";
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Setting = "Restore Node DoB && Bloodtype Entry";
     constexpr const char* MGS2_RestoreNodeDOBInfo_Help = "";
-    constexpr const char* MGS2_RestoreNodeDOBInfo_Tooltip = "Restores DOB / Bloodtype information entry at the start of the Plant chapter.";
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Tooltip = "Restores DoB / Bloodtype information entry at the start of the Plant chapter.";
 
     constexpr const char* RestoreSoLRadarRotation_Section = "Various";
-    constexpr const char* RestoreSoLRadarRotation_Setting = "MGS2 - Restore SoL Radar Rotation";
+    constexpr const char* RestoreSoLRadarRotation_Setting = "Restore SoL Radar Rotation";
     constexpr const char* RestoreSoLRadarRotation_Help = "";
     constexpr const char* RestoreSoLRadarRotation_Tooltip = "The radar in Sons of Liberty had a flag East -> West rotation during plant.\n"
                                                             "\n"
                                                             "Substance modified the rotation to align closer to the actual orientation of the struts.";
 
-    constexpr const char* MGS2_RestoreElevatorGlitch_Section = "Various";
-    constexpr const char* MGS2_RestoreElevatorGlitch_Setting = "MGS2 - Restore SoL Elevator Glitch";
+    constexpr const char* MGS2_RestoreElevatorGlitch_Section = "Speedrunner Settings";
+    constexpr const char* MGS2_RestoreElevatorGlitch_Setting = "Restore SoL Elevator Glitch";
     constexpr const char* MGS2_RestoreElevatorGlitch_Help = "";
     constexpr const char* MGS2_RestoreElevatorGlitch_Tooltip = "Speedrun opt-in. Re-enables the Sons of Liberty floor-clip: going prone at an elevator call button and operating it forces a stand-up with the player's origin left on the floor, clipping through it.\n"
                                                                "\n"
                                                                "Substance gated elevator operation to standing/squat to patch this out. Off by default.";
 
+    constexpr const char* FixIGTLoadingPause_Section = "Speedrunner Settings";
+    constexpr const char* FixIGTLoadingPause_Setting = "Fix In-Game Timer Loading Pause";
+    constexpr const char* FixIGTLoadingPause_Help = "";
+    constexpr const char* FixIGTLoadingPause_Tooltip = "Fixes the In-Game Timer (IGT) continuing to run during loading screens / level transitions.\n"
+        "\n"
+        "In earlier versions of the game, the IGT was paused during loading screens. When Bluepoint refactored the loading system for the HD Collection, "
+        "the unique flag responsible for pausing the timer was no longer applied when loading began, even though it was still cleared when loading ended.\n"
+        "\n"
+        "This restores the original pre-HD Collection IGT behavior.\n"
+        "\n"
+        "Fixing this has reportedly reduced final IGT by up to 5 minutes compared to the bugged HDC/MC IGT behavior.";
 
     constexpr const char* MGS2_PhoneJingle_Section = "Various";
-    constexpr const char* MGS2_PhoneJingle_Setting = "MGS2 - Restore Japanese Phone Ringtone";
+    constexpr const char* MGS2_PhoneJingle_Setting = "Restore Japanese Phone Ringtone";
     constexpr const char* MGS2_PhoneJingle_Help = "";
     constexpr const char* MGS2_PhoneJingle_Tooltip = "Restores the Japanese Sons of Liberty exclusive MGS theme-song phone ringtone that was missing from all future versions of the game.\n"
                                                      "\n"
                                                      "This will enable the ringtone for all versions of the game.";
 
-    constexpr const char* UnusedRetroColonel_Section = "Various";
-    constexpr const char* UnusedRetroColonel_Setting = "MGS2 - Retro MSX Colonel Sprite";
+    constexpr const char* UnusedRetroColonel_Section = "MGS2 Community Bugfix Compilation Integration";
+    constexpr const char* UnusedRetroColonel_Setting = "Retro MSX Colonel Sprite";
     constexpr const char* UnusedRetroColonel_Help = "";
     constexpr const char* UnusedRetroColonel_Tooltip = "The Colonel's glitching sometimes matches his sprites from MGS1 and from Ghost Babel. "
                                                        "Restores a removed use of his sprite from Metal Gear 2: Solid Snake.\n"
                                                        "\n"
                                                        "Disabled = The vanilla behavior, MGS1 and Ghost Babel sprites only.\n"
                                                        "MSX2 = MGS1, Ghost Babel, and the original MSX2 sprite (resembling Richard Crenna as the colonel from Rambo).\n"
-                                                       "Subsistence = MGS1, Ghost Babel, and the redrawn MG2 sprite used from the Subsistence re-release onward. Requires Community Bugfix Compilation.";
+                                                       "Subsistence = MGS1, Ghost Babel, and the redrawn MG2 sprite used from the Subsistence re-release onward.";
     constexpr const char* UnusedRetroColonel_Option_Normal = "Disabled";
     constexpr const char* UnusedRetroColonel_Option_MSX = "MSX2";
     constexpr const char* UnusedRetroColonel_Option_Subsistence = "Subsistence";
@@ -863,15 +868,15 @@ namespace ConfigKeys
 
     constexpr const char* Debugging_Start_In_Dev_Menu_Section = "Debugging";
     constexpr const char* Debugging_Start_In_Dev_Menu_Setting = "Start Game in Developer Menu";
-    constexpr const char* Debugging_Start_In_Dev_Menu_Help = "(MGS2 ONLY ATM)";
+    constexpr const char* Debugging_Start_In_Dev_Menu_Help = "";
     constexpr const char* Debugging_Start_In_Dev_Menu_Tooltip = "Starts the game in the developer menu for debugging.";
 
-    constexpr const char* Restore_Title_Screen_Swapping_Section = "Various";
-    constexpr const char* Restore_Title_Screen_Swapping_Setting = "MGS2 - Restore Title Screen 2 Color";
+    constexpr const char* Restore_Title_Screen_Swapping_Section = "MGS2 Community Bugfix Compilation Integration";
+    constexpr const char* Restore_Title_Screen_Swapping_Setting = "Restore Title Screen 2 Color Swapping";
     constexpr const char* Restore_Title_Screen_Swapping_Help = "";
-    constexpr const char* Restore_Title_Screen_Swapping_Tooltip = "Makes the title screen's 2 change color upon each game completion.\n"
+    constexpr const char* Restore_Title_Screen_Swapping_Tooltip = "Makes the title screen's 2 change color upon each game completion, which was removed in the HD Collection.\n"
                                                                   "\n"
-                                                                  "Requires MGS2 Community Bugfix Compilation.";
+                                                                  "Afevis's Alternative Titlecards and loading screens mod is also supported.";
 
     
         

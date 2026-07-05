@@ -700,6 +700,12 @@ public:
 
         m_focusSink = new wxTextCtrl(this, wxID_ANY, "", wxPoint(-10000, -10000), wxSize(1, 1), wxTE_READONLY | wxBORDER_NONE);
 
+        const int bannerID = GetBannerResourceID();
+        const int targetGameFlag =
+            iTargetGame == TARGET_GAME_MG1 ? MG :
+            iTargetGame == TARGET_GAME_MGS2 ? MGS2 :
+            iTargetGame == TARGET_GAME_MGS3 ? MGS3 : 0;
+
         m_tabs = new wxNotebook(this, wxID_ANY);
         m_tabs->Bind(wxEVT_NOTEBOOK_PAGE_CHANGING, [this](wxBookCtrlEvent& event)
                      {
@@ -722,6 +728,8 @@ public:
 
             for (auto& field : tab.second)
             {
+                const bool fieldVisible = (field.gameFlags & targetGameFlag) != 0;
+
                 if (field.section != currentSection)
                 {
                     currentSection = field.section;
@@ -731,10 +739,21 @@ public:
                     grid->AddGrowableCol(3, 1);
                     sectionSizer->Add(grid, 0, wxEXPAND | wxALL, 5);
                     vbox->Add(sectionSizer, 0, wxEXPAND | wxALL, 5);
+
+                    const bool sectionVisible = std::any_of(tab.second.begin(), tab.second.end(), [&](const Field& sectionField)
+                    {
+                        return sectionField.section == currentSection && (sectionField.gameFlags & targetGameFlag) != 0;
+                    });
+                    vbox->Show(sectionSizer, sectionVisible);
                 }
 
                 if (field.section == "About")
                 {
+                    if (!fieldVisible)
+                    {
+                        continue;
+                    }
+
                     wxBoxSizer* aboutSizer = new wxBoxSizer(wxVERTICAL);
 
                     auto* aboutText = new wxStaticText(
@@ -756,16 +775,19 @@ public:
                 }
 
                 // Label + optional help stacked vertically
-                wxBoxSizer* labelBox = new wxBoxSizer(wxVERTICAL);
-                labelBox->Add(new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.key),
-                              0, wxALIGN_LEFT | wxBOTTOM, 2);
-                if (!field.help.IsEmpty())
+                if (fieldVisible)
                 {
-                    auto* helpText = new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.help);
-                    helpText->SetForegroundColour(*wxBLUE);
-                    labelBox->Add(helpText, 0, wxALIGN_LEFT);
+                    wxBoxSizer* labelBox = new wxBoxSizer(wxVERTICAL);
+                    labelBox->Add(new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.key),
+                                  0, wxALIGN_LEFT | wxBOTTOM, 2);
+                    if (!field.help.IsEmpty())
+                    {
+                        auto* helpText = new wxStaticText(sectionSizer->GetStaticBox(), wxID_ANY, field.help);
+                        helpText->SetForegroundColour(*wxBLUE);
+                        labelBox->Add(helpText, 0, wxALIGN_LEFT);
+                    }
+                    grid->Add(labelBox, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
                 }
-                grid->Add(labelBox, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
                 // Create control
                 wxWindow* ctrl = nullptr;
@@ -956,7 +978,14 @@ public:
                 {
                     auto* spacer = new wxPanel(sectionSizer->GetStaticBox(), wxID_ANY);
                     spacer->SetMinSize(FromDIP(wxSize(0, 10)));
-                    grid->Add(spacer, 0, wxEXPAND);
+                    if (fieldVisible)
+                    {
+                        grid->Add(spacer, 0, wxEXPAND);
+                    }
+                    else
+                    {
+                        spacer->Hide();
+                    }
                     continue;
                 }
                 case Field::Float:
@@ -1090,19 +1119,38 @@ public:
                         flags |= wxEXPAND;
                     }
 
-                    grid->Add(ctrl, 0, flags);
+                    if (fieldVisible)
+                    {
+                        grid->Add(ctrl, 0, flags);
+                    }
+                    else
+                    {
+                        ctrl->Hide();
+                    }
 
                     m_controls[{field.section, field.key}] = ctrl;
                 }
             }
 
             panel->SetSizer(vbox);
-            m_tabs->AddPage(panel, tab.first, false);
+
+            const bool tabVisible = std::any_of(tab.second.begin(), tab.second.end(), [&](const Field& field)
+            {
+                return (field.gameFlags & targetGameFlag) != 0;
+            });
+
+            if (tabVisible)
+            {
+                m_tabs->AddPage(panel, tab.first, false);
+            }
+            else
+            {
+                panel->Hide();
+            }
         }
 
         wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-        int bannerID = GetBannerResourceID();
         BannerPanel* banner = new BannerPanel(this, bannerID);
         banner->SetCursor(wxCursor(wxCURSOR_HAND));
         banner->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent&)

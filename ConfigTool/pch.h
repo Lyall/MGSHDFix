@@ -18,3 +18,4 @@
 #include <string>
 #include <initializer_list>
 #include <span>
+#include <algorithm>

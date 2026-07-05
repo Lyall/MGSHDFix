@@ -28,8 +28,17 @@
 #include <wx/string.h>
 #include <optional>
 
+enum ConfigGameFlag
+{
+    MG = 1 << 0,
+    MGS2 = 1 << 1,
+    MGS3 = 1 << 2
+};
+
 struct Field
 {
+    int gameFlags;
+
     wxString section;
     wxString key;
 

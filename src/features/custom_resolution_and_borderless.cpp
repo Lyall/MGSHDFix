@@ -5,6 +5,7 @@
 #include "logging.hpp"
 
 #include "common.hpp"
+#include "config_keys.hpp"
 #include "d3d11_api.hpp"
 
 namespace
@@ -846,6 +847,11 @@ namespace CustomResolutionAndBorderless
 
     void Init_AspectFOVFix()
     {
+        if (std::abs(fAspectRatio - fNativeAspect) < 0.0001f)
+        {
+            spdlog::info("Aspect ratio matches native aspect ratio. Skipping {} and {}.", ConfigKeys::FixAspectRatio_Setting, ConfigKeys::FixFOV_Setting);
+            return;
+        }
         // Fix aspect ratio
         if (eGameType & MGS3 && bAspectFix)
         {
@@ -924,6 +930,11 @@ namespace CustomResolutionAndBorderless
 
     void Init_HUDFix()
     {
+        if (std::abs(fAspectRatio - fNativeAspect) < 0.0001f)
+        {
+            spdlog::info("Aspect ratio matches native aspect ratio. Skipping {}.", ConfigKeys::FixHUD_Setting);
+            return;
+        }
         if (eGameType & MGS2 && bHUDFix)
         {
             // MGS 2: HUD
@@ -1040,7 +1051,7 @@ namespace CustomResolutionAndBorderless
             }
 
         }
-        else if (eGameType & MGS3 && bHUDFix || eGameType & MG && fAspectRatio != fNativeAspect)
+        else if (eGameType & MGS3 && bHUDFix || eGameType & MG)
         {
             // MG1/2 | MGS 3: HUD
             uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
