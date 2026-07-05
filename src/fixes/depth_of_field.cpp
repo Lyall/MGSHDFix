@@ -204,6 +204,15 @@ namespace
     uintptr_t gMGS3FarFocusCompositeDrawReturn = 0;
     uint64_t gMGS3LastFarCompositeFrame = UINT64_MAX;
 
+    // MGS3 render-command emitters, used to queue a far-focus command from the
+    // nearfocus callback so near-only blur executes in the post-fx slot (before the
+    // 2D layer) instead of over the finished frame.
+    using MGS3RbAllocFn = void*(__fastcall*)(unsigned int size);
+    using MGS3RbPushFn = void(__fastcall*)(unsigned int type, void* payload);
+    constexpr unsigned int kMGS3CmdFarFocus = 0x31;
+    MGS3RbAllocFn gMGS3RbAlloc = nullptr;
+    MGS3RbPushFn gMGS3RbPush = nullptr;
+
     thread_local bool gInsideFarFocusBlur = false;
     thread_local bool gInsideNearFocusComposite = false;
     thread_local bool gExecutingNearFocusCommand = false;
@@ -1576,10 +1585,26 @@ namespace
         const bool stored = StoreMGS3NearFocusPacketFromWork(work, resolvedAlpha);
 
         // The far composite (which normally carries the near packet) runs earlier in
-        // the frame; if it didn't run at all this is a near-only shot.
+        // the frame; if it didn't run at all this is a near-only shot. Queue an inert
+        // far-focus command so the draw lands in the post-fx slot with the rest of the
+        // frame still to come - drawing here directly would blur the 2D layer too.
         if (stored && gMGS3LastFarCompositeFrame != gMGS3DofFrameIndex)
         {
-            DrawMGS3NearOnlyFocusPass();
+            if (gMGS3RbAlloc && gMGS3RbPush)
+            {
+                if (auto* packet = static_cast<MGS3FarFocusPacket*>(gMGS3RbAlloc(sizeof(MGS3FarFocusPacket))))
+                {
+                    packet->alpha = 1;
+                    packet->maxPlane = 2;
+                    packet->focusNear = 0.5f;
+                    packet->focusFar = 0.4f;
+                    gMGS3RbPush(kMGS3CmdFarFocus, packet);
+                }
+            }
+            else
+            {
+                DrawMGS3NearOnlyFocusPass();
+            }
         }
 
         if (auto* originalCallback = FindTrackedMGS3NearFocusCallback(work))
@@ -2579,6 +2604,28 @@ namespace
         }
     }
 
+    void ResolveMGS3RenderBufferEmitters()
+    {
+        uint8_t* alloc = Memory::PatternScan(
+            baseModule,
+            "48 63 05 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 63 C9 48 8D 14 80 49 8B 04",
+            "MGS 3: Depth of Field: render command alloc");
+        uint8_t* push = Memory::PatternScan(
+            baseModule,
+            "48 63 05 ?? ?? ?? ?? 4C 8D 15 ?? ?? ?? ?? 4C 8D 04 80 4E 8D 0C C5",
+            "MGS 3: Depth of Field: render command push");
+
+        if (alloc && push)
+        {
+            gMGS3RbAlloc = reinterpret_cast<MGS3RbAllocFn>(alloc);
+            gMGS3RbPush = reinterpret_cast<MGS3RbPushFn>(push);
+        }
+        else
+        {
+            spdlog::warn("MGS 3: Depth of Field: render command emitters not found; near-only focus draws late.");
+        }
+    }
+
     void InstallMGS3FarFocusDispatchHook()
     {
         uint8_t* farFocusDispatch = Memory::PatternScan(
@@ -2651,10 +2698,27 @@ namespace
 
             if (sourceTexture == 0 && std::isfinite(z))
             {
-                gMGS3LastFarCompositeFrame = gMGS3DofFrameIndex;
-                MGS3FarFocusPacket nearPacket {};
-                const bool hasNearPacket = ConsumeMGS3PendingNearFocusPacket(nearPacket);
-                DrawMGS3CombinedFocusSamples(ctx.rsp, packet, hasNearPacket ? &nearPacket : nullptr);
+                // Our queued near-only command carries this fingerprint; it must not
+                // count as a real far composite (the near callback would then skip
+                // queueing every other frame), and it's redundant if a real one
+                // already consumed the near packet this frame.
+                const bool synthetic = packet->alpha == 1 && packet->maxPlane == 2 &&
+                    packet->focusNear == 0.5f && packet->focusFar == 0.4f;
+                const bool redundant = synthetic && gMGS3LastFarCompositeFrame == gMGS3DofFrameIndex;
+                if (!synthetic)
+                {
+                    gMGS3LastFarCompositeFrame = gMGS3DofFrameIndex;
+                }
+
+                if (!redundant)
+                {
+                    MGS3FarFocusPacket nearPacket {};
+                    const bool hasNearPacket = ConsumeMGS3PendingNearFocusPacket(nearPacket);
+                    if (!synthetic || hasNearPacket)
+                    {
+                        DrawMGS3CombinedFocusSamples(ctx.rsp, packet, hasNearPacket ? &nearPacket : nullptr);
+                    }
+                }
             }
 
             if (gMGS3FarFocusCompositeDrawReturn)
@@ -2851,4 +2915,5 @@ void DepthOfFieldFixes::Initialize()
     InstallMGS3NearFocusWorkLinkHook();
     InstallMGS3FarFocusDispatchHook();
     InstallMGS3FarFocusCompositeDrawHook();
+    ResolveMGS3RenderBufferEmitters();
 }
