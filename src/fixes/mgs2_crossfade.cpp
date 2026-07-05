@@ -341,7 +341,9 @@ void MGS2_Crossfade::OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11S
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
             {
-                float d[4] = { alpha, brightness, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0);
+                // Fold brightness into alpha - dimming the overlay colour like the PS2
+                // darkens the whole mix here, so keep it a straight live/snap blend.
+                float d[4] = { alpha * brightness, 1.0f, 0, 0 }; memcpy(m.pData, d, 16); ctx->Unmap(cb.Get(), 0);
             }
 
             // save the pipeline state we touch, draw the fade, then restore it
