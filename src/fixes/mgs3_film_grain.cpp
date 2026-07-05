@@ -125,7 +125,16 @@ namespace
     std::atomic<size_t> gHudNoiseNodeNext = 0;
     std::atomic<uint64_t> gFrameSerial = 1;
 
-    ComPtr<ID3D11Texture2D> noiseTexture;
+    // A ring of pre-baked noise frames cycled per frame. Uploading every frame stalls
+    // some drivers for milliseconds even double-buffered (the present queue keeps both
+    // in flight); each slot uploads once and only re-bakes on a palette change.
+    constexpr int kNoiseRingSize = 8;
+    ComPtr<ID3D11Texture2D> noiseTextures[kNoiseRingSize];
+    ComPtr<ID3D11ShaderResourceView> noiseSRVs[kNoiseRingSize];
+    uint32_t noiseSlotGeneration[kNoiseRingSize] = {};
+    uint32_t noisePaletteGeneration = 1;
+    bool noiseLastColored = false;
+    ComPtr<ID3D11Texture2D> noiseTexture;   // the slot bound this frame
     ComPtr<ID3D11ShaderResourceView> noiseSRV;
     bool noiseTextureFailed = false;
     std::array<uint8_t, kNativeNoiseSize * kNativeNoiseSize * 4> noiseTextureData = {};
@@ -431,7 +440,7 @@ namespace
 
     bool EnsureNoiseTexture(ID3D11Device* device)
     {
-        if (noiseTexture)
+        if (noiseTextures[0])
         {
             return true;
         }
@@ -448,53 +457,65 @@ namespace
         textureDesc.ArraySize = 1;
         textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         textureDesc.SampleDesc.Count = 1;
-        textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+        textureDesc.Usage = D3D11_USAGE_DEFAULT;
         textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        textureDesc.CPUAccessFlags = 0;
 
-        if (FAILED(device->CreateTexture2D(&textureDesc, nullptr, noiseTexture.GetAddressOf())) ||
-            FAILED(device->CreateShaderResourceView(noiseTexture.Get(), nullptr, noiseSRV.GetAddressOf())))
+        for (int i = 0; i < kNoiseRingSize; ++i)
         {
-            noiseTexture.Reset();
-            noiseSRV.Reset();
-            noiseTextureFailed = true;
-            spdlog::warn("MGS 3: Film Grain: failed to create noise texture.");
-            return false;
+            if (FAILED(device->CreateTexture2D(&textureDesc, nullptr, noiseTextures[i].GetAddressOf())) ||
+                FAILED(device->CreateShaderResourceView(noiseTextures[i].Get(), nullptr, noiseSRVs[i].GetAddressOf())))
+            {
+                for (int k = 0; k < kNoiseRingSize; ++k)
+                {
+                    noiseTextures[k].Reset();
+                    noiseSRVs[k].Reset();
+                }
+                noiseTextureFailed = true;
+                spdlog::warn("MGS 3: Film Grain: failed to create noise texture.");
+                return false;
+            }
         }
 
         return true;
     }
 
-    bool UpdateNoiseTexture(ID3D11DeviceContext* context)
+    bool UpdateNoiseTexture(ID3D11DeviceContext* context, uint64_t frameStamp)
     {
         const uintptr_t work = gNativeWork.load(std::memory_order_relaxed);
-        const uint64_t frame = gFrameSerial.load(std::memory_order_relaxed);
-        if (noiseUploadFrame == frame && noiseUploadWork == work)
+        if (noiseUploadFrame == frameStamp && noiseUploadWork == work)
         {
-            return true;
+            return noiseTexture != nullptr;
         }
 
-        if (!context || !noiseTexture || !BuildNoiseTextureData())
-        {
-            return false;
-        }
-
-        D3D11_MAPPED_SUBRESOURCE mapped = {};
-        if (FAILED(context->Map(noiseTexture.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+        if (!context || !noiseTextures[0])
         {
             return false;
         }
 
-        auto* dest = static_cast<uint8_t*>(mapped.pData);
-        for (UINT y = 0; y < kNativeNoiseSize; ++y)
+        // Palette change invalidates the baked slots (they re-fill one per frame).
+        const bool colored = gNativeColored.load(std::memory_order_relaxed);
+        if (colored != noiseLastColored)
         {
-            memcpy(dest + y * mapped.RowPitch,
-                noiseTextureData.data() + y * kNativeNoiseSize * 4,
-                kNativeNoiseSize * 4);
+            noiseLastColored = colored;
+            ++noisePaletteGeneration;
         }
-        context->Unmap(noiseTexture.Get(), 0);
 
-        noiseUploadFrame = frame;
+        const int slot = static_cast<int>(frameStamp % kNoiseRingSize);
+        if (noiseSlotGeneration[slot] != noisePaletteGeneration)
+        {
+            if (!BuildNoiseTextureData())
+            {
+                return false;
+            }
+            context->UpdateSubresource(noiseTextures[slot].Get(), 0, nullptr,
+                noiseTextureData.data(), kNativeNoiseSize * 4, 0);
+            noiseSlotGeneration[slot] = noisePaletteGeneration;
+        }
+
+        noiseTexture = noiseTextures[slot];
+        noiseSRV = noiseSRVs[slot];
+        noiseUploadFrame = frameStamp;
         noiseUploadWork = work;
         return true;
     }
@@ -537,11 +558,10 @@ namespace
     // AutoPacket gets { node, stream }, so noise streams are matched by node - no
     // guessing. Point every op 0x13 draw state at our texture; empty ones (the goggle
     // and menu packets rely on the ignored op 0x0D instead) get the template first.
-    void RepairNoiseStream(SafetyHookContext& ctx)
+    void RepairNoiseStream(uintptr_t header)
     {
         // Hot path: runs for every stream the game executes, so no per-packet
         // readability checks - the game hands us a valid { node, stream } pair.
-        const uintptr_t header = static_cast<uintptr_t>(ctx.rcx);
         if (!header)
         {
             return;
@@ -561,7 +581,8 @@ namespace
 
         auto* device = g_D3D11Hooks.d3dDevice.Get();
         auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
-        if (!EnsureNoiseTexture(device) || !context || !UpdateNoiseTexture(context))
+        if (!EnsureNoiseTexture(device) || !context ||
+            !UpdateNoiseTexture(context, gFrameSerial.load(std::memory_order_relaxed)))
         {
             // Nothing to bind; kill the stream rather than draw with whatever's left over.
             if (Memory::IsWritable(reinterpret_cast<void*>(stream), sizeof(uint32_t)))
@@ -934,7 +955,7 @@ void MGS3FilmGrain::Initialize()
     {
         static SafetyHookMid autoPacketHook{};
         autoPacketHook = safetyhook::create_mid(address,
-            [](SafetyHookContext& ctx) { RepairNoiseStream(ctx); });
+            [](SafetyHookContext& ctx) { RepairNoiseStream(static_cast<uintptr_t>(ctx.rcx)); });
         LOG_HOOK(autoPacketHook, "MGS 3: Film Grain: BP_RenderDmaPack_AutoPacket")
         nativeRestorationActive = static_cast<bool>(autoPacketHook);
     }
@@ -1151,6 +1172,20 @@ bool MGS3FilmGrain::HasActiveGrain()
 void MGS3FilmGrain::BeginPresent()
 {
     insidePresent.store(true, std::memory_order_relaxed);
+
+    // Upload the frame's noise texture between frames; doing it from the stream hook
+    // lands mid-command-stream and stalls the GPU on the previous frame's references.
+    if (nativeRestorationActive &&
+        (gNativeNode.load(std::memory_order_relaxed) != 0 || gHudNoiseNodeNext.load(std::memory_order_relaxed) > 0))
+    {
+        auto* device = g_D3D11Hooks.d3dDevice.Get();
+        auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (device && context && EnsureNoiseTexture(device))
+        {
+            // Stamp for the upcoming frame so the stream hook's dedup hits.
+            UpdateNoiseTexture(context, gFrameSerial.load(std::memory_order_relaxed) + 1);
+        }
+    }
 }
 
 void MGS3FilmGrain::EndPresent()
