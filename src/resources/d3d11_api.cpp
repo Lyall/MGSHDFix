@@ -39,6 +39,74 @@ namespace
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
 
+    // A frame-skip catch-up renders two game frames inside one present; the second one
+    // skips its glow/grade pass, so showing it flashes a dim ungraded frame (worst at
+    // crossfade ends). The PS2 never displayed skipped frames - hold the previous image.
+    ComPtr<ID3D11Texture2D> g_heldFrame;
+    UINT g_heldW = 0, g_heldH = 0;
+    bool g_heldValid = false;
+
+    bool IsMergedPresent()
+    {
+        static uint32_t lastShadowSets = 0;
+        static bool mergedLast = false;
+
+        const uint32_t shadowSets = SceneDepth::ReadAndResetShadowSetCount();
+        const bool merged = !mergedLast && lastShadowSets >= 2 && shadowSets >= lastShadowSets * 2;
+        lastShadowSets = shadowSets;
+        mergedLast = merged;
+        return merged;
+    }
+
+    void HoldPreviousFrame(IDXGISwapChain* swap)
+    {
+        auto* device = g_D3D11Hooks.d3dDevice.Get();
+        auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        if (!device || !context || !swap)
+        {
+            return;
+        }
+
+        ComPtr<ID3D11Texture2D> backbuffer;
+        if (FAILED(swap->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backbuffer.GetAddressOf()))) || !backbuffer)
+        {
+            return;
+        }
+
+        D3D11_TEXTURE2D_DESC bb {};
+        backbuffer->GetDesc(&bb);
+        if (!g_heldFrame || g_heldW != bb.Width || g_heldH != bb.Height)
+        {
+            g_heldFrame.Reset();
+            g_heldValid = false;
+            D3D11_TEXTURE2D_DESC td = bb;
+            td.MipLevels = 1;
+            td.BindFlags = 0;
+            td.MiscFlags = 0;
+            td.Usage = D3D11_USAGE_DEFAULT;
+            td.CPUAccessFlags = 0;
+            if (FAILED(device->CreateTexture2D(&td, nullptr, g_heldFrame.GetAddressOf())))
+            {
+                return;
+            }
+            g_heldW = bb.Width;
+            g_heldH = bb.Height;
+        }
+
+        if (IsMergedPresent() && g_heldValid)
+        {
+            if (g_Logging.bVerboseLogging)
+            {
+                spdlog::info("D3D11Hooks: merged frame detected, holding previous image.");
+            }
+            context->CopyResource(backbuffer.Get(), g_heldFrame.Get());
+            return;
+        }
+
+        context->CopyResource(g_heldFrame.Get(), backbuffer.Get());
+        g_heldValid = true;
+    }
+
     void RefreshDeviceAndContext(IDXGISwapChain* swap)
     {
         ComPtr<ID3D11Device> device;
@@ -72,6 +140,11 @@ namespace
     {
         IDXGISwapChain* pSwapChain = reinterpret_cast<IDXGISwapChain*>(ctx.rcx);
         static bool firstInit = false;
+
+        if ((eGameType & (MGS2 | MGS3)) && firstInit)
+        {
+            HoldPreviousFrame(pSwapChain);
+        }
 
         if (!firstInit)
         {

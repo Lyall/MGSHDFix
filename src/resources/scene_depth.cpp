@@ -127,12 +127,32 @@ namespace
         return true;
     }
 
+    std::atomic<uint32_t> g_shadowSetCounter = 0;
+
     void STDMETHODCALLTYPE HookedOMSetRenderTargets(
         ID3D11DeviceContext* ctx,
         UINT numViews,
         ID3D11RenderTargetView* const* rtvs,
         ID3D11DepthStencilView* dsv)
     {
+        // Count shadow passes (square depth-attached targets) - a frame-skip catch-up
+        // renders the scene twice in one present, doubling this per frame.
+        if (numViews > 0 && rtvs && rtvs[0] && dsv)
+        {
+            ComPtr<ID3D11Resource> res;
+            rtvs[0]->GetResource(res.GetAddressOf());
+            ComPtr<ID3D11Texture2D> tex;
+            if (res && SUCCEEDED(res.As(&tex)))
+            {
+                D3D11_TEXTURE2D_DESC d {};
+                tex->GetDesc(&d);
+                if (d.Width == d.Height && d.Width >= 256)
+                {
+                    g_shadowSetCounter.fetch_add(1, std::memory_order_relaxed);
+                }
+            }
+        }
+
         if (dsv)
         {
             ComPtr<ID3D11Resource> res;
@@ -233,6 +253,11 @@ void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb, int priority)
         });
 }
 
+uint32_t SceneDepth::ReadAndResetShadowSetCount()
+{
+    return g_shadowSetCounter.exchange(0, std::memory_order_relaxed);
+}
+
 ID3D11ShaderResourceView* SceneDepth::GetSRV()
 {
     return g_available ? g_copySRV.Get() : nullptr;
@@ -241,6 +266,11 @@ ID3D11ShaderResourceView* SceneDepth::GetSRV()
 bool SceneDepth::IsAvailable()
 {
     return g_available;
+}
+
+ID3D11ShaderResourceView* SceneDepth::CaptureSceneDepth()
+{
+    return CopyDepth(g_sceneDepth.Get()) ? g_copySRV.Get() : nullptr;
 }
 
 ID3D11ShaderResourceView* SceneDepth::CaptureDepth(ID3D11DepthStencilView* depthStencil)
