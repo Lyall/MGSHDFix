@@ -133,6 +133,7 @@
     <ClInclude Include="src\features\mgs_smaa.hpp" />
     <ClInclude Include="src\fixes\color_correction.hpp" />
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />
+    <ClInclude Include="src\fixes\mgs2_crossfade.hpp" />
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp" />
     <ClInclude Include="src\resources\game_defines.hpp" />
     <ClInclude Include="src\resources\game_funcs.hpp" />

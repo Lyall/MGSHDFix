@@ -270,6 +270,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { ConfigKeys::MGS2_RestoreNodeDOBInfo_Section, ConfigKeys::MGS2_RestoreNodeDOBInfo_Setting, ConfigKeys::MGS2_RestoreNodeDOBInfo_Help, ConfigKeys::MGS2_RestoreNodeDOBInfo_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         { ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, ConfigKeys::MGS2_PhoneJingle_Help, ConfigKeys::MGS2_PhoneJingle_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
@@ -288,9 +291,13 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { ConfigKeys::UnusedRetroColonel_Section, ConfigKeys::UnusedRetroColonel_Setting, ConfigKeys::UnusedRetroColonel_Help, ConfigKeys::UnusedRetroColonel_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::UnusedRetroColonel_Option_Normal, { ConfigKeys::UnusedRetroColonel_Option_Normal, ConfigKeys::UnusedRetroColonel_Option_MSX, ConfigKeys::UnusedRetroColonel_Option_Subsistence } },
 
+                { ConfigKeys::MGS2_Thermal_Default_Mode_Section, "", "", "",
+        std::nullopt, false, Field::Spacer },
+
 
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, "", "", "",
         std::nullopt, false, Field::Spacer },
+
 
         {ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Section, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Setting, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Help, ConfigKeys::MGS2_Thermal_Cycle_Hotkey_Tooltip,
         std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Hotkey, 0, 0, 0, "Num7"},
@@ -298,7 +305,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         {ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, ConfigKeys::MGS2_Thermal_Mode_Help, ConfigKeys::MGS2_Thermal_Mode_Tooltip,
         std::nullopt, false, Field::Bool, false},
 
-
+ 
 
         { ConfigKeys::MGS2_Thermal_Default_Mode_Section, ConfigKeys::MGS2_Thermal_Default_Mode_Setting, ConfigKeys::MGS2_Thermal_Default_Mode_Help, ConfigKeys::MGS2_Thermal_Default_Mode_Tooltip,
         std::make_pair(ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting), false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2_Thermal_Default_Mode_Option_Substance, { ConfigKeys::MGS2_Thermal_Default_Mode_Option_Substance, ConfigKeys::MGS2_Thermal_Default_Mode_Option_RedHot, ConfigKeys::MGS2_Thermal_Default_Mode_Option_SplinterCell, ConfigKeys::MGS2_Thermal_Default_Mode_Option_WhiteHot, ConfigKeys::MGS2_Thermal_Default_Mode_Option_BlackHot } },

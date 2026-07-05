@@ -4,9 +4,10 @@
 
 
 #include "logging.hpp"
+#include "mgs2_restore_dogtag_viewer.hpp"
 #include "version.h"
 #include "version_checking.hpp"
-
+#include "config_keys.hpp"
 
 namespace
 {
@@ -324,6 +325,25 @@ void ASILoaderCompatibility::Check()
         {
             return FreeLibraryAndExitThread(baseModule, 1); //Only exit if we're in the launcher. KeepAiming will crash the game
         }                                                           //immediately once our init mutex releases, which will prevent the console & log messages from being printed.
+    }
+
+    if (eGameType & (LAUNCHER|MGS2) && MGS2_RestoreDogtagViewer::bRestoreNodeScreen && Util::CheckForASIFiles("MGS2-Dogtag-Restoration", false, false, nullptr))
+    {
+        std::string message =
+            "MOD COMPATIBILITY ALERT:\n"
+            "MGS2-Dogtag-Restoration.asi's functionality has been integrated directly into MGSHDFix.\n"
+            "\n"
+            "Please remove MGS2-Dogtag-Restoration.asi from your game directory, or disable " + std::string(ConfigKeys::MGS2_RestoreNodeDOBInfo_Setting) + " in the MGSHDFix config tool to continue using the old mod.\n";
+
+        int result = MessageBoxA(
+            nullptr,
+            message.c_str(),
+            "MGSHDFix Mod Compatibility Alert",
+            MB_ICONERROR | MB_OK
+        );
+        spdlog::error("MOD COMPATIBILITY ALERT: MGS2-Dogtag-Restoration.asi's functionality has been integrated directly into MGSHDFix.");
+        spdlog::error("MOD COMPATIBILITY ALERT: Please remove MGS2-Dogtag-Restoration.asi from your game directory, or disable {} in the MGSHDFix config tool to continue using the old mod.", ConfigKeys::MGS2_RestoreNodeDOBInfo_Setting);
+        MGS2_RestoreDogtagViewer::bRestoreNodeScreen = false;
     }
 
 }

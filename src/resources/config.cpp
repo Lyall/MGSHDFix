@@ -62,6 +62,7 @@
 #include "game_funcs.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
 #include "mgs_smaa.hpp"
 #include "mgs3_film_grain.hpp"
@@ -722,6 +723,11 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
     LOG_CONFIG(ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestoreNodeDOBInfo_Section, ConfigKeys::MGS2_RestoreNodeDOBInfo_Setting, MGS2_RestoreDogtagViewer::bRestoreNodeScreen);
+    LOG_CONFIG(ConfigKeys::MGS2_RestoreNodeDOBInfo_Section, ConfigKeys::MGS2_RestoreNodeDOBInfo_Setting, MGS2_RestoreDogtagViewer::bRestoreNodeScreen);
+
+
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2_RestoreSoLRadar::bEnabled);
     LOG_CONFIG(ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, MGS2_RestoreSoLRadar::bEnabled);

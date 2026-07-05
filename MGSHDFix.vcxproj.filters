@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\fixes\line_scaling.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\stereo_audio.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -122,13 +119,7 @@
     <ClCompile Include="src\fixes\mgs3_hud_fixes.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\depth_of_field.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
     <ClCompile Include="src\fixes\mgs2_underwater_filter.cpp">
-      <Filter>Fixes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fixes\mgs3_film_grain.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\cpu_core_limit.cpp">
@@ -275,9 +266,6 @@
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="src\fixes\optical_camo.cpp">
-      <Filter>Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="src\features\mgs_smaa.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
@@ -296,13 +284,29 @@
     <ClCompile Include="src\resources\scene_depth.cpp">
       <Filter>APIs</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mgs2_restore_elevator_glitch.cpp" />
-    <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
+    <ClCompile Include="src\resources\d3d11_state_cache.cpp">
+      <Filter>APIs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mgs2_restore_elevator_glitch.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_crossfade.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs3_film_grain.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\depth_of_field.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\line_scaling.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\optical_camo.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\fixes\line_scaling.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="src\fixes\effect_speeds.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
@@ -416,12 +420,6 @@
     </ClInclude>
     <ClInclude Include="src\resources\config_keys.hpp">
       <Filter>Config</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixes\depth_of_field.hpp">
-      <Filter>Fixes\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fixes\mgs3_film_grain.hpp">
-      <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
       <Filter>Fixes\Headers</Filter>
@@ -603,7 +601,24 @@
     <ClInclude Include="src\resources\scene_depth.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mgs2_restore_elevator_glitch.hpp" />
+    <ClInclude Include="src\resources\d3d11_state_cache.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_restore_elevator_glitch.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\depth_of_field.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\line_scaling.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs3_film_grain.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_crossfade.hpp">
+      <Filter>Shaders\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

@@ -288,7 +288,7 @@ namespace ConfigKeys
 
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "MGS3 - Restore Film Grain";
-    constexpr const char* MGS3_Restore_Film_Grain_Help = "";
+    constexpr const char* MGS3_Restore_Film_Grain_Help = "(May Impact Performance)";
     constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used by MGS3 cutscenes.";
 
     constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Bugfixes";
@@ -686,7 +686,10 @@ namespace ConfigKeys
     constexpr const char* RestoreDogtagNames_Help = "";
     constexpr const char* RestoreDogtagNames_Tooltip = "Restores the names of dogtags that were edited for copyright/legal reasons (ie Gackt -> Gekko.)";
 
-
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Section = "Various";
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Setting = "MGS2 - Restore Node DOB/Bloodtype";
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Help = "";
+    constexpr const char* MGS2_RestoreNodeDOBInfo_Tooltip = "Restores DOB / Bloodtype information entry at the start of the Plant chapter.";
 
     constexpr const char* RestoreSoLRadarRotation_Section = "Various";
     constexpr const char* RestoreSoLRadarRotation_Setting = "MGS2 - Restore SoL Radar Rotation";
@@ -864,9 +867,11 @@ namespace ConfigKeys
     constexpr const char* Debugging_Start_In_Dev_Menu_Tooltip = "Starts the game in the developer menu for debugging.";
 
     constexpr const char* Restore_Title_Screen_Swapping_Section = "Various";
-    constexpr const char* Restore_Title_Screen_Swapping_Setting = "MGS2 - Restore Title Screen 2 Color Swapping";
+    constexpr const char* Restore_Title_Screen_Swapping_Setting = "MGS2 - Restore Title Screen 2 Color";
     constexpr const char* Restore_Title_Screen_Swapping_Help = "";
-    constexpr const char* Restore_Title_Screen_Swapping_Tooltip = "Makes the title screen's 2 change color upon each game completion.";
+    constexpr const char* Restore_Title_Screen_Swapping_Tooltip = "Makes the title screen's 2 change color upon each game completion.\n"
+                                                                  "\n"
+                                                                  "Requires MGS2 Community Bugfix Compilation.";
 
     
         

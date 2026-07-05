@@ -181,6 +181,12 @@ void MGS2_RestoreDogtagViewer::Restore()
 #pragma endregion dogtag_viewer
 
 
+    if (!bRestoreNodeScreen)
+    {
+        return;
+    }
+
+
 #pragma region node_screen
     const std::time_t now = std::time(nullptr);
     std::tm localTime {};
