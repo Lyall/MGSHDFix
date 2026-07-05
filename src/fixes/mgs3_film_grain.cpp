@@ -539,8 +539,10 @@ namespace
     // and menu packets rely on the ignored op 0x0D instead) get the template first.
     void RepairNoiseStream(SafetyHookContext& ctx)
     {
+        // Hot path: runs for every stream the game executes, so no per-packet
+        // readability checks - the game hands us a valid { node, stream } pair.
         const uintptr_t header = static_cast<uintptr_t>(ctx.rcx);
-        if (!header || !Memory::IsReadable(reinterpret_cast<const void*>(header), 0x10))
+        if (!header)
         {
             return;
         }
@@ -548,6 +550,11 @@ namespace
         const uintptr_t node = *reinterpret_cast<const uintptr_t*>(header);
         const uintptr_t stream = *reinterpret_cast<const uintptr_t*>(header + 0x08);
         if (!stream || !IsTrackedNoiseNode(node))
+        {
+            return;
+        }
+
+        if (!Memory::IsReadable(reinterpret_cast<const void*>(stream), 0x10))
         {
             return;
         }
@@ -570,11 +577,6 @@ namespace
         uintptr_t command = stream;
         for (int steps = 0; steps < 256; ++steps)
         {
-            if (!Memory::IsReadable(reinterpret_cast<const void*>(command), 0x10))
-            {
-                break;
-            }
-
             const uint8_t opcode = static_cast<uint8_t>(*reinterpret_cast<const uint32_t*>(command) & 0xff);
             if (opcode == 0x22)
             {
@@ -582,7 +584,7 @@ namespace
             }
 
             const size_t size = NoiseStreamCommandSize(opcode);
-            if (!size || !Memory::IsWritable(reinterpret_cast<void*>(command), size))
+            if (!size)
             {
                 break;
             }
