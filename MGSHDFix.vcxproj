@@ -115,6 +115,7 @@
     <ClCompile Include="src\fixes\pause_on_focus_loss.cpp" />
     <ClCompile Include="src\fixes\stereo_audio.cpp" />
     <ClCompile Include="src\resources\d3d11_api.cpp" />
+    <ClCompile Include="src\resources\d3d11_state_cache.cpp" />
     <ClCompile Include="src\resources\scene_depth.cpp" />
     <ClCompile Include="src\resources\gamevars.cpp" />
     <ClCompile Include="src\resources\helper.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="src\fixes\pause_on_focus_loss.hpp" />
     <ClInclude Include="src\fixes\stereo_audio.hpp" />
     <ClInclude Include="src\resources\d3d11_api.hpp" />
+    <ClInclude Include="src\resources\d3d11_state_cache.hpp" />
     <ClInclude Include="src\resources\scene_depth.hpp" />
     <ClInclude Include="src\resources\helper.hpp" />
     <ClInclude Include="src\warnings\reshade_compatibility_checks.hpp" />

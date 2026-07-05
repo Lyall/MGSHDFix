@@ -24,6 +24,7 @@
 #include "depth_of_field.hpp"
 #include "mgs3_film_grain.hpp"
 #include "scene_depth.hpp"
+#include "d3d11_state_cache.hpp"
 void afterPresent();
 
 namespace
@@ -194,6 +195,11 @@ namespace
                 dxgiDevice->Release();
             }
             SceneDepth::Initialize();   // hook OMSetRenderTargets now that the context exists
+            if (eGameType & (MGS2 | MGS3))
+            {
+                // Drop redundant IA state changes - the games re-set layout/topology per draw.
+                D3D11StateCache::Initialize(g_D3D11Hooks.d3dDevice.Get(), g_D3D11Hooks.d3dDeviceContext.Get());
+            }
             afterPresent();
         }
 
