@@ -425,3 +425,8 @@ void MGS2_Crossfade::OnPresent(IDXGISwapChain* swap)
 
     capturedCleanFrame = false;
 }
+
+bool MGS2_Crossfade::IsFading()
+{
+    return bEnabled && active;
+}
