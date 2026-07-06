@@ -5,6 +5,7 @@
 #include "logging.hpp"
 #include "d3d11_api.hpp"
 #include "scene_depth.hpp"
+#include "mgs2_crossfade.hpp"
 
 #include "gamevars.hpp"
 
@@ -21,8 +22,8 @@ namespace
     constexpr int         kAlphaFloor       = 0;        // keep 0 so rim verts stay transparent (soft edge)
     constexpr float       kTintScale        = 1.0f;     // raw PS2 colour byte; the shader does GS modulate
     constexpr float       kAlphaGain        = 1.99f;    // PS2 blends at As/128; D3D uses byte/255 -> 255/128
-    constexpr float       kAlphaCap         = 0.5f;     // PS2 blend ceiling; bounds the feedback
-    constexpr float       kFeedbackGain     = 1.01f;    // PS2 GS overbright the Win32 renderer clamped away
+    constexpr float       kAlphaCap         = 1.0f;
+    constexpr float       kFeedbackGain     = 1.005f;   // PS2 GS overbright the Win32 renderer clamped away
 
     constexpr const char* kDieSig =
         "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
@@ -298,6 +299,7 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     {
         return;
     }
+
     if (!EnsureD3D())
     {
         return;
@@ -338,7 +340,17 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
         g_capW = bb.Width; g_capH = bb.Height;
         justCreated = true;
     }
-    if (justCreated) ctx->CopyResource(g_capTex.Get(), backbuf.Get());   // seed clean
+    // Reseed the feedback texture from the live scene when it's stale - a gap since the smoke
+    // last drew, or a camera crossfade - so the puffs never warp an old frame into a ghost.
+    static ULONGLONG s_lastCapUpdateMs = 0;
+    const ULONGLONG nowMs = GetTickCount64();
+    const bool stale = (s_lastCapUpdateMs == 0) || (nowMs - s_lastCapUpdateMs) > 100;
+    s_lastCapUpdateMs = nowMs;
+
+    if (justCreated || stale || MGS2_Crossfade::IsFading())
+    {
+        ctx->CopyResource(g_capTex.Get(), backbuf.Get());
+    }
 
     // Grow the dynamic vertex buffer if needed.
     UINT need = (UINT)verts.size();
