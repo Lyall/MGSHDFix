@@ -11,7 +11,7 @@ namespace
 {
     // Blur actor Act(); work: +0x60 packet (bit 0x100 = hidden), +0x78 intense (float, 0..128).
     constexpr const char* kActSig =
-        "48 8B C4 48 89 58 10 57 48 81 EC 80 00 00 00 0F 29 70 E8 48 8D 50 08 48 8B F9 0F 29 78 D8 8B 49 58";
+        "48 8B C4 48 89 58 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8D 50";
 
     SafetyHookInline g_actHook {};
 

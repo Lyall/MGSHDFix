@@ -271,11 +271,20 @@ namespace ConfigKeys
 
 
     constexpr const char* FixDepthOfField_Section = "Bugfixes";
-    constexpr const char* FixDepthOfField_Setting = "Fix Broken Depth of Field";
+    constexpr const char* FixDepthOfField_Setting = "Fix Depth of Field";
     constexpr const char* FixDepthOfField_Help = "";
     constexpr const char* FixDepthOfField_Tooltip = "Restores depth of field blur at higher resolutions.\n"
                                                     "\n"
                                                     "Also restores close-up depth of field / camera blur, which was outright disabled/broken by the HD Collection.";
+
+
+    constexpr const char* MotionBlur_Section = "Bugfixes";
+    constexpr const char* MotionBlur_Setting = "Fix Motion Blur";
+    constexpr const char* MotionBlur_Help = "(Can be a little extreme)";
+    constexpr const char* MotionBlur_Tooltip = "Restores the game's built-in motion blur, which was broken by the HD Collection.\n"
+                                               "\n"
+                                               "This effect can seem a little strong / distracting at higher resolutions.";
+
 
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Setting = "Depth of Field Blur Strength";
@@ -287,7 +296,7 @@ namespace ConfigKeys
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "Fix Film Grain";
     constexpr const char* MGS3_Restore_Film_Grain_Help = "(May Impact Performance)";
-    constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used during dark cutscenes.";
+    constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used during dark cutscenes, which was broken by the HD Collection.";
 
     constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Various";
     constexpr const char* MGS2_RestoreActionLevelSelection_Setting = "Restore Main Menu Voiceovers";

@@ -680,8 +680,11 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2DemoBlur::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = bRestoreVFX;
 
+            ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
+            LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
+            
 
             ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);

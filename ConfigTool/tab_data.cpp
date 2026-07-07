@@ -276,6 +276,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, ConfigKeys::MGS2_Restore_VFX_Help, ConfigKeys::MGS2_Restore_VFX_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        {(MGS2), ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, ConfigKeys::MotionBlur_Help, ConfigKeys::MotionBlur_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
         { (MGS2|MGS3), ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, ConfigKeys::FixDepthOfField_Help, ConfigKeys::FixDepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
