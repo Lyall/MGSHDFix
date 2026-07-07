@@ -39,6 +39,7 @@
 #include "mgs2_water_effects.hpp"
 #include "mgs2_lens_droplets.hpp"
 #include "mgs2_gas_haze.hpp"
+#include "mgs2_flare_occlusion.hpp"
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
@@ -545,6 +546,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2WaterEffects::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
+        INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
         INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
         INITIALIZE(TextureLiveSwaps::ApplyFixes());

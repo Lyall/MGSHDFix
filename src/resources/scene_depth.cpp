@@ -129,6 +129,128 @@ namespace
 
     std::atomic<uint32_t> g_shadowSetCounter = 0;
 
+    // ---- Late-pass depth propagation (MGS2) -----------------------------------------------------
+    // With MSAA the game renders the scene into an MSAA depth buffer, then binds a separate never-written
+    // non-MSAA depth for the late overlay pass, so overlay prims z-test against an empty buffer (and our
+    // depth copy captures that same empty buffer). Fill it from the MSAA scene depth when it is first
+    // bound each frame.
+    ComPtr<ID3D11Texture2D> g_msDepthTex;
+    bool g_msSeenThisFrame = false;
+    bool g_propagatedThisFrame = false;
+    bool g_inPropagate = false;
+    bool g_fillFailed = false;
+    ComPtr<ID3D11VertexShader>       g_fillVS;
+    ComPtr<ID3D11PixelShader>        g_fillPS;
+    ComPtr<ID3D11DepthStencilState>  g_fillDSS;
+    ComPtr<ID3D11RasterizerState>    g_fillRS;
+    ComPtr<ID3D11ShaderResourceView> g_msSRV;
+    ID3D11Texture2D*                 g_msSRVFor = nullptr;
+
+    const char* kFillShader = R"(
+    Texture2DMS<float> msDepth : register(t0);
+    void VS(uint id : SV_VertexID, out float4 pos : SV_Position) {
+        float2 uv = float2((id << 1) & 2, id & 2);
+        pos = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0);
+    }
+    float PS(float4 pos : SV_Position) : SV_Depth {
+        return msDepth.Load(int2(pos.xy), 0);
+    }
+    )";
+
+    bool EnsureFill(ID3D11Device* dev)
+    {
+        if (g_fillVS && g_fillPS && g_fillDSS && g_fillRS) return true;
+        if (g_fillFailed) return false;
+        if (!g_D3D11Hooks.D3DCompileFunc) { g_fillFailed = true; return false; }
+        ComPtr<ID3DBlob> vsb, psb, err;
+        bool ok = SUCCEEDED(g_D3D11Hooks.D3DCompileFunc(kFillShader, strlen(kFillShader), nullptr, nullptr, nullptr,
+                      "VS", "vs_5_0", 0, 0, vsb.GetAddressOf(), err.ReleaseAndGetAddressOf()));
+        if (ok) ok = SUCCEEDED(g_D3D11Hooks.D3DCompileFunc(kFillShader, strlen(kFillShader), nullptr, nullptr, nullptr,
+                      "PS", "ps_5_0", 0, 0, psb.GetAddressOf(), err.ReleaseAndGetAddressOf()));
+        if (!ok)
+        {
+            spdlog::error("SceneDepth: depth-propagate shader compile failed: {}", err ? (const char*)err->GetBufferPointer() : "?");
+            g_fillFailed = true;
+            return false;
+        }
+        if (FAILED(dev->CreateVertexShader(vsb->GetBufferPointer(), vsb->GetBufferSize(), nullptr, g_fillVS.GetAddressOf())) ||
+            FAILED(dev->CreatePixelShader(psb->GetBufferPointer(), psb->GetBufferSize(), nullptr, g_fillPS.GetAddressOf())))
+        {
+            g_fillFailed = true;
+            return false;
+        }
+        D3D11_DEPTH_STENCIL_DESC ds {};
+        ds.DepthEnable = TRUE; ds.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL; ds.DepthFunc = D3D11_COMPARISON_ALWAYS;
+        dev->CreateDepthStencilState(&ds, g_fillDSS.GetAddressOf());
+        D3D11_RASTERIZER_DESC rs {};
+        rs.FillMode = D3D11_FILL_SOLID; rs.CullMode = D3D11_CULL_NONE; rs.DepthClipEnable = FALSE;
+        dev->CreateRasterizerState(&rs, g_fillRS.GetAddressOf());
+        if (!g_fillDSS || !g_fillRS) { g_fillFailed = true; return false; }
+        return true;
+    }
+
+    void PropagateDepth(ID3D11DeviceContext* ctx, ID3D11DepthStencilView* dsv, UINT w, UINT h)
+    {
+        auto* dev = g_D3D11Hooks.d3dDevice.Get();
+        if (!dev || !EnsureFill(dev)) return;
+
+        // SRV over the game's MSAA depth (created with SHADER_RESOURCE bind).
+        if (g_msSRV && g_msSRVFor != g_msDepthTex.Get()) g_msSRV.Reset();
+        if (!g_msSRV)
+        {
+            D3D11_TEXTURE2D_DESC md {}; g_msDepthTex->GetDesc(&md);
+            DXGI_FORMAT typeless, srvFmt;
+            if (!MapDepthFormat(md.Format, typeless, srvFmt)) return;
+            D3D11_SHADER_RESOURCE_VIEW_DESC sv {};
+            sv.Format = srvFmt; sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+            if (FAILED(dev->CreateShaderResourceView(g_msDepthTex.Get(), &sv, g_msSRV.GetAddressOf()))) return;
+            g_msSRVFor = g_msDepthTex.Get();
+        }
+
+        g_inPropagate = true;
+
+        // Save what we clobber. The caller is about to rebind render targets, so those need no restore.
+        ComPtr<ID3D11VertexShader> oVS; ComPtr<ID3D11PixelShader> oPS;
+        ctx->VSGetShader(oVS.GetAddressOf(), nullptr, nullptr);
+        ctx->PSGetShader(oPS.GetAddressOf(), nullptr, nullptr);
+        ComPtr<ID3D11InputLayout> oIL; ctx->IAGetInputLayout(oIL.GetAddressOf());
+        D3D11_PRIMITIVE_TOPOLOGY oTopo; ctx->IAGetPrimitiveTopology(&oTopo);
+        ComPtr<ID3D11DepthStencilState> oDSS; UINT oSR = 0; ctx->OMGetDepthStencilState(oDSS.GetAddressOf(), &oSR);
+        ComPtr<ID3D11RasterizerState> oRS; ctx->RSGetState(oRS.GetAddressOf());
+        ComPtr<ID3D11ShaderResourceView> oSRV; ctx->PSGetShaderResources(0, 1, oSRV.GetAddressOf());
+        UINT oNVP = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
+        D3D11_VIEWPORT oVP[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+        ctx->RSGetViewports(&oNVP, oVP);
+
+        ID3D11ShaderResourceView* srv = g_msSRV.Get();
+        D3D11_VIEWPORT vp = { 0.f, 0.f, (float)w, (float)h, 0.f, 1.f };
+        ctx->OMSetRenderTargets(0, nullptr, dsv);
+        ctx->IASetInputLayout(nullptr);
+        ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        ctx->VSSetShader(g_fillVS.Get(), nullptr, 0);
+        ctx->PSSetShader(g_fillPS.Get(), nullptr, 0);
+        ctx->PSSetShaderResources(0, 1, &srv);
+        ctx->OMSetDepthStencilState(g_fillDSS.Get(), 0);
+        ctx->RSSetState(g_fillRS.Get());
+        ctx->RSSetViewports(1, &vp);
+        ctx->Draw(3, 0);
+
+        ctx->VSSetShader(oVS.Get(), nullptr, 0);
+        ctx->PSSetShader(oPS.Get(), nullptr, 0);
+        ctx->IASetInputLayout(oIL.Get());
+        ctx->IASetPrimitiveTopology(oTopo);
+        ctx->OMSetDepthStencilState(oDSS.Get(), oSR);
+        ctx->RSSetState(oRS.Get());
+        ID3D11ShaderResourceView* rSRV = oSRV.Get();
+        ctx->PSSetShaderResources(0, 1, &rSRV);
+        if (oNVP) ctx->RSSetViewports(oNVP, oVP);
+
+        g_inPropagate = false;
+        g_propagatedThisFrame = true;
+        static bool s_logged = false;
+        if (!s_logged) { s_logged = true; spdlog::info("SceneDepth: overlay depth propagation active ({}x{})", w, h); }
+    }
+
     void STDMETHODCALLTYPE HookedOMSetRenderTargets(
         ID3D11DeviceContext* ctx,
         UINT numViews,
@@ -164,9 +286,25 @@ namespace
                 tex->GetDesc(&d);
                 DXGI_FORMAT a, b;
                 UINT bb = BackbufferArea();
-                if (d.SampleDesc.Count == 1 && MapDepthFormat(d.Format, a, b) && bb &&
-                    static_cast<uint64_t>(d.Width) * d.Height >= static_cast<uint64_t>(bb * 0.6f))
+                const bool bigDepth = MapDepthFormat(d.Format, a, b) && bb &&
+                    static_cast<uint64_t>(d.Width) * d.Height >= static_cast<uint64_t>(bb * 0.6f);
+                if (bigDepth && d.SampleDesc.Count > 1 && !g_inPropagate)
                 {
+                    // The MSAA 3D-pass depth: remember it for the late-pass propagation.
+                    g_msDepthTex = tex;
+                    g_msSeenThisFrame = true;
+                    static bool s_loggedMs = false;
+                    if (!s_loggedMs) { s_loggedMs = true; spdlog::info("SceneDepth: MSAA scene depth {}x{} count={}", d.Width, d.Height, d.SampleDesc.Count); }
+                }
+                else if (bigDepth && d.SampleDesc.Count == 1)
+                {
+                    // A separate non-MSAA depth bound after the MSAA scene = the empty overlay depth;
+                    // fill it with the scene depth so the late pass z-tests like the PS2 did.
+                    if ((eGameType & MGS2) && g_msSeenThisFrame && !g_propagatedThisFrame && !g_inPropagate &&
+                        tex.Get() != g_msDepthTex.Get())
+                    {
+                        PropagateDepth(ctx, dsv, d.Width, d.Height);
+                    }
                     g_sceneDepth = tex;
                     if (numViews > 0 && rtvs && rtvs[0])
                         g_sceneColorRTV = rtvs[0];
@@ -218,6 +356,8 @@ void SceneDepth::ResetStatus()
     g_in3D = false;
     g_sceneColorRTV.Reset();
     g_sceneDepth.Reset();
+    g_msSeenThisFrame = false;
+    g_propagatedThisFrame = false;
 }
 
 void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb, int priority)

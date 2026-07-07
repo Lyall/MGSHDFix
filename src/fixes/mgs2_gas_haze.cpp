@@ -18,12 +18,16 @@ namespace
     // right after the load to set opacity. Centre verts get alpha, rim verts stay 0 (soft puff).
     constexpr const char* kAlphaSig         = "F3 0F 10 3D CC C6 18 00";
     constexpr ptrdiff_t   kAlphaHookOffset  = 8;
-    constexpr float       kAlphaScale       = 120.0f;   // centre-vert alpha = pos.vw * this (byte-capped)
+    constexpr float       kAlphaScale       = 64.0f;    // centre-vert alpha = pos.vw * this (PS2's constant;
+                                                        // higher makes the fan edges visible)
     constexpr int         kAlphaFloor       = 0;        // keep 0 so rim verts stay transparent (soft edge)
     constexpr float       kTintScale        = 1.0f;     // raw PS2 colour byte; the shader does GS modulate
     constexpr float       kAlphaGain        = 1.99f;    // PS2 blends at As/128; D3D uses byte/255 -> 255/128
     constexpr float       kAlphaCap         = 1.0f;
-    constexpr float       kFeedbackGain     = 1.005f;   // PS2 GS overbright the Win32 renderer clamped away
+    // Overbright per feedback iteration. The GS sampled the buffer it was drawing into, so overlapping
+    // puffs compounded the cue's 0x81 modulate several times per frame; we sample one frozen capture, so
+    // fold that in here. Tuned against PS2 footage.
+    constexpr float       kFeedbackGain      = 1.05f;
 
     constexpr const char* kDieSig =
         "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
@@ -43,7 +47,7 @@ namespace
     constexpr int       kNVerts        = 17;
 
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
-    constexpr float     kWarp      = 0.982f;           // PS2 ADDRESS_SCALE: per-puff lens magnify (the warp)
+    constexpr float     kWarp      = 0.98f;            // PS2 ADDRESS_SCALE: per-puff lens magnify (the warp)
     constexpr float     kSoften    = 0.00176f;         // whisper seam-hiding blur (tiny; not the old smear)
     constexpr float     kDepthBias = 0.0002f;          // reversed-Z occlusion epsilon (tuned)
 
@@ -93,8 +97,8 @@ namespace
         // (~2% magnify) -> refraction. Whisper 4-tap hides the fan seams.
         float3 c = sceneTex.Sample(sampLin, i.uv).rgb * 0.6;
         [unroll] for (int k = 0; k < 4; k++) c += sceneTex.Sample(sampLin, i.uv + K4[k]*soften).rgb * 0.1;
-        c *= i.col.rgb * 1.9921875;   // GS modulate (vertex colour; 0x80 = neutral, 255/128 = 1.9921875)
-        c *= feedbackGain;            // PS2 GS overbright, compounded via the previous-frame feedback
+        c *= i.col.rgb * 1.9921875;   // GS modulate (vertex colour; 0x80 = neutral)
+        c *= feedbackGain;            // see kFeedbackGain
         float2 screenUV = i.pos.xy / screenSize;
         float  sceneZ = depthTex.Sample(sampPt, screenUV).r;
         // reversed-Z (far=0, nearer=larger): hide where scene geometry is nearer than this puff
@@ -116,7 +120,25 @@ namespace
     ComPtr<ID3D11Texture2D>         g_capTex;
     ComPtr<ID3D11ShaderResourceView> g_capSRV;
     UINT g_capW = 0, g_capH = 0;
+    ULONGLONG g_lastCapMs = 0;      // last time g_capTex was refreshed
     bool g_d3dInit = false, g_d3dFailed = false;
+
+    // (Re)create the feedback capture texture to match the given surface. Returns true if recreated.
+    bool EnsureCapTex(ID3D11Device* dev, const D3D11_TEXTURE2D_DESC& bb)
+    {
+        if (g_capTex && g_capW == bb.Width && g_capH == bb.Height) return false;
+        g_capSRV.Reset(); g_capTex.Reset();
+        D3D11_TEXTURE2D_DESC td = bb;
+        td.BindFlags = D3D11_BIND_SHADER_RESOURCE; td.Usage = D3D11_USAGE_DEFAULT;
+        td.CPUAccessFlags = 0; td.MiscFlags = 0; td.SampleDesc = { 1, 0 };
+        td.MipLevels = 1; td.ArraySize = 1;
+        if (FAILED(dev->CreateTexture2D(&td, nullptr, g_capTex.GetAddressOf()))) return false;
+        D3D11_SHADER_RESOURCE_VIEW_DESC sv = {}; sv.Format = td.Format;
+        sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; sv.Texture2D.MipLevels = 1;
+        dev->CreateShaderResourceView(g_capTex.Get(), &sv, g_capSRV.GetAddressOf());
+        g_capW = bb.Width; g_capH = bb.Height;
+        return true;
+    }
 
     // ---- read the prim and build CPU triangles ----------------------------------------------------
     void AppendInstance(uintptr_t work)
@@ -200,11 +222,23 @@ namespace
         AppendInstance(work);
     }
 
+    // Cutscene effects tick at 30fps on the PS2 but 60fps here, running the puffs and the feedback 2x too
+    // fast. Hold the Act every other cutscene frame and only advance the feedback on frames it ran.
+    bool g_actUpdated = true;
+
     void __fastcall Act_Detour(uintptr_t work)
     {
-        g_actHook.fastcall<void>(work);
+        static int s_tickClock = -0x7fffffff;
+        static bool s_skip = false;
+        if (const int clock = g_GameVars.DG_Clock(); clock != s_tickClock)   // first Act instance this frame
+        {
+            s_tickClock = clock;
+            s_skip = g_GameVars.InCutscene() ? !s_skip : false;   // gameplay ran 60fps on PS2 too - no skip
+            g_actUpdated = !s_skip;
+        }
+        if (g_actUpdated) g_actHook.fastcall<void>(work);
         if (!work) return;
-        __try { BuildSmoke(work); }
+        __try { BuildSmoke(work); }   // re-read even when held: the frozen prims still draw this frame
         __except (EXCEPTION_EXECUTE_HANDLER) {}
     }
 
@@ -299,7 +333,6 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     {
         return;
     }
-
     if (!EnsureD3D())
     {
         return;
@@ -326,30 +359,16 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     if (bb.SampleDesc.Count != 1) return;   // MSAA scene RT not supported by the plain copy/SRV
 
     // Warp source = previous frame's result (PS2 BP_PreviousFrameTexture); fed back for accumulation.
-    bool justCreated = false;
-    if (!g_capTex || g_capW != bb.Width || g_capH != bb.Height)
-    {
-        g_capSRV.Reset(); g_capTex.Reset();
-        D3D11_TEXTURE2D_DESC td = bb;
-        td.BindFlags = D3D11_BIND_SHADER_RESOURCE; td.Usage = D3D11_USAGE_DEFAULT;
-        td.CPUAccessFlags = 0; td.MiscFlags = 0; td.SampleDesc = { 1, 0 };
-        if (FAILED(dev->CreateTexture2D(&td, nullptr, g_capTex.GetAddressOf()))) return;
-        D3D11_SHADER_RESOURCE_VIEW_DESC sv = {}; sv.Format = td.Format;
-        sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; sv.Texture2D.MipLevels = 1;
-        dev->CreateShaderResourceView(g_capTex.Get(), &sv, g_capSRV.GetAddressOf());
-        g_capW = bb.Width; g_capH = bb.Height;
-        justCreated = true;
-    }
-    // Reseed the feedback texture from the live scene when it's stale - a gap since the smoke
-    // last drew, or a camera crossfade - so the puffs never warp an old frame into a ghost.
-    static ULONGLONG s_lastCapUpdateMs = 0;
-    const ULONGLONG nowMs = GetTickCount64();
-    const bool stale = (s_lastCapUpdateMs == 0) || (nowMs - s_lastCapUpdateMs) > 100;
-    s_lastCapUpdateMs = nowMs;
-
+    const bool justCreated = EnsureCapTex(dev, bb);
+    if (!g_capTex) return;
+    // Reseed from the live scene when the capture is stale (a gap since the smoke last ran, or a camera
+    // crossfade) so the puffs never warp an old frame in as a ghost.
+    const ULONGLONG nowCapMs = GetTickCount64();
+    const bool stale = (g_lastCapMs == 0) || (nowCapMs - g_lastCapMs) > 100;
     if (justCreated || stale || MGS2_Crossfade::IsFading())
     {
         ctx->CopyResource(g_capTex.Get(), backbuf.Get());
+        g_lastCapMs = nowCapMs;
     }
 
     // Grow the dynamic vertex buffer if needed.
@@ -437,8 +456,12 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
     for (auto* s : oSRV) if (s) s->Release();
     for (auto* s : oSamp) if (s) s->Release();
 
-    // Persist this frame (scene + haze) as next frame's warp source -> feedback.
-    ctx->CopyResource(g_capTex.Get(), backbuf.Get());
+    // Persist this frame (pre-UI, so subtitles never feed back) as the next iteration's warp source.
+    if (g_actUpdated)
+    {
+        ctx->CopyResource(g_capTex.Get(), backbuf.Get());
+        g_lastCapMs = GetTickCount64();
+    }
 }
 
 void MGS2GasHaze::Initialize()

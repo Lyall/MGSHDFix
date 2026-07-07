@@ -6,6 +6,7 @@
 #include "effect_speeds.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
+#include "mgs2_flare_occlusion.hpp"
 
 #include <cmath>
 
@@ -136,8 +137,6 @@ namespace
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_RISE = 0x3D000000; // 0.03125f
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_FALL = 0xBC2AAAAB; // -0.010416667f
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_EMIT_FADE = 0xBB888889;  // -0.004166667f
-
-
 }
 
 /// Called every frame during Present()
@@ -404,24 +403,52 @@ void EffectSpeedFix::Initialize()
 #pragma endregion
 
 #pragma region demo_lens_flare
-    // lens_flare.c Act(): MC runs the sun flare dim and culls its halation off-screen, so the PS2 soft
-    // bloom (underwater Plant intro) collapses to a glint. Lift alpha, relax the off-screen cull + edge-fade.
+    // Lens flare: the PS2 blends the sprites at As/128, D3D at As/255, so the flare renders at half
+    // brightness. The ramp is also authored for the 30fps demo tick, and the cull / edge-fade thresholds
+    // fire ~33% early under the cinema's vertical crop. Fix all three, and feed the sun's position to
+    // mgs2_flare_occlusion so the flares dim when the sun is occluded.
     if (uint8_t* lensFlareRamp = Memory::PatternScan(baseModule,
             "8B 05 ?? ?? ?? ?? FF C0 66 0F 6E C0 0F 5B C0 F3 0F 59 83 3C 01 00 00 44 39 93 34 01 00 00",
             "MGS 2: Effect Speed Fix: user\\shibata\\demo\\lens_flare.c -> Act()"))
     {
+        static SafetyHookMid lensFlareRampRateHook{};
+        lensFlareRampRateHook = safetyhook::create_mid(lensFlareRamp + 0x17,   // xmm0 = ramp advance
+            [](SafetyHookContext& ctx)
+            {
+                ctx.xmm0.f32[0] *= 0.5f;   // Act runs at 60fps, the ramp delta is authored for 30
+            });
+        LOG_HOOK(lensFlareRampRateHook, "MGS 2: Effect Speed Fix: lens flare pulse rate")
         static SafetyHookMid lensFlareAlphaHook{};
-        lensFlareAlphaHook = safetyhook::create_mid(lensFlareRamp + 0x65,    // after the alpha_ratio clamp
-            [](SafetyHookContext& ctx) { *reinterpret_cast<float*>(ctx.rbx + 0x138) = 1.6f; });
-        LOG_HOOK(lensFlareAlphaHook, "MGS 2: Effect Speed Fix: lens flare intensity")
+        lensFlareAlphaHook = safetyhook::create_mid(lensFlareRamp + 0x1C3,     // xmm9 = final sprite alpha
+            [](SafetyHookContext& ctx)
+            {
+                // GS As/128 -> D3D As/255, scaled by the sun occlusion ratio.
+                ctx.xmm9.f32[0] *= 1.9921875f * MGS2FlareOcclusion::GetVisibility();
+            });
+        LOG_HOOK(lensFlareAlphaHook, "MGS 2: Effect Speed Fix: lens flare GS alpha")
+        // Run the cull and edge-fade in the original 4:3 screen space so flares only cull once they leave
+        // where the PS2 frame would have been, not 33% early at the cropped edge.
+        constexpr float kCinemaCrop = (16.0f / 9.0f) / (4.0f / 3.0f);
         static SafetyHookMid lensFlareCullHook{};
-        lensFlareCullHook = safetyhook::create_mid(lensFlareRamp + 0x106,    // off-screen cull threshold (1.4)
-            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] = 5.0f; });
+        lensFlareCullHook = safetyhook::create_mid(lensFlareRamp + 0x106,      // xmm0 = cull threshold (1.4)
+            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] *= kCinemaCrop; });
         LOG_HOOK(lensFlareCullHook, "MGS 2: Effect Speed Fix: lens flare cull")
-        static SafetyHookMid lensFlareEdgeHook{};
-        lensFlareEdgeHook = safetyhook::create_mid(lensFlareRamp + 0x180,    // edge-fade divisor (0.3)
-            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] = 3.0f; });
-        LOG_HOOK(lensFlareEdgeHook, "MGS 2: Effect Speed Fix: lens flare edge-fade")
+        static SafetyHookMid lensFlareEdgeStartHook{};
+        lensFlareEdgeStartHook = safetyhook::create_mid(lensFlareRamp + 0x166, // xmm1 = edge-fade start (1.0)
+            [](SafetyHookContext& ctx) { ctx.xmm1.f32[0] *= kCinemaCrop; });
+        LOG_HOOK(lensFlareEdgeStartHook, "MGS 2: Effect Speed Fix: lens flare edge-fade start")
+        static SafetyHookMid lensFlareEdgeBandHook{};
+        lensFlareEdgeBandHook = safetyhook::create_mid(lensFlareRamp + 0x180,  // xmm0 = edge-fade band (0.3)
+            [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] *= kCinemaCrop; });
+        LOG_HOOK(lensFlareEdgeBandHook, "MGS 2: Effect Speed Fix: lens flare edge-fade band")
+        static SafetyHookMid lensFlareSunStateHook{};
+        lensFlareSunStateHook = safetyhook::create_mid(lensFlareRamp + 0xEA,   // post-projection: sun screen/clip pos
+            [](SafetyHookContext& ctx)
+            {
+                MGS2FlareOcclusion::SetSunState(reinterpret_cast<const float*>(ctx.rbx + 0x60),
+                    ctx.xmm13.f32[0], ctx.xmm14.f32[0], ctx.xmm0.f32[0], ctx.xmm1.f32[0]);
+            });
+        LOG_HOOK(lensFlareSunStateHook, "MGS 2: Effect Speed Fix: lens flare sun state feed")
     }
 #pragma endregion
 
