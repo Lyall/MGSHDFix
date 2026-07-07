@@ -32,6 +32,14 @@ namespace
 
     std::vector<CallbackEntry> g_callbacks;
 
+    // Overlay-end detection: the frame's first big depth is the scene depth; a different big depth bound
+    // later is the late overlay pass (demo effects, lens flare). A null depth after that ends the overlay.
+    std::vector<SceneDepth::EndOf3DCallback> g_overlayEndCallbacks;
+    ComPtr<ID3D11Texture2D> g_firstDepthTex;
+    bool g_overlayActive = false;
+    bool g_overlayEndFired = false;
+    bool g_inOverlayCb = false;
+
     bool MapDepthFormat(DXGI_FORMAT texFmt, DXGI_FORMAT& typeless, DXGI_FORMAT& srv)
     {
         switch (texFmt)
@@ -288,6 +296,11 @@ namespace
                 UINT bb = BackbufferArea();
                 const bool bigDepth = MapDepthFormat(d.Format, a, b) && bb &&
                     static_cast<uint64_t>(d.Width) * d.Height >= static_cast<uint64_t>(bb * 0.6f);
+                if (bigDepth && !g_inPropagate && !g_inOverlayCb)
+                {
+                    if (!g_firstDepthTex) g_firstDepthTex = tex;
+                    else if (tex.Get() != g_firstDepthTex.Get()) g_overlayActive = true;
+                }
                 if (bigDepth && d.SampleDesc.Count > 1 && !g_inPropagate)
                 {
                     // The MSAA 3D-pass depth: remember it for the late-pass propagation.
@@ -305,11 +318,26 @@ namespace
                     {
                         PropagateDepth(ctx, dsv, d.Width, d.Height);
                     }
-                    g_sceneDepth = tex;
-                    if (numViews > 0 && rtvs && rtvs[0])
-                        g_sceneColorRTV = rtvs[0];
+                    if (!g_inOverlayCb)
+                    {
+                        g_sceneDepth = tex;
+                        if (numViews > 0 && rtvs && rtvs[0])
+                            g_sceneColorRTV = rtvs[0];
+                    }
                 }
             }
+        }
+        else if (g_overlayActive && !g_overlayEndFired && !g_inOverlayCb && !g_inPropagate)
+        {
+            g_overlayEndFired = true;
+            g_inOverlayCb = true;
+            if (g_sceneColorRTV)
+            {
+                ID3D11ShaderResourceView* depthSRV = g_available ? g_copySRV.Get() : nullptr;
+                for (auto cb : g_overlayEndCallbacks)
+                    if (cb) cb(g_sceneColorRTV.Get(), depthSRV);
+            }
+            g_inOverlayCb = false;
         }
 
         g_omSetRTHook.stdcall<void>(ctx, numViews, rtvs, dsv);
@@ -358,6 +386,9 @@ void SceneDepth::ResetStatus()
     g_sceneDepth.Reset();
     g_msSeenThisFrame = false;
     g_propagatedThisFrame = false;
+    g_firstDepthTex.Reset();
+    g_overlayActive = false;
+    g_overlayEndFired = false;
 }
 
 void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb, int priority)
@@ -391,6 +422,13 @@ void SceneDepth::SetEndOf3DCallback(EndOf3DCallback cb, int priority)
         {
             return lhs.priority < rhs.priority;
         });
+}
+
+void SceneDepth::SetOverlayEndCallback(EndOf3DCallback cb)
+{
+    if (!cb) return;
+    if (std::find(g_overlayEndCallbacks.begin(), g_overlayEndCallbacks.end(), cb) == g_overlayEndCallbacks.end())
+        g_overlayEndCallbacks.push_back(cb);
 }
 
 uint32_t SceneDepth::ReadAndResetShadowSetCount()

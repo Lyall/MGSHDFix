@@ -12,6 +12,7 @@
 #include "mgs2_water_effects.hpp"
 #include "mgs2_lens_droplets.hpp"
 #include "mgs2_gas_haze.hpp"
+#include "mgs2_demo_blur.hpp"
 #include "mgs2_crossfade.hpp"
 #include "input_handler.hpp"
 #include "intro_skip.hpp"
@@ -676,7 +677,7 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2DemoBlur::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = bRestoreVFX;
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixMGS2DepthOfField_Section, ConfigKeys::FixMGS2DepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);

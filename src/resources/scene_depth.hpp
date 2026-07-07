@@ -42,7 +42,10 @@ namespace SceneDepth
     // into and the depth SRV for occlusion.
     using EndOf3DCallback = void(*)(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
     void SetEndOf3DCallback(EndOf3DCallback cb, int priority = PRIORITY_DEFAULT);
-    
+
+    // Fires when the late overlay pass ends (after demo effects like the lens flare, before subtitles).
+    void SetOverlayEndCallback(EndOf3DCallback cb);
+
     void OnPreMenuRender();
 
 
