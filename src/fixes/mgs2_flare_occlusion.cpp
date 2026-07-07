@@ -36,13 +36,28 @@ namespace
     int  g_flip = 0;
     bool g_primed = false;
 
+    bool g_rayFaulted = false;
+
+    int GuardedCheck(int id, const float* from, const float* to, int chk, int seg, int flr)
+    {
+        __try { return g_hzxCheck(id, from, to, chk, seg, flr); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { g_rayFaulted = true; return 0; }
+    }
+
     bool RayHitsWorld(const float* from, const float* to)
     {
-        int r = g_hzxCheck(0, from, to, 0x0A, 0x40, 0x40);          // dynamic hazards (rigid movers)
+        int r = GuardedCheck(0, from, to, 0x0A, 0x40, 0x40);        // dynamic hazards (rigid movers)
         const int saved = *g_hzxCurrentGroup;
         *g_hzxCurrentGroup = 0;
-        r |= g_hzxCheck(saved, from, to, 0x8F, 0, 0);               // static map (the fence)
+        r |= GuardedCheck(saved, from, to, 0x8F, 0, 0);             // static map (the fence)
         *g_hzxCurrentGroup = saved;
+        if (g_rayFaulted)
+        {
+            // Collision query faulted (map state we don't understand) - stop raying, keep the depth verdict.
+            g_hzxCheck = nullptr;
+            spdlog::warn("MGS 2: Flare occlusion: collision check faulted; falling back to depth-only.");
+            return true;
+        }
         return (r & 3) != 0;
     }
 
