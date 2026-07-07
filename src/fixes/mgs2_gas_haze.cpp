@@ -47,7 +47,7 @@ namespace
     constexpr int       kNVerts        = 17;
 
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
-    constexpr float     kWarp      = 0.98f;            // PS2 ADDRESS_SCALE: per-puff lens magnify (the warp)
+    constexpr float     kWarp      = 0.9751f;          // per-puff lens magnify; PS2 used 0.98, +25% warp strength
     constexpr float     kSoften    = 0.00176f;         // whisper seam-hiding blur (tiny; not the old smear)
     constexpr float     kDepthBias = 0.0002f;          // reversed-Z occlusion epsilon (tuned)
 

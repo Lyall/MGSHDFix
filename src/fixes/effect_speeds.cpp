@@ -440,7 +440,7 @@ void EffectSpeedFix::Initialize()
             [](SafetyHookContext& ctx)
             {
                 // GS As/128 -> D3D As/255, scaled by the sun occlusion ratio.
-                ctx.xmm9.f32[0] *= 1.9921875f * MGS2FlareOcclusion::GetVisibility();
+                ctx.xmm9.f32[0] *= 1.9921875f * 0.85f * MGS2FlareOcclusion::GetVisibility();
             });
         LOG_HOOK(lensFlareAlphaHook, "MGS 2: Effect Speed Fix: lens flare GS alpha")
         // Run the cull and edge-fade in the original 4:3 screen space so flares only cull once they leave
