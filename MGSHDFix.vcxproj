@@ -11,6 +11,7 @@
     <ClCompile Include="src\features\mgs_smaa.cpp" />
     <ClCompile Include="src\fixes\color_correction.cpp" />
     <ClCompile Include="src\features\mgs2_vamp_punch_fix.cpp" />
+    <ClCompile Include="src\fixes\mgs2_newscrconcentrateblur.cpp" />
     <ClCompile Include="src\resources\d3d11_text_overlay.cpp" />
     <ClCompile Include="src\resources\mgs2_status_flags.cpp" />
     <ClCompile Include="src\resources\game_funcs.cpp" />
@@ -136,6 +137,7 @@
     <ClInclude Include="src\fixes\color_correction.hpp" />
     <ClInclude Include="src\features\mgs2_vamp_punch_fix.hpp" />
     <ClInclude Include="src\fixes\mgs2_crossfade.hpp" />
+    <ClInclude Include="src\fixes\mgs2_newscrconcentrateblur.hpp" />
     <ClInclude Include="src\resources\d3d11_text_overlay.hpp" />
     <ClInclude Include="src\resources\game_defines.hpp" />
     <ClInclude Include="src\resources\game_funcs.hpp" />

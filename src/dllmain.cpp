@@ -89,6 +89,7 @@
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
+#include "mgs2_newscrconcentrateblur.hpp"
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
@@ -562,6 +563,7 @@ static void InitializeSubsystems()
         INITIALIZE(HostageModel::ApplyFix());
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_ContrastShader::Setup());
+        INITIALIZE(MGS2ConcentrateBlur::Initialize());
         
     }
     else if (eGameType & MGS3)
