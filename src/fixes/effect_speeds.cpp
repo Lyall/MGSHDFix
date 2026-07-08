@@ -1,8 +1,5 @@
 // ReSharper disable CppClangTidyModernizeRawStringLiteral
 #include "stdafx.h"
-#include <intrin.h>
-#include "mgs2_railgun_beam.hpp"
-#include <unordered_map>
 
 #include "common.hpp"
 
@@ -10,8 +7,8 @@
 #include "gamevars.hpp"
 #include "logging.hpp"
 #include "mgs2_flare_occlusion.hpp"
+#include "mgs2_railgun_beam.hpp"
 
-#include <cmath>
 
 /////////////////////////////////////////////////////////////////
 /// Corrects various visual effects in MGS2 which were
@@ -137,9 +134,9 @@
 
 // Same, but these also run during gameplay firing, so not gated to cutscenes.
 #define MGS2_RAILGUN_PLAYTIME_SKIPS_ALWAYS(X) \
-    X(RailgunTrailMed, "48 8B C4 48 89 58 10 48 89 70 18 57 41 54 41 55 41 56 41 57 48 81 EC F0", "MGS 2: Effect Speed Fix : Fortune railgun demo effect Act (med)") \
-    X(RailgunTrailA, "4C 8B DC 49 89 5B 10 49 89 7B 18 55 49 8D 6B A8 48 81 EC 50 01 00 00 48", "MGS 2: Effect Speed Fix : Fortune railgun trail Act A") \
-    X(RailgunTrailB, "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 30 8B 41 78 48 8B D9 44 8B 41", "MGS 2: Effect Speed Fix : Fortune railgun trail Act B")
+    X(RailgunTrailMed, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 44 0F 29 50 ?? 44 0F 29 98 ?? ?? ?? ?? 44 0F 29 A0 ?? ?? ?? ?? 44 0F 29 6C 24", "MGS 2: Effect Speed Fix : Fortune railgun demo effect Act (med)") \
+    X(RailgunTrailA, "4C 8B DC 49 89 5B ?? 49 89 7B ?? 55 49 8D 6B ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 66 83 B9 ?? ?? ?? ?? ?? 48 8B F9 0F 85 ?? ?? ?? ?? 8B 05 ?? ?? ?? ?? 33 DB", "MGS 2: Effect Speed Fix : Fortune railgun trail Act A") \
+    X(RailgunTrailB, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B 41 ?? 48 8B D9", "MGS 2: Effect Speed Fix : Fortune railgun trail Act B")
 
 #define DEFINE_MGS2_PLAYTIME_ALWAYS_HOOK(name, pattern, label)      \
     SafetyHookInline name##_hook {};                                \
@@ -157,7 +154,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
 {
     // NewPlasmaEvade: reveal/fade are authored per 30fps frame and never tick-adjusted.
     uint8_t* act = Memory::PatternScan(baseModule,
-        "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 30 48 8B F1 C7 44 24 40 00 00",
+        "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B F1 C7 44 24 ?? 00 00 00 00",
         "MGS 2: Effect Speed Fix : NewPlasmaEvade Act");
     if (!act) return;
     // Single-buffered prims - correct the rates inside the update instead of skipping the Act.
@@ -176,7 +173,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
     LOG_HOOK(plasmaFadeHook, "MGS 2: Effect Speed Fix : NewPlasmaEvade 30fps fade")
 
     uint8_t* drawing2 = Memory::PatternScan(baseModule,
-        "48 83 EC 40 8B 69 0C 33 F6 03 69 08 48 8B D9 48 8B 79",
+        "48 83 EC ?? 8B 69 ?? 33 F6 03 69",
         "MGS 2: Effect Speed Fix : NewPlasmaEvade reveal step");
     if (!drawing2) return;
     static SafetyHookMid plasmaRevealHook{};
@@ -190,7 +187,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
 
     // The vortex ribbons draw per frame; hold only the life decrement.
     uint8_t* vortexAct = Memory::PatternScan(baseModule,
-        "48 81 EC 88 00 00 00 83 3D ?? ?? ?? ?? 00 4C 8B C1 8B 89 70 01 00 00 44",
+        "48 81 EC ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 4C 8B C1",
         "MGS 2: Effect Speed Fix : Fortune railgun vortex ribbons Act");
     if (!vortexAct) return;
     if (memcmp(vortexAct + 0x3E, "\x41\x89\x80\x70\x01\x00\x00", 7) != 0)
@@ -243,7 +240,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
     // The bolt Act also runs during gameplay firing.
     static SafetyHookInline boltHook{};
     uint8_t* bolt = Memory::PatternScan(baseModule,
-        "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 30 48 8B 99 E0 00 00 00 48 8B",
+        "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B F1 8B 0D",
         "MGS 2: Effect Speed Fix : liner_gun_plasma bolt Act");
     if (bolt)
     {
@@ -263,7 +260,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
 
     // ElectroField must run every frame; its x0.97 fade is authored for 30fps.
     uint8_t* field = Memory::PatternScan(baseModule,
-        "48 8B C4 53 55 56 57 41 54 41 55 41 56 41 57 48 81 EC D8 00 00 00 0F 29",
+        "48 8B C4 53 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8D B9",
         "MGS 2: Effect Speed Fix : NewElectroField Act");
     if (!field) return;
     if (memcmp(field + 0x33E, "\xF3\x0F\x59\x05", 4) != 0)
@@ -573,7 +570,7 @@ void EffectSpeedFix::Initialize()
     // fire ~33% early under the cinema's vertical crop. Fix all three, and feed the sun's position to
     // mgs2_flare_occlusion so the flares dim when the sun is occluded.
     uint8_t* lensFlareRamp = Memory::PatternScan(baseModule,
-            "8B 05 ?? ?? ?? ?? FF C0 66 0F 6E C0 0F 5B C0 F3 0F 59 83 3C 01 00 00 44 39 93 34 01 00 00",
+            "8B 05 ?? ?? ?? ?? FF C0 66 0F 6E C0 0F 5B C0 F3 0F 59 83 ?? ?? ?? ?? 44 39 93",
             "MGS 2: Effect Speed Fix: user\\shibata\\demo\\lens_flare.c -> Act()");
     if (lensFlareRamp)
     {

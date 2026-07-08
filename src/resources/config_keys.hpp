@@ -279,9 +279,9 @@ namespace ConfigKeys
 
 
     constexpr const char* MotionBlur_Section = "Bugfixes";
-    constexpr const char* MotionBlur_Setting = "Fix Motion Blur";
+    constexpr const char* MotionBlur_Setting = "Fix Motion Trails";
     constexpr const char* MotionBlur_Help = "(Can be a little extreme)";
-    constexpr const char* MotionBlur_Tooltip = "Restores the game's built-in motion blur, which was broken by the HD Collection.\n"
+    constexpr const char* MotionBlur_Tooltip = "Restores the game's built-in motion blur/trails, which was broken by the HD Collection.\n"
                                                "\n"
                                                "This effect can seem a little strong / distracting at higher resolutions.";
 
