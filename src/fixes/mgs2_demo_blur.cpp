@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "mgs2_demo_blur.hpp"
+#include <cmath>
+#include <algorithm>
 
 #include "common.hpp"
 #include "d3d11_api.hpp"
@@ -76,8 +78,19 @@ namespace
     bool g_havePrev = false;
     bool g_d3dInit = false, g_d3dFailed = false;
 
+    ID3D11Device* g_boundDevice = nullptr;
+
     bool EnsureD3D(ID3D11Device* dev)
     {
+        // The game recreates its device on some scene transitions - rebuild on change.
+        if (dev != g_boundDevice)
+        {
+            g_d3dInit = false; g_d3dFailed = false; g_havePrev = false;
+            g_prevSRV.Reset(); g_prevTex.Reset(); g_prevW = g_prevH = 0;
+            g_cb.Reset(); g_blend.Reset(); g_rs.Reset(); g_dss.Reset(); g_samp.Reset();
+            g_vs.Reset(); g_ps.Reset();
+            g_boundDevice = dev;
+        }
         if (g_d3dInit) return true;
         if (g_d3dFailed) return false;
         if (!g_D3D11Hooks.D3DCompileFunc) { g_d3dFailed = true; return false; }
@@ -171,7 +184,7 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
         g_prevW = bb.Width; g_prevH = bb.Height;
     }
 
-    // The feedback advanced per 30fps demo frame; composite every frame but advance on the demo tick.
+    // Advance every frame; the per-step factor makes two 60Hz steps equal one authored 30fps step.
     static int  s_tickClock = -0x7fffffff;
     static bool s_skip = false;
     if (const int clock = g_GameVars.DG_Clock(); clock != s_tickClock)
@@ -212,7 +225,8 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(g_cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
             {
-                const float cb[4] = { factor, 0, 0, 0 };
+                const float perStep = 1.0f - sqrtf(std::max(0.0f, 1.0f - factor));
+                const float cb[4] = { perStep, 0, 0, 0 };
                 memcpy(m.pData, cb, sizeof(cb));
                 ctx->Unmap(g_cb.Get(), 0);
             }

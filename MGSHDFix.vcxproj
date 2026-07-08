@@ -69,6 +69,7 @@
     <ClCompile Include="src\fixes\mgs2_gas_haze.cpp" />
     <ClCompile Include="src\fixes\mgs2_flare_occlusion.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_blur.cpp" />
+    <ClCompile Include="src\fixes\mgs2_railgun_beam.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
     <ClCompile Include="src\resources\config.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="src\fixes\mgs2_gas_haze.hpp" />
     <ClInclude Include="src\fixes\mgs2_flare_occlusion.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_blur.hpp" />
+    <ClInclude Include="src\fixes\mgs2_railgun_beam.hpp" />
     <ClInclude Include="src\fixes\mgs2_autopacket.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
