@@ -393,7 +393,7 @@ namespace
 
                 g_QuestionIntroVoiceLowBits = static_cast<int32_t>((offset / kStreamSectorSize) & kStreamPositionMask);
                 g_QuestionIntroVoiceAvailable = true;
-                spdlog::info("MGS2: Restore Action Level Selection: {} -> 0x{:06X}", kQuestionIntroVoiceName, static_cast<uint32_t>(g_QuestionIntroVoiceLowBits));
+                //spdlog::info("MGS2: Restore Action Level Selection: {} -> 0x{:06X}", kQuestionIntroVoiceName, static_cast<uint32_t>(g_QuestionIntroVoiceLowBits));
                 break;
             }
 

@@ -71,7 +71,7 @@ void AdjustableCaptions::Apply()
                     {
                         ctx.rcx = static_cast<uint32_t>(captionY);
                     }
-                    spdlog::info("MGS2: game\\jimaku.c -> set_pos() - Adjusted caption Y position to {}", ctx.rcx);
+                    //spdlog::info("MGS2: game\\jimaku.c -> set_pos() - Adjusted caption Y position to {}", ctx.rcx);
                     ctx.rcx += subtitleYOffset;
                 }
                           });

@@ -14,7 +14,7 @@ void MGS2_RestoreElevatorGlitch::Initialize()
     }
 
     MAKE_HOOK_MID(baseModule,
-        "48 89 74 24 18 41 56 4C 63 1D ?? ?? ?? ?? 4C 8D 35 ?? ?? ?? ?? 48 8B F2",
+        "48 89 74 24 ?? 41 56 4C 63 1D",
         "MGS2: Restore SoL Elevator Glitch (HZX_SetBind)", {
             const uintptr_t bnd  = ctx.rcx;
             const uint32_t  name = *reinterpret_cast<uint32_t*>(bnd);

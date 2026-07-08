@@ -140,7 +140,8 @@ public:
     }
 
     [[nodiscard]] DG_CHANL* DG_Chanl(int i) const { return p_DG_Chanls ? p_DG_Chanls + i : nullptr; }
-    
+    [[nodiscard]] int GM_CurrentStageMap() const { return p_GM_CurrentStageMap ? *p_GM_CurrentStageMap : 0; }
+
 private:
     static void OnLevelTransition();
 
@@ -159,6 +160,9 @@ private:
     int* p_GV_PauseLevel = nullptr;
     int* p_DG_Clock = nullptr;
     DG_CHANL* p_DG_Chanls = nullptr;
+
+    int32_t* p_GM_CurrentStageMap = nullptr;
+
 
 };
 

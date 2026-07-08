@@ -37,6 +37,14 @@ namespace MGS2_GameFuncs
     using WriteString_t = void(__fastcall*)(void*, const char*, int);
     inline WriteString_t WriteString = nullptr;
 
+    using UpdateVectors_t = void(__fastcall*)(void* work);
+    inline UpdateVectors_t   UpdateVectors_4 = nullptr;
+    
+    using GM_GetDGGroupID_t = int(__fastcall*)(int stageMap);
+    inline GM_GetDGGroupID_t GM_GetDGGroupID = nullptr;
+    
+    using GV_DestroyActor_t = void(__fastcall*)(void* work);
+    inline GV_DestroyActor_t GV_DestroyActor = nullptr;
 
     inline bool StartInDebugMode = false;
 }

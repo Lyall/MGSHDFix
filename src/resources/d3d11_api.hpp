@@ -19,6 +19,9 @@ public:
     ComPtr<IDXGISwapChain> swapChain;
 
     pD3DCompile D3DCompileFunc;
+
+    uint64_t FrameCount = 0;
+
 };
 
 inline D3D11Hooks g_D3D11Hooks;

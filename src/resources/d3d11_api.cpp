@@ -265,6 +265,7 @@ ColorCorrection::Draw(pSwapChain);
         }
         D3D11TextOverlay::Tick(); //keep last.
         g_preMenuFired = false;
+        g_D3D11Hooks.FrameCount++;
     }
 
 
