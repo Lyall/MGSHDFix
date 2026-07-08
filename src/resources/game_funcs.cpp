@@ -149,6 +149,12 @@ void MGS2_GameFuncs::HookGameFuncs()
     UpdateVectors_4 = reinterpret_cast<UpdateVectors_t>(Memory::ResolveCall(UpdateVectors_scan));
     spdlog::info("MGS2_GameFuncs: UpdateVectors address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)UpdateVectors_4 - (uintptr_t)baseModule);
 
+    uint8_t* GV_DestroyActor_scan = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 33 C0 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 48 8B 74 24", "GV_DestroyActor call site");
+    GV_DestroyActor = reinterpret_cast<GV_DestroyActor_t>(Memory::ResolveCall(GV_DestroyActor_scan));
+    spdlog::info("MGS2_GameFuncs: GV_DestroyActor address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GV_DestroyActor - (uintptr_t)baseModule);
+
+
+
 
     if (StartInDebugMode)
     {
