@@ -192,7 +192,7 @@ bool GameVars::MGS3IsHoldingFirstPerson() const
 
 void GameVars::OnLevelTransition()
 {
-    g_EffectSpeedFix.Reset();
+    //g_EffectSpeedFix.Reset();
     g_StatPersistence.SaveStats();
     
     KeepAimingAfterFiring::HandleLevelTransition();

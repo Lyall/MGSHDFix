@@ -217,7 +217,7 @@ namespace
 
         }
 
-        g_EffectSpeedFix.Tick();
+        //g_EffectSpeedFix.Tick();
         g_InputHandler.Update();
 
         if (eGameType & MGS3)
