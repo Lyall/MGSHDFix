@@ -119,7 +119,6 @@
     X(NewSmokeStrip, "48 8B C4 53 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B B9", "MGS 2: Effect Speed Fix : user\\okajima\\effect3\\smoke_strip.c -> NewSmokeStrip()") \
     X(NewCypherRisingSmoke, "48 8B C4 48 89 58 ?? 48 89 68 ?? 48 89 70 ?? 48 89 48 ?? 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 51", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\cypher_rising_smoke.c -> NewCypherRisingSmoke()") \
     X(NewC4_LampEX, "40 53 48 83 EC ?? 48 8B 51 ?? B8 ?? ?? ?? ?? 48 8B D9 2B 82 ?? ?? ?? ?? 89 82 ?? ?? ?? ?? 8B 89", "MGS 2: Effect Speed Fix : user\\skoba\\test\\c4_eff.c -> NewC4_LampEX()") \
-    X(NewPlasmaPoly_Demo, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 99", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> NewPlasmaPoly_Demo()") \
     X(NewTs_Spark, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? FF 41", "MGS 2: Effect Speed Fix : user\\shibata\\radio_break\\ts_spark.c -> NewTs_Spark()") \
     X(NewBombKasu, "48 8B C4 48 89 58 ?? 48 89 68 ?? 48 89 70 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 0F 29 70 ?? 4C 8B E9", "MGS 2 : Effect Speed Fix : user\\okajima\\effect\\bomb_kasu.c -> NewBombKasu()") \
     X(NewRayMissileShower, "48 8B C4 48 89 58 ?? 48 89 68 ?? 48 89 70 ?? 48 89 78 ?? 41 54 41 56 41 57 48 81 EC ?? ?? ?? ?? 4C 8B B9", "MGS 2: Effect Speed Fix : user\\okajima\\effect3\\ray_missile_shower.c -> NewRayMissileShower()") \
@@ -594,6 +593,18 @@ namespace
         }
         ctx.rip = reinterpret_cast<uint64_t>(g_pGateTo);
     }
+
+    uint8_t* g_pPlasmaGateTo = nullptr;
+    safetyhook::MidHook h_Act389_PlasmaGate;
+
+    void Act389_PlasmaGate_hook(SafetyHookContext& ctx)
+    {
+        if (!SkipFrame())
+        {
+            return;
+        }
+        ctx.rip = reinterpret_cast<uint64_t>(g_pPlasmaGateTo);
+    }
 }
 
 /// Called every frame during Present()
@@ -983,6 +994,21 @@ void EffectSpeedFix::Initialize()
     {
         g_pGateTo = pGateTo;
         h_Act16_HairPhysicsGate = safetyhook::create_mid(pGateFrom, Act16_HairPhysicsGate_hook);
+    }
+
+
+    uint8_t* pAct_389 = Memory::PatternScan(baseModule, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 99", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()");
+    uint8_t* pGateFrom_plasma_scan = Memory::PatternScan(baseModule, "4D 8D A6 ?? ?? ?? ?? 49 8B 8E", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()+0x8E");
+    uint8_t* pGateTo_plasma_scan = Memory::PatternScan(baseModule, "48 8B 4D ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 49 8B 73 ?? 49 8B 7B ?? 41 0F 28 73 ?? 41 0F 28 7B ?? 45 0F 28 43 ?? 45 0F 28 4B ?? 49 8B E3 41 5F 41 5E 41 5D 41 5C 5D C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 4C 8B DC", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()+0x1861");
+
+    if (!pAct_389 || !pGateFrom_plasma_scan || !pGateTo_plasma_scan)
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : Failed to find Plasma Poly throttle hook addresses. Skipping Plasma Poly throttle hooks.");;
+    }
+    else
+    {
+        g_pPlasmaGateTo = pGateTo_plasma_scan;
+        h_Act389_PlasmaGate = safetyhook::create_mid(pGateFrom_plasma_scan, Act389_PlasmaGate_hook);
     }
 
 }
