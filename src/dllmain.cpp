@@ -74,6 +74,7 @@
 #include "depth_of_field.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
+#include "mgs2_preshade_lights.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
 #include "mgs2_msx_colonel.hpp"
@@ -557,6 +558,7 @@ static void InitializeSubsystems()
         INITIALIZE(TextureLiveSwaps::ApplyFixes());
         INITIALIZE(SnakeArmFixes::ApplyFixes());
         INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+        INITIALIZE(MGS2PreshadeLights::Initialize());
         INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
         INITIALIZE(g_MGS2UnderwaterFilterFix.Initialize());
