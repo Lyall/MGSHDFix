@@ -320,6 +320,66 @@ namespace
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_RISE = 0x3D000000; // 0.03125f
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_ALPHA_FALL = 0xBC2AAAAB; // -0.010416667f
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_EMIT_FADE = 0xBB888889;  // -0.004166667f
+
+
+    uint8_t* g_pKMM_Routine = nullptr;
+    safetyhook::InlineHook h_KMM_ActSystem;
+    safetyhook::InlineHook h_KMM_ActControl;
+    safetyhook::InlineHook h_MEMMOT_MakeMotion;
+    safetyhook::InlineHook h_MEMMOT_MakeMotionSkip;
+
+    safetyhook::MidHook h_KMM_Routine_ThinkActionGate;
+
+    inline bool g_suppressMemmotForKamome = false;
+
+    bool SkipFrame()
+    {
+        return g_GameVars.InCutscene() && ((g_D3D11Hooks.FrameCount & 1) != 0);
+    }
+
+    void __fastcall MEMMOT_MakeMotion_hook(void* mmt_ctrl)
+    {
+        if (g_suppressMemmotForKamome)
+        {
+            return;
+        }
+        h_MEMMOT_MakeMotion.call<void>(mmt_ctrl);
+    }
+
+    void __fastcall MEMMOT_MakeMotionSkip_hook(void* mmt_ctrl)
+    {
+        if (g_suppressMemmotForKamome)
+        {
+            return;
+        }
+        h_MEMMOT_MakeMotionSkip.call<void>(mmt_ctrl);
+    }
+
+    void __fastcall KMM_ActControl_hook(void* kamome)
+    {
+        if (SkipFrame())
+        {
+            return;
+        }
+        h_KMM_ActControl.call<void>(kamome);
+    }
+
+    void __fastcall KMM_ActSystem_hook(void* kamome)
+    {
+        g_suppressMemmotForKamome = SkipFrame();
+        h_KMM_ActSystem.call<void>(kamome);
+        g_suppressMemmotForKamome = false;
+    }
+
+    void KMM_Routine_ThinkActionGate_hook(SafetyHookContext& ctx)
+    {
+        if (!SkipFrame())
+        {
+            return;
+        }
+
+        ctx.rip = reinterpret_cast<uint64_t>(g_pKMM_Routine) + 0x616;
+    }
 }
 
 /// Called every frame during Present()
@@ -400,7 +460,7 @@ void __fastcall MGS2_d_splash_parts__c_Act_hook(uint8_t* work)
     uint8_t* prim = *reinterpret_cast<uint8_t**>(work + 0x60);
     *reinterpret_cast<int32_t*>(prim + 0xAC) = GM_GetDGGroupID(g_GameVars.GM_CurrentStageMap());
 
-    if (((g_D3D11Hooks.FrameCount & 1) == 0) || !g_GameVars.InCutscene())
+    if (!SkipFrame())
     {
         UpdateVectors_4(work);
         *reinterpret_cast<int32_t*>(work + 0x90) = life - 1;
@@ -673,6 +733,29 @@ void EffectSpeedFix::Initialize()
     {
         d_splash_parts__c_Act_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_d_splash_parts__c_ActScanResult), reinterpret_cast<void*>(MGS2_d_splash_parts__c_Act_hook));
         LOG_HOOK(d_splash_parts__c_Act_hook, "MGS 2: Effect Speed Fix: user\\okajima\\demo_effect\\d_splash_parts.c")
+    }
+
+
+    uint8_t* pKMM_ActSystem = Memory::PatternScan(baseModule, "40 57 48 83 EC ?? 83 B9 ?? ?? ?? ?? 00 48 8B F9 0F 85", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActSystem()");
+    uint8_t* pKMM_ActControl = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 89 AC 24", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl()");
+    uint8_t* pMEMMOT_MakeMotion = Memory::PatternScan(baseModule, "4C 8B DC 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? ?? ?? ?? 48 8B F9", "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotion()");
+    uint8_t* pMEMMOT_MakeMotionSkip = Memory::PatternScan(baseModule, "48 8B 41 ?? F3 0F 10 51 ?? ?? ?? ?? 0F 28 C2", "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotionSkip()");
+    uint8_t* pKMM_Routine = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B F9 48 8D 91", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_Routine()");
+
+    if (!pKMM_ActControl || !pKMM_ActSystem || !pMEMMOT_MakeMotion || !pMEMMOT_MakeMotionSkip || !pKMM_Routine)
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : Failed to find Kamome throttle hook addresses. Skipping Kamome throttle hooks.");
+        return;
+    }
+    else
+    {
+        h_KMM_ActSystem = safetyhook::create_inline(reinterpret_cast<void*>(pKMM_ActSystem), KMM_ActSystem_hook);
+        h_KMM_ActControl = safetyhook::create_inline(reinterpret_cast<void*>(pKMM_ActControl), KMM_ActControl_hook);
+        h_MEMMOT_MakeMotion = safetyhook::create_inline(reinterpret_cast<void*>(pMEMMOT_MakeMotion), MEMMOT_MakeMotion_hook);
+        h_MEMMOT_MakeMotionSkip = safetyhook::create_inline(reinterpret_cast<void*>(pMEMMOT_MakeMotionSkip), MEMMOT_MakeMotionSkip_hook);
+        g_pKMM_Routine = pKMM_Routine;
+        h_KMM_Routine_ThinkActionGate = safetyhook::create_mid(pKMM_Routine + 0xBF, KMM_Routine_ThinkActionGate_hook);
+
     }
 
 }
