@@ -129,7 +129,6 @@
     X(NewHarrierLight, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_light.c -> NewHarrierLight()") \
     X(NewLineSmoke, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B 49 ?? 48 85 C9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\line_smoke.c -> NewLineSmoke()") \
     X(NewHexagonalPattern, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8D 51 ?? 8B 49", "MGS 2: Effect Speed Fix : user\\okuta\\effect\\hexagonal.c -> NewHexagonalPattern()") \
-    X(NewFogSet_Demo, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 0F 85", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_fog_set.c -> NewFogSet_Demo()") \
     X(SPH_ActBrkVol1, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1() | NewWaveSplash_Demo() | NewWaveSplash_Demo2() | NewSplash()") \
     X(NewSplushSurfaceMan, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan() | OK_PutSplushSurface()") \
     X(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()") \
