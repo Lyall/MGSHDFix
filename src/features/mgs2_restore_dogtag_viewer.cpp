@@ -11,8 +11,15 @@
 using namespace MGS2_GameFuncs;
 using namespace MGS2_LinkVarBuf;
 
+#define RETURN_IF_NOT_STAGE(stage) \
+    if (!g_GameVars.IsStage(stage)) \
+    { \
+        return; \
+    }
+
 namespace
 {
+
     
     int month {}, day {}, bloodtype {};
 
@@ -266,19 +273,23 @@ void MGS2_RestoreDogtagViewer::Restore()
 
 
     MAKE_HOOK_MID(baseModule, "66 C7 80 ?? ?? ?? ?? ?? ?? C6 80 ?? ?? ?? ?? ?? 48 63 9F ?? ?? ?? ?? 83 FB ?? 7D ?? 4C 8D B7", "skoba\\etc\\name_layout.c -> SprInit() -> @ l574 | SprInit_3 + 0x1A2", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         *reinterpret_cast<float*>(ctx.rax + 0x9C) = 160.0f;
                   });
 
     MAKE_HOOK_MID(baseModule, "C7 86 9C 00 00 00 00 00 90 42 48 63 9F 28 04 00 00", "skoba\\etc\\name_layout.c -> SprInit() -> name data field pos.x @ l550", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
     *reinterpret_cast<float*>(ctx.rsi + 0x98) += NAME_DATA_X_OFFSET;
                   });
 
     MAKE_HOOK_MID(baseModule, "8B 4F ?? E8 ?? ?? ?? ?? 48 85 C0 75 ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? B8 ?? ?? ?? ?? E9 ?? ?? ?? ?? C6 80 ?? ?? ?? ?? 00", "skoba\\etc\\name_layout.c -> SprInit() -> @ l599", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         auto* kcej = *reinterpret_cast<uint8_t**>(ctx.rdi + 0x2F8);
         if (kcej) *reinterpret_cast<float*>(kcej + 0x9C) = 160.0f;
                   });
 
     MAKE_HOOK_MID(baseModule, "C7 80 ?? ?? ?? ?? ?? ?? ?? ?? C7 80 ?? ?? ?? ?? ?? ?? ?? ?? 66 C7 80 ?? ?? ?? ?? ?? ?? C6 80 ?? ?? ?? ?? ?? 48 63 9F ?? ?? ?? ?? 83 FB ?? 7D ?? 48 8D B7", "skoba\\etc\\name_layout.c -> SprInit() -> @ l616", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         *reinterpret_cast<float*>(ctx.rax + 0x9C) = 116.0f;
                   });
 
@@ -286,33 +297,40 @@ void MGS2_RestoreDogtagViewer::Restore()
 #pragma region Menu_Navigation
 
     MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 8D 4A ?? E8 ?? ?? ?? ?? 8B 83", "skoba\\etc\\name_layout.c -> SoftKey() -> @ l925", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rax--;
                   });
 
     MAKE_HOOK_MID(baseModule, "89 8B ?? ?? ?? ?? 8B 83 ?? ?? ?? ?? BA", "skoba\\etc\\name_layout.c -> PadControlNormal() -> UP sex @ l1430", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rcx++;
                   });
 
     MAKE_HOOK_MID(baseModule, "81 A3 ?? ?? ?? ?? ?? ?? ?? ?? BA ?? ?? ?? ?? 89 83", "skoba\\etc\\name_layout.c -> PadControlNormal() -> UP blood @ l1433", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         if (ctx.rax == 2 && (ctx.rcx & 0xFFFFFFFF) == 3)
             ctx.rax = 3;
                   });
 
     MAKE_HOOK_MID(baseModule, "89 8B ?? ?? ?? ?? 8B 83 ?? ?? ?? ?? 83 F9", "skoba\\etc\\name_layout.c ->PadControlNormal() -> DOWN sex @ l1448", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rcx--;
                   });
 
     MAKE_HOOK_MID(baseModule, "81 A3 ?? ?? ?? ?? ?? ?? ?? ?? 89 83 ?? ?? ?? ?? 8D 4A", "skoba\\etc\\name_layout.c -> PadControlNormal() -> DOWN blood @ l1451", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         if (ctx.rax == 4 && (ctx.rcx & 0xFFFFFFFF) == 3)
             ctx.rax = 3;
                   });
 
     MAKE_HOOK_MID(baseModule, "89 B3 ?? ?? ?? ?? 81 A3 ?? ?? ?? ?? ?? ?? ?? ?? 41 B8", "skoba\\etc\\name_layout.c -> PadControlNormal() -> cancel @ l1470", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         auto old_pos = *reinterpret_cast<int*>(ctx.rbx + 0x110);
         if (old_pos != 5) ctx.rsi++;
                   });
 
     MAKE_HOOK_MID(baseModule, "48 8B CB 89 93 ?? ?? ?? ?? E8", "skoba\\etc\\name_layout.c -> DotUpdate() -> @ l2188", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         auto pos = static_cast<int>(ctx.rdx & 0xFFFFFFFF);
         auto& code1 = *reinterpret_cast<int*>(ctx.rbx + 0x360);
         if (pos == 2) code1 = 4786416;  // STR_CUR_BIRTH
@@ -320,11 +338,13 @@ void MGS2_RestoreDogtagViewer::Restore()
                   });
 
     MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? EB ?? 44 8B 83 ?? ?? ?? ?? 41 8B D0", "skoba\\etc\\name_layout.c -> PadControlBirthEntry() -> cancel @ l1870", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rax++;
                   });
 
 
     MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 8D 4A ?? 48 8B 5C 24", "skoba\\etc\\name_layout.c -> PadControlRegionEntry() -> cancel @ l2029", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         auto old = *reinterpret_cast<int*>(ctx.rbx + 0x110);
         if (old - (int)(ctx.rax & 0xFFFFFFFF) == 2)
         {
@@ -334,11 +354,13 @@ void MGS2_RestoreDogtagViewer::Restore()
 
     // PadControlBirthEntry+0x1A8
     MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 8D 4A ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 8B B3", "skoba\\etc\\name_layout.c -> PadControlBirthEntry() -> confirm @ l1850", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rax--;
                   });
 
                   // PadControlBirthEntry+0x2EB
     MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? EB ?? 41 8D 40", "skoba\\etc\\name_layout.c -> PadControlBirthEntry() -> confirm-sta @ l1850", {
+        RETURN_IF_NOT_STAGE(MGS2Stages::W11A);
         ctx.rax--;
                   });
 
