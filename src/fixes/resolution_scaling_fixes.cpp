@@ -153,12 +153,12 @@ void ResolutionScalingFixes::ApplyFixes()
     //    ctx.rdi = 0;  // force demo check false for more nodes
     //              });
     //MAKE_HOOK_MID(baseModule, "?? ?? ?? ?? F3 0F 11 48 ?? E8 ?? ?? ?? ?? 8B C6 8B D3 2B C3 83 F8 ?? 7F ?? 0F 28 74 24 ?? 48 8B 5C 24 ?? 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 15", "MGS2: Resolution Scaling Fixes : user\\okajima\\effect2\\liner_gun_plasma.c -> CalcNextNode()", {
-    //        if (g_GameVars.InCutscene())
-    //        {
-    //            ctx.xmm0.f32[0] *= (float)(2.0 * scaleX_fromPs2_4by3);
-    //            ctx.xmm1.f32[0] *= 2.0f;
-    //        }
-    //              });
+            //if (g_GameVars.InCutscene())
+            //{
+                //ctx.xmm0.f32[0] *= (float)(2.0 * scaleX_fromPs2_4by3);
+                //ctx.xmm1.f32[0] *= 2.0f;
+            //}
+                  //});
 
 
     MAKE_HOOK_MID(baseModule, "66 0F 6E F1 48 8B 4E", "MGS2: user\\shibata\\effect\\2d_sprt.c -> New2dSprite() -> GetResources() @l252 | tanker MGS2 logo", {
