@@ -1,5 +1,8 @@
 // ReSharper disable CppClangTidyModernizeRawStringLiteral
 #include "stdafx.h"
+#include <cmath>
+#include <unordered_map>
+#include "features/custom_resolution_and_borderless.hpp"
 
 #include "common.hpp"
 
@@ -281,6 +284,204 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
                 ctx.xmm0.f32[0] *= 1.0f / 0.97f;   // net no-op this frame - fade at 30fps
         });
     LOG_HOOK(fieldFadeHook, "MGS 2: Effect Speed Fix : NewElectroField 30fps fade")
+
+    // liner_gun_plasma_flush: the port NaN-poisons the arc's node fractal, so only a stub ever
+    // rendered. Rebuild it in a private scratch and skip the game's builder.
+    {
+        uint8_t* scrAct = Memory::PatternScan(baseModule,
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B E9",
+            "MGS 2: Effect Speed Fix : arc private scratch (act)");
+        uint8_t* scrRes = Memory::PatternScan(baseModule,
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 56 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F9 48 8D 51 70",
+            "MGS 2: Effect Speed Fix : arc private scratch (res)");
+        bool ok = scrAct && scrRes;
+        uint8_t* buf = nullptr;
+        if (ok)
+        {
+            for (uintptr_t offs = 0x02000000; offs < 0x70000000 && !buf; offs += 0x01000000)
+                buf = static_cast<uint8_t*>(VirtualAlloc(
+                    reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(baseModule) + offs),
+                    0x2000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
+            ok = buf != nullptr;
+        }
+        const int actLea[] = { 0x2F, 0x79, 0x8C, 0xAB, 0xCC };
+        const int resLea[] = { 0x140, 0x17F, 0x225, 0x233, 0x24A, 0x268, 0x287, 0x28E, 0x2A1, 0x2C1 };
+        if (ok)
+        {
+            const auto repoint = [&](uint8_t* insn, int dispOfs, int len, uint8_t* target) -> bool
+            {
+                const intptr_t disp = static_cast<intptr_t>(target - (insn + len));
+                if (disp != static_cast<int32_t>(disp)) return false;
+                Memory::Write(reinterpret_cast<uintptr_t>(insn + dispOfs), static_cast<int32_t>(disp));
+                return true;
+            };
+            for (int o : actLea)
+                ok = ok && scrAct[o] == 0x48 && scrAct[o+1] == 0x8D && repoint(scrAct + o, 3, 7, buf);
+            for (int o : resLea)
+                ok = ok && scrRes[o] == 0x48 && scrRes[o+1] == 0x8D && repoint(scrRes + o, 3, 7, buf);
+            ok = ok && scrRes[0x135] == 0x48 && scrRes[0x136] == 0xC7 && repoint(scrRes + 0x135, 3, 11, buf);          // node[0].vx/vy = 0
+            ok = ok && scrRes[0x147] == 0xC7 && scrRes[0x148] == 0x05 && repoint(scrRes + 0x147, 2, 10, buf + 8);      // node[0].vz = 0
+            ok = ok && scrRes[0x153] == 0x48 && scrRes[0x154] == 0xC7 && repoint(scrRes + 0x153, 3, 11, buf + 0xE00);  // node[224].vx/vy = 0
+            ok = ok && scrRes[0x16C] == 0xF3 && scrRes[0x16E] == 0x11 && repoint(scrRes + 0x16C, 4, 8, buf + 0xE08);   // node[224].vz = len
+        }
+        if (ok)
+        {
+            static uint8_t* s_arcScratch = nullptr;
+            s_arcScratch = buf;
+            struct ArcVec { float x, y, z, w; };
+            struct ArcFractal
+            {
+                static float Rnd()
+                {
+                    static uint32_t s = 0x2545F491;
+                    s = s * 0x5D588B65 + 1;
+                    return static_cast<float>(s) * (1.0f / 4294967296.0f);
+                }
+                static void Build(ArcVec* v, int n0, int n1)
+                {
+                    if (n1 - n0 <= 1) return;
+                    const int nc = (n0 + n1) / 2;
+                    ArcVec& f0 = v[n0]; ArcVec& f1 = v[n1]; ArcVec& f2 = v[nc];
+                    f0.w = f1.y - f0.y;
+                    f1.w = f1.z - f0.z;
+                    f2.w = f1.w * 0.25f * (Rnd() * 2.0f - 1.0f);
+                    float t = (f1.w != 0.0f) ? f0.w / f1.w : 0.0f;
+                    if (t != t) t = 0.0f; else if (t > 1.0f) t = 1.0f; else if (t < -1.0f) t = -1.0f;
+                    const float th = asinf(t);
+                    f2.x = (f1.x - f0.x) * 0.5f + f0.x + f2.w * (Rnd() * 2.0f - 1.0f);
+                    f2.y = f0.w * 0.5f + f0.y + f2.w * cosf(th);
+                    f2.z = f1.w * 0.5f + f0.z - f2.w * sinf(th);
+                    Build(v, n0, nc);
+                    Build(v, nc, n1);
+                }
+            };
+            static SafetyHookMid arcInitHook{};
+            arcInitHook = safetyhook::create_mid(scrRes + 0x174,   // at: call CalcInitNode
+                [](SafetyHookContext& ctx)
+                {
+                    ArcFractal::Build(reinterpret_cast<ArcVec*>(s_arcScratch), 0, 224);
+                    ctx.rip += 5;   // skip the game's builder
+                });
+            LOG_HOOK(arcInitHook, "MGS 2: Effect Speed Fix : arc fractal replacement")
+        }
+        // Spawn knob: drop every third arc (callers treat null as a failed allocation).
+        uint8_t* arcNew = Memory::PatternScan(baseModule,
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 41 8B E8 48 8B FA 48 8B F1 BA ?? ?? ?? ?? 41 B8 F0",
+            "MGS 2: Effect Speed Fix : arc spawn rate");
+        if (ok && arcNew)
+        {
+            static uint8_t* s_nullRet = nullptr;
+            s_nullRet = buf + 0x1FF0;
+            s_nullRet[0] = 0x33; s_nullRet[1] = 0xC0; s_nullRet[2] = 0xC3;   // xor eax,eax; ret
+            static SafetyHookMid arcRateHook{};
+            arcRateHook = safetyhook::create_mid(arcNew,
+                [](SafetyHookContext& ctx)
+                {
+                    static uint32_t s_n = 0;
+                    if (++s_n % 3 == 0)
+                        ctx.rip = reinterpret_cast<uintptr_t>(s_nullRet);
+                });
+            LOG_HOOK(arcRateHook, "MGS 2: Effect Speed Fix : arc spawn rate")
+        }
+        if (ok)
+            spdlog::info("MGS 2: Effect Speed Fix: arc private scratch installed.");
+        else
+            spdlog::error("MGS 2: Effect Speed Fix: arc private scratch sites mismatch; skipping.");
+    }
+
+    // The arc's linear alpha ramp crushes to black on sRGB displays; fade only the tip quarter.
+    uint8_t* arcAct = Memory::PatternScan(baseModule,
+        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B E9",
+        "MGS 2: Effect Speed Fix : muzzle arc Act");
+    if (arcAct && memcmp(arcAct + 0x14C, "\x41\x88\x50\xE0", 4) == 0)
+    {
+        static SafetyHookMid arcRampHook{};
+        arcRampHook = safetyhook::create_mid(arcAct + 0x14C,   // dl = k*i/224, r9d = k
+            [](SafetyHookContext& ctx)
+            {
+                const uint32_t a = static_cast<uint32_t>(ctx.rdx & 0xFF) * 4;
+                const uint32_t k = static_cast<uint32_t>(ctx.r9 & 0xFF);
+                ctx.rdx = (ctx.rdx & ~0xFFull) | static_cast<uint8_t>(a < k ? a : k);
+            });
+        LOG_HOOK(arcRampHook, "MGS 2: Effect Speed Fix : muzzle arc tail visibility")
+    }
+    else if (arcAct)
+        spdlog::error("MGS 2: Effect Speed Fix: muzzle arc ramp offset no longer matches; skipping.");
+
+    // Tazer arc growth compounds per frame; square-root the factors so 60fps matches 30fps.
+    uint8_t* mini = Memory::PatternScan(baseModule,
+        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B F9",
+        "MGS 2: Effect Speed Fix : tazer arc Act");
+    if (mini &&
+        memcmp(mini + 0x274, "\xF3\x0F\x10\x35", 4) == 0 &&
+        memcmp(mini + 0x304, "\xF3\x0F\x10\x35", 4) == 0 &&
+        memcmp(mini - 0x0E, "\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC\xCC", 14) == 0)
+    {
+        Memory::Write(reinterpret_cast<uintptr_t>(mini - 0x0C), 1.0049875f);   // sqrt(1.01)
+        Memory::Write(reinterpret_cast<uintptr_t>(mini - 0x08), 1.0344080f);   // sqrt(1.07)
+        const auto retarget = [&](uint8_t* insn, uint8_t* target)
+        {
+            const int32_t disp = static_cast<int32_t>(target - (insn + 8));
+            Memory::Write(reinterpret_cast<uintptr_t>(insn + 4), disp);
+        };
+        retarget(mini + 0x274, mini - 0x0C);
+        retarget(mini + 0x304, mini - 0x08);
+        spdlog::info("MGS 2: Effect Speed Fix: tazer arc growth rebased to 30fps.");
+    }
+    else if (mini)
+        spdlog::error("MGS 2: Effect Speed Fix: tazer growth sites no longer match; skipping.");
+
+    // Size knob: arc dot width = 5 * resY / 448. Dots must overlap to fuse into a stroke.
+    uint8_t* arcTemplate = Memory::PatternScan(baseModule,
+        "C6 02 20 C6 01 20 C6 42 02 40 C6 41 02 40",
+        "MGS 2: Effect Speed Fix : flush sprite template");
+    if (arcTemplate)
+    {
+        static SafetyHookMid arcSizeHook{};
+        arcSizeHook = safetyhook::create_mid(arcTemplate,   // rdx/rcx = the two vertex slots, wh just stored
+            [](SafetyHookContext& ctx)
+            {
+                const int resY = CustomResolutionAndBorderless::iInternalResY;
+                if (resY <= 448) return;
+                int size = 5 * resY / 448;
+                if (size > 32) size = 32;
+                static bool s_logged = false;
+                if (!s_logged)
+                {
+                    s_logged = true;
+                    spdlog::info("MGS 2: Effect Speed Fix: flush dot size {} (resY {})", size, resY);
+                }
+                const int16_t v = static_cast<int16_t>(size);
+                *reinterpret_cast<int16_t*>(ctx.rdx + 0x10) = v;
+                *reinterpret_cast<int16_t*>(ctx.rdx + 0x12) = v;
+                *reinterpret_cast<int16_t*>(ctx.rcx + 0x10) = v;
+                *reinterpret_cast<int16_t*>(ctx.rcx + 0x12) = v;
+            });
+        LOG_HOOK(arcSizeHook, "MGS 2: Effect Speed Fix : flush sprite size")
+    }
+
+    // liner_plasma_small counts life in raw frames; hold the decrement every other frame.
+    uint8_t* mini2 = Memory::PatternScan(baseModule,
+        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B F9",
+        "MGS 2: Effect Speed Fix : liner_plasma_small Act");
+    if (mini2 && memcmp(mini2 + 0x221, "\x8B\x47\x7C\x85\xC0", 5) == 0)
+    {
+        static uint8_t* s_miniSkip = nullptr;
+        s_miniSkip = mini2 + 0x237;   // past the decrement and destroy check
+        static SafetyHookMid miniLifeHook{};
+        miniLifeHook = safetyhook::create_mid(mini2 + 0x221,
+            [](SafetyHookContext& ctx)
+            {
+                static std::unordered_map<uintptr_t, uint32_t> s_ticks;
+                if (s_ticks.size() > 64) s_ticks.clear();
+                if (*reinterpret_cast<const int32_t*>(ctx.rdi + 0x7C) > 0 &&
+                    (++s_ticks[ctx.rdi] & 1) == 0)
+                    ctx.rip = reinterpret_cast<uintptr_t>(s_miniSkip);
+            });
+        LOG_HOOK(miniLifeHook, "MGS 2: Effect Speed Fix : liner_plasma_small 60fps life")
+    }
+    else if (mini2)
+        spdlog::error("MGS 2: Effect Speed Fix: liner_plasma_small life offset no longer matches; skipping.");
 
 }
 
