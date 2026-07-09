@@ -292,7 +292,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
             "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B 99 ?? ?? ?? ?? 48 8B E9",
             "MGS 2: Effect Speed Fix : arc private scratch (act)");
         uint8_t* scrRes = Memory::PatternScan(baseModule,
-            "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 56 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F9 48 8D 51 70",
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 56 48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F9 48 8D 51",
             "MGS 2: Effect Speed Fix : arc private scratch (res)");
         bool ok = scrAct && scrRes;
         uint8_t* buf = nullptr;
@@ -366,7 +366,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
         }
         // Spawn knob: drop every third arc (callers treat null as a failed allocation).
         uint8_t* arcNew = Memory::PatternScan(baseModule,
-            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 41 8B E8 48 8B FA 48 8B F1 BA ?? ?? ?? ?? 41 B8 F0",
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 41 8B E8 48 8B FA 48 8B F1 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 33 C0 48 89 43 ?? 8B CD",
             "MGS 2: Effect Speed Fix : arc spawn rate");
         if (ok && arcNew)
         {
@@ -433,7 +433,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
 
     // Size knob: arc dot width = 5 * resY / 448. Dots must overlap to fuse into a stroke.
     uint8_t* arcTemplate = Memory::PatternScan(baseModule,
-        "C6 02 20 C6 01 20 C6 42 02 40 C6 41 02 40",
+        "?? ?? 20 ?? ?? 20 C6 42 ?? 40",
         "MGS 2: Effect Speed Fix : flush sprite template");
     if (arcTemplate)
     {
