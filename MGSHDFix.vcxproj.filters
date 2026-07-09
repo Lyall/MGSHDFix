@@ -173,6 +173,9 @@
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_preshade_lights.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -479,6 +482,9 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_kirari_sun2_fix.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_preshade_lights.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_restore_phone_jingle.hpp">
