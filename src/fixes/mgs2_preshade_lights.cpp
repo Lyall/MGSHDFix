@@ -18,7 +18,7 @@ namespace
 
 void MGS2PreshadeLights::Initialize()
 {
-    if (!(eGameType & MGS2))
+    if (!(eGameType & MGS2) || !bEnabled)
     {
         return;
     }
