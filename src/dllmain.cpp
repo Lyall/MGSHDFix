@@ -553,7 +553,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
         INITIALIZE(MGS2DemoCameraJudder::Initialize());
-        INITIALIZE(MGS2ReverbWetLevel::Initialize());
+        INITIALIZE(FixReverbWetLevel::Initialize());
         INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());

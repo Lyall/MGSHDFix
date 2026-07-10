@@ -293,12 +293,19 @@ namespace ConfigKeys
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
-    constexpr const char* MGS2_Restore_Reverb_Level_Section = "Bugfixes";
-    constexpr const char* MGS2_Restore_Reverb_Level_Setting = "Restore Reverb Level";
-    constexpr const char* MGS2_Restore_Reverb_Level_Help = "";
-    constexpr const char* MGS2_Restore_Reverb_Level_Tooltip = "Raises the reverb wet volume to match the PS2's SPU2 hall reverb.\n"
+    constexpr const char* Restore_Reverb_Level_Section = "Bugfixes";
+    constexpr const char* Restore_Reverb_Level_Setting = "Boost Reverb Volume";
+    constexpr const char* Restore_Reverb_Level_Help = "";
+    constexpr const char* Restore_Reverb_Level_Tooltip = "Increases the reverb volume.\n"
+                                                        "\n"
+                                                        "In the HD Collection and Master Collection, reverb is effectively silent, causing indoor areas to sound much drier than intended.";
+
+    constexpr const char* Restore_Reverb_Level_Scale_Section = "Bugfixes";
+    constexpr const char* Restore_Reverb_Level_Scale_Setting = "Reverb Volume Multiplier";
+    constexpr const char* Restore_Reverb_Level_Scale_Help = "(1.40 Recommended)";
+    constexpr const char* Restore_Reverb_Level_Scale_Tooltip = "Increases the reverb volume by this multiplier.\n"
                                                               "\n"
-                                                              "The Master Collection's room reverb works but is much too quiet, leaving interiors sounding nearly dry.";
+                                                              "Vanilla / Disabled = 1.0";
 
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "Fix Film Grain";

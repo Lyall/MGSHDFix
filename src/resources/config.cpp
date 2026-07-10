@@ -682,6 +682,14 @@ void Config::Read()
         LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = g_EffectSpeedFix.isEnabled = bRestoreVFX;
 
+
+        ConfigHelper::getValue(ini, ConfigKeys::Restore_Reverb_Level_Section, ConfigKeys::Restore_Reverb_Level_Setting, FixReverbWetLevel::bEnabled);
+        LOG_CONFIG(ConfigKeys::Restore_Reverb_Level_Section, ConfigKeys::Restore_Reverb_Level_Setting, FixReverbWetLevel::bEnabled);
+
+        ConfigHelper::getValue(ini, ConfigKeys::Restore_Reverb_Level_Scale_Section, ConfigKeys::Restore_Reverb_Level_Scale_Setting, FixReverbWetLevel::fWetVolumeScale);
+        LOG_CONFIG(ConfigKeys::Restore_Reverb_Level_Scale_Section, ConfigKeys::Restore_Reverb_Level_Scale_Setting, FixReverbWetLevel::fWetVolumeScale);
+
+
         if (eGameType & MGS2)
         {
             g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = bRestoreVFX;
@@ -689,8 +697,6 @@ void Config::Read()
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
             LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
 
-            ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_Reverb_Level_Section, ConfigKeys::MGS2_Restore_Reverb_Level_Setting, MGS2ReverbWetLevel::bEnabled);
-            LOG_CONFIG(ConfigKeys::MGS2_Restore_Reverb_Level_Section, ConfigKeys::MGS2_Restore_Reverb_Level_Setting, MGS2ReverbWetLevel::bEnabled);
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
