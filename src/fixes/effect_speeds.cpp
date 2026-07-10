@@ -561,7 +561,6 @@ namespace
 
 }
 
-/// Called every frame during Present()
 void EffectSpeedFix::Tick()
 {
 
@@ -671,11 +670,13 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(name##_hook, label)                                               \
     }
 
+/*
     if (MGS2RailgunBeam::bEnabled)
     {
         MGS2_RAILGUN_PLAYTIME_SKIPS_ALWAYS(CREATE_PLAYTIME_HOOK)
     }
 
+    */
 #undef CREATE_PLAYTIME_HOOK
 
 #undef INSTALL_MGS2_FRAMESKIP_HOOK
@@ -862,6 +863,7 @@ void EffectSpeedFix::Initialize()
     }
     */
 
+    /*
     uint8_t* pKMM_ActSystem = Memory::PatternScan(baseModule, "40 57 48 83 EC ?? 83 B9 ?? ?? ?? ?? 00 48 8B F9 0F 85", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActSystem()");
     uint8_t* pKMM_ActControl = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 89 AC 24", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl()");
     uint8_t* pMEMMOT_MakeMotion = Memory::PatternScan(baseModule, "4C 8B DC 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? ?? ?? ?? 48 8B F9", "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotion()");
@@ -883,6 +885,7 @@ void EffectSpeedFix::Initialize()
 
     }
 
+    */
     uint8_t* pAct_16 = Memory::PatternScan(baseModule,"4C 8B DC 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 49 89 5B ?? 48 8B F9","MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()");
     uint8_t* pGateFrom = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x842");
     uint8_t* pGateTo = Memory::PatternScan(baseModule, "48 8B 8C 24 ?? ?? ?? ?? 48 33 CC E8 ?? ?? ?? ?? 48 81 C4 ?? ?? ?? ?? 5F C3 90", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x8A6");
