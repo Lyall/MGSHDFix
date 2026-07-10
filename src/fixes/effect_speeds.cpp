@@ -561,16 +561,6 @@ namespace
 
 }
 
-void EffectSpeedFix::Tick()
-{
-
-}
-
-///Called on GameVars::OnLevelTransition() to reset counters between cutscenes/levels.
-void EffectSpeedFix::Reset()
-{
-
-}
 
 SafetyHookInline solidusFireDashAct_hook {};
 int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
