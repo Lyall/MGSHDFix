@@ -293,6 +293,13 @@ namespace ConfigKeys
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
+    constexpr const char* MGS2_Restore_Reverb_Level_Section = "Bugfixes";
+    constexpr const char* MGS2_Restore_Reverb_Level_Setting = "Restore Reverb Level";
+    constexpr const char* MGS2_Restore_Reverb_Level_Help = "";
+    constexpr const char* MGS2_Restore_Reverb_Level_Tooltip = "Raises the reverb wet volume to match the PS2's SPU2 hall reverb.\n"
+                                                              "\n"
+                                                              "The Master Collection's room reverb works but is much too quiet, leaving interiors sounding nearly dry.";
+
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "Fix Film Grain";
     constexpr const char* MGS3_Restore_Film_Grain_Help = "(May Impact Performance)";

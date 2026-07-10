@@ -15,6 +15,7 @@
 #include "mgs2_gas_haze.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_demo_camera_judder.hpp"
+#include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_preshade_lights.hpp"
 #include "mgs2_crossfade.hpp"
 #include "input_handler.hpp"
@@ -687,7 +688,10 @@ void Config::Read()
 
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
             LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
-            
+
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_Reverb_Level_Section, ConfigKeys::MGS2_Restore_Reverb_Level_Setting, MGS2ReverbWetLevel::bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2_Restore_Reverb_Level_Section, ConfigKeys::MGS2_Restore_Reverb_Level_Setting, MGS2ReverbWetLevel::bEnabled);
+
 
             ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
             LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
