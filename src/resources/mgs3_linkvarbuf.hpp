@@ -77,14 +77,15 @@ namespace MGS3_LinkVarBuf
         SpecialItem_EZGun = 1 << 2
     };
 
-    enum GameOverIfDiscoveredFlags : unsigned char
+    enum GM_CONFIG : int
     {
-        GameOverIfDiscovered_Disabled = 0x00,
-        GameOverIfDiscovered_Enabled = 0x08
+        GM_CONFIG_PLAYTIME_STOP = 0x4000,
+        GM_CONFIG_GAME_OVER_IF_DISCOVERED = 0x80000
     };
 
+
     inline LinkVarValue<short, 6>           GM_GameLevel;
-    inline LinkVarValue<unsigned char, 10>  GM_GameOverIfDiscoveredFlags;
+    inline LinkVarValue<int, 8>             GM_Configuration;
 
     inline LinkVarPointer<char, 36>         GM_AreaCode;
 
