@@ -71,6 +71,7 @@
     <ClCompile Include="src\fixes\mgs2_flare_occlusion.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_blur.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_camera_judder.cpp" />
+    <ClCompile Include="src\fixes\mgs2_hair_layering.cpp" />
     <ClCompile Include="src\fixes\mgs2_reverb_wet_level.cpp" />
     <ClCompile Include="src\fixes\mgs2_railgun_beam.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="src\fixes\mgs2_flare_occlusion.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_blur.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_camera_judder.hpp" />
+    <ClInclude Include="src\fixes\mgs2_hair_layering.hpp" />
     <ClInclude Include="src\fixes\mgs2_reverb_wet_level.hpp" />
     <ClInclude Include="src\fixes\mgs2_railgun_beam.hpp" />
     <ClInclude Include="src\fixes\mgs2_autopacket.hpp" />
