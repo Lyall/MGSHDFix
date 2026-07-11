@@ -136,6 +136,7 @@
     <ClCompile Include="src\windows_multiplane_overlay_warning.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp" />
     <ClInclude Include="src\features\mg1_display_scaling.hpp" />
     <ClInclude Include="src\features\mgs_smaa.hpp" />
     <ClInclude Include="src\fixes\color_correction.hpp" />

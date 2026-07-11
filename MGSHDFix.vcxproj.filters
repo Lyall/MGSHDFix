@@ -317,6 +317,15 @@
     <ClCompile Include="src\fixes\mgs2_demo_blur.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_demo_camera_judder.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_railgun_beam.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_reverb_wet_level.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\effect_speeds.hpp">
@@ -642,6 +651,18 @@
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_demo_blur.hpp">
       <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_reverb_wet_level.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_railgun_beam.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_demo_camera_judder.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
