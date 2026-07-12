@@ -7,9 +7,11 @@
 #include "effect_speeds.hpp"
 
 #include "d3d11_api.hpp"
+#include "game_funcs.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
 #include "mgs2_flare_occlusion.hpp"
+#include "mgs2_linkvarbuf.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "custom_resolution_and_borderless.hpp"
 
@@ -40,14 +42,15 @@
 
 #define DEFINE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name)             \
     SafetyHookInline name##_hook {};                    \
-    static void name##_Hook(int64_t work)                 \
+    static int64_t name##_Hook(int64_t work)              \
     {                                                    \
         if (SkipFrame())       \
         {                                                \
-            return;                                      \
+            /* Skipped New* constructors must return NULL - callers keep the pointer. */ \
+            return 0;                                    \
         }                                                \
                                                          \
-        name##_hook.call(work);                          \
+        return name##_hook.call<int64_t>(work);          \
     }
 
 #define CREATE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name, pattern, label)                    \
@@ -63,12 +66,15 @@
 
 //  -   WIP: Bird handler. Primarily for w61a / d80p13, but LOD is fucked up and X(NewKamomeTest, "48 89 5C 24 ?? 57 48 83 EC ?? 8B 81 ?? ?? ?? ?? 48 8B D9 89 05 ?? ?? ?? ?? 0F 29 74 24", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> NewKamomeTest() -> Act() (act_471)") \
 //  -   WIP: Bird handler. Primarily for w61a / d80p13, but LOD is fucked up and X(NewKamomeManager, "40 53 48 83 EC ?? 8B 41 ?? 48 8B D9 89 05", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmmng.c -> NewKamomeManager()") \
+    // NewRainFogPersFast / NewRainFogPersDemo stay DISABLED BY DESIGN: fog/cloud effects are
+    // timeline-locked (d_fog_set.c advances by DM_FrameSkip+1) so they are already correct at
+    // 60Hz - hooking them double-corrects. This is why "fix clouds" had to be reverted twice.
     //X(NewRainFogPersFast, "40 55 53 41 55 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05", "MGS 2: Effect Speed Fix: user\\okajima\\effect3\\gas_pers_fast.c -> NewRainFogPersFast()") \
     //X(NewRainFogPersDemo, "48 89 5C 24 ?? 48 89 74 24 ?? 55 57 41 57 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B F9 48 8D 54 24 ?? 8B 49 ?? E8 ?? ?? ?? ?? 48 8B 54 24 ?? 45 33 FF BE ?? ?? ?? ?? 8D 58 ?? 48 63 C3 48 C1 E0 ?? 48 03 D0 48 89 54 24 ?? 85 DB 78 ?? 0F 1F 40 ?? 48 8B 42 ?? ?? ?? 83 F9 ?? 74 ?? 85 C9 74 ?? 3B CE 74 ?? 83 F9 ?? 75 ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B 54 24 ?? 48 83 EA ?? 2B DE 48 89 54 24 ?? 79 ?? 48 8B 05 ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? 25 ?? ?? ?? ?? 48 3D ?? ?? ?? ?? 75 ?? 81 89 ?? ?? ?? ?? ?? ?? ?? ?? E9 ?? ?? ?? ?? 89 77 ?? EB ?? 44 89 7F ?? EB ?? 44 39 7F ?? 74 ?? 81 A1 ?? ?? ?? ?? ?? ?? ?? ?? 4C 89 B4 24 ?? ?? ?? ?? 41 BE ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ?? 0F 29 BC 24 ?? ?? ?? ?? 44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 8C 24 ?? ?? ?? ?? 44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 9C 24 ?? ?? ?? ?? 44 0F 29 A4 24 ?? ?? ?? ?? 44 0F 29 AC 24 ?? ?? ?? ?? 44 39 7F ?? 75 ?? 39 35 ?? ?? ?? ?? 75 ?? 33 D2 41 8B CE E8 ?? ?? ?? ?? 8B 05 ?? ?? ?? ?? 0F 57 F6 F3 0F 10 0D", "MGS 2: Effect Speed Fix: user\\okajima\\effect\\rain_gas_pers_demo.c -> NewRainFogPersDemo()") \
 //need to investigate OK_PutSplush | mgs2x\source\user\okajima\effect2\splush_man.c
-    //X(NewSplashMotion_Demo, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 0F 29 74 24 ?? 41 8B F0 48 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 0F 28 F1 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 48 8D 05", "MGS 2 : Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_motion.c -> NewSplashMotion_Demo()") \
 
 #define MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(X) \
+    X(NewSplashMotion_Demo, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 0F 29 74 24 ?? 41 8B F0 48 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 0F 28 F1 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 48 8D 05", "MGS 2 : Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_motion.c -> NewSplashMotion_Demo() (spawner cadence: keeps droplet population PS2-sized so the shared GV heap never starves plasma/other effects)") \
     X(NewDropBodySplush, "40 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\drop_body_splush.c -> NewDropBodySplush()") \
     X(NewRipBubbleMan, "40 55 56 57 41 55 48 8D 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\ripple_bubble.c -> NewRipBubbleMan_DEMO() | NewRipBubbleMan()") \
     X(NewSplushTidalParts4, "40 53 56 48 81 EC ?? ?? ?? ?? 48 8B F1 48 83 E9 ?? E8 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 0F 2F C8 48 8B 46 ?? 76 ?? 81 88 ?? ?? ?? ?? ?? ?? ?? ?? 48 8B CE 48 81 C4 ?? ?? ?? ?? 5E 5B E9 ?? ?? ?? ?? 81 A0 ?? ?? ?? ?? ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 48 89 AC 24 ?? ?? ?? ?? 48 89 BC 24 ?? ?? ?? ?? 4C 89 A4 24 ?? ?? ?? ?? 4C 89 B4 24 ?? ?? ?? ?? 4C 89 BC 24 ?? ?? ?? ?? 4C 8B 7E ?? 0F 29 B4 24 ?? ?? ?? ?? 0F 29 BC 24 ?? ?? ?? ?? 44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 8C 24 ?? ?? ?? ?? 44 0F 29 54 24 ?? 44 0F 29 5C 24 ?? 44 0F 29 64 24 ?? 44 0F 29 6C 24 ?? F3 44 0F 10 2D ?? ?? ?? ?? 44 0F 29 74 24 ?? F3 44 0F 10 35 ?? ?? ?? ?? 44 0F 29 7C 24 ?? F3 44 0F 10 3D ?? ?? ?? ?? E8 ?? ?? ?? ?? 4D 63 8F ?? ?? ?? ?? BA ?? ?? ?? ?? 41 2B D1 41 89 87 ?? ?? ?? ?? 41 89 97 ?? ?? ?? ?? 41 BE ?? ?? ?? ?? 4C 63 46 ?? 45 3B C6 7D ?? 41 8B C6 49 8D 48 ?? 48 03 C9 41 2B C0 66 0F 6E D0 0F 5B D2 F3 0F 5E 15 ?? ?? ?? ?? 0F 28 C2 0F 28 CA F3 0F 59 86 ?? ?? ?? ?? F3 0F 59 C2 ?? ?? ?? ?? ?? 0F 28 C2 F3 0F 59 86 ?? ?? ?? ?? F3 0F 11 44 CE ?? F3 0F 59 8E ?? ?? ?? ?? F3 0F 59 CA F3 0F 11 4C CE ?? FF 46 ?? 66 44 0F 6E 66 ?? B9 ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? 45 0F 5B E4 4C 63 E2 4B 8B 94 E7 ?? ?? ?? ?? F3 44 0F 5E 25 ?? ?? ?? ?? 48 83 C2 ?? 41 0F 28 CC F3 0F 59 0D ?? ?? ?? ?? 0F 1F 40 ?? 0F 1F 84 00 ?? ?? ?? ?? 66 0F 6E C1 48 8D 52 ?? 0F 5B C0 FF C9 F3 0F 59 C1 F3 0F 59 C2 F3 0F 2C C0 88 42 ?? 85 C9 7F ?? 4B 8B 94 CF ?? ?? ?? ?? 48 8D 9E ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? F3 0F 10 B6 ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? F3 44 0F 10 5B ?? F3 0F 10 BE ?? ?? ?? ?? F3 44 0F 10 4B ?? F3 44 0F 10 86 ?? ?? ?? ?? 45 8D 41 ?? E8 ?? ?? ?? ?? ?? ?? ?? ?? F3 44 0F 5C DF F3 0F 10 4B ?? F3 45 0F 5C C8 F3 0F 10 53 ?? F3 44 0F 5C D6 0F 28 E8 0F 28 DA 0F 28 E1 F3 41 0F 5C ED 44 0F 28 6C 24 ?? F3 44 0F 5C D9 F3 44 0F 5C CA 33 ED F3 44 0F 5C D0 F3 41 0F 5C E6 44 0F 28 74 24 ?? F3 41 0F 5C DF 44 0F 28 7C 24 ?? 41 0F 28 C3 F3 44 0F 59 DD 41 0F 28 FA 45 0F 28 C1 F3 44 0F 59 CD F3 0F 59 C3 F3 44 0F 59 C4 F3 0F 59 FB F3 44 0F 5C C0 F3 44 0F 59 D4 F3 41 0F 5C F9 F3 45 0F 5C DA 44 0F 28 54 24 ?? 41 0F 28 C0 F3 41 0F 59 C0 0F 28 D7 F3 0F 59 D7 41 0F 28 CB F3 41 0F 59 CB F3 0F 58 D0 0F 57 C0 F3 0F 58 D1 0F 54 15 ?? ?? ?? ?? 0F 2E C2 77 ?? 0F 57 C0 F3 0F 51 C2 EB ?? 0F 28 C2 E8 ?? ?? ?? ?? 0F 2F 05 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 45 0F 57 C9 76 ?? 0F 28 F1 F3 0F 5E F0 EB ?? 0F 57 F6 F3 44 0F 59 C6 F3 41 0F 5C CC 48 8D 3D ?? ?? ?? ?? 44 0F 28 64 24 ?? F3 0F 59 FE F3 0F 59 4E ?? F3 44 0F 59 DE F3 41 0F 59 F1 F3 44 0F 59 C1 F3 0F 59 F9 F3 44 0F 59 D9 F3 0F 59 F1 0F 1F 40 ?? 66 66 0F 1F 84 00 ?? ?? ?? ?? F3 0F 10 83 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? F3 0F 10 83 ?? ?? ?? ?? F3 0F 58 43 ?? F3 0F 11 43 ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? E8 ?? ?? ?? ?? 41 0F 2F F9 F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2 : user\\okajima\\effect2\\splush_tidal_parts4.c -> NewSplushTidalParts4() | NewWallTidal()") \
@@ -117,14 +123,31 @@
 
 #define DEFINE_MGS2_PLAYTIME_ALWAYS_HOOK(name, pattern, label)      \
     SafetyHookInline name##_hook {};                                \
-    static void name##_Hook(int64_t work)                           \
+    static int64_t name##_Hook(int64_t work)                        \
     {                                                               \
-        if ((g_D3D11Hooks.FrameCount & 1) != 0)   \
+        if (MGS2_LinkVarBuf::linkvarbuf && ((MGS2_LinkVarBuf::GM_StagePlayTime & 1) == 0)) \
         {                                                           \
-            return;                                                 \
+            return 0;                                               \
         }                                                           \
-        name##_hook.call(work);                                     \
+        return name##_hook.call<int64_t>(work);                     \
     }
+
+// DG_FrameCount==2 = the game's own "this section ran 30fps on PS2" flag. More reliable
+// than InCutscene() - demo blips set 1, real 30fps windows set 2.
+inline int* g_pWindowFrameCount = nullptr;
+inline bool In30fpsWindow() { return g_pWindowFrameCount && *g_pWindowFrameCount == 2; }
+
+// Ribbons born inside a real 30fps window, latched at spawn. Fixed-size and alloc-free on
+// purpose: hook bodies must never allocate. Slot collisions just drop a latch early (the
+// ribbon decays at 60Hz from there) - never a crash.
+inline uintptr_t g_windowBornRibbons[64] = {};
+inline void RibbonSetWindowBorn(uintptr_t work, bool born)
+{
+    const size_t slot = (work >> 4) & 63;
+    if (born) g_windowBornRibbons[slot] = work;
+    else if (g_windowBornRibbons[slot] == work) g_windowBornRibbons[slot] = 0;
+}
+inline bool RibbonIsWindowBorn(uintptr_t work) { return g_windowBornRibbons[(work >> 4) & 63] == work; }
 
 inline void HookRailgunVortexRate(HMODULE baseModule)
 {
@@ -175,7 +198,9 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
     vortexLifeHook = safetyhook::create_mid(vortexAct + 0x3E,   // about to store life-1
         [](SafetyHookContext& ctx)
         {
-            if (!g_GameVars.InCutscene()) return;
+            // Only window-born ribbons take the 30fps hold; latched at spawn so demo blips
+            // ending mid-flight cannot disengage it. Everything else uses the 0xF0 init below.
+            if (!RibbonIsWindowBorn(ctx.r8)) return;
             static std::unordered_map<uintptr_t, uint32_t> s_ticks;
             if (s_ticks.size() > 64) s_ticks.clear();
             // Native decay for the tail so the impact smoke dies before the camera cut.
@@ -191,7 +216,11 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
         vortexInitHook = safetyhook::create_mid(vortexAct + 0xAA3,   // right after: mov [rcx+0x170], 0x78
             [](SafetyHookContext& ctx)
             {
-                if (!g_GameVars.InCutscene())
+                // Window-born: keep 0x78 + hold + native tail (verified polygon-demo look).
+                // Fight blips and gameplay: 0xF0 @ 60Hz = 4.0s = PS2's 0x78 @ 30Hz.
+                const bool windowBorn = In30fpsWindow();
+                RibbonSetWindowBorn(ctx.rcx, windowBorn);
+                if (!windowBorn)
                     *reinterpret_cast<int32_t*>(ctx.rcx + 0x170) = 0xF0;
             });
         LOG_HOOK(vortexInitHook, "MGS 2: Effect Speed Fix : vortex ribbon gameplay life span")
@@ -206,7 +235,7 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
         vortexAlphaHook = safetyhook::create_mid(vortexAct + 0x7F0,   // right after: movss xmm7, [rip] (=48.0)
             [](SafetyHookContext& ctx)
             {
-                ctx.xmm7.f32[0] *= g_GameVars.InCutscene() ? 0.5f : 0.125f;
+                ctx.xmm7.f32[0] *= In30fpsWindow() ? 0.5f : 0.125f;   // stable through fight blips
             });
         LOG_HOOK(vortexAlphaHook, "MGS 2: Effect Speed Fix : vortex ribbon gameplay alpha")
     }
@@ -467,10 +496,24 @@ namespace
 
     uintptr_t rain_slow_copyback_addr = static_cast<uintptr_t>(0);
 
+    // g_pWindowFrameCount / In30fpsWindow() are defined at file scope above
+    // HookRailgunVortexRate (the vortex hooks share them); resolved in Initialize().
     bool SkipFrame()
     {
-        return g_GameVars.InCutscene() && ((g_D3D11Hooks.FrameCount & 1) != 0);
+        // Allow skipping in any cutscene, not just flagged 30fps windows - slow-running
+        // PS2 demos can skip too for the right feel, even when authored at 60.
+        return g_GameVars.InCutscene() && (g_GameVars.DG_Clock() & 1) != 0;
     }
+
+    bool SkipFrameWindow()
+    {
+        // Real 30fps windows only - for the window countdown itself.
+        return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
+    }
+
+    // Kamome (seagull) demo pacing. PS2 ran the bird demos below 60fps, so birds moved and
+    // flapped at ~half rate. Draw stays at full 60 (prims are double-buffered) - the rates
+    // get halved instead. Gameplay birds untouched.
 
 #define DEFINE_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
     DEFINE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name);
@@ -489,60 +532,178 @@ namespace
     constexpr uint32_t CIGARETTE_MOUTH_SMOKE_EMIT_FADE = 0xBB888889;  // -0.004166667f
 
 
-    uint8_t* g_pKMM_Routine = nullptr;
+    safetyhook::InlineHook h_KMM_Routine;
     safetyhook::InlineHook h_KMM_ActSystem;
-    safetyhook::InlineHook h_KMM_ActControl;
     safetyhook::InlineHook h_MEMMOT_MakeMotion;
     safetyhook::InlineHook h_MEMMOT_MakeMotionSkip;
 
-    safetyhook::MidHook h_KMM_Routine_ThinkActionGate;
+    inline bool g_kamomeMemmotHalfStep = false;
 
-    inline bool g_suppressMemmotForKamome = false;
-
-
-
-    void __fastcall MEMMOT_MakeMotion_hook(void* mmt_ctrl)
+    // Desync the flock with a whole-frame phase offset. Whole frames only (kmtest.c checks
+    // exact phase values). Looping motions only - fixed so birds not scheduled early at 60fps.
+    void KamomeScatterPhase(void* mmt_ctrl)
     {
-        if (g_suppressMemmotForKamome)
+        uint8_t* mmt = static_cast<uint8_t*>(mmt_ctrl);
+        float* phase = reinterpret_cast<float*>(mmt + 0x18);
+        const int* loops = reinterpret_cast<const int*>(mmt + 0x14);
+        if (*loops != 0 || *phase != 0.0f)
         {
             return;
+        }
+        const int idx = *reinterpret_cast<const int*>(mmt); // KMM_MOT_FLYING/FLYING03/HOVER/HOVER02
+        if (idx != 2 && idx != 5 && idx != 7 && idx != 8)
+        {
+            return;
+        }
+        const uint8_t* bank = *reinterpret_cast<const uint8_t* const*>(mmt + 0x50);
+        if (!bank)
+        {
+            return;
+        }
+        const uint16_t* lens = *reinterpret_cast<const uint16_t* const*>(bank + 0x20);
+        if (!lens)
+        {
+            return;
+        }
+        const int half = lens[idx] / 2;
+        if (half < 2)
+        {
+            return;
+        }
+        const uint32_t h = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(mmt) >> 4);
+        *phase = static_cast<float>(static_cast<int>((h ^ (h >> 7)) & 0x7FFFFFFF) % half);
+    }
+
+    // Sample the pose every tick (skipping shows bind pose), advance the phase every other
+    // tick at full step (fractional steps break kmact.c's IsEnd/nLoop checks).
+    void __fastcall MEMMOT_MakeMotion_hook(void* mmt_ctrl)
+    {
+        if (g_kamomeMemmotHalfStep)
+        {
+            KamomeScatterPhase(mmt_ctrl);
+            if ((g_GameVars.DG_Clock() & 1) != 0)
+            {
+                float* phase = reinterpret_cast<float*>(static_cast<uint8_t*>(mmt_ctrl) + 0x18);
+                const float pre = *phase;
+                h_MEMMOT_MakeMotion.call<void>(mmt_ctrl);
+                if (*phase > pre) // undo plain advances, keep wraps
+                {
+                    *phase = pre;
+                }
+                return;
+            }
         }
         h_MEMMOT_MakeMotion.call<void>(mmt_ctrl);
     }
 
     void __fastcall MEMMOT_MakeMotionSkip_hook(void* mmt_ctrl)
     {
-        if (g_suppressMemmotForKamome)
+        if (g_kamomeMemmotHalfStep)
         {
-            return;
+            KamomeScatterPhase(mmt_ctrl);
+            if ((g_GameVars.DG_Clock() & 1) != 0)
+            {
+                return; // advance-only variant: plain hold
+            }
         }
         h_MEMMOT_MakeMotionSkip.call<void>(mmt_ctrl);
     }
 
-    void __fastcall KMM_ActControl_hook(void* kamome)
+    // KMM_ActControl(): halve the movement deltas at the accumulation adds. Y comes from the
+    // flap-height table (already phase-halved) so it needs nothing.
+    safetyhook::MidHook h_KamomeDeltaScaleX;
+    safetyhook::MidHook h_KamomeDeltaScaleZ;
+    safetyhook::MidHook h_KamomeDeltaScaleW;
+    void KamomeDeltaScaleX_hook(SafetyHookContext& ctx)
     {
-        if (SkipFrame())
+        if (g_kamomeMemmotHalfStep)
         {
-            return;
+            ctx.xmm8.f32[0] *= 0.5f;
         }
-        h_KMM_ActControl.call<void>(kamome);
+    }
+    void KamomeDeltaScaleZ_hook(SafetyHookContext& ctx)
+    {
+        if (g_kamomeMemmotHalfStep)
+        {
+            ctx.xmm6.f32[0] *= 0.5f;
+        }
+    }
+    void KamomeDeltaScaleW_hook(SafetyHookContext& ctx)
+    {
+        if (g_kamomeMemmotHalfStep)
+        {
+            ctx.xmm2.f32[0] *= 0.5f;
+        }
+    }
+
+    // KMM_ActControl()'s heading chase has no time compensation - at 60Hz turns finish 2x
+    // fast and kmact.c's glide-entry check never passes. Hold it every other demo tick.
+    uint8_t* g_pKamomeIntegrator = nullptr;
+    safetyhook::MidHook h_KamomeTurnPace;
+    void KamomeTurnPace_hook(SafetyHookContext& ctx)
+    {
+        if (g_kamomeMemmotHalfStep && (g_GameVars.DG_Clock() & 1) != 0)
+        {
+            ctx.rip = reinterpret_cast<uint64_t>(g_pKamomeIntegrator) + 0xB5;
+        }
     }
 
     void __fastcall KMM_ActSystem_hook(void* kamome)
     {
-        g_suppressMemmotForKamome = SkipFrame();
+        g_kamomeMemmotHalfStep = g_GameVars.InCutscene() || In30fpsWindow();
         h_KMM_ActSystem.call<void>(kamome);
-        g_suppressMemmotForKamome = false;
+        g_kamomeMemmotHalfStep = false;
     }
 
-    void KMM_Routine_ThinkActionGate_hook(SafetyHookContext& ctx)
+    uint8_t* g_pKMM_Routine = nullptr;
+    safetyhook::MidHook h_KMM_Routine_ThinkGate;
+    bool g_kamomeHoldThink = false;
+
+    void KMM_Routine_ThinkGate_hook(SafetyHookContext& ctx)
     {
-        if (!SkipFrame())
+        if (!g_kamomeHoldThink)
         {
             return;
         }
+        // Hold think modes 0/1 only. The order path must run every tick or demo orders get
+        // cleared before pickup.
+        const int mode = *reinterpret_cast<const int*>(ctx.rdi + 0x168);
+        if (mode == 0 || mode == 1)
+        {
+            ctx.rip = reinterpret_cast<uint64_t>(g_pKMM_Routine) + 0x616;
+        }
+    }
 
-        ctx.rip = reinterpret_cast<uint64_t>(g_pKMM_Routine) + 0x616;
+    int64_t __fastcall KMM_Routine_hook(int64_t kamome)
+    {
+        // Gate think to every other demo tick - the movers all live in it, so this is what
+        // halves movement. Head/tail (draw refresh, orders, SFX) still run every tick.
+        const bool holdThink = g_GameVars.InCutscene() || In30fpsWindow()
+            ? (g_GameVars.DG_Clock() & 1) != 0
+            : false;
+        // The head clears the LOD field and gated think can't re-set it - restore it on held
+        // ticks or the models flicker.
+        int32_t* lodMode = reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(kamome) + 0x134);
+        const int32_t prevLod = *lodMode;
+        int64_t result;
+        if (holdThink)
+        {
+            g_kamomeHoldThink = true;
+            result = h_KMM_Routine.call<int64_t>(kamome);
+            g_kamomeHoldThink = false;
+            *lodMode = prevLod;
+        }
+        else
+        {
+            result = h_KMM_Routine.call<int64_t>(kamome);
+            if (!(g_GameVars.InCutscene() || In30fpsWindow()))
+            {
+                // Gameplay: max LOD. Vanilla freezes distant birds into a static pose - fine
+                // at 480i, obvious at 4K.
+                *lodMode = 0;
+            }
+        }
+        return result;
     }
 
 
@@ -558,6 +719,29 @@ namespace
         ctx.rip = reinterpret_cast<uint64_t>(g_pGateTo);
     }
 
+    uint8_t* g_pPlasmaGateTo = nullptr;
+    safetyhook::MidHook h_Act389_PlasmaGate;
+
+    void Act389_PlasmaGate_hook(SafetyHookContext& ctx)
+    {
+        if (!SkipFrame())
+        {
+            return;
+        }
+        ctx.rip = reinterpret_cast<uint64_t>(g_pPlasmaGateTo);
+    }
+
+    // The 30fps window countdown ticks per call - at 60fps windows expired in half their
+    // real time. Hold it on skip ticks; Die still restores the divisor.
+    SafetyHookInline h_DemoFrameCountAct{};
+    int64_t __fastcall DemoFrameCountAct_hook(int64_t work)
+    {
+        if (SkipFrameWindow())
+        {
+            return 0;
+        }
+        return h_DemoFrameCountAct.call<int64_t>(work);
+    }
 
 }
 
@@ -591,29 +775,30 @@ int64_t __fastcall MGS2_solidusFireDashAct(int64_t work)
 }
 
 
-/* //breaks d_plasma_poly / plasma lines when snake's stealth camo breaks in tanker intro when fixed????????? disabled for now.
+// Re-enabled on the window clock. The old breakage was the Present-counter clock and
+// whole-cutscene scope, not this hook - it resubmits the prim every frame.
 SafetyHookInline d_splash_parts__c_Act_hook {};
+// Struct offsets parsed from the matched Act bytes at install time (the pattern wildcards
+// these displacements, so hardcoding them risks silent divergence between the twins/versions).
+int32_t g_splashLifeDisp = -1;
+int32_t g_splashPrimDisp = -1;
+int32_t g_splashGroupDisp = -1;
 void __fastcall MGS2_d_splash_parts__c_Act_hook(uint8_t* work)
 {
-    using namespace MGS2_GameFuncs;
-    int32_t life = *reinterpret_cast<int32_t*>(work + 0x90);
-    if (life <= 0)
+    // Run ticks and the dead path go through the untouched original Act, so its own update,
+    // draw and destroy logic (child cleanup included) stays fully authentic.
+    if (!SkipFrame() || *reinterpret_cast<int32_t*>(work + g_splashLifeDisp) <= 0)
     {
-        GV_DestroyActor(work);
+        d_splash_parts__c_Act_hook.call(work);
         return;
     }
 
-    // always resubmit for drawing so nothing flickers/vanishes on skipped logic frames
-    uint8_t* prim = *reinterpret_cast<uint8_t**>(work + 0x60);
-    *reinterpret_cast<int32_t*>(prim + 0xAC) = GM_GetDGGroupID(g_GameVars.GM_CurrentStageMap());
-
-    if (!SkipFrame())
+    // Held tick: only resubmit the prim group so the droplet stays visible without advancing.
+    if (uint8_t* prim = *reinterpret_cast<uint8_t**>(work + g_splashPrimDisp))
     {
-        UpdateVectors_4(work);
-        *reinterpret_cast<int32_t*>(work + 0x90) = life - 1;
+        *reinterpret_cast<int32_t*>(prim + g_splashGroupDisp) = MGS2_GameFuncs::GM_GetDGGroupID(g_GameVars.GM_CurrentStageMap());
     }
 }
-*/
 
 void EffectSpeedFix::Initialize()
 {
@@ -626,6 +811,21 @@ void EffectSpeedFix::Initialize()
     {
         SPDLOG_INFO("MGS 2: Effect Speed Fix: Config disabled. Skipping");
         return;
+    }
+
+    // Resolve DG_FrameCount from NewDemoFrameCountCall's ctor (save-old + write-2 idiom).
+    // No match = no cutscene half-rating at all, which is the safe fallback.
+    if (uint8_t* windowWrite = Memory::PatternScan(baseModule,
+        "89 4B 58 8B 05 ?? ?? ?? ?? 89 43 5C 48 8B C3 C7 05 ?? ?? ?? ?? 02 00 00 00",
+        "MGS 2: Effect Speed Fix : scripted 30fps window flag (DG_FrameCount)"))
+    {
+        g_pWindowFrameCount = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(windowWrite + 15, 2, 10));
+        spdlog::info("MGS 2: Effect Speed Fix: 30fps window flag at {:s}+{:X}", sExeName.c_str(),
+            reinterpret_cast<uintptr_t>(g_pWindowFrameCount) - reinterpret_cast<uintptr_t>(baseModule));
+    }
+    else
+    {
+        spdlog::error("MGS 2: Effect Speed Fix: 30fps window flag scan failed - cutscene speed corrections inactive this run.");
     }
 
     spdlog::info("MGS2: Effect Speed Fix - Initializing...");
@@ -660,13 +860,15 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(name##_hook, label)                                               \
     }
 
-/*
+    // Re-enabled: these parent trail/beam actors cap the whole railgun shot tree via the
+    // GV_DestroyActor cascade - with them unhooked, vortex ribbons died at half span no
+    // matter what their own life held. Skips now return 0 (constructor-safe) and key on
+    // GM_StagePlayTime, not Present parity. Follow-up: convert to in-Act life holds.
     if (MGS2RailgunBeam::bEnabled)
     {
         MGS2_RAILGUN_PLAYTIME_SKIPS_ALWAYS(CREATE_PLAYTIME_HOOK)
     }
 
-    */
 #undef CREATE_PLAYTIME_HOOK
 
 #undef INSTALL_MGS2_FRAMESKIP_HOOK
@@ -845,15 +1047,33 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(solidusFireDashAct_hook, "MGS 2: Effect Speed Fix: effect\\solidas_dash_fire.c")
     }
 
-    /*
-    if (uint8_t* MGS2_d_splash_parts__c_ActScanResult = Memory::PatternScan(baseModule, "40 57 48 83 EC 20 83 B9 ?? ?? ?? ?? 00 48 8B F9 7E ?? 48 89 5C 24 ?? 48 8B 59 ?? 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B CF 89 83 ?? ?? ?? ?? E8 ?? ?? ?? ?? FF 8F ?? ?? ?? ?? 48 8B 5C 24 ?? 48 83 C4 20 5F C3 48 83 C4 20 5F E9 ?? ?? ?? ?? CC 48 89 5C 24 ?? 57 48 83 EC 40 48 8B FA 0F 29 74 24 ?? 48 8B CF 0F 29 7C 24 ?? 49 8B D0 49 8B D8 E8 ?? ?? ?? ?? 48 C7 87 ?? ?? ?? ?? 44 00 00 00 0F 57 F6 F3 0F 10 3D ?? ?? ?? ?? F3 0F 10 2D ?? ?? ?? ?? F3 0F 10 25 ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 10 43 ?? F3 0F 59 C6 ?? ?? ?? ?? F3 0F 59 C7 F3 0F 2C C0 66 89 05 ?? ?? ?? ?? F3 0F 10 43 ?? F3 0F 59 C6 F3 0F 58 43 ?? C7 05 ?? ?? ?? ?? 00 10 FF 8F C6 05 ?? ?? ?? ?? FF C6 05 ?? ?? ?? ?? FF C6 05 ?? ?? ?? ?? FF F3 0F 59 C7 C6 05 ?? ?? ?? ?? 5A", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_parts_slow.c"))
+    if (uint8_t* MGS2_d_splash_parts__c_ActScanResult = (MGS2_GameFuncs::UpdateVectors_4 && MGS2_GameFuncs::GM_GetDGGroupID && MGS2_GameFuncs::GV_DestroyActor)
+        ? Memory::PatternScan(baseModule, "40 57 48 83 EC 20 83 B9 ?? ?? ?? ?? 00 48 8B F9 7E ?? 48 89 5C 24 ?? 48 8B 59 ?? 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B CF 89 83 ?? ?? ?? ?? E8 ?? ?? ?? ?? FF 8F ?? ?? ?? ?? 48 8B 5C 24 ?? 48 83 C4 20 5F C3 48 83 C4 20 5F E9 ?? ?? ?? ?? CC 48 89 5C 24 ?? 57 48 83 EC 40 48 8B FA 0F 29 74 24 ?? 48 8B CF 0F 29 7C 24 ?? 49 8B D0 49 8B D8 E8 ?? ?? ?? ?? 48 C7 87 ?? ?? ?? ?? 44 00 00 00 0F 57 F6 F3 0F 10 3D ?? ?? ?? ?? F3 0F 10 2D ?? ?? ?? ?? F3 0F 10 25 ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 11 2D ?? ?? ?? ?? F3 0F 11 25 ?? ?? ?? ?? F3 0F 11 1D ?? ?? ?? ?? F3 0F 11 15 ?? ?? ?? ?? F3 0F 10 43 ?? F3 0F 59 C6 ?? ?? ?? ?? F3 0F 59 C7 F3 0F 2C C0 66 89 05 ?? ?? ?? ?? F3 0F 10 43 ?? F3 0F 59 C6 F3 0F 58 43 ?? C7 05 ?? ?? ?? ?? 00 10 FF 8F C6 05 ?? ?? ?? ?? FF C6 05 ?? ?? ?? ?? FF C6 05 ?? ?? ?? ?? FF F3 0F 59 C7 C6 05 ?? ?? ?? ?? 5A", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_parts_slow.c") : nullptr)
     {
-        d_splash_parts__c_Act_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_d_splash_parts__c_ActScanResult), reinterpret_cast<void*>(MGS2_d_splash_parts__c_Act_hook));
-        LOG_HOOK(d_splash_parts__c_Act_hook, "MGS 2: Effect Speed Fix: user\\okajima\\demo_effect\\d_splash_parts.c")
+        // Parse the wildcarded displacements from the matched bytes so they can't diverge.
+        uint8_t* act = MGS2_d_splash_parts__c_ActScanResult;
+        g_splashLifeDisp = *reinterpret_cast<int32_t*>(act + 8);
+        g_splashPrimDisp = g_splashGroupDisp = -1;
+        for (int i = 0x10; i < 0x40; ++i)
+        {
+            if (g_splashPrimDisp < 0 && act[i] == 0x48 && act[i+1] == 0x8B && act[i+2] == 0x59)
+                g_splashPrimDisp = act[i+3];
+            if (g_splashGroupDisp < 0 && act[i] == 0x89 && act[i+1] == 0x83)
+                g_splashGroupDisp = *reinterpret_cast<int32_t*>(act + i + 2);
+        }
+        if (g_splashLifeDisp >= 0 && g_splashPrimDisp >= 0 && g_splashGroupDisp >= 0)
+        {
+            d_splash_parts__c_Act_hook = safetyhook::create_inline(reinterpret_cast<void*>(act), reinterpret_cast<void*>(MGS2_d_splash_parts__c_Act_hook));
+            LOG_HOOK(d_splash_parts__c_Act_hook, "MGS 2: Effect Speed Fix: user\\okajima\\demo_effect\\d_splash_parts_slow.c")
+            spdlog::info("MGS 2: Effect Speed Fix: splash offsets life=+0x{:X} prim=+0x{:X} group=+0x{:X}", g_splashLifeDisp, g_splashPrimDisp, g_splashGroupDisp);
+        }
+        else
+        {
+            spdlog::error("MGS 2: Effect Speed Fix: splash displacement parse failed; hook skipped.");
+        }
     }
-    */
 
-    /*
+    // Kamome bird pacing (see the kamome hook block above).
     uint8_t* pKMM_ActSystem = Memory::PatternScan(baseModule, "40 57 48 83 EC ?? 83 B9 ?? ?? ?? ?? 00 48 8B F9 0F 85", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActSystem()");
     uint8_t* pKMM_ActControl = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 89 AC 24", "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl()");
     uint8_t* pMEMMOT_MakeMotion = Memory::PatternScan(baseModule, "4C 8B DC 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? ?? ?? ?? 48 8B F9", "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotion()");
@@ -867,15 +1087,49 @@ void EffectSpeedFix::Initialize()
     else
     {
         h_KMM_ActSystem = safetyhook::create_inline(reinterpret_cast<void*>(pKMM_ActSystem), KMM_ActSystem_hook);
-        h_KMM_ActControl = safetyhook::create_inline(reinterpret_cast<void*>(pKMM_ActControl), KMM_ActControl_hook);
+        LOG_HOOK(h_KMM_ActSystem, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActSystem()")
         h_MEMMOT_MakeMotion = safetyhook::create_inline(reinterpret_cast<void*>(pMEMMOT_MakeMotion), MEMMOT_MakeMotion_hook);
+        LOG_HOOK(h_MEMMOT_MakeMotion, "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotion()")
         h_MEMMOT_MakeMotionSkip = safetyhook::create_inline(reinterpret_cast<void*>(pMEMMOT_MakeMotionSkip), MEMMOT_MakeMotionSkip_hook);
+        LOG_HOOK(h_MEMMOT_MakeMotionSkip, "MGS 2: Effect Speed Fix : user\\okuta\\conv\\memmot.c -> MEMMOT_MakeMotionSkip()")
+        // Mid-hook before the inline so the gate exists by the wrapper's first held call.
         g_pKMM_Routine = pKMM_Routine;
-        h_KMM_Routine_ThinkActionGate = safetyhook::create_mid(pKMM_Routine + 0xBF, KMM_Routine_ThinkActionGate_hook);
+        h_KMM_Routine_ThinkGate = safetyhook::create_mid(pKMM_Routine + 0xBF, KMM_Routine_ThinkGate_hook);
+        LOG_HOOK(h_KMM_Routine_ThinkGate, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_Routine() think gate")
+        h_KMM_Routine = safetyhook::create_inline(reinterpret_cast<void*>(pKMM_Routine), KMM_Routine_hook);
+        LOG_HOOK(h_KMM_Routine, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_Routine()")
+
+        // Byte-verify the mid-hook sites. Note the "KMM_ActControl" pattern actually lands on
+        // the position integrator.
+        if (memcmp(pKMM_ActControl + 0x5C, "\x8B\xAB\x90\x02\x00\x00", 6) == 0 &&
+            memcmp(pKMM_ActControl + 0xB5, "\x8B\x8B\x60\x01\x00\x00", 6) == 0)
+        {
+            g_pKamomeIntegrator = pKMM_ActControl;
+            h_KamomeTurnPace = safetyhook::create_mid(pKMM_ActControl + 0x5C, KamomeTurnPace_hook);
+            LOG_HOOK(h_KamomeTurnPace, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl() turn pace")
+        }
+        else
+        {
+            spdlog::error("MGS 2: Effect Speed Fix : Kamome turn-pace site mismatch; skipping.");
+        }
+        if (memcmp(pKMM_ActControl + 0x21D, "\xF3\x44\x0F\x58\x83\x10\x03\x00\x00", 9) == 0 &&
+            memcmp(pKMM_ActControl + 0x27E, "\xF3\x0F\x58\xB3\x18\x03\x00\x00", 8) == 0 &&
+            memcmp(pKMM_ActControl + 0x28E, "\xF3\x0F\x58\x93\x1C\x03\x00\x00", 8) == 0)
+        {
+            h_KamomeDeltaScaleX = safetyhook::create_mid(pKMM_ActControl + 0x21D, KamomeDeltaScaleX_hook);
+            LOG_HOOK(h_KamomeDeltaScaleX, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl() delta X")
+            h_KamomeDeltaScaleZ = safetyhook::create_mid(pKMM_ActControl + 0x27E, KamomeDeltaScaleZ_hook);
+            LOG_HOOK(h_KamomeDeltaScaleZ, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl() delta Z")
+            h_KamomeDeltaScaleW = safetyhook::create_mid(pKMM_ActControl + 0x28E, KamomeDeltaScaleW_hook);
+            LOG_HOOK(h_KamomeDeltaScaleW, "MGS 2: Effect Speed Fix : user\\okuta\\kamome\\kmtest.c -> KMM_ActControl() delta W")
+        }
+        else
+        {
+            spdlog::error("MGS 2: Effect Speed Fix : Kamome delta-scale sites mismatch; skipping.");
+        }
 
     }
 
-    */
     uint8_t* pAct_16 = Memory::PatternScan(baseModule,"4C 8B DC 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 49 89 5B ?? 48 8B F9","MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()");
     uint8_t* pGateFrom = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x842");
     uint8_t* pGateTo = Memory::PatternScan(baseModule, "48 8B 8C 24 ?? ?? ?? ?? 48 33 CC E8 ?? ?? ?? ?? 48 81 C4 ?? ?? ?? ?? 5F C3 90", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x8A6");
@@ -890,6 +1144,34 @@ void EffectSpeedFix::Initialize()
         h_Act16_HairPhysicsGate = safetyhook::create_mid(pGateFrom, Act16_HairPhysicsGate_hook);
     }
 
+    // d_plasma_poly (camo-break plasma lines): the gate jumps the Act body to its own
+    // epilogue, so no return-value hazard.
+    uint8_t* pAct_389 = Memory::PatternScan(baseModule, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? 48 8B 99", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()");
+    uint8_t* pGateFrom_plasma_scan = Memory::PatternScan(baseModule, "4D 8D A6 ?? ?? ?? ?? 49 8B 8E", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()+0x8E");
+    uint8_t* pGateTo_plasma_scan = Memory::PatternScan(baseModule, "48 8B 4D ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 49 8B 73 ?? 49 8B 7B ?? 41 0F 28 73 ?? 41 0F 28 7B ?? 45 0F 28 43 ?? 45 0F 28 4B ?? 49 8B E3 41 5F 41 5E 41 5D 41 5C 5D C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 4C 8B DC", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_plasma_poly.c -> Act()+0x1861");
+
+    if (!pAct_389 || !pGateFrom_plasma_scan || !pGateTo_plasma_scan)
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : Failed to find Plasma Poly throttle hook addresses. Skipping Plasma Poly throttle hooks.");
+    }
+    else
+    {
+        g_pPlasmaGateTo = pGateTo_plasma_scan;
+        h_Act389_PlasmaGate = safetyhook::create_mid(pGateFrom_plasma_scan, Act389_PlasmaGate_hook);
+    }
+
+    // Installed last: rewrites the countdown Act's prologue, and nothing may pattern-scan after.
+    if (uint8_t* pWindowCountdownAct = Memory::PatternScan(baseModule,
+        "8B 41 ?? 85 C0 74 ?? FF C8 89 41 ?? C3",
+        "MGS 2: Effect Speed Fix : user\\morita\\demo_frmcnt\\demo_frmcnt.c -> NewDemoFrameCountCall() -> Act()"))
+    {
+        h_DemoFrameCountAct = safetyhook::create_inline(reinterpret_cast<void*>(pWindowCountdownAct), DemoFrameCountAct_hook);
+        LOG_HOOK(h_DemoFrameCountAct, "MGS 2: Effect Speed Fix : user\\morita\\demo_frmcnt\\demo_frmcnt.c -> NewDemoFrameCountCall() -> Act()")
+    }
+    else
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : window countdown Act scan failed; windows will expire at half PS2 duration.");
+    }
 
 }
 
