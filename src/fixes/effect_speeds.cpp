@@ -500,7 +500,14 @@ namespace
     // HookRailgunVortexRate (the vortex hooks share them); resolved in Initialize().
     bool SkipFrame()
     {
-        // Skip every other game tick, but only inside real 30fps windows.
+        // Allow skipping in any cutscene, not just flagged 30fps windows - slow-running
+        // PS2 demos can skip too for the right feel, even when authored at 60.
+        return g_GameVars.InCutscene() && (g_GameVars.DG_Clock() & 1) != 0;
+    }
+
+    bool SkipFrameWindow()
+    {
+        // Real 30fps windows only - for the window countdown itself.
         return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
     }
 
@@ -729,7 +736,7 @@ namespace
     SafetyHookInline h_DemoFrameCountAct{};
     int64_t __fastcall DemoFrameCountAct_hook(int64_t work)
     {
-        if (SkipFrame())
+        if (SkipFrameWindow())
         {
             return 0;
         }
