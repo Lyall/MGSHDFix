@@ -20,9 +20,22 @@ namespace
     // Add any posters we missed here: code = the texture's 8-hex id from
     // BP_FlatlistTextureMapping.txt (strcode24 of the texture name).
     constexpr uint32_t kNoShadeTex[] = {
-        0xcae92c, 0x45e48e, 0x3b57e3, 0x3c57e3,
+        // memo notes, bullet holes
+        0x45e48e, 0x3b57e3, 0x3c57e3, 0xbd4c0b, 0x144548, 0x884312,
+        // tanker posters (quarters, lounge, engine room)
         0x5c37c1, 0xe7261d, 0x2cd7be, 0x5fc83f, 0x5fc840, 0x5fc841,
+        0x4af484, 0x4afb45, 0x4afb46,
+        // plant struts (pump room, transformer room, dining hall)
+        0x0a9041, 0xcae92c, 0x21f6e6, 0xc9e498, 0x926f7c,
+        0x82d8f5, 0x82d8f6, 0x915d28, 0x915d48,
+        // Shell 1 core (lockers, game posters, monitors, lounge)
+        0x9b65c9, 0x21f7e6, 0x21f7e7, 0xf3c96d, 0xdbab00, 0xb6ea53,
+        0xb3f9e2, 0xc3f9e2, 0xaa3210, 0x3d7b2a, 0x3d7b2b, 0x3b1381,
+        // Shell 2 core (filtration chambers, FHM)
         0xeaea41, 0xeaea42, 0xeaea43, 0xeeea3e,
+        // Substance idol posters + alt monitors + promo
+        0xd5613b, 0x15861e, 0x3b62fa, 0xc5ee63, 0xc6b2c7,
+        0x15861d, 0x3b62fb, 0xc5ee62, 0xb3f932, 0xc3f932, 0x8ef342,
     };
 
     enum class PackMode : uint8_t { Vanilla, DoorTwoSided, NoShadeNeutral };
