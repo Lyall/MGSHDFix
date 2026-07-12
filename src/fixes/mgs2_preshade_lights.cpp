@@ -64,16 +64,84 @@ namespace
     SafetyHookMid ShadeLoop_hooks[3] {};
     uintptr_t ShadeLoop_skipRip[3] {};
 
+    // The door hooks fire per vertex (and per light), and temp lights re-shade rooms every
+    // frame - hook overhead there was the cutscene lag. Door packs are a handful in one
+    // deck, so keep the hooks UNPATCHED and splice their bytes in only while a door pack
+    // is shading. Everything else runs original code at original speed.
+    struct ToggleHook
+    {
+        SafetyHookMid hook {};
+        uint8_t* site = nullptr;
+        uint8_t original[24] {};
+        uint8_t patched[24] {};
+        size_t len = 0;
+    };
+    ToggleHook gDoorHooks[2];
+    bool gDoorPatched = false;
+
+    void SetDoorHooks(bool enable)
+    {
+        if (enable == gDoorPatched)
+        {
+            return;
+        }
+        gDoorPatched = enable;
+        for (auto& t : gDoorHooks)
+        {
+            if (!t.site)
+            {
+                continue;
+            }
+            DWORD old;
+            VirtualProtect(t.site, t.len, PAGE_EXECUTE_READWRITE, &old);
+            memcpy(t.site, enable ? t.patched : t.original, t.len);
+            VirtualProtect(t.site, t.len, old, &old);
+            FlushInstructionCache(GetCurrentProcess(), t.site, t.len);
+        }
+    }
+
+    bool InstallDoorHook(ToggleHook& t, const char* pattern, const char* label,
+        void (*fn)(SafetyHookContext&))
+    {
+        uint8_t* p = Memory::PatternScan(baseModule, pattern, label);
+        if (!p)
+        {
+            return false;
+        }
+        t.site = p;
+        memcpy(t.original, p, sizeof(t.original));
+        t.hook = safetyhook::create_mid(p, fn);
+        memcpy(t.patched, p, sizeof(t.patched));
+        t.len = sizeof(t.original);
+        while (t.len > 0 && t.original[t.len - 1] == t.patched[t.len - 1])
+        {
+            t.len--;
+        }
+        if (t.len == 0)
+        {
+            return false;
+        }
+        // start unpatched; the pack classifier splices it in for door packs
+        DWORD old;
+        VirtualProtect(p, t.len, PAGE_EXECUTE_READWRITE, &old);
+        memcpy(p, t.original, t.len);
+        VirtualProtect(p, t.len, old, &old);
+        FlushInstructionCache(GetCurrentProcess(), p, t.len);
+        return true;
+    }
+
     void ShadeLoopHook(SafetyHookContext& ctx, int loop, bool outInRsi)
     {
         // pack tex slot = texture record pointer at runtime; strcode at record+0x10
+        // (plain range check - IsReadable is a syscall and this runs per pack per reshade)
         uint32_t tex = 0;
         const uint64_t rec = *reinterpret_cast<const uint64_t*>(ctx.rbx + 4);
-        if (rec && Memory::IsReadable(reinterpret_cast<void*>(rec + 0x10), 4))
+        if (rec > 0x10000 && rec < 0x00007FFFFFFFFFFFull)
         {
             tex = *reinterpret_cast<const uint32_t*>(rec + 0x10);
         }
         gPackMode = ClassifyPack(tex);
+        SetDoorHooks(gPackMode == PackMode::DoorTwoSided);
 
         if (gPackMode == PackMode::NoShadeNeutral)
         {
@@ -133,7 +201,6 @@ namespace
 
 void MGS2PreshadeLights::Initialize()
 {
-    return;
     if (!(eGameType & MGS2) || !bEnabled)
     {
         return;
@@ -174,26 +241,32 @@ void MGS2PreshadeLights::Initialize()
         LOG_HOOK(boundFix, "MGS 2: Two-Sided Preshade Lighting : light-selection bound fix")
     }
 
-    // Directional light: two-sided half-lambert wrap, door packs only.
-    MAKE_HOOK_MID(baseModule, "F3 0F 5F CA F3 0F 59 F1 F3 0F 59 F9",
-        "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_ParallelAmbientCalc()", {
-        if (gPackMode != PackMode::DoorTwoSided)
-            return;
-        const float d = ctx.xmm2.f32[0];                        // dot(normal, light dir)
-        const float wrap = kWrapScale * (d * 0.5f + 0.5f);
-        const float back = d < 0.0f ? -d * kBackSideScale : 0.0f;
-        float i = wrap > back ? wrap : back;
-        if (i > 1.0f) i = 1.0f;
-        ctx.xmm1.f32[0] = i;
-    });
-
-    // Point light: scaled away-facing side, door packs only.
-    MAKE_HOOK_MID(baseModule, "44 0F 2F CE 77 60 0F B6 43 10 0F 28 C2",
-        "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_PointLightCalc()", {
-        if (gPackMode != PackMode::DoorTwoSided)
-            return;
-        const float d = ctx.xmm6.f32[0];                        // dot(dir-to-vertex, normal)
-        if (d < 0.0f)
-            ctx.xmm6.f32[0] = -d * kBackSideScale;
-    });
+    // Directional and point two-sided treatment, door packs only - spliced in per pack.
+    const bool dirOk = InstallDoorHook(gDoorHooks[0],
+        "F3 0F 5F CA F3 0F 59 F1 F3 0F 59 F9",
+        "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_ParallelAmbientCalc()",
+        [](SafetyHookContext& ctx) {
+            if (gPackMode != PackMode::DoorTwoSided)
+                return;
+            const float d = ctx.xmm2.f32[0];                    // dot(normal, light dir)
+            const float wrap = kWrapScale * (d * 0.5f + 0.5f);
+            const float back = d < 0.0f ? -d * kBackSideScale : 0.0f;
+            float i = wrap > back ? wrap : back;
+            if (i > 1.0f) i = 1.0f;
+            ctx.xmm1.f32[0] = i;
+        });
+    const bool pointOk = InstallDoorHook(gDoorHooks[1],
+        "44 0F 2F CE 77 60 0F B6 43 10 0F 28 C2",
+        "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_PointLightCalc()",
+        [](SafetyHookContext& ctx) {
+            if (gPackMode != PackMode::DoorTwoSided)
+                return;
+            const float d = ctx.xmm6.f32[0];                    // dot(dir-to-vertex, normal)
+            if (d < 0.0f)
+                ctx.xmm6.f32[0] = -d * kBackSideScale;
+        });
+    if (!dirOk || !pointOk)
+    {
+        spdlog::error("MGS 2: Two-Sided Preshade Lighting : door hook install failed.");
+    }
 }
