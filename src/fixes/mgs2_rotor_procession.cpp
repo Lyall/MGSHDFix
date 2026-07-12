@@ -105,6 +105,22 @@ namespace
                            cur[i*4+2]*ip[2*4+j] + cur[i*4+3]*ip[3*4+j];
             }
         }
+        // Only lock genuine rotations. A real rotor spins in place so L is a clean rotation;
+        // a moving camera (e.g. the glass-shatter picture-in-picture) makes static geometry
+        // look like it spins, but L comes out non-orthonormal - reject it or the room drifts.
+        const float l0 = L[0]*L[0] + L[1]*L[1] + L[2]*L[2];
+        const float l1 = L[4]*L[4] + L[5]*L[5] + L[6]*L[6];
+        const float l2 = L[8]*L[8] + L[9]*L[9] + L[10]*L[10];
+        const float d01 = L[0]*L[4] + L[1]*L[5] + L[2]*L[6];
+        const float d02 = L[0]*L[8] + L[1]*L[9] + L[2]*L[10];
+        const float d12 = L[4]*L[8] + L[5]*L[9] + L[6]*L[10];
+        if (std::fabs(l0 - 1.0f) > 0.05f || std::fabs(l1 - 1.0f) > 0.05f ||
+            std::fabs(l2 - 1.0f) > 0.05f ||
+            std::fabs(d01) > 0.05f || std::fabs(d02) > 0.05f || std::fabs(d12) > 0.05f)
+        {
+            return false;
+        }
+
         float c = (L[0] + L[5] + L[10] - 1.0f) * 0.5f;
         c = c < -1.0f ? -1.0f : (c > 1.0f ? 1.0f : c);
         *angDeg = std::acos(c) * 57.29578f;
