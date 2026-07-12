@@ -4,6 +4,7 @@
 
 #include "common.hpp"
 #include "logging.hpp"
+#include <cmath>
 
 // Preshade fixes: two-sided lighting for the inside-out watertight door, fullbright
 // collectables, and a light-selection bound correction for rotated models.
@@ -197,6 +198,52 @@ namespace
     void ShadeLoop0_Hook(SafetyHookContext& ctx) { ShadeLoopHook(ctx, 0, true); }
     void ShadeLoop1_Hook(SafetyHookContext& ctx) { ShadeLoopHook(ctx, 1, true); }
     void ShadeLoop2_Hook(SafetyHookContext& ctx) { ShadeLoopHook(ctx, 2, false); }
+
+    // The port took pshade.c's PS3 branch of BP_LineLightCalc, which skips the per-vertex bound
+    // test PS2 ran, so line lights spill past their boxes and wash surfaces that should stay
+    // dark. Restore the test, and guard the 1/len that baked on-segment verts black.
+    SafetyHookInline LineLight_hook {};
+
+    void LineLight_Replacement(const float* v, const float* n, const uint8_t* litRaw, float* color)
+    {
+        const float* lit = reinterpret_cast<const float*>(litRaw);
+        const float* bmax = lit;                             // +0x00
+        const float* bmin = lit + 4;                         // +0x10
+        if (v[0] > bmax[0] || v[0] < bmin[0] || v[1] > bmax[1] || v[1] < bmin[1] ||
+            v[2] > bmax[2] || v[2] < bmin[2])
+        {
+            return;
+        }
+        const float* start = lit + 8;                        // +0x20
+        const float* dir = lit + 12;                         // +0x30, segment length @ +0x3c
+        const float segLen = lit[15];
+        const float n1 = start[0]*dir[0] + start[1]*dir[1] + start[2]*dir[2];
+        const float n2 = (start[0] + dir[0]*segLen)*dir[0] + (start[1] + dir[1]*segLen)*dir[1]
+                       + (start[2] + dir[2]*segLen)*dir[2];
+        float n3 = v[0]*dir[0] + v[1]*dir[1] + v[2]*dir[2];
+        n3 = n3 < n1 ? n1 : (n3 > n2 ? n2 : n3);
+        const float t = n3 - n1;
+        const float dx = v[0] - (start[0] + dir[0]*t);
+        const float dy = v[1] - (start[1] + dir[1]*t);
+        const float dz = v[2] - (start[2] + dir[2]*t);
+        const float len2 = dx*dx + dy*dy + dz*dz;
+        const float len = len2 > 1e-6f ? std::sqrt(len2) : 0.0f;
+        const float range = lit[17] * 2.0f;                  // r_range @ +0x44
+        if (len >= range)
+        {
+            return;
+        }
+        const float inv = len > 1e-6f ? 1.0f / len : 0.0f;
+        float i = (n[0]*dx + n[1]*dy + n[2]*dz) * inv;
+        if (i < 0.0f)
+        {
+            return;
+        }
+        i *= 1.5f * (range - len) / range;
+        color[0] += litRaw[0x40] * i;
+        color[1] += litRaw[0x41] * i;
+        color[2] += litRaw[0x42] * i;
+    }
 }
 
 void MGS2PreshadeLights::Initialize()
@@ -268,5 +315,18 @@ void MGS2PreshadeLights::Initialize()
     if (!dirOk || !pointOk)
     {
         spdlog::error("MGS 2: Two-Sided Preshade Lighting : door hook install failed.");
+    }
+
+    // line-light bound restore (see LineLight_Replacement)
+    if (uint8_t* ll = Memory::PatternScan(baseModule,
+        "48 8B C4 48 89 58 08 48 89 70 10 57 48 81 EC 80 00 00 00 F3 41 0F 10 68",
+        "MGS 2: Preshade Lights : system\\libdg\\pshade.c -> BP_LineLightCalc()"))
+    {
+        LineLight_hook = safetyhook::create_inline(ll, reinterpret_cast<void*>(LineLight_Replacement));
+        LOG_HOOK(LineLight_hook, "MGS 2: Preshade Lights : line-light bound restore")
+    }
+    else
+    {
+        spdlog::error("MGS 2: Preshade Lights : BP_LineLightCalc scan failed.");
     }
 }
