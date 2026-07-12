@@ -326,6 +326,12 @@
     <ClCompile Include="src\fixes\mgs2_reverb_wet_level.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_hair_layering.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_rotor_procession.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\effect_speeds.hpp">
@@ -663,6 +669,12 @@
     </ClInclude>
     <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_rotor_procession.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_hair_layering.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
