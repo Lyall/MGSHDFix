@@ -6,29 +6,43 @@
 
 #include "common.hpp"
 #include "logging.hpp"
+#include "d3d11_api.hpp"
+#include "gamevars.hpp"
 
 namespace
 {
-    // Hook: chain2 packet emitter's matrix copy. rsi = unit, r12 = matrix block.
-    // blk[0] is the model->clip composite the shader consumes; blk[1..3] are lighting - leave them alone.
+    // Hook: chain2 packet emitter's matrix copy. rsi = unit, r12 = matrix block; blk[0] is
+    // the model->clip composite the shader consumes.
     SafetyHookMid Emit_hook {};
 
     float gDriftDegPerFrame = -1.0f; // accumulating; negative = against the strobe
 
+    // Only these exact rotor-blade textures get drifted. Detecting spinners by motion instead
+    // read the camera off the composite, so a camera pan spun the whole world (Inception).
+    // A wall is never one of these. Add a heli's blade codes from the [ROTOR ID] diagnostic.
+    constexpr uint32_t kRotorTex[] = {
+        0x00ebf66e, // main rotor blur disc
+        0x001ce354, // main rotor blade
+        0x00253845, // tail rotor blur disc
+    };
+    bool IsRotorTex(uint32_t tex)
+    {
+        for (uint32_t t : kRotorTex) { if (t == tex) { return true; } }
+        return false;
+    }
+
     struct Track
     {
-        float m16[16];     // last clean composite
-        float rPost[9];    // pose as left after injection (same-frame repeat detection)
-        float axis[3];     // model-space spin axis, cardinal-snapped at lock
-        float step;        // smoothed per-frame step (deg)
-        float phase;       // accumulated drift (deg)
-        int streak;
-        int quiet;
+        float wPrev[9];     // last frame's world orientation rows
+        float axis[3];      // cardinal spin axis, once established
+        float phase;        // accumulated drift (deg)
+        uint64_t lastFrame;
         bool valid;
-        bool rotor;
+        bool locked;
     };
     std::unordered_map<uintptr_t, Track> gTracks;
 
+    // Normalised rotation rows (0-2) of a 4-wide matrix.
     bool LoadRot(const float* m, float* r)
     {
         for (int row = 0; row < 3; row++)
@@ -44,87 +58,21 @@ namespace
         return true;
     }
 
-    float DeltaAngle(const float* a, const float* b)
+    // Frame-to-frame spin between two orientations: L = cur * prev^T, axis + angle.
+    bool RelRotation(const float* prev, const float* cur, float* axis, float* angDeg)
     {
-        float tr = 0.0f;
+        float L[9];
         for (int i = 0; i < 3; i++)
+        {
             for (int j = 0; j < 3; j++)
-                if (i == j)
-                    tr += a[0*3+i]*b[0*3+j] + a[1*3+i]*b[1*3+j] + a[2*3+i]*b[2*3+j];
-        float c = (tr - 1.0f) * 0.5f;
-        c = c < -1.0f ? -1.0f : (c > 1.0f ? 1.0f : c);
-        return std::acos(c) * 57.29578f;
-    }
-
-    bool Mat4Invert(const float* m, float* out)
-    {
-        float inv[16];
-        inv[0]  =  m[5]*m[10]*m[15] - m[5]*m[11]*m[14] - m[9]*m[6]*m[15] + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
-        inv[4]  = -m[4]*m[10]*m[15] + m[4]*m[11]*m[14] + m[8]*m[6]*m[15] - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
-        inv[8]  =  m[4]*m[9]*m[15] - m[4]*m[11]*m[13] - m[8]*m[5]*m[15] + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
-        inv[12] = -m[4]*m[9]*m[14] + m[4]*m[10]*m[13] + m[8]*m[5]*m[14] - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
-        inv[1]  = -m[1]*m[10]*m[15] + m[1]*m[11]*m[14] + m[9]*m[2]*m[15] - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
-        inv[5]  =  m[0]*m[10]*m[15] - m[0]*m[11]*m[14] - m[8]*m[2]*m[15] + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
-        inv[9]  = -m[0]*m[9]*m[15] + m[0]*m[11]*m[13] + m[8]*m[1]*m[15] - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
-        inv[13] =  m[0]*m[9]*m[14] - m[0]*m[10]*m[13] - m[8]*m[1]*m[14] + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
-        inv[2]  =  m[1]*m[6]*m[15] - m[1]*m[7]*m[14] - m[5]*m[2]*m[15] + m[5]*m[3]*m[14] + m[13]*m[2]*m[7] - m[13]*m[3]*m[6];
-        inv[6]  = -m[0]*m[6]*m[15] + m[0]*m[7]*m[14] + m[4]*m[2]*m[15] - m[4]*m[3]*m[14] - m[12]*m[2]*m[7] + m[12]*m[3]*m[6];
-        inv[10] =  m[0]*m[5]*m[15] - m[0]*m[7]*m[13] - m[4]*m[1]*m[15] + m[4]*m[3]*m[13] + m[12]*m[1]*m[7] - m[12]*m[3]*m[5];
-        inv[14] = -m[0]*m[5]*m[14] + m[0]*m[6]*m[13] + m[4]*m[1]*m[14] - m[4]*m[2]*m[13] - m[12]*m[1]*m[6] + m[12]*m[2]*m[5];
-        inv[3]  = -m[1]*m[6]*m[11] + m[1]*m[7]*m[10] + m[5]*m[2]*m[11] - m[5]*m[3]*m[10] - m[9]*m[2]*m[7] + m[9]*m[3]*m[6];
-        inv[7]  =  m[0]*m[6]*m[11] - m[0]*m[7]*m[10] - m[4]*m[2]*m[11] + m[4]*m[3]*m[10] + m[8]*m[2]*m[7] - m[8]*m[3]*m[6];
-        inv[11] = -m[0]*m[5]*m[11] + m[0]*m[7]*m[9] + m[4]*m[1]*m[11] - m[4]*m[3]*m[9] - m[8]*m[1]*m[7] + m[8]*m[3]*m[5];
-        inv[15] =  m[0]*m[5]*m[10] - m[0]*m[6]*m[9] - m[4]*m[1]*m[10] + m[4]*m[2]*m[9] + m[8]*m[1]*m[6] - m[8]*m[2]*m[5];
-        float det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
-        if (std::fabs(det) < 1e-12f || !std::isfinite(det))
-        {
-            return false;
-        }
-        det = 1.0f / det;
-        for (int i = 0; i < 16; i++)
-        {
-            out[i] = inv[i] * det;
-        }
-        return true;
-    }
-
-    // model-space spin between consecutive composites: L = cur * inv(prev)
-    bool ModelAxisFromPair(const float* prev, const float* cur, float* axis, float* angDeg)
-    {
-        float ip[16];
-        if (!Mat4Invert(prev, ip))
-        {
-            return false;
-        }
-        float L[16];
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
             {
-                L[i*4+j] = cur[i*4+0]*ip[0*4+j] + cur[i*4+1]*ip[1*4+j] +
-                           cur[i*4+2]*ip[2*4+j] + cur[i*4+3]*ip[3*4+j];
+                L[i*3+j] = cur[i*3+0]*prev[j*3+0] + cur[i*3+1]*prev[j*3+1] + cur[i*3+2]*prev[j*3+2];
             }
         }
-        // Only lock genuine rotations. A real rotor spins in place so L is a clean rotation;
-        // a moving camera (e.g. the glass-shatter picture-in-picture) makes static geometry
-        // look like it spins, but L comes out non-orthonormal - reject it or the room drifts.
-        const float l0 = L[0]*L[0] + L[1]*L[1] + L[2]*L[2];
-        const float l1 = L[4]*L[4] + L[5]*L[5] + L[6]*L[6];
-        const float l2 = L[8]*L[8] + L[9]*L[9] + L[10]*L[10];
-        const float d01 = L[0]*L[4] + L[1]*L[5] + L[2]*L[6];
-        const float d02 = L[0]*L[8] + L[1]*L[9] + L[2]*L[10];
-        const float d12 = L[4]*L[8] + L[5]*L[9] + L[6]*L[10];
-        if (std::fabs(l0 - 1.0f) > 0.05f || std::fabs(l1 - 1.0f) > 0.05f ||
-            std::fabs(l2 - 1.0f) > 0.05f ||
-            std::fabs(d01) > 0.05f || std::fabs(d02) > 0.05f || std::fabs(d12) > 0.05f)
-        {
-            return false;
-        }
-
-        float c = (L[0] + L[5] + L[10] - 1.0f) * 0.5f;
+        float c = (L[0] + L[4] + L[8] - 1.0f) * 0.5f;
         c = c < -1.0f ? -1.0f : (c > 1.0f ? 1.0f : c);
         *angDeg = std::acos(c) * 57.29578f;
-        axis[0] = L[9] - L[6]; axis[1] = L[2] - L[8]; axis[2] = L[4] - L[1];
+        axis[0] = L[7] - L[5]; axis[1] = L[2] - L[6]; axis[2] = L[3] - L[1];
         const float al = std::sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]);
         if (al < 1e-5f)
         {
@@ -134,7 +82,7 @@ namespace
         return true;
     }
 
-    // model-space rotation on the composite: M' = R * M, translation row untouched
+    // Spin the composite about the axis: M' = R * M, translation row untouched.
     void ApplyModelRotation(float* m, const float* axis, float deg)
     {
         const float th = deg * 0.017453293f;
@@ -156,88 +104,80 @@ namespace
         memcpy(m, out, sizeof(out));
     }
 
+    // First pack's texture strcode: packs = *(unit+0x118), rec = *(pack0+0x20), code @ rec+0x10.
+    uint32_t UnitTex(uintptr_t unit)
+    {
+        const uintptr_t packs = *reinterpret_cast<const uintptr_t*>(unit + 0x118);
+        if (packs <= 0x10000 || packs >= 0x00007FFFFFFFFFFFull) { return 0; }
+        const uintptr_t rec = *reinterpret_cast<const uintptr_t*>(packs + 0x20);
+        if (rec <= 0x10000 || rec >= 0x00007FFFFFFFFFFFull) { return 0; }
+        return *reinterpret_cast<const uint32_t*>(rec + 0x10);
+    }
+
     void Emit_Hook(SafetyHookContext& ctx)
     {
         float* blk = reinterpret_cast<float*>(ctx.r12);
-        if (!blk)
+        const uintptr_t unit = ctx.rsi;
+        if (!blk || unit < 0x10000)
         {
             return;
         }
-        float r[9];
-        if (!LoadRot(blk, r))
+        // heli procession only happens in demos, and only rotor blades get past here
+        if (!g_GameVars.InCutscene() || !IsRotorTex(UnitTex(unit)))
         {
             return;
         }
+
+        float cur[9];
+        if (!LoadRot(blk, cur))
+        {
+            return;
+        }
+
         if (gTracks.size() > 2048)
         {
-            gTracks.clear(); // scene churn; spinners re-lock within 8 frames
+            gTracks.clear();
         }
-        auto& t = gTracks[static_cast<uintptr_t>(ctx.rsi)];
-        if (t.valid)
+        const uint64_t frame = g_D3D11Hooks.FrameCount;
+        auto& t = gTracks[unit];
+
+        if (t.valid && t.lastFrame != frame)
         {
-            // repeat packet within the same frame: block already handled
-            if (DeltaAngle(t.rPost, r) < 0.5f)
-            {
-                return;
-            }
+            // establish / refresh the cardinal spin axis (identity already proved it's a rotor)
             float axis[3];
             float ang = 0.0f;
-            const bool solved = ModelAxisFromPair(t.m16, blk, axis, &ang);
-            // machine-constant spin only: steady step about a steady axis
-            const bool qualifies = solved && ang > 20.0f && ang < 120.0f &&
-                (t.streak == 0 ||
-                 (std::fabs(ang - t.step) < 1.5f &&
-                  axis[0]*t.axis[0] + axis[1]*t.axis[1] + axis[2]*t.axis[2] > 0.995f));
-            if (qualifies)
+            if (RelRotation(t.wPrev, cur, axis, &ang) && ang > 15.0f)
             {
-                t.step = t.streak == 0 ? ang : t.step * 0.9f + ang * 0.1f;
-                memcpy(t.axis, axis, sizeof(axis));
-                t.quiet = 0;
-                if (++t.streak == 8 && !t.rotor)
+                int dom = 0;
+                for (int i = 1; i < 3; i++) { if (std::fabs(axis[i]) > std::fabs(axis[dom])) { dom = i; } }
+                if (std::fabs(axis[dom]) > 0.7f)
                 {
-                    // rotors are authored on exact cardinal axes
-                    int dom = 0;
-                    for (int i = 1; i < 3; i++)
-                    {
-                        if (std::fabs(t.axis[i]) > std::fabs(t.axis[dom])) { dom = i; }
-                    }
-                    if (std::fabs(t.axis[dom]) > 0.9f)
-                    {
-                        const float sign = t.axis[dom] < 0.0f ? -1.0f : 1.0f;
-                        t.axis[0] = t.axis[1] = t.axis[2] = 0.0f;
-                        t.axis[dom] = sign;
-                    }
-                    t.rotor = true;
+                    const float sign = axis[dom] < 0.0f ? -1.0f : 1.0f;
+                    t.axis[0] = t.axis[1] = t.axis[2] = 0.0f;
+                    t.axis[dom] = sign;
+                    t.locked = true;
                 }
             }
-            else if (++t.quiet > 30 && t.rotor)
+            memcpy(t.wPrev, cur, sizeof(cur));
+
+            if (t.locked)
             {
-                t.rotor = false;
-                t.streak = 0;
-                t.phase = 0.0f;
-            }
-            else if (t.quiet > 2)
-            {
-                t.streak = 0;
+                t.phase += gDriftDegPerFrame;
+                if (t.phase >= 360.0f) { t.phase -= 360.0f; }
+                else if (t.phase <= -360.0f) { t.phase += 360.0f; }
             }
         }
-        memcpy(t.m16, blk, sizeof(t.m16));
-        t.valid = true;
-
-        if (t.rotor && gDriftDegPerFrame != 0.0f)
+        else if (!t.valid)
         {
-            t.phase += gDriftDegPerFrame;
-            if (t.phase >= 360.0f)
-            {
-                t.phase -= 360.0f;
-            }
-            else if (t.phase <= -360.0f)
-            {
-                t.phase += 360.0f;
-            }
+            memcpy(t.wPrev, cur, sizeof(cur));
+            t.valid = true;
+        }
+        t.lastFrame = frame;
+
+        if (t.locked)
+        {
             ApplyModelRotation(blk, t.axis, t.phase);
         }
-        LoadRot(blk, t.rPost);
     }
 }
 
