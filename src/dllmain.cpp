@@ -40,6 +40,8 @@
 #include "mgs2_lens_droplets.hpp"
 #include "mgs2_gas_haze.hpp"
 #include "mgs2_demo_camera_judder.hpp"
+#include "mgs2_hair_layering.hpp"
+#include "mgs2_rotor_procession.hpp"
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_flare_occlusion.hpp"
 #include "mgs2_railgun_beam.hpp"
@@ -553,6 +555,8 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
         INITIALIZE(MGS2DemoCameraJudder::Initialize());
+        INITIALIZE(MGS2HairLayering::Initialize());
+        INITIALIZE(MGS2RotorProcession::Initialize());
         INITIALIZE(MGS2ReverbWetLevel::Initialize());
         INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
