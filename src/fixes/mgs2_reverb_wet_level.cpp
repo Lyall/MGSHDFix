@@ -4,28 +4,22 @@
 #include "common.hpp"
 #include "logging.hpp"
 
-namespace
+void FixReverbWetLevel::Initialize()
 {
-    SafetyHookMid gSetWetVolumeHook {};
-}
-
-void MGS2ReverbWetLevel::Initialize()
-{
-    if (!(eGameType & MGS2) || !bEnabled)
+    if (!(eGameType & (MGS2 | MGS3)) || !bEnabled)
     {
         return;
     }
 
-    // Reverb apply: depth -> float, * (1/32767), * master scalar, then IXAudio2Voice::SetVolume
-    // on the reverb submix. Scale the volume in xmm1 just before the call.
-    if (uint8_t* setVolume = Memory::PatternScan(baseModule,
-        "48 8B 8B A0 2E 00 00 0F 5B C9 48 8B 01 F3 0F 59 0D ?? ?? ?? ?? F3 0F 59 8B B8 2E 00 00 FF 50 60",
-        "MGS2: Reverb Wet Level: reverb submix SetVolume"))
+    if (fWetVolumeScale == 1.0f)
     {
-        gSetWetVolumeHook = safetyhook::create_mid(setVolume + 29, [](SafetyHookContext& ctx)
-        {
-            ctx.xmm1.f32[0] *= MGS2ReverbWetLevel::fWetVolumeScale;
-        });
-        LOG_HOOK(gSetWetVolumeHook, "MGS2: Reverb Wet Level: reverb submix SetVolume")
+        return;
     }
+
+    MAKE_HOOK_MID(baseModule, "FF 50 ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 41 0F 28 73", "bp\\shared\\BP_SoundSupportX360.cpp -> AudioDriver::ApplyReverbSetting() @ L1997", {
+        spdlog::info("FixReverbWetLevel: xmm1 .f32[0] = {} -> {} (wet volume scale)", ctx.xmm1.f32[0], ctx.xmm1.f32[0] * FixReverbWetLevel::fWetVolumeScale);
+        ctx.xmm1.f32[0] *= FixReverbWetLevel::fWetVolumeScale;
+                  });
+
+
 }
