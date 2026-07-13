@@ -43,6 +43,7 @@
     <ClCompile Include="src\features\mgs2_restore_phone_jingle.cpp" />
     <ClCompile Include="src\fixes\mgs2_kirari_sun2_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_preshade_lights.cpp" />
+    <ClCompile Include="src\fixes\mgs2_tanker_snake_snap.cpp" />
     <ClCompile Include="src\fixes\mgs2_snakearm_voice.cpp" />
     <ClCompile Include="src\fixes\resolution_scaling_fixes.cpp" />
     <ClCompile Include="src\features\custom_resolution_and_borderless.cpp" />

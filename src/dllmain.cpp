@@ -46,6 +46,7 @@
 #include "mgs2_flare_occlusion.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
+#include "mgs2_tanker_snake_snap.hpp"
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
@@ -557,6 +558,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2DemoCameraJudder::Initialize());
         INITIALIZE(MGS2HairLayering::Initialize());
         INITIALIZE(MGS2RotorProcession::Initialize());
+        INITIALIZE(MGS2TankerSnakeSnap::Initialize());
         INITIALIZE(MGS2ReverbWetLevel::Initialize());
         INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());

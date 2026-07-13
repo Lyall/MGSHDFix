@@ -17,6 +17,7 @@
 #include "mgs2_demo_camera_judder.hpp"
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_preshade_lights.hpp"
+#include "mgs2_tanker_snake_snap.hpp"
 #include "mgs2_crossfade.hpp"
 #include "input_handler.hpp"
 #include "intro_skip.hpp"
@@ -684,7 +685,7 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = bRestoreVFX;
 
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
             LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
