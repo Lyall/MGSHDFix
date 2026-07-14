@@ -17,13 +17,21 @@ namespace
 
     float gDriftDegPerFrame = -1.0f; // accumulating; negative = against the strobe
 
-    // Only these exact rotor-blade textures get drifted. Detecting spinners by motion instead
-    // read the camera off the composite, so a camera pan spun the whole world (Inception).
-    // A wall is never one of these. Add a heli's blade codes from the [ROTOR ID] diagnostic.
+    // Only these rotor-blade textures get drifted.
     constexpr uint32_t kRotorTex[] = {
-        0x00ebf66e, // main rotor blur disc
-        0x001ce354, // main rotor blade
-        0x00253845, // tail rotor blur disc
+        GameVars::GV_StrCode("kck_blade_blur_alp"),
+        GameVars::GV_StrCode("kck_roter01_alp"),
+        //GameVars::GV_StrCode("kck_mrot_propera"),
+
+        GameVars::GV_StrCode("gcyp_eff_blade_alp"),     
+        GameVars::GV_StrCode("gcyp_blade_alp"),
+
+        GameVars::GV_StrCode("cyp_roter01_alp"),
+        GameVars::GV_StrCode("cyp_propera_alp"),
+
+        GameVars::GV_StrCode("h6h_propera_blur_alp"),
+        GameVars::GV_StrCode("h6h_eff_mrot_alp"),
+
     };
     bool IsRotorTex(uint32_t tex)
     {
@@ -189,7 +197,7 @@ void MGS2RotorProcession::Initialize()
     }
 
     if (uint8_t* site = Memory::PatternScan(baseModule,
-        "41 0F 10 04 24 45 33 FF 0F 11 00",
+        "?? ?? ?? ?? ?? 45 33 FF ?? ?? ?? 41 0F 10 4C 24",
         "MGS 2: Rotor Procession : libdg\\chain2.c -> unit packet emitter matrix copy"))
     {
         Emit_hook = safetyhook::create_mid(site, Emit_Hook);

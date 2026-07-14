@@ -84,6 +84,7 @@ namespace MGS3_LinkVarBuf
     };
 
 
+    inline LinkVarValue<short, 2>           GM_Result;
     inline LinkVarValue<short, 4>           GM_Language;
     inline LinkVarValue<short, 6>           GM_GameLevel;
     inline LinkVarValue<int, 8>             GM_Configuration;

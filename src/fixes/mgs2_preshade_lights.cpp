@@ -6,37 +6,25 @@
 #include "logging.hpp"
 #include <cmath>
 
-// Preshade fixes: two-sided lighting for the inside-out watertight door, fullbright
-// collectables, and a light-selection bound correction for rotated models.
+#include "gamevars.hpp"
 
+//Fixes incorrect lighting on Deck 2 doors, and posters in w01a.
 namespace
 {
     constexpr float kWrapScale = 1.0f;      // half-lambert wrap (i = 0.5*dot + 0.5)
     constexpr float kBackSideScale = 0.6f;  // away-facing side, tuned to the PS2 door tone
 
-    // w03bsdr door textures only; never the shared gray trim (0x284f03)
-    constexpr uint32_t kDoorTex[] = { 0x8b77b4, 0x8b77b5, 0x9c5bba, 0x9c5bbb };
+    constexpr uint32_t kDoorTex[] = {
+        GameVars::GV_StrCode("w03b_dr00"),
+        GameVars::GV_StrCode("w03b_dr01"), //w03b_dr01.bmp
+        GameVars::GV_StrCode("w03b_dr00a"),
+        GameVars::GV_StrCode("w03b_dr00b"), //w01a0_dr00b.bmp
+    };
 
-    // Fullbright collectables (posters, memos): bake packs neutral and fullbright works.
-    // Add any posters we missed here: code = the texture's 8-hex id from
-    // BP_FlatlistTextureMapping.txt (strcode24 of the texture name).
     constexpr uint32_t kNoShadeTex[] = {
-        // memo notes, bullet holes
-        0x45e48e, 0x3b57e3, 0x3c57e3, 0xbd4c0b, 0x144548, 0x884312,
-        // tanker posters (quarters, lounge, engine room)
-        0x5c37c1, 0xe7261d, 0x2cd7be, 0x5fc83f, 0x5fc840, 0x5fc841,
-        0x4af484, 0x4afb45, 0x4afb46,
-        // plant struts (pump room, transformer room, dining hall)
-        0x0a9041, 0xcae92c, 0x21f6e6, 0xc9e498, 0x926f7c,
-        0x82d8f5, 0x82d8f6, 0x915d28, 0x915d48,
-        // Shell 1 core (lockers, game posters, monitors, lounge)
-        0x9b65c9, 0x21f7e6, 0x21f7e7, 0xf3c96d, 0xdbab00, 0xb6ea53,
-        0xb3f9e2, 0xc3f9e2, 0xaa3210, 0x3d7b2a, 0x3d7b2b, 0x3b1381,
-        // Shell 2 core (filtration chambers, FHM)
-        0xeaea41, 0xeaea42, 0xeaea43, 0xeeea3e,
-        // Substance idol posters + alt monitors + promo
-        0xd5613b, 0x15861e, 0x3b62fa, 0xc5ee63, 0xc6b2c7,
-        0x15861d, 0x3b62fb, 0xc5ee62, 0xb3f932, 0xc3f932, 0x8ef342,
+        GameVars::GV_StrCode("w01alc_mao3"),
+        GameVars::GV_StrCode("w01alc_saya2"),
+
     };
 
     enum class PackMode : uint8_t { Vanilla, DoorTwoSided, NoShadeNeutral };
@@ -255,11 +243,11 @@ void MGS2PreshadeLights::Initialize()
 
     // pack classification at each shade-loop head (shade / reshade / reshade2)
     struct { const char* pattern; const char* label; size_t skipOfs; void (*fn)(SafetyHookContext&); } loops[] = {
-        { "44 8B 0B 48 8B CE 4C 8B 43 24 48 8B 53 1C E8 ?? ?? ?? ?? 8B 03 48 8D 5B 60 FF C5",
+        { "?? ?? ?? 48 8B CE 4C 8B 43 ?? 48 8B 53 ?? E8 ?? ?? ?? ?? ?? ?? 48 8D 5B ?? FF C5",
           "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> ShadeRGB() pack loop", 19, ShadeLoop0_Hook },
-        { "44 8B 0B 48 8B CE 4C 8B 43 24 48 8B 53 1C E8 ?? ?? ?? ?? 8B 03 48 8D 5B 60 FF CF",
+        { "?? ?? ?? 48 8B CE 4C 8B 43 ?? 48 8B 53 ?? E8 ?? ?? ?? ?? ?? ?? 48 8D 5B ?? FF CF",
           "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> ReshadeRGB() pack loop", 19, ShadeLoop1_Hook },
-        { "44 8B 0B 48 8B CF 4C 8B 43 24 48 8B 53 1C 48 89 6C 24 20 E8",
+        { "?? ?? ?? 48 8B CF 4C 8B 43",
           "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> ReshadeRGB2() pack loop", 24, ShadeLoop2_Hook },
     };
     for (int i = 0; i < 3; i++)
@@ -280,7 +268,7 @@ void MGS2PreshadeLights::Initialize()
     // light-selection bound correction
     gPreshadeMatrix = reinterpret_cast<uint8_t*>(baseModule) + 0x15557E0;
     if (uint8_t* bf = Memory::PatternScan(baseModule,
-        "F3 0F 10 74 24 08 48 8D 0D ?? ?? ?? ?? F3 0F 10 7C 24 04",
+        "F3 0F 10 74 24 ?? 48 8D 0D",
         "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> CreateLightBuffer() bound transform"))
     {
         static SafetyHookMid boundFix {};
@@ -290,7 +278,7 @@ void MGS2PreshadeLights::Initialize()
 
     // Directional and point two-sided treatment, door packs only - spliced in per pack.
     const bool dirOk = InstallDoorHook(gDoorHooks[0],
-        "F3 0F 5F CA F3 0F 59 F1 F3 0F 59 F9",
+        "F3 0F 5F CA F3 0F 59 F1",
         "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_ParallelAmbientCalc()",
         [](SafetyHookContext& ctx) {
             if (gPackMode != PackMode::DoorTwoSided)
@@ -303,7 +291,7 @@ void MGS2PreshadeLights::Initialize()
             ctx.xmm1.f32[0] = i;
         });
     const bool pointOk = InstallDoorHook(gDoorHooks[1],
-        "44 0F 2F CE 77 60 0F B6 43 10 0F 28 C2",
+        "44 0F 2F CE 77 ?? 0F B6 43",
         "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> BP_PointLightCalc()",
         [](SafetyHookContext& ctx) {
             if (gPackMode != PackMode::DoorTwoSided)
@@ -319,7 +307,7 @@ void MGS2PreshadeLights::Initialize()
 
     // line-light bound restore (see LineLight_Replacement)
     if (uint8_t* ll = Memory::PatternScan(baseModule,
-        "48 8B C4 48 89 58 08 48 89 70 10 57 48 81 EC 80 00 00 00 F3 41 0F 10 68",
+        "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 81 EC ?? ?? ?? ?? F3 41 0F 10 68",
         "MGS 2: Preshade Lights : system\\libdg\\pshade.c -> BP_LineLightCalc()"))
     {
         LineLight_hook = safetyhook::create_inline(ll, reinterpret_cast<void*>(LineLight_Replacement));
