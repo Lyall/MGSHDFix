@@ -13,7 +13,7 @@ struct Stage
     /* Menus                 */ \
     X(INIT,      "init",      "Menu", "Game Initialization") \
     X(N_TITLE,   "n_title",   "Menu", "Title Screen") \
-    X(SELECT,    "select",    "Menu", "Main Menu") \
+    X(SELECT,    "select",    "Menu", "Developer Menu") \
     X(MSELECT,   "mselect",   "Menu", "VR Missions Menu") \
     X(TALES,     "tales",     "Menu", "Snake Tales Menu") \
     \
@@ -282,6 +282,7 @@ namespace MGS2Stages
     X(TITLE,   "title",   "Menu", "Title Screen / Main Menu") \
     X(THEATER, "theater", "Menu", "Demo Theater") \
     X(ENDING,  "ending",  "Menu", "Credits") \
+    X(SELECT,  "select",  "Menu", "Developer Menu") \
     \
     /* Virtuous Mission (VM) and early Snake Eater mirrors */ \
     X(V001A, "v001a", "Virtuous Mission", "Dremuchji South") \

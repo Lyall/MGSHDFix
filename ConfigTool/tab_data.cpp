@@ -521,7 +521,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MG|MGS2|MGS3), ConfigKeys::VerboseLogging_Section, ConfigKeys::VerboseLogging_Setting, ConfigKeys::VerboseLogging_Help, ConfigKeys::VerboseLogging_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { (MGS2), ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, ConfigKeys::Debugging_Start_In_Dev_Menu_Help, ConfigKeys::Debugging_Start_In_Dev_Menu_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, ConfigKeys::Debugging_Start_In_Dev_Menu_Help, ConfigKeys::Debugging_Start_In_Dev_Menu_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
         {(MG|MGS2|MGS3), "About", "", "", "", std::nullopt, false, Field::Spacer},

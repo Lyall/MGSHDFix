@@ -1011,8 +1011,8 @@ void Config::Read()
 
 
 
-    ConfigHelper::getValue(ini, ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
-    LOG_CONFIG(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, MGS2_GameFuncs::StartInDebugMode);
+    ConfigHelper::getValue(ini, ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, Shared_Gamefuncs::StartInDebugMode);
+    LOG_CONFIG(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, Shared_Gamefuncs::StartInDebugMode);
 
     ConfigHelper::getValue(ini, ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);
     LOG_CONFIG(ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);

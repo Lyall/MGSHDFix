@@ -3,6 +3,15 @@
 namespace Shared_Gamefuncs
 {
     void HookFuncs();
+    inline bool StartInDebugMode = false;
+
+
+    using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);
+    inline GM_SetArea_t GM_SetArea = nullptr;
+
+    using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
+    inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
+
 
 };
 
@@ -20,12 +29,6 @@ namespace MGS2_GameFuncs
 
     using GM_WeaponNum_t = int(__fastcall*)(int a1);
     inline GM_WeaponNum_t GM_WeaponNum = nullptr;
-
-    using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);
-    inline GM_SetArea_t GM_SetArea = nullptr;
-
-    using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
-    inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
 
     using L2D_GetObject_t = void* (__fastcall*)(int handle, int strcode);
     inline L2D_GetObject_t L2D_GetObject = nullptr;
@@ -46,7 +49,6 @@ namespace MGS2_GameFuncs
     using GV_DestroyActor_t = void(__fastcall*)(void* work);
     inline GV_DestroyActor_t GV_DestroyActor = nullptr;
 
-    inline bool StartInDebugMode = false;
 }
 
 

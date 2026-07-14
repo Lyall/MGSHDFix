@@ -8,6 +8,7 @@
 
 #include "gamevars.hpp"
 #include "mgs2_linkvarbuf.hpp"
+#include "mgs3_linkvarbuf.hpp"
 /*
 #if defined(RELEASE_BUILD)
 #define RELEASE_CLEARED
@@ -16,6 +17,8 @@
 */
 namespace
 {
+    int* GM_LoadRequest = nullptr;
+
 #if !defined(RELEASE_BUILD)
     void* null_fn(int, int) { return nullptr; }
 
@@ -84,6 +87,7 @@ namespace
     }
 #endif
 
+    constexpr unsigned int STRCODE_SCENERIO_GCX = GameVars::GV_StrCode("scenerio");
 
 
 }
@@ -104,9 +108,6 @@ static NewItemChange2_t NewItemChange2 = nullptr;
     NewItemChange2 = reinterpret_cast<NewItemChange2_t>(ResolveCall(act154 + 0x5F));
     NewItemChange = reinterpret_cast<NewItemChange_t>(ResolveCall(act154 + 0xB6));
     */
-
-    constexpr unsigned int STRCODE_SCENERIO_GCX = GameVars::GV_StrCode("scenerio");
-    int* GM_LoadRequest = nullptr;
 
 }
 
@@ -245,7 +246,46 @@ void MGS3_Gamefuncs::HookGameFuncs()
 {
     using namespace Shared_Gamefuncs;
     using namespace MGS3_Gamefuncs;
+    using namespace MGS3_LinkVarBuf;
+    using namespace MGS3Stages;
 
+
+    if (StartInDebugMode)
+    {
+        uint8_t* GM_SetArea_scan = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8", "GM_SetArea call site");
+        GM_SetArea = reinterpret_cast<GM_SetArea_t>(Memory::ResolveCall(GM_SetArea_scan));
+        spdlog::info("MGS3_GameFuncs: GM_SetArea address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_SetArea - (uintptr_t)baseModule);
+
+        uint8_t* GCL_ChangeSenerioCode_scan = Memory::PatternScan(baseModule, "83 0D ?? ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "GCL_ChangeSenerioCode call site");
+        GCL_ChangeSenerioCode = reinterpret_cast<GCL_ChangeSenerioCode_t>(Memory::ResolveCall(GCL_ChangeSenerioCode_scan + 0xC));
+        spdlog::info("MGS3_GameFuncs: GCL_ChangeSenerioCode address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GCL_ChangeSenerioCode - (uintptr_t)baseModule);
+
+
+        GM_LoadRequest = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "83 0D ?? ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS3: GM_PlayerStatus") + 2));
+        spdlog::info("MGS3_GameFuncs: GM_LoadRequest address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_LoadRequest - (uintptr_t)baseModule);
+
+        if (uint8_t* Act_addr = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 89 5C 24", "GM_StartDaemon() -> Act() | Set developer menu on startup"))
+        {
+            static SafetyHookMid Act_Startup_hook {};
+
+            Act_Startup_hook = safetyhook::create_mid(Act_addr + 0x406, [](SafetyHookContext& ctx)
+                {
+                    static bool startup = true;
+                    if (!startup)
+                    {
+                        return;
+                    }
+
+                    startup = false;
+                    GM_SetArea(GM_SaveArea, SELECT);
+                    GCL_ChangeSenerioCode(STRCODE_SCENERIO_GCX);
+                    GM_Result = 9999;
+                    *GM_LoadRequest = 0x3;
+                });
+
+            LOG_HOOK(Act_Startup_hook, "GM_StartDaemon() -> Act()+0x406 | Set developer menu on startup");
+        }
+    }
 
 
 }

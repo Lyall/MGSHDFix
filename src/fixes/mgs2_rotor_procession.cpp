@@ -21,7 +21,7 @@ namespace
     constexpr uint32_t kRotorTex[] = {
         GameVars::GV_StrCode("kck_blade_blur_alp"),
         GameVars::GV_StrCode("kck_roter01_alp"),
-        //GameVars::GV_StrCode("kck_mrot_propera"),
+        GameVars::GV_StrCode("kck_mrot_propera"),
 
         GameVars::GV_StrCode("gcyp_eff_blade_alp"),     
         GameVars::GV_StrCode("gcyp_blade_alp"),
