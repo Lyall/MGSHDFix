@@ -16,9 +16,10 @@ namespace
 
     constexpr uint32_t kDoorTex[] = {
         GameVars::GV_StrCode("w03b_dr00"),
-        GameVars::GV_StrCode("w03b_dr01"), //w03b_dr01.bmp
+        GameVars::GV_StrCode("w03b_dr01"),
         GameVars::GV_StrCode("w03b_dr00a"),
         GameVars::GV_StrCode("w03b_dr00b"), //w01a0_dr00b.bmp
+
     };
 
     constexpr uint32_t kNoShadeTex[] = {
