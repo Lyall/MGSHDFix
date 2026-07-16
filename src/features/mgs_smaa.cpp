@@ -249,15 +249,15 @@ void SMAA_AA::Init()
     if (eGameType & MGS2)
     {
         SceneDepth::SetEndOf3DCallback(&SMAA_AA::Draw, SceneDepth::PRIORITY_SMAA);
-        MAKE_HOOK_MID(baseModule, "48 83 EC ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 B9", "user\\takabe\\effect1\\ir_mode.c -> BP_IRModeCallback()", {
-              bSkipThisFrame = true;
-                      });
+
     }
     else //eGameType & MGS3
     {
+        /*
         MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B F0", "user\\takabe\\effect\\ir_mode.c -> BP_IRModeCallback()", {
               bSkipThisFrame = true;
                       });
+                      */
     }
 
 
