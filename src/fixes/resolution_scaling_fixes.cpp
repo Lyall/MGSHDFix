@@ -132,11 +132,11 @@ namespace
 
             static const uint32_t darkenHeight = static_cast<uint32_t>(std::max(1.0f, std::round((14.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY)));
             static const uint32_t blankHeight = static_cast<uint32_t>(std::max(1.0f, std::round((5.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY)));
-            static const int32_t verticalOffset25 = static_cast<int32_t>(std::round((3.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
+            static const int32_t verticalOffset25 = static_cast<int32_t>(std::round((8.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
             static const float resolutionScale = static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / 720.0f;
             if (uint8_t* BP_IRModeCallback_Scan = Memory::PatternScan(baseModule, "48 B8 64 00 00 00 40 00 00 00", "NewIRMode() -> BP_IRModeCallback Alpha"))
             {
-                Memory::PatchBytes(reinterpret_cast<uintptr_t>(BP_IRModeCallback_Scan + 6), "\x21", 1);
+                Memory::PatchBytes(reinterpret_cast<uintptr_t>(BP_IRModeCallback_Scan + 6), "\x23", 1);
             }
             MAKE_HOOK_MID(baseModule, "85 C9 66 41 0F 6E F8", "Restore PS2 NVG Lines", {
                     if (ResolutionScalingFixes::bRestorePS2NVGLineHeight && static_cast<uint32_t>(ctx.r8) == 25 && static_cast<uint32_t>(ctx.r9) == 25)
