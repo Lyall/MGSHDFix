@@ -9,4 +9,5 @@ namespace ResolutionScalingFixes
 
     inline bool bFixM92FPV = false;
 
+    inline bool bRestorePS2NVGLineHeight = true;
 }

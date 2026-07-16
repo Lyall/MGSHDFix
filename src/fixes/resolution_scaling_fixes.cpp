@@ -6,7 +6,6 @@
 #include "custom_resolution_and_borderless.hpp"
 #include "gamevars.hpp"
 //#include "input_handler.hpp"
-#include "game_funcs.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
@@ -112,6 +111,13 @@ namespace
         *a = GS_Scale(*a, scale);
     }
 
+    void MGS3Fixes()
+    {
+        
+    }
+
+    int* g_IR_Blinds_DarkenHeight = nullptr;
+    int* g_IR_Blinds_BlankHeight = nullptr;
 }
 
 
@@ -120,12 +126,10 @@ void ResolutionScalingFixes::HandleLevelTransition()
     UpdateCharacterLaserPoints();
 }
 
+void MGS2Fixes();
+
 void ResolutionScalingFixes::ApplyFixes()
 {
-    if (!(eGameType & MGS2))
-    {
-        return;
-    }
 
     scaleX_fromPs2 = CustomResolutionAndBorderless::iInternalResX / 512.0;
     scaleX_fromPs2_4by3 = ((double)CustomResolutionAndBorderless::iInternalResX) / (double)(CustomResolutionAndBorderless::iInternalResY) / (4.0 / 3.0);
@@ -134,6 +138,51 @@ void ResolutionScalingFixes::ApplyFixes()
     SPDLOG_INFO("Resolution Scaling Fixes: Internal Width = {}, Internal Height = {}", CustomResolutionAndBorderless::iInternalResX, CustomResolutionAndBorderless::iInternalResY);
     SPDLOG_INFO("Resolution Scaling Fixes: PS2 Height Delta = {}, PS2 Width Delta = {}, PS2 Width 4:3 Delta = {}", scaleY_fromPs2, scaleX_fromPs2, scaleX_fromPs2_4by3);
 
+
+#define FIX_LINE_HEIGHT //for easy before / after screenshots in case they need to be updated yet again.
+    if (eGameType & MGS2)
+    {
+#ifdef FIX_LINE_HEIGHT  
+        g_IR_Blinds_DarkenHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? 89 48 ?? 8B 0D ?? ?? ?? ?? 89 48 ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS2: g_IR_Blinds_DarkenHeight") + 2));
+
+        spdlog::info("GameVars: g_IR_Blinds_DarkenHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_DarkenHeight - (uintptr_t)baseModule);
+
+        g_IR_Blinds_BlankHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? 89 48 ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS2: g_IR_Blinds_BlankHeight") + 2));
+        spdlog::info("GameVars: g_IR_Blinds_BlankHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_BlankHeight - (uintptr_t)baseModule);
+
+        if (g_IR_Blinds_BlankHeight && g_IR_Blinds_DarkenHeight)
+        {
+            *g_IR_Blinds_BlankHeight = 25;
+            *g_IR_Blinds_DarkenHeight = 25;
+            spdlog::info("GameVars: g_IR_Blinds_BlankHeight and g_IR_Blinds_DarkenHeight set to 25");
+        }
+#endif
+        MGS2Fixes();
+    }
+    else if (eGameType & MGS3)
+    {
+#ifdef FIX_LINE_HEIGHT
+        g_IR_Blinds_DarkenHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? 89 48 ?? 8B 0D ?? ?? ?? ?? 89 48 ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS3: g_IR_Blinds_DarkenHeight") + 2));
+
+        spdlog::info("GameVars: g_IR_Blinds_DarkenHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_DarkenHeight - (uintptr_t)baseModule);
+
+        g_IR_Blinds_BlankHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? 89 48 ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS3: g_IR_Blinds_BlankHeight") + 2));
+        spdlog::info("GameVars: g_IR_Blinds_BlankHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_BlankHeight - (uintptr_t)baseModule);
+
+        if (g_IR_Blinds_BlankHeight && g_IR_Blinds_DarkenHeight)
+        {
+            *g_IR_Blinds_BlankHeight = 25;
+            *g_IR_Blinds_DarkenHeight = 25;
+            spdlog::info("GameVars: g_IR_Blinds_BlankHeight and g_IR_Blinds_DarkenHeight set to 25");
+        }
+#endif
+        MGS3Fixes();
+    }
+}
+
+void MGS2Fixes()
+{
+    using namespace ResolutionScalingFixes;
     {   // user/mode/codec/face_bug.c -> NewBugFace() - not affected by resolution, might've just been the layout change which caused it.
 
         MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? BA", "NewBugFace", {
@@ -170,7 +219,7 @@ void ResolutionScalingFixes::ApplyFixes()
             ctx.rax = 83; // height
             *reinterpret_cast<float*>(ctx.rsp + 0x30) = 83.0f;    // pos.x
             *reinterpret_cast<float*>(ctx.rsp + 0x34) = 40.0f;   // pos.y
-                          
+
 
                   });
 
@@ -275,18 +324,15 @@ void ResolutionScalingFixes::ApplyFixes()
         }
                   });
 
-    //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
-        #define	SHIFT3_X			(17.5f)
-        #define	SHIFT4_X			(0.0f)
 
     MAKE_HOOK_MID(baseModule, "75 ?? 81 4A ?? ?? ?? ?? ?? EB ?? 83 BB", "sonoyama\\raiden\\rai_equip.c -> RaiHolsterAct() -> @ l160, Raiden M9 holster fix", {
             if (ctx.rsi == MGS2_WEAPON_INDEX_M9)
             {
                 reghelpers::SetZF(ctx, true);
             }
-        });
+                  });
 
-    
+
     MAKE_HOOK_MID(baseModule, "49 81 C0 00 01 00 00 48 83 E9 01 0F 85 ?? ?? ?? ?? 44 8D 49", "InitEyesData: color fix", {
         for (int i = 0; i < 8; i++)
         {
@@ -295,6 +341,50 @@ void ResolutionScalingFixes::ApplyFixes()
         }
                   });
 
+
+//    if (bRestorePS2NVGLineHeight)
+#ifdef FIX_LINE_HEIGHT
+    {
+        static const uint32_t darkenHeight = static_cast<uint32_t>(std::max(1.0f, std::round((14.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY)));
+        static const uint32_t blankHeight = static_cast<uint32_t>(std::max(1.0f, std::round((5.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY)));
+        static const int32_t verticalOffset25 = static_cast<int32_t>(std::round((3.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
+
+        static const uint32_t codecLineHeight = static_cast<uint32_t>(std::max(1.0f, std::round((10.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY)));
+        static const int32_t codecVerticalOffset = static_cast<int32_t>(std::round((-10.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
+
+        MAKE_HOOK_MID(baseModule, "85 C9 ?? ?? ?? ?? 66 45 0F 6E C0", "Restore PS2 NVG Lines", {
+                if (static_cast<uint32_t>(ctx.r8) == 25 && static_cast<uint32_t>(ctx.r9) == 25)
+                {
+                    ctx.r8 = darkenHeight;
+                    ctx.r9 = blankHeight;
+                    ctx.xmm9.u32[0] = static_cast<uint32_t>(static_cast<int32_t>(ctx.xmm9.u32[0]) + verticalOffset25);
+                }
+                else
+                {
+                    ctx.r8 = codecLineHeight;
+                    ctx.r9 = codecLineHeight;
+                    ctx.xmm9.u32[0] = static_cast<uint32_t>(static_cast<int32_t>(ctx.xmm9.u32[0]) + codecVerticalOffset);
+                }
+                      });
+    }
+#endif  
+/*    else
+    {
+        static const float resolutionScale = static_cast<float>(CustomResolutionAndBorderless::iInternalResY) / 720.0f;
+        static const int32_t verticalOffset25 = static_cast<int32_t>(std::round((0.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
+        static const int32_t codecVerticalOffset = static_cast<int32_t>(std::round((0.0f / 2160.0f) * CustomResolutionAndBorderless::iInternalResY));
+
+        MAKE_HOOK_MID(baseModule, "85 C9 ?? ?? ?? ?? 66 45 0F 6E C0", "Scale NVG Lines", {
+                const bool is25PixelPattern = static_cast<uint32_t>(ctx.r8) == 25 && static_cast<uint32_t>(ctx.r9) == 25;
+
+                ctx.r8 = static_cast<uint32_t>(std::max(1.0f, std::round(static_cast<float>(static_cast<uint32_t>(ctx.r8)) * resolutionScale)));
+                ctx.r9 = static_cast<uint32_t>(std::max(1.0f, std::round(static_cast<float>(static_cast<uint32_t>(ctx.r9)) * resolutionScale)));
+                ctx.xmm9.u32[0] = static_cast<uint32_t>(static_cast<int32_t>(ctx.xmm9.u32[0]) + (is25PixelPattern ? verticalOffset25 : codecVerticalOffset));
+                      });
+    }
+    */
+
+            //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
 
 }
 

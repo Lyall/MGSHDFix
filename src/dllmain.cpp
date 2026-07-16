@@ -582,6 +582,7 @@ static void InitializeSubsystems()
     }
     else if (eGameType & MGS3)
     {
+        INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
         INITIALIZE(g_WaterReflectionFix.Initialize());
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FilmGrain::Initialize());
