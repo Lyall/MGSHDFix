@@ -34,17 +34,9 @@ void FixPlaytime::Apply()
             MGS2_LinkVarBuf::GM_Configuration |= GM_CONFIG_PLAYTIME_STOP;
                       });
 
-
-#if !defined(RELEASE_BUILD)
-        g_InputHandler.RegisterHotkey(VK_NUMPAD8, "report time", []()
-                                      {
-                                          spdlog::info("MGS 2: MGS2_LinkVarBuf::GM_PlayTime: {}", MGS2_LinkVarBuf::GM_PlayTime.get());
-                                      });
-#endif
-
     }
     else // eGameType & MGS3
-    {
+    { //TODO -> THIS ISN'T RIGHT.
         MGS3_GM_Configuration = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "81 25 ?? ?? ?? ?? FF FD FF FF", "MGS3: GM_Configuration"), 2, 10));
         MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 43 ?? EB", "MGS3: gm_startloader", {
             if (MGS3_GM_Configuration)

@@ -290,7 +290,7 @@ void MGS2Fixes()
 
     if (bIncreaseShadowResolution)
     {
-        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 84 FE ?? ?? ?? ?? 48 FF C7", "MGS2: shadow res", {
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 84 FE ?? ?? ?? ?? 48 FF C7", "MGS2: shadow res", { ///todo - port to mgs3
                 if (ctx.rdi == 0x16 || ctx.rdi == 0x17 || ctx.rdi == 0x18)
                 {
                     int shadowRes;

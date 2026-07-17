@@ -44,9 +44,13 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
 - Option to adjust scale and opacity of cutscene captions.
 - Option to disable Steam Achievement unlocking. (For speedrunners.)
+- SMAA (Screen Morphological Anti-Aliasing) support (MGS2/MGS3).
+- Gamma correction for all games, correcting colors to appear more vibrant and making some lower blacks even deeper, as they would have appeared on an actual CRT screen.
+- Option (MGSHDFix Internal tab) to start MGS2 & MGS3 in their developer menu level select screens.
 
 #### MG / MG2 Specific Features
 - Option to crop overscan borders on the top/bottom of the screen.
+- Option to correct the game to a 4:3 aspect ratio. (The game was using the MSX2's raw output aspect ratio of 64:53.)
 
 #### MGS2 Specific Features:
 - Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
@@ -57,10 +61,18 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to force Real Time Clock based hostage Easter Egg.
 - Option to restore grenade cooking (having detonation timer start while the grenade is still held.)
 - Option to swap X/O (OK / CANCEL inputs) in Menus.
-- Option to swap thermal goggle color palettes in realtime (Substance/vanilla, red hot / Sons of Liberty, Splinter Cell Blacklist, black hot, white hot.) [Examples](https://imgur.com/a/ThRpIbj)
+- Option to swap thermal goggle color palettes in realtime (Substance/vanilla, red hot / Sons of Liberty, Splinter Cell Blacklist, black hot, white hot), using Numpad 7 while thermals are equipped. [Examples](https://imgur.com/a/ThRpIbj)
 - Option to enable cut Metal Gear 2: Solid Snake Colonel sprites during some late-game Codec calls. [PR #234](https://github.com/ShizCalev/MGSHDFix/pull/234)
 - Option to restore original 2001 Sons of Liberty radar rotation. [Example](https://imgur.com/a/QNDTgrO)
 - BP_Asset / Manifest file modloader support. [PR #251](https://github.com/ShizCalev/MGSHDFix/pull/251)
+- Option to render shell casings at all distances.
+- Option to have shadow resolution (which was hard-coded to the PS2's 256x256 size) increase dynamically with game resolution.
+- Option to enable radar in Snake Tales.
+- Option to set a custom lifebar name.
+- Option to have the lifebar name reflect the current player character's name, like in MGS3/MGS4.
+- Option to restore Sons of Liberty's elevator glitch, for speedrunners that want to practice old strats that were patched out.
+- Option to make punches count as non-lethal damage against Vamp instead of doing lethal damage.
+- Option to force all NPCs to always use their highest quality polygon/LOD model.
 
 
 #### MGS3 Specific Features:
@@ -79,6 +91,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes vector effects / line based rendering scaling (ie rain, lasers, bullet trails.) [PR #140](https://github.com/ShizCalev/MGSHDFix/pull/140)
 - Fixes UI scaling. [PR #181](github.com/ShizCalev/MGSHDFix/pull/181)
 - Option to force the game to output stereo audio, which corrects the infamous ["rain is louder than codec conversations"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Rain_audio_is_significantly_louder_than_codec_conversations_.26_other_game_sounds) issue. [PR #162](https://github.com/ShizCalev/MGSHDFix/pull/162)
+- Restores close-up camera blur / depth of field, outright disabled in MGS2 & MGS3 by the 2011 HD Collection.
+- Fixes MGS2 & MGS3's audio reverb being nearly inaudible; volume is now boosted and user-adjustable.
+- Fixes MGS2 & MGS3's blind rendering (lines on Codec portraits / nightvision / thermal goggles) not scaling with resolution.
 
 
 #### MGS2 Specific Bug Fixes:
@@ -88,7 +103,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Restores numerous particle and visual effects to proper PS2 timing, fixing effects that ran at double speed and ended too early in the HD Collection and Master Collection versions.
 - Restores dogtag viewer information.
 - Restores color swapping Red / Blue "2" on the title screen after game completions. (Requires MGS2 Community Bugfix Compilation)
-- Fixes in-game timer not pausing during loading times. (This was a HD Collection regression. IGT behavior now matches with Substance.)
+- Fixes in-game timer not pausing during loading times. (This was a HD Collection regression. IGT behavior now matches with Substance. Can be disabled for those that want the vanilla/broken behavior.)
 - Fixes Depth of Field / blur post processing effects not scaling with resolution. [PR #248](https://github.com/ShizCalev/MGSHDFix/pull/248)
 - Fixes shadow resolution not scaling with game resolution. (It was hard-coded to 256x256 / PS2 resolution.)
 - Fixes incorrectly positioning "Metal Gear Solid 2" title card during the start of Tanker when playing in Letterbox mode. [Example](https://imgur.com/a/bGkGwJ9)
@@ -109,18 +124,52 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes invisible shell casing in cutscenes.
 - Fixes hostages having incorrectly colored hands in Shell 1 Core. (Requires MGS2 Community Bugfix Compilation) [PR #247](https://github.com/ShizCalev/MGSHDFix/pull/247)
 - Fixes incorrect screen texture during a Shell 1 core cutscene. (Requires MGS2 Community Bugfix Compilation) [PR #247](https://github.com/ShizCalev/MGSHDFix/pull/247)
+- Restores crossfade camera transitions.
+- Restores overcranked (slow-motion) cinematic camera transitions (Plant opening, Fortune's intro cutscene, several others).
+- Restores PS2 motion blur / motion trails.
+- Restores out-of-focus (concentration) camera blur.
+- Restores heat distortion effects in numerous cutscenes (helicopter heat exhaust, Solidus heat mirage, etc.)
+- Restores multiple underwater screen distortion effects.
+- Restores bloodstains on guards & RAY units when shot.
+- Restores scope distortion when using the PSG-1 / PSG-1T.
+- Restores water droplets on the camera during first-person-view cutscenes.
+- Restores several invisible water splash effects.
+- Fully restores Name, Date of Birth, and Bloodtype entry screens, and the end-game dogtag.
+- Fixed cigarette smoke in the Tanker intro not acting like smoke.
+- Fixed RAY's eye trails being misaligned during the final Arsenal cutscene.
+- Fixed sun god-rays / flare not rendering properly in several cutscenes. (This made the oil cloud during the underwater part of the Plant opening cutscene seem invisible.)
+- Restored alternative voice lines when Snake is taking photos in Holds 3.
+- Restored the Main Menu's voiceovers & Action Level selection screens.
+- Fixed Fortune's railgun having corrupt geometry (which looked like a smoke cloud) when fired.
+- Fixed Fortune's railgun arcing effects not scaling with resolution.
+- Fixed incorrect lighting on several posters & lockers/doors.
+- Corrected a camera jitter issue during in-game demos (such as viewing the Soldier at the very start of Plant) which was obvious at high resolution.
+- Fixed a model lighting bound calculation bug introduced by the 2011 HD Collection, which caused a green tint on the computers in the Shell 1 Core B2 Computer Room and left numerous models throughout Arsenal unshaded.
+- Fixed a 60 FPS camera-sync issue which caused the Kasatka's rotor blades to appear static / not moving during cutscenes.
+- Fixed the laser on several guns being incorrectly positioned compared to their laser aiming module.
+- Fixed Raiden's holster not updating when the M9 is equipped.
+- Corrected Snake's hair rendering order; Snake's hair is no longer see-through / rendering behind itself, removing the need for the separate Snake hair fix mod.
+- Fixed Snake visibly teleporting during the Tanker intro cutscene.
+- Fixed Snake's optical camo breaking effect's rotation during the Tanker intro cutscene.
+- Fixed MG Ray's eye sprites being massive / having blown out bloom.
+- Fixed a broken voice line in Deck 2's pipe-falling mini-cutscene.
+- Made Snake's holster functional. (His holster always had an extra handgun in it, even when unarmed. Requires MGS2 Community Bugfix Compilation)
+- Fixed Solidus not being visible when viewed from a malfunctioning RAY unit's POV. (Requires MGS2 Community Bugfix Compilation)
 
 
 #### MGS3 Specific Bug Fixes:
 - Restores the PlayStation 2's original cutscene camera/viewport height, fixing the 2011 HD Collection bug that cropped roughly the bottom 10% of the image in all cutscenes. (Notably, this issue was officially fixed in both the 3DS remake and Delta.)
 - Fixes water reflections (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
 - Fixes Depth of Field / blur post processing effects not scaling with resolution.
+	- Depth of field rendering has been upgraded to utilize a gaussian pyramid to clean up PS2 sampling artifacts. ♥
+- Restored cutscene film-grain rendering during low-light camera shots.
 
 
 ## Logging / Warnings for Common Configuration Issues
 - Warnings for common mod compatibility & installation issues - which often result in crashes.
 - Warnings if your game's audio is muted via the game's main launcher.
 - Logging for Steam Input's controller status (ie detected controllers, keybinds, ect.)
+- Added a warning if Windows Multi-Plane Overlay is disabled, which can cause DirectX games to freeze/crash when alt-tabbing.
 
 
 ## Installation
@@ -182,7 +231,7 @@ This list will contain bugs which may or may not be fixed.
 |:--:|
 
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/tanker_snake_shot.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/tanker_snake_shot.png" />         |
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2_w24c_color_filter.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2_w24c_color_filter.png" />         |
 | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20d00t%20-%20rain%201.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png" />         |
