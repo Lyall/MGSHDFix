@@ -152,11 +152,11 @@ namespace
     // The port rotates preshade light-selection bounds with the matrix transposed, so
     // anything placed at an angle misses point lights it should own (the Deck-2 door
     // face baked near-black from this). Redo the transform the right way round.
-    uint8_t* gPreshadeMatrix = nullptr;
+    float* gPreshadeMatrix = nullptr;
 
     void BoundFix_Hook(SafetyHookContext& ctx)
     {
-        const float* m = reinterpret_cast<const float*>(gPreshadeMatrix);
+        const float* m = gPreshadeMatrix;
         const float inMax[3] = { ctx.xmm6.f32[0], ctx.xmm8.f32[0], ctx.xmm10.f32[0] };
         const float inMin[3] = { ctx.xmm7.f32[0], ctx.xmm9.f32[0], ctx.xmm11.f32[0] };
         float outMin[3];
@@ -267,11 +267,9 @@ void MGS2PreshadeLights::Initialize()
     }
 
     // light-selection bound correction
-    gPreshadeMatrix = reinterpret_cast<uint8_t*>(baseModule) + 0x15557E0;
-    if (uint8_t* bf = Memory::PatternScan(baseModule,
-        "F3 0F 10 74 24 ?? 48 8D 0D",
-        "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> CreateLightBuffer() bound transform"))
+    if (uint8_t* bf = Memory::PatternScan(baseModule, "F3 0F 10 74 24 ?? 48 8D 0D", "MGS 2: Two-Sided Preshade Lighting : system\\libdg\\pshade.c -> CreateLightBuffer() bound transform"))
     {
+        gPreshadeMatrix = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 44 0F 10 05 ?? ?? ?? ?? F3 44 0F 10 15 ?? ?? ?? ?? F3 44 0F 10 1D ?? ?? ?? ?? 41 0F 28 CA", "MGS 2: Two-Sided Preshade Lighting : g_PreshadeMatrix") + 5));
         static SafetyHookMid boundFix {};
         boundFix = safetyhook::create_mid(bf, BoundFix_Hook);
         LOG_HOOK(boundFix, "MGS 2: Two-Sided Preshade Lighting : light-selection bound fix")
