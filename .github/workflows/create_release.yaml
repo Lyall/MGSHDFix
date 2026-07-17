@@ -192,7 +192,7 @@ jobs:
         artifactErrorsFailBuild: true
 
     - name: Upload to NexusMods - MG1 + MG2
-      uses: Nexus-Mods/upload-action@v1.0.0-beta.8
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.9
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_id: 107230
@@ -204,7 +204,7 @@ jobs:
         description: Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
             
     - name: Upload to NexusMods - MGS2
-      uses: Nexus-Mods/upload-action@v1.0.0-beta.8
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.9
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_id: 462574
@@ -220,7 +220,7 @@ jobs:
 
 
     - name: Upload to NexusMods - Upload to NexusMods - MGS3
-      uses: Nexus-Mods/upload-action@v1.0.0-beta.8
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.9
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_id: 541612
@@ -229,6 +229,7 @@ jobs:
         version: "${{ steps.extract_version.outputs.version }}"
         category: main
         archive_existing_version: true
+        update_mod_version: true
         description: |
             Set both Internal Resolution & Internal Upscaling to Default / Original in the game's launcher. (Resolution is entirely handled by MGSHDFix.)
 
