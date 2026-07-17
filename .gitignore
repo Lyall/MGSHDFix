@@ -14,6 +14,8 @@
 mgs2_live_dump.bin
 enc_temp_folder/
 
+github_notes.md
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
