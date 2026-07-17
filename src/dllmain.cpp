@@ -588,6 +588,16 @@ static void InitializeSubsystems()
         INITIALIZE(MGS3FilmGrain::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
+
+        MAKE_HOOK_MID(baseModule, "89 44 24 ?? 0F B7 05 ?? ?? ?? ?? 66 89 44 24 ?? 0F B6 05", "MGS 3: Hires Textures Enabled Check", {
+                static bool printed = false;
+                if (printed)
+                {
+                    return;
+                }
+                printed = true;
+                spdlog::info("High Resolution Texture Pack is enabled.");
+                      });
             
     }
     else if (eGameType & MG)
