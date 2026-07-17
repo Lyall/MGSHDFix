@@ -272,7 +272,7 @@ namespace ConfigKeys
 
     constexpr const char* FixDepthOfField_Section = "Bugfixes";
     constexpr const char* FixDepthOfField_Setting = "Fix Depth of Field";
-    constexpr const char* FixDepthOfField_Help = "";
+    constexpr const char* FixDepthOfField_Help = "(May Impact Performance)";
     constexpr const char* FixDepthOfField_Tooltip = "Restores depth of field blur at higher resolutions.\n"
                                                     "\n"
                                                     "Also restores close-up depth of field / camera blur, which was outright disabled/broken by the HD Collection.";

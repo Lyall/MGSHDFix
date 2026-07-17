@@ -1824,7 +1824,7 @@ namespace
         desc.Height = height;
         desc.MipLevels = 1;
         desc.ArraySize = 1;
-        desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         desc.SampleDesc.Count = 1;
         desc.Usage = D3D11_USAGE_DEFAULT;
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
@@ -1952,8 +1952,11 @@ namespace
         };
 
         runCocPass(gMGS3DofCocPS.Get(), gMGS3DofCocRTV.Get(), nullptr);
-        runCocPass(gMGS3DofDilateHPS.Get(), gMGS3DofCocScratchRTV.Get(), gMGS3DofCocSRV.Get());
-        runCocPass(gMGS3DofDilateVPS.Get(), gMGS3DofCocRTV.Get(), gMGS3DofCocScratchSRV.Get());
+        if (activeNear)
+        {
+            runCocPass(gMGS3DofDilateHPS.Get(), gMGS3DofCocScratchRTV.Get(), gMGS3DofCocSRV.Get());
+            runCocPass(gMGS3DofDilateVPS.Get(), gMGS3DofCocRTV.Get(), gMGS3DofCocScratchSRV.Get());
+        }
 
         // Back to the caller's target for the composite.
         ID3D11RenderTargetView* targetRTV = passState.oldRTV[0];
