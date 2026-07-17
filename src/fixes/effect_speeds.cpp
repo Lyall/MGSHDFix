@@ -108,7 +108,6 @@
     X(NewHarrierLight, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_light.c -> NewHarrierLight()") \
     X(NewLineSmoke, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B 49 ?? 48 85 C9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\line_smoke.c -> NewLineSmoke()") \
     X(NewHexagonalPattern, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8D 51 ?? 8B 49", "MGS 2: Effect Speed Fix : user\\okuta\\effect\\hexagonal.c -> NewHexagonalPattern()") \
-    X(SPH_ActBrkVol1, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1() | NewWaveSplash_Demo() | NewWaveSplash_Demo2() | NewSplash()") \
     X(NewSplushSurfaceMan, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan() | OK_PutSplushSurface()") \
     X(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()") \
     X(NewTraffic_Flush, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 41 56 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : NewTraffic_Flush") \
@@ -743,6 +742,46 @@ namespace
         return h_DemoFrameCountAct.call<int64_t>(work);
     }
 
+#pragma region NewSplash
+    //user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()
+    SafetyHookInline Act_227_hook {};
+    uintptr_t g_Act_227_firstTickSeen[64] = {};
+
+    bool Act_227_ConsumeFirstTick(uintptr_t work)
+    {
+        const size_t slot = (work >> 4) & 63;
+        if (g_Act_227_firstTickSeen[slot] != work)
+        {
+            g_Act_227_firstTickSeen[slot] = work;
+            return true;
+        }
+        return false;
+    }
+
+    int64_t __fastcall Act_227_Hook(int64_t work)
+    {
+        const bool firstTick = Act_227_ConsumeFirstTick(static_cast<uintptr_t>(work));
+        if (SkipFrame() && !firstTick)
+        {
+            return 0;
+        }
+        return Act_227_hook.call<int64_t>(work);
+    }
+
+    //user\\morita\\splash\\splash.c -> Die() (Die_182)
+    SafetyHookInline Die_182_hook {};
+
+    void __fastcall Die_182_Hook(int64_t work)
+    {
+        const size_t slot = (static_cast<uintptr_t>(work) >> 4) & 63;
+        if (g_Act_227_firstTickSeen[slot] == static_cast<uintptr_t>(work))
+        {
+            g_Act_227_firstTickSeen[slot] = 0;
+        }
+        Die_182_hook.call<void>(work);
+    }
+#pragma endregion NewSplash
+
 }
 
 
@@ -1172,6 +1211,28 @@ void EffectSpeedFix::Initialize()
     {
         spdlog::error("MGS 2: Effect Speed Fix : window countdown Act scan failed; windows will expire at half PS2 duration.");
     }
+
+    MAKE_HOOK_MID(baseModule, "48 83 C6 ?? 49 83 C6 ?? 48 83 C5", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> SPH_ActBrkVol1() alpha freeze fix", {
+            const int16_t pad = *reinterpret_cast<const int16_t*>(ctx.rbx + 6);
+            if (pad <= 0)
+            {
+                *reinterpret_cast<uint8_t*>(ctx.rsi - 0xC) = 0; // don't let alpha freeze at its last positive-pad value
+            }
+                  });
+
+    if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()"))
+    {
+        Act_227_hook = safetyhook::create_inline(reinterpret_cast<void*>(addr), Act_227_Hook);
+        LOG_HOOK(Act_227_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()")
+
+            if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B 79 ?? 48 8B D9 48 85 FF 74 ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B BB", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Die() (Die_182)"))
+            {
+                Die_182_hook = safetyhook::create_inline(reinterpret_cast<void*>(addr), Die_182_Hook);
+                LOG_HOOK(Die_182_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Die() (Die_182)")
+            }
+    }
+
+
 
 }
 
