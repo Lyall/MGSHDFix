@@ -23,14 +23,14 @@ namespace
         GameVars::GV_StrCode("kck_roter01_alp"),
         GameVars::GV_StrCode("kck_mrot_propera"),
 
-        GameVars::GV_StrCode("gcyp_eff_blade_alp"),     
-        GameVars::GV_StrCode("gcyp_blade_alp"),
+        //GameVars::GV_StrCode("gcyp_eff_blade_alp"),     
+        //GameVars::GV_StrCode("gcyp_blade_alp"),
 
-        GameVars::GV_StrCode("cyp_roter01_alp"),
-        GameVars::GV_StrCode("cyp_propera_alp"),
+        //GameVars::GV_StrCode("cyp_roter01_alp"),
+        //GameVars::GV_StrCode("cyp_propera_alp"),
 
-        GameVars::GV_StrCode("h6h_propera_blur_alp"),
-        GameVars::GV_StrCode("h6h_eff_mrot_alp"),
+        //GameVars::GV_StrCode("h6h_propera_blur_alp"),
+        //GameVars::GV_StrCode("h6h_eff_mrot_alp"),
 
     };
     bool IsRotorTex(uint32_t tex)
