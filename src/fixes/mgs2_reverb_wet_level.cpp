@@ -17,7 +17,7 @@ void FixReverbWetLevel::Initialize()
     }
 
     MAKE_HOOK_MID(baseModule, "FF 50 ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 41 0F 28 73", "bp\\shared\\BP_SoundSupportX360.cpp -> AudioDriver::ApplyReverbSetting() @ L1997", {
-        spdlog::info("FixReverbWetLevel: xmm1 .f32[0] = {} -> {} (wet volume scale)", ctx.xmm1.f32[0], ctx.xmm1.f32[0] * FixReverbWetLevel::fWetVolumeScale);
+        //spdlog::info("FixReverbWetLevel: xmm1 .f32[0] = {} -> {} (wet volume scale)", ctx.xmm1.f32[0], ctx.xmm1.f32[0] * FixReverbWetLevel::fWetVolumeScale);
         ctx.xmm1.f32[0] *= FixReverbWetLevel::fWetVolumeScale;
                   });
 
