@@ -29,6 +29,94 @@
 ///
 /////////////////////////////////////////////////////////////////
 
+// tracks every individual actor instance to ensure that the first tick of every actor is never skipped
+class FirstTickGuard
+{
+public:
+    bool ConsumeFirstTick(uintptr_t work)
+    {
+        const size_t slot = Slot(work);
+        if (m_seen[slot] != work)
+        {
+            m_seen[slot] = work; // collisions just force an extra un-skipped tick later - harmless
+            return true;
+        }
+        return false;
+    }
+
+    void ClearOnDeath(uintptr_t work)
+    {
+        const size_t slot = Slot(work);
+        if (m_seen[slot] == work)
+        {
+            m_seen[slot] = 0;
+        }
+    }
+
+private:
+    static size_t Slot(uintptr_t work) { return (work >> 4) & 63; }
+    uintptr_t m_seen[64] = {};
+};
+
+
+#define DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)                                    \
+    SafetyHookInline actName##_hook{};                                                     \
+    SafetyHookInline dieName##_hook{};                                                     \
+    FirstTickGuard g_##actName##_guard;                                                    \
+                                                                                             \
+    int64_t __fastcall actName##_Hook(int64_t work)                                        \
+    {                                                                                       \
+        const bool firstTick = g_##actName##_guard.ConsumeFirstTick(static_cast<uintptr_t>(work)); \
+        if (SkipFrame() && !firstTick)                                                      \
+        {                                                                                   \
+            return 0;                                                                       \
+        }                                                                                   \
+        return actName##_hook.call<int64_t>(work);                                          \
+    }                                                                                       \
+                                                                                             \
+    void __fastcall dieName##_Hook(int64_t work)                                            \
+    {                                                                                       \
+        g_##actName##_guard.ClearOnDeath(static_cast<uintptr_t>(work));                     \
+        dieName##_hook.call<void>(work);                                                    \
+    }
+
+#define INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    if (uint8_t* addr = Memory::PatternScan(baseModule, actPattern, actLabel))              \
+    {                                                                                       \
+        actName##_hook = safetyhook::create_inline(reinterpret_cast<void*>(addr), actName##_Hook); \
+        LOG_HOOK(actName##_hook, actLabel)                                                  \
+                                                                                             \
+        if (uint8_t* dieAddr = Memory::PatternScan(baseModule, diePattern, dieLabel))       \
+        {                                                                                   \
+            dieName##_hook = safetyhook::create_inline(reinterpret_cast<void*>(dieAddr), dieName##_Hook); \
+            LOG_HOOK(dieName##_hook, dieLabel)                                              \
+        }                                                                                   \
+        else                                                                                \
+        {                                                                                   \
+            spdlog::error("MGS 2: Effect Speed Fix : {} scan failed - {} throttle is active. Disabling.", dieLabel, actLabel); \
+            actName##_hook = {};                                                            \
+        }                                                                                   \
+    }                                                                                       \
+    else                                                                                    \
+    {                                                                                       \
+        spdlog::error("MGS 2: Effect Speed Fix : {} scan failed. Skipping throttle hooks.", actLabel); \
+    }
+
+
+// Act/Die pairs, tracks every individual actor instance to ensure that the first tick of every actor is never skipped
+#define MGS2_FULL_SKIP_ACT_DIE_PAIRS(X) \
+    X(Act_227, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()", \
+        Die_182, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B 79 ?? 48 8B D9 48 85 FF 74 ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B BB", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Die() (Die_182)") \
+        \
+    X(Act_234, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Act() | (Act_234)", \
+        Die_188, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 9B", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Die() (Die_188)")
+
+#define DEFINE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)
+
+#define CREATE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel)
+
 
 #define MGS2_CUTSCENE_FRAMESKIP_MIDHOOK(name, ctx)    \
     do                                           \
@@ -742,45 +830,7 @@ namespace
         return h_DemoFrameCountAct.call<int64_t>(work);
     }
 
-#pragma region NewSplash
-    //user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()
-    SafetyHookInline Act_227_hook {};
-    uintptr_t g_Act_227_firstTickSeen[64] = {};
-
-    bool Act_227_ConsumeFirstTick(uintptr_t work)
-    {
-        const size_t slot = (work >> 4) & 63;
-        if (g_Act_227_firstTickSeen[slot] != work)
-        {
-            g_Act_227_firstTickSeen[slot] = work;
-            return true;
-        }
-        return false;
-    }
-
-    int64_t __fastcall Act_227_Hook(int64_t work)
-    {
-        const bool firstTick = Act_227_ConsumeFirstTick(static_cast<uintptr_t>(work));
-        if (SkipFrame() && !firstTick)
-        {
-            return 0;
-        }
-        return Act_227_hook.call<int64_t>(work);
-    }
-
-    //user\\morita\\splash\\splash.c -> Die() (Die_182)
-    SafetyHookInline Die_182_hook {};
-
-    void __fastcall Die_182_Hook(int64_t work)
-    {
-        const size_t slot = (static_cast<uintptr_t>(work) >> 4) & 63;
-        if (g_Act_227_firstTickSeen[slot] == static_cast<uintptr_t>(work))
-        {
-            g_Act_227_firstTickSeen[slot] = 0;
-        }
-        Die_182_hook.call<void>(work);
-    }
-#pragma endregion NewSplash
+    MGS2_FULL_SKIP_ACT_DIE_PAIRS(DEFINE_FULL_SKIP_HOOK)
 
 }
 
@@ -1220,29 +1270,8 @@ void EffectSpeedFix::Initialize()
             }
                   });
 
-    if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 45 33 C0", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()"))
-    {
-        Act_227_hook = safetyhook::create_inline(reinterpret_cast<void*>(addr), Act_227_Hook);
-        LOG_HOOK(Act_227_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Act() (Act_227) | NewSplash() | NewWaveSplash_Demo() | NewWaveSplash_Demo2()")
-
-            if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B 79 ?? 48 8B D9 48 85 FF 74 ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B CF E8 ?? ?? ?? ?? 48 8B BB", "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Die() (Die_182)"))
-            {
-                Die_182_hook = safetyhook::create_inline(reinterpret_cast<void*>(addr), Die_182_Hook);
-                LOG_HOOK(Die_182_hook, "MGS 2: Effect Speed Fix : user\\morita\\splash\\splash.c -> Die() (Die_182)")
-            }
-    }
-
+    MGS2_FULL_SKIP_ACT_DIE_PAIRS(CREATE_FULL_SKIP_HOOK)
 
 
 }
 
-////////
-///     old tests on broken shit. need to redo these properly. :3
-/*
-#ifdef _MGSDEBUGGING
-
-    /*
-    if (uint8_t* Tidal4Result = Memory::PatternScan(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2: Effect Speed Fix : effect\\tidal4.c"))
-    {
-
-*/
