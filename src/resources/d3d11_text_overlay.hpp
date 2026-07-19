@@ -8,5 +8,13 @@ namespace D3D11TextOverlay
     void HandleLevelTransition();
 
     inline bool bShaderLoaded = false;
-    inline bool bShowSpeedrunnerStats = true;
+    inline bool bShowSpeedrunnerStats = false;
+    enum StatsPosition
+    {
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight
+    };
+    inline StatsPosition iStatsPosition = TopRight;
 }

@@ -259,6 +259,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2 | MGS3), ConfigKeys::Caption_Background_Opacity_Section, ConfigKeys::Caption_Background_Opacity_Setting, ConfigKeys::Caption_Background_Opacity_Help, ConfigKeys::Caption_Background_Opacity_Tooltip,
           std::nullopt, false, Field::Int, 100, 0, 100 },
 
+        { (MGS2 | MGS3), ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, ConfigKeys::ShowSpeedrunnerOverlay_Help, ConfigKeys::ShowSpeedrunnerOverlay_Tooltip,
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled, {ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled, ConfigKeys::ShowSpeedrunnerOverlay_Option_TopLeft, ConfigKeys::ShowSpeedrunnerOverlay_Option_TopRight, ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomLeft, ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomRight} },
+
         { (MGS2 | MGS3), ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, ConfigKeys::FixIGTLoadingPause_Help, ConfigKeys::FixIGTLoadingPause_Tooltip,
           std::nullopt, false, Field::Bool, true },
 

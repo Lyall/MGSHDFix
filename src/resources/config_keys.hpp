@@ -722,6 +722,19 @@ namespace ConfigKeys
                                                                "\n"
                                                                "Substance gated elevator operation to standing/squat to patch this out. Off by default.";
 
+    constexpr const char* ShowSpeedrunnerOverlay_Section = "Speedrunner Settings";
+    constexpr const char* ShowSpeedrunnerOverlay_Setting = "Gameplay Stats Overlay";
+    constexpr const char* ShowSpeedrunnerOverlay_Help = "";
+    constexpr const char* ShowSpeedrunnerOverlay_Tooltip = "Displays an overlay with current stage time / in-game timer (IGT) / elasped time.\n"
+                                                           "\n"
+                                                           "Extended stats are also shown while the game is paused.";
+    constexpr const char* ShowSpeedrunnerOverlay_Option_Disabled = "Disabled";
+    constexpr const char* ShowSpeedrunnerOverlay_Option_TopLeft = "Top Left";
+    constexpr const char* ShowSpeedrunnerOverlay_Option_TopRight = "Top Right";
+    constexpr const char* ShowSpeedrunnerOverlay_Option_BottomLeft = "Bottom Left";
+    constexpr const char* ShowSpeedrunnerOverlay_Option_BottomRight = "Bottom Right";
+
+
     constexpr const char* FixIGTLoadingPause_Section = "Speedrunner Settings";
     constexpr const char* FixIGTLoadingPause_Setting = "Fix In-Game Timer Loading Pause";
     constexpr const char* FixIGTLoadingPause_Help = "";

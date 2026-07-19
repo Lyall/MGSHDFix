@@ -65,6 +65,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "custom_player_name.hpp"
+#include "d3d11_text_overlay.hpp"
 #include "game_funcs.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -736,6 +737,43 @@ void Config::Read()
             InputHandler::GetKeybind(ini, ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, g_VectorScalingFix.vkWireframeToggle);
             g_VectorScalingFix.iVectorLineScale = 360;
         }
+
+
+        std::string sSpeedrunnerOverlay;
+        ConfigHelper::getValue(ini, ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, sSpeedrunnerOverlay);
+        if (sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled &&
+            sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_TopLeft &&
+            sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_TopRight &&
+            sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomLeft &&
+            sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomRight)
+        {
+            spdlog::error("Invalid config value for Gameplay Stats Overlay: {}", sSpeedrunnerOverlay);
+            Logging::ShowConsole();
+            std::cout << "Invalid config value for Gameplay Stats Overlay: " << sSpeedrunnerOverlay << std::endl;
+            return FreeLibraryAndExitThread(baseModule, 1);
+        }
+        if (sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled)
+        {
+            D3D11TextOverlay::bShowSpeedrunnerStats = true;
+            if (sSpeedrunnerOverlay == ConfigKeys::ShowSpeedrunnerOverlay_Option_TopLeft)
+            {
+                D3D11TextOverlay::iStatsPosition = D3D11TextOverlay::StatsPosition::TopLeft;
+            }
+            else if (sSpeedrunnerOverlay == ConfigKeys::ShowSpeedrunnerOverlay_Option_TopRight)
+            {
+                D3D11TextOverlay::iStatsPosition = D3D11TextOverlay::StatsPosition::TopRight;
+            }
+            else if (sSpeedrunnerOverlay == ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomLeft)
+            {
+                D3D11TextOverlay::iStatsPosition = D3D11TextOverlay::StatsPosition::BottomLeft;
+            }
+            else if (sSpeedrunnerOverlay == ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomRight)
+            {
+                D3D11TextOverlay::iStatsPosition = D3D11TextOverlay::StatsPosition::BottomRight;
+            }
+        }
+        LOG_CONFIG(ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, sSpeedrunnerOverlay);
+
     }
 
     ConfigHelper::getValue(ini, ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);

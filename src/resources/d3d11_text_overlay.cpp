@@ -504,6 +504,43 @@ namespace
         return buffer;
     }
 
+    void ReverseStatLines(std::string& text)
+    {
+        std::vector<std::string> lines;
+        size_t start = 0;
+
+        while (start <= text.size())
+        {
+            const size_t end = text.find('\n', start);
+            lines.emplace_back(text.substr(start, end - start));
+
+            if (end == std::string::npos)
+            {
+                break;
+            }
+
+            start = end + 1;
+        }
+
+        while (!lines.empty() && lines.back().empty())
+        {
+            lines.pop_back();
+        }
+
+        std::reverse(lines.begin(), lines.end());
+        text.clear();
+
+        for (size_t i = 0; i < lines.size(); ++i)
+        {
+            if (i > 0)
+            {
+                text += '\n';
+            }
+
+            text += lines[i];
+        }
+    }
+
     const char* GetStatOverlay()
     {
         static std::string text;
@@ -524,7 +561,12 @@ namespace
                     + (GM_ClearCodeFlag & GM_CLEAR_RADAR_USED ? "Radar used: Yes\n" : "")
                     + (GM_ClearCodeFlag & GM_CLEAR_SPECIAL_ITEM_USED ? "Special item used: Yes\n" : "")
                 ;
+                if (D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomLeft || D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomRight)
+                {
+                    ReverseStatLines(text);
+                }
             }
+
             return text.c_str();
         }
         if (eGameType & MGS3)
@@ -544,6 +586,10 @@ namespace
                    "Meals: " + std::to_string(GM_MealCount) + "\n"
                    "Saves: " + std::to_string(GM_SaveCount) + "\n"
                    ;
+                if (D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomLeft || D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomRight)
+                {
+                    ReverseStatLines(text);
+                }
             }
             return text.c_str();
         }
@@ -795,7 +841,39 @@ void D3D11TextOverlay::Tick()
 
     if (bShowSpeedrunnerStats)
     {
-        Draw(GetStatOverlay(), 3830.0f, 20.0f, 4.0f, 3.0f, { 199, 199, 199, 255 }, { 0, 0, 0, 128 }, TextHorizontalAlignment::Right, TextVerticalAlignment::Top);
-    }
+        float x = 3830.0f;
+        float y = 20.0f;
+        TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment::Right;
+        TextVerticalAlignment verticalAlignment = TextVerticalAlignment::Top;
 
+        switch (iStatsPosition)
+        {
+            case TopLeft:
+            {
+                x = 10.0f;
+                horizontalAlignment = TextHorizontalAlignment::Left;
+                break;
+            }
+            case TopRight:
+            {
+                break;
+            }
+            case BottomLeft:
+            {
+                x = 10.0f;
+                y = 2140.0f;
+                horizontalAlignment = TextHorizontalAlignment::Left;
+                verticalAlignment = TextVerticalAlignment::Bottom;
+                break;
+            }
+            case BottomRight:
+            {
+                y = 2140.0f;
+                verticalAlignment = TextVerticalAlignment::Bottom;
+                break;
+            }
+        }
+
+        Draw(GetStatOverlay(), x, y, 4.0f, 3.0f, { 199, 199, 199, 255 }, { 0, 0, 0, 128 }, horizontalAlignment, verticalAlignment);
+    }
 }
