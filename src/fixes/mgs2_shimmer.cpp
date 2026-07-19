@@ -11,6 +11,8 @@
 #include "logging.hpp"
 #include "scene_depth.hpp"
 
+using namespace MGS2_StatusFlags;
+
 namespace
 {
     const char* kShimmerShader = R"(

@@ -75,14 +75,24 @@ void GameVars::Initialize()
         aimingState = reinterpret_cast<uint64_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 35 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? 49 89 8D", "MGS 3: GameVars: aimingState") + 2));
         heldTriggers = reinterpret_cast<uint32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 3D ?? ?? ?? ?? BA ?? ?? ?? ?? 41 B8", "MGS 3: GameVars: heldTriggers") + 3));
         actorWaitValue = reinterpret_cast<double*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00 ?? ?? F2 0F 10 0D", "MGS 3: GameVars: actorWaitValue") + 13));
+        currentStage = reinterpret_cast<char const*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? 48 C1 F8", "MGS 3: GameVars: currentStage") + 3));
         MGS3_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8B 05 ?? ?? ?? ?? 66 41 83 78 ?? 00", "MGS3: LinkVarBuf") + 3));
+        p_GV_PauseLevel = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "85 05 ?? ?? ?? ?? 8B 2D", "MGS3: p_GV_PauseLevel") + 2));
+        GM_GameStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? 0F BA E0 ?? 72 ?? 8B CE", "MGS3: GM_GameStatus") + 2));
+        p_GM_MenuStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? A8 ?? 74 ?? 66 23 CF", "MGS3: p_GM_MenuStatus") + 2));
+        p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 3D ?? ?? ?? ?? 89 3D", "MGS3: DG_Clock") + 2));
 
         spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
         spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
         spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
+        spdlog::info("GameVars: currentStage address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)currentStage - (uintptr_t)baseModule);
         spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GV_PauseLevel address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GV_PauseLevel - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_Clock address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Clock - (uintptr_t)baseModule);
         
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 5F ?? E9 ?? ?? ?? ?? 39 1D", "GameVars: Level Transition"))
         {
@@ -210,6 +220,10 @@ void GameVars::OnLevelTransition()
         ResolutionScalingFixes::HandleLevelTransition();
         D3D11TextOverlay::HandleLevelTransition();
 
+    }
+    else if (eGameType & MGS3)
+    {
+        D3D11TextOverlay::HandleLevelTransition();
     }
 }
 
@@ -360,9 +374,38 @@ MGS2GameMode GameVars::MGS2_GetGameMode() const
         return MGS2GameMode::VRWeapons;
     }
 
-    spdlog::warn("Unknown game mode: {}", s->sGameMode);
+    spdlog::warn("Unknown MGS2 game mode: {}", s->sGameMode);
 
     return MGS2GameMode::Unknown;
+}
+
+MGS3GameMode GameVars::MGS3_GetGameMode() const
+{
+    const Stage* s = FindStageByName(GetCurrentStage());
+
+    if (s == nullptr || s->sGameMode == nullptr)
+    {
+        return MGS3GameMode::Unknown;
+    }
+
+    if (_stricmp(s->sGameMode, "Menu") == 0)
+    {
+        return MGS3GameMode::Menu;
+    }
+
+    if (_stricmp(s->sGameMode, "Virtuous Mission") == 0)
+    {
+        return MGS3GameMode::VirtuousMission;
+    }
+
+    if (_stricmp(s->sGameMode, "Snake Eater") == 0)
+    {
+        return MGS3GameMode::SnakeEater;
+    }
+
+    spdlog::warn("Unknown MGS3 game mode: {}", s->sGameMode);
+
+    return MGS3GameMode::Unknown;
 }
 
 bool GameVars::IsStage(const char* stageConst) const

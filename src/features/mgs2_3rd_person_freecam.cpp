@@ -6,6 +6,7 @@
 #include "gamevars.hpp"
 #include "input_handler.hpp"
 #include "logging.hpp"
+using namespace MGS2_StatusFlags;
 
 namespace
 {

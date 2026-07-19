@@ -48,7 +48,6 @@ static_assert(sizeof(DG_CHANL) == 0x530);
 static_assert(offsetof(DG_CHANL, eye_pers) == 0x000);
 static_assert(offsetof(DG_CHANL, chanl_num) == 0x524);
 
-
 enum class MGS2GameMode
 {
     Unknown,
@@ -66,6 +65,15 @@ enum class MGS2GameMode
     VRWeapons
 };
 
+enum class MGS3GameMode
+{
+    Unknown,
+
+    Menu,
+
+    VirtuousMission,
+    SnakeEater
+};
 
 class GameVars final
 {
@@ -115,6 +123,7 @@ public:
     [[nodiscard]] int Get_GM_GameStatus() const;
     [[nodiscard]] int Get_GM_VRStatus() const;
     [[nodiscard]] MGS2GameMode MGS2_GetGameMode() const;
+    [[nodiscard]] MGS3GameMode MGS3_GetGameMode() const;
 
     [[nodiscard]] int& GV_PauseLevel() const;
     [[nodiscard]] int& GM_MenuStatus() const;

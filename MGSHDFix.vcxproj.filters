@@ -332,6 +332,9 @@
     <ClCompile Include="src\fixes\mgs2_rotor_procession.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_tanker_snake_snap.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\effect_speeds.hpp">
@@ -675,6 +678,9 @@
     </ClInclude>
     <ClInclude Include="src\fixes\mgs2_hair_layering.hpp">
       <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mgs3_status_flags.hpp">
+      <Filter>APIs\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

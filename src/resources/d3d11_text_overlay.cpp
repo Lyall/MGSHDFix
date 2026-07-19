@@ -10,9 +10,12 @@
 #include "stb_easy_font.h"
 #include "version.h"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
+#include "mgs3_linkvarbuf.hpp"
+#include "mgs3_status_flags.hpp"
 #include "version_checking.hpp"
 
 namespace
@@ -197,25 +200,12 @@ namespace
         backbuffer->GetDesc(&backbufferDesc);
 
         const float resolutionScale = static_cast<float>(backbufferDesc.Height) / 2160.0f;
-        float scaledX = x * resolutionScale;
+        const float anchorX = x * resolutionScale;
         float scaledY = y * resolutionScale;
         const float scaledFont = scale * resolutionScale;
         const float scaledBorder = borderSize * resolutionScale;
-        const float textWidth = static_cast<float>(stb_easy_font_width(const_cast<char*>(text))) * scaledFont;
         const float textHeight = static_cast<float>(stb_easy_font_height(const_cast<char*>(text))) * scaledFont;
 
-        switch (horizontalAlignment)
-        {
-        case TextHorizontalAlignment::Center:
-            scaledX -= textWidth * 0.5f;
-            break;
-        case TextHorizontalAlignment::Right:
-            scaledX -= textWidth;
-            break;
-        case TextHorizontalAlignment::Left:
-        default:
-            break;
-        }
 
         switch (verticalAlignment)
         {
@@ -235,21 +225,54 @@ namespace
         const size_t estimatedVertices = strlen(text) * 6 * 9;
         textVertices.reserve(std::min(estimatedVertices, static_cast<size_t>(MaxTextVertices)));
 
-        if (borderSize > 0.0f && borderColor.a > 0)
+        float lineY = scaledY;
+        const char* lineStart = text;
+
+        while (true)
         {
-            AddTextGeometry(text, scaledX - scaledBorder, scaledY - scaledBorder, scaledFont, borderColor);
-            AddTextGeometry(text, scaledX, scaledY - scaledBorder, scaledFont, borderColor);
-            AddTextGeometry(text, scaledX + scaledBorder, scaledY - scaledBorder, scaledFont, borderColor);
+            const char* lineEnd = strchr(lineStart, '\n');
+            const std::string line = lineEnd ? std::string(lineStart, lineEnd) : std::string(lineStart);
+            const float lineWidth = static_cast<float>(stb_easy_font_width(const_cast<char*>(line.c_str()))) * scaledFont;
+            const float lineHeight = static_cast<float>(stb_easy_font_height(const_cast<char*>(line.c_str()))) * scaledFont;
+            float lineX = anchorX;
 
-            AddTextGeometry(text, scaledX - scaledBorder, scaledY, scaledFont, borderColor);
-            AddTextGeometry(text, scaledX + scaledBorder, scaledY, scaledFont, borderColor);
+            switch (horizontalAlignment)
+            {
+            case TextHorizontalAlignment::Center:
+                lineX -= lineWidth * 0.5f;
+                break;
+            case TextHorizontalAlignment::Right:
+                lineX -= lineWidth;
+                break;
+            case TextHorizontalAlignment::Left:
+            default:
+                break;
+            }
 
-            AddTextGeometry(text, scaledX - scaledBorder, scaledY + scaledBorder, scaledFont, borderColor);
-            AddTextGeometry(text, scaledX, scaledY + scaledBorder, scaledFont, borderColor);
-            AddTextGeometry(text, scaledX + scaledBorder, scaledY + scaledBorder, scaledFont, borderColor);
+            if (!line.empty())
+            {
+                if (borderSize > 0.0f && borderColor.a > 0)
+                {
+                    AddTextGeometry(line.c_str(), lineX - scaledBorder, lineY - scaledBorder, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX, lineY - scaledBorder, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX + scaledBorder, lineY - scaledBorder, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX - scaledBorder, lineY, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX + scaledBorder, lineY, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX - scaledBorder, lineY + scaledBorder, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX, lineY + scaledBorder, scaledFont, borderColor);
+                    AddTextGeometry(line.c_str(), lineX + scaledBorder, lineY + scaledBorder, scaledFont, borderColor);
+                }
+
+                AddTextGeometry(line.c_str(), lineX, lineY, scaledFont, textColor);
+            }
+
+            if (!lineEnd)
+                break;
+
+            lineY += lineHeight;
+            lineStart = lineEnd + 1;
         }
 
-        AddTextGeometry(text, scaledX, scaledY, scaledFont, textColor);
 
         if (textVertices.empty())
         {
@@ -427,6 +450,105 @@ namespace
 
     bool bShowVersionNumber = true;
     bool bShowUpdateNotification = false;
+    std::string FormatFrameTime(const int frameCount, const int frameRate = 60)
+    {
+        const int64_t totalMilliseconds = (static_cast<int64_t>(frameCount) * 1000) / frameRate;
+        const int hours = static_cast<int>(totalMilliseconds / 3600000);
+        const int minutes = static_cast<int>((totalMilliseconds / 60000) % 60);
+        const int seconds = static_cast<int>((totalMilliseconds / 1000) % 60);
+        const int milliseconds = static_cast<int>(totalMilliseconds % 1000);
+        if (hours > 0)
+            return std::format("{}:{:02}:{:02}.{:03}", hours, minutes, seconds, milliseconds);
+        if (minutes > 0)
+            return std::format("{}:{:02}.{:03}", minutes, seconds, milliseconds);
+        if (seconds > 0)
+            return std::format("{}.{:03}", seconds, milliseconds);
+        return std::to_string(milliseconds);
+    }
+
+    using StatClock = std::chrono::steady_clock;
+    inline StatClock::time_point g_RealElapsedStartTime = StatClock::now();
+    inline StatClock::time_point g_RealElapsedPauseTime;
+    inline bool g_RealElapsedPaused = false;
+
+    void ResetRealElapsedTime()
+    {
+        g_RealElapsedStartTime = StatClock::now();
+        g_RealElapsedPaused = false;
+    }
+
+    void PauseRealElapsedTime()
+    {
+        if (!g_RealElapsedPaused)
+        {
+            g_RealElapsedPauseTime = StatClock::now();
+            g_RealElapsedPaused = true;
+        }
+    }
+
+    std::string GetRealElapsedTime()
+    {
+        const auto currentTime = g_RealElapsedPaused ? g_RealElapsedPauseTime : StatClock::now();
+        const auto totalMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - g_RealElapsedStartTime).count();
+        const auto hours = totalMilliseconds / 3600000;
+        const auto minutes = (totalMilliseconds / 60000) % 60;
+        const auto seconds = (totalMilliseconds / 1000) % 60;
+        const auto milliseconds = totalMilliseconds % 1000;
+        char buffer[32];
+        if (hours > 0)
+            std::snprintf(buffer, sizeof(buffer), "%lld:%02lld:%02lld.%03lld", hours, minutes, seconds, milliseconds);
+        else if (minutes > 0)
+            std::snprintf(buffer, sizeof(buffer), "%lld:%02lld.%03lld", minutes, seconds, milliseconds);
+        else
+            std::snprintf(buffer, sizeof(buffer), "%lld.%03lld", seconds, milliseconds);
+        return buffer;
+    }
+
+    const char* GetStatOverlay()
+    {
+        static std::string text;
+        if (eGameType & MGS2)
+        {
+            using namespace MGS2_StatusFlags;
+            using namespace MGS2_LinkVarBuf;
+            text = FormatFrameTime(GM_StagePlayTime) + " / " + FormatFrameTime(GM_PlayTime) + " / " + GetRealElapsedTime();
+            if (g_GameVars.GV_PauseLevel() & MGS2_GV_PAUSE_PAUSE)
+            {
+                text += "\n"
+                    "Alerts: " + std::to_string(GM_AlertCount) + "\n"
+                    "Continues: " + std::to_string(GM_ContinueCount) + "\n"
+                    "Kills: " + std::to_string(GM_KillCount) + "\n"
+                    "Saves: " + std::to_string(GM_SaveCount) + "\n"
+                    "Shots: " + std::to_string(GM_ShootCount) + "\n"
+                    "Rations: " + std::to_string(GM_RationUseCount) + "\n"
+                    + (GM_ClearCodeFlag & GM_CLEAR_RADAR_USED ? "Radar used: Yes\n" : "")
+                    + (GM_ClearCodeFlag & GM_CLEAR_SPECIAL_ITEM_USED ? "Special item used: Yes\n" : "")
+                ;
+            }
+            return text.c_str();
+        }
+        if (eGameType & MGS3)
+        {
+            using namespace MGS3_StatusFlags;
+            using namespace MGS3_LinkVarBuf;
+            text = FormatFrameTime(GM_StagePlayTime, 300) + " / " + FormatFrameTime(GM_PlayTime) + " / " + GetRealElapsedTime();
+            if (g_GameVars.GV_PauseLevel() & MGS3_GV_PAUSE_PAUSE && !g_GameVars.InCutscene())
+            {
+                text += "\n"
+                   "Alerts: " + std::to_string(GM_AlertCount) + "\n"
+                   "Continues: " + std::to_string(GM_ContinueCount) + "\n"
+                   "Kills: " + std::to_string(GM_KillCount) + "\n"
+                   "Injuries: " + std::to_string(GM_InjuryCount) + "\n"
+                   "Lifebars: " + std::to_string(GM_LifebarDamageCount) + "\n"
+                   "Life Meds: " + std::to_string(GM_LifeMedicineUseCount) + "\n"
+                   "Meals: " + std::to_string(GM_MealCount) + "\n"
+                   "Saves: " + std::to_string(GM_SaveCount) + "\n"
+                   ;
+            }
+            return text.c_str();
+        }
+        return "null";
+    }
 
 }
 
@@ -614,8 +736,27 @@ void D3D11TextOverlay::Init()
 
 void D3D11TextOverlay::HandleLevelTransition()
 {
-
+    if (!bShowSpeedrunnerStats)
+    {
+        return;
+    }
+    if (!(eGameType & (MGS2 | MGS3)))
+    {
+        return;
+    }
+    static bool wasMenu = false;
+    const bool isCurrentlyMenu = eGameType & MGS2 ? (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Menu) : (g_GameVars.MGS3_GetGameMode() == MGS3GameMode::Menu);
+    if (isCurrentlyMenu)
+    {
+        PauseRealElapsedTime();
+    }
+    else if (wasMenu)
+    {
+        ResetRealElapsedTime();
+    }
+    wasMenu = isCurrentlyMenu;
 }
+
 
 
 void D3D11TextOverlay::Tick()
@@ -650,6 +791,11 @@ void D3D11TextOverlay::Tick()
         {
             Draw(("MGSHDFix Nightly Build v" + sFixVersion).c_str(), x_pos, y_pos, 6.0f, 1.0f, {160, 160, 160, 255}, {0,0,0,0}, TextHorizontalAlignment::Center, TextVerticalAlignment::Center);
         }
+    }
+
+    if (bShowSpeedrunnerStats)
+    {
+        Draw(GetStatOverlay(), 3830.0f, 20.0f, 4.0f, 3.0f, { 199, 199, 199, 255 }, { 0, 0, 0, 128 }, TextHorizontalAlignment::Right, TextVerticalAlignment::Top);
     }
 
 }

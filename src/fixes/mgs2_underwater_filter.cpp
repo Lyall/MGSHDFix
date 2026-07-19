@@ -8,6 +8,7 @@
 #include "logging.hpp"
 #include "mgs2_status_flags.hpp"
 #include "mgs2_underwater_filter.hpp"
+using namespace MGS2_StatusFlags;
 
 namespace
 {

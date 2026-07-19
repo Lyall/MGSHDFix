@@ -12,6 +12,7 @@ void CutscenePausing::Setup()
     {
         return;
     }
+    using namespace MGS2_StatusFlags;
 
     if (!bEnabled)
     {

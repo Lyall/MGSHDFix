@@ -8,4 +8,5 @@ namespace D3D11TextOverlay
     void HandleLevelTransition();
 
     inline bool bShaderLoaded = false;
+    inline bool bShowSpeedrunnerStats = true;
 }

@@ -9,6 +9,8 @@
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
 
+using namespace MGS2_StatusFlags;
+
 #include "game_funcs.hpp"
 #include "game_defines.hpp"
 using namespace MGS2_GameFuncs;

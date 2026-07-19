@@ -77,8 +77,11 @@ namespace MGS3_LinkVarBuf
         SpecialItem_EZGun = 1 << 2
     };
 
-    enum GM_CONFIG : int
+    enum GM_CONFIG : unsigned int
     {
+        GM_CONFIG_VIBRATION_OFF = 0x1,
+
+        GM_CONFIG_CUTSCENES_LETTERBOXED = 0x400,
         GM_CONFIG_PLAYTIME_STOP = 0x4000,
         GM_CONFIG_GAME_OVER_IF_DISCOVERED = 0x80000
     };
@@ -87,7 +90,7 @@ namespace MGS3_LinkVarBuf
     inline LinkVarValue<short, 2>           GM_Result;
     inline LinkVarValue<short, 4>           GM_Language;
     inline LinkVarValue<short, 6>           GM_GameLevel;
-    inline LinkVarValue<int, 8>             GM_Configuration;
+    inline LinkVarValue<unsigned int, 8>    GM_Configuration;
     inline LinkVarValue<int, 16>            GM_SaveArea;
     inline LinkVarPointer<char, 20>         GM_SaveResidentDir;
     inline LinkVarPointer<char, 36>         GM_SaveAreaDir;
@@ -105,9 +108,9 @@ namespace MGS3_LinkVarBuf
     inline LinkVarValue<unsigned char, 63>  GM_UniqueFoodCollectedCount;
     inline LinkVarValue<short, 64>          GM_InjuryCount;
     inline LinkVarValue<short, 66>          GM_Unknown_66;
-    inline LinkVarValue<short, 68>          GM_DamageCount;
+    inline LinkVarValue<short, 68>          GM_LifebarDamageCount;
     inline LinkVarValue<short, 70>          GM_MealCount;
-    inline LinkVarValue<int, 72>            GM_AreaPlayTime;
+    inline LinkVarValue<int, 72>            GM_StagePlayTime;
     inline LinkVarValue<int, 76>            GM_PlayTime;
     inline LinkVarValue<short, 1448>        GM_LifeMedicineUseCount;
 

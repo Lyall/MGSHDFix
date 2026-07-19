@@ -24,6 +24,7 @@
 //w32a        -> Vamp at Emma ?? Or does the sun have contrast when climbing down the oil fence? or is it the missing orange ambient?
 //w32b        -> Vamp at Emma ??
 
+using namespace MGS2_StatusFlags;
 
 namespace
 {

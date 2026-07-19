@@ -247,6 +247,8 @@ void ResolutionScalingFixes::ApplyFixes()
 
 void MGS2Fixes()
 {
+    using namespace MGS2_StatusFlags;
+
     using namespace ResolutionScalingFixes;
     {   // user/mode/codec/face_bug.c -> NewBugFace() - not affected by resolution, might've just been the layout change which caused it.
 
@@ -269,7 +271,7 @@ void MGS2Fixes()
                 return;
             }
 
-            if (!(MGS2_LinkVarBuf::GM_Configuration & GM_CONFIG_CUTSCENES_LETTERBOXED))
+            if (!(MGS2_LinkVarBuf::GM_Configuration & MGS2_LinkVarBuf::GM_CONFIG_CUTSCENES_LETTERBOXED))
             {
                 return;
             }
@@ -345,7 +347,7 @@ void MGS2Fixes()
         spdlog::info("MGS2_RayEyeTailsShift: TailsShift table found at {:s}+{:X}", sExeName.c_str(), scan - (uint8_t*)baseModule);
 
         MAKE_HOOK_MID(baseModule, "48 8B C4 48 89 58 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 44 0F 29 54 24", "MGS2: ray_eye.c -> InitTailsData()", {
-            if (!(MGS2_LinkVarBuf::GM_Configuration & GM_CONFIG_CUTSCENES_LETTERBOXED))
+            if (!(MGS2_LinkVarBuf::GM_Configuration & MGS2_LinkVarBuf::GM_CONFIG_CUTSCENES_LETTERBOXED))
             {
                 memcpy(g_rayEyeTailsShift, rayEyeTailsShift_Corrected, sizeof(rayEyeTailsShift_Corrected));
                 //spdlog::info("MGS2_RayEyeTailsShift: Ray eye tail height corrected.");

@@ -45,6 +45,27 @@ namespace MGS2_LinkVarBuf
         }
     };
 
+
+    enum MGS2_ConfigFlags : uint32_t
+    {
+        GM_CONFIG_VIBRATION_OFF = (1u << 0),
+        GM_CONFIG_CAPTION_OFF = (1u << 1),
+        GM_CONFIG_RADAR_OFF = (1u << 2),
+        GM_CONFIG_BLOOD_OFF = (1u << 3),
+        GM_CONFIG_CUTSCENES_LETTERBOXED = (1u << 4),
+        GM_CONFIG_RADAR_OFF_INTRUDE = (1u << 5),
+        GM_CONFIG_SHUKAN_REVERSE = (1u << 6),   /// First-person controls inverted
+        GM_CONFIG_OLD_TYPE_MENU = (1u << 7),
+        GM_CONFIG_WATERUD_REVERSE = (1u << 8),   /// Underwater up/down inverted
+        GM_CONFIG_MENU_QCHANGE_EX = (1u << 9),
+        GM_CONFIG_SOUND_5_1CHANL = (1u << 10),  /// 5.1ch surround sound
+        GM_CONFIG_END_IF_FOUND = (1u << 11),  /// Game over if discovered
+
+        GM_CONFIG_STORY_TANKER = (1u << 12),  /// Tanker chapter; if unset, Plant chapter
+        GM_CONFIG_TANKER_CLEARED = (1u << 13),  /// Tanker chapter cleared this playthrough
+        GM_CONFIG_PLAYTIME_STOP = (1u << 14),  /// Playtime counter stopped
+    };
+
     inline LinkVarValue<short, 0>       GM_GameClearCount;
     inline LinkVarValue<short, 2>       GM_TankerClearCount;
     inline LinkVarValue<short, 4>       GM_PlantClearCount;

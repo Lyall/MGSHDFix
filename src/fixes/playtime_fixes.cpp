@@ -7,13 +7,8 @@
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
-
-namespace
-{
-    int* MGS3_GM_Configuration = nullptr;
-
-    
-}
+#include "mgs3_linkvarbuf.hpp"
+#include "mgs3_status_flags.hpp"
 
 void FixPlaytime::Apply()
 {
@@ -30,20 +25,22 @@ void FixPlaytime::Apply()
 
     if (eGameType & MGS2)
     {
+        using namespace MGS2_LinkVarBuf;
         MAKE_HOOK_MID(baseModule, "C7 05 ?? ?? ?? ?? 00 00 00 00 48 83 C4 ?? 5F C3 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 40 53", "gm_startloader", {
-            MGS2_LinkVarBuf::GM_Configuration |= GM_CONFIG_PLAYTIME_STOP;
+            GM_Configuration |= GM_CONFIG_PLAYTIME_STOP;
                       });
 
     }
     else // eGameType & MGS3
-    { //TODO -> THIS ISN'T RIGHT.
-        MGS3_GM_Configuration = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "81 25 ?? ?? ?? ?? FF FD FF FF", "MGS3: GM_Configuration"), 2, 10));
-        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 43 ?? EB", "MGS3: gm_startloader", {
-            if (MGS3_GM_Configuration)
-            {
-                *MGS3_GM_Configuration |= 0x200;
-            }
-            });
+    { 
+        using namespace MGS3_LinkVarBuf;
+        MAKE_HOOK_MID(baseModule, "C7 05 ?? ?? ?? ?? 00 00 00 00 8B CA", "gm_startloader", {
+            GM_Configuration |= GM_CONFIG_PLAYTIME_STOP;
+                    });
+
+        MAKE_HOOK_MID(baseModule, "89 1D ?? ?? ?? ?? 89 5F", "act_loading()", {
+                      GM_Configuration &= ~GM_CONFIG_PLAYTIME_STOP;
+                    });
 
     }
 
