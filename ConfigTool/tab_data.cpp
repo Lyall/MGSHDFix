@@ -304,6 +304,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_RestoreActionLevelSelection_Section, ConfigKeys::MGS2_RestoreActionLevelSelection_Setting, ConfigKeys::MGS2_RestoreActionLevelSelection_Help, ConfigKeys::MGS2_RestoreActionLevelSelection_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MGS2), ConfigKeys::MGS2_Enhanced_Demos_Section, ConfigKeys::MGS2_Enhanced_Demos_Setting, ConfigKeys::MGS2_Enhanced_Demos_Help, ConfigKeys::MGS2_Enhanced_Demos_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
 
         { (MGS2), ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, ConfigKeys::RestoreDogtagNames_Help, ConfigKeys::RestoreDogtagNames_Tooltip,
           std::nullopt, false, Field::Bool, true },
