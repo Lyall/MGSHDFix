@@ -300,6 +300,13 @@ namespace ConfigKeys
                                                         "\n"
                                                         "In the HD Collection and Master Collection, reverb is effectively silent, causing indoor areas to sound much drier than intended.";
 
+    constexpr const char* MGS2_Enhanced_Demos_Section = "Restoration";
+    constexpr const char* MGS2_Enhanced_Demos_Setting = "Enable Enhanced Demos";
+    constexpr const char* MGS2_Enhanced_Demos_Help = "";
+    constexpr const char* MGS2_Enhanced_Demos_Tooltip = "Support for enhanced/restored demo (cutscene) mods.\n"
+                                                        "\n"
+                                                        "Lets modded demos use any effect the game contains regardless of stage, and raises the effect prim pool for denser scenes. Has no effect on stock demos.";
+
     constexpr const char* Restore_Reverb_Level_Scale_Section = "Bugfixes";
     constexpr const char* Restore_Reverb_Level_Scale_Setting = "Reverb Volume Multiplier";
     constexpr const char* Restore_Reverb_Level_Scale_Help = "(1.40 Recommended)";

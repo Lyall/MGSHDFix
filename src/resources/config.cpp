@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "config.hpp"
+#include "../fixes/mgs2_enhanced_demos.hpp"
 
 #include "inipp/inipp.h"
 
@@ -687,6 +688,9 @@ void Config::Read()
 
         ConfigHelper::getValue(ini, ConfigKeys::Restore_Reverb_Level_Section, ConfigKeys::Restore_Reverb_Level_Setting, FixReverbWetLevel::bEnabled);
         LOG_CONFIG(ConfigKeys::Restore_Reverb_Level_Section, ConfigKeys::Restore_Reverb_Level_Setting, FixReverbWetLevel::bEnabled);
+
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_Enhanced_Demos_Section, ConfigKeys::MGS2_Enhanced_Demos_Setting, MGS2EnhancedDemos::bEnabled);
+        LOG_CONFIG(ConfigKeys::MGS2_Enhanced_Demos_Section, ConfigKeys::MGS2_Enhanced_Demos_Setting, MGS2EnhancedDemos::bEnabled);
 
         ConfigHelper::getValue(ini, ConfigKeys::Restore_Reverb_Level_Scale_Section, ConfigKeys::Restore_Reverb_Level_Scale_Setting, FixReverbWetLevel::fWetVolumeScale);
         LOG_CONFIG(ConfigKeys::Restore_Reverb_Level_Scale_Section, ConfigKeys::Restore_Reverb_Level_Scale_Setting, FixReverbWetLevel::fWetVolumeScale);
