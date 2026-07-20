@@ -272,7 +272,7 @@
     <ClCompile Include="src\features\mgs_smaa.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="src\windows_multiplane_overlay_warning.cpp">
+    <ClCompile Include="src\warnings\windows_multiplane_overlay_warning.cpp">
       <Filter>Warnings</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg1_display_scaling.cpp">
@@ -333,6 +333,9 @@
       <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\fixes\mgs2_tanker_snake_snap.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fixes\caption_replacements.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -622,7 +625,7 @@
     <ClInclude Include="src\warnings\background_shuffle_warning.hpp">
       <Filter>Warnings\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\windows_multiplane_overlay_warning.hpp">
+    <ClInclude Include="src\warnings\windows_multiplane_overlay_warning.hpp">
       <Filter>Warnings\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_display_scaling.hpp">
@@ -681,6 +684,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\mgs3_status_flags.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\caption_replacements.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

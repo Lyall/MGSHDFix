@@ -101,6 +101,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs_smaa.hpp"
+#include "caption_replacements.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -578,6 +579,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_ContrastShader::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
+        INITIALIZE(CaptionReplacements::Setup());
         
     }
     else if (eGameType & MGS3)
@@ -588,6 +590,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS3FilmGrain::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
+        INITIALIZE(CaptionReplacements::Setup());
 
         MAKE_HOOK_MID(baseModule, "89 44 24 ?? 0F B7 05 ?? ?? ?? ?? 66 89 44 24 ?? 0F B6 05", "MGS 3: Hires Textures Enabled Check", {
                 static bool printed = false;
