@@ -219,7 +219,7 @@ void MGS2HairLayering::Initialize()
     // hair blends on the walls and shares Snake's fog/DOF. (chain2 room-segment end fires before the
     // walls -> see-through; the later composite stage fires after the effects -> crisp/un-fogged.)
     if (uint8_t* stage = Memory::PatternScan(baseModule,
-        "41 55 48 83 EC 50 83 3D ?? ?? ?? ?? 01 4C 8B E9",
+        "41 55 48 83 EC ?? 83 3D",
         "MGS 2: Hair Layering : post-opaque draw stage"))
     {
         DeferFlush_hook = safetyhook::create_mid(stage, DeferFlush_Hook);
