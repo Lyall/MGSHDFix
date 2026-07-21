@@ -596,6 +596,7 @@ namespace
         return "null";
     }
 
+    bool isCurrentlyMenu = true;
 }
 
 void D3D11TextOverlay::Setup()
@@ -791,7 +792,7 @@ void D3D11TextOverlay::HandleLevelTransition()
         return;
     }
     static bool wasMenu = false;
-    const bool isCurrentlyMenu = eGameType & MGS2 ? (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Menu) : (g_GameVars.MGS3_GetGameMode() == MGS3GameMode::Menu);
+    isCurrentlyMenu = eGameType & MGS2 ? (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Menu) : (g_GameVars.MGS3_GetGameMode() == MGS3GameMode::Menu);
     if (isCurrentlyMenu)
     {
         PauseRealElapsedTime();
@@ -839,7 +840,7 @@ void D3D11TextOverlay::Tick()
         }
     }
 
-    if (bShowSpeedrunnerStats)
+    if (bShowSpeedrunnerStats && !isCurrentlyMenu)
     {
         float x = 3830.0f;
         float y = 20.0f;

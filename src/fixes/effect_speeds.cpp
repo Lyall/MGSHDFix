@@ -6,7 +6,6 @@
 
 #include "effect_speeds.hpp"
 
-#include "d3d11_api.hpp"
 #include "game_funcs.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"

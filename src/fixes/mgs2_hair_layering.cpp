@@ -13,7 +13,7 @@ namespace
     SafetyHookInline EmitChars_hook {};
     SafetyHookMid PackBiasRooms_hook {};
     SafetyHookMid PackBiasChars_hook {};
-    SafetyHookMid RoomSegEnd_hook {};
+    SafetyHookMid DeferFlush_hook {};
 
     // globals the character emitter reads; the flush must refill them per unit
     uint32_t* pCharEmitTri = nullptr;
@@ -86,9 +86,9 @@ namespace
             return;
         }
 
-        // Defer: characters build before rooms, so hair fringes would blend against the fog
-        // fill. Stash and flush after the room segment; z-test handles occlusion.
-        if (charSide && RoomSegEnd_hook)
+        // Defer: characters draw before the room walls, so hair fringes would blend against the fog
+        // fill. Stash here, flush after the walls (before the post-opaque effects); z-test does occlusion.
+        if (charSide && DeferFlush_hook)
         {
             for (int i = 0; i < gStashN; i++)
             {
@@ -120,16 +120,21 @@ namespace
         }
     }
 
-    void RoomSegEnd_Hook(SafetyHookContext&)
+    // A stashed unit can go stale before the flush (scene teardown frees the actor). Re-check the
+    // marker and guard the derefs so a dead entry is skipped, not a crash.
+    void FlushOneUnit(uint8_t* unit)
     {
-        for (int i = 0; i < gStashN; i++)
+        __try
         {
-            uint8_t* unit = gStash[i];
+            if (*reinterpret_cast<const uint16_t*>(unit + 0xCE) != kHairUnitType)
+            {
+                return; // memory reused since stash
+            }
             const uint16_t nPacks = *reinterpret_cast<const uint16_t*>(unit + 0xCC);
             uint8_t* packs = *reinterpret_cast<uint8_t**>(unit + 0x118);
-            if (!packs || nPacks == 0)
+            if (!packs || nPacks == 0 || nPacks > 64)
             {
-                continue;
+                return;
             }
             *pCharEmitTri = *reinterpret_cast<const uint32_t*>(unit + 0x120);
             *pCharEmitMtx = *reinterpret_cast<const uint64_t*>(unit + 0x128);
@@ -140,6 +145,21 @@ namespace
             {
                 EmitGroupsReversed(EmitChars_hook, unit, packs, nPacks, groups, ng);
             }
+        }
+        __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION
+            ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+        {
+            // freed actor slipped into the stash across a transition -- skip it
+        }
+    }
+
+    // Runs after the opaque room walls but still in the body's opaque pass -- draw the deferred hair
+    // here so it blends against the walls AND picks up the same fog/lighting as the rest of Snake.
+    void DeferFlush_Hook(SafetyHookContext&)
+    {
+        for (int i = 0; i < gStashN; i++)
+        {
+            FlushOneUnit(gStash[i]);
         }
         gStashN = 0;
     }
@@ -195,13 +215,15 @@ void MGS2HairLayering::Initialize()
         return;
     }
 
-    // room-segment end = the defer flush slot
-    if (uint8_t* seg = Memory::PatternScan(baseModule,
-        "85 ED 74 ?? 33 D2 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 44 8B C0 48 8D 15 ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 1D",
-        "MGS 2: Hair Layering : libdg\\chain2.c -> room segment end"))
+    // flush after the opaque room walls but before the post-opaque effect passes (DOF etc.), so the
+    // hair blends on the walls and shares Snake's fog/DOF. (chain2 room-segment end fires before the
+    // walls -> see-through; the later composite stage fires after the effects -> crisp/un-fogged.)
+    if (uint8_t* stage = Memory::PatternScan(baseModule,
+        "41 55 48 83 EC ?? 83 3D",
+        "MGS 2: Hair Layering : post-opaque draw stage"))
     {
-        RoomSegEnd_hook = safetyhook::create_mid(seg + 0x28, RoomSegEnd_Hook);
-        LOG_HOOK(RoomSegEnd_hook, "MGS 2: Hair Layering : hair defer flush")
+        DeferFlush_hook = safetyhook::create_mid(stage, DeferFlush_Hook);
+        LOG_HOOK(DeferFlush_hook, "MGS 2: Hair Layering : hair defer flush")
     }
     // without the flush slot the reorder still applies, hair just draws in place
 }
