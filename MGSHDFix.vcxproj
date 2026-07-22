@@ -141,6 +141,8 @@
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\mgs2_tanker_snake_snap.hpp" />
+    <ClInclude Include="src\resources\game_strings.hpp" />
     <ClInclude Include="src\fixes\caption_replacements.hpp" />
     <ClInclude Include="src\resources\mgs3_status_flags.hpp" />
     <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp" />

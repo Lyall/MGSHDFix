@@ -691,6 +691,15 @@
     <ClInclude Include="src\fixes\caption_replacements.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\game_strings.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_tanker_snake_snap.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\windows_preffered_gpu.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

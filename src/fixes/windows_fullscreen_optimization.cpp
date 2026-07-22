@@ -6,7 +6,7 @@
 
 void FixFullscreenOptimization::Fix()
 {
-    if (Util::IsSteamOS() || bIsLauncher)
+    if (Util::IsSteamOS() || !(eGameType & (MG | MGS2 | MGS3)))
     {
         return;
     }
@@ -113,7 +113,7 @@ void FixFullscreenOptimization::Fix()
                 {
                     out << "  ...A surveillance camera?!\n";
                     out << "MGSHDFix wrote this file to track fullscreen optimization registry state.\n";
-                    out << "Delete this file to allow the fix to revert when disabled.\n";
+                    out << "Delete this file to prevent the fix from reverting when disabled.\n";
                     out.close();
                     spdlog::info("[Registry Compat Fix] Created marker file: {}", markerFile.string());
                 }
