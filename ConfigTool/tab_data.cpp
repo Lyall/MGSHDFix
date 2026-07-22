@@ -63,10 +63,13 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2|MGS3), ConfigKeys::CPUCoreLimit_Section, ConfigKeys::CPUCoreLimit_Setting, ConfigKeys::CPUCoreLimit_Help, ConfigKeys::CPUCoreLimit_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { (MGS2|MGS3), ConfigKeys::ForceStereoAudio_Section, "",
+        { (MG), ConfigKeys::ForceStereoAudio_Section, "",
           "", "",
           std::nullopt, false, Field::Spacer },
 
+
+        { (MG | MGS2 | MGS3), ConfigKeys::ForceDedicatedGPU_Section, ConfigKeys::ForceDedicatedGPU_Setting, ConfigKeys::ForceDedicatedGPU_Help, ConfigKeys::ForceDedicatedGPU_Tooltip,
+          std::nullopt, false, Field::Bool, true },
 
         { (MG|MGS2|MGS3), ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, ConfigKeys::DisableFullscreenOptimization_Help, ConfigKeys::DisableFullscreenOptimization_Tooltip,
           std::nullopt, false, Field::Bool, false },

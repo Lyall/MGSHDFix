@@ -76,6 +76,7 @@
 #include "mgs_smaa.hpp"
 #include "mgs3_film_grain.hpp"
 #include "playtime_fixes.hpp"
+#include "windows_preffered_gpu.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
@@ -779,6 +780,10 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);
     LOG_CONFIG(ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::ForceDedicatedGPU_Section, ConfigKeys::ForceDedicatedGPU_Setting, HighPerformanceGpu::bEnabled);
+    LOG_CONFIG(ConfigKeys::ForceDedicatedGPU_Section, ConfigKeys::ForceDedicatedGPU_Setting, HighPerformanceGpu::bEnabled);
+
 
     ConfigHelper::getValue(ini, ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);
     LOG_CONFIG(ConfigKeys::RestoreDogtagNames_Section, ConfigKeys::RestoreDogtagNames_Setting, MGS2_RestoreDogtags::isEnabled);

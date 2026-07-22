@@ -102,6 +102,7 @@
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
+#include "windows_preffered_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -614,6 +615,7 @@ static void InitializeSubsystems()
     INITIALIZE(DamagedSaveFix::Initialize());
     INITIALIZE(g_FixAimAfterEquip.Initialize());
     INITIALIZE(FixFullscreenOptimization::Fix());
+    INITIALIZE(HighPerformanceGpu::Fix());
     INITIALIZE(g_BusyLoopFix.Initialize());
     INITIALIZE(FixPlaytime::Apply());
     INITIALIZE(D3D11TextOverlay::Setup());

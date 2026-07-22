@@ -338,6 +338,9 @@
     <ClCompile Include="src\fixes\caption_replacements.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\windows_preferred_gpu.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\effect_speeds.hpp">

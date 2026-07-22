@@ -378,6 +378,19 @@ namespace ConfigKeys
                                                                   "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\n"
                                                                   "\n"
                                                                   "Equivalent to: Right-click the game's .exe -> Properties -> Compatibility -> check \"Disable Fullscreen Optimizations\"";
+
+    constexpr const char* ForceDedicatedGPU_Section = "System Specific Fixes";
+    constexpr const char* ForceDedicatedGPU_Setting = "Force Dedicated GPU Usage";
+    constexpr const char* ForceDedicatedGPU_Help = "";
+    constexpr const char* ForceDedicatedGPU_Tooltip = "Sets Windows compatibility settings to force the game to use the dedicated GPU.\n"
+        "\n"
+        "This writes \"GpuPreference=2;\" for the game's executable to:\n"
+        "HKEY_CURRENT_USER\\Software\\Microsoft\\DirectX\\UserGpuPreferences\n"
+        "\n"
+        "Equivalent to: Right-click desktop -> Display settings -> Graphics settings -> Browse -> Select the game's .exe -> Options -> Prefer High performance";
+
+
+
     constexpr const char* BusyLoopFix_Section = "Bugfixes";
     constexpr const char* BusyLoopFix_Setting = "Fix  High  CPU  Usage";
     constexpr const char* BusyLoopFix_Help = "(Also fixes TWD usage on handheld.)";
