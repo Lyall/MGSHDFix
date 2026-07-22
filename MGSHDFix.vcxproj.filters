@@ -697,7 +697,7 @@
     <ClInclude Include="src\fixes\mgs2_tanker_snake_snap.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\windows_preffered_gpu.hpp">
+    <ClInclude Include="src\fixes\windows_preferred_gpu.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>

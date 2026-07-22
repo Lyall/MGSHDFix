@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "windows_preffered_gpu.hpp"
+#include "windows_preferred_gpu.hpp"
 
 #include "common.hpp"
 #include "logging.hpp"
@@ -11,7 +11,7 @@ void HighPerformanceGpu::Fix()
         return;
     }
 
-    const auto markerFile = sGameSavePath / "MGSHDFix_windows_preffered_gpu.bin";
+    const auto markerFile = sGameSavePath / "MGSHDFix_windows_preferred_gpu.bin";
     const bool shouldApply = bEnabled;
     const bool markerExists = std::filesystem::exists(markerFile);
     const bool shouldRemove = !shouldApply && markerExists;

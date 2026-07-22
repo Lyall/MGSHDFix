@@ -259,7 +259,7 @@
     <ClInclude Include="src\resources\unit_tests.hpp" />
     <ClInclude Include="src\features\swap_menu_buttons.hpp" />
     <ClInclude Include="src\warnings\windows_multiplane_overlay_warning.hpp" />
-    <ClInclude Include="src\fixes\windows_preffered_gpu.hpp" />
+    <ClInclude Include="src\fixes\windows_preferred_gpu.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MGSHDFix.ini" />

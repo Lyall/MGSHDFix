@@ -77,7 +77,7 @@
 #include "mgs_smaa.hpp"
 #include "mgs3_film_grain.hpp"
 #include "playtime_fixes.hpp"
-#include "windows_preffered_gpu.hpp"
+#include "windows_preferred_gpu.hpp"
 
 // -----------------------------------------------------------------------------
 // ConfigHelper: A type-safe, case-insensitive, error-checked INI config reader.
