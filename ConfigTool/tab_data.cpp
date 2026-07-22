@@ -317,11 +317,12 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, ConfigKeys::MGS2_PhoneJingle_Help, ConfigKeys::MGS2_PhoneJingle_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MGS2|MGS3), ConfigKeys::RestorePS2MemoryCardStrings_Section, ConfigKeys::RestorePS2MemoryCardStrings_Setting, ConfigKeys::RestorePS2MemoryCardStrings_Help, ConfigKeys::RestorePS2MemoryCardStrings_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
         { (MGS2), ConfigKeys::RestoreSoLRadarRotation_Section, ConfigKeys::RestoreSoLRadarRotation_Setting, ConfigKeys::RestoreSoLRadarRotation_Help, ConfigKeys::RestoreSoLRadarRotation_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-                        { (MGS2), ConfigKeys::MGS2_Thermal_Default_Mode_Section, "", "", "",
-        std::nullopt, false, Field::Spacer },
 
 
         { (MGS2), ConfigKeys::MGS2_Thermal_Mode_Section, ConfigKeys::MGS2_Thermal_Mode_Setting, ConfigKeys::MGS2_Thermal_Mode_Help, ConfigKeys::MGS2_Thermal_Mode_Tooltip,

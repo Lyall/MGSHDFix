@@ -770,6 +770,12 @@ namespace ConfigKeys
                                                      "\n"
                                                      "This will enable the ringtone for all versions of the game.";
 
+    constexpr const char* RestorePS2MemoryCardStrings_Section = "Various";
+    constexpr const char* RestorePS2MemoryCardStrings_Setting = "Restore PS2 Memory Card Strings";
+    constexpr const char* RestorePS2MemoryCardStrings_Help = "";
+    constexpr const char* RestorePS2MemoryCardStrings_Tooltip = "Restores the original PS2 memory card strings that were changed to say \"Storage Device\" with the HD Collection.\n";
+
+
     constexpr const char* UnusedRetroColonel_Section = "MGS2 Community Bugfix Compilation Integration";
     constexpr const char* UnusedRetroColonel_Setting = "Retro MSX Colonel Sprite";
     constexpr const char* UnusedRetroColonel_Help = "";

@@ -1,5 +1,3 @@
-// ReSharper disable CppClangTidyClangDiagnosticInvalidUtf8
-// ReSharper disable CommentTypo
 #include "stdafx.h"
 
 #include "common.hpp"
@@ -17,23 +15,31 @@ namespace
 
     enum class CaptionAction : uint8_t
     {
+        None,
         Correction,
         ForceOriginal,
     };
 
+    enum class ForcePs2Action : uint8_t
+    {
+        None,
+        UsePs2String,
+        Correction,
+    };
+
     struct CaptionEntry
     {
-        CaptionAction action;
-        const char* replacement; // valid only when action == Correction
+        CaptionAction action = CaptionAction::None;
+        const char* replacement = nullptr; // valid only when action == Correction
+        ForcePs2Action forcePs2Action = ForcePs2Action::None;
+        const char* forcePs2Replacement = nullptr; // valid only when forcePs2Action == Correction
     };
 
     using CaptionEntryMap = std::unordered_map<uint32_t, CaptionEntry>;
-    using HashSet = std::unordered_set<uint32_t>;
 
     struct CaptionOverrideTables
     {
         CaptionEntryMap entries;
-        HashSet forcePs2StringList;
     };
 
     CaptionOverrideTables g_MGS2CaptionOverrides;
@@ -45,53 +51,68 @@ namespace
     {
         for (uint32_t const hash : hashes)
         {
-            if (!destination.try_emplace(hash, CaptionEntry { CaptionAction::ForceOriginal, nullptr }).second)
+            CaptionEntry& entry = destination[hash];
+
+            if (entry.action != CaptionAction::None)
             {
                 spdlog::warn("Duplicate hash in force-original list: {:#010x}", hash);
+                continue;
             }
+
+            entry.action = CaptionAction::ForceOriginal;
         }
     }
 
     template <size_t N>
     void LoadBuiltInCorrections(CaptionEntryMap& destination, const CaptionOverride(&entries)[N])
     {
-        for (CaptionOverride const& entry : entries)
+        for (CaptionOverride const& correction : entries)
         {
-            if (!destination.try_emplace(entry.ps2_crc32, CaptionEntry { CaptionAction::Correction, entry.replacement }).second)
+            CaptionEntry& entry = destination[correction.ps2_crc32];
+
+            if (entry.action != CaptionAction::None)
             {
-                spdlog::warn("Duplicate correction hash (already present as force-original or duplicate entry): {:#010x}", entry.ps2_crc32);
+                spdlog::warn("Duplicate correction hash (already present as force-original or duplicate entry): {:#010x}", correction.ps2_crc32);
+                continue;
             }
+
+            entry.action = CaptionAction::Correction;
+            entry.replacement = correction.replacement;
         }
     }
 
     template <size_t N>
-    void LoadHashSet(HashSet& destination, const uint32_t(&hashes)[N])
+    void LoadForcePs2Strings(CaptionEntryMap& destination, const uint32_t(&hashes)[N])
     {
-        destination.max_load_factor(0.8f);
-        destination.reserve(N);
         for (uint32_t const hash : hashes)
         {
-            if (!destination.emplace(hash).second)
+            CaptionEntry& entry = destination[hash];
+
+            if (entry.forcePs2Action != ForcePs2Action::None)
             {
-                spdlog::warn("Duplicate hash in caption override list: {:#010x}", hash);
+                spdlog::warn("Duplicate hash in Force PS2 string list: {:#010x}", hash);
+                continue;
             }
+
+            entry.forcePs2Action = ForcePs2Action::UsePs2String;
         }
     }
 
     template <size_t N>
-    void LoadHashSet(HashSet& destination, const std::array<uint32_t, N>& hashes)
+    void LoadForcePs2Corrections(CaptionEntryMap& destination, const CaptionOverride(&entries)[N])
     {
-        if constexpr (N > 0)
+        for (CaptionOverride const& correction : entries)
         {
-            destination.max_load_factor(0.8f);
-            destination.reserve(N);
-            for (uint32_t const hash : hashes)
+            CaptionEntry& entry = destination[correction.ps2_crc32];
+
+            if (entry.forcePs2Action == ForcePs2Action::Correction)
             {
-                if (!destination.emplace(hash).second)
-                {
-                    spdlog::warn("Duplicate hash in caption override list: {:#010x}", hash);
-                }
+                spdlog::warn("Duplicate Force PS2 correction hash: {:#010x}", correction.ps2_crc32);
+                continue;
             }
+
+            entry.forcePs2Action = ForcePs2Action::Correction;
+            entry.forcePs2Replacement = correction.replacement;
         }
     }
 
@@ -103,17 +124,42 @@ namespace
 
         if (eGameType & MGS2)
         {
-            tables.entries.reserve(std::size(kMGS2ForceOriginalHashes) + std::size(kMGS2CaptionTypoFixes));
+            size_t reserveCount = std::size(kMGS2ForceOriginalHashes) + std::size(kMGS2CaptionTypoFixes);
+
+            if (CaptionReplacements::bForcePS2)
+            {
+                reserveCount += std::size(kMGS2ForcePs2StringHashes);
+                //reserveCount += std::size(kMGS2ForcePs2Corrections);
+            }
+
+            tables.entries.reserve(reserveCount);
             LoadForceOriginal(tables.entries, kMGS2ForceOriginalHashes);
             LoadBuiltInCorrections(tables.entries, kMGS2CaptionTypoFixes);
-            LoadHashSet(tables.forcePs2StringList, kMGS2ForcePs2StringHashes);
+
+            if (CaptionReplacements::bForcePS2)
+            {
+                LoadForcePs2Strings(tables.entries, kMGS2ForcePs2StringHashes);
+                //LoadForcePs2Corrections(tables.entries, kMGS2ForcePs2Corrections);
+            }
         }
         else
         {
-            tables.entries.reserve(std::size(kMGS3CaptionTypoFixes));
+            size_t reserveCount = std::size(kMGS3CaptionTypoFixes);
+
+            if (CaptionReplacements::bForcePS2)
+            {
+                reserveCount += std::size(kMGS3ForcePs2StringHashes) + std::size(kMGS3ForcePs2Corrections);
+            }
+
+            tables.entries.reserve(reserveCount);
             //LoadForceOriginal(tables.entries, kMGS3ForceOriginalHashes);
             LoadBuiltInCorrections(tables.entries, kMGS3CaptionTypoFixes);
-            LoadHashSet(tables.forcePs2StringList, kMGS3ForcePs2StringHashes);
+
+            if (CaptionReplacements::bForcePS2)
+            {
+                LoadForcePs2Strings(tables.entries, kMGS3ForcePs2StringHashes);
+                LoadForcePs2Corrections(tables.entries, kMGS3ForcePs2Corrections);
+            }
         }
     }
 
@@ -127,14 +173,34 @@ namespace
         uint32_t const hash = Util::StringToCRC32(inputString);
         const CaptionOverrideTables& tables = (eGameType & MGS2) ? g_MGS2CaptionOverrides : g_MGS3CaptionOverrides;
 
-        if (CaptionReplacements::bForcePS2 && tables.forcePs2StringList.contains(hash))
-        {
-            return inputString;
-        }
-
         if (auto const it = tables.entries.find(hash); it != tables.entries.end())
         {
-            return it->second.action == CaptionAction::ForceOriginal ? inputString : const_cast<char*>(it->second.replacement);
+            CaptionEntry const& entry = it->second;
+
+            if (CaptionReplacements::bForcePS2)
+            {
+                if (entry.forcePs2Action == ForcePs2Action::Correction)
+                {
+                    //spdlog::info("Forcing PS2 caption replacement for hash {:#010x}: {}", hash, entry.forcePs2Replacement);
+                    return const_cast<char*>(entry.forcePs2Replacement);
+                }
+
+                if (entry.forcePs2Action == ForcePs2Action::UsePs2String)
+                {
+                    //spdlog::info("Forcing PS2 caption for hash {:#010x}: {}", hash, inputString);
+                    return inputString;
+                }
+            }
+
+            if (entry.action == CaptionAction::ForceOriginal)
+            {
+                return inputString;
+            }
+
+            if (entry.action == CaptionAction::Correction)
+            {
+                return const_cast<char*>(entry.replacement);
+            }
         }
 
 #ifdef _DUMP_INPUT_STRINGS

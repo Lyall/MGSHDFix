@@ -57,6 +57,7 @@
 #include "mgs2_underwater_filter.hpp"
 #include "original_camera_positions.hpp"
 #include "adjustable_captions.hpp"
+#include "caption_replacements.hpp"
 #include "color_correction.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "resolution_scaling_fixes.hpp"
@@ -854,6 +855,8 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
     LOG_CONFIG(ConfigKeys::MGS2_PhoneJingle_Section, ConfigKeys::MGS2_PhoneJingle_Setting, MGS2_RestorePhoneJingle::bEnabled);
    
+    ConfigHelper::getValue(ini, ConfigKeys::RestorePS2MemoryCardStrings_Section, ConfigKeys::RestorePS2MemoryCardStrings_Setting, CaptionReplacements::bForcePS2);
+    LOG_CONFIG(ConfigKeys::RestorePS2MemoryCardStrings_Section, ConfigKeys::RestorePS2MemoryCardStrings_Setting, CaptionReplacements::bForcePS2);
 
     ConfigHelper::getValue(ini, ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
     LOG_CONFIG(ConfigKeys::Disable_HDC_Camera_Positions_Section, ConfigKeys::Disable_HDC_Camera_Positions_Setting, OriginalCameraPositions::bEnabled);
