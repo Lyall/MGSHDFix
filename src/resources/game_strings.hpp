@@ -693,7 +693,23 @@ constexpr uint32_t kMGS3ForcePs2StringHashes[] =
 
 constexpr CaptionOverride kMGS3ForcePs2Corrections[] =
 {
-    { Util::StringToCRC32("Checking storage device"), "Checking memory card (PS2)" },
+    0xCD026F45, "Checking memory card (PS2)", // "Checking storage device"
+    0x64DE27EE, "No data present on memory card (PS2).", // "No data present on storage device."
+    0xE2C49FA3, "Memory Card (PS2)", // "Storage Device"
+    0xE8CE489A, "メモリーカード(PS2)をチェックしています。", // "データ保存機器の確認中です。"
+    0xFD93EA20, "メモリーカード(PS2)にデータがありません。", // "データ保存機器にデータがありません。"
+    0xEE1CBC44, "Vérification de la Memory Card (PS2).", // "Vérification du périphérique de stockage."
+    0x455F1B84, "La Memory Card (PS2) ne contient pas de données.", // "Le disque dur ne contient pas de données."
+    0x9453A735, "Memory Card (PS2)", // "Périphérique de stockage"
+    0xC6048F06, "Memory Card (PS2) wird überprüft.", // "Speichergerät wird überprüft."
+    0x7DBFAE4C, "Keine Daten auf der Memory Card (PS2) vorhanden.", // "Keine Daten auf dem Speichergerät vorhanden."
+    0x1E25E0AB, "Memory Card (PS2)", // "Speichergerät"
+    0xA7D29A66, "Controllo memory card (PS2).", // "Controllo periferica di memorizzazione."
+    0x6BF9B773, "Nessun dato presente sulla memory card (PS2).", // "Nessun dato presente sulla periferica di memorizzazione."
+    0xED834D91, "Memory card (PS2)", // "Periferica di memorizzazione"
+    0xE173B3B2, "Comprobando Memory Card (PS2).", // "Comprobando dispositivo de almacenamiento."
+    0x8E5C562F, "No hay datos en la Memory Card (PS2).", // "No hay datos en el dispositivo de almacenamiento."
+    0xBD0D857D, "Memory Card (PS2)", // "Disp. de almacenamiento"
 };
 
 
