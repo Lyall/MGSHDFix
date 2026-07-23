@@ -282,6 +282,7 @@ void Logging::LogSysInfo()
 
     std::string os;
     std::string WindowsVersionNumber;
+    DWORD windowsBuildNumber = 0;
     bool isWindows11 = false;
 
     if (Util::IsSteamOS())
@@ -330,7 +331,7 @@ void Logging::LogSysInfo()
 
                 if (RtlGetVersion(&info) == 0)
                 {
-                    // Build the semantic version number
+                    windowsBuildNumber = info.dwBuildNumber;
                     WindowsVersionNumber = std::to_string(info.dwMajorVersion) + "." + std::to_string(info.dwMinorVersion) + "." + std::to_string(info.dwBuildNumber) + "." + std::to_string(ubr);
                     // Append build number and UBR (e.g. " (26100.4652)")
                     os += " (" + std::to_string(info.dwBuildNumber) + "." + std::to_string(ubr) + ")";
@@ -358,8 +359,17 @@ void Logging::LogSysInfo()
             constexpr auto MinimumWindows10Version = "10.0.19045.6332"; //September 9, 2025 / 22H2 / KB5065429
             constexpr auto MinimumWindows11Version = "10.0.26100.4946"; //August 12, 2025 / 24H2 / KB5063878
 
-            const auto minRequired = isWindows11 ? MinimumWindows11Version : MinimumWindows10Version;
-            if (VersionCheck::CompareSemanticVersion(WindowsVersionNumber, minRequired) == VersionCheck::CompareResult::Older)
+            const char* minRequired = nullptr;
+            if (isWindows11)
+            {
+                minRequired = MinimumWindows11Version;
+            }
+            else if (windowsBuildNumber == 19045)
+            {
+                minRequired = MinimumWindows10Version;
+            }
+
+            if (minRequired && VersionCheck::CompareSemanticVersion(WindowsVersionNumber, minRequired) == VersionCheck::CompareResult::Older)
             {
                 spdlog::warn("-------------------    SYSTEM WARNING     ----------------------");
                 spdlog::warn("SYSTEM WARNING: Outdated Windows version detected: {}", os);
