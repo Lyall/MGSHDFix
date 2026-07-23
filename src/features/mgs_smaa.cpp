@@ -138,112 +138,165 @@ namespace
     }
 
     bool bSkipThisFrame = false;
+
+
+    bool bShadersCompiled = false;
+
+    ComPtr<ID3DBlob> vsEdgeBlob;
+    ComPtr<ID3DBlob> psEdgeBlob;
+    ComPtr<ID3DBlob> vsBlendBlob;
+    ComPtr<ID3DBlob> psBlendBlob;
+    ComPtr<ID3DBlob> vsNeighborBlob;
+    ComPtr<ID3DBlob> psNeighborBlob;
+
 }
 
-// ---------------------------------------------------------------------------
-void SMAA_AA::Init()
+
+bool SMAA_AA::CompileShaders()
 {
-    if (!(eGameType & (MGS2|MGS3)))
+    if (!(eGameType & (MGS2 | MGS3)) || !bEnabled)
     {
-        return;
-    }
-    if (!bEnabled)
-    {
-        return;
+        return false;
     }
 
     if (!g_D3D11Hooks.D3DCompileFunc)
     {
-        spdlog::error("SMAA: D3DCompile not found"); 
-        return;
+        spdlog::error("SMAA: D3DCompile not found");
+        return false;
     }
 
     FileInclude inc;
 
-    auto* dev = g_D3D11Hooks.d3dDevice.Get();
+    auto compile = [&](const char* entry, const char* target, ComPtr<ID3DBlob>& out) -> bool
+        {
+            ComPtr<ID3DBlob> err;
+            const HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kSMAAShader, strlen(kSMAAShader), "smaa_wrapper.hlsl", nullptr, &inc, entry, target, 0, 0, out.GetAddressOf(), err.GetAddressOf());
+            if (FAILED(hr))
+            {
+                spdlog::error("SMAA '{}': {}", entry, err ? (char*)err->GetBufferPointer() : "unknown");
+                return false;
+            }
 
-    auto compile = [&](const char* entry, const char* target, auto& out) -> bool
+            return true;
+        };
+
+    if (!compile("EdgeDetectionVS", "vs_5_0", vsEdgeBlob)) return false;
+    if (!compile("EdgeDetectionPS", "ps_5_0", psEdgeBlob)) return false;
+    if (!compile("BlendWeightVS", "vs_5_0", vsBlendBlob)) return false;
+    if (!compile("BlendWeightPS", "ps_5_0", psBlendBlob)) return false;
+    if (!compile("NeighborhoodVS", "vs_5_0", vsNeighborBlob)) return false;
+    if (!compile("NeighborhoodPS", "ps_5_0", psNeighborBlob)) return false;
+
+    bShadersCompiled = true;
+    spdlog::info("SMAA shaders compiled.");
+    return true;
+}
+
+void SMAA_AA::Init()
+{
+    if (!(eGameType & (MGS2 | MGS3)) || !bEnabled)
     {
-        ComPtr<ID3DBlob> blob, err;
-        HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kSMAAShader, strlen(kSMAAShader), "smaa_wrapper.hlsl",
-                                    nullptr, &inc, entry, target, 0, 0,
-                                    blob.GetAddressOf(), err.GetAddressOf());
-        if (FAILED(hr)) {
-            spdlog::error("SMAA '{}': {}", entry, err ? static_cast<char*>(err->GetBufferPointer()) : "unknown");
-            return false;
-        }
-        if constexpr (std::is_same_v<std::decay_t<decltype(out)>, ComPtr<ID3D11VertexShader>>)
-            dev->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, out.GetAddressOf());
-        else
-            dev->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, out.GetAddressOf());
-        return true;
-    };
+        return;
+    }
 
-    if (!compile("EdgeDetectionVS", "vs_5_0", vsEdge))     goto fail;
-    if (!compile("EdgeDetectionPS", "ps_5_0", psEdge))     goto fail;
-    if (!compile("BlendWeightVS",   "vs_5_0", vsBlend))    goto fail;
-    if (!compile("BlendWeightPS",   "ps_5_0", psBlend))    goto fail;
-    if (!compile("NeighborhoodVS",  "vs_5_0", vsNeighbor)) goto fail;
-    if (!compile("NeighborhoodPS",  "ps_5_0", psNeighbor)) goto fail;
+    if (!bShadersCompiled && !CompileShaders())
+    {
+        spdlog::error("SMAA: shader compilation failed");
+        return;
+    }
+
+    auto* dev = g_D3D11Hooks.d3dDevice.Get();
+    if (!dev)
+    {
+        spdlog::error("SMAA: D3D11 device not initialized");
+        return;
+    }
+
+    if (FAILED(dev->CreateVertexShader(vsEdgeBlob->GetBufferPointer(), vsEdgeBlob->GetBufferSize(), nullptr, vsEdge.GetAddressOf()))) goto fail;
+    if (FAILED(dev->CreatePixelShader(psEdgeBlob->GetBufferPointer(), psEdgeBlob->GetBufferSize(), nullptr, psEdge.GetAddressOf()))) goto fail;
+    if (FAILED(dev->CreateVertexShader(vsBlendBlob->GetBufferPointer(), vsBlendBlob->GetBufferSize(), nullptr, vsBlend.GetAddressOf()))) goto fail;
+    if (FAILED(dev->CreatePixelShader(psBlendBlob->GetBufferPointer(), psBlendBlob->GetBufferSize(), nullptr, psBlend.GetAddressOf()))) goto fail;
+    if (FAILED(dev->CreateVertexShader(vsNeighborBlob->GetBufferPointer(), vsNeighborBlob->GetBufferSize(), nullptr, vsNeighbor.GetAddressOf()))) goto fail;
+    if (FAILED(dev->CreatePixelShader(psNeighborBlob->GetBufferPointer(), psNeighborBlob->GetBufferSize(), nullptr, psNeighbor.GetAddressOf()))) goto fail;
 
     {
         D3D11_BUFFER_DESC cbd = {};
-        cbd.ByteWidth = 16; cbd.Usage = D3D11_USAGE_DYNAMIC;
-        cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER; cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        dev->CreateBuffer(&cbd, nullptr, cbSMAA.GetAddressOf());
+        cbd.ByteWidth = 16;
+        cbd.Usage = D3D11_USAGE_DYNAMIC;
+        cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        if (FAILED(dev->CreateBuffer(&cbd, nullptr, cbSMAA.GetAddressOf()))) goto fail;
     }
 
-    // Area texture (160x560 RG8) - from Textures/AreaTex.h
     {
         D3D11_TEXTURE2D_DESC d = {};
-        d.Width = AREATEX_WIDTH; d.Height = AREATEX_HEIGHT; d.MipLevels = 1; d.ArraySize = 1;
-        d.Format = DXGI_FORMAT_R8G8_UNORM; d.SampleDesc.Count = 1;
-        d.Usage = D3D11_USAGE_IMMUTABLE; d.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        d.Width = AREATEX_WIDTH;
+        d.Height = AREATEX_HEIGHT;
+        d.MipLevels = 1;
+        d.ArraySize = 1;
+        d.Format = DXGI_FORMAT_R8G8_UNORM;
+        d.SampleDesc.Count = 1;
+        d.Usage = D3D11_USAGE_IMMUTABLE;
+        d.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
         D3D11_SUBRESOURCE_DATA init = { areaTexBytes, AREATEX_PITCH, 0 };
         ComPtr<ID3D11Texture2D> tex;
-        dev->CreateTexture2D(&d, &init, tex.GetAddressOf());
-        dev->CreateShaderResourceView(tex.Get(), nullptr, srvArea.GetAddressOf());
+        if (FAILED(dev->CreateTexture2D(&d, &init, tex.GetAddressOf()))) goto fail;
+        if (FAILED(dev->CreateShaderResourceView(tex.Get(), nullptr, srvArea.GetAddressOf()))) goto fail;
     }
 
-    // Search texture (64x16 R8) - from Textures/SearchTex.h
     {
         D3D11_TEXTURE2D_DESC d = {};
-        d.Width = SEARCHTEX_WIDTH; d.Height = SEARCHTEX_HEIGHT; d.MipLevels = 1; d.ArraySize = 1;
-        d.Format = DXGI_FORMAT_R8_UNORM; d.SampleDesc.Count = 1;
-        d.Usage = D3D11_USAGE_IMMUTABLE; d.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        d.Width = SEARCHTEX_WIDTH;
+        d.Height = SEARCHTEX_HEIGHT;
+        d.MipLevels = 1;
+        d.ArraySize = 1;
+        d.Format = DXGI_FORMAT_R8_UNORM;
+        d.SampleDesc.Count = 1;
+        d.Usage = D3D11_USAGE_IMMUTABLE;
+        d.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
         D3D11_SUBRESOURCE_DATA init = { searchTexBytes, SEARCHTEX_PITCH, 0 };
         ComPtr<ID3D11Texture2D> tex;
-        dev->CreateTexture2D(&d, &init, tex.GetAddressOf());
-        dev->CreateShaderResourceView(tex.Get(), nullptr, srvSearch.GetAddressOf());
+        if (FAILED(dev->CreateTexture2D(&d, &init, tex.GetAddressOf()))) goto fail;
+        if (FAILED(dev->CreateShaderResourceView(tex.Get(), nullptr, srvSearch.GetAddressOf()))) goto fail;
     }
 
     {
         D3D11_SAMPLER_DESC sd = {};
         sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
         sd.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-        dev->CreateSamplerState(&sd, sampLinear.GetAddressOf());
+        if (FAILED(dev->CreateSamplerState(&sd, sampLinear.GetAddressOf()))) goto fail;
         sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-        dev->CreateSamplerState(&sd, sampPoint.GetAddressOf());
+        if (FAILED(dev->CreateSamplerState(&sd, sampPoint.GetAddressOf()))) goto fail;
     }
 
     {
         D3D11_RASTERIZER_DESC rd = {};
-        rd.FillMode = D3D11_FILL_SOLID; rd.CullMode = D3D11_CULL_NONE;
-        dev->CreateRasterizerState(&rd, rsState.GetAddressOf());
+        rd.FillMode = D3D11_FILL_SOLID;
+        rd.CullMode = D3D11_CULL_NONE;
+        if (FAILED(dev->CreateRasterizerState(&rd, rsState.GetAddressOf()))) goto fail;
     }
 
     {
         D3D11_DEPTH_STENCIL_DESC dsd = {};
-        dev->CreateDepthStencilState(&dsd, dssState.GetAddressOf());
+        if (FAILED(dev->CreateDepthStencilState(&dsd, dssState.GetAddressOf()))) goto fail;
     }
 
     {
         D3D11_BLEND_DESC bd = {};
         bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-        dev->CreateBlendState(&bd, bsOpaque.GetAddressOf());
+        if (FAILED(dev->CreateBlendState(&bd, bsOpaque.GetAddressOf()))) goto fail;
     }
 
-    bInitialized   = true;
+    vsEdgeBlob.Reset();
+    psEdgeBlob.Reset();
+    vsBlendBlob.Reset();
+    psBlendBlob.Reset();
+    vsNeighborBlob.Reset();
+    psNeighborBlob.Reset();
+
+    bInitialized = true;
     spdlog::info("SMAA initialized.");
 
     if (eGameType & MGS2)
@@ -266,7 +319,7 @@ void SMAA_AA::Init()
     return;
 
 fail:
-    spdlog::info("SMAA: shader compilation failed");
+    spdlog::error("SMAA: D3D11 resource creation failed");
 }
 
 void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* /*depth*/)

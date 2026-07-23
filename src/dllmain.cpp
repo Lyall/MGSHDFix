@@ -588,6 +588,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ContrastShader::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
+        INITIALIZE(SMAA_AA::CompileShaders());
         
     }
     else if (eGameType & MGS3)
@@ -599,6 +600,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
         INITIALIZE(CaptionReplacements::Setup());
+        INITIALIZE(SMAA_AA::CompileShaders());
 
         MAKE_HOOK_MID(baseModule, "89 44 24 ?? 0F B7 05 ?? ?? ?? ?? 66 89 44 24 ?? 0F B6 05", "MGS 3: Hires Textures Enabled Check", {
                 static bool printed = false;
