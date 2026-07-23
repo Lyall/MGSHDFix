@@ -328,11 +328,14 @@ void SMAA_AA::Draw(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*
     {
         return;
     }
+
+    /*
     if (bSkipThisFrame)
     {
         bSkipThisFrame = false;
         return;
     }
+    */
     /*
     static int timer = 0;
     if (timer <= 120)

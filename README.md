@@ -47,6 +47,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - SMAA (Screen Morphological Anti-Aliasing) support (MGS2/MGS3).
 - Gamma correction for all games, correcting colors to appear more vibrant and making some lower blacks even deeper, as they would have appeared on an actual CRT screen.
 - Option (MGSHDFix Internal tab) to start MGS2 & MGS3 in their developer menu level select screens.
+- Speedrunner In-Game Timer / statistics overlay
+- Option to restore PS2 memory card strings / messages / captions.
 
 #### MG / MG2 Specific Features
 - Option to crop overscan borders on the top/bottom of the screen.
@@ -82,7 +84,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ## Bug Fixes
 #### Shared Engine Bugs:
-- Fix idle wait issue, dramatically reducing CPU usage - increasing game performance. [PR#225]
+- Fixes hundreds of typos across both MGS2 & MGS3.
+- Fixes idle wait issue, dramatically reducing CPU usage - increasing game performance. [PR#225]
 - Fixes the collection's games sometimes defaulting to integrated graphics processors on systems with multiple GPUs (due to Nvidia/AMD driver misconfiguration.)
 - Fixes gameplay/cutscene aspect ratio for ultrawide resolutions (MGS2/MGS3).
 - Fixes window size on displays with High DPI scaling enabled. [PR #127](https://github.com/ShizCalev/MGSHDFix/pull/127)
@@ -94,12 +97,14 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Restores close-up camera blur / depth of field, outright disabled in MGS2 & MGS3 by the 2011 HD Collection.
 - Fixes MGS2 & MGS3's audio reverb being nearly inaudible; volume is now boosted and user-adjustable.
 - Fixes MGS2 & MGS3's blind rendering (lines on Codec portraits / nightvision / thermal goggles) not scaling with resolution.
+- Rewrites some game functions to speed up processing. ♥
 
 
 #### MGS2 Specific Bug Fixes:
+- Restores numerous strings that were changed in the HDC due to TRC game certification restrictions.
 - Restores contrast / color filter post processing effects in numerous cutscenes, which have been broken/missing since the 2011 HD Collection. [Examples (SPOILER WARNING)](https://imgur.com/a/pJAc8H1)
-- Restore broken heat haze post processing effect on roof of Strut A.
-- Restore underwater UI swimming post processing effect. [PR #245](https://github.com/ShizCalev/MGSHDFix/pull/245)
+- Restores broken heat haze post processing effect on roof of Strut A.
+- Restores underwater UI swimming post processing effect. [PR #245](https://github.com/ShizCalev/MGSHDFix/pull/245)
 - Restores numerous particle and visual effects to proper PS2 timing, fixing effects that ran at double speed and ended too early in the HD Collection and Master Collection versions.
 - Restores dogtag viewer information.
 - Restores color swapping Red / Blue "2" on the title screen after game completions. (Requires MGS2 Community Bugfix Compilation)
@@ -163,6 +168,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes Depth of Field / blur post processing effects not scaling with resolution.
 	- Depth of field rendering has been upgraded to utilize a gaussian pyramid to clean up PS2 sampling artifacts. ♥
 - Restored cutscene film-grain rendering during low-light camera shots.
+- Fixes misaligned NVG crosshairs.
+- Fixes misaligned NVG & Thermal goggle angle indicator.
 
 
 ## Logging / Warnings for Common Configuration Issues
@@ -268,7 +275,6 @@ This list will contain bugs which may or may not be fixed.
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
-- MGS3 - Fix Angle of Attack Indicator in FPV with NVG & Thermals (2011 HDC)
 - MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
 - MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
