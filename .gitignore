@@ -371,3 +371,4 @@ FodyWeavers.xsd
 
 # RE dumps (decrypted MC image, large binary)
 re/
+desktop.ini

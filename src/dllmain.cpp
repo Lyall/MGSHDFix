@@ -102,7 +102,7 @@
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
-#include "windows_preffered_gpu.hpp"
+#include "windows_preferred_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
@@ -469,6 +469,13 @@ void afterPresent()
     }
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
+
+    if (eGameType & (MGS2|MGS3))
+    {
+        CaptionReplacements::InitializeCaptionOverrides();
+
+    }
+
     if (eGameType & MGS2)
     {
         MGS2_ContrastShader::Init();
