@@ -792,7 +792,7 @@ namespace
         return result;
     }
 
-
+    /*
     uint8_t* g_pGateTo = nullptr;
     safetyhook::MidHook h_Act16_HairPhysicsGate;
 
@@ -804,6 +804,7 @@ namespace
         }
         ctx.rip = reinterpret_cast<uint64_t>(g_pGateTo);
     }
+*/
 
     uint8_t* g_pPlasmaGateTo = nullptr;
     safetyhook::MidHook h_Act389_PlasmaGate;
@@ -1218,6 +1219,7 @@ void EffectSpeedFix::Initialize()
 
     }
 
+    /*
     uint8_t* pAct_16 = Memory::PatternScan(baseModule,"4C 8B DC 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 49 89 5B ?? 48 8B F9","MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()");
     uint8_t* pGateFrom = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x842");
     uint8_t* pGateTo = Memory::PatternScan(baseModule, "48 8B 8C 24 ?? ?? ?? ?? 48 33 CC E8 ?? ?? ?? ?? 48 81 C4 ?? ?? ?? ?? 5F C3 90", "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> Act()+0x8A6");
@@ -1231,6 +1233,8 @@ void EffectSpeedFix::Initialize()
         g_pGateTo = pGateTo;
         h_Act16_HairPhysicsGate = safetyhook::create_mid(pGateFrom, Act16_HairPhysicsGate_hook);
     }
+    */
+
 
     // d_plasma_poly (camo-break plasma lines): the gate jumps the Act body to its own
     // epilogue, so no return-value hazard.
