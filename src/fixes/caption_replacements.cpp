@@ -331,7 +331,7 @@ void CaptionReplacements::InitializeCaptionOverrides()
         if (CaptionReplacements::bForcePS2)
         {
             reserveCount += std::size(kMGS2ForcePs2StringHashes);
-            //reserveCount += std::size(kMGS2ForcePs2Corrections);
+            reserveCount += std::size(kMGS2ForcePs2Corrections);
         }
     }
     else
@@ -360,7 +360,7 @@ void CaptionReplacements::InitializeCaptionOverrides()
         if (CaptionReplacements::bForcePS2)
         {
             forcePs2StringsLoaded = LoadForcePs2Strings(tables.entries, kMGS2ForcePs2StringHashes);
-            //forcePs2CorrectionsLoaded = LoadForcePs2Corrections(tables.entries, kMGS2ForcePs2Corrections);
+            forcePs2CorrectionsLoaded = LoadForcePs2Corrections(tables.entries, kMGS2ForcePs2Corrections);
         }
     }
     else
