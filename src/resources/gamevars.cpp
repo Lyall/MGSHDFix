@@ -27,7 +27,7 @@ void GameVars::Initialize()
         actorWaitValue = reinterpret_cast<double*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "66 0F 2F 05 ?? ?? ?? ?? 73 ?? 33 C0", "MGS 2: GameVars: actorWaitValue") + 4));
         currentStage = reinterpret_cast<char const*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 4C 8D 05", "MGS 2: GameVars: currentStage") + 3));
 
-        GM_WaterLevel = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 11 0D ?? ?? ?? ?? 41 8B D5 0F 2F 0D ?? ?? ?? ?? 48 8D 4F", "MGS 2: GameVars: GM_WaterLevel") + 4));
+        GM_WaterLevel = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 5C 05 ?? ?? ?? ?? F3 41 0F 5C F3", "MGS 2: GameVars: GM_WaterLevel") + 4));
 
         heldTriggers = reinterpret_cast<uint32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F2 0F 11 05 ?? ?? ?? ?? 0F 11 0D", "MGS 2: GameVars: heldTriggers") + 4));
         GM_PlayerStatus = reinterpret_cast<uint64_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 48 23 C1 C3", "MGS2: GM_PlayerStatus") + 3));
