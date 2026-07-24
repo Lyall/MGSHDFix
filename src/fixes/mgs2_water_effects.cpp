@@ -97,7 +97,7 @@ namespace
     // the MC's larger pool spawns it. Block the spawn in d001p01 to match PS2
     void* __fastcall MgrSpawn_Detour(int name, int map)
     {
-        if (g_GameVars.IsStage(MGS2Stages::D001P01))
+        if (g_GameVars.IsStage(MGS2Stages::D001P01)) //afevis -> todo, check how many calls there are
         {
             return nullptr;   // PS2 hits EFFECT MEMORY LIMIT here; keep the manager null so the splash stays suppressed
         }

@@ -38,4 +38,27 @@ void MGS2_Kirari_Sun2Fix::ApplyFix()
         sparkle_effect_root_pos[2] = (sparkle_effect_root_pos[2] - cam_z) * scale;
 
                   });
+
+
+    //readd compiled out KP_XBOX NaN protection
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 10 45 ?? 48 8D 55 ?? F3 0F 10 74 24", "MGS2: Kirari Water Sun Fix: okajima\\effect3\\kirari_water_sun.c -> NewKirariWaterSun() -> Act() | @l285 (sun_pos.vw)", {
+        float* w = reinterpret_cast<float*>(ctx.rbp - 0x34);
+        if (*w == 0.0f) *w = 0.00001f;
+                  });
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 10 4D ?? 48 8D 55 ?? F3 0F 10 55 ?? 48 8D 4D ?? F3 0F 10 5D ?? 0F 28 C6", "MGS2: Kirari Water Sun Fix: okajima\\effect3\\kirari_water_sun.c -> NewKirariWaterSun() -> Act() | @l293 (sun_pos_mirror.vw)", {
+        float* w = reinterpret_cast<float*>(ctx.rbp - 0x44);
+        if (*w == 0.0f) *w = 0.00001f;
+                  });
+
+    MAKE_HOOK_MID(baseModule, "F3 0F 10 45 ?? 0F 28 D7 F3 0F 5E 75", "MGS2: Kirari Water Sun Fix: okajima\\effect3\\kirari_water_sun.c -> NewKirariWaterSun() -> Act() | @l302 (near_limit.vw)", {
+        float* w = reinterpret_cast<float*>(ctx.rbp - 0x4);
+        if (*w == 0.0f) *w = 0.00001f;
+                  });
+
+    MAKE_HOOK_MID(baseModule, "69 0D ?? ?? ?? ?? ?? ?? ?? ?? 0F 57 C0 ?? ?? ?? ?? ?? 0F 28 CF", "MGS2: Kirari Water Sun Fix: okajima\\effect3\\kirari_water_sun.c -> NewKirariWaterSun() -> Act() | @l359 (cal_pos_after->vw)", {
+        float* w = reinterpret_cast<float*>(ctx.r14 + 0xC);
+        if (*w == 0.0f) *w = 0.00001f;
+                  });
 }

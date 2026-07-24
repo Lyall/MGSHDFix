@@ -17,7 +17,7 @@ namespace
 
     // Anchor inside the game's line-of-sight check actor (unique): the dynamic-check call at +0x15,
     // the current-group global load at +0x1A.
-    constexpr const char* kOnlineCheckSig = "41 B9 0A 00 00 00 C7 44 24 20 40 00 00 00";
+    constexpr const char* kOnlineCheckSig = "41 B9 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? 48 8D 54 24 ?? 33 C9";
 
     using HzxCheckFn = int(__fastcall*)(int id, const float* from, const float* to, int chk, int seg, int flr);
     HzxCheckFn g_hzxCheck = nullptr;
