@@ -62,32 +62,6 @@ namespace
         g_laserPoints[0] = MGS2_Characters::IsRaiden() ? raiden_laserpoints[0] : m92_snake_override;
     }
 
-    constexpr float RAYEYE_TAILSSHIFT_Y_OFFSET = 1000.0f;
-    constexpr float RAYEYE_TAILSSHIFT_X_OFFSET = 3400.0f;
-
-    constexpr FVECTOR rayEyeTailsShift_Original[8] = {
-        {  511.0F, 1039.0F, 2485.0F, 1.0F },
-        {  571.0F, 1073.0F, 2335.0F, 1.0F },
-        {  571.0F, 1073.0F, 2335.0F, 1.0F },
-        {  713.0F, 1152.0F, 1970.0F, 1.0F },
-        { -511.0F, 1039.0F, 2485.0F, 1.0F },
-        { -571.0F, 1073.0F, 2335.0F, 1.0F },
-        { -571.0F, 1073.0F, 2335.0F, 1.0F },
-        { -713.0F, 1152.0F, 1970.0F, 1.0F },
-    };
-
-    constexpr FVECTOR rayEyeTailsShift_Corrected[8] = {
-        {  511.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1039.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2485.0F, 1.0F },
-        {  571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
-        {  571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
-        {  713.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1152.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 1970.0F, 1.0F },
-        { -511.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1039.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2485.0F, 1.0F },
-        { -571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
-        { -571.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1073.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 2335.0F, 1.0F },
-        { -713.0F-RAYEYE_TAILSSHIFT_X_OFFSET, 1152.0F + RAYEYE_TAILSSHIFT_Y_OFFSET, 1970.0F, 1.0F },
-    };
-
-    FVECTOR* g_rayEyeTailsShift = nullptr;
 
     inline uint8_t GS_Scale(uint8_t v, float scale)
     {
@@ -341,29 +315,18 @@ void MGS2Fixes()
         spdlog::error("MGS2_LaserPoints: Weapon LaserPoints table not found.");
     }
 
-    if (uint8_t* scan = Memory::PatternScan(baseModule, "00 80 FF 43 00 E0 81 44 00 50 1B 45 00 00 80 3F 00 C0 0E 44 00 20 86 44 00 F0 11 45 00 00 80 3F", "RayEyeTailsShift"))
-    {
-        g_rayEyeTailsShift = reinterpret_cast<FVECTOR*>(scan);
-        spdlog::info("MGS2_RayEyeTailsShift: TailsShift table found at {:s}+{:X}", sExeName.c_str(), scan - (uint8_t*)baseModule);
 
-        MAKE_HOOK_MID(baseModule, "48 8B C4 48 89 58 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 0F 29 78 ?? 44 0F 29 40 ?? 44 0F 29 48 ?? 44 0F 29 54 24", "MGS2: ray_eye.c -> InitTailsData()", {
-            if (!(MGS2_LinkVarBuf::GM_Configuration & MGS2_LinkVarBuf::GM_CONFIG_CUTSCENES_LETTERBOXED))
-            {
-                memcpy(g_rayEyeTailsShift, rayEyeTailsShift_Corrected, sizeof(rayEyeTailsShift_Corrected));
-                //spdlog::info("MGS2_RayEyeTailsShift: Ray eye tail height corrected.");
-            }
-            else
-            {
-                memcpy(g_rayEyeTailsShift, rayEyeTailsShift_Original, sizeof(rayEyeTailsShift_Original));
-                //spdlog::info("MGS2_RayEyeTailsShift: Ray eye tail height restored.");
-            }
-                      });
-    }
-    else
-    {
-        spdlog::error("MGS2_RayEyeTailsShift: TailsShift table not found. Ray cutscene eye fix not applied.");
-    }
+    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 48 8D 55 ?? 48 8D 4D ?? E8 ?? ?? ?? ?? B9", "MGS2: user\\shibata\\effect\\ray_eye.c -> InitTailsData()", {
+              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
+                  });
 
+    MAKE_HOOK_MID(baseModule, "41 89 86 ?? ?? ?? ?? 8B 47 ?? 41 89 86 ?? ?? ?? ?? ?? ?? 41 89 86", "MGS2: user\\shibata\\effect\\ray_eye.c -> TaileAct_NoCheck()", {
+              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
+                  });
+
+    MAKE_HOOK_MID(baseModule, "41 89 46 ?? 8B 43 ?? 41 89 46 ?? ?? ?? ?? ?? ?? 8B 43 ?? 41 89 46", "MGS2: user\\shibata\\effect\\ray_eye.c -> TaileAct_Check()", {
+              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
+                  });
 
     struct RouteVoiceEntry {
         short route;

@@ -1,6 +1,9 @@
 #pragma once
 #include "safetyhook.hpp"
 
+#define RETARGET_STRUCT_ENTRY(reg, type, from_field, to_field) \
+    reg += (offsetof(type, to_field) - offsetof(type, from_field))
+
 // ==========================================================
 // ContextHelpers
 //
