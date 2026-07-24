@@ -689,9 +689,9 @@ constexpr uint32_t kMGS3ForcePs2StringHashes[] =
     0x7f66dba5,		//"別のストレージをセットしてください。"
 };
 
+
 constexpr CaptionOverride kMGS2ForcePs2Corrections[] =
 {
-    0x18D96931, "Checking memory card (PS2).", // "Checking hard disk drive"
     0x18D96931, "Checking MEMORY CARD (PS2)", // "Checking hard disk drive"
     0x524558F1, "Comprobando MEMORY CARD (PS2)", // "Comprobando disco duro"
     0xBF173BA0, "Controllo MEMORY CARD (PS2).", // "Controllo disco fisso."
@@ -701,15 +701,12 @@ constexpr CaptionOverride kMGS2ForcePs2Corrections[] =
     0xE5498091, "MEMORY CARD (PS2)", // "Disque dur"
     0xAD2B5773, "MEMORY CARD (PS2)", // "Festplatte"
     0xFB233A6F, "MEMORY CARD (PS2) wird überprüft.", // "Festplatte wird überprüft."
-    0x9E22D110, "Memory Card (PS2)", // "Hard disk drive"
-    0x9E22D110, "MEMORY CARD (PS2)", // "Hard disk drive"
     0x646C0AE2, "メモリーカード(PS2)", // "HDD"
     0xCED90214, "メモリーカード(PS2)にデータがありません。", // "HDDにデータがありません。"
     0xD9A378E9, "メモリーカード(PS2)の確認中です", // "HDDの確認中です"
-    0x455F1B84, "Pas de données présentes sur la Memory Card (PS2).", // "Le disque dur ne contient pas de données."
+    0x9E22D110, "MEMORY CARD (PS2)", // "Hard disk drive"
     0x455F1B84, "La MEMORY CARD (PS2) ne contient pas de données.", // "Le disque dur ne contient pas de données."
     0x81D90724, "Nessun dato salvato presente sulla MEMORY CARD (PS2).", // "Nessun dato salvato presente sull'unità disco fisso."
-    0xD01BD49C, "No data present on memory card (PS2).", // "No data present on hard disk drive."
     0xD01BD49C, "No data present on MEMORY CARD (PS2).", // "No data present on hard disk drive."
     0x61FFCFA5, "No hay datos en la MEMORY CARD (PS2).", // "No hay datos en el disco duro."
     0x25D5E9CD, "Vérification de la MEMORY CARD (PS2)", // "Vérification du disque dur"
@@ -719,22 +716,17 @@ constexpr CaptionOverride kMGS3ForcePs2Corrections[] =
 {
     0x4AF67E67, "Checking memory card (PS2).", // "CHECKING hard disk drive"
     0xF80F07AF, "Checking memory card (PS2).", // "CHECKING hard drive"
-    0xCD026F45, "Checking memory card (PS2)", // "Checking storage device"
     0xCD026F45, "Checking memory card (PS2).", // "Checking storage device"
     0x6CA23831, "Comprobando Memory Card (PS2).", // "COMPROBANDO hard drive"
     0xE173B3B2, "Comprobando Memory Card (PS2).", // "Comprobando dispositivo de almacenamiento."
     0xAEB666D6, "Controllo memory card (PS2).", // "CONTROLLO hard disk"
     0xE90121F9, "Controllo memory card (PS2).", // "CONTROLLO hard drive"
     0xA7D29A66, "Controllo memory card (PS2).", // "Controllo periferica di memorizzazione."
-    0xE8CE489A, "メモリーカード(PS2)をチェックしています。", // "データ保存機器の確認中です。"
-    0xFD93EA20, "メモリーカード(PS2)にデータがありません。", // "データ保存機器にデータがありません。"
-    0xFD93EA20, "メモリーカード(PS2)にデータが見つかりません。", // "データ保存機器にデータがありません。"
     0xBD0D857D, "Memory Card (PS2)", // "Disp. de almacenamiento"
     0x9C930788, "Memory Card (PS2)", // "HARD DISK"
     0xF43A21CC, "Memory Card (PS2)", // "HARD DISK DRIVE"
     0x5E8E58A3, "Memory Card (PS2)", // "HARD DRIVE"
     0x7DBFAE4C, "Keine Daten auf der Memory Card (PS2) vorhanden.", // "Keine Daten auf dem Speichergerät vorhanden."
-    0x455F1B84, "La Memory Card (PS2) ne contient pas de données.", // "Le disque dur ne contient pas de données."
     0x455F1B84, "Pas de données présentes sur la Memory Card (PS2).", // "Le disque dur ne contient pas de données."
     0x6BF9B773, "Nessun dato presente sulla memory card (PS2).", // "Nessun dato presente sulla periferica di memorizzazione."
     0x64DE27EE, "No data present on memory card (PS2).", // "No data present on storage device."
@@ -746,6 +738,8 @@ constexpr CaptionOverride kMGS3ForcePs2Corrections[] =
     0xE2C49FA3, "Memory Card (PS2)", // "Storage Device"
     0x0F0ED6F1, "Vérification de la Memory Card (PS2).", // "VERIFICATION hard drive"
     0xEE1CBC44, "Vérification de la Memory Card (PS2).", // "Vérification du périphérique de stockage."
+    0xFD93EA20, "メモリーカード(PS2)にデータがありません。", // "データ保存機器にデータがありません。"
+    0xE8CE489A, "メモリーカード(PS2)をチェックしています。", // "データ保存機器の確認中です。"
 };
 
 
