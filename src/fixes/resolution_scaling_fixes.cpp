@@ -316,18 +316,6 @@ void MGS2Fixes()
     }
 
 
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 48 8D 55 ?? 48 8D 4D ?? E8 ?? ?? ?? ?? B9", "MGS2: user\\shibata\\effect\\ray_eye.c -> InitTailsData()", {
-              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
-                  });
-
-    MAKE_HOOK_MID(baseModule, "41 89 86 ?? ?? ?? ?? 8B 47 ?? 41 89 86 ?? ?? ?? ?? ?? ?? 41 89 86", "MGS2: user\\shibata\\effect\\ray_eye.c -> TaileAct_NoCheck()", {
-              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
-                  });
-
-    MAKE_HOOK_MID(baseModule, "41 89 46 ?? 8B 43 ?? 41 89 46 ?? ?? ?? ?? ?? ?? 8B 43 ?? 41 89 46", "MGS2: user\\shibata\\effect\\ray_eye.c -> TaileAct_Check()", {
-              RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
-                  });
-
     struct RouteVoiceEntry {
         short route;
         short point;
