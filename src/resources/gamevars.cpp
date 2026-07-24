@@ -10,6 +10,7 @@
 #include "logging.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_first_person_view_mode.hpp"
+#include "mgs2_rotor_procession.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
 #include "mgs3_linkvarbuf.hpp"
@@ -219,6 +220,7 @@ void GameVars::OnLevelTransition()
         MGS2VampFPVPunch::HandleLevelTransition();
         ResolutionScalingFixes::HandleLevelTransition();
         D3D11TextOverlay::HandleLevelTransition();
+        MGS2RotorProcession::HandleLevelTransition();
 
     }
     else if (eGameType & MGS3)

@@ -7,4 +7,6 @@ namespace MGS2RotorProcession
 {
     inline bool bEnabled = true;
     void Initialize();
+
+    void HandleLevelTransition();
 }

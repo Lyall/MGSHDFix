@@ -703,7 +703,9 @@
     <ClInclude Include="src\fixes\windows_preferred_gpu.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\fixes\screenspace_fixes.hpp" />
+    <ClInclude Include="src\fixes\screenspace_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

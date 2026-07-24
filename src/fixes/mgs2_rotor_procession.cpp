@@ -11,6 +11,9 @@
 
 namespace
 {
+    bool isTanker = false;
+
+
     // Hook: chain2 packet emitter's matrix copy. rsi = unit, r12 = matrix block; blk[0] is
     // the model->clip composite the shader consumes.
     SafetyHookMid Emit_hook {};
@@ -124,6 +127,10 @@ namespace
 
     void Emit_Hook(SafetyHookContext& ctx)
     {
+        if (!isTanker) //rotors are randomly flipping axis atm. it's more visible during plant due to the brighter skies.
+        {
+            return;
+        }
         float* blk = reinterpret_cast<float*>(ctx.r12);
         const uintptr_t unit = ctx.rsi;
         if (!blk || unit < 0x10000)
@@ -187,6 +194,19 @@ namespace
             ApplyModelRotation(blk, t.axis, t.phase);
         }
     }
+
+}
+
+
+void MGS2RotorProcession::HandleLevelTransition()
+{
+    if (!(eGameType & MGS2) || !bEnabled)
+    {
+        return;
+    }
+
+    isTanker = (g_GameVars.MGS2_GetGameMode() == MGS2GameMode::Tanker);
+
 }
 
 void MGS2RotorProcession::Initialize()
