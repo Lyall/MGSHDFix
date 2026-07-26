@@ -118,13 +118,23 @@ void BP_FilesysChanges::Initialize() {
 		return;
 	}
 
+	if (Util::IsSteamOS()) // temporary. linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
+	{
+        spdlog::warn("BP_FilesysChanges: Temporarily disabled on SteamOS due to crashing issues with Linux filesystems.");
+        spdlog::warn("BP_FilesysChanges: Features reliant on expand_bp_assets will not be available.");
+        spdlog::warn("BP_FilesysChanges: This includes: Snake Holster Fix, Hostage Arm Fix, Shell 1 Core Camera Screen fix, Alternative Colonel MSX Sprite.");
+		return;
+	}
+
+	bLoaded = true;
+
 	// The HD Collection (hence, the Master Collection) have a different file system to the original games.
 	// Files are stored with their proper names, but loaded into a cache with their strcode names as needed.
 	// This cache is defined by manifest.txt and bp_assets.txt files for each stage and each codec character.
 	// To increase compatibility, we hook the cache loader and allow loading multiple such manifests.
 	// Specifically, the part of the loader that initializes a buffer and reads the file into memory.
 	//uint8_t* ManifestLoader = Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 4B", "manifest.txt loader");
-	uint8_t* BPAssetsLoader = Memory::PatternScan(baseModule, "40 53 55 56 57 41 54 41 56 41 57 48 81 EC 70 03 00 00", "bp_assets.txt loader");
+	uint8_t* BPAssetsLoader = Memory::PatternScan(baseModule, "40 53 55 56 57 41 54 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24", "bp_assets.txt loader");
 	if (!BPAssetsLoader) {
 		spdlog::error("Failed to match BP_LoadFlatFSSync.");
 		return;
@@ -148,7 +158,7 @@ void BP_FilesysChanges::Initialize() {
 	}
 	// system/libfs/loader_flatfs.cpp -> BP_LoadFlatFSSync()
 	{
-		MAKE_HOOK_MID(baseModule, "48 89 87 50 05 00 00 C7 07 03 00 00 00", "bp_assets.txt Union", {
+		MAKE_HOOK_MID(baseModule, "48 89 87 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? E8", "bp_assets.txt Union", {
 			// rax = file handle
 			// rdi = load state struct
 			ctx.rax = (uintptr_t)LoadSimilarFiles((BPLoadFileState*)ctx.rdi, true);

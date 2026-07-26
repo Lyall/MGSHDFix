@@ -522,6 +522,7 @@ static void InitializeSubsystems()
     INITIALIZE(CustomResolutionAndBorderless::Init_AspectFOVFix());
     INITIALIZE(CustomResolutionAndBorderless::Init_HUDFix());
     INITIALIZE(Init_Miscellaneous());
+    INITIALIZE(BP_FilesysChanges::Initialize()); //keep this early. liveswaps & other asset replacements need to check its state.
 
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
@@ -550,7 +551,6 @@ static void InitializeSubsystems()
     INITIALIZE(g_DistanceCulling.Initialize());
     INITIALIZE(OriginalCameraPositions::Activate());
     INITIALIZE(AdjustableCaptions::Apply());
-    INITIALIZE(BP_FilesysChanges::Initialize());
 
 
     INITIALIZE(ColorCorrection::Setup());
