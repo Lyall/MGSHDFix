@@ -10,7 +10,7 @@
 
 #define VERSION_MAJOR 4
 #define VERSION_MINOR 0
-#define VERSION_PATCH 0
+#define VERSION_PATCH 1
 #define VERSION_CI_BUILD 0
 
 /// Current release version of MGSHDFix at time of compile.
