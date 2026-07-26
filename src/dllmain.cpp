@@ -90,6 +90,7 @@
 #include "cutscene_pausing.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
+#include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
@@ -479,6 +480,7 @@ void afterPresent()
 
     if (eGameType & MGS2)
     {
+        MGS2_CodecBackground::Init();
         MGS2_ContrastShader::Init();
         MGS2_ShimmerEffect::Init();
         MGS2_Crossfade::Initialize();
@@ -586,6 +588,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
         INITIALIZE(HostageModel::ApplyFix());
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
+        INITIALIZE(MGS2_CodecBackground::Setup());
         INITIALIZE(MGS2_ContrastShader::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
