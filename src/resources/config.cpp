@@ -699,8 +699,27 @@ void Config::Read()
         {
             g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = bRestoreVFX;
 
-            ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
-            LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
+            std::string sMotionBlur;
+            ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
+            if (sMotionBlur != ConfigKeys::MotionBlur_Option_Disabled &&
+                sMotionBlur != ConfigKeys::MotionBlur_Option_CutscenesOnly &&
+                sMotionBlur != ConfigKeys::MotionBlur_Option_Full)
+            {
+                spdlog::error("Invalid config value for {}: {}", ConfigKeys::MotionBlur_Setting, sMotionBlur);
+                Logging::ShowConsole();
+                std::cout << "Invalid config value for " << ConfigKeys::MotionBlur_Setting << ": " << sMotionBlur << std::endl;
+                return FreeLibraryAndExitThread(baseModule, 1);
+            }
+            if (sMotionBlur == ConfigKeys::MotionBlur_Option_Disabled)
+            {
+                MGS2DemoBlur::bEnabled = false;
+            }
+            else
+            {
+                MGS2DemoBlur::bEnabled = true;
+                MGS2DemoBlur::bCutscenesOnly = (sMotionBlur == ConfigKeys::MotionBlur_Option_CutscenesOnly);
+            }
+            LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
 
 
 

@@ -164,6 +164,12 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     if (!dev || !ctx || !EnsureD3D(dev)) return;
 
+    bool inCutscene = g_GameVars.InCutscene();
+    if (bCutscenesOnly && !inCutscene)
+    {
+        return;
+    }
+
     ComPtr<ID3D11Resource> colorRes;
     sceneColor->GetResource(colorRes.GetAddressOf());
     ComPtr<ID3D11Texture2D> backbuf;
@@ -190,7 +196,7 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
     if (const int clock = g_GameVars.DG_Clock(); clock != s_tickClock)
     {
         s_tickClock = clock;
-        s_skip = g_GameVars.InCutscene() ? !s_skip : false;
+        s_skip = inCutscene ? !s_skip : false;
     }
     const bool advance = !s_skip;
 

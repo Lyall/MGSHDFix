@@ -283,7 +283,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true },
 
         {(MGS2), ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, ConfigKeys::MotionBlur_Help, ConfigKeys::MotionBlur_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MotionBlur_Option_Full, {ConfigKeys::MotionBlur_Option_Full, ConfigKeys::MotionBlur_Option_CutscenesOnly, ConfigKeys::MotionBlur_Option_Disabled} },
 
         { (MGS2|MGS3), ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, ConfigKeys::FixDepthOfField_Help, ConfigKeys::FixDepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },

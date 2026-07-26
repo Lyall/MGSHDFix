@@ -284,6 +284,9 @@ namespace ConfigKeys
     constexpr const char* MotionBlur_Tooltip = "Restores the game's built-in motion blur/trails, which was broken by the HD Collection.\n"
                                                "\n"
                                                "This effect can seem a little strong / distracting at higher resolutions.";
+    constexpr const char* MotionBlur_Option_Disabled = "Disabled";
+    constexpr const char* MotionBlur_Option_Full = "Full (Gameplay + Cutscenes)";
+    constexpr const char* MotionBlur_Option_CutscenesOnly = "Cutscenes Only";
 
 
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;

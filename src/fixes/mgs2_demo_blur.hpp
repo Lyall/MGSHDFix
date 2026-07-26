@@ -14,4 +14,6 @@ namespace MGS2DemoBlur
     void DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
 
     inline bool bEnabled = true;
+
+    inline bool bCutscenesOnly = false;
 }
