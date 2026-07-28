@@ -34,8 +34,7 @@ namespace SceneDepth
     // points in the frame where depth is no longer bound.
     ID3D11ShaderResourceView* CaptureSceneDepth();
 
-    // Per-frame count of shadow target sets; doubles when a frame-skip catch-up renders
-    // the scene twice in one present.
+    // Per-present shadow pass count; doubles when a crossfade draws the scene twice.
     uint32_t ReadAndResetShadowSetCount();
 
     // Fires at the end of the 3D pass (after the scene, before UI). Gives the scene colour RT to draw

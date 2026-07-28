@@ -265,8 +265,7 @@ namespace
         ID3D11RenderTargetView* const* rtvs,
         ID3D11DepthStencilView* dsv)
     {
-        // Count shadow passes (square depth-attached targets) - a frame-skip catch-up
-        // renders the scene twice in one present, doubling this per frame.
+        // Shadow passes are the square depth-attached targets.
         if (numViews > 0 && rtvs && rtvs[0] && dsv)
         {
             ComPtr<ID3D11Resource> res;

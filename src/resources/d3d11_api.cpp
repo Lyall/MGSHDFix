@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "d3d11_api.hpp"
 
+#include "gamevars.hpp"
 #include "gpu_check.hpp"
 #include "logging.hpp"
 
@@ -40,27 +41,49 @@ namespace
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
 
-    // A frame-skip catch-up renders two game frames inside one present; the second one
-    // skips its glow/grade pass, so showing it flashes a dim ungraded frame (worst at
-    // crossfade ends). The PS2 never displayed skipped frames - hold the previous image.
+    // The PS2 never presented a frame it hadn't drawn; the port does, and it flashes dim.
     ComPtr<ID3D11Texture2D> g_heldFrame;
     UINT g_heldW = 0, g_heldH = 0;
     bool g_heldValid = false;
 
-    bool IsMergedPresent()
-    {
-        static uint32_t lastShadowSets = 0;
-        static bool mergedLast = false;
+    // A stage load parks DG_UnDrawFrameCount at DG_UNDRAW_MAX, and the port draws its own
+    // loading screen through those frames, so hold only the short scheduled runs.
+    constexpr int64_t kMaxHeldRun = 64;
 
-        const uint32_t shadowSets = SceneDepth::ReadAndResetShadowSetCount();
-        const bool merged = !mergedLast && lastShadowSets >= 2 && shadowSets >= lastShadowSets * 2;
-        lastShadowSets = shadowSets;
-        mergedLast = merged;
-        return merged;
+    // DG_StartFrame clears DG_LastWhich to -1 only on the path that draws.
+    bool IsUnDrawnFrame()
+    {
+        return g_GameVars.DG_LastWhich() >= 0 && g_GameVars.DG_UnDrawFrameCount() <= kMaxHeldRun;
+    }
+
+    // A crossfade draws the scene twice in one frame and the second pass misses the glow/grade
+    // build. Gated to cutscenes - a count change during gameplay is just scenery coming into view.
+    bool IsDoubleRenderedFrame(uint32_t shadowSets)
+    {
+        static uint32_t history[4] {};
+        static size_t head = 0;
+        static bool firedLast = false;
+
+        const uint32_t prev = history[(head + std::size(history) - 1) % std::size(history)];
+        bool steady = prev >= 2;
+        for (const uint32_t s : history)
+        {
+            steady = steady && s == prev;
+        }
+
+        const bool doubled = !firedLast && steady && shadowSets == prev * 2;
+        history[head] = shadowSets;
+        head = (head + 1) % std::size(history);
+        firedLast = doubled;
+
+        return doubled && g_GameVars.InScriptedSequence();
     }
 
     void HoldPreviousFrame(IDXGISwapChain* swap)
     {
+        // Consume the count every present, before any bail-out, or it accrues into a false double.
+        const bool doubleRendered = IsDoubleRenderedFrame(SceneDepth::ReadAndResetShadowSetCount());
+
         auto* device = g_D3D11Hooks.d3dDevice.Get();
         auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
         if (!device || !context || !swap)
@@ -94,11 +117,13 @@ namespace
             g_heldH = bb.Height;
         }
 
-        if (IsMergedPresent() && g_heldValid)
+        const bool undrawn = IsUnDrawnFrame();
+        if ((undrawn || doubleRendered) && g_heldValid)
         {
             if (g_Logging.bVerboseLogging)
             {
-                spdlog::info("D3D11Hooks: merged frame detected, holding previous image.");
+                spdlog::info("D3D11Hooks: {} frame, holding previous image. (stage={})",
+                    undrawn ? "undrawn" : "double-rendered", g_GameVars.GetCurrentStage());
             }
             context->CopyResource(backbuffer.Get(), g_heldFrame.Get());
             return;
