@@ -32,7 +32,7 @@ void MGS3_CrossfadeCapture::Initialize()
 {
     uint8_t* dieAddr = Memory::PatternScan(baseModule,
         "48 8B C4 48 89 58 08 48 89 70 10 57 48 83 EC ?? 33 F6 48 8B D9 39 B1 ?? ?? ?? ?? 75 ?? 89 70 E8",
-        "MGS 3: Crossfade : user\\takabe\\effect\\crosfade.c -> Die()");
+        "MGS 3: Crossfade : user\\takabe\\effect\\crosfade.c -> NewCrossFadeEffect() -> Die()");
     if (dieAddr)
     {
         dieHook = safetyhook::create_inline(dieAddr, reinterpret_cast<void*>(Die_Detour));
