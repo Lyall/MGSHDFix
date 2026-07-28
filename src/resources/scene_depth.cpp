@@ -137,6 +137,13 @@ namespace
 
     std::atomic<uint32_t> g_shadowSetCounter = 0;
 
+    // Diagnostic: are the doubled passes the same targets twice, or twice as many casters?
+    struct ShadowPass { const void* tex; uint32_t dim; };
+    ShadowPass g_shadowPasses[64] {};
+    std::atomic<uint32_t> g_shadowPassCount = 0;
+    ShadowPass g_lastPasses[64] {};
+    uint32_t g_lastPassCount = 0;
+
     // ---- Late-pass depth propagation (MGS2) -----------------------------------------------------
     // With MSAA the game renders the scene into an MSAA depth buffer, then binds a separate never-written
     // non-MSAA depth for the late overlay pass, so overlay prims z-test against an empty buffer (and our
@@ -278,6 +285,11 @@ namespace
                 if (d.Width == d.Height && d.Width >= 256)
                 {
                     g_shadowSetCounter.fetch_add(1, std::memory_order_relaxed);
+                    const uint32_t slot = g_shadowPassCount.fetch_add(1, std::memory_order_relaxed);
+                    if (slot < std::size(g_shadowPasses))
+                    {
+                        g_shadowPasses[slot] = { tex.Get(), d.Width };
+                    }
                 }
             }
         }
@@ -432,7 +444,23 @@ void SceneDepth::SetOverlayEndCallback(EndOf3DCallback cb)
 
 uint32_t SceneDepth::ReadAndResetShadowSetCount()
 {
+    const uint32_t n = g_shadowPassCount.exchange(0, std::memory_order_relaxed);
+    g_lastPassCount = (std::min)(n, static_cast<uint32_t>(std::size(g_shadowPasses)));
+    memcpy(g_lastPasses, g_shadowPasses, sizeof(g_lastPasses));
     return g_shadowSetCounter.exchange(0, std::memory_order_relaxed);
+}
+
+void SceneDepth::GetShadowPasses(std::vector<std::pair<const void*, uint32_t>>& out)
+{
+    out.clear();
+    for (uint32_t i = 0; i < g_lastPassCount; i++)
+    {
+        auto it = std::find_if(out.begin(), out.end(),
+            [&](const auto& p) { return p.first == g_lastPasses[i].tex; });
+        if (it == out.end()) out.emplace_back(g_lastPasses[i].tex, 1u);
+        else it->second++;
+    }
+    std::sort(out.begin(), out.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
 }
 
 ID3D11ShaderResourceView* SceneDepth::GetSRV()

@@ -21,6 +21,7 @@
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_crossfade.hpp"
+#include "mgs3_crossfade_capture.hpp"
 #include "mgs_smaa.hpp"
 #include "depth_of_field.hpp"
 #include "mgs3_film_grain.hpp"
@@ -56,33 +57,51 @@ namespace
         return g_GameVars.DG_LastWhich() >= 0 && g_GameVars.DG_UnDrawFrameCount() <= kMaxHeldRun;
     }
 
-    // A crossfade draws the scene twice in one frame and the second pass misses the glow/grade
-    // build. Gated to cutscenes - a count change during gameplay is just scenery coming into view.
-    bool IsDoubleRenderedFrame(uint32_t shadowSets)
+    // The MGS3 crossfade teardown can present one ungraded frame; it shows up as the same shadow
+    // targets rebinding at exactly double their steady rate. Only consulted inside the short
+    // window the crossfade Die hook arms, so scenery changes elsewhere can never trip it.
+    bool IsDoubleRenderedFrame(bool releaseWindow)
     {
-        static uint32_t history[4] {};
-        static size_t head = 0;
+        static std::vector<std::pair<const void*, uint32_t>> baseline;
+        static int steady = 0;
         static bool firedLast = false;
 
-        const uint32_t prev = history[(head + std::size(history) - 1) % std::size(history)];
-        bool steady = prev >= 2;
-        for (const uint32_t s : history)
+        std::vector<std::pair<const void*, uint32_t>> now;
+        SceneDepth::GetShadowPasses(now);
+
+        const bool sameTargets = now.size() == baseline.size() && !now.empty() &&
+            std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.first == b.first; });
+
+        if (sameTargets && std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.second == b.second; }))
         {
-            steady = steady && s == prev;
+            steady++;
+            firedLast = false;
+            return false;
         }
 
-        const bool doubled = !firedLast && steady && shadowSets == prev * 2;
-        history[head] = shadowSets;
-        head = (head + 1) % std::size(history);
-        firedLast = doubled;
+        const bool doubled = sameTargets && !firedLast && steady >= 3 && releaseWindow &&
+            std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.second == b.second * 2; });
 
-        return doubled && g_GameVars.InScriptedSequence();
+        if (doubled)
+        {
+            firedLast = true;   // hold the duplicate, keep the baseline for the frames after it
+            return true;
+        }
+
+        baseline = now;
+        steady = 0;
+        firedLast = false;
+        return false;
     }
 
     void HoldPreviousFrame(IDXGISwapChain* swap)
     {
-        // Consume the count every present, before any bail-out, or it accrues into a false double.
-        const bool doubleRendered = IsDoubleRenderedFrame(SceneDepth::ReadAndResetShadowSetCount());
+        // Consume the passes every present, before any bail-out, or they accrue into a false double.
+        SceneDepth::ReadAndResetShadowSetCount();
+        const bool doubleRendered = IsDoubleRenderedFrame(MGS3_CrossfadeCapture::ReleaseWindowTick());
 
         auto* device = g_D3D11Hooks.d3dDevice.Get();
         auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
