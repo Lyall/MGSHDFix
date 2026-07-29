@@ -55,6 +55,7 @@
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "mgs3_film_grain.hpp"
+#include "mgs3_crossfade_capture.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
 #include "mgs2_snakearm_voice.hpp"
@@ -598,6 +599,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_WaterReflectionFix.Initialize());
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FilmGrain::Initialize());
+        INITIALIZE(MGS3_CrossfadeCapture::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
         INITIALIZE(CaptionReplacements::Setup());
