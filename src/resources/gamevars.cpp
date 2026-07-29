@@ -94,11 +94,8 @@ void GameVars::Initialize()
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 3D ?? ?? ?? ?? 89 3D", "MGS3: DG_Clock") + 2));
 
         // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
-        if (uint8_t* DG_StartFrame = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 8B 0D ?? ?? ?? ?? BB 01 00 00 00 8B 05 ?? ?? ?? ?? 8B FB 2B 3D ?? ?? ?? ?? 89 3D ?? ?? ?? ?? 85 C9", "MGS3: DG_StartFrame"))
-        {
-            p_DG_UnDrawFrameCount32 = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(DG_StartFrame + 0x0A, 2, 6));
-            p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(DG_StartFrame + 0x15, 2, 6));
-        }
+        p_DG_UnDrawFrameCount32 = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? BB ?? ?? ?? ?? 8B 05", "MGS3: DG_UnDrawFrameCount32"), 2, 6));
+        p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B FB", "MGS3: DG_LastWhich"), 2, 6));
 
         spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
