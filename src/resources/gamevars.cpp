@@ -40,11 +40,8 @@ void GameVars::Initialize()
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 0D ?? ?? ?? ?? E8", "MGS2: DG_Clock") + 2));
 
         // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
-        if (uint8_t* DG_StartFrame = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B 0D ?? ?? ?? ?? BF 01 00 00 00 8B 05 ?? ?? ?? ?? 8B DF 2B 1D ?? ?? ?? ?? 89 1D ?? ?? ?? ?? 48 85 C9", "MGS2: DG_StartFrame"))
-        {
-            p_DG_UnDrawFrameCount64 = reinterpret_cast<int64_t*>(Memory::GetRipRelativeAddress(DG_StartFrame + 0x0A, 3, 7));
-            p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(DG_StartFrame + 0x16, 2, 6));
-        }
+            p_DG_UnDrawFrameCount64 = reinterpret_cast<int64_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? BF", "MGS2: DG_UnDrawFrameCount64"), 3, 7));
+            p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B DF", "MGS2: DG_LastWhich"), 2, 6));
         p_DG_Chanls = reinterpret_cast<DG_CHANL*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CB", "MGS2: DG_Chanls") + 3));
         p_GM_CurrentStageMap = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B F8", "MGS2: GM_CurrentStageMap") + 2));
 
