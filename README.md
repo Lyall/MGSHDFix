@@ -44,7 +44,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
 - Option to adjust scale and opacity of cutscene captions.
 - Option to disable Steam Achievement unlocking. (For speedrunners.)
-- SMAA (Screen Morphological Anti-Aliasing) support (MGS2/MGS3).
+- SMAA (Subpixel Morphological Anti-Aliasing) support (MGS2/MGS3).
 - Gamma correction for all games, correcting colors to appear more vibrant and making some lower blacks even deeper, as they would have appeared on an actual CRT screen.
 - Option (MGSHDFix Internal tab) to start MGS2 & MGS3 in their developer menu level select screens.
 - Speedrunner In-Game Timer / statistics overlay
