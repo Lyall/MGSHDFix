@@ -22,7 +22,7 @@ struct Stage
     X(W00B, "w00b", "Tanker", "Deck A - Starboard (Olga)") \
     X(W00C, "w00c", "Tanker", "Navigational Deck") \
     X(W01A, "w01a", "Tanker", "Deck A Crew Quarters") \
-    X(W01B, "w01b", "Tanker", "Deck A Crew Quarters Starboard") \
+    X(W01B, "w01b", "Tanker", "Deck B Crew Quarters") \
     X(W01C, "w01c", "Tanker", "Deck C Crew Quarters") \
     X(W01D, "w01d", "Tanker", "Deck D Crew Quarters") \
     X(W01E, "w01e", "Tanker", "Deck E Bridge") \
