@@ -312,7 +312,7 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
 [safetyhook](https://github.com/cursey/safetyhook) for hooking.  <br />
-[stb](https://github.com/nothings/stb) for png decoding.
-Gamma correction based off [SweetFX Shader Suite by CeeJay.dk].
-SMAA made by [Jorge Jimenez, Jose I. Echevarria, Belen Masia, Fernando Navarro, Diego Gutierrez](https://www.iryoku.com/smaa/).
+[stb](https://github.com/nothings/stb) for png decoding. <br />
+Gamma correction based off [SweetFX Shader Suite by CeeJay.dk](https://github.com/CeeJayDK/SweetFX). <br />
+SMAA made by [Jorge Jimenez, Jose I. Echevarria, Belen Masia, Fernando Navarro, Diego Gutierrez](https://www.iryoku.com/smaa/). <br />
 Universal Config Tool (made by ShizCalev/Afevis. Powered by SDL3.)
