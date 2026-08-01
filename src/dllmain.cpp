@@ -98,6 +98,7 @@
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
 #include "mgs2_newscrconcentrateblur.hpp"
+#include "mgs2_enhanced_demos.hpp"
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
@@ -589,6 +590,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_ContrastShader::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
+        INITIALIZE(MGS2EnhancedDemos::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
         INITIALIZE(SMAA_AA::CompileShaders());
         INITIALIZE(ScreenspaceFixes::Apply());
