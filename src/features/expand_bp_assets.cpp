@@ -69,6 +69,53 @@ static void SplitLines(const char* data, size_t size, std::vector<std::string>& 
 	}
 }
 
+// Ultimate ASI Loader redirects opens into its overload folder, but these lists are found
+// by scanning a directory rather than opened by name, so a mod's copies there are never
+// seen. Ask the loader where that folder is and scan it too. No loader, no change.
+typedef bool (WINAPI* GetOverloadPathWFn)(wchar_t*, size_t);
+
+static const std::filesystem::path& OverloadRoot() {
+	static std::filesystem::path root;
+	static bool resolved = false;
+	if (resolved) {
+		return root;
+	}
+	resolved = true;
+
+	HMODULE mods[256];
+	DWORD needed = 0;
+	if (K32EnumProcessModules(GetCurrentProcess(), mods, sizeof(mods), &needed)) {
+		const size_t count = std::min<size_t>(needed / sizeof(HMODULE), std::size(mods));
+		for (size_t i = 0; i < count; i++) {
+			auto fn = (GetOverloadPathWFn)GetProcAddress(mods[i], "GetOverloadPathW");
+			if (!fn) {
+				continue;
+			}
+			wchar_t buf[MAX_PATH] {};
+			if (fn(buf, std::size(buf)) && buf[0]) {
+				root = buf;
+				spdlog::info("BP_FilesysChanges: loader overload folder is {}", root.string());
+			}
+			break;
+		}
+	}
+	return root;
+}
+
+// The same stage folder inside the overload root, or empty when there is no loader.
+static std::filesystem::path OverloadMirror(const std::filesystem::path& directory) {
+	const std::filesystem::path& root = OverloadRoot();
+	if (root.empty()) {
+		return {};
+	}
+	std::error_code ec;
+	std::filesystem::path rel = std::filesystem::relative(directory, sExePath.parent_path(), ec);
+	if (ec || rel.empty() || *rel.begin() == "..") {
+		return {};
+	}
+	return root / rel;
+}
+
 static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 #define match_substr (isBPAssets ? "bp_assets_" : "manifest_")
 
@@ -82,12 +129,20 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 	// For after the loop
 	size_t originalFileSize = state->currentFileSize;
 
-	for (auto const& dir_entry : std::filesystem::directory_iterator(directory)) {
-		if (!dir_entry.is_regular_file()) {
+	std::vector<std::filesystem::path> entries;
+	std::error_code ec;
+	for (auto const& d : { directory, OverloadMirror(directory) }) {
+		if (d.empty() || !std::filesystem::is_directory(d, ec)) {
 			continue;
 		}
+		for (auto const& dir_entry : std::filesystem::directory_iterator(d, ec)) {
+			if (dir_entry.is_regular_file(ec)) {
+				entries.push_back(dir_entry.path());
+			}
+		}
+	}
 
-		std::filesystem::path entry_path = dir_entry.path();
+	for (auto const& entry_path : entries) {
 		if (entry_path.stem().string().starts_with(match_substr)
 			&& entry_path.extension() == ".txt") {
 			// Match found, load it
