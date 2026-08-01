@@ -21,6 +21,7 @@
 #include "pause_on_focus_loss.hpp"
 #include "stat_persistence.hpp"
 #include "mgs2_sunglasses.hpp"
+#include "pressure_inputs.hpp"
 #include "mgs2_restore_dogtags.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
@@ -527,6 +528,8 @@ static void InitializeSubsystems()
 
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
+    INITIALIZE(PressureInputs::Initialize());
+
     if (eGameType & MGS2)
     {
         INITIALIZE(g_MGS2Sunglasses.Initialize());

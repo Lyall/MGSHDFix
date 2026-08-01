@@ -627,6 +627,17 @@ namespace ConfigKeys
     constexpr const char* SkipLauncher_Help = "";
     constexpr const char* SkipLauncher_Tooltip = "Skips the launcher app and runs the game directly.";
 
+    constexpr const char* PressureSensitiveFacebuttons_Section = "Controller Settings";
+    constexpr const char* PressureSensitiveFacebuttons_Setting = "Pressure Sensitive Facebuttons";
+    constexpr const char* PressureSensitiveFacebuttons_Help = "(Experimental)";
+    constexpr const char* PressureSensitiveFacebuttons_Tooltip =
+        "Restores pressure sensitivity to the face buttons, shoulders and d-pad, and the\n"
+        "mechanics that depend on it: the CQC throat slit, the knife's hard stab, grenade\n"
+        "throw distance, the locker lean and the coolant spray.\n"
+        "Requires a pressure capable pad (DualShock 2 or 3) through DsHidMini in SDF or SXS\n"
+        "mode. May require updating your bindings.\n"
+        "Has no effect if such a pad is not connected.";
+
     constexpr const char* CtrlType_Section = "Controller Settings";
     constexpr const char* CtrlType_Setting = "Button Icons";
     constexpr const char* CtrlType_Help = "";

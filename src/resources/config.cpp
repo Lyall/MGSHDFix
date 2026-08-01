@@ -8,6 +8,7 @@
 
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
+#include "pressure_inputs.hpp"
 #include "mgs2_blood_stains.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
@@ -653,6 +654,9 @@ void Config::Read()
     // Launcher settings
     std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
 
+
+    ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+    LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
