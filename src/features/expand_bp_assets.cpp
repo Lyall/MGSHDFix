@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include <filesystem>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "expand_bp_assets.hpp"
 
@@ -41,6 +43,30 @@ static inline size_t RoundUp(size_t size) {
 	while (ret < size)
 		ret <<= 1;
 	return ret;
+}
+
+// Key on the cache fields, not the source path. One texture can be registered against
+// several tri groups, and those lines differ only in the last field.
+static inline std::string_view CacheKey(const std::string& line) {
+	const size_t comma = line.find(',');
+	return comma == std::string::npos ? std::string_view(line) : std::string_view(line).substr(comma + 1);
+}
+
+static void SplitLines(const char* data, size_t size, std::vector<std::string>& out) {
+	size_t start = 0;
+	for (size_t i = 0; i <= size; i++) {
+		if (i != size && data[i] != '\n') {
+			continue;
+		}
+		size_t end = i;
+		while (end > start && (data[end - 1] == '\r' || data[end - 1] == '\n')) {
+			end--;
+		}
+		if (end > start) {
+			out.emplace_back(data + start, end - start);
+		}
+		start = i + 1;
+	}
 }
 
 static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
@@ -93,19 +119,46 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 		}
 	}
 	
-	// Put the vanilla data last, to ensure the modded data takes priority
+	// Merge instead of prepending. A cache path the stage already lists replaces it in
+	// place, since loading an asset twice starves the streamer and runs the stage in slow
+	// motion. New entries go on the end: the list is in dependency order.
 	size_t newFilesSize = state->currentFileSize - originalFileSize;
 	if (newFilesSize) {
-		char* originalFileBuffer = (char*)malloc(originalFileSize);
-		char* newFilesBuffer = (char*)malloc(newFilesSize);
-		memcpy(originalFileBuffer, *buffer, originalFileSize);
-		memcpy(newFilesBuffer, &(*buffer)[originalFileSize], newFilesSize);
-		
-		memcpy(*buffer, newFilesBuffer, newFilesSize);
-		memcpy(&(*buffer)[newFilesSize], originalFileBuffer, originalFileSize);
+		std::vector<std::string> lines, extra;
+		SplitLines(*buffer, originalFileSize, lines);
+		SplitLines(&(*buffer)[originalFileSize], newFilesSize, extra);
 
-		free(originalFileBuffer);
-		free(newFilesBuffer);
+		size_t replaced = 0, added = 0;
+		for (const std::string& line : extra) {
+			const std::string_view key = CacheKey(line);
+			auto match = std::find_if(lines.begin(), lines.end(),
+				[&](const std::string& v) { return CacheKey(v) == key; });
+			if (match != lines.end()) {
+				*match = line;
+				replaced++;
+			}
+			else {
+				lines.push_back(line);
+				added++;
+			}
+		}
+
+		std::string merged;
+		merged.reserve(state->currentFileSize + 2 * lines.size() + 1);
+		for (const std::string& line : lines) {
+			merged += line;
+			merged += "\r\n";
+		}
+
+		const size_t needed = RoundUp(merged.size() + 1);
+		if (needed > prevBufferSize) {
+			*buffer = (char*)realloc(*buffer, needed);
+		}
+		memcpy(*buffer, merged.data(), merged.size());
+		(*buffer)[merged.size()] = '\0';
+		state->currentFileSize = merged.size();
+		spdlog::info("{}: merged {} supplementary entries ({} replaced, {} added)",
+			std::filesystem::path(filePath).filename().string(), extra.size(), replaced, added);
 	}
 
 	return state->currentFileHandle;

@@ -130,6 +130,7 @@ public:
     [[nodiscard]] int& DG_Clock() const;
     [[nodiscard]] int& DG_LastWhich() const; // >= 0 when DG_StartFrame skipped drawing the frame.
     [[nodiscard]] int64_t DG_UnDrawFrameCount() const; // Frames still scheduled undrawn.
+    [[nodiscard]] uint8_t* DG_InitChanlSystem_ObjQueueInit() const { return p_DG_ObjQueueInit; }
 
     [[nodiscard]] static constexpr uint32_t GV_StrCode(const char* inputString)
     {
@@ -173,6 +174,7 @@ private:
     int* p_DG_LastWhich = nullptr;
     int64_t* p_DG_UnDrawFrameCount64 = nullptr; // MGS2 declares it long64, MGS3 long
     int32_t* p_DG_UnDrawFrameCount32 = nullptr;
+    uint8_t* p_DG_ObjQueueInit = nullptr;
     DG_CHANL* p_DG_Chanls = nullptr;
 
     int32_t* p_GM_CurrentStageMap = nullptr;
