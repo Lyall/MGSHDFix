@@ -38,6 +38,7 @@ private:
 };
 
 void CheckForUpdates();
+void MarkUpdaterShuttingDown();
 
 constexpr int TARGET_GAME_NULL = 0;
 constexpr int TARGET_GAME_MG1 = 1;

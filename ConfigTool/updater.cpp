@@ -7,6 +7,17 @@
 #include "wx/filefn.h"
 #include "wx/log.h"
 
+namespace
+{
+    // track if the main app is closer since we're running async
+    std::atomic<bool> g_UpdaterShuttingDown{false};
+}
+
+void MarkUpdaterShuttingDown()
+{
+    g_UpdaterShuttingDown.store(true, std::memory_order_relaxed);
+}
+
 void CheckForUpdates()
 {
     if (!iTargetGame)
@@ -68,6 +79,10 @@ namespace
         {
             return;
         }
+        if (g_UpdaterShuttingDown.load(std::memory_order_relaxed))
+        {
+            return;
+        }
 
         std::string joined;
         for (size_t i = 0; i < providers.size(); ++i)
@@ -91,6 +106,11 @@ namespace
 
 bool LatestVersionChecker::checkForUpdates()
 {
+    if (g_UpdaterShuttingDown.load(std::memory_order_relaxed))
+    {
+        return false;
+    }
+
     std::string cachedLatest;
     std::string warnedVersion;
     bool cacheIsFresh = false;
@@ -180,6 +200,11 @@ bool LatestVersionChecker::checkForUpdates()
     else
     {
         wxLogDebug("Version Check: Under %i hours since last update check. Skipping update check.", iCacheTTLHours);
+    }
+
+    if (g_UpdaterShuttingDown.load(std::memory_order_relaxed))
+    {
+        return false;
     }
 
     switch (Helper::CompareSemanticVersion(VERSION_STRING, cachedLatest))
