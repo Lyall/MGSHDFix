@@ -27,6 +27,7 @@ private:
     bool loadCache(std::string& cachedLatest, std::string& warnedVersion, bool& cacheIsFresh);
     void saveCache(const std::string& latestVersion, const std::string& warnedVersion);
     bool queryLatestVersion(const RepoInfo& repoInfo, std::string& latestVersion);
+    bool NotifyUpdateAvailable(const std::string& latestVersion);
     std::wstring buildUserAgent() const;
     RepoInfo parseRepoUrl(const std::string& url) const;
 

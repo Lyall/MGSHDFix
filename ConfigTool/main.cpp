@@ -76,12 +76,11 @@ protected:
             return;
         }
 
-        wxMessageBox(
-            msg,
-            "MGSHDFix Error",
-            wxOK | wxICON_ERROR,
-            m_parent
-        );
+        wxWindow* parent = m_parent;
+        Helper::RunOnMainThread([msg, parent]()
+        {
+            wxMessageBox(msg, "MGSHDFix Error", wxOK | wxICON_ERROR, parent);
+        });
     }
 
 private:

@@ -1,10 +1,14 @@
 #pragma once
 #include <filesystem>
+#include <functional>
 #include <string>
 
 namespace Helper
 {
     std::filesystem::path FindASILocation(std::string fileName);
+
+    // Runs fn on the main GUI thread now if already on it, otherwise marshals it there.
+    void RunOnMainThread(std::function<void()> fn);
 
 
     enum class VersionCompareResult

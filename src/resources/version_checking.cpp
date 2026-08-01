@@ -243,7 +243,9 @@ namespace
         std::string msg =
             "Failed to contact " + joined +
             " while update checks are enabled.\n\n"
-            "Is your firewall or network blocking the game from reaching the update provider?";
+            "Is your firewall or network blocking the game from reaching the update provider?\n"
+            "\n"
+            "If you wish to completely disable MGSHDFix's update checking, you can do so under the MGSHDFix Internal settings tab.";
 
         MessageBoxA(nullptr, msg.c_str(), (sFixName + " update checker").c_str(), MB_OK | MB_ICONWARNING);
         g_ShownUpdateContactError = true;

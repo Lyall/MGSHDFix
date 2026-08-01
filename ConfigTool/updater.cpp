@@ -6,6 +6,11 @@
 #include "helper.hpp"
 #include "wx/filefn.h"
 #include "wx/log.h"
+#include "wx/msgdlg.h"
+
+//#define SIMULATE_UPDATE_AVAILABLE  
+//#define TEST_PRIMARY_REPO_FAILURE   
+//#define TEST_BOTH_REPOS_FAILURE       
 
 namespace
 {
@@ -97,9 +102,18 @@ namespace
         std::string msg =
             "Failed to contact " + joined +
             " while update checks are enabled.\n\n"
-            "Is your firewall or network blocking the game from reaching the update provider?";
+            "Is your firewall or network blocking the config tool from reaching the update provider?\n"
+            "\n"
+            "If you wish to completely disable MGSHDFix's update checking, you can do so under the MGSHDFix Internal settings tab.";
 
-        MessageBoxA(nullptr, msg.c_str(), (sFixName + " update checker").c_str(), MB_OK | MB_ICONWARNING);
+        std::string title = sFixName + " update checker";
+
+        Helper::RunOnMainThread([msg, title]()
+        {
+            wxWindow* parent = wxTheApp ? wxTheApp->GetTopWindow() : nullptr;
+            wxMessageBox(msg, title, wxOK | wxICON_WARNING, parent);
+        });
+
         g_ShownUpdateContactError = true;
     }
 }
@@ -111,12 +125,17 @@ bool LatestVersionChecker::checkForUpdates()
         return false;
     }
 
+#if defined(SIMULATE_UPDATE_AVAILABLE)
+    wxLogDebug("Version Check: [SIMULATED] Forcing 'update available' result.");
+    return NotifyUpdateAvailable("999.0.0.0");
+#endif
+
     std::string cachedLatest;
     std::string warnedVersion;
     bool cacheIsFresh = false;
     bool didCheck = false;
 
-    // Track which providers we attempted. If they all fail, pop a MessageBoxA.
+    // Track which providers we attempted. If they all fail, ShowUpdateContactFailure pops a dialog.
     std::vector<std::string> attemptedProviders;
 
     if (!loadCache(cachedLatest, warnedVersion, cacheIsFresh))
@@ -148,7 +167,7 @@ bool LatestVersionChecker::checkForUpdates()
 #endif
     if (!didCheck)
     {
-        wxLogError("Version Check: Unable to contact Repo API. Skipping version check.");
+        wxLogDebug("Version Check: Unable to contact Repo API. Skipping version check.");
         ShowUpdateContactFailure(attemptedProviders);
         return false;
     }
@@ -192,7 +211,7 @@ bool LatestVersionChecker::checkForUpdates()
 
     if (!didCheck)
     {
-        wxLogError("Version Check: Unable to contact Repo API on stale cache. Skipping version check.");
+        wxLogDebug("Version Check: Unable to contact Repo API on stale cache. Skipping version check.");
         ShowUpdateContactFailure(attemptedProviders);
         return false;
     }
@@ -222,23 +241,34 @@ bool LatestVersionChecker::checkForUpdates()
 
         if (warnedVersion != cachedLatest)
         {
-
-            std::string message = "A new version of " + std::string(FIX_NAME) + " is available!\n\n"
-                "Current Version: " + std::string(VERSION_STRING) + "\n"
-                "Latest Version: " + cachedLatest + "\n\n"
-                "Click the banner at the top of the window to\n"
-                "open the " FIX_NAME " Nexus page.\n"
-                                     "\n"
-                                     "(This notification will be silenced for 24 hours.)";
-            wxLogMessage(message);
             saveCache(cachedLatest, cachedLatest);
-            return true;
+            return NotifyUpdateAvailable(cachedLatest);
         }
         return false;
     }
 
     return false;
 
+}
+
+bool LatestVersionChecker::NotifyUpdateAvailable(const std::string& latestVersion)
+{
+    std::string message = "A new version of " + std::string(FIX_NAME) + " is available!\n\n"
+        "Current Version: " + std::string(VERSION_STRING) + "\n"
+        "Latest Version: " + latestVersion + "\n\n"
+        "Click the banner at the top of the window to\n"
+        "open the " FIX_NAME " Nexus page.\n"
+                             "\n"
+                             "(This notification will be silenced for 24 hours.)";
+
+    wxString title = wxString(FIX_NAME) + " - Update Available";
+
+    Helper::RunOnMainThread([message, title]()
+    {
+        wxMessageBox(message, title, wxOK | wxICON_INFORMATION);
+    });
+
+    return true;
 }
 
 bool LatestVersionChecker::loadCache(std::string& cachedLatest, std::string& warnedVersion, bool& cacheIsFresh)
@@ -338,6 +368,19 @@ LatestVersionChecker::RepoInfo LatestVersionChecker::parseRepoUrl(const std::str
 
 bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::string& latestVersion)
 {
+#if defined(TEST_BOTH_REPOS_FAILURE)
+    wxLogDebug("Version Check: [SIMULATED] Forcing failure for %s.", repoInfo.displayName);
+    return false;
+#endif
+
+#if defined(TEST_PRIMARY_REPO_FAILURE) && defined(PRIMARY_REPO_URL)
+    if (repoInfo.apiHost == parseRepoUrl(PRIMARY_REPO_URL).apiHost)
+    {
+        wxLogDebug("Version Check: [SIMULATED] Forcing primary provider (%s) failure.", repoInfo.displayName);
+        return false;
+    }
+#endif
+
     wxLogDebug("Version Check: Contacting %s API...", repoInfo.displayName);
 
     HINTERNET hSession = WinHttpOpen(

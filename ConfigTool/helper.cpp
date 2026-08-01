@@ -1,8 +1,10 @@
 #include "pch.h"
 #include "helper.hpp"
+#include <wx/app.h>
 #include <wx/filefn.h>
 #include <wx/log.h>
 #include <wx/stdpaths.h>
+#include <wx/thread.h>
 #include "version.h"
 
 namespace
@@ -140,6 +142,17 @@ namespace
 namespace Helper
 {
 
+    void RunOnMainThread(std::function<void()> fn)
+    {
+        if (wxIsMainThread())
+        {
+            fn();
+        }
+        else
+        {
+            wxTheApp->CallAfter(std::move(fn));
+        }
+    }
 
     // ------------------------------------------------------------
     // ASI location + install validation
