@@ -81,6 +81,7 @@
     <ClCompile Include="src\fixes\mgs2_reverb_wet_level.cpp" />
     <ClCompile Include="src\fixes\mgs2_railgun_beam.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
+    <ClCompile Include="src\fixes\pressure_inputs.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
     <ClCompile Include="src\resources\config.cpp" />
     <ClCompile Include="external\safetyhook\src\allocator.cpp">
@@ -228,6 +229,7 @@
     <ClInclude Include="src\fixes\mgs2_railgun_beam.hpp" />
     <ClInclude Include="src\fixes\mgs2_autopacket.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
+    <ClInclude Include="src\fixes\pressure_inputs.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
     <ClInclude Include="src\resources\config.hpp" />
     <ClInclude Include="external\safetyhook\include\safetyhook.hpp" />
