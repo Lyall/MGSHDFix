@@ -339,22 +339,16 @@ namespace
 
     // On PS2, pressure[PL_PAD_PRESS_LOCKER] > 128 snaps the camera in and overshoots into the
     // poster kiss or the head bang. Bluepoint eases off the right stick, so it never can.
-    uintptr_t gLockerBranch = 0;    // picks the pressure test over the stick
-    uintptr_t gLockerSpeed = 0;     // picks the snap/crawl choice over the fixed ease
+    // MC takes the locker's zoom speed from the right stick, so make its deflection out of R1's
+    // pressure instead.
+    std::atomic<uint8_t> gLockerPressure = 0;
 
-    void SetLockerAnalogue(bool on)
+    uint8_t LockerDeflection(uint8_t stick)
     {
-        if (gLockerBranch == 0 || gLockerSpeed == 0)
-        {
-            return;
-        }
-        static bool patched = false;
-        if (on != patched)
-        {
-            patched = on;
-            Memory::PatchBytes(gLockerBranch, on ? "\xEB" : "\x74", 1);   // je -> jmp
-            Memory::PatchBytes(gLockerSpeed, on ? "\xEB" : "\x74", 1);
-        }
+        const float lean = gLockerPressure.load() * (0.55f / 128.0f);
+        const int pressed = std::clamp(static_cast<int>(127.0f - lean * 128.0f), 0, 255);
+        return static_cast<uint8_t>(PressureInputs::bSuppressAlternates
+            ? pressed : std::min<int>(stick, pressed));
     }
 
     // MC's stand-ins for pressure, and the controls they borrow.
@@ -438,19 +432,18 @@ namespace
     {
         if (!gHavePad.load())
         {
-            SetLockerAnalogue(false);
             SetScopeAnalogue(false);
             SetAlternatesSuppressed(false);
             RebindNegativeThought(false);
             return;
         }
-        SetLockerAnalogue(true);
         SetScopeAnalogue(true);
         SetAlternatesSuppressed(PressureInputs::bSuppressAlternates);
         RebindNegativeThought(true);
 
         uint8_t now[kSlots];
         ReadPad(now);
+        gLockerPressure = now[kR1];
         for (size_t s = 0; s < kSlots; ++s)
         {
             // Write the zero too. The button bit outlives the pressure, so skipping it leaves
@@ -966,20 +959,16 @@ namespace
             ApplyPressure(reinterpret_cast<uint8_t*>(ctx.rbx + 0x18));
         });
 
-        // Two `cmp [PlayerPad.enable], 0 / je`: input, then speed. Both have to go.
-        if (uint8_t* address = Memory::PatternScan(baseModule,
-            "44 39 25 ?? ?? ?? ?? 48 8B 8F 00 0D 00 00 74 5D 8B 41 04 85 05 ?? ?? ?? ?? 74 67",
-            "MGS 2: Pressure Inputs - Locker Lean | plugin\\locker2.c"))
+        // The right stick's deflection, on its way to the locker's speed choice.
+        MAKE_HOOK_MID(baseModule,
+            "66 0F 6E C0 0F 5B C0 F3 0F 5C C8 F3 0F 5C 0D ?? ?? ?? ?? F3 0F 59 0D",
+            "MGS 2: Pressure Inputs - Locker Lean | plugin\\locker2.c",
         {
-            gLockerBranch = reinterpret_cast<uintptr_t>(address) + 14;
-        }
-
-        if (uint8_t* address = Memory::PatternScan(baseModule,
-            "44 39 25 ?? ?? ?? ?? 74 1F 48 8D 9F D0 0C 00 00 41 B9 03 00 00 00 48 8B CB",
-            "MGS 2: Pressure Inputs - Locker Zoom Speed | plugin\\locker2.c"))
-        {
-            gLockerSpeed = reinterpret_cast<uintptr_t>(address) + 7;
-        }
+            if (gHavePad.load())
+            {
+                ctx.rax = LockerDeflection(static_cast<uint8_t>(ctx.rax));
+            }
+        });
 
         if (uint8_t* address = Memory::PatternScan(baseModule,
             "44 39 25 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 0F 29 BC 24 10 01 00 00 48 8B CF",
