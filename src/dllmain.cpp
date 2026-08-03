@@ -48,6 +48,7 @@
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
+#include "mgs2_glass_dmapack_overflow.hpp"
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
@@ -533,6 +534,7 @@ static void InitializeSubsystems()
 
     if (eGameType & MGS2)
     {
+        INITIALIZE(MGS2_GlassDmapackOverflow::Initialize());
         INITIALIZE(g_MGS2Sunglasses.Initialize());
         INITIALIZE(MGS2_RestoreDogtags::Initialize());
         INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
