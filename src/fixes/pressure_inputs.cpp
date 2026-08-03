@@ -13,6 +13,10 @@ namespace
 {
     constexpr size_t kSlots = 12;
     constexpr size_t kCircle = 5;
+    constexpr size_t kTriangle = 4;
+    constexpr size_t kL1 = 8;           // libgv.h PAD_PRESS_L1
+    constexpr size_t kR1 = 9;           // libgv.h PAD_PRESS_R1
+    constexpr size_t kR2 = 11;          // libgv.h PAD_PRESS_R2
     constexpr size_t kSquare = 7;
 
     // pressure[] slot -> index within the report's pressure block, for each block order.
@@ -277,18 +281,25 @@ namespace
 
     // ---- MGS 2 ------------------------------------------------------------------------------
     // The negative inner thought is L1 on PS2, R2 in MC. Rebound only while a pad is present.
+    // The read is redirected here so the game loads our value.
+    uint8_t gThoughtScratch = 0;
+
     uintptr_t gThoughtGate = 0;
     uintptr_t gThoughtPick = 0;
     uintptr_t gThoughtHold = 0;
     std::atomic<bool> gThoughtRebound = false;
 
+    std::atomic<bool> gThoughtOnlyL1 = false;
+
     void RebindNegativeThought(bool on)
     {
-        if (on == gThoughtRebound.load())
+        if (on == gThoughtRebound.load()
+            && (!on || PressureInputs::bSuppressAlternates == gThoughtOnlyL1.load()))
         {
             return;
         }
         gThoughtRebound = on;
+        gThoughtOnlyL1 = PressureInputs::bSuppressAlternates;
 
         if (!on)                                                      // back to MC's own R2
         {
@@ -299,7 +310,6 @@ namespace
             if (gThoughtPick != 0)
             {
                 Memory::PatchBytes(gThoughtPick, "\x45\x84\xC9", 3);
-                Memory::PatchBytes(gThoughtPick + 9, "\x23", 1);
             }
             if (gThoughtHold != 0)
             {
@@ -308,20 +318,23 @@ namespace
             return;
         }
 
+        // Suppressed: L1 alone, as PS2. Otherwise MC's R2 stays live and L1 joins it.
+        const bool only = PressureInputs::bSuppressAlternates;
         if (gThoughtGate != 0)
         {
-            Memory::PatchBytes(gThoughtGate + 7, "\x0C", 1);          // press & (R1|L1)
+            Memory::PatchBytes(gThoughtGate + 7, only ? "\x0C" : "\x0E", 1);   // R1|L1 (|R2)
         }
         if (gThoughtPick != 0)
         {
-            Memory::PatchBytes(gThoughtPick, "\xF6\xC1\x04", 3);      // test r9b, cl -> test cl, 4
-            Memory::PatchBytes(gThoughtPick + 9, "\x20", 1);          // pressure[R2] -> [L1]
+            // Only the button test: +9 is the last byte of the instruction the hook sits on.
+            Memory::PatchBytes(gThoughtPick, only ? "\xF6\xC1\x04" : "\xF6\xC1\x06", 3);
         }
         if (gThoughtHold != 0)
         {
-            Memory::PatchBytes(gThoughtHold + 11, "\x20", 1);
+            Memory::PatchBytes(gThoughtHold + 11, only ? "\x20" : "\x23", 1);
         }
-        spdlog::info("MGS 2: Pressure Inputs - Negative inner thought bound to L1.");
+        spdlog::info("MGS 2: Pressure Inputs - Negative inner thought bound to {}.",
+            only ? "L1" : "L1 and R2");
     }
 
     // On PS2, pressure[PL_PAD_PRESS_LOCKER] > 128 snaps the camera in and overshoots into the
@@ -344,15 +357,96 @@ namespace
         }
     }
 
+    // MC's stand-ins for pressure, and the controls they borrow.
+    uintptr_t gWeaponOverride = 0;   // raiden.c  -> the whole synthesised weapon pad
+    uintptr_t gSprayPitch = 0;       // subject.c -> right-stick pitch, killed while spraying
+
+    void SetAlternatesSuppressed(bool on)
+    {
+        if (gWeaponOverride == 0 || gSprayPitch == 0)
+        {
+            return;
+        }
+        static bool patched = false;
+        if (on != patched)
+        {
+            patched = on;
+            // je rel32 -> nop + jmp rel32: the displacement still ends where it did
+            Memory::PatchBytes(gWeaponOverride, on ? "\x90\xE9" : "\x0F\x84", 2);
+            Memory::PatchBytes(gSprayPitch, on ? "\xEB" : "\x74", 1);
+        }
+    }
+
+
+    // MGS 3's stick clicks. Interrogate needs both its entry and its exit; L3's holster is the
+    // emulator faking SQUARE, one site per edge.
+    uintptr_t gCqcInterrogateEntry = 0;
+    uintptr_t gCqcInterrogateExit = 0;
+    uintptr_t gHolsterEdge = 0;
+    uintptr_t gDrawEdge = 0;
+
+    void SetStickActionsRestored(bool on)
+    {
+        if (gCqcInterrogateEntry == 0 || gCqcInterrogateExit == 0
+            || gHolsterEdge == 0 || gDrawEdge == 0)
+        {
+            return;
+        }
+        static bool patched = false;
+        if (on == patched)
+        {
+            return;
+        }
+        patched = on;
+
+        // Eleven bytes either way so the je never moves; si keeps 0x100 for the store below.
+        Memory::PatchBytes(gCqcInterrogateEntry,
+            on ? "\x66\xBE\x00\x01\xF6\x87\xF0\x07\x00\x00\x02"
+               : "\xBE\x00\x01\x00\x00\x85\xB7\xF0\x07\x00\x00", 11);
+        Memory::PatchBytes(gCqcInterrogateExit, on ? "\x02\x00\x00\x00" : "\x00\x01\x00\x00", 4);
+
+        Memory::PatchBytes(gHolsterEdge, on ? "\x00" : "\x02", 1);
+        Memory::PatchBytes(gDrawEdge, on ? "\x00" : "\x02", 1);
+    }
+
+
+
+    // The scope's zoom rate, flat in MC and pressure/60 on PS2. In and out differ by register.
+    uintptr_t gScopeZoomIn = 0;
+    uintptr_t gScopeZoomOut = 0;
+
+    void SetScopeAnalogue(bool on)
+    {
+        if (gScopeZoomIn == 0 || gScopeZoomOut == 0)
+        {
+            return;
+        }
+        static bool patched = false;
+        if (on != patched)
+        {
+            patched = on;
+            Memory::PatchBytes(gScopeZoomIn, on ? "\xEB" : "\x74", 1);    // je -> jmp
+            Memory::PatchBytes(gScopeZoomOut, on ? "\xEB" : "\x74", 1);
+        }
+    }
+
+    // The cutscene zoom, R1 on PS2 and R2 in MC. Both of MC's branches meet on one instruction
+    // with the pressure in eax.
+    uint8_t* gDirectPressure = nullptr;   // GV_PadDataDirect's array, the pad the demo camera reads
+
     void ApplyPressure(uint8_t* pressure)
     {
         if (!gHavePad.load())
         {
             SetLockerAnalogue(false);
+            SetScopeAnalogue(false);
+            SetAlternatesSuppressed(false);
             RebindNegativeThought(false);
             return;
         }
         SetLockerAnalogue(true);
+        SetScopeAnalogue(true);
+        SetAlternatesSuppressed(PressureInputs::bSuppressAlternates);
         RebindNegativeThought(true);
 
         uint8_t now[kSlots];
@@ -410,6 +504,7 @@ namespace
     // MGS3 builds its triggers from floats, but SXS reads them as fully held at rest.
     constexpr int kPadPressureSrc[kPadSlots] = { 10, 11, 8, 9, 4, 5, 6, 7 };
     uint8_t* gPadPressure = nullptr;
+    uint8_t* gMgs3DemoPad = nullptr;    // GV_PadDataDirect, what the demo camera reads
 
     void SetKnifeAnalogue(bool on);
 
@@ -421,6 +516,7 @@ namespace
             return;
         }
         SetKnifeAnalogue(true);
+        SetStickActionsRestored(PressureInputs::bSuppressAlternates);
 
         if (gPadPressure == nullptr)
         {
@@ -464,8 +560,9 @@ namespace
         // Accidental slits were a common complaint about the PS2 game. If it should be harder to
         // trigger, that goes here: raise kSlitPressure, or require a minimum before feeding at all.
         float squeeze = static_cast<float>(gCirclePressure.load()) / kSlitPressure;
-        // Keep MC's TRIANGLE kill: hand it the full scale its timer would have reached.
-        if ((*gAnalogStatus & 0x1000) != 0)
+        // Keep MC's TRIANGLE kill: hand it the full scale its timer would have reached. It is one
+        // of the stand-ins, so it goes when they do and the squeeze is the only way in.
+        if (!PressureInputs::bSuppressAlternates && (*gAnalogStatus & 0x1000) != 0)
         {
             squeeze = 1.0f;
         }
@@ -723,6 +820,61 @@ namespace
             LOG_HOOK(tickHook, "MGS 3: Pressure Inputs - Input Tick")
         }
 
+        // The cutscene zoom: TRIANGLE on PS2, R2 in MC, chosen by the cmov above. It reads a pad
+        // we do not fill.
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "48 8D 0D ?? ?? ?? ?? 45 0F 57 E4 E8",
+            "MGS 3: Pressure Inputs - Demo Camera Pad | demo\cam_act.c -> Act()"))
+        {
+            gMgs3DemoPad = address + 7 + *reinterpret_cast<int32_t*>(address + 3);
+        }
+
+        MAKE_HOOK_MID(baseModule, "33 DB 83 F8 1E 7E ?? 83 C0 E2 69 C8 FF 00 00 00",
+            "MGS 3: Pressure Inputs - Demo Zoom Amount | demo\cam_act.c -> Act()",
+        {
+            if (gHavePad.load() && gMgs3DemoPad != nullptr)
+            {
+                uint8_t now[kSlots];
+                ReadPad(now);
+                // The getter only reports a button that is held, so mirror that.
+                const uint32_t status = *reinterpret_cast<const uint32_t*>(gMgs3DemoPad);
+                const uint8_t tri = (status & 0x1000) ? now[kTriangle] : 0;
+                const uint8_t r2 = (status & 0x0200) ? now[kR2] : 0;
+                ctx.rax = PressureInputs::bSuppressAlternates ? tri : std::max(tri, r2);
+            }
+        });
+
+        // Both sit in the one input handler; the mask is the imm32 the press is tested against.
+        // Wildcarded imm so the scan still matches once we have patched it.
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "BE ?? 01 00 00 85 B7 F0 07 00 00",
+            "MGS 3: Pressure Inputs - Interrogate Entry"))
+        {
+            gCqcInterrogateEntry = reinterpret_cast<uintptr_t>(address);
+        }
+
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "F7 87 EC 07 00 00 ?? 01 00 00",
+            "MGS 3: Pressure Inputs - Interrogate Exit"))
+        {
+            gCqcInterrogateExit = reinterpret_cast<uintptr_t>(address) + 6;
+        }
+
+        // L3 faking a SQUARE press: one site per edge, both needed.
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "F6 05 ?? ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? F7 05 ?? ?? ?? ?? 00 80 00 00",
+            "MGS 3: Pressure Inputs - Holster Edge"))
+        {
+            gHolsterEdge = reinterpret_cast<uintptr_t>(address) + 6;
+        }
+
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "B8 01 00 00 00 83 E1 ?? 41 BF 07 00 00 00 0F 45 F0",
+            "MGS 3: Pressure Inputs - Draw Edge"))
+        {
+            gDrawEdge = reinterpret_cast<uintptr_t>(address) + 7;
+        }
+
         // Anchored on the comiss: -0x0A is the movss that loads the timer, +19 the TRIANGLE je.
         if (uint8_t* address = Memory::PatternScan(baseModule,
             "0F 2F 05 ?? ?? ?? ?? 72 10 F7 05 ?? ?? ?? ?? 00 10 00 00 74 04 4C 89 63 58",
@@ -802,7 +954,8 @@ namespace
         MAKE_HOOK_MID(baseModule, "41 F7 41 24 2F 01 00 00 74 0C 49",
             "MGS 2: Pressure Inputs - Pad Writer | libgv\\pad.c -> setup_pressure()",
         {
-            ApplyPressure(reinterpret_cast<uint8_t*>(ctx.r9 + 0x18));
+            gDirectPressure = reinterpret_cast<uint8_t*>(ctx.r9 + 0x18);
+            ApplyPressure(gDirectPressure);
         });
 
         // MSVC inlined pad.c's second UpdatePad, so the hook above only sees GV_PadDataDirect,
@@ -828,15 +981,101 @@ namespace
             gLockerSpeed = reinterpret_cast<uintptr_t>(address) + 7;
         }
 
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "44 39 25 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 0F 29 BC 24 10 01 00 00 48 8B CF",
+            "MGS 2: Pressure Inputs - Weapon Pad Override | raiden\\raiden.c"))
+        {
+            gWeaponOverride = reinterpret_cast<uintptr_t>(address) + 7;
+        }
+
+        // The je is a few instructions after its cmp; the flags survive the stick reads.
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "F3 0F 5C F9 F3 0F 5C F1 74 0C 83 BD ?? ?? ?? ?? 0E 75 03 0F 57 F6",
+            "MGS 2: Pressure Inputs - Spray Camera Pitch | raiden\\subject.c"))
+        {
+            gSprayPitch = reinterpret_cast<uintptr_t>(address) + 8;
+        }
+
+        // PressureToZoomIn/OutSpeed, inlined into the zoom camera's Act(). Identical but for the
+        // register the speed lands in, so the pattern runs to the mulss that separates them.
+        {
+            constexpr const char* kZoom =
+                "F3 0F 2C C8 74 13 85 C9 74 0A F3 0F 10 0D ?? ?? ?? ?? EB 25 0F 57 C9 EB 20 "
+                "83 F9 3C 7C 14 B8 89 88 88 88 F7 E9 8D 3C 11 C1 FF 05 8B C7 C1 E8 1F 03 F8 "
+                "66 0F 6E CF 0F 5B C9 F3 41 0F 59 ";
+            if (uint8_t* address = Memory::PatternScan(baseModule, (std::string(kZoom) + "C9").c_str(),
+                "MGS 2: Pressure Inputs - Scope Zoom In | etc\\zoomcam.c -> Act()"))
+            {
+                gScopeZoomIn = reinterpret_cast<uintptr_t>(address) + 4;
+            }
+            if (uint8_t* address = Memory::PatternScan(baseModule, (std::string(kZoom) + "C8").c_str(),
+                "MGS 2: Pressure Inputs - Scope Zoom Out | etc\\zoomcam.c -> Act()"))
+            {
+                gScopeZoomOut = reinterpret_cast<uintptr_t>(address) + 4;
+            }
+        }
+
+        // Both of Bluepoint's zoom reads, the switch case and the R1-gated one. The byte we move
+        // is the low half of the RIP displacement, so scan to the instruction and step in 3.
+        // Where both of Bluepoint's zoom branches meet, with the pressure they chose in eax.
+        MAKE_HOOK_MID(baseModule, "66 44 0F 6E C0 49 8B 46 58 45 0F 5B C0",
+            "MGS 2: Pressure Inputs - Demo Zoom Amount | demo\\cam_act.c -> Act()",
+        {
+            if (gHavePad.load() && gDirectPressure != nullptr)
+            {
+                const uint8_t r1 = gDirectPressure[kR1];
+                const uint8_t r2 = gDirectPressure[kR2];
+                ctx.rax = PressureInputs::bSuppressAlternates ? r1 : std::max(r1, r2);
+            }
+        });
+
         gThoughtGate = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
             "48 8B 43 58 F6 40 08 0A",
             "MGS 2: Pressure Inputs - Thought Gate | codec\\cdc_mind.c"));
         gThoughtPick = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "41 84 C9 74 05 44 0F B6 40 23",
+            "41 84 C9 74 ?? 44 0F B6 40 23",
             "MGS 2: Pressure Inputs - Thought Select | codec\\cdc_mind.c"));
         gThoughtHold = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "74 06 0F B6 40 21 EB 04 0F B6 40 23",
+            "74 ?? 0F B6 40 21 EB ?? 0F B6 40 23",
             "MGS 2: Pressure Inputs - Thought Hold | codec\\cdc_mind.c"));
+
+        // The mask, adjusted at the store: the register that builds it is also the codec state.
+        MAKE_HOOK_MID(baseModule, "48 89 83 B0 00 00 00 89 8B A4 00 00 00",
+            "MGS 2: Pressure Inputs - Thought Held Mask | codec\\cdc_mind.c",
+        {
+            if (gHavePad.load() && gThoughtRebound.load() && ctx.rax == 2)
+            {
+                ctx.rax = PressureInputs::bSuppressAlternates ? 4 : 6;    // L1, or L1|R2
+            }
+        });
+
+        // The peak tracker reads the slot the mask implies, so feed it the same value.
+        MAKE_HOOK_MID(baseModule, "3B 8B A4 00 00 00 7E ??",
+            "MGS 2: Pressure Inputs - Thought Peak | codec\\cdc_mind.c",
+        {
+            if (gHavePad.load() && gDirectPressure != nullptr && gThoughtRebound.load()
+                && (*reinterpret_cast<const uint32_t*>(ctx.rbx + 0xb0) & 8) == 0)
+            {
+                ctx.rcx = PressureInputs::bSuppressAlternates
+                    ? gDirectPressure[kL1]
+                    : std::max(gDirectPressure[kL1], gDirectPressure[kR2]);
+            }
+        });
+
+        // With both buttons live the game still reads one slot, so give it the harder press.
+        MAKE_HOOK_MID(baseModule, "44 0F B6 40 23 41 3B D0",
+            "MGS 2: Pressure Inputs - Thought Pressure | codec\\cdc_mind.c",
+        {
+            // The load would overwrite r8, so redirect what it reads. rax dies two on.
+            if (gHavePad.load() && gDirectPressure != nullptr && gThoughtRebound.load())
+            {
+                gThoughtScratch = PressureInputs::bSuppressAlternates
+                    ? gDirectPressure[kL1]
+                    : std::max(gDirectPressure[kL1], gDirectPressure[kR2]);
+                ctx.rax = reinterpret_cast<uintptr_t>(&gThoughtScratch) - 0x23;
+            }
+        });
+
 
         // WP_ColdSpray clamps the right stick to 0..1 and uses that one float for both the fire
         // gate (0 strips PL_PAD_WEAPON) and the jet thickness, so the button does nothing. Take

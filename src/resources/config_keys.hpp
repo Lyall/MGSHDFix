@@ -627,6 +627,15 @@ namespace ConfigKeys
     constexpr const char* SkipLauncher_Help = "";
     constexpr const char* SkipLauncher_Tooltip = "Skips the launcher app and runs the game directly.";
 
+    constexpr const char* SuppressAlternativeActions_Section = "Controller Settings";
+    constexpr const char* SuppressAlternativeActions_Setting = "Suppress Alternative Actions";
+    constexpr const char* SuppressAlternativeActions_Help = "(Experimental)";
+    constexpr const char* SuppressAlternativeActions_Tooltip =
+        "Drops the stand-ins the Master Collection added for the pressure it could not read,\n"
+        "leaving only the controls the games shipped with: the right stick goes back to the\n"
+        "camera instead of spraying coolant, and Triangle no longer slits a throat.\n"
+        "Needs Pressure Sensitive Facebuttons and a controller that reports pressure.";
+
     constexpr const char* PressureSensitiveFacebuttons_Section = "Controller Settings";
     constexpr const char* PressureSensitiveFacebuttons_Setting = "Pressure Sensitive Facebuttons";
     constexpr const char* PressureSensitiveFacebuttons_Help = "(Experimental)";

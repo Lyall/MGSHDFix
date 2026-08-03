@@ -658,6 +658,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
     LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
 
+    ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+    LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
 
