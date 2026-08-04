@@ -817,13 +817,13 @@ namespace
         // we do not fill.
         if (uint8_t* address = Memory::PatternScan(baseModule,
             "48 8D 0D ?? ?? ?? ?? 45 0F 57 E4 E8",
-            "MGS 3: Pressure Inputs - Demo Camera Pad | demo\cam_act.c -> Act()"))
+            "MGS 3: Pressure Inputs - Demo Camera Pad | demo\\cam_act.c -> Act()"))
         {
             gMgs3DemoPad = address + 7 + *reinterpret_cast<int32_t*>(address + 3);
         }
 
         MAKE_HOOK_MID(baseModule, "33 DB 83 F8 1E 7E ?? 83 C0 E2 69 C8 FF 00 00 00",
-            "MGS 3: Pressure Inputs - Demo Zoom Amount | demo\cam_act.c -> Act()",
+            "MGS 3: Pressure Inputs - Demo Zoom Amount | demo\\cam_act.c -> Act()",
         {
             if (gHavePad.load() && gMgs3DemoPad != nullptr)
             {
