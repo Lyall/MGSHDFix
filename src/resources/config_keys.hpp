@@ -647,6 +647,15 @@ namespace ConfigKeys
         "mode. May require updating your bindings.\n"
         "Has no effect if such a pad is not connected.";
 
+    constexpr const char* Ds3Rumble_Section = "Controller Settings";
+    constexpr const char* Ds3Rumble_Setting = "DualShock 3 Rumble";
+    constexpr const char* Ds3Rumble_Help = "(Experimental)";
+    constexpr const char* Ds3Rumble_Tooltip =
+        "Restores rumble to a DualShock 3 on DsHidMini: the Master Collection sends vibration\n"
+        "through Steam, which cannot see the pad in SDF or SXS mode, so the motors stay dead.\n"
+        "This drives them directly with the game's own vibration values.\n"
+        "Needs Pressure Sensitive Facebuttons.";
+
     constexpr const char* CtrlType_Section = "Controller Settings";
     constexpr const char* CtrlType_Setting = "Button Icons";
     constexpr const char* CtrlType_Help = "";
