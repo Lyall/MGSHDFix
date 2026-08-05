@@ -656,6 +656,13 @@ namespace ConfigKeys
         "This drives them directly with the game's own vibration values.\n"
         "Needs Pressure Sensitive Facebuttons.";
 
+    constexpr const char* Ds3RumbleStrength_Section = "Controller Settings";
+    constexpr const char* Ds3RumbleStrength_Setting = "DualShock 3 Rumble Strength";
+    constexpr const char* Ds3RumbleStrength_Help = "";
+    constexpr const char* Ds3RumbleStrength_Tooltip =
+        "Scales the heavy motor as a percentage, up to 200. The light motor is on/off\n"
+        "in hardware and is not affected.";
+
     constexpr const char* CtrlType_Section = "Controller Settings";
     constexpr const char* CtrlType_Setting = "Button Icons";
     constexpr const char* CtrlType_Help = "";

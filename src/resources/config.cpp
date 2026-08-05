@@ -665,6 +665,10 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
     LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
 
+    ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+    Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
+    LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
 

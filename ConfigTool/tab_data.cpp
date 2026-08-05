@@ -95,6 +95,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2 | MGS3), ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, ConfigKeys::Ds3Rumble_Help, ConfigKeys::Ds3Rumble_Tooltip,
           std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
 
+        { (MGS2 | MGS3), ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, ConfigKeys::Ds3RumbleStrength_Help, ConfigKeys::Ds3RumbleStrength_Tooltip,
+          std::make_pair(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting), false, Field::Int, 100, 0, 200 },
+
         { (MG|MGS2|MGS3), ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, ConfigKeys::CtrlType_Help, ConfigKeys::CtrlType_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },

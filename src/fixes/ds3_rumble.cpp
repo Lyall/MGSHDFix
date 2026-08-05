@@ -27,7 +27,8 @@ namespace
 
     uint8_t BigMotorCurve(uint8_t value)
     {
-        return value ? static_cast<uint8_t>(kBigMotorFloor + value * (255 - kBigMotorFloor) / 255) : 0;
+        const int scaled = std::min(255, value * Ds3Rumble::iStrength / 100);
+        return scaled ? static_cast<uint8_t>(kBigMotorFloor + scaled * (255 - kBigMotorFloor) / 255) : 0;
     }
 
     void CloseDevice()
