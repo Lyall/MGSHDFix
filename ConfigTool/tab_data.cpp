@@ -231,6 +231,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2), ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, ConfigKeys::MGS2_FixDamageType_Help, ConfigKeys::MGS2_FixDamageType_Tooltip,
             std::nullopt, false, Field::Bool, false},
 
+        { (MGS2 | MGS3), ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, ConfigKeys::PhotoCamera_Help, ConfigKeys::PhotoCamera_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
 
             {(MGS2), ConfigKeys::MGS2_Lifebar_Name_Custom_Section, "", "", "", std::nullopt, false, Field::Spacer },
 

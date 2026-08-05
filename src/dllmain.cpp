@@ -99,6 +99,7 @@
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
+#include "photo_camera.hpp"
 #include "mgs2_newscrconcentrateblur.hpp"
 #include "mgs2_enhanced_demos.hpp"
 #include "playtime_fixes.hpp"
@@ -478,7 +479,7 @@ void afterPresent()
     if (eGameType & (MGS2|MGS3))
     {
         CaptionReplacements::InitializeCaptionOverrides();
-
+        PhotoCamera::Initialize();
     }
 
     if (eGameType & MGS2)
