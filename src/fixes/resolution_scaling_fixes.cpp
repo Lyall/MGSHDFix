@@ -7,6 +7,7 @@
 #include "gamevars.hpp"
 //#include "input_handler.hpp"
 #include "color_correction.hpp"
+//#include "game_funcs.hpp"
 #include "line_scaling.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
@@ -147,6 +148,7 @@ namespace
 
     int* g_IR_Blinds_DarkenHeight = nullptr;
     int* g_IR_Blinds_BlankHeight = nullptr;
+
 
 }
 
