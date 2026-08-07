@@ -7,7 +7,6 @@
 
 #pragma warning(push)
 #pragma warning(disable:4828)
-#include "steam_api.h"
 #include "isteamscreenshots.h"
 #pragma warning(pop)
 
@@ -93,16 +92,20 @@ void PhotoCamera::Initialize()
     {
         return;
     }
+    if (!g_SteamAPI.bInitialized)
+    {
+        spdlog::info("MGS 2: Photo Camera: SteamAPI not initialized. Skipping setup.");
+        return;
+    }
 
     // Both games freeze the screen for the capture (DG_UnDrawFrameCount parked at its max),
     // so that store is the shutter moment: once per photo, every camera mode.
     uint8_t* address = eGameType & MGS2
         ? Memory::PatternScan(baseModule,
-            "8B 0D ?? ?? ?? ?? 44 89 35 ?? ?? ?? ?? 89 4F 5C 44 89 35 ?? ?? ?? ?? 48 C7 05 ?? ?? ?? ?? 00 00 FF 7F",
+            "8B 0D ?? ?? ?? ?? 44 89 35 ?? ?? ?? ?? 89 4F",
             "MGS 2: Photo Camera - Capture Start | skoba\\equip\\capture.c -> NewCaptureStart()")
         : Memory::PatternScan(baseModule,
-            "8B 05 ?? ?? ?? ?? 8B C8 48 8B 5C 24 ?? F7 D1 83 E1 2C 83 C8 2C 89 05 ?? ?? ?? ?? "
-            "48 8B 47 50 89 88 ?? ?? ?? ?? C7 05 ?? ?? ?? ?? FF FF 00 00",
+            "8B 05 ?? ?? ?? ?? 8B C8 48 8B 5C 24",
             "MGS 3: Photo Camera - Capture Start | mc_photo.c photo actor");
     if (address == nullptr)
     {
