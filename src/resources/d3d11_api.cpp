@@ -15,6 +15,7 @@
 #include "input_handler.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
@@ -282,6 +283,7 @@ namespace
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
+            MGS2_AiRayVision::OnPresent();
             MGS2_Crossfade::OnPresent(pSwapChain);
         }
         else if (eGameType & MGS3)

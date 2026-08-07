@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -30,6 +30,7 @@
     <ClCompile Include="src\fixes\mgs2_ray_photo_voice.cpp" />
     <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp" />
     <ClCompile Include="src\fixes\playtime_fixes.cpp" />
+    <ClCompile Include="src\fixes\mgs2_ai_ray_vision.cpp" />
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
     <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="src\fixes\mgs2_ray_photo_voice.hpp" />
     <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp" />
     <ClInclude Include="src\fixes\playtime_fixes.hpp" />
+    <ClInclude Include="src\fixes\mgs2_ai_ray_vision.hpp" />
     <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />

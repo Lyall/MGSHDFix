@@ -95,6 +95,7 @@
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_restore_elevator_glitch.hpp"
@@ -489,6 +490,7 @@ void afterPresent()
         MGS2_ShimmerEffect::Init();
         MGS2_Crossfade::Initialize();
         g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+        MGS2_AiRayVision::Init();
     }
     else if (eGameType & MG)
     {
@@ -597,6 +599,7 @@ static void InitializeSubsystems()
         INITIALIZE(HostageModel::ApplyFix());
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_ContrastShader::Setup());
+        INITIALIZE(MGS2_AiRayVision::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
         INITIALIZE(MGS2EnhancedDemos::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
