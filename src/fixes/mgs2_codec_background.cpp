@@ -87,7 +87,7 @@ void MGS2_CodecBackground::Setup()
 
     spdlog::info("MGS2_CodecBackground: Setting up codec background shader...");
 
-    if (uint8_t* codexInOutResult = Memory::PatternScan(baseModule, "48 8B C4 53 48 81 EC ?? ?? ?? ?? 48 8B D9 0F 29 78 D8", "bp\\shared\\BP_RenderFX.cpp -> BP_PostFX_MGS2_CodexInOut()"))
+    if (uint8_t* codexInOutResult = Memory::PatternScan(baseModule, "48 8B C4 53 48 81 EC ?? ?? ?? ?? 48 8B D9", "bp\\shared\\BP_RenderFX.cpp -> BP_PostFX_MGS2_CodexInOut()"))
     {
         codexInOutHook = safetyhook::create_inline(reinterpret_cast<void*>(codexInOutResult), reinterpret_cast<void*>(MGS2_CodexInOut));
         LOG_HOOK(codexInOutHook, "MGS2_CodecBackground: bp/shared/BP_RenderFX.cpp -> BP_PostFX_MGS2_CodexInOut()")
