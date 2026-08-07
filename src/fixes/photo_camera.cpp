@@ -8,6 +8,7 @@
 #pragma warning(push)
 #pragma warning(disable:4828)
 #include "isteamscreenshots.h"
+#include "isteamremotestorage.h"
 #pragma warning(pop)
 
 // The camera freezes the screen for its capture, so the next present still shows exactly the
