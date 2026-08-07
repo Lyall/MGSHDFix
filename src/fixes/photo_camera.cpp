@@ -7,7 +7,6 @@
 
 #pragma warning(push)
 #pragma warning(disable:4828)
-#include "isteamscreenshots.h"
 #include "steam_api.h"
 #include "isteamscreenshots.h"
 #pragma warning(pop)
