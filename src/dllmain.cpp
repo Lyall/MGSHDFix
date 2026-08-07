@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "common.hpp"
 #include "logging.hpp"
@@ -45,7 +45,6 @@
 #include "mgs2_hair_layering.hpp"
 #include "mgs2_rotor_procession.hpp"
 #include "mgs2_reverb_wet_level.hpp"
-#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
@@ -584,7 +583,6 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RotorProcession::Initialize());
         INITIALIZE(MGS2TankerSnakeSnap::Initialize());
         INITIALIZE(FixReverbWetLevel::Initialize());
-        INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
