@@ -1,5 +1,13 @@
 #pragma once
 
+// One entry of a stage chara table (chara.h CHARA_TABLE)
+struct CHARA
+{
+    unsigned int class_id;
+    void* (__fastcall* new_)(int, int);
+};
+static_assert(sizeof(CHARA) == 0x10);
+
 namespace Shared_Gamefuncs
 {
     void HookFuncs();

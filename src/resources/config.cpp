@@ -8,6 +8,9 @@
 
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
+#include "pressure_inputs.hpp"
+#include "photo_camera.hpp"
+#include "ds3_rumble.hpp"
 #include "mgs2_blood_stains.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
@@ -72,6 +75,7 @@
 #include "mg1_display_scaling.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_newscrconcentrateblur.hpp"
 #include "mgs2_restore_dogtag_viewer.hpp"
 #include "mgs2_vamp_punch_fix.hpp"
@@ -489,6 +493,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, bDisableTextureFiltering);
     LOG_CONFIG(ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, bDisableTextureFiltering);
 
+    ConfigHelper::getValue(ini, ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, PhotoCamera::bEnabled);
+    LOG_CONFIG(ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, PhotoCamera::bEnabled);
+
     ConfigHelper::getValue(ini, ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, CustomResolutionAndBorderless::bFramebufferFix);
     LOG_CONFIG(ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, CustomResolutionAndBorderless::bFramebufferFix);
 
@@ -655,6 +662,19 @@ void Config::Read()
     std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
 
 
+    ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+    LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+    LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+    LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+    Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
+    LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
 
@@ -698,10 +718,29 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_AiRayVision::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled = bRestoreVFX;
 
-            ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
-            LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, MGS2DemoBlur::bEnabled);
+            std::string sMotionBlur;
+            ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
+            if (sMotionBlur != ConfigKeys::MotionBlur_Option_Disabled &&
+                sMotionBlur != ConfigKeys::MotionBlur_Option_CutscenesOnly &&
+                sMotionBlur != ConfigKeys::MotionBlur_Option_Full)
+            {
+                spdlog::error("Invalid config value for {}: {}", ConfigKeys::MotionBlur_Setting, sMotionBlur);
+                Logging::ShowConsole();
+                std::cout << "Invalid config value for " << ConfigKeys::MotionBlur_Setting << ": " << sMotionBlur << std::endl;
+                return FreeLibraryAndExitThread(baseModule, 1);
+            }
+            if (sMotionBlur == ConfigKeys::MotionBlur_Option_Disabled)
+            {
+                MGS2DemoBlur::bEnabled = false;
+            }
+            else
+            {
+                MGS2DemoBlur::bEnabled = true;
+                MGS2DemoBlur::bCutscenesOnly = (sMotionBlur == ConfigKeys::MotionBlur_Option_CutscenesOnly);
+            }
+            LOG_CONFIG(ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
 
 
 

@@ -26,15 +26,12 @@ jobs:
     steps:
       - name: Mirror GitHub release to GitLab
         env:
-          GITLAB_URL: ${{ secrets.GITLAB_URL }}
           GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
           GITLAB_PROJECT_ID: ${{ secrets.GITLAB_PROJECT_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          GITLAB_URL="${GITLAB_URL%/}"
-
           release_json=$(gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json tagName,name,body,assets)
 
           RELEASE_NAME=$(echo "$release_json" | jq -r '.name')
@@ -67,7 +64,7 @@ jobs:
             upload_json=$(curl --fail-with-body --silent --show-error --request POST \
               --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
               --form "file=@${file}" \
-              "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/uploads")
+              "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/uploads")
 
             uploaded_path=$(echo "$upload_json" | jq -r '.full_path // .url // empty')
 
@@ -80,7 +77,7 @@ jobs:
             if [[ "$uploaded_path" == http://* || "$uploaded_path" == https://* ]]; then
               uploaded_url="$uploaded_path"
             else
-              uploaded_url="${GITLAB_URL}${uploaded_path}"
+              uploaded_url="https://gitlab.com${uploaded_path}"
             fi
 
             args+=(--data-urlencode "assets[links][$index][name]=${filename}")
@@ -94,7 +91,7 @@ jobs:
 
           curl --silent --output /dev/null --request DELETE \
             --header "PRIVATE-TOKEN: ${GITLAB_PAT}" \
-            "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${encoded_tag}"
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases/${encoded_tag}"
 
           curl --fail-with-body --silent --show-error "${args[@]}" \
-            "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/releases"
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/releases"

@@ -523,11 +523,14 @@ inline void HookRailgunVortexRate(HMODULE baseModule)
                 if (resY <= 448) return;
                 int size = 5 * resY / 448;
                 if (size > 32) size = 32;
-                static bool s_logged = false;
-                if (!s_logged)
+                if (g_Logging.bVerboseLogging)
                 {
-                    s_logged = true;
-                    spdlog::info("MGS 2: Effect Speed Fix: flush dot size {} (resY {})", size, resY);
+                    static bool s_logged = false;
+                    if (!s_logged)
+                    {
+                        s_logged = true;
+                        spdlog::info("MGS 2: Effect Speed Fix: flush dot size {} (resY {})", size, resY);
+                    }
                 }
                 const int16_t v = static_cast<int16_t>(size);
                 *reinterpret_cast<int16_t*>(ctx.rdx + 0x10) = v;

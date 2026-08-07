@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include <filesystem>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "expand_bp_assets.hpp"
 
@@ -43,6 +45,77 @@ static inline size_t RoundUp(size_t size) {
 	return ret;
 }
 
+// Key on the cache fields, not the source path. One texture can be registered against
+// several tri groups, and those lines differ only in the last field.
+static inline std::string_view CacheKey(const std::string& line) {
+	const size_t comma = line.find(',');
+	return comma == std::string::npos ? std::string_view(line) : std::string_view(line).substr(comma + 1);
+}
+
+static void SplitLines(const char* data, size_t size, std::vector<std::string>& out) {
+	size_t start = 0;
+	for (size_t i = 0; i <= size; i++) {
+		if (i != size && data[i] != '\n') {
+			continue;
+		}
+		size_t end = i;
+		while (end > start && (data[end - 1] == '\r' || data[end - 1] == '\n')) {
+			end--;
+		}
+		if (end > start) {
+			out.emplace_back(data + start, end - start);
+		}
+		start = i + 1;
+	}
+}
+
+// Ultimate ASI Loader redirects opens into its overload folder, but these lists are found
+// by scanning a directory rather than opened by name, so a mod's copies there are never
+// seen. Ask the loader where that folder is and scan it too. No loader, no change.
+typedef bool (WINAPI* GetOverloadPathWFn)(wchar_t*, size_t);
+
+static const std::filesystem::path& OverloadRoot() {
+	static std::filesystem::path root;
+	static bool resolved = false;
+	if (resolved) {
+		return root;
+	}
+	resolved = true;
+
+	HMODULE mods[256];
+	DWORD needed = 0;
+	if (K32EnumProcessModules(GetCurrentProcess(), mods, sizeof(mods), &needed)) {
+		const size_t count = std::min<size_t>(needed / sizeof(HMODULE), std::size(mods));
+		for (size_t i = 0; i < count; i++) {
+			auto fn = (GetOverloadPathWFn)GetProcAddress(mods[i], "GetOverloadPathW");
+			if (!fn) {
+				continue;
+			}
+			wchar_t buf[MAX_PATH] {};
+			if (fn(buf, std::size(buf)) && buf[0]) {
+				root = buf;
+				spdlog::info("BP_FilesysChanges: loader overload folder is {}", root.string());
+			}
+			break;
+		}
+	}
+	return root;
+}
+
+// The same stage folder inside the overload root, or empty when there is no loader.
+static std::filesystem::path OverloadMirror(const std::filesystem::path& directory) {
+	const std::filesystem::path& root = OverloadRoot();
+	if (root.empty()) {
+		return {};
+	}
+	std::error_code ec;
+	std::filesystem::path rel = std::filesystem::relative(directory, sExePath.parent_path(), ec);
+	if (ec || rel.empty() || *rel.begin() == "..") {
+		return {};
+	}
+	return root / rel;
+}
+
 static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 #define match_substr (isBPAssets ? "bp_assets_" : "manifest_")
 
@@ -56,12 +129,20 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 	// For after the loop
 	size_t originalFileSize = state->currentFileSize;
 
-	for (auto const& dir_entry : std::filesystem::directory_iterator(directory)) {
-		if (!dir_entry.is_regular_file()) {
+	std::vector<std::filesystem::path> entries;
+	std::error_code ec;
+	for (auto const& d : { directory, OverloadMirror(directory) }) {
+		if (d.empty() || !std::filesystem::is_directory(d, ec)) {
 			continue;
 		}
+		for (auto const& dir_entry : std::filesystem::directory_iterator(d, ec)) {
+			if (dir_entry.is_regular_file(ec)) {
+				entries.push_back(dir_entry.path());
+			}
+		}
+	}
 
-		std::filesystem::path entry_path = dir_entry.path();
+	for (auto const& entry_path : entries) {
 		if (entry_path.stem().string().starts_with(match_substr)
 			&& entry_path.extension() == ".txt") {
 			// Match found, load it
@@ -93,19 +174,46 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 		}
 	}
 	
-	// Put the vanilla data last, to ensure the modded data takes priority
+	// Merge instead of prepending. A cache path the stage already lists replaces it in
+	// place, since loading an asset twice starves the streamer and runs the stage in slow
+	// motion. New entries go on the end: the list is in dependency order.
 	size_t newFilesSize = state->currentFileSize - originalFileSize;
 	if (newFilesSize) {
-		char* originalFileBuffer = (char*)malloc(originalFileSize);
-		char* newFilesBuffer = (char*)malloc(newFilesSize);
-		memcpy(originalFileBuffer, *buffer, originalFileSize);
-		memcpy(newFilesBuffer, &(*buffer)[originalFileSize], newFilesSize);
-		
-		memcpy(*buffer, newFilesBuffer, newFilesSize);
-		memcpy(&(*buffer)[newFilesSize], originalFileBuffer, originalFileSize);
+		std::vector<std::string> lines, extra;
+		SplitLines(*buffer, originalFileSize, lines);
+		SplitLines(&(*buffer)[originalFileSize], newFilesSize, extra);
 
-		free(originalFileBuffer);
-		free(newFilesBuffer);
+		size_t replaced = 0, added = 0;
+		for (const std::string& line : extra) {
+			const std::string_view key = CacheKey(line);
+			auto match = std::find_if(lines.begin(), lines.end(),
+				[&](const std::string& v) { return CacheKey(v) == key; });
+			if (match != lines.end()) {
+				*match = line;
+				replaced++;
+			}
+			else {
+				lines.push_back(line);
+				added++;
+			}
+		}
+
+		std::string merged;
+		merged.reserve(state->currentFileSize + 2 * lines.size() + 1);
+		for (const std::string& line : lines) {
+			merged += line;
+			merged += "\r\n";
+		}
+
+		const size_t needed = RoundUp(merged.size() + 1);
+		if (needed > prevBufferSize) {
+			*buffer = (char*)realloc(*buffer, needed);
+		}
+		memcpy(*buffer, merged.data(), merged.size());
+		(*buffer)[merged.size()] = '\0';
+		state->currentFileSize = merged.size();
+		spdlog::info("{}: merged {} supplementary entries ({} replaced, {} added)",
+			std::filesystem::path(filePath).filename().string(), extra.size(), replaced, added);
 	}
 
 	return state->currentFileHandle;
@@ -118,13 +226,23 @@ void BP_FilesysChanges::Initialize() {
 		return;
 	}
 
+	if (Util::IsSteamOS()) // temporary. linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
+	{
+        spdlog::warn("BP_FilesysChanges: Temporarily disabled on SteamOS due to crashing issues with Linux filesystems.");
+        spdlog::warn("BP_FilesysChanges: Features reliant on expand_bp_assets will not be available.");
+        spdlog::warn("BP_FilesysChanges: This includes: Snake Holster Fix, Hostage Arm Fix, Shell 1 Core Camera Screen fix, Alternative Colonel MSX Sprite.");
+		return;
+	}
+
+	bLoaded = true;
+
 	// The HD Collection (hence, the Master Collection) have a different file system to the original games.
 	// Files are stored with their proper names, but loaded into a cache with their strcode names as needed.
 	// This cache is defined by manifest.txt and bp_assets.txt files for each stage and each codec character.
 	// To increase compatibility, we hook the cache loader and allow loading multiple such manifests.
 	// Specifically, the part of the loader that initializes a buffer and reads the file into memory.
 	//uint8_t* ManifestLoader = Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8D 4B", "manifest.txt loader");
-	uint8_t* BPAssetsLoader = Memory::PatternScan(baseModule, "40 53 55 56 57 41 54 41 56 41 57 48 81 EC 70 03 00 00", "bp_assets.txt loader");
+	uint8_t* BPAssetsLoader = Memory::PatternScan(baseModule, "40 53 55 56 57 41 54 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24", "bp_assets.txt loader");
 	if (!BPAssetsLoader) {
 		spdlog::error("Failed to match BP_LoadFlatFSSync.");
 		return;
@@ -148,7 +266,7 @@ void BP_FilesysChanges::Initialize() {
 	}
 	// system/libfs/loader_flatfs.cpp -> BP_LoadFlatFSSync()
 	{
-		MAKE_HOOK_MID(baseModule, "48 89 87 50 05 00 00 C7 07 03 00 00 00", "bp_assets.txt Union", {
+		MAKE_HOOK_MID(baseModule, "48 89 87 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? E8", "bp_assets.txt Union", {
 			// rax = file handle
 			// rdi = load state struct
 			ctx.rax = (uintptr_t)LoadSimilarFiles((BPLoadFileState*)ctx.rdi, true);

@@ -44,7 +44,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
 - Option to adjust scale and opacity of cutscene captions.
 - Option to disable Steam Achievement unlocking. (For speedrunners.)
-- SMAA (Screen Morphological Anti-Aliasing) support (MGS2/MGS3).
+- SMAA (Subpixel Morphological Anti-Aliasing) support (MGS2/MGS3).
 - Gamma correction for all games, correcting colors to appear more vibrant and making some lower blacks even deeper, as they would have appeared on an actual CRT screen.
 - Option (MGSHDFix Internal tab) to start MGS2 & MGS3 in their developer menu level select screens.
 - Speedrunner In-Game Timer / statistics overlay
@@ -312,7 +312,7 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
 [safetyhook](https://github.com/cursey/safetyhook) for hooking.  <br />
-[stb](https://github.com/nothings/stb) for png decoding.
-Gamma correction based off [SweetFX Shader Suite by CeeJay.dk].
-SMAA made by [Jorge Jimenez, Jose I. Echevarria, Belen Masia, Fernando Navarro, Diego Gutierrez](https://www.iryoku.com/smaa/).
+[stb](https://github.com/nothings/stb) for png decoding. <br />
+Gamma correction based off [SweetFX Shader Suite by CeeJay.dk](https://github.com/CeeJayDK/SweetFX). <br />
+SMAA made by [Jorge Jimenez, Jose I. Echevarria, Belen Masia, Fernando Navarro, Diego Gutierrez](https://www.iryoku.com/smaa/). <br />
 Universal Config Tool (made by ShizCalev/Afevis. Powered by SDL3.)

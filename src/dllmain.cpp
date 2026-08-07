@@ -21,6 +21,8 @@
 #include "pause_on_focus_loss.hpp"
 #include "stat_persistence.hpp"
 #include "mgs2_sunglasses.hpp"
+#include "pressure_inputs.hpp"
+#include "ds3_rumble.hpp"
 #include "mgs2_restore_dogtags.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
@@ -47,6 +49,7 @@
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
+#include "mgs2_glass_dmapack_overflow.hpp"
 #include "cpu_core_limit.hpp"
 #include "aiming_after_equip.hpp"
 #include "line_scaling.hpp"
@@ -55,6 +58,7 @@
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "mgs3_film_grain.hpp"
+#include "mgs3_crossfade_capture.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
 #include "mgs2_snakearm_voice.hpp"
@@ -92,12 +96,15 @@
 #include "mg1_display_scaling.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
+#include "photo_camera.hpp"
 #include "mgs2_newscrconcentrateblur.hpp"
+#include "mgs2_enhanced_demos.hpp"
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
@@ -475,7 +482,7 @@ void afterPresent()
     if (eGameType & (MGS2|MGS3))
     {
         CaptionReplacements::InitializeCaptionOverrides();
-
+        PhotoCamera::Initialize();
     }
 
     if (eGameType & MGS2)
@@ -485,6 +492,7 @@ void afterPresent()
         MGS2_ShimmerEffect::Init();
         MGS2_Crossfade::Initialize();
         g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+        MGS2_AiRayVision::Init();
     }
     else if (eGameType & MG)
     {
@@ -524,11 +532,16 @@ static void InitializeSubsystems()
     INITIALIZE(CustomResolutionAndBorderless::Init_AspectFOVFix());
     INITIALIZE(CustomResolutionAndBorderless::Init_HUDFix());
     INITIALIZE(Init_Miscellaneous());
+    INITIALIZE(BP_FilesysChanges::Initialize()); //keep this early. liveswaps & other asset replacements need to check its state.
 
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
+    INITIALIZE(PressureInputs::Initialize());
+    INITIALIZE(Ds3Rumble::Initialize());
+
     if (eGameType & MGS2)
     {
+        INITIALIZE(MGS2_GlassDmapackOverflow::Initialize());
         INITIALIZE(g_MGS2Sunglasses.Initialize());
         INITIALIZE(MGS2_RestoreDogtags::Initialize());
         INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
@@ -552,7 +565,6 @@ static void InitializeSubsystems()
     INITIALIZE(g_DistanceCulling.Initialize());
     INITIALIZE(OriginalCameraPositions::Activate());
     INITIALIZE(AdjustableCaptions::Apply());
-    INITIALIZE(BP_FilesysChanges::Initialize());
 
 
     INITIALIZE(ColorCorrection::Setup());
@@ -590,7 +602,9 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
         INITIALIZE(MGS2_CodecBackground::Setup());
         INITIALIZE(MGS2_ContrastShader::Setup());
+        INITIALIZE(MGS2_AiRayVision::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
+        INITIALIZE(MGS2EnhancedDemos::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
         INITIALIZE(SMAA_AA::CompileShaders());
         INITIALIZE(ScreenspaceFixes::Apply());
@@ -601,6 +615,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_WaterReflectionFix.Initialize());
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FilmGrain::Initialize());
+        INITIALIZE(MGS3_CrossfadeCapture::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
         INITIALIZE(CaptionReplacements::Setup());
@@ -758,6 +773,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         //spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
         g_StatPersistence.SaveStats();
         g_BusyLoopFix.Shutdown();
+        Ds3Rumble::Shutdown();
         spdlog::shutdown();
     }
     return TRUE;

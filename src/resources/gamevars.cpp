@@ -38,6 +38,11 @@ void GameVars::Initialize()
         p_GV_PauseLevel= reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 ?? 74 ?? A8 ?? 75", "MGS2: p_GV_PauseLevel") + 2));
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 0D ?? ?? ?? ?? E8", "MGS2: DG_Clock") + 2));
+
+        // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
+        p_DG_UnDrawFrameCount64 = reinterpret_cast<int64_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? BF", "MGS2: DG_UnDrawFrameCount64"), 3, 7));
+        p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B DF", "MGS2: DG_LastWhich"), 2, 6));
+        p_DG_ObjQueueInit = Memory::PatternScan(baseModule, "48 C7 05 ?? ?? ?? ?? 00 03 00 00", "MGS 2: GameVars: DG_InitChanlSystem() -> DG_ObjQueue init");
         p_DG_Chanls = reinterpret_cast<DG_CHANL*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CB", "MGS2: DG_Chanls") + 3));
         p_GM_CurrentStageMap = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B F8", "MGS2: GM_CurrentStageMap") + 2));
 
@@ -55,6 +60,8 @@ void GameVars::Initialize()
         spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: DG_Clock address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Clock - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_LastWhich address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_LastWhich - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_UnDrawFrameCount address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_UnDrawFrameCount64 - (uintptr_t)baseModule);
         spdlog::info("GameVars: DG_Chanls address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Chanls - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_CurrentStageMap address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_CurrentStageMap - (uintptr_t)baseModule);
         
@@ -83,6 +90,10 @@ void GameVars::Initialize()
         p_GM_MenuStatus = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "0B 05 ?? ?? ?? ?? A8 ?? 74 ?? 66 23 CF", "MGS3: p_GM_MenuStatus") + 2));
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 3D ?? ?? ?? ?? 89 3D", "MGS3: DG_Clock") + 2));
 
+        // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
+        p_DG_UnDrawFrameCount32 = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? BB ?? ?? ?? ?? 8B 05", "MGS3: DG_UnDrawFrameCount32"), 2, 6));
+        p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B FB", "MGS3: DG_LastWhich"), 2, 6));
+
         spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: scriptedSequenceFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)scriptedSequenceFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
@@ -94,7 +105,9 @@ void GameVars::Initialize()
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: DG_Clock address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Clock - (uintptr_t)baseModule);
-        
+        spdlog::info("GameVars: DG_LastWhich address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_LastWhich - (uintptr_t)baseModule);
+        spdlog::info("GameVars: DG_UnDrawFrameCount address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_UnDrawFrameCount32 - (uintptr_t)baseModule);
+
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 5F ?? E9 ?? ?? ?? ?? 39 1D", "GameVars: Level Transition"))
         {
             static SafetyHookMid levelTransitionMidHook {};
@@ -495,4 +508,27 @@ int& GameVars::DG_Clock() const
         return dummyDG_Clock;
     }
     return *p_DG_Clock;
+}
+
+int& GameVars::DG_LastWhich() const
+{
+    static int dummyDG_LastWhich = -1; // -1 so a failed scan never holds.
+    if (p_DG_LastWhich == nullptr)
+    {
+        return dummyDG_LastWhich;
+    }
+    return *p_DG_LastWhich;
+}
+
+int64_t GameVars::DG_UnDrawFrameCount() const
+{
+    if (p_DG_UnDrawFrameCount64 != nullptr)
+    {
+        return *p_DG_UnDrawFrameCount64;
+    }
+    if (p_DG_UnDrawFrameCount32 != nullptr)
+    {
+        return *p_DG_UnDrawFrameCount32;
+    }
+    return 0;
 }

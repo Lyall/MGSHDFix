@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "d3d11_api.hpp"
 
+#include "gamevars.hpp"
 #include "gpu_check.hpp"
 #include "logging.hpp"
 
@@ -14,12 +15,15 @@
 #include "input_handler.hpp"
 #include "mgs2_3rd_person_freecam.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_crossfade.hpp"
+#include "photo_camera.hpp"
+#include "mgs3_crossfade_capture.hpp"
 #include "mgs_smaa.hpp"
 #include "depth_of_field.hpp"
 #include "mgs3_film_grain.hpp"
@@ -40,27 +44,67 @@ namespace
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
 
-    // A frame-skip catch-up renders two game frames inside one present; the second one
-    // skips its glow/grade pass, so showing it flashes a dim ungraded frame (worst at
-    // crossfade ends). The PS2 never displayed skipped frames - hold the previous image.
+    // The PS2 never presented a frame it hadn't drawn; the port does, and it flashes dim.
     ComPtr<ID3D11Texture2D> g_heldFrame;
     UINT g_heldW = 0, g_heldH = 0;
     bool g_heldValid = false;
 
-    bool IsMergedPresent()
-    {
-        static uint32_t lastShadowSets = 0;
-        static bool mergedLast = false;
+    // A stage load parks DG_UnDrawFrameCount at DG_UNDRAW_MAX, and the port draws its own
+    // loading screen through those frames, so hold only the short scheduled runs.
+    constexpr int64_t kMaxHeldRun = 64;
 
-        const uint32_t shadowSets = SceneDepth::ReadAndResetShadowSetCount();
-        const bool merged = !mergedLast && lastShadowSets >= 2 && shadowSets >= lastShadowSets * 2;
-        lastShadowSets = shadowSets;
-        mergedLast = merged;
-        return merged;
+    // DG_StartFrame clears DG_LastWhich to -1 only on the path that draws.
+    bool IsUnDrawnFrame()
+    {
+        return g_GameVars.DG_LastWhich() >= 0 && g_GameVars.DG_UnDrawFrameCount() <= kMaxHeldRun;
+    }
+
+    // The MGS3 crossfade teardown can present one ungraded frame; it shows up as the same shadow
+    // targets rebinding at exactly double their steady rate. Only consulted inside the short
+    // window the crossfade Die hook arms, so scenery changes elsewhere can never trip it.
+    bool IsDoubleRenderedFrame(bool releaseWindow)
+    {
+        static std::vector<std::pair<const void*, uint32_t>> baseline;
+        static int steady = 0;
+        static bool firedLast = false;
+
+        std::vector<std::pair<const void*, uint32_t>> now;
+        SceneDepth::GetShadowPasses(now);
+
+        const bool sameTargets = now.size() == baseline.size() && !now.empty() &&
+            std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.first == b.first; });
+
+        if (sameTargets && std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.second == b.second; }))
+        {
+            steady++;
+            firedLast = false;
+            return false;
+        }
+
+        const bool doubled = sameTargets && !firedLast && steady >= 3 && releaseWindow &&
+            std::equal(now.begin(), now.end(), baseline.begin(),
+                [](const auto& a, const auto& b) { return a.second == b.second * 2; });
+
+        if (doubled)
+        {
+            firedLast = true;   // hold the duplicate, keep the baseline for the frames after it
+            return true;
+        }
+
+        baseline = now;
+        steady = 0;
+        firedLast = false;
+        return false;
     }
 
     void HoldPreviousFrame(IDXGISwapChain* swap)
     {
+        // Consume the passes every present, before any bail-out, or they accrue into a false double.
+        SceneDepth::ReadAndResetShadowSetCount();
+        const bool doubleRendered = IsDoubleRenderedFrame(MGS3_CrossfadeCapture::ReleaseWindowTick());
+
         auto* device = g_D3D11Hooks.d3dDevice.Get();
         auto* context = g_D3D11Hooks.d3dDeviceContext.Get();
         if (!device || !context || !swap)
@@ -94,11 +138,13 @@ namespace
             g_heldH = bb.Height;
         }
 
-        if (IsMergedPresent() && g_heldValid)
+        const bool undrawn = IsUnDrawnFrame();
+        if ((undrawn || doubleRendered) && g_heldValid)
         {
             if (g_Logging.bVerboseLogging)
             {
-                spdlog::info("D3D11Hooks: merged frame detected, holding previous image.");
+                spdlog::info("D3D11Hooks: {} frame, holding previous image. (stage={})",
+                    undrawn ? "undrawn" : "double-rendered", g_GameVars.GetCurrentStage());
             }
             context->CopyResource(backbuffer.Get(), g_heldFrame.Get());
             return;
@@ -237,6 +283,7 @@ namespace
                 MGS2_ContrastShader::Draw(pSwapChain, work->keep_r_plus, work->keep_g_plus, work->keep_b_plus, work->keep_a_plus, work->nega_posi_flag);
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
+            MGS2_AiRayVision::OnPresent();
             MGS2_Crossfade::OnPresent(pSwapChain);
         }
         else if (eGameType & MGS3)
@@ -262,6 +309,10 @@ ColorCorrection::Draw(pSwapChain);
         if (eGameType & MGS3)
         {
             MGS3FilmGrain::EndPresent();
+        }
+        if (eGameType & (MGS2 | MGS3))
+        {
+            PhotoCamera::OnPresent(pSwapChain);   // before the overlay: the photo is the game frame
         }
         D3D11TextOverlay::Tick(); //keep last.
         g_preMenuFired = false;

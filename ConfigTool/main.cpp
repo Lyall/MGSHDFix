@@ -76,12 +76,11 @@ protected:
             return;
         }
 
-        wxMessageBox(
-            msg,
-            "MGSHDFix Error",
-            wxOK | wxICON_ERROR,
-            m_parent
-        );
+        wxWindow* parent = m_parent;
+        Helper::RunOnMainThread([msg, parent]()
+        {
+            wxMessageBox(msg, "MGSHDFix Error", wxOK | wxICON_ERROR, parent);
+        });
     }
 
 private:
@@ -1359,7 +1358,8 @@ public:
 
         if (v != 0)
         {
-            CheckForUpdates();
+            // async'd update check, otherwise it can block the ui if the user is having connection issues to github/gitlab.
+            std::thread(&CheckForUpdates).detach();
         }
     }
 
@@ -2545,6 +2545,8 @@ public:
 
     int OnExit() override
     {
+        MarkUpdaterShuttingDown();
+
         CloseOpenGamepads();
 
         if (g_SDLGamepadInitialized)

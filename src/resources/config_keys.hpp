@@ -89,6 +89,14 @@ namespace ConfigKeys
     constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
 
 
+    constexpr const char* PhotoCamera_Section = "Various";
+    constexpr const char* PhotoCamera_Setting = "Digital Camera Steam Screenshots";
+    constexpr const char* PhotoCamera_Help = "";
+    constexpr const char* PhotoCamera_Tooltip =
+        "Every photo taken with the in-game camera also lands in your Steam screenshot\n"
+        "library at full resolution, alongside the tiny save-file photo the game keeps\n"
+        "for itself. MGS 2's digital camera and MGS 3's camera, ghosts included.";
+
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
     constexpr const char* DisableTextureFiltering_Help = "";
@@ -284,6 +292,9 @@ namespace ConfigKeys
     constexpr const char* MotionBlur_Tooltip = "Restores the game's built-in motion blur/trails, which was broken by the HD Collection.\n"
                                                "\n"
                                                "This effect can seem a little strong / distracting at higher resolutions.";
+    constexpr const char* MotionBlur_Option_Disabled = "Disabled";
+    constexpr const char* MotionBlur_Option_Full = "Full (Gameplay + Cutscenes)";
+    constexpr const char* MotionBlur_Option_CutscenesOnly = "Cutscenes Only";
 
 
     constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;
@@ -623,6 +634,42 @@ namespace ConfigKeys
     constexpr const char* SkipLauncher_Setting = "Skip Launcher";
     constexpr const char* SkipLauncher_Help = "";
     constexpr const char* SkipLauncher_Tooltip = "Skips the launcher app and runs the game directly.";
+
+    constexpr const char* SuppressAlternativeActions_Section = "Controller Settings";
+    constexpr const char* SuppressAlternativeActions_Setting = "Suppress Alternative Actions";
+    constexpr const char* SuppressAlternativeActions_Help = "(Experimental)";
+    constexpr const char* SuppressAlternativeActions_Tooltip =
+        "Drops the stand-ins the Master Collection added for the pressure it could not read,\n"
+        "leaving only the controls the games shipped with: the right stick goes back to the\n"
+        "camera instead of spraying coolant, and Triangle no longer slits a throat.\n"
+        "Needs Pressure Sensitive Facebuttons and a controller that reports pressure.";
+
+    constexpr const char* PressureSensitiveFacebuttons_Section = "Controller Settings";
+    constexpr const char* PressureSensitiveFacebuttons_Setting = "Pressure Sensitive Facebuttons";
+    constexpr const char* PressureSensitiveFacebuttons_Help = "(Experimental)";
+    constexpr const char* PressureSensitiveFacebuttons_Tooltip =
+        "Restores pressure sensitivity to the face buttons, shoulders and d-pad, and the\n"
+        "mechanics that depend on it: the CQC throat slit, the knife's hard stab, grenade\n"
+        "throw distance, the locker lean and the coolant spray.\n"
+        "Requires a pressure capable pad (DualShock 2 or 3) through DsHidMini in SDF or SXS\n"
+        "mode. May require updating your bindings.\n"
+        "Has no effect if such a pad is not connected.";
+
+    constexpr const char* Ds3Rumble_Section = "Controller Settings";
+    constexpr const char* Ds3Rumble_Setting = "DualShock 3 Rumble";
+    constexpr const char* Ds3Rumble_Help = "(Experimental)";
+    constexpr const char* Ds3Rumble_Tooltip =
+        "Restores rumble to a DualShock 3 on DsHidMini: the Master Collection sends vibration\n"
+        "through Steam, which cannot see the pad in SDF or SXS mode, so the motors stay dead.\n"
+        "This drives them directly with the game's own vibration values.\n"
+        "Needs Pressure Sensitive Facebuttons.";
+
+    constexpr const char* Ds3RumbleStrength_Section = "Controller Settings";
+    constexpr const char* Ds3RumbleStrength_Setting = "DualShock 3 Rumble Strength";
+    constexpr const char* Ds3RumbleStrength_Help = "";
+    constexpr const char* Ds3RumbleStrength_Tooltip =
+        "Scales the heavy motor as a percentage, up to 200. The light motor is on/off\n"
+        "in hardware and is not affected.";
 
     constexpr const char* CtrlType_Section = "Controller Settings";
     constexpr const char* CtrlType_Setting = "Button Icons";

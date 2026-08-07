@@ -3,6 +3,7 @@
 #include "texture_live_swaps.hpp"
 
 #include "common.hpp"
+#include "expand_bp_assets.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
 
@@ -219,7 +220,8 @@ void TextureLiveSwaps::ApplyFixes()
 #define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
                           && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
 
-    if (exists(sExePath / "assets" / "tri" / "us" / "spacecore_w24c1.tri")
+    if (BP_FilesysChanges::bLoaded && //linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
+        exists(sExePath / "assets" / "tri" / "us" / "spacecore_w24c1.tri")
         && TEXTURE_EU_JP("_win" / "spacecore_w24c1_rev_disp_02.bmp.ctxr")
         && EU_JP("stage" / "d036p03" / "manifest_cbfc_hostage_fixes.txt")
         && EU_JP("stage" / "d036p03" / "bp_assets_cbfc_hostage_fixes.txt"))
@@ -266,7 +268,8 @@ void TextureLiveSwaps::ApplyFixes()
     }
 
 
-    if (EU_JP("stage" / "r_sna_b" / "bp_assets_holster_fix.txt") &&
+    if (BP_FilesysChanges::bLoaded && //linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
+        EU_JP("stage" / "r_sna_b" / "bp_assets_holster_fix.txt") &&
         EU_JP("stage" / "r_tnk0" / "bp_assets_holster_fix.txt") &&
         EU_JP("stage" / "r_plt_s" / "bp_assets_holster_fix.txt") &&
         EU_JP("stage" / "r_vr_s" / "bp_assets_holster_fix.txt") &&

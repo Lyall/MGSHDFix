@@ -243,7 +243,9 @@ namespace
         std::string msg =
             "Failed to contact " + joined +
             " while update checks are enabled.\n\n"
-            "Is your firewall or network blocking the game from reaching the update provider?";
+            "Is your firewall or network blocking the game from reaching the update provider?\n"
+            "\n"
+            "If you wish to completely disable MGSHDFix's update checking, you can do so under the MGSHDFix Internal settings tab.";
 
         MessageBoxA(nullptr, msg.c_str(), (sFixName + " update checker").c_str(), MB_OK | MB_ICONWARNING);
         g_ShownUpdateContactError = true;
@@ -388,20 +390,19 @@ bool LatestVersionChecker::loadCache(std::string& cachedLatest, std::string& war
 
     std::string versionLine;
     std::string timeLine;
+    std::string installedVersionLine;
 
-    if (!std::getline(file, versionLine) || !std::getline(file, timeLine))
+    if (!std::getline(file, versionLine) || !std::getline(file, timeLine) || !std::getline(file, warnedVersion) || !std::getline(file, installedVersionLine))
     {
         return false;
     }
 
     cachedLatest = versionLine;
 
-    std::getline(file, warnedVersion);
-
     auto cachedTime = parseISO8601(timeLine);
     auto now = std::chrono::system_clock::now();
     auto age = std::chrono::duration_cast<std::chrono::hours>(now - cachedTime);
-    cacheIsFresh = (age.count() <= iCacheTTLHours);
+    cacheIsFresh = age.count() <= iCacheTTLHours && installedVersionLine == VERSION_STRING;
 
     return true;
 }
@@ -417,6 +418,7 @@ void LatestVersionChecker::saveCache(const std::string& latestVersion, const std
     file << latestVersion << "\n";
     file << currentTimeISO8601() << "\n";
     file << warnedVersion << "\n";
+    file << VERSION_STRING << "\n";
 }
 
 std::wstring LatestVersionChecker::buildUserAgent() const

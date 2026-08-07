@@ -86,6 +86,18 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MG|MGS2|MGS3), ConfigKeys::Language_Section, ConfigKeys::Language_Setting, ConfigKeys::Language_Help, ConfigKeys::Language_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, "", {} },
 
+        { (MGS2 | MGS3), ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, ConfigKeys::PressureSensitiveFacebuttons_Help, ConfigKeys::PressureSensitiveFacebuttons_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+        { (MGS2 | MGS3), ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, ConfigKeys::SuppressAlternativeActions_Help, ConfigKeys::SuppressAlternativeActions_Tooltip,
+          std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
+
+        { (MGS2 | MGS3), ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, ConfigKeys::Ds3Rumble_Help, ConfigKeys::Ds3Rumble_Tooltip,
+          std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
+
+        { (MGS2 | MGS3), ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, ConfigKeys::Ds3RumbleStrength_Help, ConfigKeys::Ds3RumbleStrength_Tooltip,
+          std::make_pair(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting), false, Field::Int, 100, 0, 200 },
+
         { (MG|MGS2|MGS3), ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, ConfigKeys::CtrlType_Help, ConfigKeys::CtrlType_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
@@ -225,6 +237,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2), ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, ConfigKeys::MGS2_FixDamageType_Help, ConfigKeys::MGS2_FixDamageType_Tooltip,
             std::nullopt, false, Field::Bool, false},
 
+        { (MGS2 | MGS3), ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, ConfigKeys::PhotoCamera_Help, ConfigKeys::PhotoCamera_Tooltip,
+          std::nullopt, false, Field::Bool, true},
+
 
             {(MGS2), ConfigKeys::MGS2_Lifebar_Name_Custom_Section, "", "", "", std::nullopt, false, Field::Spacer },
 
@@ -283,7 +298,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
           std::nullopt, false, Field::Bool, true },
 
         {(MGS2), ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, ConfigKeys::MotionBlur_Help, ConfigKeys::MotionBlur_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+          std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MotionBlur_Option_Full, {ConfigKeys::MotionBlur_Option_Full, ConfigKeys::MotionBlur_Option_CutscenesOnly, ConfigKeys::MotionBlur_Option_Disabled} },
 
         { (MGS2|MGS3), ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, ConfigKeys::FixDepthOfField_Help, ConfigKeys::FixDepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
