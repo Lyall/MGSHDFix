@@ -9,6 +9,7 @@
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
 #include "pressure_inputs.hpp"
+#include "photo_camera.hpp"
 #include "ds3_rumble.hpp"
 #include "mgs2_blood_stains.hpp"
 #include "mgs2_scope_warp.hpp"
@@ -489,6 +490,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, bDisableTextureFiltering);
     LOG_CONFIG(ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, bDisableTextureFiltering);
+
+    ConfigHelper::getValue(ini, ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, PhotoCamera::bEnabled);
+    LOG_CONFIG(ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, PhotoCamera::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, CustomResolutionAndBorderless::bFramebufferFix);
     LOG_CONFIG(ConfigKeys::FramebufferFix_Section, ConfigKeys::FramebufferFix_Setting, CustomResolutionAndBorderless::bFramebufferFix);

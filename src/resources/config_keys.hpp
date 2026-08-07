@@ -89,6 +89,14 @@ namespace ConfigKeys
     constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
 
 
+    constexpr const char* PhotoCamera_Section = "Various";
+    constexpr const char* PhotoCamera_Setting = "Digital Camera Steam Screenshots";
+    constexpr const char* PhotoCamera_Help = "";
+    constexpr const char* PhotoCamera_Tooltip =
+        "Every photo taken with the in-game camera also lands in your Steam screenshot\n"
+        "library at full resolution, alongside the tiny save-file photo the game keeps\n"
+        "for itself. MGS 2's digital camera and MGS 3's camera, ghosts included.";
+
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
     constexpr const char* DisableTextureFiltering_Help = "";
