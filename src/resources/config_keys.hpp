@@ -865,6 +865,13 @@ namespace ConfigKeys
     constexpr const char* CycleWireframeMode_Help = "";
     constexpr const char* CycleWireframeMode_Tooltip = "Cycle between wireframe rendering modes (available when Rain Width Fix is enabled).";
 
+    constexpr const char* DevMenuHotkey_Section = "Hotkeys";
+    constexpr const char* DevMenuHotkey_Setting = "Return to Developer Menu";
+    constexpr const char* DevMenuHotkey_Help = "";
+    constexpr const char* DevMenuHotkey_Tooltip = "Returns to the developer menu at any time, from anywhere in the game.\n"
+                                                  "\n"
+                                                  "Requires \"Start Game in Developer Menu\" to be enabled.";
+
 
     // Achievements
 
