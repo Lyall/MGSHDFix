@@ -1,4 +1,4 @@
-// ReSharper disable CppClangTidyModernizeRawStringLiteral
+﻿// ReSharper disable CppClangTidyModernizeRawStringLiteral
 #include "stdafx.h"
 
 
@@ -9,7 +9,6 @@
 #include "game_funcs.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
-#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "custom_resolution_and_borderless.hpp"

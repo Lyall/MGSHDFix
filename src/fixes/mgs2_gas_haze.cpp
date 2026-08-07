@@ -24,10 +24,6 @@ namespace
     constexpr float       kTintScale        = 1.0f;     // raw PS2 colour byte; the shader does GS modulate
     constexpr float       kAlphaGain        = 1.99f;    // PS2 blends at As/128; D3D uses byte/255 -> 255/128
     constexpr float       kAlphaCap         = 1.0f;
-    // Overbright per feedback iteration. The GS sampled the buffer it was drawing into, so overlapping
-    // puffs compounded the cue's 0x81 modulate several times per frame; we sample one frozen capture, so
-    // fold that in here. Tuned against PS2 footage.
-    constexpr float       kFeedbackGain      = 1.05f;
 
     constexpr const char* kDieSig =
         "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
@@ -47,7 +43,7 @@ namespace
     constexpr int       kNVerts        = 17;
 
     constexpr float     kUv2Norm   = 1.0f / 4096.0f;
-    constexpr float     kWarp      = 0.9751f;          // per-puff lens magnify; PS2 used 0.98, +25% warp strength
+    constexpr float     kWarp      = 0.98f;            // per-puff lens magnify (PS2's constant)
     constexpr float     kSoften    = 0.00176f;         // whisper seam-hiding blur (tiny; not the old smear)
     constexpr float     kDepthBias = 0.0002f;          // reversed-Z occlusion epsilon (tuned)
 
@@ -80,9 +76,8 @@ namespace
         float2 invDraw;      // 1/512, 1/448
         float2 screenSize;   // backbuffer w,h
         float  depthBias;
-        float  feedbackGain; // overbright ramp (>1) compounded through the previous-frame feedback
         float  soften;       // whisper 4-tap radius to hide circle-fan polygon seams (normalised UV)
-        float  _pad;
+        float2 _pad;
     };
     struct VSIn  { float2 pos:POSITION; float2 uv:TEXCOORD0; float z:TEXCOORD1; float4 col:COLOR0; };
     struct VSOut { float4 pos:SV_Position; float2 uv:TEXCOORD0; float z:TEXCOORD1; float4 col:COLOR0; };
@@ -98,7 +93,6 @@ namespace
         float3 c = sceneTex.Sample(sampLin, i.uv).rgb * 0.6;
         [unroll] for (int k = 0; k < 4; k++) c += sceneTex.Sample(sampLin, i.uv + K4[k]*soften).rgb * 0.1;
         c *= i.col.rgb * 1.9921875;   // GS modulate (vertex colour; 0x80 = neutral)
-        c *= feedbackGain;            // see kFeedbackGain
         float2 screenUV = i.pos.xy / screenSize;
         float  sceneZ = depthTex.Sample(sampPt, screenUV).r;
         // reversed-Z (far=0, nearer=larger): hide where scene geometry is nearer than this puff
@@ -392,7 +386,7 @@ void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResou
         D3D11_MAPPED_SUBRESOURCE m;
         ctx->Map(g_cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m);
         float cb[8] = { 1.0f / kDrawW, 1.0f / kDrawH, (float)bb.Width, (float)bb.Height,
-                        kDepthBias, kFeedbackGain, kSoften, 0.0f };
+                        kDepthBias, kSoften, 0.0f, 0.0f };
         memcpy(m.pData, cb, sizeof(cb));
         ctx->Unmap(g_cb.Get(), 0);
     }
