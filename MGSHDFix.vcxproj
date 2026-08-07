@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\mgs2_codec_background.cpp" />
     <ClCompile Include="src\fixes\screenspace_fixes.cpp" />
     <ClCompile Include="src\fixes\caption_replacements.cpp" />
     <ClCompile Include="src\features\mg1_display_scaling.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\mgs2_codec_background.hpp" />
     <ClInclude Include="src\fixes\screenspace_fixes.hpp" />
     <ClInclude Include="src\fixes\mgs2_tanker_snake_snap.hpp" />
     <ClInclude Include="src\fixes\mgs2_glass_dmapack_overflow.hpp" />
