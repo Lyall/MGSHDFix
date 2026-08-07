@@ -207,6 +207,9 @@ namespace
     {
         bArmed = false;
         iPlateOrdinal = -1;
+        uCandidate = 0;
+        uProbed[0] = 0;
+        uProbed[1] = 0;
 
         return Die512_hook.call<int64_t>(a1);
     }
@@ -319,7 +322,7 @@ void MGS2_AiRayVision::Init()
 
 void MGS2_AiRayVision::OnPresent()
 {
-    if (!bLoaded)
+    if (!bLoaded || !bArmed)
     {
         return;
     }
