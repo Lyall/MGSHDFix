@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "photo_camera.hpp"
-
+#include "steamworks_api.hpp"
 #include "common.hpp"
 #include "logging.hpp"
 #include "d3d11_api.hpp"
