@@ -203,13 +203,13 @@ void Ds3Rumble::Initialize()
     {
         // pad_send_vibration's movzx pair before the Steam bridge call: al = small, cl = big.
         uint8_t* address = Memory::PatternScan(baseModule,
-            "84 D2 75 ?? 84 C9",
+            "0F B6 D1 0F B6 C8",
             "MGS 2: DS3 Rumble - Vibration Sink | libgv\\pad.c -> pad_send_vibration()");
         if (address == nullptr)
         {
             return;
         }
-        gSinkHook = safetyhook::create_mid(address + 28, [](SafetyHookContext& ctx)
+        gSinkHook = safetyhook::create_mid(address, [](SafetyHookContext& ctx)
         {
             Publish(static_cast<uint16_t>(((ctx.rax & 0xFF) << 8) | (ctx.rcx & 0xFF)));
         });
