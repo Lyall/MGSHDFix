@@ -10,7 +10,10 @@
 #include "logging.hpp"
 
 typedef long long (__fastcall* FASTCALL_1IN1OUT)(void*);
+typedef void* (__fastcall* FASTCALL_2IN1OUT)(void*, size_t);
 typedef void* (__fastcall* FASTCALL_3IN1OUT)(void*, void*, size_t);
+
+#define debug(...) do { if (g_Logging.bVerboseLogging) { spdlog::info("BPFilesysChanges: " __VA_ARGS__); } } while (0)
 
 // core components of struct; original definition in system/libfs/loader_flatfs.h
 typedef struct {
@@ -35,6 +38,8 @@ namespace {
 	//FASTCALL_3IN1OUT BPReadFile;
 	FASTCALL_1IN1OUT BPCloseFile;
 	//FASTCALL_1IN1OUT BPIsReadDone;
+	FASTCALL_1IN1OUT* MGSMalloc;
+	//FASTCALL_1IN1OUT* MGSFree;
 }
 
 // Helper for optimized file buffer allocation
@@ -45,11 +50,31 @@ static inline size_t RoundUp(size_t size) {
 	return ret;
 }
 
+static inline void* MGSRealloc(void* oldBuf, size_t newSize) {
+	//void* newBuf = (void*)(*MGSMalloc)((void*)newSize);
+	//memcpy(newBuf, oldBuf, oldSize);
+	//(*MGSFree)(oldBuf);
+	//return newBuf;
+	// 
+	// Get game realloc function relatively from the table that holds malloc.
+	return ((FASTCALL_2IN1OUT)(MGSMalloc[2]))(oldBuf, newSize);
+}
+
 // Key on the cache fields, not the source path. One texture can be registered against
 // several tri groups, and those lines differ only in the last field.
 static inline std::string_view CacheKey(const std::string& line) {
 	const size_t comma = line.find(',');
 	return comma == std::string::npos ? std::string_view(line) : std::string_view(line).substr(comma + 1);
+}
+
+static inline std::string_view GetExtension(const std::string& line) {
+	const size_t period = line.find_last_of('.');
+	if (period == std::string::npos) {
+		return std::string_view(line);
+	}
+	else {
+		return std::string_view(line).substr(period + 1);
+	}
 }
 
 static void SplitLines(const char* data, size_t size, std::vector<std::string>& out) {
@@ -118,6 +143,7 @@ static std::filesystem::path OverloadMirror(const std::filesystem::path& directo
 
 static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 #define match_substr (isBPAssets ? "bp_assets_" : "manifest_")
+	debug("loading a {}", isBPAssets ? "bp_assets" : "manifest");
 
 	// Find files similar to the currently used path.
 	const char* filePath = isBPAssets ? state->bpAssetsPath : state->manifestPath;
@@ -146,22 +172,24 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 		if (entry_path.stem().string().starts_with(match_substr)
 			&& entry_path.extension() == ".txt") {
 			// Match found, load it
-			// Need to update: buffer, file size, file handle
-			BPCloseFile(state->currentFileHandle);
-			state->currentFileHandle = (void*)BPOpenFile((void*)entry_path.string().c_str());
-			size_t newFileSize = BPGetFileSize(state->currentFileHandle);
+			// Need to update: buffer, file size, NOT file handle
+			//BPCloseFile(state->currentFileHandle);
+			//state->currentFileHandle = (void*)BPOpenFile((void*)entry_path.string().c_str());
+			// The Master Collection file reader is asynchronous. We need more consistency than that.
+			FILE* fp = fopen(entry_path.string().c_str(), "rb");
+			fseek(fp, 0, SEEK_END);
+			size_t newFileSize = ftell(fp);
+			fseek(fp, 0, SEEK_SET);
 			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1);
 			if (newBufferSize > prevBufferSize) {
+				debug("reallocing");
 				char* oldBuf = *buffer;
-				*buffer = (char*)realloc(oldBuf, newBufferSize);
-				//spdlog::info("buffer for {} was at {}, now {}", filePath, (long long)oldBuf, (long long)*buffer);
+				*buffer = (char*)MGSRealloc(oldBuf, newBufferSize);
+				debug("buffer for {} was at {}, now {}", filePath, (void*)oldBuf, (void*)*buffer);
 				(*buffer)[state->currentFileSize + newFileSize] = '\0';
 			}
 			prevBufferSize = newBufferSize;
-			// Oh, and read the new file, of course.
-			//state->currentFileHandle = BPReadFile(state->currentFileHandle, &(*buffer)[state->currentFileSize], newFileSize);
-			// The Master Collection file reader is asynchronous. We need more consistency than that.
-			FILE* fp = fopen(entry_path.string().c_str(), "rb");
+			// And read the new file, of course.
 			fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
 			fclose(fp);
 			if ((*buffer)[state->currentFileSize] == '\0')
@@ -179,41 +207,71 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 	// motion. New entries go on the end: the list is in dependency order.
 	size_t newFilesSize = state->currentFileSize - originalFileSize;
 	if (newFilesSize) {
-		std::vector<std::string> lines, extra;
-		SplitLines(*buffer, originalFileSize, lines);
-		SplitLines(&(*buffer)[originalFileSize], newFilesSize, extra);
+		std::vector<std::string> lines;
+		SplitLines(*buffer, state->currentFileSize, lines);
+
+		// Sort lines by asset type and remove duplicates (later entry prioritized)
+		typedef std::pair<std::string, std::vector<std::string>> LineGroup;
+		std::vector<LineGroup> sortedLines = {
+			{"tri", {}},
+			{"hzx", {}},
+			{"var", {}},
+			{"sar", {}},
+			{"row", {}},
+			{"mar", {}},
+			{"lt2", {}},
+			{"kms", {}},
+			{"evm", {}},
+			{"cv2", {}},
+			{"gcx", {}},
+			{"ctxr", {}},
+			{"cmdl", {}},
+			{"other", {}} // Extension-match iterator defaults to this
+		};
 
 		size_t replaced = 0, added = 0;
-		for (const std::string& line : extra) {
+		for (const std::string& line : lines) {
+			// Get appropriate vector 
+			const std::string_view extension = GetExtension(line);
+			// std::prev causes fallback case to be "other" rather than sortedLines.end()
+			auto matchGroup = std::find_if(sortedLines.begin(), std::prev(sortedLines.end()),
+				[&](const LineGroup& v) { return v.first == extension; });
+			std::vector<std::string>& lineVec = (*matchGroup).second;
+
+			// Insert into vector, with duplicate cleanup
 			const std::string_view key = CacheKey(line);
-			auto match = std::find_if(lines.begin(), lines.end(),
+			auto match = std::find_if(lineVec.begin(), lineVec.end(),
 				[&](const std::string& v) { return CacheKey(v) == key; });
-			if (match != lines.end()) {
+			if (match != lineVec.end()) {
 				*match = line;
 				replaced++;
 			}
 			else {
-				lines.push_back(line);
 				added++;
+				lineVec.push_back(line);
 			}
 		}
 
 		std::string merged;
-		merged.reserve(state->currentFileSize + 2 * lines.size() + 1);
-		for (const std::string& line : lines) {
-			merged += line;
-			merged += "\r\n";
+		merged.reserve(state->currentFileSize + lines.size() + 1);
+		for (const LineGroup& group : sortedLines) {
+			for (const std::string& line : group.second) {
+				merged += line;
+				// Unix newline is slightly more optimal as the game's parser discards CR.
+				merged += "\n";
+			}
 		}
 
 		const size_t needed = RoundUp(merged.size() + 1);
 		if (needed > prevBufferSize) {
-			*buffer = (char*)realloc(*buffer, needed);
+			spdlog::warn("BPFilesysChanges: Unexpected reallocation (should have had space already?)");
+			*buffer = (char*)MGSRealloc(*buffer, needed);
 		}
 		memcpy(*buffer, merged.data(), merged.size());
 		(*buffer)[merged.size()] = '\0';
 		state->currentFileSize = merged.size();
 		spdlog::info("{}: merged {} supplementary entries ({} replaced, {} added)",
-			std::filesystem::path(filePath).filename().string(), extra.size(), replaced, added);
+			std::filesystem::path(filePath).filename().string(), replaced + added, replaced, added);
 	}
 
 	return state->currentFileHandle;
@@ -253,23 +311,21 @@ void BP_FilesysChanges::Initialize() {
 	BPOpenFile = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x91);
 	BPGetFileSize = (FASTCALL_1IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0xa6);
 	//BPReadFile = (FASTCALL_3IN1OUT)Memory::GetRelativeOffset(BPAssetsLoader + 0x10f);
+	MGSMalloc = (FASTCALL_1IN1OUT*)Memory::GetRelativeOffset(BPAssetsLoader + 0xe3);
+	//MGSFree = (FASTCALL_1IN1OUT*)Memory::GetRelativeOffset(BPAssetsLoader + 0x1e2);
 
 
-	// Both these injections are immediately after the file is read in; we can close the handle and open new ones as needed.
-	// system/libfs/loader_flatfs.cpp -> BP_BeginLoadFlatFS()
-	{
-		MAKE_HOOK_MID(baseModule, "48 89 83 50 05 00 00 48 83 C4 20 5B C3", "manifest.txt Union", {
-			// rax = file handle
-			// rbx = load state struct
-			ctx.rax = (uintptr_t)LoadSimilarFiles((BPLoadFileState*)ctx.rbx, false);
-		});
-	}
+	// Both these injections are immediately before the file is closed; we realloc and add data to the buffer.
 	// system/libfs/loader_flatfs.cpp -> BP_LoadFlatFSSync()
 	{
-		MAKE_HOOK_MID(baseModule, "48 89 87 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8B 8F ?? ?? ?? ?? E8", "bp_assets.txt Union", {
-			// rax = file handle
+		MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 87 08 01 00 00 48 8D 8F 18 01 00 00", "manifest.txt Union", {
 			// rdi = load state struct
-			ctx.rax = (uintptr_t)LoadSimilarFiles((BPLoadFileState*)ctx.rdi, true);
+			LoadSimilarFiles((BPLoadFileState*)ctx.rdi, false);
+		});
+
+		MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 8B 87 20 02 00 00 B9 10 57 00 00", "bp_assets.txt Union", {
+			// rdi = load state struct
+			LoadSimilarFiles((BPLoadFileState*)ctx.rdi, true);
 		});
 	}
 }
