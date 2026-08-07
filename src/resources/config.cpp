@@ -9,6 +9,7 @@
 #include "aiming_after_equip.hpp"
 #include "aiming_full_tilt.hpp"
 #include "pressure_inputs.hpp"
+#include "ds3_rumble.hpp"
 #include "mgs2_blood_stains.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
@@ -660,6 +661,13 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
     LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+    LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+    Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
+    LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
 
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
