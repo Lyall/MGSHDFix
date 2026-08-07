@@ -284,14 +284,6 @@ void BP_FilesysChanges::Initialize() {
 		return;
 	}
 
-	if (Util::IsSteamOS()) // temporary. linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
-	{
-        spdlog::warn("BP_FilesysChanges: Temporarily disabled on SteamOS due to crashing issues with Linux filesystems.");
-        spdlog::warn("BP_FilesysChanges: Features reliant on expand_bp_assets will not be available.");
-        spdlog::warn("BP_FilesysChanges: This includes: Snake Holster Fix, Hostage Arm Fix, Shell 1 Core Camera Screen fix, Alternative Colonel MSX Sprite.");
-		return;
-	}
-
 	bLoaded = true;
 
 	// The HD Collection (hence, the Master Collection) have a different file system to the original games.

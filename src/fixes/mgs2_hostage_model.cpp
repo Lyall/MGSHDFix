@@ -23,11 +23,6 @@ void HostageModel::ApplyFix()
         return;
     }
 
-    if (!BP_FilesysChanges::bLoaded) //linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
-    {
-        return;
-    }
-
     // Depends on custom models (provided by community bugfix pack)
 #define EU_JP(X) (exists(sExePath / "eu" / X) && exists(sExePath / "jp" / X))
 
