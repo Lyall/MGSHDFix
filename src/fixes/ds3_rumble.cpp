@@ -203,8 +203,7 @@ void Ds3Rumble::Initialize()
     {
         // pad_send_vibration's movzx pair before the Steam bridge call: al = small, cl = big.
         uint8_t* address = Memory::PatternScan(baseModule,
-            "84 D2 75 ?? 84 C9 75 ?? 42 38 94 66 ?? ?? ?? ?? 75 ?? 42 38 94 66 ?? ?? ?? ?? 74 ?? "
-            "0F B6 D1 0F B6 C8 E8",
+            "84 D2 75 ?? 84 C9",
             "MGS 2: DS3 Rumble - Vibration Sink | libgv\\pad.c -> pad_send_vibration()");
         if (address == nullptr)
         {
@@ -221,7 +220,7 @@ void Ds3Rumble::Initialize()
         // The logical pad's motor bytes; the engine's consume sits behind a Steam-visibility
         // gate that never passes with the pad hidden, so read and clear them here.
         uint8_t* address = Memory::PatternScan(baseModule,
-            "85 FF 74 ?? 44 39 7B 20 74 ?? 0F B6 53 39 41 8B C7 0F B6 4B 38",
+            "85 FF 74 ?? 44 39 7B",
             "MGS 3: DS3 Rumble - Vibration Sink | input poll pad loop");
         if (address == nullptr)
         {
