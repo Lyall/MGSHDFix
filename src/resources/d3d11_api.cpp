@@ -28,6 +28,7 @@
 #include "depth_of_field.hpp"
 #include "mgs3_film_grain.hpp"
 #include "scene_depth.hpp"
+#include "mgs2_soft_shadows.hpp"
 #include "d3d11_state_cache.hpp"
 void afterPresent();
 
@@ -327,6 +328,7 @@ ColorCorrection::Draw(pSwapChain);
         if (SUCCEEDED(result))
         {
             RefreshDeviceAndContext(pSwapChain);
+            MGS2SoftShadows::Reset();
         }
 
         return result;

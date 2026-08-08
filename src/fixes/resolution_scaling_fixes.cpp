@@ -288,6 +288,12 @@ void MGS2Fixes()
                         shadowRes = 512;
                     }
 
+                    // Half size is the most one bilinear tap can resolve cleanly.
+                    if (ctx.rdi == 0x17)
+                    {
+                        shadowRes /= 2;
+                    }
+
                     ctx.rcx = shadowRes;
                     ctx.rdx = shadowRes;
                 }

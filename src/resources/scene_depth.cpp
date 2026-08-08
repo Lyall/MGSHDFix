@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "scene_depth.hpp"
+#include "mgs2_soft_shadows.hpp"
 
 #include "common.hpp"
 #include "d3d11_api.hpp"
@@ -273,6 +274,8 @@ namespace
         ID3D11DepthStencilView* dsv)
     {
         // Shadow passes are the square depth-attached targets.
+        ID3D11Texture2D* squareShadow = nullptr;
+        UINT squareShadowDim = 0;
         if (numViews > 0 && rtvs && rtvs[0] && dsv)
         {
             ComPtr<ID3D11Resource> res;
@@ -284,6 +287,8 @@ namespace
                 tex->GetDesc(&d);
                 if (d.Width == d.Height && d.Width >= 256)
                 {
+                    squareShadow = tex.Get();
+                    squareShadowDim = d.Width;
                     g_shadowSetCounter.fetch_add(1, std::memory_order_relaxed);
                     const uint32_t slot = g_shadowPassCount.fetch_add(1, std::memory_order_relaxed);
                     if (slot < std::size(g_shadowPasses))
@@ -293,6 +298,9 @@ namespace
                 }
             }
         }
+
+        // Every bind, so the blur lands when the projector stops drawing and starts sampling.
+        MGS2SoftShadows::NoteSquareTarget(ctx, squareShadow, squareShadowDim);
 
         if (dsv)
         {
