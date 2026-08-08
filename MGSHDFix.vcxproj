@@ -35,6 +35,7 @@
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
     <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
+    <ClCompile Include="src\fixes\mgs2_bandana_mass.cpp" />
     <ClCompile Include="src\fixes\mgs2_thermal_goggles.cpp" />
     <ClCompile Include="src\features\cutscene_pausing.cpp" />
     <ClCompile Include="src\features\adjustable_captions.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
+    <ClInclude Include="src\fixes\mgs2_bandana_mass.hpp" />
     <ClInclude Include="src\fixes\mgs2_thermal_goggles.hpp" />
     <ClInclude Include="src\features\cutscene_pausing.hpp" />
     <ClInclude Include="src\resources\mgs2_status_flags.hpp" />

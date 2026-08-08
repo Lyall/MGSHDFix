@@ -107,6 +107,7 @@
 #include "playtime_fixes.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
+#include "mgs2_bandana_mass.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
 #include "screenspace_fixes.hpp"
@@ -555,6 +556,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RetroColonel::Initialize());
         INITIALIZE(MGS2_SnakeTalesRadar::Apply());
         INITIALIZE(MGS2ThermalGoggles::Setup());
+        INITIALIZE(MGS2BandanaMass::Initialize());
         INITIALIZE(CustomPlayerName::Apply());
         INITIALIZE(MGS2VampFPVPunch::Apply());
     }
