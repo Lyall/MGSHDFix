@@ -10,6 +10,8 @@ struct alignas(16) FVECTOR { float x, y, z, w; };
 
 struct alignas(16) FMATRIX { float m[4][4]; };
 
+struct SVECTOR { short x, y, z, w; };
+
 struct alignas(16) DG_CHANL
 {
     FMATRIX eye_pers;               // 0x000
@@ -74,6 +76,9 @@ enum class MGS3GameMode
     VirtuousMission,
     SnakeEater
 };
+
+
+
 
 class GameVars final
 {
@@ -153,6 +158,13 @@ public:
 
     [[nodiscard]] DG_CHANL* DG_Chanl(int i) const { return p_DG_Chanls ? p_DG_Chanls + i : nullptr; }
     [[nodiscard]] int GM_CurrentStageMap() const { return p_GM_CurrentStageMap ? *p_GM_CurrentStageMap : 0; }
+    [[nodiscard]] const SVECTOR* GM_CameraDir() const { return p_GM_CameraDir; }
+    [[nodiscard]] uintptr_t GM_PlayerWork() const { return p_GM_PlayerWork ? *p_GM_PlayerWork : 0; }
+    [[nodiscard]] uintptr_t GM_PlayerBody() const { return p_GM_PlayerBody ? *p_GM_PlayerBody : 0; }
+
+    [[nodiscard]] const FVECTOR* GM_CameraTarget() const { return p_GM_CameraTarget; }
+    [[nodiscard]] const FVECTOR* ArmCamShift() const { return p_ArmCamShift; }
+
 
 private:
     static void OnLevelTransition();
@@ -179,6 +191,11 @@ private:
 
     int32_t* p_GM_CurrentStageMap = nullptr;
 
+    SVECTOR* p_GM_CameraDir = nullptr;
+    uintptr_t* p_GM_PlayerWork = nullptr;
+    uintptr_t* p_GM_PlayerBody = nullptr;
+    FVECTOR* p_GM_CameraTarget = nullptr;
+    FVECTOR* p_ArmCamShift = nullptr;
 
 };
 
