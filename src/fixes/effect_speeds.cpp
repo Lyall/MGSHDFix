@@ -603,6 +603,28 @@ namespace
         ctx.rip = SkipFrameWindow() ? g_trafficActHold : g_trafficActRun;
     }
 
+    // Demo lightning: the bolt's life and its blink are both counted in frames, so at 60 it dies
+    // twice as fast and flickers twice as quickly.
+    SafetyHookMid h_ThunderLife {};
+    SafetyHookMid h_ThunderBlink {};
+    uintptr_t g_thunderLifeHold = 0;
+
+    void ThunderLife_hook(SafetyHookContext& ctx)
+    {
+        if (SkipFrameWindow())
+        {
+            ctx.rip = g_thunderLifeHold;
+        }
+    }
+
+    void ThunderBlink_hook(SafetyHookContext& ctx)
+    {
+        if (In30fpsWindow())
+        {
+            ctx.rax >>= 1;
+        }
+    }
+
     // Kamome (seagull) demo pacing. PS2 ran the bird demos below 60fps, so birds moved and
     // flapped at ~half rate. Draw stays at full 60 (prims are double-buffered) - the rates
     // get halved instead. Gameplay birds untouched.
@@ -955,6 +977,21 @@ void EffectSpeedFix::Initialize()
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
     CREATE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name, pattern, label);
+
+    if (uint8_t* life = Memory::PatternScan(baseModule, "FF C8 89 87 ?? ?? ?? ?? 48 83 C4 60 5F C3",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() life"))
+    {
+        g_thunderLifeHold = reinterpret_cast<uintptr_t>(life) + 8;
+        h_ThunderLife = safetyhook::create_mid(life, ThunderLife_hook);
+        LOG_HOOK(h_ThunderLife, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() life")
+    }
+
+    if (uint8_t* blink = Memory::PatternScan(baseModule, "25 01 00 00 80 7D ?? FF C8 83 C8 FE FF C0 85 C0 75 ?? 48 8B 87 ?? ?? ?? ?? 81 88",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() blink"))
+    {
+        h_ThunderBlink = safetyhook::create_mid(blink, ThunderBlink_hook);
+        LOG_HOOK(h_ThunderBlink, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() blink")
+    }
 
     MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(INSTALL_MGS2_FRAMESKIP_HOOK)
 
