@@ -44,7 +44,7 @@ namespace {
 
 // Helper for optimized file buffer allocation
 static inline size_t RoundUp(size_t size) {
-	int ret = 1;
+	size_t ret = 1;
 	while (ret < size)
 		ret <<= 1;
 	return ret;
@@ -176,11 +176,17 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			//BPCloseFile(state->currentFileHandle);
 			//state->currentFileHandle = (void*)BPOpenFile((void*)entry_path.string().c_str());
 			// The Master Collection file reader is asynchronous. We need more consistency than that.
-			FILE* fp = fopen(entry_path.string().c_str(), "rb");
+			FILE* fp = _wfopen(entry_path.c_str(), L"rb");
+			if (!fp) {
+				spdlog::warn("BPFilesysChanges: Failed to open {} with error \"{}\". Skipping.", entry_path.string(), strerror(errno));
+				continue;
+			}
 			fseek(fp, 0, SEEK_END);
 			size_t newFileSize = ftell(fp);
 			fseek(fp, 0, SEEK_SET);
-			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1);
+			// In case a file is missing its trailing newline, make sure to insert that before it causes problems.
+			bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
+			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1 + needNewline);
 			if (newBufferSize > prevBufferSize) {
 				debug("reallocing");
 				char* oldBuf = *buffer;
@@ -190,8 +196,14 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 			}
 			prevBufferSize = newBufferSize;
 			// And read the new file, of course.
+			if (needNewline) {
+				debug("Newline added.");
+				(*buffer)[state->currentFileSize] = '\n';
+				state->currentFileSize++;
+			}
 			fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
 			fclose(fp);
+
 			if ((*buffer)[state->currentFileSize] == '\0')
 			{
 				// ??? mission failed? what?
