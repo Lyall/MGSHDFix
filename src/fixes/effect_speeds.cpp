@@ -952,7 +952,7 @@ void EffectSpeedFix::Initialize()
         spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
     }
 
-    if (uint8_t* spawn = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 41 8B 06 48 83 C5 04 89 43 F8 49 83 C6 10",
+    if (uint8_t* spawn = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C5 ?? 89 43",
         "MGS 2: Effect Speed Fix : user\okajima\demo_effect\d_splash_motion.c -> Act() droplet spawn"))
     {
         g_splashSpawnResume = reinterpret_cast<uintptr_t>(spawn) + 5;
