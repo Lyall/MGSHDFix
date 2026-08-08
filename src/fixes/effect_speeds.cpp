@@ -592,6 +592,39 @@ namespace
         return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
     }
 
+    // EVM hair, which also drives Solidus's mantle, Snake's coat hem and a flag. The timestep only
+    // reaches the solver through the acceleration, so a quarter of it runs the hair at half speed.
+    // It still runs every frame, so the roots stay on the head. Skipping it is what detached Vamp.
+    constexpr float kHairHalfStep = 0.25f;
+
+    SafetyHookMid h_HairStepScale {};
+    SafetyHookMid h_HairStepRestore {};
+    uintptr_t g_hairInvMassOffset = 0;
+    float* g_pHairInvMass = nullptr;
+    float g_hairInvMass = 0.0f;
+
+    void HairStepScale_hook(SafetyHookContext& ctx)
+    {
+        g_pHairInvMass = nullptr;
+        if (!In30fpsWindow())
+        {
+            return;
+        }
+
+        g_pHairInvMass = reinterpret_cast<float*>(ctx.rdi + g_hairInvMassOffset);
+        g_hairInvMass = *g_pHairInvMass;
+        *g_pHairInvMass = g_hairInvMass * kHairHalfStep;
+    }
+
+    void HairStepRestore_hook(SafetyHookContext&)
+    {
+        if (g_pHairInvMass)
+        {
+            *g_pHairInvMass = g_hairInvMass;
+            g_pHairInvMass = nullptr;
+        }
+    }
+
     // t00a2d bridge traffic. traffic.c moves the cars a fixed step per Act, so they run at the port's
     // rate, not the 30fps the demo was authored at. Hold every other frame.
     SafetyHookMid h_TrafficDemoAct {};
@@ -940,6 +973,32 @@ void EffectSpeedFix::Initialize()
     else
     {
         spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
+    }
+
+    // Both or neither: a scale without its restore would leave the hair limp for good.
+    uint8_t* hairStep = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F 60 E8 ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 4C 8B A4 24",
+        "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm()");
+    uint8_t* hairDone = Memory::PatternScan(baseModule, "8B 87 C4 02 00 00 4C 8B A4 24 ?? ?? ?? ?? 48 8B B4 24 ?? ?? ?? ?? 85 C0 7E",
+        "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm() return");
+
+    auto invMassLoads = Memory::FindMultiplePatternMatches(baseModule,
+        "F3 44 0F 10 8D ?? ?? ?? ?? 41 0F 28 F9 41 0F 28 F1");
+
+    if (invMassLoads.size() != 2)
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : expected 2 hairevm.c inv_m loads, found {}.", invMassLoads.size());
+    }
+    else if (hairStep && hairDone)
+    {
+        g_hairInvMassOffset = hairStep[6] + *reinterpret_cast<int32_t*>(invMassLoads[0] + 5);
+    }
+
+    if (g_hairInvMassOffset)
+    {
+        h_HairStepScale = safetyhook::create_mid(hairStep, HairStepScale_hook);
+        LOG_HOOK(h_HairStepScale, "MGS 2: Effect Speed Fix : hairevm.c -> hair timestep")
+        h_HairStepRestore = safetyhook::create_mid(hairDone, HairStepRestore_hook);
+        LOG_HOOK(h_HairStepRestore, "MGS 2: Effect Speed Fix : hairevm.c -> hair timestep restore")
     }
 
     // The port's own frame gate for the traffic Act: skip the car update on 4 frames in 5.
