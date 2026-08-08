@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\fixes\mgs2_codec_background.cpp" />
     <ClCompile Include="src\fixes\screenspace_fixes.cpp" />
     <ClCompile Include="src\fixes\caption_replacements.cpp" />
     <ClCompile Include="src\features\mg1_display_scaling.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="src\fixes\mgs2_ray_photo_voice.cpp" />
     <ClCompile Include="src\fixes\mgs2_parrot_radar_fix.cpp" />
     <ClCompile Include="src\fixes\playtime_fixes.cpp" />
+    <ClCompile Include="src\fixes\mgs2_ai_ray_vision.cpp" />
     <ClCompile Include="src\fixes\mgs2_contrast_fix.cpp" />
     <ClCompile Include="src\fixes\mgs2_shimmer.cpp" />
     <ClCompile Include="src\fixes\mgs2_crossfade.cpp" />
@@ -74,7 +76,6 @@
     <ClCompile Include="src\fixes\mgs2_water_effects.cpp" />
     <ClCompile Include="src\fixes\mgs2_lens_droplets.cpp" />
     <ClCompile Include="src\fixes\mgs2_gas_haze.cpp" />
-    <ClCompile Include="src\fixes\mgs2_flare_occlusion.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_blur.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_camera_judder.cpp" />
     <ClCompile Include="src\fixes\mgs2_hair_layering.cpp" />
@@ -83,6 +84,8 @@
     <ClCompile Include="src\fixes\mgs2_railgun_beam.cpp" />
     <ClCompile Include="src\features\keep_aiming_after_firing.cpp" />
     <ClCompile Include="src\fixes\pressure_inputs.cpp" />
+    <ClCompile Include="src\fixes\photo_camera.cpp" />
+    <ClCompile Include="src\fixes\ds3_rumble.cpp" />
     <ClCompile Include="src\features\mgs2_sunglasses.cpp" />
     <ClCompile Include="src\resources\config.cpp" />
     <ClCompile Include="external\safetyhook\src\allocator.cpp">
@@ -146,6 +149,7 @@
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\fixes\mgs2_codec_background.hpp" />
     <ClInclude Include="src\fixes\screenspace_fixes.hpp" />
     <ClInclude Include="src\fixes\mgs2_tanker_snake_snap.hpp" />
     <ClInclude Include="src\fixes\mgs2_glass_dmapack_overflow.hpp" />
@@ -174,6 +178,7 @@
     <ClInclude Include="src\fixes\mgs2_ray_photo_voice.hpp" />
     <ClInclude Include="src\fixes\mgs2_parrot_radar_fix.hpp" />
     <ClInclude Include="src\fixes\playtime_fixes.hpp" />
+    <ClInclude Include="src\fixes\mgs2_ai_ray_vision.hpp" />
     <ClInclude Include="src\fixes\mgs2_contrast_fix.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer.hpp" />
     <ClInclude Include="src\fixes\mgs2_shimmer_noise_map.hpp" />
@@ -222,7 +227,6 @@
     <ClInclude Include="src\fixes\mgs2_water_effects.hpp" />
     <ClInclude Include="src\fixes\mgs2_lens_droplets.hpp" />
     <ClInclude Include="src\fixes\mgs2_gas_haze.hpp" />
-    <ClInclude Include="src\fixes\mgs2_flare_occlusion.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_blur.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_camera_judder.hpp" />
     <ClInclude Include="src\fixes\mgs2_hair_layering.hpp" />
@@ -232,6 +236,8 @@
     <ClInclude Include="src\fixes\mgs2_autopacket.hpp" />
     <ClInclude Include="src\features\keep_aiming_after_firing.hpp" />
     <ClInclude Include="src\fixes\pressure_inputs.hpp" />
+    <ClInclude Include="src\fixes\photo_camera.hpp" />
+    <ClInclude Include="src\fixes\ds3_rumble.hpp" />
     <ClInclude Include="src\features\mgs2_sunglasses.hpp" />
     <ClInclude Include="src\resources\config.hpp" />
     <ClInclude Include="external\safetyhook\include\safetyhook.hpp" />

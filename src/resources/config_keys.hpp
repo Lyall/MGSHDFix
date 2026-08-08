@@ -89,6 +89,14 @@ namespace ConfigKeys
     constexpr const char* ColorCorrection_Enabled_Tooltip = "Corrects gamma levels to more closely match the original presentation on a CRT.";
 
 
+    constexpr const char* PhotoCamera_Section = "Various";
+    constexpr const char* PhotoCamera_Setting = "Digital Camera Steam Screenshots";
+    constexpr const char* PhotoCamera_Help = "";
+    constexpr const char* PhotoCamera_Tooltip =
+        "Every photo taken with the in-game camera also lands in your Steam screenshot\n"
+        "library at full resolution, alongside the tiny save-file photo the game keeps\n"
+        "for itself. MGS 2's digital camera and MGS 3's camera, ghosts included.";
+
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
     constexpr const char* DisableTextureFiltering_Help = "";
@@ -647,6 +655,22 @@ namespace ConfigKeys
         "mode. May require updating your bindings.\n"
         "Has no effect if such a pad is not connected.";
 
+    constexpr const char* Ds3Rumble_Section = "Controller Settings";
+    constexpr const char* Ds3Rumble_Setting = "DualShock 3 Rumble";
+    constexpr const char* Ds3Rumble_Help = "(Experimental)";
+    constexpr const char* Ds3Rumble_Tooltip =
+        "Restores rumble to a DualShock 3 on DsHidMini: the Master Collection sends vibration\n"
+        "through Steam, which cannot see the pad in SDF or SXS mode, so the motors stay dead.\n"
+        "This drives them directly with the game's own vibration values.\n"
+        "Needs Pressure Sensitive Facebuttons.";
+
+    constexpr const char* Ds3RumbleStrength_Section = "Controller Settings";
+    constexpr const char* Ds3RumbleStrength_Setting = "DualShock 3 Rumble Strength";
+    constexpr const char* Ds3RumbleStrength_Help = "";
+    constexpr const char* Ds3RumbleStrength_Tooltip =
+        "Scales the heavy motor as a percentage, up to 200. The light motor is on/off\n"
+        "in hardware and is not affected.";
+
     constexpr const char* CtrlType_Section = "Controller Settings";
     constexpr const char* CtrlType_Setting = "Button Icons";
     constexpr const char* CtrlType_Help = "";
@@ -840,6 +864,13 @@ namespace ConfigKeys
     constexpr const char* CycleWireframeMode_Setting = "Cycle Wireframe Mode";
     constexpr const char* CycleWireframeMode_Help = "";
     constexpr const char* CycleWireframeMode_Tooltip = "Cycle between wireframe rendering modes (available when Rain Width Fix is enabled).";
+
+    constexpr const char* DevMenuHotkey_Section = "Hotkeys";
+    constexpr const char* DevMenuHotkey_Setting = "Return to Developer Menu";
+    constexpr const char* DevMenuHotkey_Help = "";
+    constexpr const char* DevMenuHotkey_Tooltip = "Returns to the developer menu at any time, from anywhere in the game.\n"
+                                                  "\n"
+                                                  "Requires \"Start Game in Developer Menu\" to be enabled.";
 
 
     // Achievements

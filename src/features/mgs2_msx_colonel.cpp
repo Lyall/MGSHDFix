@@ -36,8 +36,7 @@ void MGS2RetroColonel::Initialize()
 #define TEXTURE_EU_JP(X) (exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_eu" / X) \
                           && exists(sExePath / "textures" / "flatlist" / "ovr_stm" / "ovr_jp" / X))
 
-    if (BP_FilesysChanges::bLoaded && //linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
-        g_MGS2RetroColonel.bUseNewSprite
+    if (g_MGS2RetroColonel.bUseNewSprite
         && exists(sExePath / "assets" / "tri" / "us" / "spacecore_taisa.tri")
         && TEXTURE_EU_JP("_win" / "spacecore_taisa_subsist_alp_ovl.bmp.ctxr")
         && EU_JP("face" / "f01e" / "manifest_cbfc_spacecore_msx_subsis.txt")
@@ -55,8 +54,7 @@ void MGS2RetroColonel::Initialize()
         camPosList[1][4] = 6;
         camPosList[1][5] = 10796;
     }
-    else if (BP_FilesysChanges::bLoaded && //linux filesystems are stupid and shit reliant on expand_bp_assets can randomly cause crashing.
-             g_MGS2RetroColonel.bUseNewSprite)
+    else if (g_MGS2RetroColonel.bUseNewSprite)
     {
         spdlog::warn("MGS2: MG2 Colonel Sprite: MGS2 Community Bugfix Compilation files missing. Using original sprite and position.");
     }

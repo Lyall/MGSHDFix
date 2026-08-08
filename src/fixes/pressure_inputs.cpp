@@ -47,6 +47,17 @@ namespace
     uint8_t gPressure[kSlots] {};
     std::mutex gPressureLock;
 
+    // The open device's path and kProfiles index, for rumble's own write handle.
+    std::wstring gDevicePath;
+    int gDeviceMode = -1;
+
+    void PublishDevice(const std::wstring& path, int mode)
+    {
+        const std::lock_guard<std::mutex> guard(gPressureLock);
+        gDevicePath = path;
+        gDeviceMode = mode;
+    }
+
     constexpr DWORD kReadGone = ~0u;    // disconnected, as opposed to merely quiet
 
     // Reconnect backoff. Discovery walks the whole HID class key, so without this a session with
@@ -162,6 +173,7 @@ namespace
             {
                 found = h;
                 gProfile = &kProfiles[0];
+                PublishDevice(path, 0);
                 continue;
             }
 
@@ -179,6 +191,7 @@ namespace
             {
                 found = h;
                 gProfile = profile;
+                PublishDevice(path, static_cast<int>(profile - kProfiles));
             }
             else
             {
@@ -258,6 +271,7 @@ namespace
                 pad = nullptr;
                 gProfile = nullptr;
                 gHavePad = false;
+                PublishDevice({}, -1);
                 Sleep(retry);
                 retry = std::min<DWORD>(retry * 2, kRetryMax);
                 continue;
@@ -1092,6 +1106,26 @@ namespace
             }
         });
     }
+}
+
+bool PressureInputs::HavePad()
+{
+    return gHavePad.load();
+}
+
+int PressureInputs::Ds3DeviceMode(std::wstring& path)
+{
+    if (!gHavePad.load())
+    {
+        return -1;
+    }
+    const std::lock_guard<std::mutex> guard(gPressureLock);
+    if (gDeviceMode < 0)
+    {
+        return -1;
+    }
+    path = gDevicePath;
+    return gDeviceMode;
 }
 
 void PressureInputs::Initialize()

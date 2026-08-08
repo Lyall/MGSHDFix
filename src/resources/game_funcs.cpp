@@ -9,6 +9,7 @@
 #include "gamevars.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs3_linkvarbuf.hpp"
+#include "input_handler.hpp"
 /*
 #if defined(RELEASE_BUILD)
 #define RELEASE_CLEARED
@@ -89,7 +90,22 @@ namespace
 
     constexpr unsigned int STRCODE_SCENERIO_GCX = GameVars::GV_StrCode("scenerio");
 
+    // Swap to the select stage under scenerio.gcx and flag a load, the same request the game's own
+    // debug helper issues. Set by whichever game hooked, since the linkvars differ.
+    void (*EnterDeveloperMenu)() = nullptr;
 
+    void RegisterDevMenuHotkey()
+    {
+        if (!Shared_Gamefuncs::DevMenuHotkey || !EnterDeveloperMenu)
+        {
+            return;
+        }
+
+        g_InputHandler.RegisterHotkey(Shared_Gamefuncs::DevMenuHotkey, "Return to Developer Menu", []()
+        {
+            EnterDeveloperMenu();
+        });
+    }
 }
 
 namespace MGS2_GameFuncs
@@ -171,6 +187,23 @@ void MGS2_GameFuncs::HookGameFuncs()
         GM_LoadRequest = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? A8 10 74 ?? E8", "MGS2: GM_PlayerStatus") + 2));
         spdlog::info("MGS2_GameFuncs: GM_LoadRequest address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_LoadRequest - (uintptr_t)baseModule);
 
+        EnterDeveloperMenu = []()
+        {
+            using namespace Shared_Gamefuncs;
+            using namespace MGS2_LinkVarBuf;
+            using namespace MGS2Stages;
+
+            if (!GM_SetArea || !GCL_ChangeSenerioCode || !GM_LoadRequest)
+            {
+                return;
+            }
+
+            GM_SetArea(GM_SaveArea, SELECT);
+            GCL_ChangeSenerioCode(STRCODE_SCENERIO_GCX);
+            GM_Result = 9999;
+            *GM_LoadRequest = 0x0002 | 0x1;
+        };
+
         MAKE_HOOK_MID(baseModule, "E9 ?? ?? ?? ?? C7 43 ?? 01 00 00 00 E9", "GM_StartDaemon() -> Act() | Set developer menu on startup", {
             static bool startup = true;
             if (!startup)
@@ -178,11 +211,10 @@ void MGS2_GameFuncs::HookGameFuncs()
                 return;
             }
             startup = false;
-            GM_SetArea(GM_SaveArea, SELECT);
-            GCL_ChangeSenerioCode(STRCODE_SCENERIO_GCX);
-            GM_Result = 9999;
-            *GM_LoadRequest = 0x0002 | 0x1;
+            EnterDeveloperMenu();
                       });
+
+        RegisterDevMenuHotkey();
     }
 
 
@@ -261,8 +293,27 @@ void MGS3_Gamefuncs::HookGameFuncs()
         spdlog::info("MGS3_GameFuncs: GCL_ChangeSenerioCode address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GCL_ChangeSenerioCode - (uintptr_t)baseModule);
 
 
-        GM_LoadRequest = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "83 0D ?? ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS3: GM_PlayerStatus") + 2));
+        // or dword ptr [rip+disp32], imm8 - the imm8 makes this 7 bytes, so the displacement is
+        // not the last field and GetRelativeOffset would land a byte low.
+        GM_LoadRequest = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "83 0D ?? ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS3: GM_PlayerStatus"), 2, 7));
         spdlog::info("MGS3_GameFuncs: GM_LoadRequest address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_LoadRequest - (uintptr_t)baseModule);
+
+        EnterDeveloperMenu = []()
+        {
+            using namespace Shared_Gamefuncs;
+            using namespace MGS3_LinkVarBuf;
+            using namespace MGS3Stages;
+
+            if (!GM_SetArea || !GCL_ChangeSenerioCode || !GM_LoadRequest)
+            {
+                return;
+            }
+
+            GM_SetArea(GM_SaveArea, SELECT);
+            GCL_ChangeSenerioCode(STRCODE_SCENERIO_GCX);
+            GM_Result = 9999;
+            *GM_LoadRequest = 0x3;
+        };
 
         if (uint8_t* Act_addr = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 89 5C 24", "GM_StartDaemon() -> Act() | Set developer menu on startup"))
         {
@@ -277,14 +328,13 @@ void MGS3_Gamefuncs::HookGameFuncs()
                     }
 
                     startup = false;
-                    GM_SetArea(GM_SaveArea, SELECT);
-                    GCL_ChangeSenerioCode(STRCODE_SCENERIO_GCX);
-                    GM_Result = 9999;
-                    *GM_LoadRequest = 0x3;
+                    EnterDeveloperMenu();
                 });
 
             LOG_HOOK(Act_Startup_hook, "GM_StartDaemon() -> Act()+0x406 | Set developer menu on startup");
         }
+
+        RegisterDevMenuHotkey();
     }
 
 

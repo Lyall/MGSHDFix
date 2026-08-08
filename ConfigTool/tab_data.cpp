@@ -92,6 +92,12 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2 | MGS3), ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, ConfigKeys::SuppressAlternativeActions_Help, ConfigKeys::SuppressAlternativeActions_Tooltip,
           std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
 
+        { (MGS2 | MGS3), ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, ConfigKeys::Ds3Rumble_Help, ConfigKeys::Ds3Rumble_Tooltip,
+          std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
+
+        { (MGS2 | MGS3), ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, ConfigKeys::Ds3RumbleStrength_Help, ConfigKeys::Ds3RumbleStrength_Tooltip,
+          std::make_pair(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting), false, Field::Int, 100, 0, 200 },
+
         { (MG|MGS2|MGS3), ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, ConfigKeys::CtrlType_Help, ConfigKeys::CtrlType_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
@@ -230,6 +236,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
         { (MGS2), ConfigKeys::MGS2_FixDamageType_Section, ConfigKeys::MGS2_FixDamageType_Setting, ConfigKeys::MGS2_FixDamageType_Help, ConfigKeys::MGS2_FixDamageType_Tooltip,
             std::nullopt, false, Field::Bool, false},
+
+        { (MGS2 | MGS3), ConfigKeys::PhotoCamera_Section, ConfigKeys::PhotoCamera_Setting, ConfigKeys::PhotoCamera_Help, ConfigKeys::PhotoCamera_Tooltip,
+          std::nullopt, false, Field::Bool, true},
 
 
             {(MGS2), ConfigKeys::MGS2_Lifebar_Name_Custom_Section, "", "", "", std::nullopt, false, Field::Spacer },
@@ -456,6 +465,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MGS2|MGS3), ConfigKeys::CycleWireframeMode_Section, ConfigKeys::CycleWireframeMode_Setting, ConfigKeys::CycleWireframeMode_Help, ConfigKeys::CycleWireframeMode_Tooltip,
           std::make_pair(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting), false, Field::Hotkey, 0, 0, 0, "End"},
+
+        { (MGS2|MGS3), ConfigKeys::DevMenuHotkey_Section, ConfigKeys::DevMenuHotkey_Setting, ConfigKeys::DevMenuHotkey_Help, ConfigKeys::DevMenuHotkey_Tooltip,
+          std::make_pair(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
 
         { (MGS3), ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },

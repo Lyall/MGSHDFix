@@ -12,6 +12,7 @@ namespace Shared_Gamefuncs
 {
     void HookFuncs();
     inline bool StartInDebugMode = false;
+    inline int  DevMenuHotkey = 0;
 
 
     using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);

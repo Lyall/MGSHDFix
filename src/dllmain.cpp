@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "common.hpp"
 #include "logging.hpp"
@@ -22,6 +22,7 @@
 #include "stat_persistence.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "pressure_inputs.hpp"
+#include "ds3_rumble.hpp"
 #include "mgs2_restore_dogtags.hpp"
 #include "swap_menu_buttons.hpp"
 #include "mgs2_restore_phone_jingle.hpp"
@@ -44,7 +45,6 @@
 #include "mgs2_hair_layering.hpp"
 #include "mgs2_rotor_procession.hpp"
 #include "mgs2_reverb_wet_level.hpp"
-#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
@@ -93,12 +93,15 @@
 #include "cutscene_pausing.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
+#include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_parrot_radar_fix.hpp"
 #include "mgs2_restore_sol_radar.hpp"
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_shimmer.hpp"
 #include "mgs2_crossfade.hpp"
+#include "photo_camera.hpp"
 #include "mgs2_newscrconcentrateblur.hpp"
 #include "mgs2_enhanced_demos.hpp"
 #include "playtime_fixes.hpp"
@@ -478,15 +481,17 @@ void afterPresent()
     if (eGameType & (MGS2|MGS3))
     {
         CaptionReplacements::InitializeCaptionOverrides();
-
+        PhotoCamera::Initialize();
     }
 
     if (eGameType & MGS2)
     {
+        MGS2_CodecBackground::Init();
         MGS2_ContrastShader::Init();
         MGS2_ShimmerEffect::Init();
         MGS2_Crossfade::Initialize();
         g_MGS2UnderwaterFilterFix.InstallD3D11StateHooks();
+        MGS2_AiRayVision::Init();
     }
     else if (eGameType & MG)
     {
@@ -531,6 +536,7 @@ static void InitializeSubsystems()
         //Features
     //INITIALIZE(g_TextureBufferSize.Initialize());
     INITIALIZE(PressureInputs::Initialize());
+    INITIALIZE(Ds3Rumble::Initialize());
 
     if (eGameType & MGS2)
     {
@@ -577,7 +583,6 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RotorProcession::Initialize());
         INITIALIZE(MGS2TankerSnakeSnap::Initialize());
         INITIALIZE(FixReverbWetLevel::Initialize());
-        INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
@@ -593,7 +598,9 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_ParrotRadarFix::Apply());
         INITIALIZE(HostageModel::ApplyFix());
         INITIALIZE(MGS2RayPhotoVoice::Initialize());
+        INITIALIZE(MGS2_CodecBackground::Setup());
         INITIALIZE(MGS2_ContrastShader::Setup());
+        INITIALIZE(MGS2_AiRayVision::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
         INITIALIZE(MGS2EnhancedDemos::Initialize());
         INITIALIZE(CaptionReplacements::Setup());
@@ -764,6 +771,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         //spdlog::info("DLL_PROCESS_DETACH called, shutting down MGSHDFix.");
         g_StatPersistence.SaveStats();
         g_BusyLoopFix.Shutdown();
+        Ds3Rumble::Shutdown();
         spdlog::shutdown();
     }
     return TRUE;

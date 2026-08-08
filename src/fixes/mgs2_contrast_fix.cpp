@@ -62,17 +62,6 @@ namespace
 
 
 
-    safetyhook::InlineHook MGS2_Die512_hook;
-    /// user\\skoba\\weapon\\ai_ray_layout.c -> NewAiRaySight() -> Die()
-    int64_t __fastcall MGS2_Die512(int64_t a1)
-    {
-        MGS2_ContrastShader::ClearOverride();
-        //  spdlog::info("user\skoba\weapon\ai_ray_layout.c -> NewAiRaySight() -> Die(): clearing contrast shader override.");
-
-        return MGS2_Die512_hook.call<int64_t>(a1);
-    }
-
-
     MGS2_ContrastShader::ContrastWork overrideContrastWork = {};
     bool bOverrideActive = false;
 };
@@ -164,19 +153,6 @@ void MGS2_ContrastShader::Setup()
     }
 
     spdlog::info("MGS2_ContrastShader: Compiled contrast shader successfully");
-
-    MAKE_HOOK_MID(baseModule, "48 89 B3 ?? ?? ?? ?? 89 83", "NewAiRaySight -> Act -> MsgDie()", {
-            MGS2_ContrastShader::SetOverride(6, 15, 15, 189, 0);
-                  });
-
-    if (uint8_t* MGS2_Die512ScanResult = Memory::PatternScan(baseModule, "4C 8D 05 ?? ?? ?? ?? 89 B8 ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? C7 80 ?? ?? ?? ?? ?? ?? ?? ?? 48 8B CB", "MGS 2: user\\skoba\\weapon\\ai_ray_layout.c -> NewAiRaySight() -> Die()"))
-    {
-        const uintptr_t MGS2_Die512Address = Memory::GetRipRelativeAddress(MGS2_Die512ScanResult, 3, 7);
-
-        MGS2_Die512_hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS2_Die512Address), reinterpret_cast<void*>(MGS2_Die512));
-        LOG_HOOK(MGS2_Die512_hook, "MGS 2: Clear Contrast Shader Override : Die_512")
-    }
-
 
       /*
     MAKE_HOOK_MID(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 85 C0 75 ?? B8", "L2D_ReleaseLayout", {

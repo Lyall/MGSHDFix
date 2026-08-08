@@ -1,4 +1,4 @@
-// ReSharper disable CppClangTidyModernizeRawStringLiteral
+﻿// ReSharper disable CppClangTidyModernizeRawStringLiteral
 #include "stdafx.h"
 
 
@@ -9,7 +9,6 @@
 #include "game_funcs.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
-#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "custom_resolution_and_borderless.hpp"
@@ -593,6 +592,17 @@ namespace
         return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
     }
 
+    // t00a2d bridge traffic. traffic.c moves the cars a fixed step per Act, so they run at the port's
+    // rate, not the 30fps the demo was authored at. Hold every other frame.
+    SafetyHookMid h_TrafficDemoAct {};
+    uintptr_t g_trafficActRun = 0;
+    uintptr_t g_trafficActHold = 0;
+
+    void TrafficDemoAct_hook(SafetyHookContext& ctx)
+    {
+        ctx.rip = SkipFrameWindow() ? g_trafficActHold : g_trafficActRun;
+    }
+
     // Kamome (seagull) demo pacing. PS2 ran the bird demos below 60fps, so birds moved and
     // flapped at ~half rate. Draw stays at full 60 (prims are double-buffered) - the rates
     // get halved instead. Gameplay birds untouched.
@@ -930,6 +940,17 @@ void EffectSpeedFix::Initialize()
     else
     {
         spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
+    }
+
+    // The port's own frame gate for the traffic Act: skip the car update on 4 frames in 5.
+    if (uint8_t* je = Memory::PatternScan(baseModule, "0F 84 ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 48 89 9C 24",
+        "MGS 2: Effect Speed Fix : user\\shibata\\demo\\traffic.c -> Act()"))
+    {
+        g_trafficActRun = reinterpret_cast<uintptr_t>(je) + 6;
+        g_trafficActHold = g_trafficActRun + *reinterpret_cast<int32_t*>(je + 2);
+
+        h_TrafficDemoAct = safetyhook::create_mid(je, TrafficDemoAct_hook);
+        LOG_HOOK(h_TrafficDemoAct, "MGS 2: Effect Speed Fix : traffic.c -> Act()")
     }
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
