@@ -976,9 +976,9 @@ void EffectSpeedFix::Initialize()
     }
 
     // Both or neither: a scale without its restore would leave the hair limp for good.
-    uint8_t* hairStep = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F 60 E8 ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 4C 8B A4 24",
+    uint8_t* hairStep = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F",
         "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm()");
-    uint8_t* hairDone = Memory::PatternScan(baseModule, "8B 87 C4 02 00 00 4C 8B A4 24 ?? ?? ?? ?? 48 8B B4 24 ?? ?? ?? ?? 85 C0 7E",
+    uint8_t* hairDone = Memory::PatternScan(baseModule, "8B 87 ?? ?? ?? ?? 4C 8B A4 24 ?? ?? ?? ?? 48 8B B4 24",
         "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm() return");
 
     auto invMassLoads = Memory::FindMultiplePatternMatches(baseModule,
