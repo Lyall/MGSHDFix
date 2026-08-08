@@ -3,6 +3,11 @@
 ###############################################################################
 * text=auto
 
+*.c   text eol=crlf
+*.h   text eol=crlf
+*.cpp text eol=crlf
+*.hpp text eol=crlf
+
 # CSVs: keep exact bytes
 "GCX Fixes/**/*.csv" -text
 

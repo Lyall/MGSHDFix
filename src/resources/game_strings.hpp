@@ -233,8 +233,11 @@ constexpr uint32_t kMGS2ForceOriginalHashes[] =
     0x7ca2016f, //"制作者の好みを暴け！日並雅宏\n代表作は「リングオブレッド」。"
     0xc76fa726, //"制作者の好みを暴け！松花賢和\n主な作品は「スナッチャー」「ポリスノーツ」\n「リーサルエンフォーサーズ」\n「メ夕ルギアソリッド」シリーズ。"
     0xaf473797, //"制作者の好みを暴け！野尻真太\n主な作品は「ゴーストバベル」\n「メ夕ルギアソリッド2」(スクリプト班)"
+    0x8f1a2ec0, // "Thermal Goggles\nVisualizes heat source\ndistribution. Allows one to see\nin the dark when equipped.\nClaymores can be seen when used."
 
-
+    0x603666cb, //"USP Suppressor\nFiring noise is reduced when\nattached to USP. Equip together\nw/ USP to attach. Unremovable\nonce attached." 
+    0xb2909177,// "Cigarettes\nHighly addictive and hazardous\nto your health." 
+    0x1713d8dc, //"Bandana\nSolid Snake's bandana. \342\210\236\n(infinity) symbol is sewn in." 
 };
 
 #pragma region mgs2_ps2_memory_card_strings
