@@ -979,7 +979,7 @@ void EffectSpeedFix::Initialize()
     }
 
     if (uint8_t* slowDownAct = Memory::PatternScan(baseModule,
-        "40 53 48 83 EC 20 8B 05 ?? ?? ?? ?? 48 8B D9 0B 05 ?? ?? ?? ?? 7D ?? C7 05 ?? ?? ?? ?? 00 00 00 00",
+        "40 53 48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 8B D9 0B 05 ?? ?? ?? ?? 7D",
         "MGS 2: Effect Speed Fix : user\\okajima\\effect\\slowdown.c -> Act()"))
     {
         h_SlowDownAct = safetyhook::create_mid(slowDownAct, SlowDownAct_hook);
@@ -987,7 +987,7 @@ void EffectSpeedFix::Initialize()
     }
 
     if (uint8_t* exec = Memory::PatternScan(baseModule,
-        "BE 0C 00 00 00 48 8D 2D ?? ?? ?? ?? 66 0F 1F 84 00 00 00 00 00 8B 05 ?? ?? ?? ?? A8 20 74 ?? 48 3B FD 74 ?? 83 C8 01 85 47 70 75 ?? 48 8B 0F 66 0F 1F 44 00 00 F7 41 10 00 00 0F 00 48 8B 19 75 ?? 48 8B 41 08 48 85 C0 74 ?? FF D0 48 8B CB 48 85 DB 75 ?? 48 83 C7 78 FF CE 85 F6 7F ??",
+        "BE ?? ?? ?? ?? 48 8D 2D ?? ?? ?? ?? 66 0F 1F 84 00",
         "MGS 2: Effect Speed Fix : system\\libgv\\actor.c -> GV_ExecActorSystem()"))
     {
         // Pattern ends on the loop's jg, so the epilogue is right after it.
