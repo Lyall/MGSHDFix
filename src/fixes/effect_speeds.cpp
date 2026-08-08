@@ -978,7 +978,7 @@ void EffectSpeedFix::Initialize()
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
     CREATE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name, pattern, label);
 
-    if (uint8_t* life = Memory::PatternScan(baseModule, "FF C8 89 87 ?? ?? ?? ?? 48 83 C4 60 5F C3",
+    if (uint8_t* life = Memory::PatternScan(baseModule, "FF C8 89 87 ?? ?? ?? ?? 48 83 C4 ?? 5F C3 48 8B CF",
         "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() life"))
     {
         g_thunderLifeHold = reinterpret_cast<uintptr_t>(life) + 8;
@@ -986,7 +986,7 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(h_ThunderLife, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() life")
     }
 
-    if (uint8_t* blink = Memory::PatternScan(baseModule, "25 01 00 00 80 7D ?? FF C8 83 C8 FE FF C0 85 C0 75 ?? 48 8B 87 ?? ?? ?? ?? 81 88",
+    if (uint8_t* blink = Memory::PatternScan(baseModule, "25 ?? ?? ?? ?? 7D ?? FF C8 83 C8 ?? FF C0 85 C0 75 ?? 48 8B 87",
         "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() blink"))
     {
         h_ThunderBlink = safetyhook::create_mid(blink, ThunderBlink_hook);
