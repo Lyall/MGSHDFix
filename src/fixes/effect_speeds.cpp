@@ -212,7 +212,8 @@ private:
 // DG_FrameCount==2 = the game's own "this section ran 30fps on PS2" flag. More reliable
 // than InCutscene() - demo blips set 1, real 30fps windows set 2.
 inline int* g_pWindowFrameCount = nullptr;
-inline bool In30fpsWindow() { return g_pWindowFrameCount && *g_pWindowFrameCount == 2; }
+inline bool g_slowDownDriving = false;
+inline bool In30fpsWindow() { return !g_slowDownDriving && g_pWindowFrameCount && *g_pWindowFrameCount == 2; }
 
 // Ribbons born inside a real 30fps window, latched at spawn. Fixed-size and alloc-free on
 // purpose: hook bodies must never allocate. Slot collisions just drop a latch early (the
@@ -591,6 +592,41 @@ namespace
         return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
     }
 
+    // Scripted slow motion. slowdown.c asks for N vsyncs a frame and the PS2 waited them out, so skip
+    // the whole actor pass on N-1 frames in N. Holding only part of it desyncs the game.
+    SafetyHookMid h_SlowDownAct {};
+    SafetyHookMid h_ExecActorSystem {};
+    uintptr_t g_execActorSystemDone = 0;
+    int g_slowDownPhase = 0;
+
+    void SlowDownAct_hook(SafetyHookContext&)
+    {
+        g_slowDownDriving = true;
+    }
+
+    void ExecActorSystem_hook(SafetyHookContext& ctx)
+    {
+        const int frames = g_pWindowFrameCount ? *g_pWindowFrameCount : 0;
+        if (frames < 2)
+        {
+            g_slowDownDriving = false;
+            g_slowDownPhase = 0;
+            return;
+        }
+
+        // 30fps demo windows write the same flag, and those stay at 60.
+        if (!g_slowDownDriving)
+        {
+            return;
+        }
+
+        g_slowDownPhase = (g_slowDownPhase + 1) % frames;
+        if (g_slowDownPhase != 0)
+        {
+            ctx.rip = g_execActorSystemDone;
+        }
+    }
+
     // t00a2d bridge traffic. traffic.c moves the cars a fixed step per Act, so they run at the port's
     // rate, not the 30fps the demo was authored at. Hold every other frame.
     SafetyHookMid h_TrafficDemoAct {};
@@ -600,6 +636,28 @@ namespace
     void TrafficDemoAct_hook(SafetyHookContext& ctx)
     {
         ctx.rip = SkipFrameWindow() ? g_trafficActHold : g_trafficActRun;
+    }
+
+    // Demo lightning: the bolt's life and its blink are both counted in frames, so at 60 it dies
+    // twice as fast and flickers twice as quickly.
+    SafetyHookMid h_ThunderLife {};
+    SafetyHookMid h_ThunderBlink {};
+    uintptr_t g_thunderLifeHold = 0;
+
+    void ThunderLife_hook(SafetyHookContext& ctx)
+    {
+        if (SkipFrameWindow())
+        {
+            ctx.rip = g_thunderLifeHold;
+        }
+    }
+
+    void ThunderBlink_hook(SafetyHookContext& ctx)
+    {
+        if (In30fpsWindow())
+        {
+            ctx.rax >>= 1;
+        }
     }
 
     // Kamome (seagull) demo pacing. PS2 ran the bird demos below 60fps, so birds moved and
@@ -959,6 +1017,25 @@ void EffectSpeedFix::Initialize()
         splashSpawn_hook = safetyhook::create_mid(spawn, MGS2_SplashSpawn_hook);
         LOG_HOOK(splashSpawn_hook, "MGS 2: Effect Speed Fix : d_splash_motion.c -> Act() droplet spawn")
     }
+          
+    if (uint8_t* slowDownAct = Memory::PatternScan(baseModule,
+        "40 53 48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 8B D9 0B 05 ?? ?? ?? ?? 7D",
+        "MGS 2: Effect Speed Fix : user\\okajima\\effect\\slowdown.c -> Act()"))
+    {
+        h_SlowDownAct = safetyhook::create_mid(slowDownAct, SlowDownAct_hook);
+        LOG_HOOK(h_SlowDownAct, "MGS 2: Effect Speed Fix : slowdown.c -> Act()")
+    }
+
+    if (uint8_t* exec = Memory::PatternScan(baseModule,
+        "BE ?? ?? ?? ?? 48 8D 2D ?? ?? ?? ?? 66 0F 1F 84 00",
+        "MGS 2: Effect Speed Fix : system\\libgv\\actor.c -> GV_ExecActorSystem()"))
+    {
+        // Pattern ends on the loop's jg, so the epilogue is right after it.
+        g_execActorSystemDone = reinterpret_cast<uintptr_t>(exec) + 0x5E;
+
+        h_ExecActorSystem = safetyhook::create_mid(exec, ExecActorSystem_hook);
+        LOG_HOOK(h_ExecActorSystem, "MGS 2: Effect Speed Fix : actor.c -> GV_ExecActorSystem()")
+    }
 
     // The port's own frame gate for the traffic Act: skip the car update on 4 frames in 5.
     if (uint8_t* je = Memory::PatternScan(baseModule, "0F 84 ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 48 89 9C 24",
@@ -973,6 +1050,21 @@ void EffectSpeedFix::Initialize()
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
     CREATE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name, pattern, label);
+
+    if (uint8_t* life = Memory::PatternScan(baseModule, "FF C8 89 87 ?? ?? ?? ?? 48 83 C4 ?? 5F C3 48 8B CF",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() life"))
+    {
+        g_thunderLifeHold = reinterpret_cast<uintptr_t>(life) + 8;
+        h_ThunderLife = safetyhook::create_mid(life, ThunderLife_hook);
+        LOG_HOOK(h_ThunderLife, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() life")
+    }
+
+    if (uint8_t* blink = Memory::PatternScan(baseModule, "25 ?? ?? ?? ?? 7D ?? FF C8 83 C8 ?? FF C0 85 C0 75 ?? 48 8B 87",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() blink"))
+    {
+        h_ThunderBlink = safetyhook::create_mid(blink, ThunderBlink_hook);
+        LOG_HOOK(h_ThunderBlink, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() blink")
+    }
 
     MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(INSTALL_MGS2_FRAMESKIP_HOOK)
 

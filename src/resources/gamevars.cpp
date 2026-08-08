@@ -46,6 +46,15 @@ void GameVars::Initialize()
         p_DG_Chanls = reinterpret_cast<DG_CHANL*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CB", "MGS2: DG_Chanls") + 3));
         p_GM_CurrentStageMap = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B F8", "MGS2: GM_CurrentStageMap") + 2));
 
+        p_GM_CameraDir = reinterpret_cast<SVECTOR*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 15 ?? ?? ?? ?? 83 25", "MGS 2: GameVars: GM_CameraDir") + 3));
+        p_GM_PlayerWork = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 0F BF 51 ?? 75", "MGS 2: GameVars: GM_PlayerWork") + 3));
+        p_GM_PlayerBody = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 0F 10 49", "MGS 2: GameVars: GM_PlayerBody") + 3));
+        p_ArmCamShift = reinterpret_cast<FVECTOR*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 0F 10 87 ?? ?? ?? ?? F3 0F 5C 44 24", "MGS 2: GameVars: ArmCamShift") + 3));
+
+
+        p_GM_CameraTarget = reinterpret_cast<FVECTOR*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 15 ?? ?? ?? ?? 48 8B F9 4D 89 73", "MGS 2: GameVars: GM_CameraTarget") + 3));
+
+        
         spdlog::info("GameVars: GM_GameStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GameStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_MenuStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_MenuStatus - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_PlayerStatus address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_PlayerStatus - (uintptr_t)baseModule);
@@ -64,7 +73,10 @@ void GameVars::Initialize()
         spdlog::info("GameVars: DG_UnDrawFrameCount address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_UnDrawFrameCount64 - (uintptr_t)baseModule);
         spdlog::info("GameVars: DG_Chanls address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_DG_Chanls - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_CurrentStageMap address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_CurrentStageMap - (uintptr_t)baseModule);
-        
+        spdlog::info("GameVars: GM_CameraDir address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_CameraDir - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_PlayerWork address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_PlayerWork - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GM_PlayerBody address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_PlayerBody - (uintptr_t)baseModule);
+
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
         {
             static SafetyHookMid levelTransitionMidHook {};

@@ -159,7 +159,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixed MG Ray's eye sprites being massive / having blown out bloom.
 - Fixed a broken voice line in Deck 2's pipe-falling mini-cutscene.
 - Made Snake's holster functional. (His holster always had an extra handgun in it, even when unarmed. Requires MGS2 Community Bugfix Compilation)
-- Fixed Solidus not being visible when viewed from a malfunctioning RAY unit's POV. (Requires MGS2 Community Bugfix Compilation)
+- Fixed Solidus not being visible when viewed from a malfunctioning RAY unit's POV.
 
 
 #### MGS3 Specific Bug Fixes:
