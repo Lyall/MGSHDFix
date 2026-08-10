@@ -5,6 +5,7 @@
 #include "gamevars.hpp"
 #include "input_handler.hpp"
 #include "logging.hpp"
+#include "mgs2_demo_scope.hpp"
 //#include "mgs2_first_person_view_mode.hpp"
 
 namespace
@@ -13,6 +14,11 @@ namespace
     bool codec_camera_init = false;
     bool OverrideCameraPositions()
     {
+        if ((eGameType & MGS2) && MGS2DemoScope::NeedsCameraCorrection())
+        {
+            return true;
+        }
+
         if (!toggleValue)
         {
             return false;

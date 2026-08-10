@@ -37,6 +37,7 @@
 ///Fixes
 #include "aiming_full_tilt.hpp"
 #include "mgs2_blood_stains.hpp"
+#include "mgs2_demo_scope.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
 #include "mgs2_lens_droplets.hpp"
@@ -575,6 +576,7 @@ static void InitializeSubsystems()
         INITIALIZE(g_OpticalCamoFix.Initialize());
         INITIALIZE(FixAimingFullTilt::Initialize());
         INITIALIZE(MGS2BloodStains::Initialize());
+        INITIALIZE(MGS2DemoScope::Initialize());
         INITIALIZE(MGS2ScopeWarp::Initialize());
         INITIALIZE(MGS2WaterEffects::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
