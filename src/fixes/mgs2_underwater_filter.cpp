@@ -34,11 +34,13 @@ namespace
     constexpr int kDmapackInvisibleAll = 0x01F0;
     constexpr int kDmapackPhaseAfter = 0x04;
     constexpr int kScrWaterPriority = 120;
+    constexpr int kOriginalScrWaterPriority = 144;
     constexpr int kMenuPrimTrailPriority = kScrWaterPriority - 1;
 
     constexpr uint8_t kCmdAlpha = 20;
+    constexpr uint8_t kCmdViewMapping = 22;
     constexpr uint8_t kCmdUseFrameTex = 26;
-    constexpr uint8_t kCmdBackupFrame = 22;
+    constexpr uint8_t kCmdBackupFrame = 27;
     constexpr uint8_t kCmdEnd = 30;
 
     constexpr ptrdiff_t kActorActOffset = 0x08;
@@ -124,6 +126,10 @@ namespace
     bool gScrWaterActive = false;
     bool gScrWaterSawUnderwaterStep = false;
     void* gScrWaterWork = nullptr;
+    bool gScrWaterBluePatched = false;
+    bool gScrWaterWarpPatched = false;
+    float gScrWaterOriginalBlue = 0.0f;
+    float gScrWaterOriginalWarp = 0.0f;
     using DmapackQueueFn = int(__fastcall*)(RuntimeDmapack*);
     DmapackQueueFn gDmapackQueue = nullptr;
 
@@ -172,7 +178,6 @@ namespace
     bool IsPlayerInWater();
     bool IsUnderwaterCodecSequence();
     bool IsDemo();
-    bool UseCurrentFrameBackup();
 
     using Memory::IsReadable;
     using Memory::ReadableBytes;
@@ -1135,7 +1140,8 @@ namespace
     bool LooksLikeDmapackPacket(void* packetMem)
     {
         const uint8_t cmd = PacketCommand(packetMem);
-        return cmd == kCmdBackupFrame || cmd == kCmdEnd || cmd == kCmdUseFrameTex || cmd == kCmdAlpha;
+        return cmd == kCmdViewMapping || cmd == kCmdBackupFrame || cmd == kCmdEnd ||
+            cmd == kCmdUseFrameTex || cmd == kCmdAlpha;
     }
 
     void* GetDmapackPacket(RuntimeDmapack* dmapack)
@@ -1302,11 +1308,6 @@ namespace
         return (g_GameVars.Get_GM_GameStatus() & STATE_PLAY_DEMO) != 0 && !IsUnderwaterCodecSequence();
     }
 
-    bool UseCurrentFrameBackup()
-    {
-        return IsDemo();
-    }
-
     void PatchTuning(void* work, ptrdiff_t dmapackFieldOffset)
     {
         auto* bytes = static_cast<uint8_t*>(work);
@@ -1318,16 +1319,44 @@ namespace
             std::abs(diffColor[1]) < 0.01f &&
             diffColor[2] > 20.0f && diffColor[2] < 40.0f)
         {
+            if (!gScrWaterBluePatched)
+            {
+                gScrWaterOriginalBlue = diffColor[2];
+                gScrWaterBluePatched = true;
+            }
             diffColor[2] = 4.0f;
         }
 
         if (IsReadable(warp, sizeof(float)) && *warp > 24.0f && *warp < 40.0f)
         {
+            if (!gScrWaterWarpPatched)
+            {
+                gScrWaterOriginalWarp = *warp;
+                gScrWaterWarpPatched = true;
+            }
             *warp = 80.0f;
         }
     }
 
-    void PatchPacket(void* packetMem)
+    void RestoreTuning(void* work, ptrdiff_t dmapackFieldOffset)
+    {
+        auto* bytes = static_cast<uint8_t*>(work);
+        auto* diffColor = reinterpret_cast<float*>(bytes + dmapackFieldOffset + 0x20);
+        auto* warp = reinterpret_cast<float*>(bytes + dmapackFieldOffset + 0x30);
+
+        if (gScrWaterBluePatched && IsReadable(diffColor, sizeof(float) * 4))
+        {
+            diffColor[2] = gScrWaterOriginalBlue;
+            gScrWaterBluePatched = false;
+        }
+        if (gScrWaterWarpPatched && IsReadable(warp, sizeof(float)))
+        {
+            *warp = gScrWaterOriginalWarp;
+            gScrWaterWarpPatched = false;
+        }
+    }
+
+    void PatchPacket(void* packetMem, bool demo)
     {
         auto* packet = static_cast<uint8_t*>(packetMem);
         const size_t packetSize = std::min<size_t>(ReadableBytes(packet), 0x2000);
@@ -1346,7 +1375,7 @@ namespace
 
             if (backupFrame->cmd == kCmdBackupFrame)
             {
-                backupFrame->param = UseCurrentFrameBackup() ? 0 : 1;
+                backupFrame->param = demo ? 0 : 1;
                 break;
             }
         }
@@ -1359,10 +1388,18 @@ namespace
                 break;
             }
 
-            if (alpha->cmd == kCmdAlpha && alpha->alpha0 == 100 && alpha->alpha1 == 72)
+            if (alpha->cmd == kCmdAlpha && alpha->alpha0 == 100)
             {
-                alpha->alpha1 = 50;
-                break;
+                if (!demo && alpha->alpha1 == 72)
+                {
+                    alpha->alpha1 = 50;
+                    break;
+                }
+                if (demo && alpha->alpha1 == 50)
+                {
+                    alpha->alpha1 = 72;
+                    break;
+                }
             }
         }
     }
@@ -1404,7 +1441,7 @@ namespace
         void* packetBegin = info.packetMem;
 
         ScrWaterAct_hook.fastcall<void>(work);
-        PatchPacket(packetBegin);
+        PatchPacket(packetBegin, IsDemo());
         g_MGS2UnderwaterFilterFix.PatchWork(work);
     }
 
@@ -1449,13 +1486,18 @@ namespace
 
     void PatchScrWaterDmapackCreateArgs(SafetyHookContext& ctx)
     {
+        if (IsDemo())
+        {
+            return;
+        }
+
         const int flag = static_cast<int>(ctx.rcx);
         const int phase = static_cast<int>(ctx.rdx);
         const int priority = static_cast<int>(ctx.r8);
         constexpr int originalScrWaterFlag = kDmapackNormal | kDmapackInvisible0 | kDmapackInvisible1;
         if ((flag & originalScrWaterFlag) != originalScrWaterFlag ||
             phase != kDmapackPhaseAfter ||
-            priority != 144)
+            priority != kOriginalScrWaterPriority)
         {
             return;
         }
@@ -1599,12 +1641,27 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
         return;
     }
 
-    PatchTuning(work, info.dmapackFieldOffset);
     if (gScrWaterWork != work)
     {
         gScrWaterWork = work;
         gScrWaterSawUnderwaterStep = false;
+        gScrWaterBluePatched = false;
+        gScrWaterWarpPatched = false;
     }
+
+    const bool demo = IsDemo();
+    if (demo)
+    {
+        RestoreTuning(work, info.dmapackFieldOffset);
+        gScrWaterActive = false;
+        dmapack->flag &= ~(kDmapackMenu | kDmapackInvisibleAll);
+        dmapack->flag |= kDmapackNormal | kDmapackInvisible0 | kDmapackInvisible1;
+        dmapack->priority = kOriginalScrWaterPriority;
+        PatchPacket(info.packetMem, true);
+        return;
+    }
+
+    PatchTuning(work, info.dmapackFieldOffset);
 
     const int step = ScrWaterStep(work, info.dmapackFieldOffset);
     if (step >= 1 && step <= 2)
@@ -1627,7 +1684,7 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
         dmapack->flag |= kDmapackInvisible0 | kDmapackInvisibleMenu;
     }
 
-    PatchPacket(info.packetMem);
+    PatchPacket(info.packetMem, false);
 }
 
 void MGS2UnderwaterFilterFix::BeforePresent()

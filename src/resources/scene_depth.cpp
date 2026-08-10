@@ -382,11 +382,12 @@ void SceneDepth::OnPreMenuRender()
     if (g_sceneColorRTV)
     {
         ID3D11ShaderResourceView* depthSRV = g_available ? g_copySRV.Get() : nullptr;
+        g_inOverlayCb = true;
         for (const auto& entry : g_callbacks)
             if (entry.callback) entry.callback(g_sceneColorRTV.Get(), depthSRV);
+        g_inOverlayCb = false;
     }
 }
-
 
 void SceneDepth::ResetStatus()
 {
