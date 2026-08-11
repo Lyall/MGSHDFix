@@ -297,6 +297,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, ConfigKeys::MGS2_Restore_VFX_Help, ConfigKeys::MGS2_Restore_VFX_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MGS2), ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, ConfigKeys::MGS2_Photosensitive_Help, ConfigKeys::MGS2_Photosensitive_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         {(MGS2), ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, ConfigKeys::MotionBlur_Help, ConfigKeys::MotionBlur_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MotionBlur_Option_Full, {ConfigKeys::MotionBlur_Option_Full, ConfigKeys::MotionBlur_Option_CutscenesOnly, ConfigKeys::MotionBlur_Option_Disabled} },
 

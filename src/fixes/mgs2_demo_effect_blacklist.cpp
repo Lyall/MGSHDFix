@@ -6,6 +6,12 @@
 
 // The MC blacklists demo fade/flush launches per stage (photosensitivity trim) - d12t3 loses its detonation flash and underwater green.
 
+namespace
+{
+    uint8_t* NewFadeInOutForce_Demo_0008Launch_Call_scan = nullptr;
+    uint8_t* NewFlush_0005Launch_Call_scan = nullptr;
+}
+
 void MGS2DemoEffectBlacklist::Initialize()
 {
     if (!(eGameType & MGS2) || !bEnabled)
@@ -13,21 +19,21 @@ void MGS2DemoEffectBlacklist::Initialize()
         return;
     }
 
-    if (uint8_t* address = Memory::PatternScan(
-            baseModule,
-            "E8 ?? ?? ?? ?? 33 FF 4C 8D 05 ?? ?? ?? ?? 8B D7 0F 1F 40 00 0F B6 0C 10",
-            "MGS 2: Demo Effect Blacklist: mode\\demo\\demo_eft.c -> NewFadeInOutForce_Demo() launch gate"))
+    NewFadeInOutForce_Demo_0008Launch_Call_scan = Memory::PatternScan(baseModule, "8B 84 24 ?? ?? ?? ?? 45 8B CC 89 74 24",
+        "MGS 2: Demo Effect Blacklist: user\\mode\\demo\\effect\\0008_NewFadeInOutForce_Demo.c-> NewFadeInOutForce_Demo_0008Launch() | NewFadeInOutForce_Demo() call @l58");
+    if (NewFadeInOutForce_Demo_0008Launch_Call_scan)
     {
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address), "\xE9\xE9\x00\x00\x00", 5);
-        spdlog::info("MGS 2: Demo Effect Blacklist: fade launch blacklist bypassed.");
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 33 FF 4C 8D 05", "MGS 2: Demo Effect Blacklist: user\\mode\\demo\\effect\\0008_NewFadeInOutForce_Demo.c-> NewFadeInOutForce_Demo_0008Launch() | mc area check", {
+            ctx.rip = reinterpret_cast<uintptr_t>(NewFadeInOutForce_Demo_0008Launch_Call_scan);
+        });
     }
 
-    if (uint8_t* address = Memory::PatternScan(
-            baseModule,
-            "E8 ?? ?? ?? ?? 33 C9 4C 8D 05 ?? ?? ?? ?? 66 0F 1F 84 00 00 00 00 00 0F B6 14 08",
-            "MGS 2: Demo Effect Blacklist: mode\\demo\\demo_eft.c -> NewFlush() launch gate"))
+    NewFlush_0005Launch_Call_scan = Memory::PatternScan(baseModule, "8B D6 8B CB 48 8B 5C 24",
+        "MGS 2: Demo Effect Blacklist: user\\mode\\demo\\effect\\0005_NewFlush.c-> NewFlush_0005Launch() | NewFlush() call @l49");
+    if (NewFlush_0005Launch_Call_scan)
     {
-        Memory::PatchBytes(reinterpret_cast<uintptr_t>(address), "\xE9\x53\x00\x00\x00", 5);
-        spdlog::info("MGS 2: Demo Effect Blacklist: flush launch blacklist bypassed.");
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 33 C9 4C 8D 05 ?? ?? ?? ?? 66 0F 1F 84 00", "MGS 2: Demo Effect Blacklist: user\\mode\\demo\\effect\\0005_NewFlush.c-> NewFlush_0005Launch() | mc area check", {
+            ctx.rip = reinterpret_cast<uintptr_t>(NewFlush_0005Launch_Call_scan);
+        });
     }
 }
