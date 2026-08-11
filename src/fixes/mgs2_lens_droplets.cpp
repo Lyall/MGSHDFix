@@ -141,7 +141,7 @@ void MGS2LensDroplets::Initialize()
     }
 
     // Gameplay twin (guard pee, Vamp drips, waterfall) - same work layout, same dead draw.
-    if (uint8_t* address = Memory::PatternScan(baseModule, "40 53 41 54 48 83 EC 48 45 33 E4 48 8B D9 F6 05 ?? ?? ?? ?? 01", "MGS 2: Lens Droplets - shibata\\effect\\scr_drop.c -> NewScrDrop() -> Act()"))
+    if (uint8_t* address = Memory::PatternScan(baseModule, "40 53 41 54 48 83 EC ?? 45 33 E4", "MGS 2: Lens Droplets - shibata\\effect\\scr_drop.c -> NewScrDrop() -> Act()"))
     {
         g_actGameHook = safetyhook::create_inline(address, reinterpret_cast<void*>(ActGame_Detour));
         LOG_HOOK(g_actGameHook, "MGS 2: Lens Droplets - Gameplay Act");
