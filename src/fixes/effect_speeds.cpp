@@ -57,7 +57,7 @@ private:
 };
 
 
-#define DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)                                    \
+#define DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, skipCheck)                              \
     SafetyHookInline actName##_hook{};                                                     \
     SafetyHookInline dieName##_hook{};                                                     \
     FirstTickGuard g_##actName##_guard;                                                    \
@@ -65,7 +65,7 @@ private:
     int64_t __fastcall actName##_Hook(int64_t work)                                        \
     {                                                                                       \
         const bool firstTick = g_##actName##_guard.ConsumeFirstTick(static_cast<uintptr_t>(work)); \
-        if (SkipFrame() && !firstTick)                                                      \
+        if ((skipCheck) && !firstTick)                                                      \
         {                                                                                   \
             return 0;                                                                       \
         }                                                                                   \
@@ -77,6 +77,12 @@ private:
         g_##actName##_guard.ClearOnDeath(static_cast<uintptr_t>(work));                     \
         dieName##_hook.call<void>(work);                                                    \
     }
+
+#define DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName) \
+    DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, SkipFrame())
+
+#define DEFINE_WINDOW_SKIP_ACT_DIE_PAIR(actName, dieName) \
+    DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, SkipFrameWindow())
 
 #define INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     if (uint8_t* addr = Memory::PatternScan(baseModule, actPattern, actLabel))              \
@@ -109,10 +115,23 @@ private:
     X(Act_234, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Act() | (Act_234)", \
         Die_188, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 9B", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Die() (Die_188)")
 
+#define MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(X) \
+    X(Act_WaterWind, "40 53 55 41 55 48 81 EC", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\water_wind.c -> Act() (Act_391) | NewWaterWindSplush_DEMO()", \
+        Die_WaterWind, "40 53 48 83 EC ?? 83 79 ?? 00 48 8B D9 74 ?? 48 83 C1", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\water_wind.c -> Die() (Die_305)") \
+        \
+    X(Act_SplushMan, "41 57 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 4C 8B F9", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_man.c -> Act() (Act_365) | OK_PutSplush()", \
+        Die_SplushMan, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 70 00 01 00", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_man.c -> Die() (Die_291)")
+
 #define DEFINE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)
 
 #define CREATE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel)
+
+#define DEFINE_WINDOW_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    DEFINE_WINDOW_SKIP_ACT_DIE_PAIR(actName, dieName)
+
+#define CREATE_WINDOW_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel)
 
 
@@ -150,7 +169,6 @@ private:
 
 //GOOD EFFECT - DON'T USE  (NewDemoSplashBlood, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\demo_splash_blood.c -> NewDemoSplashBlood()")
 
-//todo: need to investigate OK_PutSplush | mgs2x\source\user\okajima\effect2\splush_man.c
 
 #define MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(X) \
     X(NewDropBodySplush, "40 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\drop_body_splush.c -> NewDropBodySplush()") \
@@ -928,7 +946,18 @@ namespace
         return h_DemoFrameCountAct.call<int64_t>(work);
     }
 
+    SafetyHookInline h_AutoSplushAct{};
+
+    void __fastcall AutoSplushAct_hook(int64_t work)
+    {
+        if (!SkipFrameWindow())
+        {
+            h_AutoSplushAct.call<void>(work);
+        }
+    }
+
     MGS2_FULL_SKIP_ACT_DIE_PAIRS(DEFINE_FULL_SKIP_HOOK)
+    MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(DEFINE_WINDOW_SKIP_HOOK)
 
 }
 
@@ -1395,7 +1424,16 @@ void EffectSpeedFix::Initialize()
             }
                   });
 
+    if (uint8_t* autoSplushAct = Memory::PatternScan(baseModule,
+        "48 8B C4 48 89 58 ?? 55 56 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 44 0F 29 40",
+        "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\auto_splush.c -> Act() | NewAutoSplush_EftCtrl()"))
+    {
+        h_AutoSplushAct = safetyhook::create_inline(reinterpret_cast<void*>(autoSplushAct), AutoSplushAct_hook);
+        LOG_HOOK(h_AutoSplushAct, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\auto_splush.c -> Act() | NewAutoSplush_EftCtrl()")
+    }
+
     MGS2_FULL_SKIP_ACT_DIE_PAIRS(CREATE_FULL_SKIP_HOOK)
+    MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(CREATE_WINDOW_SKIP_HOOK)
 
 
 }
