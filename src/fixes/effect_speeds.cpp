@@ -186,9 +186,7 @@ private:
     X(NewBombGasEffect, "4C 8B DC 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B 41", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\bomb_gas.c -> NewBombGasEffect()") \
     X(NewSpark2, "48 89 5C 24 ?? 56 48 83 EC ?? FF 49", "MGS 2 : user\\okajima\\t_effect\\spark.c -> NewSpark2() | NewSpark()") \
     X(NewDiveSplash, "40 57 48 83 EC 20 83 B9 ?? ?? ?? ?? 00 48 8B F9 7E 33 48 89 5C 24 ?? 48 8B 59 ?? 8B 0D ?? ?? ?? ?? E8 DA 47 D6 FF", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\dive_splash.c-> NewDiveSplash() | NewDiveSplash2() | NewDiveSplashScn() | NewDiveSplash_Parent() ") \
-    X(NewRopeModel3, "40 53 48 83 EC ?? 48 8B D9 48 8D 91 ?? ?? ?? ?? 48 8B 49 ?? E8 ?? ?? ?? ?? 48 8D 05", "MGS 2: Effect Speed Fix : user\\kano\\rope\\ropemain.c -> NewRopeModel3() | NewRopeModel_called() | NewRopeModel3_called()") \
     X(NewFootSplash, "40 53 48 83 EC ?? 48 83 B9 ?? ?? ?? ?? 00 48 8B D9 0F 84 ?? ?? ?? ?? 48 83 B9 ?? ?? ?? ?? 00", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\ft_splsh.c -> NewFootSplash()") \
-    X(NewRainCamera_Demo, "48 8B C4 55 57 41 54 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_rain_cm.c -> NewRainCamera_Demo()") \
     X(NewBodySplash, "40 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 83 79 ?? 00 48 8B F1 74", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\body_sph.c -> NewBodySplashScn() | NewBodySplash() | NewBodySplash2() | NewBodySplash3()") \
     X(NewRayEye, "F6 41 ?? ?? 0F 85 ?? ?? ?? ?? E9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\ray_eye.c -> NewRayEye()") \
     X(NewDemoHarrierDamageSmoke, "4C 8B DC 53 57 48 81 EC ?? ?? ?? ?? 45 0F 29 53", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_damage_smoke.c-> NewDemoHarrierDamageSmoke()") \
