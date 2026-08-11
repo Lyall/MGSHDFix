@@ -169,7 +169,6 @@ private:
 
 //GOOD EFFECT - DON'T USE  (NewDemoSplashBlood, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\demo_splash_blood.c -> NewDemoSplashBlood()")
 
-//todo: need to investigate OK_PutSplush | mgs2x\source\user\okajima\effect2\splush_man.c
 
 #define MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(X) \
     X(NewDropBodySplush, "40 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\drop_body_splush.c -> NewDropBodySplush()") \
