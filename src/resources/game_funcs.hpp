@@ -58,6 +58,9 @@ namespace MGS2_GameFuncs
     using GV_DestroyActor_t = void(__fastcall*)(void* work);
     inline GV_DestroyActor_t GV_DestroyActor = nullptr;
 
+    using HZX_OnlineHazardCheck_t = int(__fastcall*)(int id, const float* from, const float* to, int chk, int seg, int flr);
+    inline HZX_OnlineHazardCheck_t HZX_OnlineHazardCheck = nullptr;
+
 }
 
 

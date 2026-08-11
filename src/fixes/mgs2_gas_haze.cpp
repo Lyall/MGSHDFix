@@ -676,7 +676,7 @@ void MGS2GasHaze::Initialize()
 
     if (uint8_t* primRender = Memory::PatternScan(
             baseModule,
-            "4C 8B DC 53 48 83 EC 70 83 79 38 00 48 8B D9 0F 84 ?? ?? ?? ?? 49 89 6B 18 48 8B 69 20",
+            "4C 8B DC 53 48 83 EC ?? 83 79 ?? 00",
             "MGS 2: Gas Haze - BP_Prim_RenderPacket"))
     {
         g_primRenderHook = safetyhook::create_inline(

@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "d3d11_api.hpp"
 #include "scene_depth.hpp"
+#include "game_funcs.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
 
@@ -12,12 +13,6 @@ namespace
     constexpr float kQuadHalf    = 26400.0f;
     constexpr UINT  kPatch       = 8;
     constexpr float kDepthMargin = 0.002f;
-
-    constexpr const char* kOnlineCheckSig = "41 B9 ?? ?? ?? ?? C7 44 24 ?? ?? ?? ?? ?? 48 8D 54 24 ?? 33 C9";
-
-    using HzxCheckFn = int(__fastcall*)(int id, const float* from, const float* to, int chk, int seg, int flr);
-    HzxCheckFn g_hzxCheck = nullptr;
-    int*       g_hzxCurrentGroup = nullptr;
 
     std::atomic<float>     g_scrX { 0.0f };
     std::atomic<float>     g_scrY { 0.0f };
@@ -38,7 +33,7 @@ namespace
     {
         __try
         {
-            return g_hzxCheck(id, from, to, chk, seg, flr);
+            return MGS2_GameFuncs::HZX_OnlineHazardCheck(id, from, to, chk, seg, flr);
         }
         __except (EXCEPTION_EXECUTE_HANDLER)
         {
@@ -50,13 +45,13 @@ namespace
     bool RayHitsWorld(const float* from, const float* to)
     {
         int r = GuardedCheck(0, from, to, 0x0A, 0x40, 0x40);
-        const int saved = *g_hzxCurrentGroup;
-        *g_hzxCurrentGroup = 0;
+        int* currentGroup = g_GameVars.HZX_CurrentGroupID();
+        const int saved = *currentGroup;
+        *currentGroup = 0;
         r |= GuardedCheck(saved, from, to, 0x8F, 0, 0);
-        *g_hzxCurrentGroup = saved;
+        *currentGroup = saved;
         if (g_rayFaulted)
         {
-            g_hzxCheck = nullptr;
             spdlog::warn("MGS 2: Flare Occlusion: collision check failed; using depth only.");
             return true;
         }
@@ -166,7 +161,7 @@ void MGS2FlareOcclusion::SetSunState(const float* sunWorldPos, float scrX, float
     const int mask = g_depthBlockedMask.load(std::memory_order_relaxed);
     int sum = 0;
     const auto* chanl = g_GameVars.DG_Chanl(0);
-    const bool canRay = g_hzxCheck && g_hzxCurrentGroup && chanl && sunWorldPos;
+    const bool canRay = MGS2_GameFuncs::HZX_OnlineHazardCheck && g_GameVars.HZX_CurrentGroupID() && !g_rayFaulted && chanl && sunWorldPos;
     for (int i = 0; i < 4; ++i)
     {
         bool blocked = (mask & (1 << i)) != 0;
@@ -204,16 +199,6 @@ void MGS2FlareOcclusion::Initialize()
 
     SceneDepth::SetEndOf3DCallback(&OnEndOf3D, SceneDepth::PRIORITY_DEFAULT);
 
-    if (uint8_t* anchor = Memory::PatternScan(baseModule, kOnlineCheckSig, "MGS 2: Flare Occlusion - HZX online check"))
-    {
-        if (anchor[0x15] == 0xE8 && anchor[0x1A] == 0x8B)
-        {
-            g_hzxCheck = reinterpret_cast<HzxCheckFn>(Memory::GetRelativeOffset(anchor + 0x16));
-            g_hzxCurrentGroup = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(anchor + 0x1A, 0x02, 0x06));
-            spdlog::info("MGS 2: Flare Occlusion: collision check at {:s}+{:X}.",
-                sExeName.c_str(), reinterpret_cast<uintptr_t>(g_hzxCheck) - reinterpret_cast<uintptr_t>(baseModule));
-            return;
-        }
-    }
-    spdlog::warn("MGS 2: Flare Occlusion: collision check unavailable; using depth only.");
+    if (!MGS2_GameFuncs::HZX_OnlineHazardCheck || !g_GameVars.HZX_CurrentGroupID())
+        spdlog::warn("MGS 2: Flare Occlusion: collision check unavailable; using depth only.");
 }

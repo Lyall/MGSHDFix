@@ -170,6 +170,9 @@ void MGS2_GameFuncs::HookGameFuncs()
     GV_DestroyActor = reinterpret_cast<GV_DestroyActor_t>(Memory::ResolveCall(GV_DestroyActor_scan));
     spdlog::info("MGS2_GameFuncs: GV_DestroyActor address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GV_DestroyActor - (uintptr_t)baseModule);
 
+    HZX_OnlineHazardCheck = reinterpret_cast<HZX_OnlineHazardCheck_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 48 8B F2 8B E9 33 D2 41 B8 ?? ?? ?? ??", "HZX_OnlineHazardCheck"));
+    spdlog::info("MGS2_GameFuncs: HZX_OnlineHazardCheck address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)HZX_OnlineHazardCheck - (uintptr_t)baseModule);
+
 
 
 

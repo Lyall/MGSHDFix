@@ -21,8 +21,8 @@ namespace SceneDepth
         PRIORITY_HAZE = 10,
         PRIORITY_HAZE_CAPTURE = 20,
 
-        PRIORITY_DEMO_BLUR = 997,
-        PRIORITY_SMAA = 998,
+        PRIORITY_SMAA = 997,
+        PRIORITY_DEMO_BLUR = 998,
         PRIORITY_CROSSFADE = 999, // Capture after SMAA.
         PRIORITY_DEMO_BLUR_CAPTURE = 1000,
         PRIORITY_FEEDBACK_CAPTURE = 1001,

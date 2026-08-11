@@ -21,8 +21,6 @@ namespace {
     // Final plant_sun alpha marks active feedback scenes.
     std::atomic<ULONGLONG> g_plantSunLastActiveMs { 0 };
     SafetyHookInline g_plantSunActHook {};
-    SafetyHookMid g_plantSunProjectionHook {};
-    SafetyHookMid g_plantSunActivityHook {};
 
     void __fastcall PlantSunAct_Detour(uintptr_t work)
     {
@@ -116,37 +114,14 @@ void ScreenspaceFixes::Apply()
                       });
         
 
-        constexpr auto kPlantSunPattern =
-            "44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 64 24 ?? 44 0F 29 6C 24";
-        if (uint8_t* plantSun = Memory::PatternScan(
-                baseModule, kPlantSunPattern,
-                "MGS2: Screenspace Fixes: user\\shibata\\effect\\plant_sun.c -> NewPlantSunMain() -> Flare_Act()"))
-        {
-            // Use the final flare alpha as the activity signal.
-            if (memcmp(plantSun + 0x1B5, "\xF3\x44\x0F\x2C\xD0", 5) == 0)
-            {
-                g_plantSunActivityHook = safetyhook::create_mid(
-                    plantSun + 0x1B5,
-                    [](SafetyHookContext& ctx)
-                    {
-                        if (ctx.xmm0.f32[0] >= 1.0f)
-                            g_plantSunLastActiveMs.store(GetTickCount64(), std::memory_order_relaxed);
-                    });
-                LOG_HOOK(g_plantSunActivityHook, "MGS 2: Screenspace Fixes: plant_sun feedback activity")
-            }
-            else
-            {
-                spdlog::warn("MGS 2: Screenspace Fixes: plant_sun alpha scan failed; feedback cadence limiter disabled.");
-            }
+        MAKE_HOOK_MID(baseModule, "44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 64 24 ?? 44 0F 29 6C 24", "MGS 2: Screenspace Fixes: user\\shibata\\effect\\plant_sun.c -> NewPlantSunMain() -> Act() -> Flare_Act() - Projection | @l273: ", {
+                RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
+            });
 
-            g_plantSunProjectionHook = safetyhook::create_mid(
-                plantSun,
-                [](SafetyHookContext& ctx)
-                {
-                    RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
-                });
-            LOG_HOOK(g_plantSunProjectionHook, "MGS 2: Screenspace Fixes: plant_sun projection")
-        }
+        MAKE_HOOK_MID(baseModule, "F3 44 0F 2C D0 66 0F 1F 84 00", "MGS 2: Screenspace Fixes: user\\shibata\\effect\\plant_sun.c -> NewPlantSunMain() -> Act() -> Flare_Act() - Feedback Activity | @l331: ", {
+                if (ctx.xmm0.f32[0] >= 1.0f)
+                    g_plantSunLastActiveMs.store(GetTickCount64(), std::memory_order_relaxed);
+            });
         // Prim.fx handles the GS alpha scale.
 
 
@@ -184,68 +159,32 @@ void ScreenspaceFixes::Apply()
 
 #pragma region demo_lens_flare
 
-        MAKE_HOOK_MID(baseModule, "44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 9C 24", "MGS 2: Screenspace Fixes: user\\okajima\\demo\\lens_flare.c -> Act()", {
+        MAKE_HOOK_MID(baseModule, "44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 94 24 ?? ?? ?? ?? 44 0F 29 9C 24", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - Projection | @l230: ", {
                 RETARGET_STRUCT_ENTRY(ctx.rcx, DG_CHANL, eye_pers, eye_pers_no_offset);
-            }); 
+            });
 
+        MAKE_HOOK_MID(baseModule, "0F 2F C1 89 44 24 ?? 0F 83 ?? ?? ?? ?? F3 44 0F 10 44 24", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - Sun State | @l241: ", {
+                MGS2FlareOcclusion::SetSunState(reinterpret_cast<const float*>(ctx.rbx + 0x60), ctx.xmm13.f32[0], ctx.xmm14.f32[0], ctx.xmm0.f32[0], ctx.xmm1.f32[0]);
+            });
 
-        uint8_t* lensFlareRamp = Memory::PatternScan(baseModule,
-                                                     "8B 05 ?? ?? ?? ?? FF C0 66 0F 6E C0 0F 5B C0 F3 0F 59 83 ?? ?? ?? ?? 44 39 93",
-                                                     "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> Act()");
-        if (lensFlareRamp)
-        {
-            // The hook sits past the matched bytes; make sure it lands on the expected instruction
-            // so a changed exe fails cleanly instead of hooking mid-instruction.
-            if (memcmp(lensFlareRamp + 0x106, "\x44\x0F\x2F\xC0", 4) != 0 ||    // comiss xmm8, xmm0
-                memcmp(lensFlareRamp + 0x166, "\xF3\x44\x0F\x5C\xC1", 5) != 0 || // subss xmm8, xmm1
-                memcmp(lensFlareRamp + 0x180, "\xF3\x44\x0F\x5E", 4) != 0 ||    // divss xmm10
-                memcmp(lensFlareRamp + 0x1C3, "\x48\x8B\xCB", 3) != 0)          // mov rcx, rbx
-            {
-                spdlog::error("MGS 2: Screenspace Fixes: lens flare hook offsets no longer match; flare fixes disabled.");
-                lensFlareRamp = nullptr;
-            }
-        }
-        if (lensFlareRamp)
-        {
-            static SafetyHookMid lensFlareSunStateHook {};
-            lensFlareSunStateHook = safetyhook::create_mid(lensFlareRamp + 0xEA,   // post-projection: sun screen/clip pos
-                                                          [](SafetyHookContext& ctx)
-                                                          {
-                                                              MGS2FlareOcclusion::SetSunState(reinterpret_cast<const float*>(ctx.rbx + 0x60),
-                                                                                              ctx.xmm13.f32[0], ctx.xmm14.f32[0],
-                                                                                              ctx.xmm0.f32[0], ctx.xmm1.f32[0]);
-                                                          });
-            LOG_HOOK(lensFlareSunStateHook, "MGS 2: Screenspace Fixes: lens flare sun state feed")
+        MAKE_HOOK_MID(baseModule, "48 8B CB E8 ?? ?? ?? ?? 41 0F 28 E5", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - GS Alpha | @l259: ", {
+                ctx.xmm9.f32[0] *= MGS2FlareOcclusion::GetVisibility();
+            });
 
-            static SafetyHookMid lensFlareAlphaHook {};
-            lensFlareAlphaHook = safetyhook::create_mid(lensFlareRamp + 0x1C3,     // xmm9 = final sprite alpha
-                                                         [](SafetyHookContext& ctx)
-                                                         {
-                                                             ctx.xmm9.f32[0] *= MGS2FlareOcclusion::GetVisibility();
-                                                         });
-            LOG_HOOK(lensFlareAlphaHook, "MGS 2: Screenspace Fixes: lens flare GS alpha")
-                
+        // Run the cull and edge-fade in the original 4:3 screen space.
+        constexpr float kCinemaCrop = (16.0f / 9.0f) / (4.0f / 3.0f);
 
+        MAKE_HOOK_MID(baseModule, "44 0F 2F C0 0F 87 ?? ?? ?? ?? F3 0F 10 7C 24", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - Cull | @l241: ", {
+                ctx.xmm0.f32[0] *= kCinemaCrop;
+            });
 
+        MAKE_HOOK_MID(baseModule, "F3 44 0F 5C C1 F3 0F 5E C2", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - Edge Fade Start | @l250: ", {
+                ctx.xmm1.f32[0] *= kCinemaCrop;
+            });
 
-
-            // Run the cull and edge-fade in the original 4:3 screen space so flares only cull once they leave
-            // where the PS2 frame would have been, not 33% early at the cropped edge.
-            constexpr float kCinemaCrop = (16.0f / 9.0f) / (4.0f / 3.0f);
-            static SafetyHookMid lensFlareCullHook {};
-            lensFlareCullHook = safetyhook::create_mid(lensFlareRamp + 0x106,      // xmm0 = cull threshold (1.4)
-                                                       [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] *= kCinemaCrop; });
-            LOG_HOOK(lensFlareCullHook, "MGS 2: Screenspace Fixes: lens flare cull")
-                static SafetyHookMid lensFlareEdgeStartHook {};
-            lensFlareEdgeStartHook = safetyhook::create_mid(lensFlareRamp + 0x166, // xmm1 = edge-fade start (1.0)
-                                                            [](SafetyHookContext& ctx) { ctx.xmm1.f32[0] *= kCinemaCrop; });
-            LOG_HOOK(lensFlareEdgeStartHook, "MGS 2: Screenspace Fixes: lens flare edge-fade start")
-                static SafetyHookMid lensFlareEdgeBandHook {};
-            lensFlareEdgeBandHook = safetyhook::create_mid(lensFlareRamp + 0x180,  // xmm0 = edge-fade band (0.3)
-                                                           [](SafetyHookContext& ctx) { ctx.xmm0.f32[0] *= kCinemaCrop; });
-            LOG_HOOK(lensFlareEdgeBandHook, "MGS 2: Screenspace Fixes: lens flare edge-fade band")
-            
-        }
+        MAKE_HOOK_MID(baseModule, "F3 44 0F 5E 15 ?? ?? ?? ?? 76", "MGS 2: Screenspace Fixes: user\\shibata\\demo\\lens_flare.c -> NewLensFlare_Demo() -> Act() - Edge Fade Band | @l252: ", {
+                ctx.xmm0.f32[0] *= kCinemaCrop;
+            });
 #pragma endregion
 
     
