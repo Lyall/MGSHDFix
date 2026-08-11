@@ -30,6 +30,7 @@ namespace
     constexpr uint64_t kMdlPrim  = 0x15cULL;
 
     SafetyHookInline g_actHook{};
+    SafetyHookInline g_actGameHook{};
     InitMdlDrawFn    g_initMdlDraw = nullptr;
 
     alignas(16) uint8_t g_autopacket[0x80000];
@@ -106,6 +107,15 @@ namespace
             BuildDropsAutopacket(work);
         }
     }
+
+    void __fastcall ActGame_Detour(uintptr_t work)
+    {
+        g_actGameHook.fastcall<void>(work);
+        if (g_initMdlDraw && work)
+        {
+            BuildDropsAutopacket(work);
+        }
+    }
 }
 
 void MGS2LensDroplets::Initialize()
@@ -128,5 +138,12 @@ void MGS2LensDroplets::Initialize()
     {
         g_actHook = safetyhook::create_inline(address, reinterpret_cast<void*>(Act_Detour));
         LOG_HOOK(g_actHook, "MGS 2: Lens Droplets - Act");
+    }
+
+    // Gameplay twin (guard pee, Vamp drips, waterfall) - same work layout, same dead draw.
+    if (uint8_t* address = Memory::PatternScan(baseModule, "40 53 41 54 48 83 EC 48 45 33 E4 48 8B D9 F6 05 ?? ?? ?? ?? 01", "MGS 2: Lens Droplets - shibata\\effect\\scr_drop.c -> NewScrDrop() -> Act()"))
+    {
+        g_actGameHook = safetyhook::create_inline(address, reinterpret_cast<void*>(ActGame_Detour));
+        LOG_HOOK(g_actGameHook, "MGS 2: Lens Droplets - Gameplay Act");
     }
 }
