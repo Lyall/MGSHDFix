@@ -72,6 +72,8 @@
     <ClCompile Include="src\fixes\fix_default_gpu.cpp" />
     <ClCompile Include="src\fixes\aiming_full_tilt.cpp" />
     <ClCompile Include="src\fixes\mgs2_blood_stains.cpp" />
+    <ClCompile Include="src\fixes\mgs2_camera_offsets.cpp" />
+    <ClCompile Include="src\fixes\mgs2_demo_scope.cpp" />
     <ClCompile Include="src\fixes\mgs2_scope_warp.cpp" />
     <ClCompile Include="src\fixes\mgs2_water_effects.cpp" />
     <ClCompile Include="src\fixes\mgs2_lens_droplets.cpp" />
@@ -224,6 +226,8 @@
     <ClInclude Include="src\fixes\mgs3_hud_fixes.hpp" />
     <ClInclude Include="src\fixes\aiming_full_tilt.hpp" />
     <ClInclude Include="src\fixes\mgs2_blood_stains.hpp" />
+    <ClInclude Include="src\fixes\mgs2_camera_offsets.hpp" />
+    <ClInclude Include="src\fixes\mgs2_demo_scope.hpp" />
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp" />
     <ClInclude Include="src\fixes\mgs2_water_effects.hpp" />
     <ClInclude Include="src\fixes\mgs2_lens_droplets.hpp" />
