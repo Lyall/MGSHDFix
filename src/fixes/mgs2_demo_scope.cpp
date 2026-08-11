@@ -8,7 +8,6 @@
 #include "mgs2_linkvarbuf.hpp"
 #include "original_camera_positions.hpp"
 
-#include <atomic>
 
 namespace
 {
@@ -79,11 +78,6 @@ bool MGS2DemoScope::NeedsCameraCorrection()
         return false;
     }
 
-    if (!MGS2_LinkVarBuf::linkvarbuf || !*MGS2_LinkVarBuf::linkvarbuf)
-    {
-        return false;
-    }
-
     return !(MGS2_LinkVarBuf::GM_Configuration & MGS2_LinkVarBuf::GM_CONFIG_CUTSCENES_LETTERBOXED);
 }
 
@@ -96,7 +90,7 @@ void MGS2DemoScope::Initialize()
 
     if (uint8_t* address = Memory::PatternScan(
             baseModule,
-            "48 89 5C 24 10 57 48 83 EC 20 8B F9 BA 00 20 00 00 B9 0A 00 00 00 44 8D 49 16 45 8D 41 78 E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 75",
+            "48 89 5C 24 ?? 57 48 83 EC ?? 8B F9 BA ?? ?? ?? ?? B9 ?? ?? ?? ?? 44 8D 49 ?? 45 8D 41",
             "MGS 2: Demo Scope: user\\skoba\\weapon\\psg_layout.c -> NewPsg1Sight()"))
     {
         g_newPsg1SightHook = safetyhook::create_inline(address, reinterpret_cast<void*>(NewPsg1Sight_Detour));
