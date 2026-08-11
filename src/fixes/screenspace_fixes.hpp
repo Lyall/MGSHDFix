@@ -3,5 +3,5 @@
 namespace ScreenspaceFixes
 {
     void Apply();
+    bool IsPlantSunFeedbackActive();
 }
-

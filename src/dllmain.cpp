@@ -47,6 +47,7 @@
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
+#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
 #include "mgs2_glass_dmapack_overflow.hpp"
 #include "cpu_core_limit.hpp"
@@ -585,6 +586,7 @@ static void InitializeSubsystems()
         INITIALIZE(FixReverbWetLevel::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());
+        INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
         INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
         INITIALIZE(TextureLiveSwaps::ApplyFixes());

@@ -6,9 +6,11 @@ struct ID3D11ShaderResourceView;
 namespace MGS2GasHaze
 {
     void Initialize();
-    // D3D11 smoke pass; called at the end of the 3D pass (before UI) via SceneDepth's callback,
-    // drawing into the scene colour RT with the live depth for occlusion.
+    void DrawIntoCurrentTarget();
     void DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
+    void OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
+    void OnFeedbackCapture(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
+    bool IsActive();
 
     inline bool bEnabled = true;
 };

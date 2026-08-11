@@ -45,6 +45,7 @@ void GameVars::Initialize()
         p_DG_ObjQueueInit = Memory::PatternScan(baseModule, "48 C7 05 ?? ?? ?? ?? 00 03 00 00", "MGS 2: GameVars: DG_InitChanlSystem() -> DG_ObjQueue init");
         p_DG_Chanls = reinterpret_cast<DG_CHANL*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B CB", "MGS2: DG_Chanls") + 3));
         p_GM_CurrentStageMap = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B F8", "MGS2: GM_CurrentStageMap") + 2));
+        p_HZX_CurrentGroupID = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? 4C 8D 44 24 ?? 33 ED 48 8D 54 24 ?? 89 2D", "MGS 2: GameVars: HZX_CurrentGroupID") + 2));
 
         p_GM_CameraDir = reinterpret_cast<SVECTOR*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8D 15 ?? ?? ?? ?? 83 25", "MGS 2: GameVars: GM_CameraDir") + 3));
         p_GM_PlayerWork = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 0F BF 51 ?? 75", "MGS 2: GameVars: GM_PlayerWork") + 3));
@@ -76,6 +77,7 @@ void GameVars::Initialize()
         spdlog::info("GameVars: GM_CameraDir address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_CameraDir - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_PlayerWork address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_PlayerWork - (uintptr_t)baseModule);
         spdlog::info("GameVars: GM_PlayerBody address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GM_PlayerBody - (uintptr_t)baseModule);
+        spdlog::info("GameVars: HZX_CurrentGroupID address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_HZX_CurrentGroupID - (uintptr_t)baseModule);
 
         if (uint8_t* LevelTransitionResult = Memory::PatternScan(baseModule, "89 73 ?? 81 25", "GameVars: Level Transition"))
         {

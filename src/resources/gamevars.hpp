@@ -161,6 +161,7 @@ public:
     [[nodiscard]] const SVECTOR* GM_CameraDir() const { return p_GM_CameraDir; }
     [[nodiscard]] uintptr_t GM_PlayerWork() const { return p_GM_PlayerWork ? *p_GM_PlayerWork : 0; }
     [[nodiscard]] uintptr_t GM_PlayerBody() const { return p_GM_PlayerBody ? *p_GM_PlayerBody : 0; }
+    [[nodiscard]] int* HZX_CurrentGroupID() const { return p_HZX_CurrentGroupID; }
 
     [[nodiscard]] const FVECTOR* GM_CameraTarget() const { return p_GM_CameraTarget; }
     [[nodiscard]] const FVECTOR* ArmCamShift() const { return p_ArmCamShift; }
@@ -194,6 +195,7 @@ private:
     SVECTOR* p_GM_CameraDir = nullptr;
     uintptr_t* p_GM_PlayerWork = nullptr;
     uintptr_t* p_GM_PlayerBody = nullptr;
+    int* p_HZX_CurrentGroupID = nullptr;
     FVECTOR* p_GM_CameraTarget = nullptr;
     FVECTOR* p_ArmCamShift = nullptr;
 

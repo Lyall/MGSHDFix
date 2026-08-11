@@ -415,6 +415,7 @@ void D3D11Hooks::Initialize()
 
     if (eGameType & MGS2)
     {
+        constexpr uint32_t kDG_DMAPACK_NORMAL = 0x0001;
         constexpr uint32_t kDG_DMAPACK_MENU = 0x0002;
         MAKE_HOOK_MID(baseModule, "40 55 57 41 56 48 8D AC 24 40 FC FF FF 48 81 EC C0 04 00 00 48 8B F9", "D3D11 Hooks: BP_RenderDmaPack_AutoPacket", {
                 auto* dmapack = *reinterpret_cast<const uintptr_t* const*>(ctx.rcx);
@@ -422,16 +423,19 @@ void D3D11Hooks::Initialize()
                 {
                     return;
                 }
-                if (!(*reinterpret_cast<const uint32_t*>(dmapack) & kDG_DMAPACK_MENU))
+
+                const auto* bytes = reinterpret_cast<const uint8_t*>(dmapack);
+                const uint32_t dmapackFlags = *reinterpret_cast<const uint32_t*>(bytes);
+
+                // NORMAL|MENU first runs on the normal channel.
+                if (!g_preMenuFired &&
+                    (dmapackFlags & kDG_DMAPACK_MENU) &&
+                    !(dmapackFlags & kDG_DMAPACK_NORMAL))
                 {
-                    return;
+                    g_preMenuFired = true;
+                    SceneDepth::OnPreMenuRender();
                 }
-                if (g_preMenuFired)
-                {
-                    return;
-                }
-                g_preMenuFired = true;
-                SceneDepth::OnPreMenuRender();
+
                 });
     }
 
