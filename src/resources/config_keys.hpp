@@ -370,6 +370,13 @@ namespace ConfigKeys
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
 
+    constexpr const char* MGS2_Photosensitive_Section = "Bugfixes";
+    constexpr const char* MGS2_Photosensitive_Setting = "Disable Photosensitive Effects";
+    constexpr const char* MGS2_Photosensitive_Help = "";
+    constexpr const char* MGS2_Photosensitive_Tooltip = "The Master Collection removes a handful of scripted flash effects for photosensitivity reasons (the Tanker sinking's detonation flash among them).\n"
+                                                       "\n"
+                                                       "Turn this setting off to restore the original PS2 effects.";
+
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
     constexpr const char* CPUCoreLimit_Help = "(Fixes cutscene crashes on some newer CPUs)";

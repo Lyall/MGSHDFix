@@ -230,8 +230,15 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
     const bool inCutscene = g_GameVars.InCutscene();
     if (bCutscenesOnly && !inCutscene) return;
 
-    const ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
-    const bool alive = last && (GetTickCount64() - last) < 250;
+    const ULONGLONG now = GetTickCount64();
+    ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
+    // The blur actor's Act freezes with the pause level - keep a live window open or the trails age out mid-pause.
+    if (g_GameVars.GV_PauseLevel() != 0 && last && (now - last) < 250)
+    {
+        g_lastActMs.store(now, std::memory_order_relaxed);
+        last = now;
+    }
+    const bool alive = last && (now - last) < 250;
     const float authoredFactor = std::clamp(g_factor.load(std::memory_order_relaxed), 0.0f, 1.0f);
     const float factor = authoredFactor;
     if (!alive || factor <= 0.003f) return;
@@ -354,6 +361,11 @@ void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11Shader
 
     ctx->CopyResource(g_prevTex.Get(), sceneTex.Get());
     g_havePrev = true;
+}
+
+void MGS2DemoBlur::InvalidateCapture()
+{
+    g_havePrev = false;
 }
 
 void MGS2DemoBlur::Initialize()

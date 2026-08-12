@@ -630,6 +630,11 @@ void MGS2GasHaze::OnFeedbackCapture(ID3D11RenderTargetView* sceneColor, ID3D11Sh
     g_lastCapFrame = g_D3D11Hooks.FrameCount;
 }
 
+void MGS2GasHaze::InvalidateCapture()
+{
+    g_lastCapFrame = UINT64_MAX;
+}
+
 void MGS2GasHaze::Initialize()
 {
     if (!(eGameType & MGS2))

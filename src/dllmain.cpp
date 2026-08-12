@@ -42,6 +42,8 @@
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
 #include "mgs2_body_splash_guard.hpp"
+#include "mgs2_codec_band.hpp"
+#include "mgs2_demo_effect_blacklist.hpp"
 #include "mgs2_lens_droplets.hpp"
 #include "mgs2_gas_haze.hpp"
 #include "mgs2_demo_camera_judder.hpp"
@@ -583,6 +585,8 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2ScopeWarp::Initialize());
         INITIALIZE(MGS2WaterEffects::Initialize());
         INITIALIZE(MGS2BodySplashGuard::Initialize());
+        INITIALIZE(MGS2CodecBand::Initialize());
+        INITIALIZE(MGS2DemoEffectBlacklist::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
         INITIALIZE(MGS2DemoCameraJudder::Initialize());

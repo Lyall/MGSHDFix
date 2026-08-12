@@ -19,6 +19,8 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
+#include "mgs2_demo_blur.hpp"
+#include "mgs2_gas_haze.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_crossfade.hpp"
@@ -139,6 +141,43 @@ namespace
         }
 
         const bool undrawn = IsUnDrawnFrame();
+
+        // A stage boundary invalidates the held frame and every frame-feedback capture, or the
+        // old scene replays into the new stage's first frames.
+        static std::string s_heldStage;
+        static int64_t s_lastUndrawCount = 0;
+        static int s_parkSyncFrames = 0;
+        const int64_t undrawCount = g_GameVars.DG_UnDrawFrameCount();
+        const char* stage = g_GameVars.GetCurrentStage();
+        if ((stage && s_heldStage != stage) || s_lastUndrawCount > kMaxHeldRun)
+        {
+            g_heldValid = false;
+            if (eGameType & MGS2)
+            {
+                MGS2DemoBlur::InvalidateCapture();
+                MGS2GasHaze::InvalidateCapture();
+                g_MGS2UnderwaterFilterFix.InvalidateCapture();
+            }
+            if (stage)
+            {
+                s_heldStage = stage;
+            }
+        }
+        if (undrawCount > kMaxHeldRun && s_lastUndrawCount <= kMaxHeldRun)
+        {
+            s_parkSyncFrames = 4;
+        }
+        s_lastUndrawCount = undrawCount;
+
+        // During loading the port shows its two internal frame buffers in turns. If they differ,
+        // the old frame flashes on screen - so make them equal when the load starts.
+        if (s_parkSyncFrames > 0 && undrawCount > kMaxHeldRun)
+        {
+            s_parkSyncFrames--;
+            SceneDepth::SyncRecentSceneTargets();
+            return;
+        }
+
         if ((undrawn || doubleRendered) && g_heldValid)
         {
             if (g_Logging.bVerboseLogging)
@@ -147,6 +186,11 @@ namespace
                     undrawn ? "undrawn" : "double-rendered", g_GameVars.GetCurrentStage());
             }
             context->CopyResource(backbuffer.Get(), g_heldFrame.Get());
+            return;
+        }
+
+        if (undrawn)
+        {
             return;
         }
 
