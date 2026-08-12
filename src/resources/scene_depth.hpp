@@ -30,6 +30,7 @@ namespace SceneDepth
 
     void Initialize();
     void ResetStatus();
+    void SyncRecentSceneTargets();
     ID3D11ShaderResourceView* GetSRV();
     bool IsAvailable();
     ID3D11ShaderResourceView* CaptureDepth(ID3D11DepthStencilView* depthStencil);
