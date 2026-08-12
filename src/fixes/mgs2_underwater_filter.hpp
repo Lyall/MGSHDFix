@@ -8,6 +8,7 @@ public:
     void Initialize();
     void PatchWork(void* work) const;
     void BeforePresent();
+    void InvalidateCapture();
     void InstallD3D11StateHooks();
 };
 

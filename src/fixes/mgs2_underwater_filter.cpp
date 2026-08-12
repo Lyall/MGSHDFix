@@ -1261,6 +1261,12 @@ namespace
             return false;
         }
 
+        // scr_water.c's WaterVisible() also hides the film through the START pause.
+        if ((g_GameVars.GV_PauseLevel() & MGS2_GV_PAUSE_PAUSE) != 0)
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -1669,11 +1675,15 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
         gScrWaterSawUnderwaterStep = true;
     }
 
-    const bool codecFallback = step == 0 && !gScrWaterSawUnderwaterStep && IsUnderwaterCodecSequence();
+    // Radio only - the RADAR|GAGE combo matches ordinary wet gameplay HUD.
+    const bool codecFallback = step == 0 && !gScrWaterSawUnderwaterStep && IsPlayerInWater() &&
+        (g_GameVars.GM_MenuStatus() & MENU_RADIO_ON) != 0;
     const bool active = ((step >= 1 && step <= 2) || codecFallback) && IsWaterVisible();
     gScrWaterActive = active;
 
     dmapack->flag |= kDmapackMenu;
+    // Channels 2/3 are the codec face windows - the fullscreen film squashes into them.
+    dmapack->flag |= kDmapackInvisible2 | kDmapackInvisible3;
     dmapack->priority = kScrWaterPriority;
     if (active)
     {
@@ -1685,6 +1695,11 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
     }
 
     PatchPacket(info.packetMem, false);
+}
+
+void MGS2UnderwaterFilterFix::InvalidateCapture()
+{
+    gOwnedWaterFeedbackHasFrame = false;
 }
 
 void MGS2UnderwaterFilterFix::BeforePresent()
