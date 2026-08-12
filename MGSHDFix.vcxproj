@@ -77,6 +77,7 @@
     <ClCompile Include="src\fixes\mgs2_demo_scope.cpp" />
     <ClCompile Include="src\fixes\mgs2_scope_warp.cpp" />
     <ClCompile Include="src\fixes\mgs2_water_effects.cpp" />
+    <ClCompile Include="src\fixes\mgs2_body_splash_guard.cpp" />
     <ClCompile Include="src\fixes\mgs2_codec_band.cpp" />
     <ClCompile Include="src\fixes\mgs2_demo_effect_blacklist.cpp" />
     <ClCompile Include="src\fixes\mgs2_lens_droplets.cpp" />
@@ -234,6 +235,7 @@
     <ClInclude Include="src\fixes\mgs2_demo_scope.hpp" />
     <ClInclude Include="src\fixes\mgs2_scope_warp.hpp" />
     <ClInclude Include="src\fixes\mgs2_water_effects.hpp" />
+    <ClInclude Include="src\fixes\mgs2_body_splash_guard.hpp" />
     <ClInclude Include="src\fixes\mgs2_codec_band.hpp" />
     <ClInclude Include="src\fixes\mgs2_demo_effect_blacklist.hpp" />
     <ClInclude Include="src\fixes\mgs2_lens_droplets.hpp" />
