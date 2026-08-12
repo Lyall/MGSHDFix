@@ -1121,7 +1121,7 @@ void EffectSpeedFix::Initialize()
     }
 
     if (uint8_t* spawn = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C5 ?? 89 43",
-        "MGS 2: Effect Speed Fix : user\okajima\demo_effect\d_splash_motion.c -> Act() droplet spawn"))
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_motion.c -> Act() droplet spawn"))
     {
         g_splashSpawnResume = reinterpret_cast<uintptr_t>(spawn) + 5;
         splashSpawn_hook = safetyhook::create_mid(spawn, MGS2_SplashSpawn_hook);

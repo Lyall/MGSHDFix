@@ -18,8 +18,6 @@ namespace Memory
 
     bool PatchFloatImmediate(void* module, const char* signature, ptrdiff_t immediateOffset, uint32_t value, const char* prefix);
 
-    static HMODULE GetThisDllHandle();
-
     std::uint8_t* PatternScanSilent(void* module, const char* signature);
 
     std::uint8_t* PatternScan(void* module, const char* signature, const char* prefix);
@@ -72,7 +70,7 @@ namespace Util
 #endif
     void DumpContext(const safetyhook::Context& ctx);
 
-    void DumpBytes(uintptr_t address, size_t count);
+    void DumpBytes(uintptr_t address, size_t count = 16)
 #endif
     
     std::string GetCommandLineArgs();
@@ -101,14 +99,22 @@ namespace Util
 
     std::string StripQuotes(const std::string& value);
 
-    std::string GetParentProcessName(bool returnFullPath);
+    std::string GetParentProcessName(bool returnFullPath = false);
 
     bool IsProcessParent(const std::string& exeName);
 
 
     std::string GetFileProductName(const std::filesystem::path& path);
 
-    bool SHA1Check(const std::filesystem::path& filePath, const std::string& expected);
+    using SHA1Hash = std::array<std::uint8_t, 20>;
+
+    std::optional<SHA1Hash> ComputeSHA1Bytes(const std::filesystem::path& filePath);
+
+    bool SHA1Equals(const SHA1Hash& actual, std::string_view expected);
+
+    bool SHA1Check(const std::filesystem::path& filePath, std::string_view expected);
+
+    void ShutdownSHA1Provider();
 
     bool IsFileReadOnly(const std::filesystem::path& path);
 
