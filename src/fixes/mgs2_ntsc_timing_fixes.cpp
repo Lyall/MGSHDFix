@@ -47,10 +47,10 @@ namespace
         }
         else if (nameHash == STRCODE_CAMERA_SHAKE_TIME && (!strcmp(stage, MGS2Stages::W00A) || !strcmp(stage, MGS2Stages::A00A)))
         {
-            spdlog::info("MGS 2: NTSC Timing Fixes: Checking for W00A/A00A カメラゆれタイム in stage {} with ticks {}", stage, currentTicks);
+            //spdlog::info("MGS 2: NTSC Timing Fixes: Checking for W00A/A00A カメラゆれタイム in stage {} with ticks {}", stage, currentTicks);
             if (currentTicks == Shared_Gamefuncs::BP_AdjustTick(21))
             {
-                spdlog::info("MGS 2: NTSC Timing Fixes: Fixing W00A/A00A カメラゆれタイム from 21 to 20 ticks");
+                //spdlog::info("MGS 2: NTSC Timing Fixes: Fixing W00A/A00A カメラゆれタイム from 21 to 20 ticks");
                 return 20;
             }
         }
@@ -79,10 +79,24 @@ namespace
         }
         return 0;
     }
+
+
+    bool CheckNTSCFile(const std::filesystem::path& path, std::string_view expectedSHA1)
+    {
+        spdlog::info("MGS 2: NTSC Timing Fixes: Checking for file: {}", path.string());
+        return std::filesystem::exists(path) && Util::SHA1Check(path, expectedSHA1);
+    }
+
 }
 
 void MGS2_NTSCTimingFixes::ApplyFix()
 {
+    if (!(eGameType & MGS2))
+    {
+        return;
+    }
+
+
     if (!Shared_Gamefuncs::BP_AdjustTick || !Shared_Gamefuncs::GM_GetArea)
     {
         spdlog::error("MGS 2: NTSC Timing Fixes: Shared_Gamefuncs::BP_AdjustTick or Shared_Gamefuncs::GM_GetArea is null, cannot apply timing fixes.");
@@ -91,21 +105,11 @@ void MGS2_NTSCTimingFixes::ApplyFix()
 
     spdlog::info("MGS 2: NTSC Timing Fixes: Applying EU .GCX -> NTSC timing fixes.");
 
-    const auto pRow_w13a_paddemo_00_Path = sExePath / "assets" / "row" / "eu" / "00ca766e.row";   //ntsc = w13a_paddemo_00.row  | pal = w13a_paddemo_00_pal.row
-    const auto pRow_w23a_paddemo_n00_Path = sExePath / "assets" / "row" / "eu" / "005a9862.row";  //ntsc = w23a_paddemo_n00.row | pal = w23a_paddemo_n00_pal.row
+    auto w13aFuture = std::async(std::launch::async, CheckNTSCFile, sExePath / "assets" / "row" / "eu" / "00ca766e.row", "f03496720bab8acf405611764f1c10b0230f44dc");   // ntsc = w13a_paddemo_00.row  | pal = w13a_paddemo_00_pal.row
+    auto w23aFuture = std::async(std::launch::async, CheckNTSCFile, sExePath / "assets" / "row" / "eu" / "005a9862.row", "3dfd7c949ba46cce542a330a1ba6a154cfbd58d1");  // ntsc = w23a_paddemo_n00.row | pal = w23a_paddemo_n00_pal.row
 
-
-    spdlog::info("MGS 2: NTSC Timing Fixes: Checking for file: {}", pRow_w13a_paddemo_00_Path.string());
-    if (std::filesystem::exists(pRow_w13a_paddemo_00_Path) && Util::SHA1Check(pRow_w13a_paddemo_00_Path, "f03496720bab8acf405611764f1c10b0230f44dc"))
-    {
-        bNTSC_w13a_paddemo_00_Present = true;
-    }
-
-    spdlog::info("MGS 2: NTSC Timing Fixes: Checking for file: {}", pRow_w23a_paddemo_n00_Path.string());
-    if (std::filesystem::exists(pRow_w23a_paddemo_n00_Path) && Util::SHA1Check(pRow_w23a_paddemo_n00_Path, "3dfd7c949ba46cce542a330a1ba6a154cfbd58d1"))
-    {
-        bNTSC_w23a_paddemo_n00_Present = true;
-    }
+    bNTSC_w13a_paddemo_00_Present = w13aFuture.get();
+    bNTSC_w23a_paddemo_n00_Present = w23aFuture.get();
 
     if (!bNTSC_w13a_paddemo_00_Present || !bNTSC_w23a_paddemo_n00_Present)
     {

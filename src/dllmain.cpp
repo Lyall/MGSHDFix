@@ -687,6 +687,8 @@ static void InitializeSubsystems()
     INITIALIZE(UnitTests::runAllTests());
 
 #endif
+
+    INITIALIZE(Util::ShutdownSHA1Provider());
 }
 
 std::mutex mainThreadFinishedMutex;
