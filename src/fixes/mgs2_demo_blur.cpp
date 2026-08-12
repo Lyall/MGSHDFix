@@ -363,6 +363,11 @@ void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11Shader
     g_havePrev = true;
 }
 
+void MGS2DemoBlur::InvalidateCapture()
+{
+    g_havePrev = false;
+}
+
 void MGS2DemoBlur::Initialize()
 {
     if (!(eGameType & MGS2) || !bEnabled) return;

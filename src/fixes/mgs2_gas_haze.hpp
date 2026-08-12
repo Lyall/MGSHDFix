@@ -9,6 +9,7 @@ namespace MGS2GasHaze
     void DrawIntoCurrentTarget();
     void DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
     void OnPreMenuRender(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
+    void InvalidateCapture();
     void OnFeedbackCapture(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth);
     bool IsActive();
 

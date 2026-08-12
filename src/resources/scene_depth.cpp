@@ -20,6 +20,7 @@ namespace
     // 3D-pass tracking, for the end-of-3D transition (draw effects under the UI).
     ComPtr<ID3D11Texture2D>          g_sceneDepth;     // the scene depth currently bound
     ComPtr<ID3D11RenderTargetView>   g_sceneColorRTV;  // colour RT bound alongside it
+    ComPtr<ID3D11RenderTargetView>   g_recentSceneRTVs[2];
     bool g_in3D = false;
     bool g_fired = false;
     UINT g_bbArea = 0;
@@ -333,7 +334,15 @@ namespace
                     {
                         g_sceneDepth = tex;
                         if (numViews > 0 && rtvs && rtvs[0])
+                        {
                             g_sceneColorRTV = rtvs[0];
+                            // Both parities of the internal frame target, for the loading sync.
+                            if (g_recentSceneRTVs[0].Get() != rtvs[0])
+                            {
+                                g_recentSceneRTVs[1] = g_recentSceneRTVs[0];
+                                g_recentSceneRTVs[0] = rtvs[0];
+                            }
+                        }
                     }
                 }
             }
@@ -387,6 +396,40 @@ void SceneDepth::OnPreMenuRender()
             if (entry.callback) entry.callback(g_sceneColorRTV.Get(), depthSRV);
         g_inOverlayCb = false;
     }
+}
+
+void SceneDepth::SyncRecentSceneTargets()
+{
+    ID3D11DeviceContext* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+    if (!ctx || !g_recentSceneRTVs[0] || !g_recentSceneRTVs[1])
+    {
+        return;
+    }
+
+    // Copy the fresh parity over the stale one - clearing either flickers what's on screen.
+    ComPtr<ID3D11Resource> fresh, stale;
+    g_recentSceneRTVs[0]->GetResource(fresh.GetAddressOf());
+    g_recentSceneRTVs[1]->GetResource(stale.GetAddressOf());
+    if (!fresh || !stale || fresh == stale)
+    {
+        return;
+    }
+
+    ComPtr<ID3D11Texture2D> freshTex, staleTex;
+    if (FAILED(fresh.As(&freshTex)) || FAILED(stale.As(&staleTex)) || !freshTex || !staleTex)
+    {
+        return;
+    }
+    D3D11_TEXTURE2D_DESC fd {}, sd {};
+    freshTex->GetDesc(&fd);
+    staleTex->GetDesc(&sd);
+    if (fd.Width != sd.Width || fd.Height != sd.Height || fd.Format != sd.Format ||
+        fd.SampleDesc.Count != sd.SampleDesc.Count)
+    {
+        return;
+    }
+
+    ctx->CopyResource(stale.Get(), fresh.Get());
 }
 
 void SceneDepth::ResetStatus()
