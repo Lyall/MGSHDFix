@@ -38,11 +38,11 @@ void MGS2CodecBand::Initialize()
         spdlog::error("MGS 2: Codec Band: expected 2 TrBuffer sites, found {}.", sites.size());
     }
 
-    MAKE_HOOK_MID(baseModule, "89 83 A4 00 00 00 75 ?? F3 0F", "MGS 2: Codec Band: user\\mode\\codec\\codeccrt.c -> init_black_zone() | wait store", {
+    MAKE_HOOK_MID(baseModule, "89 83 ?? ?? ?? ?? 75 ?? F3 0F 58 0D", "MGS 2: Codec Band: user\\mode\\codec\\codeccrt.c -> init_black_zone() | wait store", {
         ctx.rax >>= 4;
     });
 
-    MAKE_HOOK_MID(baseModule, "89 81 A4 00 00 00 F6 05", "MGS 2: Codec Band: user\\mode\\codec\\codeccrt.c -> proc_black_zone() | wait store", {
+    MAKE_HOOK_MID(baseModule, "89 81 ?? ?? ?? ?? F6 05 ?? ?? ?? ?? ?? F3 0F 58 CA", "MGS 2: Codec Band: user\\mode\\codec\\codeccrt.c -> proc_black_zone() | wait store", {
         ctx.rax >>= 4;
     });
 }
