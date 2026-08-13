@@ -71,6 +71,7 @@
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
+#include "mgs2_soft_shadows.hpp"
 #include "custom_player_name.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "game_funcs.hpp"
@@ -478,6 +479,7 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
     LOG_CONFIG(ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
+    MGS2SoftShadows::bEnabled = ResolutionScalingFixes::bIncreaseShadowResolution;
 
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ResolutionScalingFixes::bFixM92FPV);
