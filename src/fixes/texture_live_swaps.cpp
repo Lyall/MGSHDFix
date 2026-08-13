@@ -275,7 +275,7 @@ void TextureLiveSwaps::ApplyFixes()
     {
         using namespace MGS2_Characters;
 
-
+        spdlog::info("MGS 2 - Texture Swaps: Snake holster fix enabled.");
         constexpr uint32_t NULL_MSK_STRCODE = GameVars::GV_StrCode("null_msk.bmp");
         constexpr uint32_t SNA_DEF_TRI_STRCODE = 0x55aab1;
         constexpr uint32_t SNA_M9_GLIP = 0x495322;

@@ -41,6 +41,7 @@
 #include "mgs2_demo_scope.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
+#include "mgs2_body_splash_guard.hpp"
 #include "mgs2_codec_band.hpp"
 #include "mgs2_demo_effect_blacklist.hpp"
 #include "mgs2_lens_droplets.hpp"
@@ -87,6 +88,7 @@
 #include "depth_of_field.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
+#include "mgs2_ntsc_timing_fixes.hpp"
 #include "mgs2_preshade_lights.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
@@ -583,6 +585,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2DemoScope::Initialize());
         INITIALIZE(MGS2ScopeWarp::Initialize());
         INITIALIZE(MGS2WaterEffects::Initialize());
+        INITIALIZE(MGS2BodySplashGuard::Initialize());
         INITIALIZE(MGS2CodecBand::Initialize());
         INITIALIZE(MGS2DemoEffectBlacklist::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
@@ -600,6 +603,7 @@ static void InitializeSubsystems()
         INITIALIZE(TextureLiveSwaps::ApplyFixes());
         INITIALIZE(SnakeArmFixes::ApplyFixes());
         INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+        INITIALIZE(MGS2_NTSCTimingFixes::ApplyFix());
         INITIALIZE(MGS2PreshadeLights::Initialize());
         INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
@@ -689,6 +693,8 @@ static void InitializeSubsystems()
     INITIALIZE(UnitTests::runAllTests());
 
 #endif
+
+    INITIALIZE(Util::ShutdownSHA1Provider());
 }
 
 std::mutex mainThreadFinishedMutex;
