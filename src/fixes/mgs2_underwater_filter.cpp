@@ -1661,7 +1661,7 @@ void MGS2UnderwaterFilterFix::PatchWork(void* work) const
         RestoreTuning(work, info.dmapackFieldOffset);
         gScrWaterActive = false;
         dmapack->flag &= ~(kDmapackMenu | kDmapackInvisibleAll);
-        dmapack->flag |= kDmapackNormal | kDmapackInvisible0 | kDmapackInvisible1;
+        dmapack->flag |= kDmapackNormal | kDmapackInvisible0 | kDmapackInvisible1 | kDmapackInvisible2 | kDmapackInvisible3;
         dmapack->priority = kOriginalScrWaterPriority;
         PatchPacket(info.packetMem, true);
         return;
