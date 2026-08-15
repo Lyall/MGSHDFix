@@ -63,6 +63,8 @@
 #include "water_reflections.hpp"
 #include "mgs3_hud_fixes.hpp"
 #include "mgs3_film_grain.hpp"
+#include "mgs3_glow_overbright.hpp"
+#include "mgs3_map_relight.hpp"
 #include "mgs3_crossfade_capture.hpp"
 #include "windows_fullscreen_optimization.hpp"
 #include "busy_loop_fix.hpp"
@@ -627,6 +629,8 @@ static void InitializeSubsystems()
         INITIALIZE(g_WaterReflectionFix.Initialize());
         INITIALIZE(MGS3HudFixes::Initialize());
         INITIALIZE(MGS3FilmGrain::Initialize());
+        INITIALIZE(MGS3GlowOverbright::Initialize());
+        INITIALIZE(MGS3MapRelight::Initialize());
         INITIALIZE(MGS3_CrossfadeCapture::Initialize());
         INITIALIZE(MGS3FixCameraOffset::Activate());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
