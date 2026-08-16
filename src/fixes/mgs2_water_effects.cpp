@@ -64,14 +64,14 @@ namespace
                     const uint64_t uv    = *reinterpret_cast<const uint64_t*>(v + 0x10);
                     const uint64_t xyz   = *reinterpret_cast<const uint64_t*>(v + 0x20);
 
-                    const int sx = (int)(uint16_t)(xyz & 0xFFFF) >> 4;
-                    const int sy = (int)(uint16_t)((xyz >> 16) & 0xFFFF) >> 4;
-                    const int up = (int)(uint16_t)(uv & 0xFFFF) >> 4;
-                    const int vp = (int)(uint16_t)((uv >> 16) & 0xFFFF) >> 4;
+                    const float sx = (float)(uint16_t)(xyz & 0xFFFF) / 16.0f;
+                    const float sy = (float)(uint16_t)((xyz >> 16) & 0xFFFF) / 16.0f;
+                    const float up = (float)(uint16_t)(uv & 0xFFFF) / 16.0f;
+                    const float vp = (float)(uint16_t)((uv >> 16) & 0xFFFF) / 16.0f;
                     const uint32_t color = (uint32_t)(rgbaq & 0xFFFFFFFFu);
 
-                    p = WriteVertex(p, (float)(sx - kPosOffX), (float)(sy - kPosOffY),
-                                    (float)up / kDrawW, (float)vp / kDrawH, color);
+                    p = WriteVertex(p, sx - kPosOffX, sy - kPosOffY,
+                                    up / kDrawW, vp / kDrawH, color);
                 }
                 *countField = (uint32_t)kVertsPerStrip;
             }

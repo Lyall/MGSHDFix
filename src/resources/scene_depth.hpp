@@ -15,17 +15,22 @@
 // Initialize() once the device exists; ResetStatus() once per frame from Present.
 namespace SceneDepth
 {
-    enum CALLBACK_PRIORITY :std::uint16_t
+    enum CALLBACK_PRIORITY : std::uint16_t
     {
-        PRIORITY_DEFAULT = 1, 
+        PRIORITY_DEFAULT = 1,
         PRIORITY_HAZE = 10,
-        
-        PRIORITY_SMAA = 998,
-        PRIORITY_CROSSFADE = 999, //capture after SMAA pass
+        PRIORITY_HAZE_CAPTURE = 20,
+
+        PRIORITY_SMAA = 997,
+        PRIORITY_DEMO_BLUR = 998,
+        PRIORITY_CROSSFADE = 999, // Capture after SMAA.
+        PRIORITY_DEMO_BLUR_CAPTURE = 1000,
+        PRIORITY_FEEDBACK_CAPTURE = 1001,
     };
 
     void Initialize();
     void ResetStatus();
+    void SyncRecentSceneTargets();
     ID3D11ShaderResourceView* GetSRV();
     bool IsAvailable();
     ID3D11ShaderResourceView* CaptureDepth(ID3D11DepthStencilView* depthStencil);

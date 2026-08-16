@@ -18,6 +18,8 @@
 #include "mgs2_gas_haze.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_demo_camera_judder.hpp"
+#include "mgs2_codec_band.hpp"
+#include "mgs2_demo_effect_blacklist.hpp"
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_preshade_lights.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
@@ -70,6 +72,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_bandana_mass.hpp"
+#include "mgs2_soft_shadows.hpp"
 #include "custom_player_name.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "game_funcs.hpp"
@@ -477,6 +480,7 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
     LOG_CONFIG(ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
+    MGS2SoftShadows::bEnabled = ResolutionScalingFixes::bIncreaseShadowResolution;
 
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ResolutionScalingFixes::bFixM92FPV);
@@ -719,7 +723,12 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_AiRayVision::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled = MGS2BandanaMass::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_AiRayVision::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled  = MGS2BandanaMass::bEnabled = MGS2CodecBand::bEnabled = bRestoreVFX;
+
+            bool bDisablePhotosensitive = true;
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, bDisablePhotosensitive);
+            MGS2DemoEffectBlacklist::bEnabled = !bDisablePhotosensitive;
+            LOG_CONFIG(ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, bDisablePhotosensitive);
 
             std::string sMotionBlur;
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);

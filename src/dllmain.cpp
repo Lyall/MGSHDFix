@@ -37,8 +37,13 @@
 ///Fixes
 #include "aiming_full_tilt.hpp"
 #include "mgs2_blood_stains.hpp"
+#include "mgs2_camera_offsets.hpp"
+#include "mgs2_demo_scope.hpp"
 #include "mgs2_scope_warp.hpp"
 #include "mgs2_water_effects.hpp"
+#include "mgs2_body_splash_guard.hpp"
+#include "mgs2_codec_band.hpp"
+#include "mgs2_demo_effect_blacklist.hpp"
 #include "mgs2_lens_droplets.hpp"
 #include "mgs2_gas_haze.hpp"
 #include "mgs2_demo_camera_judder.hpp"
@@ -47,6 +52,7 @@
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
+#include "mgs2_flare_occlusion.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
 #include "mgs2_glass_dmapack_overflow.hpp"
 #include "cpu_core_limit.hpp"
@@ -82,6 +88,7 @@
 #include "depth_of_field.hpp"
 #include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
+#include "mgs2_ntsc_timing_fixes.hpp"
 #include "mgs2_preshade_lights.hpp"
 #include "mgs3_fix_camera_offset.hpp"
 #include "mgs3_fix_holster_after_torture.hpp"
@@ -576,8 +583,13 @@ static void InitializeSubsystems()
         INITIALIZE(g_OpticalCamoFix.Initialize());
         INITIALIZE(FixAimingFullTilt::Initialize());
         INITIALIZE(MGS2BloodStains::Initialize());
+        INITIALIZE(MGS2CameraOffsets::Initialize());
+        INITIALIZE(MGS2DemoScope::Initialize());
         INITIALIZE(MGS2ScopeWarp::Initialize());
         INITIALIZE(MGS2WaterEffects::Initialize());
+        INITIALIZE(MGS2BodySplashGuard::Initialize());
+        INITIALIZE(MGS2CodecBand::Initialize());
+        INITIALIZE(MGS2DemoEffectBlacklist::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
         INITIALIZE(MGS2DemoCameraJudder::Initialize());
@@ -587,11 +599,13 @@ static void InitializeSubsystems()
         INITIALIZE(FixReverbWetLevel::Initialize());
         INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());
+        INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());
         INITIALIZE(ResolutionScalingFixes::ApplyFixes()); // Always load after custom resolution
         INITIALIZE(TextureLiveSwaps::ApplyFixes());
         INITIALIZE(SnakeArmFixes::ApplyFixes());
         INITIALIZE(MGS2_Kirari_Sun2Fix::ApplyFix());
+        INITIALIZE(MGS2_NTSCTimingFixes::ApplyFix());
         INITIALIZE(MGS2PreshadeLights::Initialize());
         INITIALIZE(MGS2_RestoreDogtagViewer::Restore());
         INITIALIZE(g_DepthOfFieldFixes.Initialize());
@@ -681,6 +695,8 @@ static void InitializeSubsystems()
     INITIALIZE(UnitTests::runAllTests());
 
 #endif
+
+    INITIALIZE(Util::ShutdownSHA1Provider());
 }
 
 std::mutex mainThreadFinishedMutex;

@@ -5,6 +5,7 @@ class EffectSpeedFix final
 {
 public:
     static void Initialize();
+    static bool IsFeedbackHoldTick();
 
     bool isEnabled = true;
 
@@ -13,5 +14,3 @@ public:
 };
 
 inline EffectSpeedFix g_EffectSpeedFix;
-
-

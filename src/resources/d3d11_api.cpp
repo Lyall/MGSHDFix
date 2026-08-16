@@ -19,6 +19,8 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_underwater_filter.hpp"
+#include "mgs2_demo_blur.hpp"
+#include "mgs2_gas_haze.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mgs2_crossfade.hpp"
@@ -28,6 +30,7 @@
 #include "depth_of_field.hpp"
 #include "mgs3_film_grain.hpp"
 #include "scene_depth.hpp"
+#include "mgs2_soft_shadows.hpp"
 #include "d3d11_state_cache.hpp"
 void afterPresent();
 
@@ -139,6 +142,43 @@ namespace
         }
 
         const bool undrawn = IsUnDrawnFrame();
+
+        // A stage boundary invalidates the held frame and every frame-feedback capture, or the
+        // old scene replays into the new stage's first frames.
+        static std::string s_heldStage;
+        static int64_t s_lastUndrawCount = 0;
+        static int s_parkSyncFrames = 0;
+        const int64_t undrawCount = g_GameVars.DG_UnDrawFrameCount();
+        const char* stage = g_GameVars.GetCurrentStage();
+        if ((stage && s_heldStage != stage) || s_lastUndrawCount > kMaxHeldRun)
+        {
+            g_heldValid = false;
+            if (eGameType & MGS2)
+            {
+                MGS2DemoBlur::InvalidateCapture();
+                MGS2GasHaze::InvalidateCapture();
+                g_MGS2UnderwaterFilterFix.InvalidateCapture();
+            }
+            if (stage)
+            {
+                s_heldStage = stage;
+            }
+        }
+        if (undrawCount > kMaxHeldRun && s_lastUndrawCount <= kMaxHeldRun)
+        {
+            s_parkSyncFrames = 4;
+        }
+        s_lastUndrawCount = undrawCount;
+
+        // During loading the port shows its two internal frame buffers in turns. If they differ,
+        // the old frame flashes on screen - so make them equal when the load starts.
+        if (s_parkSyncFrames > 0 && undrawCount > kMaxHeldRun)
+        {
+            s_parkSyncFrames--;
+            SceneDepth::SyncRecentSceneTargets();
+            return;
+        }
+
         if ((undrawn || doubleRendered) && g_heldValid)
         {
             if (g_Logging.bVerboseLogging)
@@ -147,6 +187,11 @@ namespace
                     undrawn ? "undrawn" : "double-rendered", g_GameVars.GetCurrentStage());
             }
             context->CopyResource(backbuffer.Get(), g_heldFrame.Get());
+            return;
+        }
+
+        if (undrawn)
+        {
             return;
         }
 
@@ -327,6 +372,7 @@ ColorCorrection::Draw(pSwapChain);
         if (SUCCEEDED(result))
         {
             RefreshDeviceAndContext(pSwapChain);
+            MGS2SoftShadows::Reset();
         }
 
         return result;
@@ -415,6 +461,7 @@ void D3D11Hooks::Initialize()
 
     if (eGameType & MGS2)
     {
+        constexpr uint32_t kDG_DMAPACK_NORMAL = 0x0001;
         constexpr uint32_t kDG_DMAPACK_MENU = 0x0002;
         MAKE_HOOK_MID(baseModule, "40 55 57 41 56 48 8D AC 24 40 FC FF FF 48 81 EC C0 04 00 00 48 8B F9", "D3D11 Hooks: BP_RenderDmaPack_AutoPacket", {
                 auto* dmapack = *reinterpret_cast<const uintptr_t* const*>(ctx.rcx);
@@ -422,16 +469,19 @@ void D3D11Hooks::Initialize()
                 {
                     return;
                 }
-                if (!(*reinterpret_cast<const uint32_t*>(dmapack) & kDG_DMAPACK_MENU))
+
+                const auto* bytes = reinterpret_cast<const uint8_t*>(dmapack);
+                const uint32_t dmapackFlags = *reinterpret_cast<const uint32_t*>(bytes);
+
+                // NORMAL|MENU first runs on the normal channel.
+                if (!g_preMenuFired &&
+                    (dmapackFlags & kDG_DMAPACK_MENU) &&
+                    !(dmapackFlags & kDG_DMAPACK_NORMAL))
                 {
-                    return;
+                    g_preMenuFired = true;
+                    SceneDepth::OnPreMenuRender();
                 }
-                if (g_preMenuFired)
-                {
-                    return;
-                }
-                g_preMenuFired = true;
-                SceneDepth::OnPreMenuRender();
+
                 });
     }
 

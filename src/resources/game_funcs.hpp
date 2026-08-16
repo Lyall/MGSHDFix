@@ -18,6 +18,12 @@ namespace Shared_Gamefuncs
     using GM_SetArea_t = void(__fastcall*)(int id, const char* dirname);
     inline GM_SetArea_t GM_SetArea = nullptr;
 
+    using GM_GetArea_t = const char* ();
+    inline GM_GetArea_t* GM_GetArea = nullptr;
+
+    using BP_AdjustTick_t = int(__fastcall*)(int tick);
+    inline BP_AdjustTick_t BP_AdjustTick = nullptr;
+
     using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
     inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
 
@@ -57,6 +63,9 @@ namespace MGS2_GameFuncs
     
     using GV_DestroyActor_t = void(__fastcall*)(void* work);
     inline GV_DestroyActor_t GV_DestroyActor = nullptr;
+
+    using HZX_OnlineHazardCheck_t = int(__fastcall*)(int id, const float* from, const float* to, int chk, int seg, int flr);
+    inline HZX_OnlineHazardCheck_t HZX_OnlineHazardCheck = nullptr;
 
 }
 

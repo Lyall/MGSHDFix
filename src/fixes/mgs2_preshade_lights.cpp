@@ -8,7 +8,7 @@
 
 #include "gamevars.hpp"
 
-//Fixes incorrect lighting on Deck 2 doors, and posters in w01a.
+//Fixes incorrect lighting on Deck 2 doors
 namespace
 {
     constexpr float kWrapScale = 1.0f;      // half-lambert wrap (i = 0.5*dot + 0.5)
@@ -22,11 +22,11 @@ namespace
 
     };
 
-    constexpr uint32_t kNoShadeTex[] = {
-        GameVars::GV_StrCode("w01alc_mao3"),
-        GameVars::GV_StrCode("w01alc_saya2"),
-
-    };
+    //constexpr uint32_t kNoShadeTex[] = {
+    //    GameVars::GV_StrCode("w01alc_mao3"),
+    //    GameVars::GV_StrCode("w01alc_saya2"),
+    //
+    //};
 
     enum class PackMode : uint8_t { Vanilla, DoorTwoSided, NoShadeNeutral };
     thread_local PackMode gPackMode = PackMode::Vanilla;
@@ -40,13 +40,13 @@ namespace
                 return PackMode::DoorTwoSided;
             }
         }
-        for (uint32_t t : kNoShadeTex)
-        {
-            if (t == tex)
-            {
-                return PackMode::NoShadeNeutral;
-            }
-        }
+        //for (uint32_t t : kNoShadeTex)
+        //{
+        //    if (t == tex)
+        //    {
+        //        return PackMode::NoShadeNeutral;
+        //    }
+        //}
         return PackMode::Vanilla;
     }
 
@@ -133,20 +133,20 @@ namespace
         gPackMode = ClassifyPack(tex);
         SetDoorHooks(gPackMode == PackMode::DoorTwoSided);
 
-        if (gPackMode == PackMode::NoShadeNeutral)
-        {
-            // neutral vertex colors, skip the lighting call
-            uint32_t* out = reinterpret_cast<uint32_t*>(outInRsi ? ctx.rsi : ctx.rdi);
-            const uint32_t n = *reinterpret_cast<const uint32_t*>(ctx.rbx);
-            if (out && n <= 0x10000)
-            {
-                for (uint32_t i = 0; i < n; i++)
-                {
-                    out[i] = 0x80808080;
-                }
-            }
-            ctx.rip = ShadeLoop_skipRip[loop];
-        }
+        //if (gPackMode == PackMode::NoShadeNeutral)
+        //{
+        //    // neutral vertex colors, skip the lighting call
+        //    uint32_t* out = reinterpret_cast<uint32_t*>(outInRsi ? ctx.rsi : ctx.rdi);
+        //    const uint32_t n = *reinterpret_cast<const uint32_t*>(ctx.rbx);
+        //    if (out && n <= 0x10000)
+        //    {
+        //        for (uint32_t i = 0; i < n; i++)
+        //        {
+        //            out[i] = 0x80989898;
+        //        }
+        //    }
+        //    ctx.rip = ShadeLoop_skipRip[loop];
+        //}
     }
 
     // The port rotates preshade light-selection bounds with the matrix transposed, so

@@ -280,7 +280,7 @@ namespace ConfigKeys
 
     constexpr const char* FixDepthOfField_Section = "Bugfixes";
     constexpr const char* FixDepthOfField_Setting = "Fix Depth of Field";
-    constexpr const char* FixDepthOfField_Help = "(May Impact Performance)";
+    constexpr const char* FixDepthOfField_Help = "(Performance Heavy)";
     constexpr const char* FixDepthOfField_Tooltip = "Restores depth of field blur at higher resolutions.\n"
                                                     "\n"
                                                     "Also restores close-up depth of field / camera blur, which was outright disabled/broken by the HD Collection.";
@@ -320,7 +320,7 @@ namespace ConfigKeys
 
     constexpr const char* MGS3_Restore_Film_Grain_Section = "Bugfixes";
     constexpr const char* MGS3_Restore_Film_Grain_Setting = "Fix Film Grain";
-    constexpr const char* MGS3_Restore_Film_Grain_Help = "(May Impact Performance)";
+    constexpr const char* MGS3_Restore_Film_Grain_Help = "(Performance Heavy)";
     constexpr const char* MGS3_Restore_Film_Grain_Tooltip = "Restores the film grain effect used during dark cutscenes, which was broken by the HD Collection.";
 
     constexpr const char* MGS2_RestoreActionLevelSelection_Section = "Various";
@@ -369,6 +369,13 @@ namespace ConfigKeys
     constexpr const char* MGS2_Restore_VFX_Tooltip = "Restores numerous broken visual effects that were broken by the HD Collection / Master Collection.\n"
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
+
+    constexpr const char* MGS2_Photosensitive_Section = "Bugfixes";
+    constexpr const char* MGS2_Photosensitive_Setting = "Disable Photosensitive Effects";
+    constexpr const char* MGS2_Photosensitive_Help = "";
+    constexpr const char* MGS2_Photosensitive_Tooltip = "The Master Collection removes a handful of scripted flash effects for photosensitivity reasons (the Tanker sinking's detonation flash among them).\n"
+                                                       "\n"
+                                                       "Turn this setting off to restore the original PS2 effects.";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";

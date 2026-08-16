@@ -7,6 +7,7 @@
 #include "gamevars.hpp"
 //#include "input_handler.hpp"
 #include "color_correction.hpp"
+//#include "game_funcs.hpp"
 #include "line_scaling.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
@@ -128,15 +129,27 @@ namespace
         }
 
 #endif
+        /*
+                        //_MENU_PutExplainText+139
+        MAKE_HOOK_MID(baseModule, "F3 41 0F 2C E9 66 0F 6E C2", "MGS 3: Weapon & Item Description Text Width Fix: MENU_PutExplainText()", {
+                constexpr float kWidthScale = 1.0f;
+                ctx.xmm9.f32[0] *= kWidthScale;
 
+                // position adjustment
+                //constexpr float kXOffset = 0.0f; // negative = left, positive = right
+                //constexpr float kYOffset = 0.0f; // negative = up, positive = down
+                //ctx.xmm8.f32[0] += kXOffset;
+                //ctx.xmm7.f32[0] += kYOffset;
+                      });
 
-
-         
+         */
 
     }
 
     int* g_IR_Blinds_DarkenHeight = nullptr;
     int* g_IR_Blinds_BlankHeight = nullptr;
+
+
 }
 
 
@@ -161,6 +174,7 @@ void ResolutionScalingFixes::ApplyFixes()
     ColorCorrection::bShaderLoaded = false;
     g_VectorScalingFix.bToggleRainShader = false;
     SMAA_AA::bEnabled = false;
+    return;
 #endif
 
 
@@ -168,8 +182,6 @@ void ResolutionScalingFixes::ApplyFixes()
     if (eGameType & MGS2)
     {
 
-
-#ifndef BEFORE_COMPARISON_PICS 
         g_IR_Blinds_DarkenHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 0D ?? ?? ?? ?? 89 48 ?? 8B 0D ?? ?? ?? ?? 89 48 ?? B9 ?? ?? ?? ?? 48 83 C4 ?? E9", "MGS2: g_IR_Blinds_DarkenHeight") + 2));
 
         spdlog::info("GameVars: g_IR_Blinds_DarkenHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_DarkenHeight - (uintptr_t)baseModule);
@@ -183,7 +195,6 @@ void ResolutionScalingFixes::ApplyFixes()
             *g_IR_Blinds_DarkenHeight = 25;
             spdlog::info("GameVars: g_IR_Blinds_BlankHeight and g_IR_Blinds_DarkenHeight set to 25");
         }
-#endif
 
 
         MGS2Fixes();
@@ -196,7 +207,6 @@ void ResolutionScalingFixes::ApplyFixes()
     {
 
 
-#ifndef BEFORE_COMPARISON_PICS
         g_IR_Blinds_DarkenHeight = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "8B 1D ?? ?? ?? ?? 8B 3D ?? ?? ?? ?? E8", "MGS3: g_IR_Blinds_DarkenHeight") + 2));
 
         spdlog::info("GameVars: g_IR_Blinds_DarkenHeight address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)g_IR_Blinds_DarkenHeight - (uintptr_t)baseModule);
@@ -210,8 +220,6 @@ void ResolutionScalingFixes::ApplyFixes()
             *g_IR_Blinds_DarkenHeight = 25;
             spdlog::info("GameVars: g_IR_Blinds_BlankHeight and g_IR_Blinds_DarkenHeight set to 25");
         }
-#endif
-
 
         MGS3Fixes();
 
@@ -286,6 +294,12 @@ void MGS2Fixes()
                     else
                     {
                         shadowRes = 512;
+                    }
+
+                    // Half size is the most one bilinear tap can resolve cleanly.
+                    if (ctx.rdi == 0x17)
+                    {
+                        shadowRes /= 2;
                     }
 
                     ctx.rcx = shadowRes;
@@ -401,10 +415,33 @@ void MGS2Fixes()
     }
 #endif  
 
+
+                      //_MENU_PutExplainText+1F6
+    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? 0F 57 D2 0F 57 C9 F3 44 0F 11 4C 24 ?? 48 8B C8 48 89 86", "MGS 2: Weapon & Item Description Text Aspect Fix: mgs2x\\source\\user\\mode\\menu\\xmenusub.c -> MENU_PutExplainText() | @l1528: ", {
+            constexpr float kWidthScale = 475.0f / 400.0f; // "magazine" is 400px @ 4k in mc, pcsx2 is 475px
+
+            // resize the actual quad the text is drawing on.
+            float const posX = ctx.xmm1.f32[0];
+            float* const rightEdge = reinterpret_cast<float*>(ctx.rsp + 0x28);
+
+            *rightEdge = posX + (*rightEdge - posX) * kWidthScale;
+
+             //position
+            constexpr float kXOffset = -20.0f * (512.0f / 3840.0f); //pixel offset @ 4k
+            ctx.xmm1.f32[0] = posX + kXOffset;
+            *rightEdge += kXOffset;
+                  });
+
+
+
+
+
+
+
             //todo: NewUSPLight -> light_offset: convert to per-weapon offset.
 
-}
 
+}
 
 
 #pragma region UnusedLaserDebuggingCode

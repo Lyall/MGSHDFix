@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "mgs2_demo_blur.hpp"
-#include <cmath>
 #include <algorithm>
 
 #include "common.hpp"
 #include "d3d11_api.hpp"
 #include "scene_depth.hpp"
+#include "effect_speeds.hpp"
 #include "gamevars.hpp"
 #include "logging.hpp"
 
@@ -14,6 +14,9 @@ namespace
     // Blur actor Act(); work: +0x60 packet (bit 0x100 = hidden), +0x78 intense (float, 0..128).
     constexpr const char* kActSig =
         "48 8B C4 48 89 58 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8D 50";
+    constexpr ptrdiff_t kWorkDmapack = 0x60;
+    constexpr ptrdiff_t kDmapackAutopacket = 0x38;
+    constexpr uint8_t kOpEnd = 0x1e;
 
     SafetyHookInline g_actHook {};
 
@@ -33,7 +36,7 @@ namespace
         }
 
         const float intense = *reinterpret_cast<const float*>(work + 0x78);
-        const uintptr_t packet = *reinterpret_cast<const uintptr_t*>(work + 0x60);
+        const uintptr_t packet = *reinterpret_cast<const uintptr_t*>(work + kWorkDmapack);
         const bool hidden = !packet || (*reinterpret_cast<const uint32_t*>(packet) & 0x100) != 0;
         if (!hidden && intense > 0.5f)
             s_keep *= 1.0f - std::min(intense, 128.0f) / 128.0f;
@@ -41,11 +44,33 @@ namespace
         g_lastActMs.store(GetTickCount64(), std::memory_order_relaxed);
     }
 
+    void SuppressNativeDraw(uintptr_t work)
+    {
+        const uintptr_t packet = *reinterpret_cast<const uintptr_t*>(work + kWorkDmapack);
+        if (!packet) return;
+
+        auto* autopacket = *reinterpret_cast<uint8_t**>(packet + kDmapackAutopacket);
+        if (!autopacket) return;
+
+        autopacket[0] = kOpEnd;
+
+        static bool logged = false;
+        if (!logged)
+        {
+            logged = true;
+            spdlog::info("MGS 2: Demo Blur: native draw suppressed.");
+        }
+    }
+
     void __fastcall Act_Detour(uintptr_t work)
     {
         g_actHook.fastcall<void>(work);
         if (!work) return;
-        __try { ReadInstance(work); }
+        __try
+        {
+            ReadInstance(work);
+            SuppressNativeDraw(work);
+        }
         __except (EXCEPTION_EXECUTE_HANDLER) {}
     }
 
@@ -75,6 +100,8 @@ namespace
     ComPtr<ID3D11Texture2D>         g_prevTex;
     ComPtr<ID3D11ShaderResourceView> g_prevSRV;
     UINT g_prevW = 0, g_prevH = 0;
+    DXGI_FORMAT g_prevFormat = DXGI_FORMAT_UNKNOWN;
+    DXGI_FORMAT g_prevViewFormat = DXGI_FORMAT_UNKNOWN;
     bool g_havePrev = false;
     bool g_d3dInit = false, g_d3dFailed = false;
 
@@ -87,6 +114,7 @@ namespace
         {
             g_d3dInit = false; g_d3dFailed = false; g_havePrev = false;
             g_prevSRV.Reset(); g_prevTex.Reset(); g_prevW = g_prevH = 0;
+            g_prevFormat = g_prevViewFormat = DXGI_FORMAT_UNKNOWN;
             g_cb.Reset(); g_blend.Reset(); g_rs.Reset(); g_dss.Reset(); g_samp.Reset();
             g_vs.Reset(); g_ps.Reset();
             g_boundDevice = dev;
@@ -145,30 +173,79 @@ namespace
         g_d3dInit = g_cb && g_blend && g_rs && g_dss && g_samp;
         return g_d3dInit;
     }
+
+    bool EnsurePrevTexture(ID3D11Device* dev, ID3D11RenderTargetView* sceneColor,
+                           const D3D11_TEXTURE2D_DESC& sceneDesc)
+    {
+        D3D11_RENDER_TARGET_VIEW_DESC rtvDesc {};
+        sceneColor->GetDesc(&rtvDesc);
+        const DXGI_FORMAT viewFormat = rtvDesc.Format != DXGI_FORMAT_UNKNOWN ? rtvDesc.Format : sceneDesc.Format;
+
+        if (g_prevTex && g_prevSRV && g_prevW == sceneDesc.Width && g_prevH == sceneDesc.Height &&
+            g_prevFormat == sceneDesc.Format && g_prevViewFormat == viewFormat)
+        {
+            return true;
+        }
+
+        g_prevSRV.Reset();
+        g_prevTex.Reset();
+        g_prevW = g_prevH = 0;
+        g_prevFormat = g_prevViewFormat = DXGI_FORMAT_UNKNOWN;
+        g_havePrev = false;
+
+        D3D11_TEXTURE2D_DESC td = sceneDesc;
+        td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage = D3D11_USAGE_DEFAULT;
+        td.CPUAccessFlags = 0;
+        td.MiscFlags = 0;
+        td.SampleDesc = { 1, 0 };
+        td.MipLevels = 1;
+        td.ArraySize = 1;
+        if (FAILED(dev->CreateTexture2D(&td, nullptr, g_prevTex.GetAddressOf()))) return false;
+
+        D3D11_SHADER_RESOURCE_VIEW_DESC sv {};
+        sv.Format = viewFormat;
+        sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        sv.Texture2D.MipLevels = 1;
+        if (FAILED(dev->CreateShaderResourceView(g_prevTex.Get(), &sv, g_prevSRV.GetAddressOf())))
+        {
+            g_prevTex.Reset();
+            return false;
+        }
+
+        g_prevW = sceneDesc.Width;
+        g_prevH = sceneDesc.Height;
+        g_prevFormat = sceneDesc.Format;
+        g_prevViewFormat = viewFormat;
+        spdlog::info("MGS 2: Demo Blur: history target {}x{}, resource format {}, view format {}.",
+                     g_prevW, g_prevH, static_cast<int>(g_prevFormat), static_cast<int>(g_prevViewFormat));
+        return true;
+    }
 }
 
 void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*)
 {
     if (!(eGameType & MGS2) || !bEnabled || !sceneColor) return;
 
-    const ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
-    const bool alive = last && (GetTickCount64() - last) < 250;
-    const float factor = g_factor.load(std::memory_order_relaxed);
-    if (!alive)
+    const bool inCutscene = g_GameVars.InCutscene();
+    if (bCutscenesOnly && !inCutscene) return;
+
+    const ULONGLONG now = GetTickCount64();
+    ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
+    // The blur actor's Act freezes with the pause level - keep a live window open or the trails age out mid-pause.
+    if (g_GameVars.GV_PauseLevel() != 0 && last && (now - last) < 250)
     {
-        g_havePrev = false;   // effect gone - reseed on next spawn
-        return;
+        g_lastActMs.store(now, std::memory_order_relaxed);
+        last = now;
     }
+    const bool alive = last && (now - last) < 250;
+    const float authoredFactor = std::clamp(g_factor.load(std::memory_order_relaxed), 0.0f, 1.0f);
+    const float factor = authoredFactor;
+    if (!alive || factor <= 0.003f) return;
 
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     if (!dev || !ctx || !EnsureD3D(dev)) return;
-
-    bool inCutscene = g_GameVars.InCutscene();
-    if (bCutscenesOnly && !inCutscene)
-    {
-        return;
-    }
 
     ComPtr<ID3D11Resource> colorRes;
     sceneColor->GetResource(colorRes.GetAddressOf());
@@ -176,37 +253,8 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
     if (!colorRes || FAILED(colorRes.As(&backbuf)) || !backbuf) return;
     D3D11_TEXTURE2D_DESC bb; backbuf->GetDesc(&bb);
     if (bb.SampleDesc.Count != 1) return;
+    if (!EnsurePrevTexture(dev, sceneColor, bb) || !g_havePrev) return;
 
-    if (!g_prevTex || g_prevW != bb.Width || g_prevH != bb.Height)
-    {
-        g_prevSRV.Reset(); g_prevTex.Reset(); g_havePrev = false;
-        D3D11_TEXTURE2D_DESC td = bb;
-        td.BindFlags = D3D11_BIND_SHADER_RESOURCE; td.Usage = D3D11_USAGE_DEFAULT;
-        td.CPUAccessFlags = 0; td.MiscFlags = 0; td.SampleDesc = { 1, 0 }; td.MipLevels = 1;
-        if (FAILED(dev->CreateTexture2D(&td, nullptr, g_prevTex.GetAddressOf()))) return;
-        D3D11_SHADER_RESOURCE_VIEW_DESC sv = {}; sv.Format = td.Format;
-        sv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D; sv.Texture2D.MipLevels = 1;
-        dev->CreateShaderResourceView(g_prevTex.Get(), &sv, g_prevSRV.GetAddressOf());
-        g_prevW = bb.Width; g_prevH = bb.Height;
-    }
-
-    // Advance every frame; the per-step factor makes two 60Hz steps equal one authored 30fps step.
-    static int  s_tickClock = -0x7fffffff;
-    static bool s_skip = false;
-    if (const int clock = g_GameVars.DG_Clock(); clock != s_tickClock)
-    {
-        s_tickClock = clock;
-        s_skip = inCutscene ? !s_skip : false;
-    }
-    const bool advance = !s_skip;
-
-    if (!g_havePrev)
-    {
-        ctx->CopyResource(g_prevTex.Get(), backbuf.Get());
-        g_havePrev = true;
-    }
-
-    if (factor > 0.003f)
     {
         ID3D11RenderTargetView* oRTV[8] = {}; ID3D11DepthStencilView* oDSV = nullptr;
         ctx->OMGetRenderTargets(8, oRTV, &oDSV);
@@ -216,8 +264,12 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
         ctx->OMGetDepthStencilState(oDSS.GetAddressOf(), &oSR);
         ComPtr<ID3D11RasterizerState> oRS; ctx->RSGetState(oRS.GetAddressOf());
         ComPtr<ID3D11VertexShader> oVS; ComPtr<ID3D11PixelShader> oPS;
+        ComPtr<ID3D11GeometryShader> oGS; ComPtr<ID3D11HullShader> oHS; ComPtr<ID3D11DomainShader> oDS;
         ctx->VSGetShader(oVS.GetAddressOf(), nullptr, nullptr);
         ctx->PSGetShader(oPS.GetAddressOf(), nullptr, nullptr);
+        ctx->GSGetShader(oGS.GetAddressOf(), nullptr, nullptr);
+        ctx->HSGetShader(oHS.GetAddressOf(), nullptr, nullptr);
+        ctx->DSGetShader(oDS.GetAddressOf(), nullptr, nullptr);
         ComPtr<ID3D11InputLayout> oIL; ctx->IAGetInputLayout(oIL.GetAddressOf());
         D3D11_PRIMITIVE_TOPOLOGY oTopo; ctx->IAGetPrimitiveTopology(&oTopo);
         ComPtr<ID3D11ShaderResourceView> oSRV; ctx->PSGetShaderResources(0, 1, oSRV.GetAddressOf());
@@ -231,8 +283,7 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(g_cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
             {
-                const float perStep = 1.0f - sqrtf(std::max(0.0f, 1.0f - factor));
-                const float cb[4] = { perStep, 0, 0, 0 };
+                const float cb[4] = { factor, 0, 0, 0 };
                 memcpy(m.pData, cb, sizeof(cb));
                 ctx->Unmap(g_cb.Get(), 0);
             }
@@ -249,6 +300,9 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
         ctx->IASetInputLayout(nullptr);
         ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         ctx->VSSetShader(g_vs.Get(), nullptr, 0);
+        ctx->GSSetShader(nullptr, nullptr, 0);
+        ctx->HSSetShader(nullptr, nullptr, 0);
+        ctx->DSSetShader(nullptr, nullptr, 0);
         ctx->PSSetShader(g_ps.Get(), nullptr, 0);
         ctx->PSSetShaderResources(0, 1, &srv);
         ctx->PSSetSamplers(0, 1, &smp);
@@ -261,6 +315,9 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
         ctx->RSSetState(oRS.Get());
         if (oNVP) ctx->RSSetViewports(oNVP, oVP);
         ctx->VSSetShader(oVS.Get(), nullptr, 0);
+        ctx->GSSetShader(oGS.Get(), nullptr, 0);
+        ctx->HSSetShader(oHS.Get(), nullptr, 0);
+        ctx->DSSetShader(oDS.Get(), nullptr, 0);
         ctx->PSSetShader(oPS.Get(), nullptr, 0);
         ctx->IASetInputLayout(oIL.Get());
         ctx->IASetPrimitiveTopology(oTopo);
@@ -271,7 +328,44 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
         if (oDSV) oDSV->Release();
     }
 
-    if (advance) ctx->CopyResource(g_prevTex.Get(), backbuf.Get());
+}
+
+bool MGS2DemoBlur::IsFeedbackActive()
+{
+    if (!(eGameType & MGS2) || !bEnabled) return false;
+    if (bCutscenesOnly && !g_GameVars.InCutscene()) return false;
+
+    const ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
+    return last && (GetTickCount64() - last) < 250 &&
+           g_factor.load(std::memory_order_relaxed) > 0.003f;
+}
+
+void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*)
+{
+    if (!(eGameType & MGS2) || !bEnabled || !sceneColor) return;
+
+    if (EffectSpeedFix::IsFeedbackHoldTick()) return;
+
+    auto* dev = g_D3D11Hooks.d3dDevice.Get();
+    auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+    if (!dev || !ctx || !EnsureD3D(dev)) return;
+
+    ComPtr<ID3D11Resource> colorRes;
+    sceneColor->GetResource(colorRes.GetAddressOf());
+    ComPtr<ID3D11Texture2D> sceneTex;
+    if (!colorRes || FAILED(colorRes.As(&sceneTex)) || !sceneTex) return;
+
+    D3D11_TEXTURE2D_DESC desc {};
+    sceneTex->GetDesc(&desc);
+    if (desc.SampleDesc.Count != 1 || !EnsurePrevTexture(dev, sceneColor, desc)) return;
+
+    ctx->CopyResource(g_prevTex.Get(), sceneTex.Get());
+    g_havePrev = true;
+}
+
+void MGS2DemoBlur::InvalidateCapture()
+{
+    g_havePrev = false;
 }
 
 void MGS2DemoBlur::Initialize()
@@ -282,7 +376,8 @@ void MGS2DemoBlur::Initialize()
     {
         g_actHook = safetyhook::create_inline(act, reinterpret_cast<void*>(Act_Detour));
         LOG_HOOK(g_actHook, "MGS 2: Demo Blur - Act");
-        SceneDepth::SetOverlayEndCallback(&MGS2DemoBlur::DrawInto);
+        SceneDepth::SetEndOf3DCallback(&MGS2DemoBlur::DrawInto, SceneDepth::PRIORITY_DEMO_BLUR);
+        SceneDepth::SetEndOf3DCallback(&MGS2DemoBlur::CaptureFrame, SceneDepth::PRIORITY_DEMO_BLUR_CAPTURE);
     }
     else
     {

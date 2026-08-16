@@ -11,6 +11,9 @@
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_railgun_beam.hpp"
+#include "mgs2_demo_blur.hpp"
+#include "mgs2_gas_haze.hpp"
+#include "screenspace_fixes.hpp"
 #include "custom_resolution_and_borderless.hpp"
 
 
@@ -57,7 +60,7 @@ private:
 };
 
 
-#define DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)                                    \
+#define DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, skipCheck)                              \
     SafetyHookInline actName##_hook{};                                                     \
     SafetyHookInline dieName##_hook{};                                                     \
     FirstTickGuard g_##actName##_guard;                                                    \
@@ -65,7 +68,7 @@ private:
     int64_t __fastcall actName##_Hook(int64_t work)                                        \
     {                                                                                       \
         const bool firstTick = g_##actName##_guard.ConsumeFirstTick(static_cast<uintptr_t>(work)); \
-        if (SkipFrame() && !firstTick)                                                      \
+        if ((skipCheck) && !firstTick)                                                      \
         {                                                                                   \
             return 0;                                                                       \
         }                                                                                   \
@@ -77,6 +80,12 @@ private:
         g_##actName##_guard.ClearOnDeath(static_cast<uintptr_t>(work));                     \
         dieName##_hook.call<void>(work);                                                    \
     }
+
+#define DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName) \
+    DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, SkipFrame())
+
+#define DEFINE_WINDOW_SKIP_ACT_DIE_PAIR(actName, dieName) \
+    DEFINE_SKIP_ACT_DIE_PAIR(actName, dieName, SkipFrameWindow())
 
 #define INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     if (uint8_t* addr = Memory::PatternScan(baseModule, actPattern, actLabel))              \
@@ -109,10 +118,23 @@ private:
     X(Act_234, "48 8B C4 48 89 58 ?? 48 89 70 ?? 48 89 78 ?? 55 41 56 41 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Act() | (Act_234)", \
         Die_188, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 9B", "MGS 2: Effect Speed Fix : user\\morita\\demo_bul\\demo_bullet.c -> NewDemoBulletCall() -> Die() (Die_188)")
 
+#define MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(X) \
+    X(Act_WaterWind, "40 53 55 41 55 48 81 EC", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\water_wind.c -> Act() (Act_391) | NewWaterWindSplush_DEMO()", \
+        Die_WaterWind, "40 53 48 83 EC ?? 83 79 ?? 00 48 8B D9 74 ?? 48 83 C1", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\water_wind.c -> Die() (Die_305)") \
+        \
+    X(Act_SplushMan, "41 57 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 4C 8B F9", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_man.c -> Act() (Act_365) | OK_PutSplush()", \
+        Die_SplushMan, "40 53 48 83 EC ?? 48 8B D9 48 8B 89 70 00 01 00", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_man.c -> Die() (Die_291)")
+
 #define DEFINE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     DEFINE_FULL_SKIP_ACT_DIE_PAIR(actName, dieName)
 
 #define CREATE_FULL_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel)
+
+#define DEFINE_WINDOW_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
+    DEFINE_WINDOW_SKIP_ACT_DIE_PAIR(actName, dieName)
+
+#define CREATE_WINDOW_SKIP_HOOK(actName, actPattern, actLabel, dieName, diePattern, dieLabel) \
     INSTALL_FULL_SKIP_ACT_DIE_PAIR(actName, actPattern, actLabel, dieName, diePattern, dieLabel)
 
 
@@ -150,24 +172,18 @@ private:
 
 //GOOD EFFECT - DON'T USE  (NewDemoSplashBlood, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8B D9", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\demo_splash_blood.c -> NewDemoSplashBlood()")
 
-//todo: need to investigate OK_PutSplush | mgs2x\source\user\okajima\effect2\splush_man.c
 
 #define MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(X) \
-    X(NewSplashMotion_Demo, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 45 33 C9 0F 29 74 24 ?? 41 8B F0 48 8B F9 BA ?? ?? ?? ?? 41 B8 ?? ?? ?? ?? 0F 28 F1 41 8D 49 ?? E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 0F 84 ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8B C8 48 8D 15 ?? ?? ?? ?? E8 ?? ?? ?? ?? 81 4B ?? ?? ?? ?? ?? 48 8D 05", "MGS 2 : Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_motion.c -> NewSplashMotion_Demo() (spawner cadence: keeps droplet population PS2-sized so the shared GV heap never starves plasma/other effects)") \
-    X(NewDropBodySplush, "40 57 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\drop_body_splush.c -> NewDropBodySplush()") \
-    X(NewRipBubbleMan, "40 55 56 57 41 55 48 8D 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\ripple_bubble.c -> NewRipBubbleMan_DEMO() | NewRipBubbleMan()") \
+    X(NewRipBubbleMan, "40 55 56 57 41 55 48 8D 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\ripple_bubble.c -> NewRipBubbleMan_DEMO() -> Act() (NewRipBubbleMan_DEMO | NewRipBubbleMan)") \
     X(NewSplushTidalParts4, "40 53 56 48 81 EC ?? ?? ?? ?? 48 8B F1 48 83 E9 ?? E8 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 0F 2F C8 48 8B 46 ?? 76 ?? 81 88 ?? ?? ?? ?? ?? ?? ?? ?? 48 8B CE 48 81 C4 ?? ?? ?? ?? 5E 5B E9 ?? ?? ?? ?? 81 A0 ?? ?? ?? ?? ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 48 89 AC 24 ?? ?? ?? ?? 48 89 BC 24 ?? ?? ?? ?? 4C 89 A4 24 ?? ?? ?? ?? 4C 89 B4 24 ?? ?? ?? ?? 4C 89 BC 24 ?? ?? ?? ?? 4C 8B 7E ?? 0F 29 B4 24 ?? ?? ?? ?? 0F 29 BC 24 ?? ?? ?? ?? 44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 8C 24 ?? ?? ?? ?? 44 0F 29 54 24 ?? 44 0F 29 5C 24 ?? 44 0F 29 64 24 ?? 44 0F 29 6C 24 ?? F3 44 0F 10 2D ?? ?? ?? ?? 44 0F 29 74 24 ?? F3 44 0F 10 35 ?? ?? ?? ?? 44 0F 29 7C 24 ?? F3 44 0F 10 3D ?? ?? ?? ?? E8 ?? ?? ?? ?? 4D 63 8F ?? ?? ?? ?? BA ?? ?? ?? ?? 41 2B D1 41 89 87 ?? ?? ?? ?? 41 89 97 ?? ?? ?? ?? 41 BE ?? ?? ?? ?? 4C 63 46 ?? 45 3B C6 7D ?? 41 8B C6 49 8D 48 ?? 48 03 C9 41 2B C0 66 0F 6E D0 0F 5B D2 F3 0F 5E 15 ?? ?? ?? ?? 0F 28 C2 0F 28 CA F3 0F 59 86 ?? ?? ?? ?? F3 0F 59 C2 ?? ?? ?? ?? ?? 0F 28 C2 F3 0F 59 86 ?? ?? ?? ?? F3 0F 11 44 CE ?? F3 0F 59 8E ?? ?? ?? ?? F3 0F 59 CA F3 0F 11 4C CE ?? FF 46 ?? 66 44 0F 6E 66 ?? B9 ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? 45 0F 5B E4 4C 63 E2 4B 8B 94 E7 ?? ?? ?? ?? F3 44 0F 5E 25 ?? ?? ?? ?? 48 83 C2 ?? 41 0F 28 CC F3 0F 59 0D ?? ?? ?? ?? 0F 1F 40 ?? 0F 1F 84 00 ?? ?? ?? ?? 66 0F 6E C1 48 8D 52 ?? 0F 5B C0 FF C9 F3 0F 59 C1 F3 0F 59 C2 F3 0F 2C C0 88 42 ?? 85 C9 7F ?? 4B 8B 94 CF ?? ?? ?? ?? 48 8D 9E ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? F3 0F 10 B6 ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? F3 44 0F 10 5B ?? F3 0F 10 BE ?? ?? ?? ?? F3 44 0F 10 4B ?? F3 44 0F 10 86 ?? ?? ?? ?? 45 8D 41 ?? E8 ?? ?? ?? ?? ?? ?? ?? ?? F3 44 0F 5C DF F3 0F 10 4B ?? F3 45 0F 5C C8 F3 0F 10 53 ?? F3 44 0F 5C D6 0F 28 E8 0F 28 DA 0F 28 E1 F3 41 0F 5C ED 44 0F 28 6C 24 ?? F3 44 0F 5C D9 F3 44 0F 5C CA 33 ED F3 44 0F 5C D0 F3 41 0F 5C E6 44 0F 28 74 24 ?? F3 41 0F 5C DF 44 0F 28 7C 24 ?? 41 0F 28 C3 F3 44 0F 59 DD 41 0F 28 FA 45 0F 28 C1 F3 44 0F 59 CD F3 0F 59 C3 F3 44 0F 59 C4 F3 0F 59 FB F3 44 0F 5C C0 F3 44 0F 59 D4 F3 41 0F 5C F9 F3 45 0F 5C DA 44 0F 28 54 24 ?? 41 0F 28 C0 F3 41 0F 59 C0 0F 28 D7 F3 0F 59 D7 41 0F 28 CB F3 41 0F 59 CB F3 0F 58 D0 0F 57 C0 F3 0F 58 D1 0F 54 15 ?? ?? ?? ?? 0F 2E C2 77 ?? 0F 57 C0 F3 0F 51 C2 EB ?? 0F 28 C2 E8 ?? ?? ?? ?? 0F 2F 05 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 45 0F 57 C9 76 ?? 0F 28 F1 F3 0F 5E F0 EB ?? 0F 57 F6 F3 44 0F 59 C6 F3 41 0F 5C CC 48 8D 3D ?? ?? ?? ?? 44 0F 28 64 24 ?? F3 0F 59 FE F3 0F 59 4E ?? F3 44 0F 59 DE F3 41 0F 59 F1 F3 44 0F 59 C1 F3 0F 59 F9 F3 44 0F 59 D9 F3 0F 59 F1 0F 1F 40 ?? 66 66 0F 1F 84 00 ?? ?? ?? ?? F3 0F 10 83 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? F3 0F 10 83 ?? ?? ?? ?? F3 0F 58 43 ?? F3 0F 11 43 ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? E8 ?? ?? ?? ?? 41 0F 2F F9 F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 41 0F 28 C3", "MGS 2 : user\\okajima\\effect2\\splush_tidal_parts4.c -> NewSplushTidalParts4() | NewWallTidal()") \
     X(NewSplushTidalParts, "40 53 56 48 81 EC ?? ?? ?? ?? 48 8B F1 48 83 E9 ?? E8 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 0F 2F C8 48 8B 46 ?? 76 ?? 81 88 ?? ?? ?? ?? ?? ?? ?? ?? 48 8B CE 48 81 C4 ?? ?? ?? ?? 5E 5B E9 ?? ?? ?? ?? 81 A0 ?? ?? ?? ?? ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 48 89 AC 24 ?? ?? ?? ?? 48 89 BC 24 ?? ?? ?? ?? 4C 89 A4 24 ?? ?? ?? ?? 4C 89 B4 24 ?? ?? ?? ?? 4C 89 BC 24 ?? ?? ?? ?? 4C 8B 7E ?? 0F 29 B4 24 ?? ?? ?? ?? 0F 29 BC 24 ?? ?? ?? ?? 44 0F 29 84 24 ?? ?? ?? ?? 44 0F 29 8C 24 ?? ?? ?? ?? 44 0F 29 54 24 ?? 44 0F 29 5C 24 ?? 44 0F 29 64 24 ?? 44 0F 29 6C 24 ?? F3 44 0F 10 2D ?? ?? ?? ?? 44 0F 29 74 24 ?? F3 44 0F 10 35 ?? ?? ?? ?? 44 0F 29 7C 24 ?? F3 44 0F 10 3D ?? ?? ?? ?? E8 ?? ?? ?? ?? 4D 63 8F ?? ?? ?? ?? BA ?? ?? ?? ?? 41 2B D1 41 89 87 ?? ?? ?? ?? 41 89 97 ?? ?? ?? ?? 41 BE ?? ?? ?? ?? 4C 63 46 ?? 45 3B C6 7D ?? 41 8B C6 49 8D 48 ?? 48 03 C9 41 2B C0 66 0F 6E D0 0F 5B D2 F3 0F 5E 15 ?? ?? ?? ?? 0F 28 C2 0F 28 CA F3 0F 59 86 ?? ?? ?? ?? F3 0F 59 C2 ?? ?? ?? ?? ?? 0F 28 C2 F3 0F 59 86 ?? ?? ?? ?? F3 0F 11 44 CE ?? F3 0F 59 8E ?? ?? ?? ?? F3 0F 59 CA F3 0F 11 4C CE ?? FF 46 ?? 66 44 0F 6E 66 ?? B9 ?? ?? ?? ?? F3 0F 10 15 ?? ?? ?? ?? 45 0F 5B E4 4C 63 E2 4B 8B 94 E7 ?? ?? ?? ?? F3 44 0F 5E 25 ?? ?? ?? ?? 48 83 C2 ?? 41 0F 28 CC F3 0F 59 0D ?? ?? ?? ?? 0F 1F 40 ?? 0F 1F 84 00 ?? ?? ?? ?? 66 0F 6E C1 48 8D 52 ?? 0F 5B C0 FF C9 F3 0F 59 C1 F3 0F 59 C2 F3 0F 2C C0 88 42 ?? 85 C9 7F ?? 4B 8B 94 CF ?? ?? ?? ?? 48 8D 9E ?? ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 0D ?? ?? ?? ?? F3 0F 10 B6 ?? ?? ?? ?? 41 B9 ?? ?? ?? ?? F3 44 0F 10 5B ?? F3 0F 10 BE ?? ?? ?? ?? F3 44 0F 10 4B ?? F3 44 0F 10 86 ?? ?? ?? ?? 45 8D 41 ?? E8 ?? ?? ?? ?? ?? ?? ?? ?? F3 44 0F 5C DF F3 0F 10 4B ?? F3 45 0F 5C C8 F3 0F 10 53 ?? F3 44 0F 5C D6 0F 28 E8 0F 28 DA 0F 28 E1 F3 41 0F 5C ED 44 0F 28 6C 24 ?? F3 44 0F 5C D9 F3 44 0F 5C CA 33 ED F3 44 0F 5C D0 F3 41 0F 5C E6 44 0F 28 74 24 ?? F3 41 0F 5C DF 44 0F 28 7C 24 ?? 41 0F 28 C3 F3 44 0F 59 DD 41 0F 28 FA 45 0F 28 C1 F3 44 0F 59 CD F3 0F 59 C3 F3 44 0F 59 C4 F3 0F 59 FB F3 44 0F 5C C0 F3 44 0F 59 D4 F3 41 0F 5C F9 F3 45 0F 5C DA 44 0F 28 54 24 ?? 41 0F 28 C0 F3 41 0F 59 C0 0F 28 D7 F3 0F 59 D7 41 0F 28 CB F3 41 0F 59 CB F3 0F 58 D0 0F 57 C0 F3 0F 58 D1 0F 54 15 ?? ?? ?? ?? 0F 2E C2 77 ?? 0F 57 C0 F3 0F 51 C2 EB ?? 0F 28 C2 E8 ?? ?? ?? ?? 0F 2F 05 ?? ?? ?? ?? F3 0F 10 0D ?? ?? ?? ?? 45 0F 57 C9 76 ?? 0F 28 F1 F3 0F 5E F0 EB ?? 0F 57 F6 F3 44 0F 59 C6 F3 41 0F 5C CC 48 8D 3D ?? ?? ?? ?? 44 0F 28 64 24 ?? F3 0F 59 FE F3 0F 59 4E ?? F3 44 0F 59 DE F3 41 0F 59 F1 F3 44 0F 59 C1 F3 0F 59 F9 F3 44 0F 59 D9 F3 0F 59 F1 0F 1F 40 ?? 66 66 0F 1F 84 00 ?? ?? ?? ?? F3 0F 10 83 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? F3 0F 10 83 ?? ?? ?? ?? F3 0F 58 43 ?? F3 0F 11 43 ?? F3 0F 10 4B ?? F3 0F 58 8B ?? ?? ?? ?? F3 0F 11 4B ?? E8 ?? ?? ?? ?? 41 0F 2F F9 F3 0F 58 83 ?? ?? ?? ?? F3 0F 11 83 ?? ?? ?? ?? 0F 28 C7", "MGS 2 : user\\okajima\\effect2\\splush_tidal_parts.c -> NewSplushTidalParts()") \
     X(NewSplushTidalParts2, "40 53 57 48 81 EC ?? ?? ?? ?? 48 8B F9 48 83 E9", "MGS 2: Effect Speed Fix : okajima\\effect2\\splush_tidal_parts2.c -> NewSplushTidalParts2()") \
-    X(NewBubbleMany, "40 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 83 79 ?? 00 48 8B F1 75", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\bubble_many.c -> NewBubbleMany_Demo() | NewBubbleMany() | NewRaidenMaskBubbleDemo()") \
+    X(NewBubbleMany, "40 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 83 79 ?? 00 48 8B F1 75", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\bubble_many.c -> NewBubbleMany_Demo() -> Act() (NewBubbleMany_Demo | NewBubbleMany | NewRaidenMaskBubbleDemo)") \
+    X(RaidenMaskBubbleManager, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B D9 48 8D 54 24 ?? 8B 49 ?? E8 ?? ?? ?? ?? 48 8B 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect3\\raiden_mask_bubble.c -> NewRaidenMaskBubbleDemo() -> Act() (periodic bubble-spawn manager)") \
     X(NewBreath, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 83 B9 ?? ?? ?? ?? ?? 48 8B F1", "MGS 2: Effect Speed Fix : user\\okajima\\t_effect\\breath.c -> NewBreath() | NewBreathDemo()") \
-    X(NewRippleMan, "48 89 4C 24 ?? 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B 69", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\ripple_man.c -> NewRippleMan()") \
     X(NewBombGasEffect, "4C 8B DC 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 8B 41", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\bomb_gas.c -> NewBombGasEffect()") \
     X(NewSpark2, "48 89 5C 24 ?? 56 48 83 EC ?? FF 49", "MGS 2 : user\\okajima\\t_effect\\spark.c -> NewSpark2() | NewSpark()") \
-    X(NewDiveSplash, "40 57 48 83 EC 20 83 B9 ?? ?? ?? ?? 00 48 8B F9 7E 33 48 89 5C 24 ?? 48 8B 59 ?? 8B 0D ?? ?? ?? ?? E8 DA 47 D6 FF", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\dive_splash.c-> NewDiveSplash() | NewDiveSplash2() | NewDiveSplashScn() | NewDiveSplash_Parent() ") \
-    X(NewRopeModel3, "40 53 48 83 EC ?? 48 8B D9 48 8D 91 ?? ?? ?? ?? 48 8B 49 ?? E8 ?? ?? ?? ?? 48 8D 05", "MGS 2: Effect Speed Fix : user\\kano\\rope\\ropemain.c -> NewRopeModel3() | NewRopeModel_called() | NewRopeModel3_called()") \
     X(NewFootSplash, "40 53 48 83 EC ?? 48 83 B9 ?? ?? ?? ?? 00 48 8B D9 0F 84 ?? ?? ?? ?? 48 83 B9 ?? ?? ?? ?? 00", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\ft_splsh.c -> NewFootSplash()") \
-    X(NewRainCamera_Demo, "48 8B C4 55 57 41 54 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_rain_cm.c -> NewRainCamera_Demo()") \
     X(NewBodySplash, "40 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 83 79 ?? 00 48 8B F1 74", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\body_sph.c -> NewBodySplashScn() | NewBodySplash() | NewBodySplash2() | NewBodySplash3()") \
     X(NewRayEye, "F6 41 ?? ?? 0F 85 ?? ?? ?? ?? E9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\ray_eye.c -> NewRayEye()") \
     X(NewDemoHarrierDamageSmoke, "4C 8B DC 53 57 48 81 EC ?? ?? ?? ?? 45 0F 29 53", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_damage_smoke.c-> NewDemoHarrierDamageSmoke()") \
@@ -187,7 +203,6 @@ private:
     X(NewHarrierLight, "48 8B C4 48 89 58 ?? 48 89 70 ?? 57 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_light.c -> NewHarrierLight()") \
     X(NewLineSmoke, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B 49 ?? 48 85 C9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\line_smoke.c -> NewLineSmoke()") \
     X(NewHexagonalPattern, "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8D 51 ?? 8B 49", "MGS 2: Effect Speed Fix : user\\okuta\\effect\\hexagonal.c -> NewHexagonalPattern()") \
-    X(NewSplushSurfaceMan, "48 8B C4 48 89 48 ?? 41 55", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_man.c -> NewSplushSurfaceMan() | OK_PutSplushSurface()") \
     X(NewSplushSurface2Man, "48 89 5C 24 ?? 48 89 74 24 ?? 48 89 4C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\splush_surface_gravity_man.c -> NewSplushSurface2Man()") \
     X(NewTraffic_Flush, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 41 56 48 83 EC ?? 48 8B 51", "MGS 2: Effect Speed Fix : NewTraffic_Flush") \
     X(NewDebris_Tex, "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24", "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\debris_tex.c -> NewDebris_Tex()") \
@@ -213,7 +228,8 @@ private:
 // DG_FrameCount==2 = the game's own "this section ran 30fps on PS2" flag. More reliable
 // than InCutscene() - demo blips set 1, real 30fps windows set 2.
 inline int* g_pWindowFrameCount = nullptr;
-inline bool In30fpsWindow() { return g_pWindowFrameCount && *g_pWindowFrameCount == 2; }
+inline bool g_slowDownDriving = false;
+inline bool In30fpsWindow() { return !g_slowDownDriving && g_pWindowFrameCount && *g_pWindowFrameCount == 2; }
 
 // Ribbons born inside a real 30fps window, latched at spawn. Fixed-size and alloc-free on
 // purpose: hook bodies must never allocate. Slot collisions just drop a latch early (the
@@ -592,6 +608,76 @@ namespace
         return In30fpsWindow() && (g_GameVars.DG_Clock() & 1) != 0;
     }
 
+
+  // EVM hair, which also drives Solidus's mantle, Snake's coat hem and a flag. The timestep only
+    // reaches the solver through the acceleration, so a quarter of it runs the hair at half speed.
+    // It still runs every frame, so the roots stay on the head. Skipping it is what detached Vamp.
+    constexpr float kHairHalfStep = 0.25f;
+
+    SafetyHookMid h_HairStepScale {};
+    SafetyHookMid h_HairStepRestore {};
+    uintptr_t g_hairInvMassOffset = 0;
+    float* g_pHairInvMass = nullptr;
+    float g_hairInvMass = 0.0f;
+
+    void HairStepScale_hook(SafetyHookContext& ctx)
+    {
+        g_pHairInvMass = nullptr;
+        if (!In30fpsWindow())
+        {
+            return;
+        }
+
+        g_pHairInvMass = reinterpret_cast<float*>(ctx.rdi + g_hairInvMassOffset);
+        g_hairInvMass = *g_pHairInvMass;
+        *g_pHairInvMass = g_hairInvMass * kHairHalfStep;
+    }
+
+    void HairStepRestore_hook(SafetyHookContext&)
+    {
+        if (g_pHairInvMass)
+        {
+            *g_pHairInvMass = g_hairInvMass;
+            g_pHairInvMass = nullptr;
+        }
+    }
+  
+  
+    // Scripted slow motion. slowdown.c asks for N vsyncs a frame and the PS2 waited them out, so skip
+    // the whole actor pass on N-1 frames in N. Holding only part of it desyncs the game.
+    SafetyHookMid h_SlowDownAct {};
+    SafetyHookMid h_ExecActorSystem {};
+    uintptr_t g_execActorSystemDone = 0;
+    int g_slowDownPhase = 0;
+
+    void SlowDownAct_hook(SafetyHookContext&)
+    {
+        g_slowDownDriving = true;
+    }
+
+    void ExecActorSystem_hook(SafetyHookContext& ctx)
+    {
+        const int frames = g_pWindowFrameCount ? *g_pWindowFrameCount : 0;
+        if (frames < 2)
+        {
+            g_slowDownDriving = false;
+            g_slowDownPhase = 0;
+            return;
+        }
+
+        // 30fps demo windows write the same flag, and those stay at 60.
+        if (!g_slowDownDriving)
+        {
+            return;
+        }
+
+        g_slowDownPhase = (g_slowDownPhase + 1) % frames;
+        if (g_slowDownPhase != 0)
+        {
+            ctx.rip = g_execActorSystemDone;
+        }
+    }
+
     // t00a2d bridge traffic. traffic.c moves the cars a fixed step per Act, so they run at the port's
     // rate, not the 30fps the demo was authored at. Hold every other frame.
     SafetyHookMid h_TrafficDemoAct {};
@@ -601,6 +687,28 @@ namespace
     void TrafficDemoAct_hook(SafetyHookContext& ctx)
     {
         ctx.rip = SkipFrameWindow() ? g_trafficActHold : g_trafficActRun;
+    }
+
+    // Demo lightning: the bolt's life and its blink are both counted in frames, so at 60 it dies
+    // twice as fast and flickers twice as quickly.
+    SafetyHookMid h_ThunderLife {};
+    SafetyHookMid h_ThunderBlink {};
+    uintptr_t g_thunderLifeHold = 0;
+
+    void ThunderLife_hook(SafetyHookContext& ctx)
+    {
+        if (SkipFrameWindow())
+        {
+            ctx.rip = g_thunderLifeHold;
+        }
+    }
+
+    void ThunderBlink_hook(SafetyHookContext& ctx)
+    {
+        if (In30fpsWindow())
+        {
+            ctx.rax >>= 1;
+        }
     }
 
     // Kamome (seagull) demo pacing. PS2 ran the bird demos below 60fps, so birds moved and
@@ -836,7 +944,18 @@ namespace
         return h_DemoFrameCountAct.call<int64_t>(work);
     }
 
+    SafetyHookInline h_AutoSplushAct{};
+
+    void __fastcall AutoSplushAct_hook(int64_t work)
+    {
+        if (!SkipFrameWindow())
+        {
+            h_AutoSplushAct.call<void>(work);
+        }
+    }
+
     MGS2_FULL_SKIP_ACT_DIE_PAIRS(DEFINE_FULL_SKIP_HOOK)
+    MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(DEFINE_WINDOW_SKIP_HOOK)
 
 }
 
@@ -882,7 +1001,7 @@ void __fastcall MGS2_d_splash_parts__c_Act_hook(uint8_t* work)
 {
     // Run ticks and the dead path go through the untouched original Act, so its own update,
     // draw and destroy logic (child cleanup included) stays fully authentic.
-    if (!SkipFrame() || *reinterpret_cast<int32_t*>(work + g_splashLifeDisp) <= 0)
+    if (!SkipFrameWindow() || *reinterpret_cast<int32_t*>(work + g_splashLifeDisp) <= 0)
     {
         d_splash_parts__c_Act_hook.call(work);
         return;
@@ -893,6 +1012,35 @@ void __fastcall MGS2_d_splash_parts__c_Act_hook(uint8_t* work)
     {
         *reinterpret_cast<int32_t*>(prim + g_splashGroupDisp) = MGS2_GameFuncs::GM_GetDGGroupID(g_GameVars.GM_CurrentStageMap());
     }
+}
+
+// Droplets spawn per frame, so halve them to match the rate their Act is held at.
+SafetyHookMid splashSpawn_hook {};
+uintptr_t g_splashSpawnResume = 0;
+void MGS2_SplashSpawn_hook(SafetyHookContext& ctx)
+{
+    if (SkipFrameWindow())
+    {
+        ctx.rip = g_splashSpawnResume;
+    }
+}
+
+bool EffectSpeedFix::IsFeedbackHoldTick()
+{
+    const bool plantSun = ScreenspaceFixes::IsPlantSunFeedbackActive();
+    const bool gas = MGS2GasHaze::IsActive();
+    const bool demoBlur = MGS2DemoBlur::IsFeedbackActive();
+    const bool automatic30 = demoBlur && gas && plantSun;
+
+    static std::atomic<int> s_lastAutomatic30 { -1 };
+    const int previousAutomatic30 = s_lastAutomatic30.exchange(automatic30 ? 1 : 0, std::memory_order_relaxed);
+    if (previousAutomatic30 != static_cast<int>(automatic30))
+    {
+        spdlog::info("MGS 2: Effect Speed Fix: feedback cadence limiter {}.",
+                     automatic30 ? "enabled" : "disabled");
+    }
+
+    return (In30fpsWindow() || automatic30) && (g_GameVars.DG_Clock() & 1) != 0;
 }
 
 void EffectSpeedFix::Initialize()
@@ -942,6 +1090,59 @@ void EffectSpeedFix::Initialize()
         spdlog::error("MGS 2: Effect Speed Fix : rain_slow.c - Failed to find rain_slow copyback address, rain_slow.c frameskip is disabled.");
     }
 
+    // Both or neither: a scale without its restore would leave the hair limp for good.
+    uint8_t* hairStep = Memory::PatternScan(baseModule, "41 8B D4 48 8D 4F",
+        "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm()");
+    uint8_t* hairDone = Memory::PatternScan(baseModule, "8B 87 ?? ?? ?? ?? 4C 8B A4 24 ?? ?? ?? ?? 48 8B B4 24",
+        "MGS 2: Effect Speed Fix : user\\kano\\hair\\hairevm.c -> MoveHairEvm() return");
+
+    auto invMassLoads = Memory::FindMultiplePatternMatches(baseModule,
+        "F3 44 0F 10 8D ?? ?? ?? ?? 41 0F 28 F9 41 0F 28 F1");
+
+    if (invMassLoads.size() != 2)
+    {
+        spdlog::error("MGS 2: Effect Speed Fix : expected 2 hairevm.c inv_m loads, found {}.", invMassLoads.size());
+    }
+    else if (hairStep && hairDone)
+    {
+        g_hairInvMassOffset = hairStep[6] + *reinterpret_cast<int32_t*>(invMassLoads[0] + 5);
+    }
+
+    if (g_hairInvMassOffset)
+    {
+        h_HairStepScale = safetyhook::create_mid(hairStep, HairStepScale_hook);
+        LOG_HOOK(h_HairStepScale, "MGS 2: Effect Speed Fix : hairevm.c -> hair timestep")
+        h_HairStepRestore = safetyhook::create_mid(hairDone, HairStepRestore_hook);
+        LOG_HOOK(h_HairStepRestore, "MGS 2: Effect Speed Fix : hairevm.c -> hair timestep restore")
+    }
+
+    if (uint8_t* spawn = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C5 ?? 89 43",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_splash_motion.c -> Act() droplet spawn"))
+    {
+        g_splashSpawnResume = reinterpret_cast<uintptr_t>(spawn) + 5;
+        splashSpawn_hook = safetyhook::create_mid(spawn, MGS2_SplashSpawn_hook);
+        LOG_HOOK(splashSpawn_hook, "MGS 2: Effect Speed Fix : d_splash_motion.c -> Act() droplet spawn")
+    }
+          
+    if (uint8_t* slowDownAct = Memory::PatternScan(baseModule,
+        "40 53 48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 8B D9 0B 05 ?? ?? ?? ?? 7D",
+        "MGS 2: Effect Speed Fix : user\\okajima\\effect\\slowdown.c -> Act()"))
+    {
+        h_SlowDownAct = safetyhook::create_mid(slowDownAct, SlowDownAct_hook);
+        LOG_HOOK(h_SlowDownAct, "MGS 2: Effect Speed Fix : slowdown.c -> Act()")
+    }
+
+    if (uint8_t* exec = Memory::PatternScan(baseModule,
+        "BE ?? ?? ?? ?? 48 8D 2D ?? ?? ?? ?? 66 0F 1F 84 00",
+        "MGS 2: Effect Speed Fix : system\\libgv\\actor.c -> GV_ExecActorSystem()"))
+    {
+        // Pattern ends on the loop's jg, so the epilogue is right after it.
+        g_execActorSystemDone = reinterpret_cast<uintptr_t>(exec) + 0x5E;
+
+        h_ExecActorSystem = safetyhook::create_mid(exec, ExecActorSystem_hook);
+        LOG_HOOK(h_ExecActorSystem, "MGS 2: Effect Speed Fix : actor.c -> GV_ExecActorSystem()")
+    }
+
     // The port's own frame gate for the traffic Act: skip the car update on 4 frames in 5.
     if (uint8_t* je = Memory::PatternScan(baseModule, "0F 84 ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 48 89 9C 24",
         "MGS 2: Effect Speed Fix : user\\shibata\\demo\\traffic.c -> Act()"))
@@ -955,6 +1156,21 @@ void EffectSpeedFix::Initialize()
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \
     CREATE_MGS2_CUTSCENE_FRAMESKIP_HOOK(name, pattern, label);
+
+    if (uint8_t* life = Memory::PatternScan(baseModule, "FF C8 89 87 ?? ?? ?? ?? 48 83 C4 ?? 5F C3 48 8B CF",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() life"))
+    {
+        g_thunderLifeHold = reinterpret_cast<uintptr_t>(life) + 8;
+        h_ThunderLife = safetyhook::create_mid(life, ThunderLife_hook);
+        LOG_HOOK(h_ThunderLife, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() life")
+    }
+
+    if (uint8_t* blink = Memory::PatternScan(baseModule, "25 ?? ?? ?? ?? 7D ?? FF C8 83 C8 ?? FF C0 85 C0 75 ?? 48 8B 87",
+        "MGS 2: Effect Speed Fix : user\\okajima\\demo_effect\\d_thunder_parts.c -> Act() blink"))
+    {
+        h_ThunderBlink = safetyhook::create_mid(blink, ThunderBlink_hook);
+        LOG_HOOK(h_ThunderBlink, "MGS 2: Effect Speed Fix : d_thunder_parts.c -> Act() blink")
+    }
 
     MGS2_CUTSCENE_FRAMESKIP_INLINE_HOOKS(INSTALL_MGS2_FRAMESKIP_HOOK)
 
@@ -1105,6 +1321,7 @@ void EffectSpeedFix::Initialize()
             d_splash_parts__c_Act_hook = safetyhook::create_inline(reinterpret_cast<void*>(act), reinterpret_cast<void*>(MGS2_d_splash_parts__c_Act_hook));
             LOG_HOOK(d_splash_parts__c_Act_hook, "MGS 2: Effect Speed Fix: user\\okajima\\demo_effect\\d_splash_parts_slow.c")
             spdlog::info("MGS 2: Effect Speed Fix: splash offsets life=+0x{:X} prim=+0x{:X} group=+0x{:X}", g_splashLifeDisp, g_splashPrimDisp, g_splashGroupDisp);
+
         }
         else
         {
@@ -1223,7 +1440,16 @@ void EffectSpeedFix::Initialize()
             }
                   });
 
+    if (uint8_t* autoSplushAct = Memory::PatternScan(baseModule,
+        "48 8B C4 48 89 58 ?? 55 56 57 48 8D 68 ?? 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 44 0F 29 40",
+        "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\auto_splush.c -> Act() | NewAutoSplush_EftCtrl()"))
+    {
+        h_AutoSplushAct = safetyhook::create_inline(reinterpret_cast<void*>(autoSplushAct), AutoSplushAct_hook);
+        LOG_HOOK(h_AutoSplushAct, "MGS 2: Effect Speed Fix : user\\okajima\\effect2\\auto_splush.c -> Act() | NewAutoSplush_EftCtrl()")
+    }
+
     MGS2_FULL_SKIP_ACT_DIE_PAIRS(CREATE_FULL_SKIP_HOOK)
+    MGS2_WINDOW_SKIP_ACT_DIE_PAIRS(CREATE_WINDOW_SKIP_HOOK)
 
 
 }

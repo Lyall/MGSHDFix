@@ -80,7 +80,7 @@ namespace MGS3_LinkVarBuf
     enum GM_CONFIG : unsigned int
     {
         GM_CONFIG_VIBRATION_OFF = 0x1,
-
+        GM_CONFIG_CAPTION_OFF = 0x2,
         GM_CONFIG_CUTSCENES_LETTERBOXED = 0x400,
         GM_CONFIG_PLAYTIME_STOP = 0x4000,
         GM_CONFIG_GAME_OVER_IF_DISCOVERED = 0x80000
@@ -112,6 +112,10 @@ namespace MGS3_LinkVarBuf
     inline LinkVarValue<short, 70>          GM_MealCount;
     inline LinkVarValue<int, 72>            GM_StagePlayTime;
     inline LinkVarValue<int, 76>            GM_PlayTime;
+
+    inline LinkVarValue<short, 746>         GM_Weapon;
+
+
     inline LinkVarValue<short, 1448>        GM_LifeMedicineUseCount;
 
     inline LinkVarValue<int, 1452>          GM_WeaponCount;

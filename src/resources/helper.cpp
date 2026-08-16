@@ -10,6 +10,93 @@
 
 #pragma comment(lib, "bcrypt.lib")
 
+namespace
+{
+    BCRYPT_ALG_HANDLE gSha1Alg = nullptr;
+    DWORD gSha1HashObjectSize = 0;
+    std::mutex gSha1ProviderMutex;
+
+    bool ParseSHA1Hex(std::string_view value, Util::SHA1Hash& output)
+    {
+        if (value.size() != output.size() * 2)
+        {
+            return false;
+        }
+
+        auto HexValue = [](const char c) -> int
+            {
+                if (c >= '0' && c <= '9')
+                {
+                    return c - '0';
+                }
+
+                if (c >= 'a' && c <= 'f')
+                {
+                    return c - 'a' + 10;
+                }
+
+                if (c >= 'A' && c <= 'F')
+                {
+                    return c - 'A' + 10;
+                }
+
+                return -1;
+            };
+
+        for (size_t i = 0; i < output.size(); ++i)
+        {
+            const int high = HexValue(value[i * 2]);
+            const int low = HexValue(value[i * 2 + 1]);
+
+            if (high < 0 || low < 0)
+            {
+                return false;
+            }
+
+            output[i] = static_cast<std::uint8_t>((high << 4) | low);
+        }
+
+        return true;
+    }
+
+    bool GetSHA1ProviderSnapshot(BCRYPT_ALG_HANDLE& hAlg, DWORD& hashObjectSize)
+    {
+        std::scoped_lock lock(gSha1ProviderMutex);
+
+        if (gSha1Alg == nullptr)
+        {
+            if (BCryptOpenAlgorithmProvider(&gSha1Alg, BCRYPT_SHA1_ALGORITHM, nullptr, 0) != 0)
+            {
+                spdlog::error("SHA1Check: BCryptOpenAlgorithmProvider failed.");
+                return false;
+            }
+
+            DWORD bytesWritten = 0;
+
+            if (BCryptGetProperty(
+                gSha1Alg,
+                BCRYPT_OBJECT_LENGTH,
+                reinterpret_cast<PUCHAR>(&gSha1HashObjectSize),
+                sizeof(gSha1HashObjectSize),
+                &bytesWritten,
+                0) != 0)
+            {
+                spdlog::error("SHA1Check: BCryptGetProperty failed.");
+
+                BCryptCloseAlgorithmProvider(gSha1Alg, 0);
+                gSha1Alg = nullptr;
+                gSha1HashObjectSize = 0;
+
+                return false;
+            }
+        }
+
+        hAlg = gSha1Alg;
+        hashObjectSize = gSha1HashObjectSize;
+        return true;
+    }
+}
+
 namespace Memory
 {
     std::vector<int> PatternToBytes(const char* pattern)
@@ -159,14 +246,7 @@ namespace Memory
 
         return false;
     }
-   
-    static HMODULE GetThisDllHandle()
-    {
-        MEMORY_BASIC_INFORMATION info;
-        size_t len = VirtualQueryEx(GetCurrentProcess(), (void*)GetThisDllHandle, &info, sizeof(info));
-        assert(len == sizeof(info));
-        return len ? (HMODULE)info.AllocationBase : NULL;
-    }
+
 
     // CSGOSimple's pattern scan
     // https://github.com/OneshotGH/CSGOSimple-master/blob/master/CSGOSimple/helpers/utils.cpp
@@ -455,7 +535,7 @@ namespace Util
         );
     }
 
-    void DumpBytes(uintptr_t address, size_t count = 16)
+    void DumpBytes(uintptr_t address, size_t count)
     {
         if (address == 0)
         {
@@ -751,7 +831,7 @@ namespace Util
     }
 
 
-    std::string GetParentProcessName(const bool returnFullPath = false)
+    std::string GetParentProcessName(bool returnFullPath)
     {
         DWORD currentPid = GetCurrentProcessId();
         DWORD parentPid = 0;
@@ -872,99 +952,132 @@ namespace Util
         return {};
     }
 
-
-    bool SHA1Check(const std::filesystem::path& filePath, const std::string& expected)
+    std::optional<SHA1Hash> ComputeSHA1Bytes(const std::filesystem::path& filePath)
     {
         BCRYPT_ALG_HANDLE hAlg = nullptr;
-        BCRYPT_HASH_HANDLE hHash = nullptr;
         DWORD hashObjectSize = 0;
-        DWORD cbData = 0;
-        BYTE* hashObject = nullptr;
-        BYTE hash[20]; // SHA-1 = 20 bytes
 
-        if (BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA1_ALGORITHM, nullptr, 0))
+        if (!GetSHA1ProviderSnapshot(hAlg, hashObjectSize))
         {
-            spdlog::error("SHA1Check: BCryptOpenAlgorithmProvider failed for '{}'", filePath.string());
-            return false;
+            spdlog::error("ComputeSHA1Bytes: failed to initialize SHA-1 provider for '{}'", filePath.string());
+            return std::nullopt;
         }
 
-        if (BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, reinterpret_cast<PUCHAR>(&hashObjectSize),
-                              sizeof(DWORD), &cbData, 0))
-        {
-            spdlog::error("SHA1Check: BCryptGetProperty failed for '{}'", filePath.string());
-            BCryptCloseAlgorithmProvider(hAlg, 0);
-            return false;
-        }
+        std::vector<std::uint8_t> hashObject(hashObjectSize);
 
-        hashObject = new BYTE[hashObjectSize];
-        if (BCryptCreateHash(hAlg, &hHash, hashObject, hashObjectSize, nullptr, 0, 0))
+        BCRYPT_HASH_HANDLE hHash = nullptr;
+
+        if (BCryptCreateHash(
+            hAlg,
+            &hHash,
+            hashObject.data(),
+            hashObjectSize,
+            nullptr,
+            0,
+            0) != 0)
         {
-            spdlog::error("SHA1Check: BCryptCreateHash failed for '{}'", filePath.string());
-            delete[] hashObject;
-            BCryptCloseAlgorithmProvider(hAlg, 0);
-            return false;
+            spdlog::error("ComputeSHA1Bytes: BCryptCreateHash failed for '{}'", filePath.string());
+            return std::nullopt;
         }
 
         std::ifstream file(filePath, std::ios::binary);
+
         if (!file)
         {
-            spdlog::error("SHA1Check: Failed to open file '{}'", filePath.string());
-            delete[] hashObject;
+            spdlog::error("ComputeSHA1Bytes: failed to open file '{}'", filePath.string());
             BCryptDestroyHash(hHash);
-            BCryptCloseAlgorithmProvider(hAlg, 0);
-            return false;
+            return std::nullopt;
         }
 
-        std::vector<char> buffer(1 << 16);
-        while (file.good())
+        thread_local std::vector<char> buffer(1 << 16);
+
+        while (true)
         {
-            file.read(buffer.data(), buffer.size());
-            if (BCryptHashData(hHash, reinterpret_cast<PUCHAR>(buffer.data()), static_cast<ULONG>(file.gcount()), 0))
+            file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+            const std::streamsize bytesRead = file.gcount();
+
+            if (bytesRead > 0)
             {
-                spdlog::error("SHA1Check: BCryptHashData failed for '{}'", filePath.string());
-                delete[] hashObject;
+                if (BCryptHashData(
+                    hHash,
+                    reinterpret_cast<PUCHAR>(buffer.data()),
+                    static_cast<ULONG>(bytesRead),
+                    0) != 0)
+                {
+                    spdlog::error("ComputeSHA1Bytes: BCryptHashData failed for '{}'", filePath.string());
+                    BCryptDestroyHash(hHash);
+                    return std::nullopt;
+                }
+            }
+
+            if (file.eof())
+            {
+                break;
+            }
+
+            if (file.fail())
+            {
+                spdlog::error("ComputeSHA1Bytes: read failed for '{}'", filePath.string());
                 BCryptDestroyHash(hHash);
-                BCryptCloseAlgorithmProvider(hAlg, 0);
-                return false;
+                return std::nullopt;
             }
         }
 
-        if (BCryptFinishHash(hHash, hash, sizeof(hash), 0))
+        SHA1Hash computedHash {};
+
+        if (BCryptFinishHash(
+            hHash,
+            computedHash.data(),
+            static_cast<ULONG>(computedHash.size()),
+            0) != 0)
         {
-            spdlog::error("SHA1Check: BCryptFinishHash failed for '{}'", filePath.string());
-            delete[] hashObject;
+            spdlog::error("ComputeSHA1Bytes: BCryptFinishHash failed for '{}'", filePath.string());
             BCryptDestroyHash(hHash);
-            BCryptCloseAlgorithmProvider(hAlg, 0);
-            return false;
+            return std::nullopt;
         }
 
-        std::ostringstream oss;
-        for (auto b : hash)
-        {
-            oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(b);
-        }
-
-        delete[] hashObject;
         BCryptDestroyHash(hHash);
-        BCryptCloseAlgorithmProvider(hAlg, 0);
-
-        std::string computed = oss.str();
-
-        if (computed.size() != expected.size())
-        {
-            spdlog::error("SHA1Check: Mismatch length for '{}' (expected {} chars, got {})",
-                          filePath.string(), expected.size(), computed.size());
-            return false;
-        }
-
-        bool match = std::equal(computed.begin(), computed.end(), expected.begin(),
-                                [](char a, char b)
-                                {
-                                    return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
-                                });
-        return match;
+        return computedHash;
     }
 
+    bool SHA1Equals(const SHA1Hash& actual, const std::string_view expected)
+    {
+        SHA1Hash expectedBytes {};
+
+        if (!ParseSHA1Hex(expected, expectedBytes))
+        {
+            spdlog::error("SHA1Equals: invalid expected SHA-1 hex.");
+            return false;
+        }
+
+        return actual == expectedBytes;
+    }
+
+    bool SHA1Check(const std::filesystem::path& filePath, const std::string_view expected)
+    {
+        const std::optional<SHA1Hash> computed = ComputeSHA1Bytes(filePath);
+
+        if (!computed.has_value())
+        {
+            return false;
+        }
+
+        return SHA1Equals(*computed, expected);
+    }
+
+    void ShutdownSHA1Provider()
+    {
+        std::scoped_lock lock(gSha1ProviderMutex);
+
+        if (gSha1Alg != nullptr)
+        {
+            BCryptCloseAlgorithmProvider(gSha1Alg, 0);
+            gSha1Alg = nullptr;
+            gSha1HashObjectSize = 0;
+
+            spdlog::info("SHA1Check: SHA-1 provider shut down.");
+        }
+    }
 
     bool IsFileReadOnly(const std::filesystem::path& path)
     {

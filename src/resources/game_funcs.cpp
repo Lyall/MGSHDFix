@@ -29,10 +29,8 @@ namespace
         hook = safetyhook::create_inline(addr, null_fn);
     }
 
-    using GM_GetArea_t = const char* ();
     using NewCharaCallback = std::function<void* (int, int)>;
 
-    GM_GetArea_t* GM_GetArea = nullptr;
     NewCharaCallback* pending = nullptr;
 
     std::unordered_map<std::string, std::unordered_map<uint32_t, NewCharaCallback>> return_hooks;
@@ -56,7 +54,7 @@ namespace
 
     void* hooked_GM_GetCharaID(int nID)
     {
-        if (const char* stage = GM_GetArea())
+        if (const char* stage = Shared_Gamefuncs::GM_GetArea())
         {
             auto osit = observe_hooks.find(stage);
             if (osit != observe_hooks.end())
@@ -169,6 +167,9 @@ void MGS2_GameFuncs::HookGameFuncs()
     uint8_t* GV_DestroyActor_scan = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 33 C0 48 8B 74 24 ?? 48 83 C4 ?? 5F C3 48 8B 74 24", "GV_DestroyActor call site");
     GV_DestroyActor = reinterpret_cast<GV_DestroyActor_t>(Memory::ResolveCall(GV_DestroyActor_scan));
     spdlog::info("MGS2_GameFuncs: GV_DestroyActor address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GV_DestroyActor - (uintptr_t)baseModule);
+
+    HZX_OnlineHazardCheck = reinterpret_cast<HZX_OnlineHazardCheck_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 48 8B F2 8B E9 33 D2 41 B8 ?? ?? ?? ??", "HZX_OnlineHazardCheck"));
+    spdlog::info("MGS2_GameFuncs: HZX_OnlineHazardCheck address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)HZX_OnlineHazardCheck - (uintptr_t)baseModule);
 
 
 
@@ -344,14 +345,21 @@ void MGS3_Gamefuncs::HookGameFuncs()
 
 void Shared_Gamefuncs::HookFuncs()
 {
+    uint8_t* GM_GetArea_scan = Memory::PatternScan(baseModule, (eGameType & MGS2) ? "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 0D ?? ?? ?? ?? 4C 8B D0" : "E8 ?? ?? ?? ?? 33 C9 4C 8D 05 ?? ?? ?? ?? 0F 1F 40", "GM_GetArea call site");
+    Shared_Gamefuncs::GM_GetArea = reinterpret_cast<Shared_Gamefuncs::GM_GetArea_t*>(Memory::ResolveCall(GM_GetArea_scan));
+    spdlog::info("Shared_GameFuncs: GM_GetArea address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)Shared_Gamefuncs::GM_GetArea - (uintptr_t)baseModule);
+
+    if (eGameType & (MGS2|MGS3))
+    {
+        //_NewDelay+3C
+        uint8_t* BP_AdjustTick_scan = Memory::PatternScan(baseModule, (eGameType & MGS2) ? "E8 ?? ?? ?? ?? 8B F8 B1 ?? E8 ?? ?? ?? ?? 48 85 C0 74 ?? E8 ?? ?? ?? ?? 48 8B E8" : "E8 ?? ?? ?? ?? 48 63 97 ?? ?? ?? ?? 48 8D 4C 24", "BP_AdjustTick call site (delay.c -> NewDelay())");
+        Shared_Gamefuncs::BP_AdjustTick = reinterpret_cast<Shared_Gamefuncs::BP_AdjustTick_t>(Memory::ResolveCall(BP_AdjustTick_scan));
+        spdlog::info("Shared_GameFuncs: BP_AdjustTick address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)Shared_Gamefuncs::BP_AdjustTick - (uintptr_t)baseModule);
+    }
 
 #if !defined(RELEASE_BUILD)
 
     spdlog::info("Shared_GameFuncs: Hooking CHARA stage function table.");
-
-    uint8_t* GM_GetArea_scan = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 0D ?? ?? ?? ?? 4C 8B D0", "GM_GetArea call site");
-    GM_GetArea = reinterpret_cast<GM_GetArea_t*>(Memory::ResolveCall(GM_GetArea_scan));
-    spdlog::info("Shared_GameFuncs: GM_GetArea address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GM_GetArea - (uintptr_t)baseModule);
 
     uint8_t* GM_GetCharaID_scan = Memory::PatternScan(baseModule, eGameType & MGS2 ? "E8 ?? ?? ?? ?? 48 8B F0 48 85 C0 75 ?? 8D 46 ?? 48 83 C4" : "E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 75 ?? 48 8D 43 ?? 48 83 C4 ?? 5B", "GM_GetCharaID call site");
     GM_GetCharaID_hook = safetyhook::create_inline(Memory::ResolveCall(GM_GetCharaID_scan), hooked_GM_GetCharaID);
