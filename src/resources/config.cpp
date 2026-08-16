@@ -85,6 +85,8 @@
 #include "mgs2_vamp_punch_fix.hpp"
 #include "mgs_smaa.hpp"
 #include "mgs3_film_grain.hpp"
+#include "mgs3_glow_overbright.hpp"
+#include "mgs3_map_relight.hpp"
 #include "playtime_fixes.hpp"
 #include "windows_preferred_gpu.hpp"
 
@@ -712,6 +714,8 @@ void Config::Read()
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = g_EffectSpeedFix.isEnabled = bRestoreVFX;
+        MGS3GlowOverbright::bEnabled = bRestoreVFX;
+        MGS3MapRelight::bEnabled = bRestoreVFX;
 
 
         ConfigHelper::getValue(ini, ConfigKeys::Restore_Reverb_Level_Section, ConfigKeys::Restore_Reverb_Level_Setting, FixReverbWetLevel::bEnabled);
