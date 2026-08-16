@@ -71,6 +71,7 @@
 #include "mgs2_restore_elevator_glitch.hpp"
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
+#include "mgs2_bandana_mass.hpp"
 #include "mgs2_soft_shadows.hpp"
 #include "custom_player_name.hpp"
 #include "d3d11_text_overlay.hpp"
@@ -722,7 +723,7 @@ void Config::Read()
 
         if (eGameType & MGS2)
         {
-            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_AiRayVision::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled = MGS2CodecBand::bEnabled = bRestoreVFX;
+            g_MGS2UnderwaterFilterFix.bEnabled = g_OpticalCamoFix.bEnabled = MGS2BloodStains::bEnabled = MGS2ScopeWarp::bEnabled = MGS2WaterEffects::bEnabled = MGS2LensDroplets::bEnabled = MGS2GasHaze::bEnabled = MGS2_ContrastShader::bEnabled = MGS2_AiRayVision::bEnabled = MGS2_Crossfade::bEnabled = MGS2ConcentrateBlur::bEnabled = MGS2RailgunBeam::bEnabled = MGS2DemoCameraJudder::bEnabled = MGS2PreshadeLights::bEnabled = MGS2TankerSnakeSnap::bEnabled = MGS2HairLayering::bEnabled = MGS2_CodecBackground::bEnabled  = MGS2BandanaMass::bEnabled = MGS2CodecBand::bEnabled = bRestoreVFX;
 
             bool bDisablePhotosensitive = true;
             ConfigHelper::getValue(ini, ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, bDisablePhotosensitive);
