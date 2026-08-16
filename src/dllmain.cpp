@@ -21,6 +21,7 @@
 #include "pause_on_focus_loss.hpp"
 #include "stat_persistence.hpp"
 #include "mgs2_scanline_scale.hpp"
+#include "mgs2_fixed_alpha.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "pressure_inputs.hpp"
 #include "ds3_rumble.hpp"
@@ -620,6 +621,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_CodecBackground::Setup());
         INITIALIZE(MGS2_ContrastShader::Setup());
         INITIALIZE(MGS2_AiRayVision::Setup());
+        INITIALIZE(MGS2FixedAlpha::Setup());
         INITIALIZE(MGS2ConcentrateBlur::Initialize());
         INITIALIZE(MGS2EnhancedDemos::Initialize());
         INITIALIZE(CaptionReplacements::Setup());

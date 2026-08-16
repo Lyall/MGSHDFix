@@ -33,6 +33,7 @@
 #include "mgs2_soft_shadows.hpp"
 #include "mgs3_glow_overbright.hpp"
 #include "mgs2_scanline_scale.hpp"
+#include "mgs2_fixed_alpha.hpp"
 #include "mgs3_map_relight.hpp"
 #include "d3d11_state_cache.hpp"
 void afterPresent();
@@ -290,6 +291,7 @@ namespace
             }
             SceneDepth::Initialize();   // hook OMSetRenderTargets now that the context exists
             MGS2ScanlineScale::OnDeviceReady();
+            MGS2FixedAlpha::OnDeviceReady();
             MGS3MapRelight::OnDeviceReady();
             MGS3GlowOverbright::OnDeviceReady(g_D3D11Hooks.d3dDevice.Get());
             if (eGameType & (MGS2 | MGS3))
