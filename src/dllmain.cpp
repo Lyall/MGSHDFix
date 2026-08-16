@@ -20,6 +20,7 @@
 #include "keep_aiming_after_firing.hpp"
 #include "pause_on_focus_loss.hpp"
 #include "stat_persistence.hpp"
+#include "mgs2_scanline_scale.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "pressure_inputs.hpp"
 #include "ds3_rumble.hpp"
@@ -657,6 +658,7 @@ static void InitializeSubsystems()
     }
     INITIALIZE(g_CPUCoreLimitFix.ApplyFix());
     INITIALIZE(g_VectorScalingFix.Initialize());
+    INITIALIZE(MGS2ScanlineScale::Initialize());
     INITIALIZE(g_EffectSpeedFix.Initialize()); //todo - fix more effects, ie rain speed, bullet trails, helicopter rotors
     INITIALIZE(g_StereoAudioFix.Initialize());
     INITIALIZE(DamagedSaveFix::Initialize());

@@ -72,6 +72,7 @@
 #include "mgs2_snake_tales_radar.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_bandana_mass.hpp"
+#include "mgs2_scanline_scale.hpp"
 #include "mgs2_soft_shadows.hpp"
 #include "custom_player_name.hpp"
 #include "d3d11_text_overlay.hpp"
@@ -714,6 +715,7 @@ void Config::Read()
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
         g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = g_EffectSpeedFix.isEnabled = bRestoreVFX;
+        MGS2ScanlineScale::bEnabled = bRestoreVFX;
         MGS3GlowOverbright::bEnabled = bRestoreVFX;
         MGS3MapRelight::bEnabled = bRestoreVFX;
 
