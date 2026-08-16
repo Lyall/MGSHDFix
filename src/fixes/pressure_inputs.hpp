@@ -12,6 +12,10 @@ namespace PressureInputs
 
     void Initialize();
 
+    // Twelve slots, libgv order: R L U D TRI CIR CRO SQU L1 R1 L2 R2. Zeroed without a pad.
+    constexpr size_t kPadSlots = 12;
+    void ReadPad(uint8_t (&out)[kPadSlots]);
+
     // The open DsHidMini device, for rumble to open its own write handle: fills path and
     // returns the mode (0 SXS, 1 SDF, 2 native), or -1 without a pad.
     int Ds3DeviceMode(std::wstring& path);
