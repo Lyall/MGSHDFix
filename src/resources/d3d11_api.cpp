@@ -18,6 +18,7 @@
 #include "mgs2_ai_ray_vision.hpp"
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
+#include "mgs2_tanker_fog.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_gas_haze.hpp"
@@ -290,6 +291,7 @@ namespace
             SceneDepth::Initialize();   // hook OMSetRenderTargets now that the context exists
             MGS3MapRelight::OnDeviceReady();
             MGS3GlowOverbright::OnDeviceReady(g_D3D11Hooks.d3dDevice.Get());
+            MGS2TankerFog::OnDeviceReady();
             if (eGameType & (MGS2 | MGS3))
             {
                 // Drop redundant IA state changes - the games re-set layout/topology per draw.
@@ -333,6 +335,7 @@ namespace
             }
             g_MGS2UnderwaterFilterFix.BeforePresent();
             MGS2_AiRayVision::OnPresent();
+            MGS2TankerFog::OnPresent();
             MGS2_Crossfade::OnPresent(pSwapChain);
         }
         else if (eGameType & MGS3)
