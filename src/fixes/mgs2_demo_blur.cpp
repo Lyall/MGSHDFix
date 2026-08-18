@@ -7,7 +7,10 @@
 #include "scene_depth.hpp"
 #include "effect_speeds.hpp"
 #include "gamevars.hpp"
+#include "mgs2_status_flags.hpp"
 #include "logging.hpp"
+
+using namespace MGS2_StatusFlags;
 
 namespace
 {
@@ -230,6 +233,8 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
     const bool inCutscene = g_GameVars.InCutscene();
     if (bCutscenesOnly && !inCutscene) return;
 
+    if (g_GameVars.GM_MenuStatus() & MENU_RADIO_ON) return;
+
     const ULONGLONG now = GetTickCount64();
     ULONGLONG last = g_lastActMs.load(std::memory_order_relaxed);
     // The blur actor's Act freezes with the pause level - keep a live window open or the trails age out mid-pause.
@@ -343,6 +348,8 @@ bool MGS2DemoBlur::IsFeedbackActive()
 void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*)
 {
     if (!(eGameType & MGS2) || !bEnabled || !sceneColor) return;
+
+    if (g_GameVars.GM_MenuStatus() & MENU_RADIO_ON) { g_havePrev = false; return; }
 
     if (EffectSpeedFix::IsFeedbackHoldTick()) return;
 
