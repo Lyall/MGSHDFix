@@ -165,8 +165,16 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2 | MGS3), ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, ConfigKeys::EnableSMAA_Help, ConfigKeys::EnableSMAA_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+
         { (MGS2|MGS3), ConfigKeys::DisableTextureFiltering_Section, ConfigKeys::DisableTextureFiltering_Setting, ConfigKeys::DisableTextureFiltering_Help, ConfigKeys::DisableTextureFiltering_Tooltip,
           std::nullopt, false, Field::Bool, false },
+
+
+
+        { (MGS2), ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, ConfigKeys::MGS2_Photosensitive_Help, ConfigKeys::MGS2_Photosensitive_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+
 
         { (MGS2), ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, ConfigKeys::LOD_MGS2_NPC_Help, ConfigKeys::LOD_MGS2_NPC_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -298,9 +306,6 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
 
         { (MGS2), ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, ConfigKeys::MGS2_Restore_VFX_Help, ConfigKeys::MGS2_Restore_VFX_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { (MGS2), ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, ConfigKeys::MGS2_Photosensitive_Help, ConfigKeys::MGS2_Photosensitive_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
         {(MGS2), ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, ConfigKeys::MotionBlur_Help, ConfigKeys::MotionBlur_Tooltip,
