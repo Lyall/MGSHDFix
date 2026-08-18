@@ -1108,6 +1108,13 @@ namespace
     }
 }
 
+void PressureInputs::ReadPad(uint8_t (&out)[kPadSlots])
+{
+    static_assert(kPadSlots == kSlots, "pad slot count out of step with libgv");
+    const std::lock_guard<std::mutex> guard(gPressureLock);
+    memcpy(out, gPressure, sizeof(out));
+}
+
 bool PressureInputs::HavePad()
 {
     return gHavePad.load();

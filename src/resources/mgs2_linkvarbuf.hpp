@@ -106,6 +106,22 @@ namespace MGS2_LinkVarBuf
     inline LinkVarValue<short, 266>     GM_PlayerSneezeTime;
     inline LinkVarValue<int, 268>       GM_PlayerColdCount;
     inline LinkVarValue<int, 272>       GM_PlayerColdStartTime;
+
+    enum GM_PlayerStateFlags : uint16_t
+    {
+        PL_START_STATE_BLOOD = 0x1,
+        PL_START_STATE_BLADE_OUT = 0x2,
+        PL_START_STATE_BLADE_INV = 0x4,
+        PL_BLADE_MODE_MINEUCHI = 0x8,
+        PL_SOCOM_SPPRSR_ATTACHED = 0x10,
+        PL_AK_SPPRSR_ATTACHED = 0x20,
+        PL_GBSCAP_EXIST = 0x40,
+        PL_USP_SPPRSR_ATTACHED = 0x80,
+        PL_FACE_WOUNDED = 0x100,
+        PL_SHOWERED = 0x200,
+        PL_GAVE_SHAVER_TO_SNAKE = 0x400,
+    };
+
     inline LinkVarValue<short, 276>     GM_PlayerStateFlag;
     inline LinkVarValue<short, 278>     GM_WeaponPrev;
     inline LinkVarValue<short, 280>     GM_ItemPrev;

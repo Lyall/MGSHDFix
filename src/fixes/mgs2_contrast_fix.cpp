@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "mgs2_contrast_fix.hpp"
+#include "mgs2_fixed_alpha.hpp"
 #include "d3d11_api.hpp"
 #include "common.hpp"
 #include "gamevars.hpp"
@@ -288,6 +289,11 @@ void MGS2_ContrastShader::Draw(IDXGISwapChain* swap, int keepR, int keepG, int k
     if (!bShaderLoaded)
     {
         return;
+    }
+    // The fixed alpha fix brightens the game's own draw; doing it here too would square the gain.
+    if (MGS2FixedAlpha::ConsumeDestScaleRepair() && keepA > 128)
+    {
+        keepA = 128;
     }
     if (keepR == 0 && keepG == 0 && keepB == 0 && keepA == 128)
     {

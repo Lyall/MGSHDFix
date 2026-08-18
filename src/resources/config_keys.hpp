@@ -370,12 +370,10 @@ namespace ConfigKeys
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
 
-    constexpr const char* MGS2_Photosensitive_Section = "Bugfixes";
-    constexpr const char* MGS2_Photosensitive_Setting = "Disable Photosensitive Effects";
+    constexpr const char* MGS2_Photosensitive_Section = EnableSMAA_Section;
+    constexpr const char* MGS2_Photosensitive_Setting = "Reduce Photosensitive Effects";
     constexpr const char* MGS2_Photosensitive_Help = "";
-    constexpr const char* MGS2_Photosensitive_Tooltip = "The Master Collection removes a handful of scripted flash effects for photosensitivity reasons (the Tanker sinking's detonation flash among them).\n"
-                                                       "\n"
-                                                       "Turn this setting off to restore the original PS2 effects.";
+    constexpr const char* MGS2_Photosensitive_Tooltip = "Enable this setting to reduce photosensitive effects (such as detonation effects during the Tanker sinking.)";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";
@@ -803,6 +801,18 @@ namespace ConfigKeys
     constexpr const char* ShowSpeedrunnerOverlay_Option_TopRight = "Top Right";
     constexpr const char* ShowSpeedrunnerOverlay_Option_BottomLeft = "Bottom Left";
     constexpr const char* ShowSpeedrunnerOverlay_Option_BottomRight = "Bottom Right";
+
+
+    constexpr const char* ShowPressureLevels_Section = "Speedrunner Settings";
+    constexpr const char* ShowPressureLevels_Setting = "Show Pressure Levels";
+    constexpr const char* ShowPressureLevels_Help = "";
+    constexpr const char* ShowPressureLevels_Tooltip = "Adds a pressure meter for each face button and direction under the stats overlay.\n"
+                                                      "\n"
+                                                      "Ticks mark the thresholds the game gates on, such as firing and sneaking. Bars go blue at full pressure, and the thin line is the last peak.\n"
+                                                      "\n"
+                                                      "A green dot under Square means letting go now lowers the weapon instead of firing it.\n"
+                                                      "\n"
+                                                      "Needs a DualShock 3 through DsHidMini, and the stats overlay switched on.";
 
 
     constexpr const char* FixIGTLoadingPause_Section = "Speedrunner Settings";

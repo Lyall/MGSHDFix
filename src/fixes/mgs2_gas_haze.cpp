@@ -8,6 +8,9 @@
 #include "scene_depth.hpp"
 
 #include "gamevars.hpp"
+#include "mgs2_status_flags.hpp"
+
+using namespace MGS2_StatusFlags;
 
 namespace
 {
@@ -450,6 +453,10 @@ void MGS2GasHaze::DrawIntoCurrentTarget()
 void MGS2GasHaze::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView* depth)
 {
     if (!(eGameType & MGS2) || !bEnabled || !sceneColor)
+    {
+        return;
+    }
+    if (g_GameVars.GM_MenuStatus() & MENU_RADIO_ON)
     {
         return;
     }

@@ -278,11 +278,11 @@ namespace MGS2Stages
 
 #define MGS3_STAGE_LIST \
     /* Menus / Intro / Ending */ \
-    X(KYLE_OP, "kyle_op", "Menu", "Opening Snake Eater Video") \
     X(TITLE,   "title",   "Menu", "Title Screen / Main Menu") \
     X(THEATER, "theater", "Menu", "Demo Theater") \
     X(ENDING,  "ending",  "Menu", "Credits") \
     X(SELECT,  "select",  "Menu", "Developer Menu") \
+    \
     \
     /* Virtuous Mission (VM) and early Snake Eater mirrors */ \
     X(V001A, "v001a", "Virtuous Mission", "Dremuchji South") \
@@ -319,6 +319,7 @@ namespace MGS2Stages
     X(S044A, "s044a", "Snake Eater", "Ponizovje Warehouse (Interior)") \
     \
     /* Graniny Gorki (The Fear; labs) */ \
+    X(KYLE_OP, "kyle_op", "Snake Eater", "Opening Snake Eater Video") \
     X(S051A, "s051a", "Snake Eater", "Graniny Gorki South (The Fear)") \
     X(S051B, "s051b", "Snake Eater", "Graniny Gorki South (The Fear)") \
     X(S052A, "s052a", "Snake Eater", "Graniny Gorki Lab Exterior: Outside Walls") \
