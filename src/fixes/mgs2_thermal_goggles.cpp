@@ -130,61 +130,12 @@ void MGS2ThermalGoggles::Tick()
 
 }
 
-namespace
-{
-    // Thermal's beam and dot ask for a 2x fixed alpha, which clamps to 1x as a D3D blend factor. They
-    // share vertex colours with the normal laser, which reads the alpha, so colour up and alpha down.
-    void RestoreIRLaserBrightness()
-    {
-        // Beam 32,32,32/64 -> 64,64,64/32, written twice by an unrolled loop.
-        // Dot 128,64,64/128 -> 255,127,127/64, written in pairs.
-        struct Site { const char* pattern; size_t matches; size_t at; uint8_t value; };
-        static const Site sites[] = {
-            { "41 C6 84 ?? 00 20 00 00 20", 2, 8, 0x40 },
-            { "41 C6 84 ?? 02 20 00 00 20", 2, 8, 0x40 },
-            { "41 C6 84 ?? 04 20 00 00 20", 2, 8, 0x40 },
-            { "41 C6 84 ?? 06 20 00 00 40", 2, 8, 0x20 },
-            { "C6 41 F6 80 C6 41 F8 40",    1, 3, 0xFF },
-            { "C6 41 F6 80 C6 41 F8 40",    1, 7, 0x7F },
-            { "C6 41 FA 40 C6 41 FC 80",    1, 3, 0x7F },
-            { "C6 41 FA 40 C6 41 FC 80",    1, 7, 0x40 },
-        };
-
-        constexpr size_t count = std::size(sites);
-
-        // Scan everything first: a patched byte stops its own scan, and a half applied set is worse.
-        std::vector<uint8_t*> found[count];
-        for (size_t i = 0; i < count; i++)
-        {
-            found[i] = Memory::FindMultiplePatternMatches(baseModule, sites[i].pattern);
-            if (found[i].size() != sites[i].matches)
-            {
-                spdlog::error("MGS2ThermalGoggles: expected {} laser colour writes, found {}. Leaving the laser alone.",
-                    sites[i].matches, found[i].size());
-                return;
-            }
-        }
-
-        for (size_t i = 0; i < count; i++)
-        {
-            for (uint8_t* match : found[i])
-            {
-                Memory::Write<uint8_t>(reinterpret_cast<uintptr_t>(match) + sites[i].at, sites[i].value);
-            }
-        }
-
-        spdlog::info("MGS2ThermalGoggles: Thermal laser brightness restored.");
-    }
-}
-
 void MGS2ThermalGoggles::Setup()
 {
     if (!(eGameType & MGS2))
     {
         return;
     }
-
-    RestoreIRLaserBrightness();
 
     if (!bEnabled)
     {
