@@ -9,6 +9,7 @@ namespace D3D11TextOverlay
 
     inline bool bShaderLoaded = false;
     inline bool bShowSpeedrunnerStats = false;
+    inline bool bShowPressureLevels = false;
     enum StatsPosition
     {
         TopLeft,

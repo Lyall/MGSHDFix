@@ -17,6 +17,7 @@
 #include "mgs3_linkvarbuf.hpp"
 #include "mgs3_status_flags.hpp"
 #include "version_checking.hpp"
+#include "pressure_inputs.hpp"
 
 namespace
 {
@@ -129,6 +130,8 @@ namespace
     std::array<uint8_t, EasyFontBufferSize> easyFontBuffer;
     std::vector<TextVertex> textVertices;
 
+    void FlushGeometry();
+
     void AddTextGeometry(const char* text, float x, float y, float scale, const TextColor& color)
     {
         unsigned char stbColor[4] = { color.r, color.g, color.b, color.a };
@@ -171,6 +174,234 @@ namespace
             addVertex(quad[2]);
             addVertex(quad[3]);
         }
+    }
+
+
+    // ---- pressure strip -------------------------------------------------------------------
+    // libgv slot order is R L U D TRI CIR CRO SQU L1 R1 L2 R2; these are the ten worth watching.
+    struct PressureSlot { size_t slot; const char* label; };
+    constexpr PressureSlot kStrip[] = {
+        { 2, "U" }, { 3, "D" }, { 1, "L" }, { 0, "R" },
+        { 8, "L1" }, { 9, "R1" },
+        { 4, "T" }, { 5, "O" }, { 6, "X" }, { 7, "S" },
+    };
+    constexpr size_t kStripCount = std::size(kStrip);
+
+    // The values worth marking on a bar: what a press has to reach to change the game's mind.
+    struct Gate { uint8_t value; };
+    constexpr size_t kMaxGates = 2;
+    struct Gates { Gate gate[kMaxGates]; size_t count; };
+
+    Gates SlotGates(size_t slot)
+    {
+        // Square is about letting go, not pressing: 24 lowers the gun instead of firing (both
+        // games), and a rapid-fire weapon only runs above TH2, which MGS3 doubled.
+        if (slot == 7)
+        {
+            return { { { 24 }, { (eGameType & MGS3) ? uint8_t(120) : uint8_t(60) } }, 2 };
+        }
+        if ((eGameType & MGS3) && slot == 5)
+        {
+            return { { { 200 } }, 1 };                     // CQC slit
+        }
+        // PL_MoveLevel scales the d-pad by 2.4 before testing PAD_WALK_TH, so 62 is the last sneak
+        if ((eGameType & MGS2) && slot < 4)
+        {
+            return { { { 62 } }, 1 };
+        }
+        return { {}, 0 };
+    }
+
+    // Ease off into this band and the weapon lowers instead of firing - two consecutive samples
+    // inside it (attack.c, PL_PAD_WEAPON_TH). Exclusive upper bound, 0 where there is no release.
+    uint8_t ReleaseBand(size_t slot)
+    {
+        return (slot == 7) ? 24 : 0;
+    }
+
+    TextColor PressureColour(uint8_t value, uint8_t alpha)
+    {
+        return (value >= 255) ? TextColor{ 96, 176, 255, alpha } : TextColor{ 210, 210, 210, alpha };
+    }
+
+    void AddQuad(float x, float y, float w, float h, const TextColor& c)
+    {
+        if (textVertices.size() + 6 > MaxTextVertices || w <= 0.0f || h <= 0.0f)
+        {
+            return;
+        }
+        const auto vert = [&](float vx, float vy) {
+            TextVertex v = {};
+            v.x = vx; v.y = vy; v.z = 0.0f;
+            v.color[0] = c.r; v.color[1] = c.g; v.color[2] = c.b; v.color[3] = c.a;
+            textVertices.push_back(v);
+            };
+        vert(x, y);         vert(x + w, y);     vert(x + w, y + h);
+        vert(x, y);         vert(x + w, y + h); vert(x, y + h);
+    }
+
+    struct SlotState { uint8_t peak; uint64_t held; uint8_t band; uint8_t dot; uint8_t dotHold; };
+    SlotState gSlots[kStripCount] {};
+
+    constexpr float kLabelScale = 3.0f;
+    constexpr float kValueScale = 2.2f;
+    constexpr float kRowGutter = 10.0f;      // between every row
+    constexpr float kDotSize = 9.0f;
+
+    float LabelHeight()  { return static_cast<float>(stb_easy_font_height(const_cast<char*>("X"))) * kLabelScale; }
+    float ValueHeight()  { return static_cast<float>(stb_easy_font_height(const_cast<char*>("255"))) * kValueScale; }
+
+    // bar, label, number, safe dot - measured so nothing crowds the stats text above
+    float PressureStripHeight(float barH)
+    {
+        return barH + kRowGutter + LabelHeight() + kRowGutter + ValueHeight() + kRowGutter + kDotSize;
+    }
+
+    void DrawPressureStrip(float x, float y, float cellW, float barH, TextHorizontalAlignment align)
+    {
+        uint8_t now[PressureInputs::kPadSlots] {};
+        PressureInputs::ReadPad(now);
+
+        const uint64_t tick = GetTickCount64();
+        constexpr uint64_t kPeakHoldMs = 1500;
+
+        const float stripW = cellW * kStripCount;
+        const float left = (align == TextHorizontalAlignment::Right) ? x - stripW : x;
+
+        constexpr float kBarW = 7.0f;
+
+        for (size_t i = 0; i < kStripCount; i++)
+        {
+            SlotState& st = gSlots[i];
+            const uint8_t value = now[kStrip[i].slot];
+            const Gates gates = SlotGates(kStrip[i].slot);
+            // Armed the frame the value drops into the band, confirmed the frame after. The verdict
+            // then outlives the press, so it can still be read once the button is back up.
+            constexpr uint8_t kDotHoldFrames = 45;
+            const uint8_t band = ReleaseBand(kStrip[i].slot);
+            if (!band || value >= band)
+            {
+                st.band = 0;
+                st.dot = 0;
+                st.dotHold = 0;                  // back on the trigger, the old verdict is stale
+            }
+            else if (value > 0)
+            {
+                st.band = static_cast<uint8_t>(std::min(2, st.band + 1));
+                st.dot = st.band;
+                st.dotHold = kDotHoldFrames;
+            }
+            else if (st.dotHold)
+            {
+                st.dotHold--;
+                st.band = 0;
+            }
+            const bool safe = st.dot != 0 && st.dotHold != 0;
+
+            if (value >= st.peak && value > 0)
+            {
+                st.peak = value;
+                st.held = tick;
+            }
+            else if (tick - st.held > kPeakHoldMs)
+            {
+                st.peak = 0;
+            }
+
+            const float cellX = left + cellW * static_cast<float>(i);
+            const float barX = cellX + (cellW - kBarW) * 0.5f;
+
+            AddQuad(barX, y, kBarW, barH, { 255, 255, 255, 40 });
+
+            if (band)
+            {
+                const float bandTop = y + barH * (1.0f - static_cast<float>(band) / 255.0f);
+                const float bandH = std::max(2.0f, y + barH - bandTop);
+                AddQuad(barX - 3.0f, bandTop, kBarW + 6.0f, bandH, { 120, 200, 140, 55 });
+            }
+
+            for (size_t g = 0; g < gates.count; g++)
+            {
+                const float tickY = y + barH * (1.0f - static_cast<float>(gates.gate[g].value) / 255.0f);
+                AddQuad(barX - 2.0f, tickY, kBarW + 4.0f, 1.5f, { 255, 255, 255, 235 });
+            }
+
+            if (value)
+            {
+                const float fill = barH * static_cast<float>(value) / 255.0f;
+                AddQuad(barX, y + barH - fill, kBarW, fill, PressureColour(value, 120));
+            }
+
+            if (st.peak)
+            {
+                const float peakY = y + barH * (1.0f - static_cast<float>(st.peak) / 255.0f);
+                AddQuad(barX, peakY, kBarW, 2.0f, PressureColour(st.peak, 200));
+            }
+
+            const auto centred = [&](const char* t, float ty, float sc, const TextColor& col) {
+                const float w = static_cast<float>(stb_easy_font_width(const_cast<char*>(t))) * sc;
+                AddTextGeometry(t, cellX + (cellW - w) * 0.5f, ty, sc, col);
+                };
+
+            const float labelY = y + barH + kRowGutter;
+            const float valueY = labelY + LabelHeight() + kRowGutter;
+            centred(kStrip[i].label, labelY, kLabelScale, { 190, 190, 190, 200 });
+
+            // live while held, then the peak lingers so a press can be read after the fact
+            char readout[8] = {};
+            TextColor readoutColour = { 0, 0, 0, 0 };
+            if (value)
+            {
+                snprintf(readout, sizeof(readout), "%u", value);
+                readoutColour = PressureColour(value, 230);
+            }
+            else if (st.peak)
+            {
+                snprintf(readout, sizeof(readout), "%u", st.peak);
+                readoutColour = PressureColour(st.peak, 150);
+            }
+            if (readout[0])
+            {
+                centred(readout, valueY, kValueScale, readoutColour);
+            }
+
+            if (safe)
+            {
+                // dark the frame it arms, bright once the second frame confirms the release
+                const TextColor dot = (st.dot > 1) ? TextColor{ 130, 245, 155, 245 }
+                    : TextColor{ 40, 125, 65, 225 };
+                AddQuad(cellX + (cellW - kDotSize) * 0.5f, valueY + ValueHeight() + kRowGutter,
+                    kDotSize, kDotSize, dot);
+            }
+        }
+    }
+
+    // authored against 4K like the rest of the overlay, then scaled to the real backbuffer
+    void DrawPressure(float x, float y, TextHorizontalAlignment align)
+    {
+        if (!D3D11TextOverlay::bShaderLoaded || !PressureInputs::HavePad())
+        {
+            return;
+        }
+
+        auto* swap = g_D3D11Hooks.swapChain.Get();
+        if (!swap)
+        {
+            return;
+        }
+
+        ComPtr<ID3D11Texture2D> backbuffer;
+        if (FAILED(swap->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backbuffer.GetAddressOf()))))
+        {
+            return;
+        }
+        D3D11_TEXTURE2D_DESC bb = {};
+        backbuffer->GetDesc(&bb);
+        const float s = static_cast<float>(bb.Height) / 2160.0f;
+
+        textVertices.clear();
+        DrawPressureStrip(x * s, y * s, 46.0f * s, 46.0f * s, align);
+        FlushGeometry();
     }
 
     void Draw(const char* text, float x, float y, float scale, float borderSize, const TextColor& textColor, const TextColor& borderColor, TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment::Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment::Top)
@@ -274,11 +505,36 @@ namespace
         }
 
 
+        FlushGeometry();
+    }
+
+    void FlushGeometry()
+    {
         if (textVertices.empty())
         {
             return;
         }
 
+        auto* swap = g_D3D11Hooks.swapChain.Get();
+        auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
+        auto* dev = g_D3D11Hooks.d3dDevice.Get();
+        if (!swap || !ctx || !dev)
+        {
+            textVertices.clear();
+            return;
+        }
+
+        ComPtr<ID3D11Texture2D> backbuffer;
+        if (FAILED(swap->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backbuffer.GetAddressOf()))))
+        {
+            textVertices.clear();
+            return;
+        }
+
+        D3D11_TEXTURE2D_DESC backbufferDesc = {};
+        backbuffer->GetDesc(&backbufferDesc);
+
+        HRESULT hr = S_OK;
         ComPtr<ID3D11RenderTargetView> rtv;
         hr = dev->CreateRenderTargetView(backbuffer.Get(), nullptr, rtv.GetAddressOf());
         if (FAILED(hr))
@@ -363,6 +619,7 @@ namespace
         ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
 
         ctx->Draw(static_cast<UINT>(textVertices.size()), 0);
+        textVertices.clear();
 
         ctx->OMSetRenderTargets(8, oldRTV, oldDSV);
         ctx->OMSetBlendState(oldBlend, oldBlendFactor, oldBlendMask);
@@ -876,5 +1133,15 @@ void D3D11TextOverlay::Tick()
         }
 
         Draw(GetStatOverlay(), x, y, 4.0f, 3.0f, { 199, 199, 199, 255 }, { 0, 0, 0, 128 }, horizontalAlignment, verticalAlignment);
+
+        if (bShowPressureLevels)
+        {
+            constexpr float kStatsGutter = 24.0f;
+            const float statsHeight = static_cast<float>(stb_easy_font_height(const_cast<char*>(GetStatOverlay()))) * 4.0f;
+            const float stripY = (verticalAlignment == TextVerticalAlignment::Bottom)
+                ? y - statsHeight - kStatsGutter - PressureStripHeight(46.0f)
+                : y + statsHeight + kStatsGutter;
+            DrawPressure(x, stripY, horizontalAlignment);
+        }
     }
 }

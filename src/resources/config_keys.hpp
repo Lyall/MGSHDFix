@@ -805,6 +805,18 @@ namespace ConfigKeys
     constexpr const char* ShowSpeedrunnerOverlay_Option_BottomRight = "Bottom Right";
 
 
+    constexpr const char* ShowPressureLevels_Section = "Speedrunner Settings";
+    constexpr const char* ShowPressureLevels_Setting = "Show Pressure Levels";
+    constexpr const char* ShowPressureLevels_Help = "";
+    constexpr const char* ShowPressureLevels_Tooltip = "Adds a pressure meter for each face button and direction under the stats overlay.\n"
+                                                      "\n"
+                                                      "Ticks mark the thresholds the game gates on, such as firing and sneaking. Bars go blue at full pressure, and the thin line is the last peak.\n"
+                                                      "\n"
+                                                      "A green dot under Square means letting go now lowers the weapon instead of firing it.\n"
+                                                      "\n"
+                                                      "Needs a DualShock 3 through DsHidMini, and the stats overlay switched on.";
+
+
     constexpr const char* FixIGTLoadingPause_Section = "Speedrunner Settings";
     constexpr const char* FixIGTLoadingPause_Setting = "Fix In-Game Timer Loading Pause";
     constexpr const char* FixIGTLoadingPause_Help = "";
