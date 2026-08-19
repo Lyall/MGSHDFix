@@ -593,7 +593,7 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2WaterEffects::Initialize());
         INITIALIZE(MGS2BodySplashGuard::Initialize());
         INITIALIZE(MGS2CodecBand::Initialize());
-        INITIALIZE(MGS2DemoEffectBlacklist::Initialize());
+        INITIALIZE(MGS2_RestorePhotosensitiveEffects::Initialize());
         INITIALIZE(MGS2LensDroplets::Initialize());
         INITIALIZE(MGS2GasHaze::Initialize());
         INITIALIZE(MGS2DemoCameraJudder::Initialize());

@@ -6,15 +6,11 @@
 #include "custom_resolution_and_borderless.hpp"
 #include "gamevars.hpp"
 //#include "input_handler.hpp"
-#include "color_correction.hpp"
 //#include "game_funcs.hpp"
-#include "line_scaling.hpp"
 #include "logging.hpp"
 #include "mgs2_linkvarbuf.hpp"
-#include "mgs_smaa.hpp"
 
 
-//#define BEFORE_COMPARISON_PICS
 
 namespace
 {
@@ -101,7 +97,6 @@ namespace
         
 
 
-#ifndef BEFORE_COMPARISON_PICS
         {
 
 
@@ -128,7 +123,6 @@ namespace
                           });
         }
 
-#endif
         /*
                         //_MENU_PutExplainText+139
         MAKE_HOOK_MID(baseModule, "F3 41 0F 2C E9 66 0F 6E C2", "MGS 3: Weapon & Item Description Text Width Fix: MENU_PutExplainText()", {
@@ -171,9 +165,7 @@ void ResolutionScalingFixes::ApplyFixes()
     SPDLOG_INFO("Resolution Scaling Fixes: PS2 Height Delta = {}, PS2 Width Delta = {}, PS2 Width 4:3 Delta = {}", scaleY_fromPs2, scaleX_fromPs2, scaleX_fromPs2_4by3);
 
 #ifdef BEFORE_COMPARISON_PICS
-    ColorCorrection::bShaderLoaded = false;
-    g_VectorScalingFix.bToggleRainShader = false;
-    SMAA_AA::bEnabled = false;
+    spdlog::info("BEFORE_COMPARISON_PICS TRUE. SKIPPING RESOLUTION SCALING FIXES");
     return;
 #endif
 

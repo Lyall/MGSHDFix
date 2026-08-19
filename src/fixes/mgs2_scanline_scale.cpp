@@ -5,6 +5,8 @@
 #include "logging.hpp"
 #include "d3d11_api.hpp"
 
+//mgs2x\source\user\takabe\effect1\raster.c -> NewRasterEffect() | (mgs2x\source\user\skoba\weapon\equip_layout.c -> NewDEMO_Equip() / mgs2x\source\user\skoba\weapon\vtr_layout.c -> NewVtrSight() / mgs2x\source\user\skoba\weapon\ray_layout.c -> NewRaySight())
+
 // The raster effect lays 112 lines down the screen, 3 units tall with a 1 unit gap. Scale that to
 // a vertical resolution it doesn't divide into and lines land on a mix of pixel counts, so round
 // the pitch up to whole pixels and let the extra run off the bottom.

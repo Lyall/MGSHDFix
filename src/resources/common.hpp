@@ -43,3 +43,7 @@ inline bool jpDatExists;
 
 constexpr float f_PS2_Width = 512.0f;
 constexpr float f_PS2_Height = 448.0f;
+
+
+//#define BEFORE_COMPARISON_PICS
+//#define DISABLE_MGS3_CUTSCENE_CAMERA_FIX

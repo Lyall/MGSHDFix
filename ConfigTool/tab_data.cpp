@@ -171,7 +171,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
 
 
-        { (MGS2), ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, ConfigKeys::MGS2_Photosensitive_Help, ConfigKeys::MGS2_Photosensitive_Tooltip,
+        { (MGS2), ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Help, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
 

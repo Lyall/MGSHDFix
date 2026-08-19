@@ -370,10 +370,10 @@ namespace ConfigKeys
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
 
-    constexpr const char* MGS2_Photosensitive_Section = EnableSMAA_Section;
-    constexpr const char* MGS2_Photosensitive_Setting = "Reduce Photosensitive Effects";
-    constexpr const char* MGS2_Photosensitive_Help = "";
-    constexpr const char* MGS2_Photosensitive_Tooltip = "Enable this setting to reduce photosensitive effects (such as detonation effects during the Tanker sinking.)";
+    constexpr const char* MGS2_RestorePhotosensitiveEffects_Section = EnableSMAA_Section;
+    constexpr const char* MGS2_RestorePhotosensitiveEffects_Setting = "Reduce Photosensitive Effects";
+    constexpr const char* MGS2_RestorePhotosensitiveEffects_Help = "";
+    constexpr const char* MGS2_RestorePhotosensitiveEffects_Tooltip = "Enable this setting to reduce photosensitive effects (such as detonation effects during the Tanker sinking.)";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";

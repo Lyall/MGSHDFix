@@ -715,7 +715,12 @@ void Config::Read()
 
         bool bRestoreVFX = true;
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
+#if defined(BEFORE_COMPARISON_PICS)
+        spdlog::info("DISABLED VFX FIXES");
+        bRestoreVFX = false;
+#endif
         LOG_CONFIG(ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
+
         g_VectorScalingFix.bFixRain = g_VectorScalingFix.bFixUI = g_EffectSpeedFix.isEnabled = bRestoreVFX;
         MGS2ScanlineScale::bEnabled = bRestoreVFX;
         MGS3GlowOverbright::bEnabled = bRestoreVFX;
@@ -758,13 +763,14 @@ void Config::Read()
             for (bool* pEnabled : vfxToggles)
                 *pEnabled = bRestoreVFX;
 
-            bool bDisablePhotosensitive = true;
-            ConfigHelper::getValue(ini, ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, bDisablePhotosensitive);
-            MGS2DemoEffectBlacklist::bEnabled = !bDisablePhotosensitive;
-            LOG_CONFIG(ConfigKeys::MGS2_Photosensitive_Section, ConfigKeys::MGS2_Photosensitive_Setting, bDisablePhotosensitive);
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
 
             std::string sMotionBlur;
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
+#if defined(BEFORE_COMPARISON_PICS)
+            sMotionBlur = MotionBlur_Option_Disabled;
+#endif
             if (sMotionBlur != ConfigKeys::MotionBlur_Option_Disabled &&
                 sMotionBlur != ConfigKeys::MotionBlur_Option_CutscenesOnly &&
                 sMotionBlur != ConfigKeys::MotionBlur_Option_Full)
@@ -788,14 +794,19 @@ void Config::Read()
 
 
             ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+#if defined(BEFORE_COMPARISON_PICS)
+            g_DepthOfFieldFixes.bEnabled = false;
+#endif
             LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
         }
         else if (eGameType & MGS3)
         {
-            std::string sFilmGrainMode = "On";
 
-            ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
-            ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+#if defined(BEFORE_COMPARISON_PICS)
+            spdlog::info("DISABLED VFX FIXES");
+#endif 
+
+            std::string sFilmGrainMode = "On";
             ConfigHelper::getValue(ini, ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, sFilmGrainMode);
 
             bool bFilmGrainEnabled = true;
@@ -810,12 +821,23 @@ void Config::Read()
                     ConfigHelper::FatalConfigError(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, "Invalid option '" + sFilmGrainMode + "'");
                 }
             }
+        
+#if defined(BEFORE_COMPARISON_PICS)
+            bFilmGrainEnabled = false;
+#endif
             MGS3FilmGrain::mode = bFilmGrainEnabled ? MGS3FilmGrain::Mode::On : MGS3FilmGrain::Mode::Off;
-
-            LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
-            LOG_CONFIG(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
             LOG_CONFIG(ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, bFilmGrainEnabled);
+
+            ConfigHelper::getValue(ini, ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+#if defined(BEFORE_COMPARISON_PICS)
+            g_DepthOfFieldFixes.bEnabled = false;
+#endif 
+            LOG_CONFIG(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, g_DepthOfFieldFixes.bEnabled);
+            
+            ConfigHelper::getValue(ini, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
+            LOG_CONFIG(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, g_DepthOfFieldFixes.fBlurUvMultiplier);
         }
+
 
         if (g_VectorScalingFix.bFixRain || g_VectorScalingFix.bFixUI)
         {
@@ -1127,11 +1149,17 @@ void Config::Read()
 
 
     ConfigHelper::getValue(ini, ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
+#if defined(BEFORE_COMPARISON_PICS)
+    //SMAA_AA::bEnabled = false;
+#endif
     LOG_CONFIG(ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
 
 
 
     ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
+#if defined(BEFORE_COMPARISON_PICS)
+//ColorCorrection::bEnabled = false;
+#endif
     LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Crop_Overscan_Enabled_Section, ConfigKeys::MG1_Crop_Overscan_Enabled_Setting, MG1_DisplayScaling::bCropBorders);

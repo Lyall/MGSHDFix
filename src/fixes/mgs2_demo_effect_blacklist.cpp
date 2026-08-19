@@ -12,7 +12,7 @@ namespace
     uint8_t* NewFlush_0005Launch_Call_scan = nullptr;
 }
 
-void MGS2DemoEffectBlacklist::Initialize()
+void MGS2_RestorePhotosensitiveEffects::Initialize()
 {
     if (!(eGameType & MGS2) || !bEnabled)
     {
