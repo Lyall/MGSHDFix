@@ -392,8 +392,10 @@ namespace MGS2Stages
     /* Finale */ \
     X(S191A, "s191a", "Snake Eater", "Zaozyorje West") \
     X(S192A, "s192a", "Snake Eater", "Zaozyorje East") \
-    X(S201A, "s201a", "Snake Eater", "Rokovj Bereg (The Boss Arena)") \
-    X(S211A, "s211a", "Snake Eater", "Wig: Interior (SAA Choice)")
+    X(S201A, "s201a", "Snake Eater", "Rokovj Bereg (The Boss)") \
+    X(S211A, "s211a", "Snake Eater", "Wig: Interior")\
+    X(S221A, "s221a", "Snake Eater", "Great Falls, VA")\
+    X(S223A, "s223a", "Snake Eater", "Washington, D.C. / Arlington, VA")
 
 
 namespace MGS3Stages

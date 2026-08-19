@@ -628,7 +628,7 @@ void MGS2_RestoreActionLevelSelection::Apply()
 
     MAKE_HOOK_MID(baseModule,
         "48 8B 05 ?? ?? ?? ?? 66 09 88 ?? ?? ?? ?? B8",
-        "MGS2: Restore Action Level Selection - final story flag | kano\titlescr\newgame.c -> NewNewGameScr() -> Die()", {
+        "MGS2: Restore Action Level Selection - final story flag | kano\\titlescr\\newgame.c -> NewNewGameScr() -> Die()", {
             if (IsFirstTimeQuestionPath(ctx.rdi))
             {
                 ctx.rcx = Memory::ReadField<int16_t>(ctx.rdi, kWorkQuestionCursor, -1) < 3 ? 3 : 2;

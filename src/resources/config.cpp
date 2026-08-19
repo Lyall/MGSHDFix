@@ -1149,16 +1149,18 @@ void Config::Read()
 
 
     ConfigHelper::getValue(ini, ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
-#if defined(BEFORE_COMPARISON_PICS)
-    //SMAA_AA::bEnabled = false;
+#if defined(BEFORE_COMPARISON_PICS_NO_SMAA)
+    SMAA_AA::bEnabled = false;
+    spdlog::info("BEFORE_COMPARISON_PICS_NO_SMAA ENABLED. DISABLED SMAA");
 #endif
     LOG_CONFIG(ConfigKeys::EnableSMAA_Section, ConfigKeys::EnableSMAA_Setting, SMAA_AA::bEnabled);
 
 
 
     ConfigHelper::getValue(ini, ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
-#if defined(BEFORE_COMPARISON_PICS)
-//ColorCorrection::bEnabled = false;
+#if defined(BEFORE_COMPARISON_PICS_NO_GAMMA_CORRECTION)
+    ColorCorrection::bEnabled = false;
+    spdlog::info("BEFORE_COMPARISON_PICS_NO_GAMMA_CORRECTION ENABLED. DISABLED COLOR CORRECTION");
 #endif
     LOG_CONFIG(ConfigKeys::ColorCorrection_Enabled_Section, ConfigKeys::ColorCorrection_Enabled_Setting, ColorCorrection::bEnabled);
 
