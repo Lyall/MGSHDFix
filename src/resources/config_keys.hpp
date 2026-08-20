@@ -757,6 +757,12 @@ namespace ConfigKeys
                                                                  "\n"
                                                                  "Higher multipliers produce more sensitivity.";
 
+    constexpr const char* MGS2BladeAnywhere_Section = "Various";
+    constexpr const char* MGS2BladeAnywhere_Setting = "High Frequency Blade Anywhere";
+    constexpr const char* MGS2BladeAnywhere_Help = "(Experimental)";
+    constexpr const char* MGS2BladeAnywhere_Tooltip = "Makes the High-Frequency Blade usable on every stage.\n"
+        "Loads its models and motions everywhere, arms the blade plugin, and adds it to the inventory.";
+
     constexpr const char* MGS2Sunglasses_Section = "Various";
     constexpr const char* MGS2Sunglasses_Setting = "Force Sunglasses";
     constexpr const char* MGS2Sunglasses_Help = "";

@@ -72,6 +72,17 @@ namespace MGS2_LinkVarBuf
     inline LinkVarValue<short, 6>       GM_Configuration;
     inline LinkVarValue<int, 8>         GM_Configuration2;
     inline LinkVarValue<int, 12>        GM_VRConfiguration;
+
+    enum class GameLevel : short
+    {
+        VeryEasy = 10,
+        Easy = 20,
+        Normal = 30,
+        Hard = 40,
+        Extreme = 50,
+        EuropeanExtreme = 60
+    };
+
     inline LinkVarValue<short, 16>      GM_GameLevel;
     inline LinkVarValue<short, 18>      GM_Result;
     inline LinkVarValue<short, 20>      GM_Language;

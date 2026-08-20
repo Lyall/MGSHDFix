@@ -22,6 +22,7 @@
 #include "stat_persistence.hpp"
 #include "mgs2_scanline_scale.hpp"
 #include "mgs2_fixed_alpha.hpp"
+#include "mgs2_blade_anywhere.hpp"
 #include "mgs2_sunglasses.hpp"
 #include "pressure_inputs.hpp"
 #include "ds3_rumble.hpp"
@@ -554,6 +555,7 @@ static void InitializeSubsystems()
     {
         INITIALIZE(MGS2_GlassDmapackOverflow::Initialize());
         INITIALIZE(g_MGS2Sunglasses.Initialize());
+        INITIALIZE(MGS2BladeAnywhere::Initialize());
         INITIALIZE(MGS2_RestoreDogtags::Initialize());
         INITIALIZE(MGS2_RestoreOriginalDifficulty::Apply());
         INITIALIZE(MGS2_RestorePhoneJingle::Apply());

@@ -235,6 +235,10 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MG|MGS2|MGS3), ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
+        { (MGS2), ConfigKeys::MGS2BladeAnywhere_Section, ConfigKeys::MGS2BladeAnywhere_Setting, ConfigKeys::MGS2BladeAnywhere_Help, ConfigKeys::MGS2BladeAnywhere_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
+
         { (MGS2), ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, ConfigKeys::MGS2Sunglasses_Help, ConfigKeys::MGS2Sunglasses_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::MGS2Sunglasses_Option_Normal, {ConfigKeys::MGS2Sunglasses_Option_Normal,ConfigKeys::MGS2Sunglasses_Option_Always, ConfigKeys::MGS2Sunglasses_Option_Never } },
 
