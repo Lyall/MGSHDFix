@@ -266,7 +266,7 @@ void MGS2_First_Person_View::Activate()
 
     // Resume FPV automatically, changing rcx here will make the game update the camera functions all by itself
     if (bFirst_Person_View_Sticky) {
-        MAKE_HOOK_MID(baseModule, "3B C1 74 ?? 89 05", "MGS 2: FPV - user\sonoyama\raiden\event.c -> CheckWatch() inline @ l68 | Fix FPV Automatic Activation", {
+        MAKE_HOOK_MID(baseModule, "3B C1 74 ?? 89 05", "MGS 2: FPV - user\\sonoyama\\raiden\\event.c -> CheckWatch() inline @ l68 | Fix FPV Automatic Activation", {
             if (*gBP_1stPersonCamera_Active)
             {
                 ctx.rcx = *gBP_1stPersonCamera_Movement_Active;
