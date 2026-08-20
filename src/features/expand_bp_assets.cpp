@@ -94,6 +94,47 @@ static void SplitLines(const char* data, size_t size, std::vector<std::string>& 
 	}
 }
 
+namespace {
+	std::vector<std::string> gUniversalManifest;
+	std::vector<std::string> gUniversalBpAssets;
+}
+
+void BP_FilesysChanges::AddUniversalStageLines(std::vector<std::string> manifestLines,
+                                               std::vector<std::string> bpAssetsLines) {
+	for (auto& l : manifestLines) gUniversalManifest.push_back(std::move(l));
+	for (auto& l : bpAssetsLines) gUniversalBpAssets.push_back(std::move(l));
+}
+
+// "<region>/stage/<stage>/manifest.txt" -> the expanded universal lines, or empty when the
+// path is a codec cache or a resident (r_*) pack.
+static std::string UniversalLinesFor(const char* filePath, bool isBPAssets) {
+	const auto& tmpl = isBPAssets ? gUniversalBpAssets : gUniversalManifest;
+	if (tmpl.empty()) {
+		return {};
+	}
+	std::string p(filePath);
+	for (auto& c : p) if (c == '\\') c = '/';
+	const size_t st = p.find("/stage/");
+	if (st == std::string::npos) {
+		return {};
+	}
+	const std::string region = p.substr(p.rfind('/', st - 1) + 1, st - (p.rfind('/', st - 1) + 1));
+	const size_t ss = st + 7;
+	const std::string stage = p.substr(ss, p.find('/', ss) - ss);
+	if (stage.rfind("r_", 0) == 0) {
+		return {};   // resident packs use resident/ paths; these templates are cache/ form
+	}
+	std::string out;
+	for (const std::string& t : tmpl) {
+		std::string line = t;
+		for (size_t i; (i = line.find("%S%")) != std::string::npos;) line.replace(i, 3, stage);
+		for (size_t i; (i = line.find("%R%")) != std::string::npos;) line.replace(i, 3, region);
+		out += line;
+		out += '\n';
+	}
+	return out;
+}
+
 // Ultimate ASI Loader redirects opens into its overload folder, but these lists are found
 // by scanning a directory rather than opened by name, so a mod's copies there are never
 // seen. Ask the loader where that folder is and scan it too. No loader, no change.
@@ -214,6 +255,24 @@ static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
 		}
 	}
 	
+	// Feature-registered lines (e.g. the blade kit) merge into every gameplay stage the
+	// same way an on-disk supplement would.
+	const std::string universal = UniversalLinesFor(filePath, isBPAssets);
+	if (!universal.empty()) {
+		bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
+		size_t newBufferSize = RoundUp(state->currentFileSize + universal.size() + 1 + needNewline);
+		if (newBufferSize > prevBufferSize) {
+			*buffer = (char*)MGSRealloc(*buffer, newBufferSize);
+			prevBufferSize = newBufferSize;
+		}
+		if (needNewline) {
+			(*buffer)[state->currentFileSize++] = '\n';
+		}
+		memcpy(&(*buffer)[state->currentFileSize], universal.data(), universal.size());
+		state->currentFileSize += universal.size();
+		(*buffer)[state->currentFileSize] = '\0';
+	}
+
 	// Merge instead of prepending. A cache path the stage already lists replaces it in
 	// place, since loading an asset twice starves the streamer and runs the stage in slow
 	// motion. New entries go on the end: the list is in dependency order.

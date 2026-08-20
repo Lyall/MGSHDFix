@@ -18,6 +18,10 @@ namespace
     std::int32_t* gBP_3rdPersonCamera_Override = nullptr;
 
     int* gBP_3rdPersonCamera_Dist = nullptr;         // max camera distance from player
+    float* gBP_3rdPersonCamera_HSpeed = nullptr;     // right stick -> camera, per axis
+    float* gBP_3rdPersonCamera_VSpeed = nullptr;
+    float gCameraHSpeed = 0.0f;                      // what those settled on, to put back
+    float gCameraVSpeed = 0.0f;
     int* gBP_Camera_InheritRot = nullptr;              // Inherit rotation between cameras
                                                         // the code suggests it has something to do with elevator and locker focus, but i haven't noticed it actually do anything.
 
@@ -147,6 +151,47 @@ namespace
 
     bool isW45a = false;
     bool isMainGameOrAlternate = false;
+
+    // bladeply.c slashes on any right stick deflection, so Triangle decides who the stick belongs to.
+    constexpr ptrdiff_t kPlayerWorkPad = 0xD00;     // raiden\pl_inline.c -> PL_UseStickR()
+    constexpr ptrdiff_t kPadPressure = 0x18;        // libgv.h GV_PAD.pressure[12]
+    constexpr size_t kPadPressTriangle = 4;         // libgv.h PAD_PRESS_X
+
+    safetyhook::InlineHook g_PL_UseStickR_hook;
+    bool gBladeHasStick = false;
+
+    bool BladeShouldShareStick()
+    {
+        return gBP_3rdPersonCamera_Override != nullptr && *gBP_3rdPersonCamera_Override
+            && MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE;
+    }
+
+    int __fastcall PL_UseStickR_hooked(void* work)
+    {
+        const int used = g_PL_UseStickR_hook.fastcall<int>(work);
+        if (work == nullptr || !BladeShouldShareStick())
+        {
+            gBladeHasStick = false;
+            return used;
+        }
+        const uint8_t* pad = *reinterpret_cast<uint8_t* const*>(static_cast<uint8_t*>(work) + kPlayerWorkPad);
+        gBladeHasStick = pad != nullptr && pad[kPadPressure + kPadPressTriangle] != 0;
+        return gBladeHasStick ? used : 0;
+    }
+
+    // Freeze the camera's own read rather than the pad, so the blade still sees a live stick.
+    void ApplyStickOwner()
+    {
+        static bool frozen = false;
+        const bool freeze = gBladeHasStick;
+        if (freeze == frozen || gBP_3rdPersonCamera_HSpeed == nullptr || gBP_3rdPersonCamera_VSpeed == nullptr)
+        {
+            return;
+        }
+        frozen = freeze;
+        *gBP_3rdPersonCamera_HSpeed = freeze ? 0.0f : gCameraHSpeed;
+        *gBP_3rdPersonCamera_VSpeed = freeze ? 0.0f : gCameraVSpeed;
+    }
 }
 
 void MGS2_ThirdPersonFreecam::Tick()
@@ -177,11 +222,19 @@ void MGS2_ThirdPersonFreecam::Tick()
 
     //if (Get_PL_Status() & (PLAYER_CAUTION|STATE_CUT_IN))
 
-    if (MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE || MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_COOLANT)
+    // These drive a camera of their own, but only take the channel while the player is subjective.
+    if ((MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_HIGH_FREQUENCY_BLADE || MGS2_LinkVarBuf::GM_Weapon == MGS2_WEAPON_INDEX_COOLANT)
+        && (g_GameVars.Get_PL_Status() & (PLAYER_WATCH | PLAYER_INTRUDE)))
     {
         ForceCameraDisabled();
         return;
     }
+
+    if (!BladeShouldShareStick())
+    {
+        gBladeHasStick = false;      // the blade is away, so nothing polls it any more
+    }
+    ApplyStickOwner();
 
 
     if (isW45a)
@@ -254,21 +307,26 @@ void MGS2_ThirdPersonFreecam::Activate()
                                       Toggle3rdPersonCamera();
                                   });
 
-    if (fHorizontal_Sensitivity != k3rdPersonFreecamDefaultHorizontalSensitivity)
+    // Always resolved: the sensitivity settings write them, and the blade zeroes them while it swings.
+    gBP_3rdPersonCamera_HSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C F8 66 29 3D", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_HSpeed") + 4));
+    gBP_3rdPersonCamera_VSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C C0 EB ?? 8B C7", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_VSpeed") + 4));
+    if (gBP_3rdPersonCamera_HSpeed != nullptr)
     {
-        if (const auto gBP_3rdPersonCamera_HSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C F8 66 29 3D", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_HSpeed") + 4)); gBP_3rdPersonCamera_HSpeed != nullptr)
+        if (fHorizontal_Sensitivity != k3rdPersonFreecamDefaultHorizontalSensitivity)
         {
             *gBP_3rdPersonCamera_HSpeed = fHorizontal_Sensitivity;
             spdlog::info("MGS2: Third Person Freecam: Set horizontal sensitivity to {}", fHorizontal_Sensitivity);
         }
+        gCameraHSpeed = *gBP_3rdPersonCamera_HSpeed;
     }
-    if (fVertical_Sensitivity != k3rdPersonFreecamDefaultVerticalSensitivity)
+    if (gBP_3rdPersonCamera_VSpeed != nullptr)
     {
-        if (const auto gBP_3rdPersonCamera_VSpeed = reinterpret_cast<float*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "F3 0F 59 05 ?? ?? ?? ?? F3 0F 2C C0 EB ?? 8B C7", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_VSpeed") + 4)); gBP_3rdPersonCamera_VSpeed != nullptr)
+        if (fVertical_Sensitivity != k3rdPersonFreecamDefaultVerticalSensitivity)
         {
             *gBP_3rdPersonCamera_VSpeed = fVertical_Sensitivity;
             spdlog::info("MGS2: Third Person Freecam: Set vertical sensitivity to {}", fVertical_Sensitivity);
         }
+        gCameraVSpeed = *gBP_3rdPersonCamera_VSpeed;
     }
 
     gBP_3rdPersonCamera_Dist = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "4C 8D 0D ?? ?? ?? ?? F3 0F 11 05", "MGS 2: Third Person Freecam: gBP_3rdPersonCamera_Dist") + 3));
@@ -317,5 +375,15 @@ void MGS2_ThirdPersonFreecam::Activate()
     g_GM_ChangeCamera_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 B8", "MGS 2: Third Person Freecam: GM_ChangeCamera")+1)), reinterpret_cast<void*>(GM_ChangeCamera_hooked));
     g_GM_SetCameraInterpMode_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 33 FF 4C 8D 35", "MGS 2: Third Person Freecam: GM_SetCameraInterpMode")), reinterpret_cast<void*>(GM_SetCameraInterpMode_hooked));
     g_PL_LeaveSubject_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 74 ?? 0F BF 89", "MGS 2: Third Person Freecam: PL_LeaveSubject")), reinterpret_cast<void*>(PL_LeaveSubject_hooked));
+
+    // Every blade poll of the right stick goes through here, so it is the one place to deny it.
+    if (uint8_t* useStickR = Memory::PatternScan(baseModule,
+        "48 8B 81 00 0D 00 00 0F BF 40 12 83 E0 02 C3",
+        "MGS 2: Third Person Freecam: sonoyama\\raiden\\pl_inline.c -> PL_UseStickR()"))
+    {
+        g_PL_UseStickR_hook = safetyhook::create_inline(reinterpret_cast<void*>(useStickR),
+            reinterpret_cast<void*>(PL_UseStickR_hooked));
+        LOG_HOOK(g_PL_UseStickR_hook, "MGS 2: Third Person Freecam: PL_UseStickR")
+    }
 }
 

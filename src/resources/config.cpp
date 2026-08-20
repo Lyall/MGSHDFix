@@ -10,6 +10,7 @@
 #include "aiming_full_tilt.hpp"
 #include "pressure_inputs.hpp"
 #include "photo_camera.hpp"
+#include "mgs2_blade_anywhere.hpp"
 #include "ds3_rumble.hpp"
 #include "mgs2_blood_stains.hpp"
 #include "mgs2_scope_warp.hpp"
@@ -591,6 +592,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
     LOG_CONFIG(ConfigKeys::FixAimingFullTilt_Section, ConfigKeys::FixAimingFullTilt_Setting, FixAimingFullTilt::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2BladeAnywhere_Section, ConfigKeys::MGS2BladeAnywhere_Setting, MGS2BladeAnywhere::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2BladeAnywhere_Section, ConfigKeys::MGS2BladeAnywhere_Setting, MGS2BladeAnywhere::bEnabled);
 
     std::string sShouldWearSunglasses;
     ConfigHelper::getValue(ini, ConfigKeys::MGS2Sunglasses_Section, ConfigKeys::MGS2Sunglasses_Setting, sShouldWearSunglasses);

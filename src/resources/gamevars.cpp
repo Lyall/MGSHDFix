@@ -39,6 +39,10 @@ void GameVars::Initialize()
         MGS2_LinkVarBuf::linkvarbuf = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 89 81 ?? ?? ?? ?? 48 8B CB", "MGS2: LinkVarBuf") + 3));
         p_DG_Clock = reinterpret_cast<int*>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "2B 0D ?? ?? ?? ?? E8", "MGS2: DG_Clock") + 2));
 
+        // system/libgcl/parse.c -> GCL_GetOption() reads the line and leaves the cursor behind it.
+        p_GCL_CommandLine = reinterpret_cast<char***>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 4C 8D 44 24 ?? 0F BE D9", "MGS2: GCL_CommandLine") + 3));
+        p_GCL_NextStrPtr = reinterpret_cast<char**>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 44 24 ?? 48 89 05 ?? ?? ?? ?? 48 83 C4 20 5B C3", "MGS2: GCL_NextStrPtr") + 5, 3, 7));
+
         // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
         p_DG_UnDrawFrameCount64 = reinterpret_cast<int64_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? BF", "MGS2: DG_UnDrawFrameCount64"), 3, 7));
         p_DG_LastWhich = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "8B 05 ?? ?? ?? ?? 8B DF", "MGS2: DG_LastWhich"), 2, 6));
@@ -65,6 +69,8 @@ void GameVars::Initialize()
         spdlog::info("GameVars: actorWaitValue address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)actorWaitValue - (uintptr_t)baseModule);
         spdlog::info("GameVars: aimingState address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)aimingState - (uintptr_t)baseModule);
         spdlog::info("GameVars: currentStage address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)currentStage - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GCL_CommandLine address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GCL_CommandLine - (uintptr_t)baseModule);
+        spdlog::info("GameVars: GCL_NextStrPtr address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)p_GCL_NextStrPtr - (uintptr_t)baseModule);
         spdlog::info("GameVars: cutsceneFlag address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)cutsceneFlag - (uintptr_t)baseModule);
         spdlog::info("GameVars: heldTriggers address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)heldTriggers - (uintptr_t)baseModule);
         spdlog::info("GameVars: linkvarbuf address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_LinkVarBuf::linkvarbuf - (uintptr_t)baseModule);
@@ -406,6 +412,19 @@ MGS2GameMode GameVars::MGS2_GetGameMode() const
     spdlog::warn("Unknown MGS2 game mode: {}", s->sGameMode);
 
     return MGS2GameMode::Unknown;
+}
+
+// The stage table calls the cutscene stages Tanker/Plant too, so their 'd' prefix is still the tell.
+bool GameVars::MGS2_IsPlayableStage() const
+{
+    const char* current = GetCurrentStage();
+    if (current == nullptr || current[0] == '\0' || current[0] == 'd')
+    {
+        return false;
+    }
+
+    const MGS2GameMode mode = MGS2_GetGameMode();
+    return mode != MGS2GameMode::Unknown && mode != MGS2GameMode::Menu;
 }
 
 MGS3GameMode GameVars::MGS3_GetGameMode() const

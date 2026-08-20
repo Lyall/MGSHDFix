@@ -128,6 +128,7 @@ public:
     [[nodiscard]] int Get_GM_GameStatus() const;
     [[nodiscard]] int Get_GM_VRStatus() const;
     [[nodiscard]] MGS2GameMode MGS2_GetGameMode() const;
+    [[nodiscard]] bool MGS2_IsPlayableStage() const;
     [[nodiscard]] MGS3GameMode MGS3_GetGameMode() const;
 
     [[nodiscard]] int& GV_PauseLevel() const;
@@ -163,6 +164,10 @@ public:
     [[nodiscard]] uintptr_t GM_PlayerBody() const { return p_GM_PlayerBody ? *p_GM_PlayerBody : 0; }
     [[nodiscard]] int* HZX_CurrentGroupID() const { return p_HZX_CurrentGroupID; }
 
+    // libgcl/parse.c: the option line GCL_GetOption() reads, and the cursor it leaves behind.
+    [[nodiscard]] char*** GCL_CommandLine() const { return p_GCL_CommandLine; }
+    [[nodiscard]] char** GCL_NextStrPtr() const { return p_GCL_NextStrPtr; }
+
     [[nodiscard]] const FVECTOR* GM_CameraTarget() const { return p_GM_CameraTarget; }
     [[nodiscard]] const FVECTOR* ArmCamShift() const { return p_ArmCamShift; }
 
@@ -175,6 +180,8 @@ private:
     int* scriptedSequenceFlag = nullptr;
     double* actorWaitValue = nullptr;
     const char* currentStage = nullptr;
+    char*** p_GCL_CommandLine = nullptr;
+    char** p_GCL_NextStrPtr = nullptr;
     uint32_t* heldTriggers = nullptr;
     float* GM_WaterLevel = nullptr;
 

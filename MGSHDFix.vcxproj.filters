@@ -86,6 +86,9 @@
     <ClCompile Include="src\resources\config.cpp">
       <Filter>Config</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mgs2_blade_anywhere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mgs2_sunglasses.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -441,6 +444,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\config.hpp">
       <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mgs2_blade_anywhere.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_sunglasses.hpp">
       <Filter>Features\Headers</Filter>
