@@ -583,12 +583,15 @@ namespace ConfigKeys
     constexpr const char* MGS2_First_Person_View_Hold_Button_Help = "";
     constexpr const char* MGS2_First_Person_View_Hold_Button_Tooltip = "";
 
-
-
     constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Section = MGS2_First_Person_View_Enabled_Section;
     constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Setting = "Toggle Tap for First Person View";
     constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Help = "";
     constexpr const char* MGS2_First_Person_View_Hold_ToggleKey_Tooltip = "";
+
+    constexpr const char* MGS2_First_Person_View_Sticky_Section = MGS2_First_Person_View_Enabled_Section;
+    constexpr const char* MGS2_First_Person_View_Sticky_Setting = "Keep First Person View Across Rooms";
+    constexpr const char* MGS2_First_Person_View_Sticky_Help = "";
+    constexpr const char* MGS2_First_Person_View_Sticky_Tooltip = "";
 
 
     constexpr const char* MGS2_RestoreOriginalDifficulty_Solidus_Choking_Section = "Difficulty Restoration";

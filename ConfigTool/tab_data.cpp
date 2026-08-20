@@ -393,24 +393,26 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, ConfigKeys::MGS2_First_Person_View_Hold_Button_Help, ConfigKeys::MGS2_First_Person_View_Hold_Button_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-
         { (MGS2), ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Tooltip,
-        std::make_pair(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting), false, Field::Hotkey, 0, 0, 0, "Up" },
+          std::make_pair(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting), false, Field::Hotkey, 0, 0, 0, "Up" },
+        
 
-
-
-      { (MGS2), ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, ConfigKeys::MGS2_First_Person_View_Enabled_Help, ConfigKeys::MGS2_First_Person_View_Enabled_Tooltip,
-            std::nullopt, false, Field::Bool, false },
+        { (MGS2), ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting, ConfigKeys::MGS2_First_Person_View_Enabled_Help, ConfigKeys::MGS2_First_Person_View_Enabled_Tooltip,
+          std::nullopt, false, Field::Bool, false },
 
         { (MGS2), ConfigKeys::MGS2_First_Person_View_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_ToggleKey_Tooltip,
-            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Right" },
+          std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Right" },
 
 
         { (MGS2), ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Section, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Setting, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Help, ConfigKeys::MGS2_First_Person_View_Movement_Enabled_By_Default_Tooltip,
-            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Bool, true },
+          std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Bool, true },
 
-      { (MGS2), ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Tooltip,
-            std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Down" },
+        { (MGS2), ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Setting, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Help, ConfigKeys::MGS2_First_Person_View_Movement_ToggleKey_Tooltip,
+          std::make_pair(ConfigKeys::MGS2_First_Person_View_Enabled_Section, ConfigKeys::MGS2_First_Person_View_Enabled_Setting), false, Field::Hotkey, 0, 0, 0, "Down" },
+        
+
+        { (MGS2), ConfigKeys::MGS2_First_Person_View_Sticky_Section, ConfigKeys::MGS2_First_Person_View_Sticky_Setting, ConfigKeys::MGS2_First_Person_View_Sticky_Help, ConfigKeys::MGS2_First_Person_View_Sticky_Tooltip,
+          std::make_pair(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting), false, Field::Bool, false },
 
 
 
