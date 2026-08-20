@@ -250,7 +250,7 @@ void MGS2BladeAnywhere::Initialize()
     }
 
     uint8_t* ctor = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 83 3D ?? ?? ?? ?? 00 0F 85", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade()");
-    uint8_t* alive = Memory::PatternScan(baseModule "83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8D 15", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | BladeMngAlive");
+    uint8_t* alive = Memory::PatternScan(baseModule, "83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8D 15", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | BladeMngAlive");
     uint8_t* flags = Memory::PatternScan(baseModule, "C7 05 ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 54 24 ?? C7 05", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PullOutFlag, VisFlag");
     uint8_t* attack = Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 48 8D 05", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PL_CheckAttackFunc");
     uint8_t* setWeapon = Memory::PatternScan(baseModule, "40 53 57 41 54 41 56 41 57 48 83 EC ?? 48 8B 05", "MGS2: Blade Anywhere: sonoyama\\raiden\\event.c -> SetWeapon()");
