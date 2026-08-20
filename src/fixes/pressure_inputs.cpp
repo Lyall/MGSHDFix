@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "logging.hpp"
+#include "gamevars.hpp"
 
 #include <hidsdi.h>
 #pragma comment(lib, "hid.lib")
@@ -970,6 +971,12 @@ namespace
         MAKE_HOOK_MID(baseModule, "41 83 E2 DF 44 89 15",
             "MGS 2: Pressure Inputs - Gameplay Pad | libgv\\pad.c -> GV_PadData",
         {
+            // A pad demo replays its own recorded pressure into this pad, and the controller it was
+            // recorded on is not the one on the desk. Leave the recording alone.
+            if (g_GameVars.Get_GM_GameStatus() & MGS2_StatusFlags::STATE_PAD_DEMO)
+            {
+                return;
+            }
             ApplyPressure(reinterpret_cast<uint8_t*>(ctx.rbx + 0x18));
         });
 
