@@ -377,9 +377,7 @@ void MGS2_ThirdPersonFreecam::Activate()
     g_PL_LeaveSubject_hook = safetyhook::create_inline(reinterpret_cast<void*>(Memory::PatternScan(baseModule, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 74 ?? 0F BF 89", "MGS 2: Third Person Freecam: PL_LeaveSubject")), reinterpret_cast<void*>(PL_LeaveSubject_hooked));
 
     // Every blade poll of the right stick goes through here, so it is the one place to deny it.
-    if (uint8_t* useStickR = Memory::PatternScan(baseModule,
-        "48 8B 81 00 0D 00 00 0F BF 40 12 83 E0 02 C3",
-        "MGS 2: Third Person Freecam: sonoyama\\raiden\\pl_inline.c -> PL_UseStickR()"))
+    if (uint8_t* useStickR = Memory::PatternScan(baseModule, "48 8B 81 ?? ?? ?? ?? 0F BF 40", "MGS 2: Third Person Freecam: sonoyama\\raiden\\pl_inline.c -> PL_UseStickR()"))
     {
         g_PL_UseStickR_hook = safetyhook::create_inline(reinterpret_cast<void*>(useStickR),
             reinterpret_cast<void*>(PL_UseStickR_hooked));

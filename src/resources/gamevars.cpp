@@ -41,7 +41,7 @@ void GameVars::Initialize()
 
         // system/libgcl/parse.c -> GCL_GetOption() reads the line and leaves the cursor behind it.
         p_GCL_CommandLine = reinterpret_cast<char***>(Memory::GetRelativeOffset(Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 4C 8D 44 24 ?? 0F BE D9", "MGS2: GCL_CommandLine") + 3));
-        p_GCL_NextStrPtr = reinterpret_cast<char**>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 44 24 ?? 48 89 05 ?? ?? ?? ?? 48 83 C4 20 5B C3", "MGS2: GCL_NextStrPtr") + 5, 3, 7));
+        p_GCL_NextStrPtr = reinterpret_cast<char**>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 44 24 ?? 48 89 05 ?? ?? ?? ?? 48 83 C4", "MGS2: GCL_NextStrPtr") + 5, 3, 7));
 
         // system/libdg/frame.cpp -> DG_StartFrame() loads both globals before its undraw test.
         p_DG_UnDrawFrameCount64 = reinterpret_cast<int64_t*>(Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? BF", "MGS2: DG_UnDrawFrameCount64"), 3, 7));

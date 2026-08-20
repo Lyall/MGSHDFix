@@ -7,7 +7,6 @@
 #include "expand_bp_assets.hpp"
 #include "mgs2_linkvarbuf.hpp"
 
-#include <cstring>
 
 namespace
 {
@@ -34,9 +33,9 @@ namespace
         | MGS2_LinkVarBuf::PL_START_STATE_BLADE_INV | MGS2_LinkVarBuf::PL_BLADE_MODE_MINEUCHI;
 
     // raiden\motion.h act names, as GV_StrCode hashes.
-    constexpr uint64_t kStandStill = 0x42D644;
-    constexpr uint64_t kSquatStill = 0x407324;
-    constexpr uint64_t kStandRun = 0x160CD7;
+    constexpr uint64_t kStandStill = GameVars::GV_StrCode("StandStill");
+    constexpr uint64_t kSquatStill = GameVars::GV_StrCode("SquatStill");
+    constexpr uint64_t kStandRun = GameVars::GV_StrCode("StandRun");
 
     // GCL bytecode for `-m <int>`: an option block then the end tag (libgcl/parse.c).
     constexpr uint8_t kLine[] = {
@@ -250,22 +249,11 @@ void MGS2BladeAnywhere::Initialize()
         return;
     }
 
-    uint8_t* ctor = Memory::PatternScan(baseModule,
-        "48 83 EC 78 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 60 83 3D ?? ?? ?? ?? 00",
-        "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade()");
-    uint8_t* alive = Memory::PatternScan(baseModule,
-        "83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8D 15",
-        "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | BladeMngAlive");
-    uint8_t* flags = Memory::PatternScan(baseModule,
-        "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8D 54 24 ?? C7 05 ?? ?? ?? ?? 01 00 00 00",
-        "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PullOutFlag, VisFlag");
-    uint8_t* attack = Memory::PatternScan(baseModule,
-        "48 8B 0D ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 05 ?? ?? ?? ?? 48 89 1D",
-        "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PL_CheckAttackFunc");
-    uint8_t* setWeapon = Memory::PatternScan(baseModule,
-        "40 53 57 41 54 41 56 41 57 48 83 EC 50 48 8B 05 ?? ?? ?? ?? 48 33 C4 "
-        "48 89 44 24 ?? 48 8B D9 4C 8D 25",
-        "MGS2: Blade Anywhere: sonoyama\\raiden\\event.c -> SetWeapon()");
+    uint8_t* ctor = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 83 3D ?? ?? ?? ?? 00 0F 85", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade()");
+    uint8_t* alive = Memory::PatternScan(baseModule "83 3D ?? ?? ?? ?? 00 0F 85 ?? ?? ?? ?? 48 8D 15", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | BladeMngAlive");
+    uint8_t* flags = Memory::PatternScan(baseModule, "C7 05 ?? ?? ?? ?? ?? ?? ?? ?? 48 8D 54 24 ?? C7 05", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PullOutFlag, VisFlag");
+    uint8_t* attack = Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 48 8D 05", "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> NewPluginBlade() | PL_CheckAttackFunc");
+    uint8_t* setWeapon = Memory::PatternScan(baseModule, "40 53 57 41 54 41 56 41 57 48 83 EC ?? 48 8B 05", "MGS2: Blade Anywhere: sonoyama\\raiden\\event.c -> SetWeapon()");
     if (ctor == nullptr || alive == nullptr || flags == nullptr || attack == nullptr
         || setWeapon == nullptr)
     {
@@ -293,9 +281,7 @@ void MGS2BladeAnywhere::Initialize()
 
     // A model the blade wants can be absent on a stage that never had it, and DG_MakeObjs derefs the
     // null def rather than checking. Its own callers cope with null, so hand them one and name the file.
-    if (uint8_t* makeObjs = Memory::PatternScan(baseModule,
-        "48 89 5C 24 10 48 89 6C 24 18 56 57 41 54 41 56 41 57 48 83 EC 20 41 8B E8 8B F2 48 8B F9",
-        "MGS2: Blade Anywhere: system\\libdg\\objs.c -> DG_MakeObjsD() | missing-model guard"))
+    if (uint8_t* makeObjs = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 54 41 56 41 57 48 83 EC ?? 41 8B E8", "MGS2: Blade Anywhere: system\\libdg\\objs.c -> DG_MakeObjs() | missing-model guard"))
     {
         g_makeObjs_hook = safetyhook::create_inline(reinterpret_cast<void*>(makeObjs),
             reinterpret_cast<void*>(MakeObjs_hooked));
@@ -315,7 +301,7 @@ void MGS2BladeAnywhere::Initialize()
     // Same on the way back in, and a crouch joins them: putting it away has no reason to stand him up,
     // which is what BMputback ends on. A slash keeps its animation - that one is matched against
     // work->action rather than the stance, so it is out of reach here and better left alone.
-    MAKE_HOOK_MID(baseModule, "41 81 F8 44 D6 42 00 0F 84 ?? ?? ?? ?? 41 81 F8 24 73 40 00",
+    MAKE_HOOK_MID(baseModule, "41 81 F8 44 D6 42 00",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> CheckBladePullOut() | sheathe stance",
     {
         if (ctx.r8 == kStandStill || ctx.r8 == kSquatStill || ctx.r8 == kStandRun) { ctx.r8 = 0; }
@@ -328,13 +314,13 @@ void MGS2BladeAnywhere::Initialize()
     // had already eaten the damage before this test, so lending them a bullet's bit only adds the
     // spark, the ring and the guard reaction.
     HookWeaponRead(
-        "48 8B 87 A0 00 00 00 48 B9 1C 80 04 00 00 00 08 00 48 85 C1 0F 84 ?? ?? ?? ?? F3 0F 10 47 60",
+        "48 8B 87 ?? ?? ?? ?? 48 B9 1C 80 04 00 00 00 08 00 48 85 C1 0F 84 ?? ?? ?? ?? F3 0F 10 47",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> Hitted() | guarded weapon", 1,
         [](SafetyHookContext& ctx) { if (ctx.rax & kWpNikitaBit) { ctx.rax |= kWpUspBit; } });
 
     // SlashHoming() derefs homing->body unchecked, and a stage that never had the blade can offer a
     // homing target without one, so answer the hazard test for it and let its own early-out run.
-    MAKE_HOOK_MID(baseModule, "85 C0 0F 85 ?? ?? ?? ?? 48 8B 8E 90 02 00 00",
+    MAKE_HOOK_MID(baseModule, "85 C0 0F 85 ?? ?? ?? ?? 48 8B 8E ?? ?? ?? ?? 48 8D 54 24",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> SlashHoming() | bodyless target",
     {
         if (Memory::ReadField<void*>(ctx.rdi, 8) == nullptr
@@ -347,7 +333,7 @@ void MGS2BladeAnywhere::Initialize()
     // fatdamage.c gives each of Fatman's five damage handlers its own dispatch and inlines
     // FAT_SetWepDmgWork's narc and stun timers right after, so translate at every weapon read.
     // Patching one point mid-chain only ever reached the state he was standing in.
-    HookWeaponRead("4D 8B B8 A0 00 00 00 49 8B EF",
+    HookWeaponRead("4D 8B B8 ?? ?? ?? ?? 49 8B EF",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | downed, part r14, work rdi", 1,
         [](SafetyHookContext& ctx)
         {
@@ -355,7 +341,7 @@ void MGS2BladeAnywhere::Initialize()
             if (FatmanForceHead(ctx.r15)) { ctx.r14 = kFatHead; }
             ctx.r15 = FatmanWeapon(ctx.r15);
         });
-    HookWeaponRead("4D 8B B8 A0 00 00 00 4D 8B F7 41 83 E6 02 49 0F BA E7 0B 73 ?? 89 B7",
+    HookWeaponRead("4D 8B B8 ?? ?? ?? ?? 4D 8B F7 41 83 E6 ?? 49 0F BA E7 ?? 73 ?? 89 B7",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | downed, part rbp, work rdi", 1,
         [](SafetyHookContext& ctx)
         {
@@ -371,29 +357,29 @@ void MGS2BladeAnywhere::Initialize()
             if (FatmanForceHead(ctx.r15)) { ctx.rbp = kFatHead; }
             ctx.r15 = FatmanWeapon(ctx.r15);
         });
-    HookWeaponRead("4D 8B B8 A0 00 00 00 49 8B DF",
+    HookWeaponRead("4D 8B B8 ?? ?? ?? ?? 49 8B DF",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | r15, part r13", 1,
         [](SafetyHookContext& ctx)
         {
             if (FatmanForceHead(ctx.r15)) { ctx.r13 = kFatHead; }
             ctx.r15 = FatmanWeapon(ctx.r15);
         });
-    HookWeaponRead("49 8B A8 A0 00 00 00 E8 ?? ?? ?? ??",
+    HookWeaponRead("49 8B A8 ?? ?? ?? ?? E8",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | rbp, part r14", 1,
         [](SafetyHookContext& ctx)
         {
             if (FatmanForceHead(ctx.rbp)) { ctx.r14 = kFatHead; }
             ctx.rbp = FatmanWeapon(ctx.rbp);
         });
-    HookWeaponRead("49 8B AF A0 00 00 00 33 DB",
+    HookWeaponRead("49 8B AF ?? ?? ?? ?? 33 DB",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | rbp, r12d stun", 1,
         [](SafetyHookContext& ctx) { ctx.rbp = FatmanWeapon(ctx.rbp); });
-    HookWeaponRead("49 8B BF A0 00 00 00 33 ED",
+    HookWeaponRead("49 8B BF ?? ?? ?? ?? 33 ED",
         "MGS2: Blade Anywhere: okuta\\fatman\\fatdamage.c -> weapon read | rdi, r12d stun", 1,
         [](SafetyHookContext& ctx) { ctx.rdi = FatmanWeapon(ctx.rdi); });
 
     // Vamp has an arm for the edge and none for the flat, so let the flat take the edge's.
-    MAKE_HOOK_MID(baseModule, "49 0F BA E7 0D 73 ??",
+    MAKE_HOOK_MID(baseModule, "49 0F BA E7 ?? 73 ?? 8B 8D",
         "MGS2: Blade Anywhere: shibata\\vamp\\vamp.c -> ChildDmgCallBack() | blade arm",
     {
         if (ctx.r15 & kWpStuns)
@@ -403,7 +389,7 @@ void MGS2BladeAnywhere::Initialize()
     });
 
     // Then move its damage into the faint field - VMP_SET_DMFLAG packs those at bits 9 and 15.
-    MAKE_HOOK_MID(baseModule, "89 93 AC 12 00 00 EB ??",
+    MAKE_HOOK_MID(baseModule, "89 93 ?? ?? ?? ?? EB ?? 49 0F BA E7",
         "MGS2: Blade Anywhere: shibata\\vamp\\vamp.c -> ChildDmgCallBack() | blade damage",
     {
         if (ctx.r15 & kWpStuns)
@@ -442,7 +428,7 @@ void MGS2BladeAnywhere::Initialize()
         });
 
     MAKE_HOOK_MID(baseModule,
-        "48 89 5C 24 60 E8 ?? ?? ?? ?? 44 8B 0D ?? ?? ?? ?? 4C 8D 05 ?? ?? ?? ?? 48 8D 15",
+        "48 89 5C 24 ?? E8 ?? ?? ?? ?? 44 8B 0D",
         "MGS2: Blade Anywhere: system\\libgv\\pad.c -> GV_UpdatePadSystem() body | game tick", {
         GameTick();
     });
