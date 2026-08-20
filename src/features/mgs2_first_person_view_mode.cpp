@@ -14,6 +14,7 @@ namespace
     int* gBP_1stPersonCamera_Move = nullptr;             // is fpv movement enabled
     int* gBP_1stPersonCamera_Hold_Toggle = nullptr;             // is first person toggled on/off
     int* gBP_1stPersonCamera_Active = nullptr;             // currently in 3rd or 1st person. (cutscene detection?)
+    int* gBP_1stPersonCamera_Movement_Active = nullptr;  // Seems to control shooter mode movement. Funny results if active without gBP_1stPersonCamera_Active
 
     /*
 
@@ -32,6 +33,7 @@ namespace
 
     bool bCameraForcedDisabled = false;
     bool bPreviousOverrideState = false;
+    bool bPreviousActiveState = false;
 
     void ForceCameraDisabled()
     {
@@ -39,6 +41,7 @@ namespace
         {
             bCameraForcedDisabled = true;
             bPreviousOverrideState = *gBP_1stPersonCamera_Override;
+            bPreviousActiveState = *gBP_1stPersonCamera_Active;
             //spdlog::info("MGS2: First Person View Mode: Forcing camera disabled. Override: {}, Hold Toggle: {}, Movement: {}", bPreviousOverrideState, bPreviousHoldToggleState, bPreviousMoveState);
         }
         *gBP_1stPersonCamera_Override = false;
@@ -46,7 +49,13 @@ namespace
 
     void ReleaseCameraState()
     {
-        bCameraForcedDisabled = false;
+        if (bCameraForcedDisabled) {
+            bCameraForcedDisabled = false;
+            if (MGS2_First_Person_View::bFirst_Person_View_Sticky) {
+                *gBP_1stPersonCamera_Active = bPreviousActiveState;
+            }
+        }
+        // TODO: Should this be checking for bCameraForcedDisabled being active previously? I'm gating the bPreviousActiveState to that.
         *gBP_1stPersonCamera_Override = bPreviousOverrideState;
         //spdlog::info("MGS2: First Person View Mode: Camera state released. Override: {}, Hold Toggle: {}, Movement: {}", *gBP_1stPersonCamera_Override, *gBP_1stPersonCamera_Hold_Toggle, *gBP_1stPersonCamera_Move);
     }
@@ -221,6 +230,7 @@ void MGS2_First_Person_View::Activate()
 
     gBP_1stPersonCamera_Active = reinterpret_cast<int*>(Memory::GetRelativeOffset(gBP_1stPersonCamera_Active_scan + 2));
 
+    gBP_1stPersonCamera_Movement_Active = reinterpret_cast<int*>(Memory::GetRelativeOffset(gBP_1stPersonCamera_Move_scan + 8));
 
 
     MAKE_HOOK_MID(baseModule, "0F 84 ?? ?? ?? ?? 33 C9 E8 ?? ?? ?? ?? 39 6F", "NewDivingGoggles -> act()", {
@@ -253,5 +263,16 @@ void MGS2_First_Person_View::Activate()
     }
                   });
                   */
+
+    // Resume FPV automatically, changing rcx here will make the game update the camera functions all by itself
+    if (bFirst_Person_View_Sticky) {
+        MAKE_HOOK_MID(baseModule, "3B C1 74 ?? 89 05", "MGS 2: FPV - user\\sonoyama\\raiden\\event.c -> CheckWatch() inline @ l68 | Fix FPV Automatic Activation", {
+            if (*gBP_1stPersonCamera_Active)
+            {
+                ctx.rcx = *gBP_1stPersonCamera_Movement_Active;
+            }
+        });
+    }
+
 
 }

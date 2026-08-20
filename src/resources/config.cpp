@@ -1099,6 +1099,8 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Hold_Button_Section, ConfigKeys::MGS2_First_Person_View_Hold_Button_Setting, MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold);
     if (MGS2_First_Person_View::bFirst_Person_View_Toggle_Hold)
     {
+        ConfigHelper::getValue(ini, ConfigKeys::MGS2_First_Person_View_Sticky_Section, ConfigKeys::MGS2_First_Person_View_Sticky_Setting, MGS2_First_Person_View::bFirst_Person_View_Sticky);
+        LOG_CONFIG(ConfigKeys::MGS2_First_Person_View_Sticky_Section, ConfigKeys::MGS2_First_Person_View_Sticky_Setting, MGS2_First_Person_View::bFirst_Person_View_Sticky);
         InputHandler::GetKeybind(ini, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Section, ConfigKeys::MGS2_First_Person_View_Hold_ToggleKey_Setting, MGS2_First_Person_View::vkToggle_Hold_First_Person_View);
     }
 
