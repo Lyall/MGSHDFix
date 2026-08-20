@@ -3,6 +3,19 @@ setlocal enabledelayedexpansion
 
 echo === Building SDL3 if needed ===
 
+set "SDL_TOOLSET=%~1"
+set "SDL_TOOLS_VER=%~2"
+
+set "CMAKE_TOOLSET_SPEC="
+set "CMAKE_TOOLSET_OPT="
+if defined SDL_TOOLSET (
+    set "CMAKE_TOOLSET_SPEC=!SDL_TOOLSET!"
+    if defined SDL_TOOLS_VER set "CMAKE_TOOLSET_SPEC=!SDL_TOOLSET!,version=!SDL_TOOLS_VER!"
+    set "CMAKE_TOOLSET_OPT=-T !CMAKE_TOOLSET_SPEC!"
+) else (
+    set "CMAKE_TOOLSET_SPEC=(generator default)"
+)
+
 REM --- Locate SDL folder ---
 set "SDL_DIR=%~dp0external\SDL"
 if not exist "%SDL_DIR%\CMakeLists.txt" (
@@ -23,7 +36,7 @@ where cl >nul 2>nul
 if errorlevel 1 (
     echo ERROR: cl.exe was not found.
     echo Run this from a Visual Studio Developer Command Prompt.
-    echo For example: x64 Native Tools Command Prompt for VS 2022
+    echo For example: x64 Native Tools Command Prompt for Visual Studio
     exit /b 1
 )
 
@@ -106,7 +119,10 @@ if not defined SDL_HASH (
 )
 popd >nul
 
-REM --- Paths for artifacts and stored hash ---
+REM --- Stamp: source hash + the toolset that produced the lib ---
+set "SDL_STAMP=%SDL_HASH%-%SDL_TOOLSET%-%SDL_TOOLS_VER%"
+
+REM --- Paths for artifacts and stored stamp ---
 set "SDL_BUILD_DIR=%SDL_DIR%\build\msvc-x64-static"
 set "SDL_LIB_DIR=%SDL_BUILD_DIR%\Release"
 set "HASH_FILE=%SDL_BUILD_DIR%\.sdl_build_hash"
@@ -120,9 +136,14 @@ if not exist "%SDL_LIB_DIR%\SDL3-static.lib" set "NEED_RELEASE_BUILD=1"
 if not exist "%HASH_FILE%" set "NEED_RELEASE_BUILD=1"
 
 if exist "%HASH_FILE%" (
-    set "OLD_HASH="
-    set /p OLD_HASH=<"%HASH_FILE%"
-    if not "!OLD_HASH!"=="%SDL_HASH%" set "NEED_RELEASE_BUILD=1"
+    set "OLD_STAMP="
+    set /p OLD_STAMP=<"%HASH_FILE%"
+    if not "!OLD_STAMP!"=="%SDL_STAMP%" (
+        echo [SDL3] Stamp changed:
+        echo [SDL3]   cached: !OLD_STAMP!
+        echo [SDL3]   wanted: %SDL_STAMP%
+        set "NEED_RELEASE_BUILD=1"
+    )
 )
 
 REM --- If hash is outdated, wipe the build folder ---
@@ -134,11 +155,11 @@ if "%NEED_RELEASE_BUILD%"=="1" (
 
 REM --- Configure and build Release ---
 if "%NEED_RELEASE_BUILD%"=="1" (
-    echo [SDL3] Configuring Release...
+    echo [SDL3] Configuring Release with toolset !CMAKE_TOOLSET_SPEC!...
 
     cmake -S "%SDL_DIR%" -B "%SDL_BUILD_DIR%" ^
         -A x64 ^
-        -T v143 ^
+        !CMAKE_TOOLSET_OPT! ^
         -DSDL_SHARED=OFF ^
         -DSDL_STATIC=ON ^
         -DSDL_TESTS=OFF ^
@@ -150,7 +171,7 @@ if "%NEED_RELEASE_BUILD%"=="1" (
         echo Make sure you have:
         echo - Visual Studio 2026 or Visual Studio 2022
         echo - Desktop development with C++
-        echo - MSVC v143 - VS 2022 C++ x64/x86 build tools
+        echo - The MSVC build tools matching toolset !CMAKE_TOOLSET_SPEC!
         echo - Windows 10/11 SDK
         echo - A recent CMake version that supports your installed Visual Studio version
         exit /b 1
@@ -162,7 +183,7 @@ if "%NEED_RELEASE_BUILD%"=="1" (
 
     if errorlevel 1 (
         echo ERROR: SDL3 Release build failed.
-        echo Make sure MSVC v143 and the Windows SDK are installed.
+        echo Make sure MSVC toolset !CMAKE_TOOLSET_SPEC! and the Windows SDK are installed.
         exit /b 1
     )
 
@@ -171,9 +192,9 @@ if "%NEED_RELEASE_BUILD%"=="1" (
     echo [SDL3] Release build up to date, skipping.
 )
 
-REM --- Update hash only after build succeeds ---
+REM --- Update stamp only after build succeeds ---
 if "%DID_REBUILD%"=="1" (
-    >"%HASH_FILE%" echo %SDL_HASH%
+    >"%HASH_FILE%" echo %SDL_STAMP%
 )
 
 echo === SDL3 build check complete ===

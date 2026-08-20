@@ -380,7 +380,7 @@
       <Command>call "update_local_game_files.py"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>call "$(ProjectDir)build_zydis.cmd" $(Platform)
+      <Command>call "$(ProjectDir)build_zydis.cmd" $(Platform) $(PlatformToolset) $(VCToolsVersion)
 powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)get_asi_loader_version.ps1"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
