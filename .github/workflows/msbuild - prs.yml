@@ -174,6 +174,12 @@ jobs:
       working-directory: dist
       run: 7z a -tzip "../${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip" *
 
+    - name: VirusTotal Scan
+      uses: crazy-max/ghaction-virustotal@v5
+      with:
+        vt_api_key: ${{ secrets.VT_API_KEY }}
+        files: ${{ github.event.repository.name }}_${{ steps.extract_version.outputs.version }}.zip
+        
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
