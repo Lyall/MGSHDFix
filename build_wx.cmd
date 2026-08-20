@@ -3,6 +3,13 @@ setlocal enabledelayedexpansion
 
 echo === Building wxWidgets if needed ===
 
+set "WX_TOOLSET=%~1"
+set "WX_TOOLS_VER=%~2"
+
+set "MSBUILD_PROPS="
+if defined WX_TOOLSET set "MSBUILD_PROPS=!MSBUILD_PROPS! /p:PlatformToolset=!WX_TOOLSET!"
+if defined WX_TOOLS_VER set "MSBUILD_PROPS=!MSBUILD_PROPS! /p:VCToolsVersion=!WX_TOOLS_VER!"
+
 REM --- Locate wx build folder ---
 set "WX_BUILD_DIR=%~dp0external\wxWidgets\build\msw"
 if not exist "%WX_BUILD_DIR%" (
@@ -40,7 +47,12 @@ if not defined WX_SLN (
 )
 
 echo [wxWidgets] Using solution: %WX_SLN%
-echo [wxWidgets] PlatformToolset will be selected by wx_config.props
+if defined WX_TOOLSET (
+    echo [wxWidgets] PlatformToolset: !WX_TOOLSET!  VCToolsVersion: !WX_TOOLS_VER!
+) else (
+    echo [wxWidgets] WARNING: no toolset supplied, wx_config.props will choose one.
+    echo [wxWidgets] WARNING: this can mismatch the linking project's toolset.
+)
 
 REM --- Get current submodule commit hash ---
 pushd "%~dp0external\wxWidgets" >nul
@@ -52,7 +64,10 @@ if not defined WX_HASH (
 )
 popd >nul
 
-REM --- Paths for artifacts and stored hash ---
+REM --- Stamp: source hash + the toolset that produced the libs ---
+set "WX_STAMP=%WX_HASH%-%WX_TOOLSET%-%WX_TOOLS_VER%"
+
+REM --- Paths for artifacts and stored stamp ---
 set "WX_LIB_DIR=%WX_BUILD_DIR%\..\..\lib\vc_x64_lib"
 set "HASH_FILE=%WX_LIB_DIR%\.wx_build_hash"
 
@@ -66,9 +81,14 @@ if not exist "%WX_LIB_DIR%\mswu\wx\setup.h" set "NEED_RELEASE_BUILD=1"
 if not exist "%HASH_FILE%" set "NEED_RELEASE_BUILD=1"
 
 if exist "%HASH_FILE%" (
-    set "OLD_HASH="
-    set /p OLD_HASH=<"%HASH_FILE%"
-    if not "!OLD_HASH!"=="%WX_HASH%" set "NEED_RELEASE_BUILD=1"
+    set "OLD_STAMP="
+    set /p OLD_STAMP=<"%HASH_FILE%"
+    if not "!OLD_STAMP!"=="%WX_STAMP%" (
+        echo [wxWidgets] Stamp changed:
+        echo [wxWidgets]   cached: !OLD_STAMP!
+        echo [wxWidgets]   wanted: %WX_STAMP%
+        set "NEED_RELEASE_BUILD=1"
+    )
 )
 
 REM --- If Release rebuilds, force Debug too ---
@@ -79,13 +99,13 @@ if /i not "%CI%"=="true" (
     if not exist "%WX_LIB_DIR%\mswud\wx\setup.h" set "NEED_DEBUG_BUILD=1"
     if not exist "%HASH_FILE%" set "NEED_DEBUG_BUILD=1"
     if exist "%HASH_FILE%" (
-        set "OLD_HASH="
-        set /p OLD_HASH=<"%HASH_FILE%"
-        if not "!OLD_HASH!"=="%WX_HASH%" set "NEED_DEBUG_BUILD=1"
+        set "OLD_STAMP="
+        set /p OLD_STAMP=<"%HASH_FILE%"
+        if not "!OLD_STAMP!"=="%WX_STAMP%" set "NEED_DEBUG_BUILD=1"
     )
 )
 
-REM --- If hash is outdated, wipe the lib folder ---
+REM --- If stamp is outdated, wipe the lib folder ---
 if "%NEED_RELEASE_BUILD%"=="1" (
     echo [wxWidgets] Clearing old libraries...
     rmdir /s /q "%WX_LIB_DIR%" 2>nul
@@ -95,7 +115,7 @@ if "%NEED_RELEASE_BUILD%"=="1" (
 REM --- Build Release ---
 if "%NEED_RELEASE_BUILD%"=="1" (
     echo [wxWidgets] Building Release...
-    msbuild "%WX_SLN%" /p:Configuration=Release /p:Platform=x64 /m /t:Rebuild
+    msbuild "%WX_SLN%" /p:Configuration=Release /p:Platform=x64 !MSBUILD_PROPS! /m /t:Rebuild
     if errorlevel 1 (
         echo ERROR: Release build failed.
         exit /b 1
@@ -109,7 +129,7 @@ REM --- Build Debug (only if not CI) ---
 if /i not "%CI%"=="true" (
     if "%NEED_DEBUG_BUILD%"=="1" (
         echo [wxWidgets] Building Debug...
-        msbuild "%WX_SLN%" /p:Configuration=Debug /p:Platform=x64 /m /t:Rebuild
+        msbuild "%WX_SLN%" /p:Configuration=Debug /p:Platform=x64 !MSBUILD_PROPS! /m /t:Rebuild
         if errorlevel 1 (
             echo ERROR: Debug build failed.
             exit /b 1
@@ -122,9 +142,9 @@ if /i not "%CI%"=="true" (
     echo [wxWidgets] Skipping Debug build in CI.
 )
 
-REM --- Update hash only after all builds succeed ---
+REM --- Update stamp only after all builds succeed ---
 if "%DID_REBUILD%"=="1" (
-    >"%HASH_FILE%" echo %WX_HASH%
+    >"%HASH_FILE%" echo %WX_STAMP%
 )
 
 echo === wxWidgets build check complete ===

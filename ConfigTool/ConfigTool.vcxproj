@@ -58,8 +58,8 @@
       <AdditionalDependencies>winmm.lib;imm32.lib;SDL3-static.lib;wxmsw33u_core.lib;wxbase33u.lib;wxpng.lib;wxjpeg.lib;wxtiff.lib;wxzlib.lib;wxregexu.lib;comctl32.lib;rpcrt4.lib;uxtheme.lib;oleacc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>call "$(SolutionDir)build_wx.cmd"
-call "$(SolutionDir)build_sdl3.cmd"</Command>
+      <Command>call "$(SolutionDir)build_wx.cmd" $(PlatformToolset) $(VCToolsVersion)
+call "$(SolutionDir)build_sdl3.cmd" $(PlatformToolset) $(VCToolsVersion)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>call "..\update_local_game_files.py"</Command>

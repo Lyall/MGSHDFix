@@ -65,6 +65,36 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    - name: Identify MSVC toolchain
+      id: toolchain
+      run: |
+        $vswhere = (Get-Command vswhere -ErrorAction SilentlyContinue).Source
+        if (-not $vswhere) {
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        }
+        if (-not (Test-Path $vswhere)) {
+          Write-Error "vswhere.exe not found; cannot determine the MSVC toolset for cache keying."
+          exit 1
+        }
+
+        $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $vsPath) {
+          Write-Error "No Visual Studio install with the C++ toolset was found."
+          exit 1
+        }
+
+        $versionFile = Join-Path $vsPath "VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt"
+        if (-not (Test-Path $versionFile)) {
+          Write-Error "Could not read $versionFile"
+          exit 1
+        }
+
+        $vcToolsVersion = (Get-Content $versionFile | Select-Object -First 1).Trim()
+        $imageVersion = $env:ImageVersion
+        Write-Host "VS: $vsPath"
+        Write-Host "Image: $imageVersion  VCTools: $vcToolsVersion"
+        "id=img$imageVersion-vc$vcToolsVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
     # wxWidgets cache setup
     - name: Get wxWidgets submodule hash
       id: wxhash
@@ -77,7 +107,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: external/wxWidgets/lib/vc_x64_lib
-        key: wxwidgets-${{ runner.os }}-${{ steps.wxhash.outputs.hash }}
+        key: wxwidgets-${{ runner.os }}-${{ steps.toolchain.outputs.id }}-${{ steps.wxhash.outputs.hash }}
 
     # SDL3 cache setup
     - name: Get SDL3 submodule hash
@@ -91,7 +121,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: external/SDL/build/msvc-x64-static
-        key: sdl3-${{ runner.os }}-vs2022-v143-x64-static-v3-${{ steps.sdlhash.outputs.hash }}
+        key: sdl3-${{ runner.os }}-${{ steps.toolchain.outputs.id }}-x64-static-v3-${{ steps.sdlhash.outputs.hash }}
 
     # Zydis cache setup
     - name: Get Zydis submodule hash
@@ -107,7 +137,7 @@ jobs:
         path: |
           external/zydis/msvc/bin/ReleaseX64
           external/zydis/msvc/bin/ReleaseX86
-        key: zydis-${{ runner.os }}-${{ steps.zydishash.outputs.hash }}
+        key: zydis-${{ runner.os }}-${{ steps.toolchain.outputs.id }}-${{ steps.zydishash.outputs.hash }}
 
     # -------------------------
     # Prepare output structure
@@ -139,7 +169,7 @@ jobs:
     # Build
     # -------------------------
     - name: Build
-      run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64 -property:PlatformToolset=v143
+      run: msbuild "${{ github.event.repository.name }}.sln" /m -t:rebuild -verbosity:minimal -property:Configuration=Release -property:Platform=x64
 
     # Copy built binaries directly into plugins\
     - run: Copy-Item "x64\Release\${{ github.event.repository.name }}.asi" "dist/plugins/${{ github.event.repository.name }}.asi"

@@ -8,6 +8,18 @@ set "PLAT=%~1"
 if "%PLAT%"=="" set "PLAT=%Platform%"
 if "%PLAT%"=="" set "PLAT=x64"
 
+REM --- Zydis.vcxproj pins toolset v143 itself; set to 1 to override ---
+set "ZY_FORCE_TOOLSET=1"
+
+set "ZY_TOOLSET=%~2"
+set "ZY_TOOLS_VER=%~3"
+
+set "TOOLSET_ARGS="
+if "%ZY_FORCE_TOOLSET%"=="1" (
+    if defined ZY_TOOLSET set "TOOLSET_ARGS=!TOOLSET_ARGS! /p:PlatformToolset=!ZY_TOOLSET!"
+    if defined ZY_TOOLS_VER set "TOOLSET_ARGS=!TOOLSET_ARGS! /p:VCToolsVersion=!ZY_TOOLS_VER!"
+)
+
 REM --- Locate Zydis project file ---
 set "ZY_PROJECT=%~dp0external\zydis\msvc\zydis\Zydis.vcxproj"
 if not exist %ZY_PROJECT% (
@@ -24,6 +36,8 @@ if not defined ZY_HASH (
     exit /b 1
 )
 popd >nul
+
+set "ZY_STAMP=%ZY_HASH%-%ZY_TOOLSET%-%ZY_TOOLS_VER%-f%ZY_FORCE_TOOLSET%"
 
 REM --- Configure paths ---
 if /i "%PLAT%"=="x64" (
@@ -46,8 +60,14 @@ if not exist "%ZY_LIB%" set "NEED_BUILD=1"
 if not exist "%HASH_FILE%" set "NEED_BUILD=1"
 
 if exist "%HASH_FILE%" (
-    set /p OLD_HASH=<"%HASH_FILE%"
-    if not "!OLD_HASH!"=="%ZY_HASH%" set "NEED_BUILD=1"
+    set "OLD_STAMP="
+    set /p OLD_STAMP=<"%HASH_FILE%"
+    if not "!OLD_STAMP!"=="%ZY_STAMP%" (
+        echo [Zydis] Stamp changed:
+        echo [Zydis]   cached: !OLD_STAMP!
+        echo [Zydis]   wanted: %ZY_STAMP%
+        set "NEED_BUILD=1"
+    )
 )
 
 if "%NEED_BUILD%"=="1" (
@@ -59,12 +79,12 @@ if "%NEED_BUILD%"=="1" (
 REM --- Build if needed ---
 if "%NEED_BUILD%"=="1" (
     echo [Zydis] Building Release MT %PLAT%
-    msbuild %ZY_PROJECT% %MSBUILD_ARGS%
+    msbuild %ZY_PROJECT% %MSBUILD_ARGS%!TOOLSET_ARGS!
     if errorlevel 1 (
         echo ERROR: Zydis Release MT %PLAT% build failed
         exit /b 1
     )
-    >"%HASH_FILE%" echo %ZY_HASH%
+    >"%HASH_FILE%" echo %ZY_STAMP%
 ) else (
     echo [Zydis] Release MT %PLAT% up to date, skipping
 )
