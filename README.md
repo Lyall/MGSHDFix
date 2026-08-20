@@ -297,8 +297,7 @@ wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio 
 - MSVC v145
 - Desktop development with C++
 - Game development with C++
-- Windows 10/11 SDK
-- A recent CMake version that supports Visual Studio 2026
+- CMake with Visual Studio 2026 support
  
 ### Windows
 Open MGSHDFix.sln in Visual Studio (2026) and build.
