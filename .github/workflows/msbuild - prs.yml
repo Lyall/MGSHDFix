@@ -50,10 +50,9 @@ jobs:
         }
 
         $vcToolsVersion = (Get-Content $versionFile | Select-Object -First 1).Trim()
-        $imageVersion = $env:ImageVersion
         Write-Host "VS: $vsPath"
-        Write-Host "Image: $imageVersion  VCTools: $vcToolsVersion"
-        "id=img$imageVersion-vc$vcToolsVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        Write-Host "Image: $env:ImageVersion  VCTools: $vcToolsVersion"
+        "id=vc$vcToolsVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
     # wxWidgets cache setup
     - name: Get wxWidgets submodule hash
