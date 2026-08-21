@@ -92,7 +92,7 @@ namespace
         D3D11_TEXTURE2D_DESC sd {};
         src->GetDesc(&sd);
         DXGI_FORMAT typeless, srvFmt;
-        if (!MapDepthFormat(sd.Format, typeless, srvFmt))
+        if (sd.SampleDesc.Count > 1 || !MapDepthFormat(sd.Format, typeless, srvFmt))
         {
             return false;
         }

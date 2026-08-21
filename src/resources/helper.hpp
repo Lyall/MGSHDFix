@@ -118,6 +118,21 @@ namespace Util
 
     bool IsFileReadOnly(const std::filesystem::path& path);
 
+    // FNV-1a over the texel rows of an RGBA8 upload.
+    inline uint64_t HashTexels(const void* data, size_t rowPitch, unsigned width, unsigned height)
+    {
+        uint64_t hash = 0xcbf29ce484222325ull;
+        for (unsigned y = 0; y < height; y++)
+        {
+            const auto* row = static_cast<const uint8_t*>(data) + static_cast<size_t>(y) * rowPitch;
+            for (unsigned b = 0; b < width * 4; b++)
+            {
+                hash = (hash ^ row[b]) * 0x100000001b3ull;
+            }
+        }
+        return hash;
+    }
+
     bool IsJapanese();
 
 

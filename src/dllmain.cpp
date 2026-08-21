@@ -603,7 +603,6 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2RotorProcession::Initialize());
         INITIALIZE(MGS2TankerSnakeSnap::Initialize());
         INITIALIZE(FixReverbWetLevel::Initialize());
-        INITIALIZE(MGS2RailgunBeam::InitializeEarly());
         INITIALIZE(MGS2DemoBlur::Initialize());
         INITIALIZE(MGS2FlareOcclusion::Initialize());
         INITIALIZE(CoolantMirrorFix::ApplyFix());

@@ -19,6 +19,8 @@
 #include "mgs2_first_person_view_mode.hpp"
 #include "mgs2_thermal_goggles.hpp"
 #include "mgs2_tanker_fog.hpp"
+#include "mgs2_soft_particles.hpp"
+#include "mgs2_railgun_beam.hpp"
 #include "mgs2_underwater_filter.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_gas_haze.hpp"
@@ -51,6 +53,80 @@ namespace
 
     using ResizeBuffersFn = HRESULT(__stdcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT);
     ResizeBuffersFn oResizeBuffers = nullptr;
+
+    // Stock Prim.fx vertex shaders, told apart by DXBC digest as the game creates them.
+    constexpr uint8_t kSpriteVSDigest[16] = {
+        0xB1, 0x03, 0x51, 0x1F, 0x89, 0xD7, 0x41, 0xB7, 0xAF, 0x31, 0x0C, 0xD9, 0x77, 0x2C, 0x24, 0x14 };
+    constexpr size_t kSpriteVSSize = 4544;
+    constexpr uint8_t kPrimVSDigest[16] = {
+        0x92, 0x12, 0x98, 0xF1, 0x43, 0xBD, 0xE0, 0xFC, 0xBC, 0x66, 0xB2, 0xD2, 0x83, 0xD7, 0x14, 0x39 };
+    constexpr size_t kPrimVSSize = 4504;
+
+    struct StockVS { ID3D11VertexShader* vs; bool sprite; };
+    StockVS g_stockVS[16] {};
+    int g_stockVSCount = 0;
+
+    SafetyHookInline g_createDeviceHook {};
+    SafetyHookInline g_createDeviceSwapHook {};
+    SafetyHookInline g_createVSHook {};
+
+    HRESULT STDMETHODCALLTYPE HookedCreateVertexShader(ID3D11Device* dev, const void* bytecode,
+        SIZE_T length, ID3D11ClassLinkage* linkage, ID3D11VertexShader** out)
+    {
+        const HRESULT hr = g_createVSHook.stdcall<HRESULT>(dev, bytecode, length, linkage, out);
+        if (SUCCEEDED(hr) && bytecode && out && *out && g_stockVSCount < static_cast<int>(std::size(g_stockVS)))
+        {
+            const uint8_t* digest = static_cast<const uint8_t*>(bytecode) + 4;
+            if (length == kSpriteVSSize && memcmp(digest, kSpriteVSDigest, 16) == 0)
+            {
+                g_stockVS[g_stockVSCount++] = { *out, true };
+            }
+            else if (length == kPrimVSSize && memcmp(digest, kPrimVSDigest, 16) == 0)
+            {
+                g_stockVS[g_stockVSCount++] = { *out, false };
+            }
+        }
+        return hr;
+    }
+
+    void OnDeviceCreated(ID3D11Device* dev)
+    {
+        if (!dev || g_createVSHook)
+        {
+            return;
+        }
+        void** vtable = *reinterpret_cast<void***>(dev);
+        g_createVSHook = safetyhook::create_inline(vtable[12], reinterpret_cast<void*>(HookedCreateVertexShader));
+        LOG_HOOK(g_createVSHook, "D3D11Hooks: CreateVertexShader");
+        MGS2RailgunBeam::OnDeviceCreated(dev);
+    }
+
+    HRESULT WINAPI HookedD3D11CreateDevice(IDXGIAdapter* adapter, D3D_DRIVER_TYPE driverType,
+        HMODULE software, UINT flags, const D3D_FEATURE_LEVEL* levels, UINT numLevels, UINT sdkVersion,
+        ID3D11Device** dev, D3D_FEATURE_LEVEL* level, ID3D11DeviceContext** ctx)
+    {
+        const HRESULT hr = g_createDeviceHook.stdcall<HRESULT>(adapter, driverType, software, flags,
+            levels, numLevels, sdkVersion, dev, level, ctx);
+        if (SUCCEEDED(hr) && dev)
+        {
+            OnDeviceCreated(*dev);
+        }
+        return hr;
+    }
+
+    HRESULT WINAPI HookedD3D11CreateDeviceAndSwapChain(IDXGIAdapter* adapter, D3D_DRIVER_TYPE driverType,
+        HMODULE software, UINT flags, const D3D_FEATURE_LEVEL* levels, UINT numLevels, UINT sdkVersion,
+        const DXGI_SWAP_CHAIN_DESC* scDesc, IDXGISwapChain** swap, ID3D11Device** dev,
+        D3D_FEATURE_LEVEL* level, ID3D11DeviceContext** ctx)
+    {
+        const HRESULT hr = g_createDeviceSwapHook.stdcall<HRESULT>(adapter, driverType, software, flags,
+            levels, numLevels, sdkVersion, scDesc, swap, dev, level, ctx);
+        if (SUCCEEDED(hr) && dev)
+        {
+            OnDeviceCreated(*dev);
+        }
+        return hr;
+    }
 
     // The PS2 never presented a frame it hadn't drawn; the port does, and it flashes dim.
     ComPtr<ID3D11Texture2D> g_heldFrame;
@@ -296,6 +372,7 @@ namespace
             MGS3MapRelight::OnDeviceReady();
             MGS3GlowOverbright::OnDeviceReady(g_D3D11Hooks.d3dDevice.Get());
             MGS2TankerFog::OnDeviceReady();
+            MGS2SoftParticles::OnDeviceReady();
             if (eGameType & (MGS2 | MGS3))
             {
                 // Drop redundant IA state changes - the games re-set layout/topology per draw.
@@ -472,6 +549,20 @@ void D3D11Hooks::Initialize()
 
     if (eGameType & MGS2)
     {
+        if (const HMODULE d3d11 = LoadLibraryW(L"d3d11.dll"))
+        {
+            if (auto* p = GetProcAddress(d3d11, "D3D11CreateDevice"))
+            {
+                g_createDeviceHook = safetyhook::create_inline(p, reinterpret_cast<void*>(HookedD3D11CreateDevice));
+                LOG_HOOK(g_createDeviceHook, "D3D11Hooks: D3D11CreateDevice");
+            }
+            if (auto* p = GetProcAddress(d3d11, "D3D11CreateDeviceAndSwapChain"))
+            {
+                g_createDeviceSwapHook = safetyhook::create_inline(p, reinterpret_cast<void*>(HookedD3D11CreateDeviceAndSwapChain));
+                LOG_HOOK(g_createDeviceSwapHook, "D3D11Hooks: D3D11CreateDeviceAndSwapChain");
+            }
+        }
+
         constexpr uint32_t kDG_DMAPACK_NORMAL = 0x0001;
         constexpr uint32_t kDG_DMAPACK_MENU = 0x0002;
         MAKE_HOOK_MID(baseModule, "40 55 57 41 56 48 8D AC 24 40 FC FF FF 48 81 EC C0 04 00 00 48 8B F9", "D3D11 Hooks: BP_RenderDmaPack_AutoPacket", {
@@ -502,4 +593,28 @@ void D3D11Hooks::Initialize()
     {
         return;
     }*/
+}
+
+bool D3D11Hooks::IsStockSpriteVS(ID3D11VertexShader* vs)
+{
+    for (int i = 0; i < g_stockVSCount; i++)
+    {
+        if (g_stockVS[i].vs == vs)
+        {
+            return g_stockVS[i].sprite;
+        }
+    }
+    return false;
+}
+
+bool D3D11Hooks::IsStockPrimVS(ID3D11VertexShader* vs)
+{
+    for (int i = 0; i < g_stockVSCount; i++)
+    {
+        if (g_stockVS[i].vs == vs)
+        {
+            return !g_stockVS[i].sprite;
+        }
+    }
+    return false;
 }

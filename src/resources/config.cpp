@@ -21,6 +21,7 @@
 #include "mgs2_demo_camera_judder.hpp"
 #include "mgs2_codec_band.hpp"
 #include "mgs2_tanker_fog.hpp"
+#include "mgs2_soft_particles.hpp"
 #include "mgs2_demo_effect_blacklist.hpp"
 #include "mgs2_reverb_wet_level.hpp"
 #include "mgs2_preshade_lights.hpp"
@@ -487,6 +488,9 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
     LOG_CONFIG(ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ResolutionScalingFixes::bIncreaseShadowResolution);
     MGS2SoftShadows::bEnabled = ResolutionScalingFixes::bIncreaseShadowResolution;
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_SoftParticles_Section, ConfigKeys::MGS2_SoftParticles_Setting, MGS2SoftParticles::bEnabled);
+    LOG_CONFIG(ConfigKeys::MGS2_SoftParticles_Section, ConfigKeys::MGS2_SoftParticles_Setting, MGS2SoftParticles::bEnabled);
 
 
     ConfigHelper::getValue(ini, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Section, ConfigKeys::MGS2_LaserOriginFix_FixM9FPV_Setting, ResolutionScalingFixes::bFixM92FPV);

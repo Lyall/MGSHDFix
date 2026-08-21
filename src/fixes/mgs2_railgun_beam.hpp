@@ -4,7 +4,7 @@
 // shader path, twice as bright as the GS. Substitutes a mid-grey twin for effect draws.
 namespace MGS2RailgunBeam
 {
-    void InitializeEarly();   // hooks D3D11 device creation - call at dll load, before the game boots
+    void OnDeviceCreated(ID3D11Device* dev);   // d3d11_api calls this as the game creates its device
 
     inline bool bEnabled = true;
 
