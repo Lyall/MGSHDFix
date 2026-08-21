@@ -24,8 +24,8 @@ namespace
     void* g_bladeCheckAttack = nullptr;
     safetyhook::InlineHook g_setWeapon_hook;
 
-    using ChangeMotionArcFn = void(__fastcall*)(uintptr_t work, int arc);
-    ChangeMotionArcFn g_changeMotionArc = nullptr;
+    using PL_ChangeMotionArcFn = void(__fastcall*)(uintptr_t work, int arc);
+    PL_ChangeMotionArcFn g_PL_ChangeMotionArc = nullptr;
     ptrdiff_t g_curMar = 0;
     ptrdiff_t g_orgMotion = 0;
 
@@ -320,26 +320,26 @@ void MGS2BladeAnywhere::Initialize()
     {
         g_curMar = *reinterpret_cast<int32_t*>(arc + 2);
         g_orgMotion = *reinterpret_cast<int32_t*>(arc + 10);
-        g_changeMotionArc = reinterpret_cast<ChangeMotionArcFn>(Memory::ResolveCall(arc + 17));
+        g_PL_ChangeMotionArc = reinterpret_cast<PL_ChangeMotionArcFn>(Memory::ResolveCall(arc + 17));
     }
     // water.c SetWaterAct(): walking into the water picks its stair animation out of whatever set is
     // loaded, and the blade's set has no stair animation - so he gets the unsheathe, which never walks
     // him anywhere, and the stairs only end once he has. Leaving the water loads his own set first.
     if (uint8_t* stair = Memory::PatternScan(baseModule,
-        "33 D2 48 8B CB E8 ?? ?? ?? ?? 45 33 C9 45 33 C0",
+        "45 33 C9 45 33 C0 48 8B CB 41 8D 51 ?? E8 ?? ?? ?? ?? 85 FF 78 ?? 66 89 BB ?? ?? ?? ?? 66 89 BB ?? ?? ?? ?? 48 8D 15 ?? ?? ?? ?? 48 8B CB E8 ?? ?? ?? ?? B9",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\water.c -> SetWaterAct() | stair entry motion arc"))
     {
         static SafetyHookMid stairHook {};
-        stairHook = safetyhook::create_mid(stair + 0x0A, [](SafetyHookContext& ctx)
+        stairHook = safetyhook::create_mid(stair, [](SafetyHookContext& ctx)
         {
             const uintptr_t work = ctx.rbx;
-            if (work == 0 || !g_changeMotionArc)
+            if (work == 0 || !g_PL_ChangeMotionArc)
             {
                 return;
             }
             if (*reinterpret_cast<int*>(work + g_curMar) == kRaiBladeMotion)
             {
-                g_changeMotionArc(work, *reinterpret_cast<int*>(work + g_orgMotion));
+                g_PL_ChangeMotionArc(work, *reinterpret_cast<int*>(work + g_orgMotion));
             }
         });
         LOG_HOOK(stairHook, "MGS2: Blade Anywhere: water stairs start on his own motion arc")
