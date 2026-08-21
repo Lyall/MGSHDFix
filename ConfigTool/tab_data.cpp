@@ -186,6 +186,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2), ConfigKeys::MGS2_Increase_Shadow_Resolution_Section, ConfigKeys::MGS2_Increase_Shadow_Resolution_Setting, ConfigKeys::MGS2_Increase_Shadow_Resolution_Help, ConfigKeys::MGS2_Increase_Shadow_Resolution_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MGS2), ConfigKeys::MGS2_SoftParticles_Section, ConfigKeys::MGS2_SoftParticles_Setting, ConfigKeys::MGS2_SoftParticles_Help, ConfigKeys::MGS2_SoftParticles_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
 
 
         { (MGS3), ConfigKeys::DistanceCullingGrassAlways_Section, ConfigKeys::DistanceCullingGrassAlways_Setting, ConfigKeys::DistanceCullingGrassAlways_Help, ConfigKeys::DistanceCullingGrassAlways_Tooltip,

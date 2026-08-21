@@ -7,6 +7,10 @@ class D3D11Hooks final
 public:
     static void Initialize();
 
+    // Stock Prim.fx vertex shaders, caught as the game creates them.
+    static bool IsStockSpriteVS(ID3D11VertexShader* vs);   // SPRITE=1
+    static bool IsStockPrimVS(ID3D11VertexShader* vs);     // the untextured prim path
+
     HWND MainHwnd = nullptr;
 
     // ===================== Device and Context =====================

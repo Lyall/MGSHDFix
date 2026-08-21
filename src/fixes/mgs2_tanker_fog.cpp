@@ -99,17 +99,7 @@ namespace
             return false;
         }
 
-        // FNV-1a: seed with its 64-bit offset basis, then xor each byte in and multiply by its prime.
-        uint64_t hash = 0xcbf29ce484222325ull;
-        for (UINT y = 0; y < desc.Height; y++)
-        {
-            const auto* row = static_cast<const uint8_t*>(data) + static_cast<size_t>(y) * rowPitch;
-            for (UINT b = 0; b < desc.Width * 4; b++)
-            {
-                hash = (hash ^ row[b]) * 0x100000001b3ull;
-            }
-        }
-        return hash == kFogMaskHash;
+        return Util::HashTexels(data, rowPitch, desc.Width, desc.Height) == kFogMaskHash;
     }
 
     // The camera only reaches us through the constants the game maps every pass.

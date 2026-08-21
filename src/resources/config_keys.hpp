@@ -335,6 +335,13 @@ namespace ConfigKeys
         "\n"
         "This option makes shadow resolution scale dynamically with the game's internal resolution.";
 
+    constexpr const char* MGS2_SoftParticles_Section = "Model Quality && Level of Detail Enhancements";
+    constexpr const char* MGS2_SoftParticles_Setting = "Show Soft Particles";
+    constexpr const char* MGS2_SoftParticles_Help = "";
+    constexpr const char* MGS2_SoftParticles_Tooltip = "Spray and dust puffs are flat sprites, so they cut off along a hard line wherever they pass through water or ground.\n"
+        "\n"
+        "This option fades them out against nearby surfaces instead.";
+
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Section = "Bugfixes";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "Fix M92 Laser Origin in FPV";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
