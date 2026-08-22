@@ -6,6 +6,7 @@
 #include "gamevars.hpp"
 
 #include <hidsdi.h>
+#include <limits>
 #pragma comment(lib, "hid.lib")
 
 // libgv\pad.c -> setup_pressure() flattens GV_PAD.pressure[12] to 0xFF/0x00 for any pad the engine
@@ -600,7 +601,6 @@ namespace
     // ---- Grenade throws ----------------------------------------------------------------------
     // ThrowGrenade() takes five levels off the weapon button, clamp((pressure - 140) / 28, 0, 4),
     // peak-held across the wind-up. MGS 3 throws at a fixed speed instead.
-    constexpr uint8_t kStrongThrow = 196;       // MGS 2 picks the long animation at force >= 2
     std::atomic<uint8_t> gThrowPeak = 0;
 
     int ThrowLevel()
@@ -910,20 +910,37 @@ namespace
             gKnifeBranch = reinterpret_cast<uintptr_t>(address) + 13;
         }
 
-        // work+0xD4 is the weak/strong motion flag, set from hold time. Swap it at the one read.
+        // Throwables get a made-up SQUARE pressure: 69, or 70 once held for 0.7 s. Keep the
+        // timer from ever getting there, and put the real pressure where the 69 goes.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "44 0F B6 87 D4 00 00 00 BB 07 00 00 00 85 C0",
-            "MGS 3: Pressure Inputs - Throw Strength"))
+            "0F 2F 84 82 ?? ?? ?? ?? 76 ?? B8 02 00 00 00",
+            "MGS 3: Pressure Inputs - Throwable Hold Timer | player pad, the 0.7 s hold that stamps 70"))
         {
-            static SafetyHookMid strengthHook {};
-            strengthHook = safetyhook::create_mid(address + 8, [](SafetyHookContext& ctx)
+            static SafetyHookMid timerHook {};
+            timerHook = safetyhook::create_mid(address, [](SafetyHookContext& ctx)
             {
                 if (gHavePad.load())
                 {
-                    ctx.r8 = gThrowPeak.load() >= kStrongThrow ? 1 : 0;
+                    ctx.xmm0.f32[0] = std::numeric_limits<float>::max();
                 }
             });
-            LOG_HOOK(strengthHook, "MGS 3: Pressure Inputs - Throw Strength")
+            LOG_HOOK(timerHook, "MGS 3: Pressure Inputs - Throwable Hold Timer | player pad, the 0.7 s hold that stamps 70")
+        }
+        if (uint8_t* address = Memory::PatternScan(baseModule,
+            "89 05 ?? ?? ?? ?? 44 8D 78 FF E9 ?? ?? ?? ?? BF 46 00 00 00",
+            "MGS 3: Pressure Inputs - Throwable Pressure | player pad, the SQUARE stamp for throwables"))
+        {
+            static SafetyHookMid stampHook {};
+            stampHook = safetyhook::create_mid(address, [](SafetyHookContext& ctx)
+            {
+                if (gHavePad.load())
+                {
+                    uint8_t now[kSlots];
+                    ReadPad(now);
+                    ctx.rdi = now[kSquare];
+                }
+            });
+            LOG_HOOK(stampHook, "MGS 3: Pressure Inputs - Throwable Pressure | player pad, the SQUARE stamp for throwables")
         }
 
         // The weapon state machine, for the wind-up peak.
