@@ -47,7 +47,8 @@ namespace
         {
             ComPtr<ID3D11VertexShader> vs;
             ctx->VSGetShader(vs.GetAddressOf(), nullptr, nullptr);
-            if (vs && (D3D11Hooks::IsStockSpriteVS(vs.Get()) || D3D11Hooks::IsStockPrimVS(vs.Get())))
+            const D3D11Hooks::StockVS kind = D3D11Hooks::GetStockVS(vs.Get());
+            if (kind == D3D11Hooks::StockVS::Sprite || kind == D3D11Hooks::StockVS::Poly)
             {
                 ComPtr<ID3D11ShaderResourceView> srv;
                 ctx->PSGetShaderResources(0, 1, srv.GetAddressOf());
