@@ -913,8 +913,8 @@ namespace
         // Throwables get a made-up SQUARE pressure: 69, or 70 once held for 0.7 s. Keep the
         // timer from ever getting there, and put the real pressure where the 69 goes.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "0F 2F 84 82 ?? ?? ?? ?? 76 ?? B8 02 00 00 00",
-            "MGS 3: Pressure Inputs - Throwable Hold Timer | player pad, the 0.7 s hold that stamps 70"))
+            "0F 2F 84 82 ?? ?? ?? ?? 76 ?? B8",
+            "MGS 3: Pressure Inputs - Throwable Hold Timer | player pad, the 0.7 s hold that stamps 70 | (NewPlayer() -> PL_PluginStart() -> PL_PLG_PadPlugin() -> Act()"))
         {
             static SafetyHookMid timerHook {};
             timerHook = safetyhook::create_mid(address, [](SafetyHookContext& ctx)
@@ -927,8 +927,8 @@ namespace
             LOG_HOOK(timerHook, "MGS 3: Pressure Inputs - Throwable Hold Timer | player pad, the 0.7 s hold that stamps 70")
         }
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "89 05 ?? ?? ?? ?? 44 8D 78 FF E9 ?? ?? ?? ?? BF 46 00 00 00",
-            "MGS 3: Pressure Inputs - Throwable Pressure | player pad, the SQUARE stamp for throwables"))
+            "89 05 ?? ?? ?? ?? 44 8D 78",
+            "MGS 3: Pressure Inputs - Throwable Pressure | player pad, the SQUARE stamp for throwables | (NewPlayer() -> PL_PluginStart() -> PL_PLG_PadPlugin() -> Act()"))
         {
             static SafetyHookMid stampHook {};
             stampHook = safetyhook::create_mid(address, [](SafetyHookContext& ctx)
