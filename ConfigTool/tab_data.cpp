@@ -321,8 +321,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2|MGS3), ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting, ConfigKeys::FixDepthOfField_Help, ConfigKeys::FixDepthOfField_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-        { (MGS3), ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Tooltip,
-          std::make_pair(ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::MGS3DepthOfFieldBlurUvMultiplier_Setting), false, Field::Float, 0, 0, 0, "", {}, 10.0, 0.0, 20.0 },
+        { (MGS2|MGS3), ConfigKeys::DepthOfFieldBlurUvMultiplier_Section, ConfigKeys::DepthOfFieldBlurUvMultiplier_Setting, ConfigKeys::DepthOfFieldBlurUvMultiplier_Help, ConfigKeys::DepthOfFieldBlurUvMultiplier_Tooltip,
+          std::make_pair(ConfigKeys::FixDepthOfField_Section, ConfigKeys::FixDepthOfField_Setting), false, Field::Float, 0, 0, 0, "", {}, 10.0, 0.0, 30.0 },
 
         { (MGS3), ConfigKeys::MGS3_Restore_Film_Grain_Section, ConfigKeys::MGS3_Restore_Film_Grain_Setting, ConfigKeys::MGS3_Restore_Film_Grain_Help, ConfigKeys::MGS3_Restore_Film_Grain_Tooltip,
           std::nullopt, false, Field::Bool, true },

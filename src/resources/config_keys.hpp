@@ -297,10 +297,10 @@ namespace ConfigKeys
     constexpr const char* MotionBlur_Option_CutscenesOnly = "Cutscenes Only";
 
 
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Setting = "Depth of Field Blur Strength";
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Help = "";
-    constexpr const char* MGS3DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the UV radius used by MGS3's depth of field blur.\n"
+    constexpr const char* DepthOfFieldBlurUvMultiplier_Section = FixDepthOfField_Section;
+    constexpr const char* DepthOfFieldBlurUvMultiplier_Setting = "Depth of Field Blur Strength";
+    constexpr const char* DepthOfFieldBlurUvMultiplier_Help = "";
+    constexpr const char* DepthOfFieldBlurUvMultiplier_Tooltip = "Scales the radius of the depth of field blur.\n"
                                                                      "\n"
                                                                      "Higher values increase blur radius but can expose sampling artifacts.";
 
