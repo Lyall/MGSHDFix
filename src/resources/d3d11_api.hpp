@@ -8,8 +8,8 @@ public:
     static void Initialize();
 
     // Stock Prim.fx vertex shaders, caught as the game creates them.
-    static bool IsStockSpriteVS(ID3D11VertexShader* vs);   // SPRITE=1
-    static bool IsStockPrimVS(ID3D11VertexShader* vs);     // the untextured prim path
+    enum class StockVS { None, Sprite, SpriteFog, Poly, PolyFog };
+    static StockVS GetStockVS(ID3D11VertexShader* vs);
 
     HWND MainHwnd = nullptr;
 

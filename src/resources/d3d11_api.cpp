@@ -55,15 +55,21 @@ namespace
     ResizeBuffersFn oResizeBuffers = nullptr;
 
     // Stock Prim.fx vertex shaders, told apart by DXBC digest as the game creates them.
-    constexpr uint8_t kSpriteVSDigest[16] = {
-        0xB1, 0x03, 0x51, 0x1F, 0x89, 0xD7, 0x41, 0xB7, 0xAF, 0x31, 0x0C, 0xD9, 0x77, 0x2C, 0x24, 0x14 };
-    constexpr size_t kSpriteVSSize = 4544;
-    constexpr uint8_t kPrimVSDigest[16] = {
-        0x92, 0x12, 0x98, 0xF1, 0x43, 0xBD, 0xE0, 0xFC, 0xBC, 0x66, 0xB2, 0xD2, 0x83, 0xD7, 0x14, 0x39 };
-    constexpr size_t kPrimVSSize = 4504;
+    struct StockVSDigest
+    {
+        D3D11Hooks::StockVS kind;
+        size_t size;
+        uint8_t digest[16];
+    };
+    constexpr StockVSDigest kStockVSDigests[] = {
+        { D3D11Hooks::StockVS::Sprite,    4544, { 0xB1, 0x03, 0x51, 0x1F, 0x89, 0xD7, 0x41, 0xB7, 0xAF, 0x31, 0x0C, 0xD9, 0x77, 0x2C, 0x24, 0x14 } },
+        { D3D11Hooks::StockVS::SpriteFog, 4660, { 0x01, 0x4E, 0x2F, 0x77, 0x74, 0x05, 0x3D, 0x61, 0xB3, 0x08, 0x14, 0x9B, 0x17, 0x79, 0x02, 0xF9 } },
+        { D3D11Hooks::StockVS::Poly,      4504, { 0x92, 0x12, 0x98, 0xF1, 0x43, 0xBD, 0xE0, 0xFC, 0xBC, 0x66, 0xB2, 0xD2, 0x83, 0xD7, 0x14, 0x39 } },
+        { D3D11Hooks::StockVS::PolyFog,   4620, { 0x47, 0x5D, 0x70, 0x52, 0xB9, 0x44, 0x7A, 0xCE, 0x30, 0x00, 0xEA, 0x63, 0x07, 0xDD, 0x01, 0x8A } },
+    };
 
-    struct StockVS { ID3D11VertexShader* vs; bool sprite; };
-    StockVS g_stockVS[16] {};
+    struct StockVSEntry { ID3D11VertexShader* vs; D3D11Hooks::StockVS kind; };
+    StockVSEntry g_stockVS[16] {};
     int g_stockVSCount = 0;
 
     SafetyHookInline g_createDeviceHook {};
@@ -76,14 +82,13 @@ namespace
         const HRESULT hr = g_createVSHook.stdcall<HRESULT>(dev, bytecode, length, linkage, out);
         if (SUCCEEDED(hr) && bytecode && out && *out && g_stockVSCount < static_cast<int>(std::size(g_stockVS)))
         {
-            const uint8_t* digest = static_cast<const uint8_t*>(bytecode) + 4;
-            if (length == kSpriteVSSize && memcmp(digest, kSpriteVSDigest, 16) == 0)
+            for (const StockVSDigest& known : kStockVSDigests)
             {
-                g_stockVS[g_stockVSCount++] = { *out, true };
-            }
-            else if (length == kPrimVSSize && memcmp(digest, kPrimVSDigest, 16) == 0)
-            {
-                g_stockVS[g_stockVSCount++] = { *out, false };
+                if (length == known.size && memcmp(static_cast<const uint8_t*>(bytecode) + 4, known.digest, 16) == 0)
+                {
+                    g_stockVS[g_stockVSCount++] = { *out, known.kind };
+                    break;
+                }
             }
         }
         return hr;
@@ -595,26 +600,14 @@ void D3D11Hooks::Initialize()
     }*/
 }
 
-bool D3D11Hooks::IsStockSpriteVS(ID3D11VertexShader* vs)
+D3D11Hooks::StockVS D3D11Hooks::GetStockVS(ID3D11VertexShader* vs)
 {
     for (int i = 0; i < g_stockVSCount; i++)
     {
         if (g_stockVS[i].vs == vs)
         {
-            return g_stockVS[i].sprite;
+            return g_stockVS[i].kind;
         }
     }
-    return false;
-}
-
-bool D3D11Hooks::IsStockPrimVS(ID3D11VertexShader* vs)
-{
-    for (int i = 0; i < g_stockVSCount; i++)
-    {
-        if (g_stockVS[i].vs == vs)
-        {
-            return !g_stockVS[i].sprite;
-        }
-    }
-    return false;
+    return StockVS::None;
 }
