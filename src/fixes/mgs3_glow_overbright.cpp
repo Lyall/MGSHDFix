@@ -6,7 +6,6 @@
 #include "d3d11_api.hpp"
 
 #include <d3d11.h>
-#include <vector>
 
 // The PS2 blended in whole numbers and threw the fraction away. BP keeps it, in float,
 // so light the hardware rounded down to nothing still shows up here. Do the same sums the

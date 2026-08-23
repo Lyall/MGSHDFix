@@ -2808,7 +2808,7 @@ namespace
     {
         uint8_t* compositeDrawSetup = Memory::PatternScan(
             baseModule,
-            "48 8B 44 35 B0 48 8D 55 80 48 8B 4C 35 A0 0F 28 C7 F3 0F 5C C1 F3 0F 11 54 24 28 45 33 C9 48 89 44 24 20 45 8D 41 01 F3 0F 11 45 8C E8 ?? ?? ?? ??",
+            "48 8B 44 35",
             "MGS 3: Depth of Field: far focus composite draw");
 
         if (!compositeDrawSetup)

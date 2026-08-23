@@ -1067,7 +1067,7 @@ namespace
             "MGS 2: Pressure Inputs - Thought Hold | codec\\cdc_mind.c"));
 
         // The mask, adjusted at the store: the register that builds it is also the codec state.
-        MAKE_HOOK_MID(baseModule, "48 89 83 B0 00 00 00 89 8B A4 00 00 00",
+        MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? 89 8B ?? ?? ?? ?? EB",
             "MGS 2: Pressure Inputs - Thought Held Mask | codec\\cdc_mind.c",
         {
             if (gHavePad.load() && gThoughtRebound.load() && ctx.rax == 2)
@@ -1077,7 +1077,7 @@ namespace
         });
 
         // The peak tracker reads the slot the mask implies, so feed it the same value.
-        MAKE_HOOK_MID(baseModule, "3B 8B A4 00 00 00 7E ??",
+        MAKE_HOOK_MID(baseModule, "3B 8B ?? ?? ?? ?? 7E ?? 89 8B",
             "MGS 2: Pressure Inputs - Thought Peak | codec\\cdc_mind.c",
         {
             if (gHavePad.load() && gDirectPressure != nullptr && gThoughtRebound.load()
@@ -1108,7 +1108,7 @@ namespace
         // gate (0 strips PL_PAD_WEAPON) and the jet thickness, so the button does nothing. Take
         // whichever is further on so the stick keeps working - speedruns are built around it.
         MAKE_HOOK_MID(baseModule,
-            "8B 15 ?? ?? ?? ?? 85 C0 74 0A 0F BA E2 10 73 04 41 0F 28 F0 44 8B 0D ?? ?? ?? ??",
+            "8B 15 ?? ?? ?? ?? 85 C0 74 ?? 0F BA E2",
             "MGS 2: Pressure Inputs - Coolant Spray | skoba\\weapon\\spray.c",
         {
             if (gHavePad.load())

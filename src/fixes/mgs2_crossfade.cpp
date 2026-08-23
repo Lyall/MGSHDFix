@@ -271,7 +271,7 @@ void MGS2_Crossfade::Initialize()
     dev->CreateSamplerState(&sd, sampler.GetAddressOf());
 
     // GetResources time is in 1/300s ticks.
-    if (uint8_t* addr = Memory::PatternScan(baseModule, "40 53 55 56 57 41 56 48 83 EC ?? 41 8B C0 89 51 ?? 83 E0 01 89 51 ??", "MGS2: Crossfade GetResources"))
+    if (uint8_t* addr = Memory::PatternScan(baseModule, "40 53 55 56 57 41 56 48 83 EC ?? 41 8B C0", "MGS2: Crossfade GetResources"))
     {
         getResourcesHook = safetyhook::create_mid(addr, [](SafetyHookContext& ctx)
         {
@@ -290,7 +290,7 @@ void MGS2_Crossfade::Initialize()
         LOG_HOOK(getResourcesHook, "MGS2: Crossfade GetResources");
     }
 
-    if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 8B 6C 24 ?? 41 8B F9 41 8B F0 44 8B F2 44 8B F9 45 85 C0", "MGS2: Crossfade Custom"))
+    if (uint8_t* addr = Memory::PatternScan(baseModule, "48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 8B 6C 24 ?? 41 8B F9", "MGS2: Crossfade Custom"))
     {
         customHook = safetyhook::create_inline(addr, reinterpret_cast<void*>(CrossfadeCustom_Detour));
         LOG_HOOK(customHook, "MGS2: Crossfade Custom");

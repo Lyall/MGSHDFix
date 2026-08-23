@@ -777,7 +777,7 @@ void Config::Read()
             std::string sMotionBlur;
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
 #if defined(BEFORE_COMPARISON_PICS)
-            sMotionBlur = MotionBlur_Option_Disabled;
+            sMotionBlur = ConfigKeys::MotionBlur_Option_Disabled;
 #endif
             if (sMotionBlur != ConfigKeys::MotionBlur_Option_Disabled &&
                 sMotionBlur != ConfigKeys::MotionBlur_Option_CutscenesOnly &&

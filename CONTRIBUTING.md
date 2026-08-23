@@ -19,6 +19,9 @@ These unique patterns wildcard relative memory offsets + immediate values which 
 **IDA Plugin:**
 https://github.com/A200K/IDA-Pro-SigMaker
 
+**Ghidra Plugin:**
+https://github.com/lexika979/Sigga
+
 Please make an explicit note beside a function if you have to enable "Continue when leaving function scope". While the game typically does not move functions around greatly between game updates, this helps with troubleshooting if a game update breaks something.
 
 ![Signature Maker usage](screenshots/Signature_Maker_usage.png)

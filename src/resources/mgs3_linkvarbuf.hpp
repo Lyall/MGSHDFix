@@ -475,6 +475,8 @@ namespace MGS3_LinkVarBuf
     inline LinkVarValue<short, 4>           GM_Language;
     inline LinkVarValue<short, 6>           GM_GameLevel;
     inline LinkVarValue<unsigned int, 8>    GM_Configuration;
+    inline LinkVarValue<short, 10>          GM_ScrAdjX;
+    inline LinkVarValue<short, 12>          GM_ScrAdjY;
     inline LinkVarValue<int, 16>            GM_SaveArea;
     inline LinkVarPointer<char, 20>         GM_SaveResidentDir;
     inline LinkVarPointer<char, 36>         GM_SaveAreaDir;

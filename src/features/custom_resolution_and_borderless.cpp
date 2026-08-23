@@ -362,9 +362,9 @@ namespace CustomResolutionAndBorderless
         if (eGameType & (MG | MGS2 | MGS3) && bOutputResolution)
         {
             // MGS 2 | MGS 3: Custom Resolution
-            uint8_t* MGS2_MGS3_InternalResolutionScanResult = Memory::PatternScan(baseModule, "F2 0F ?? ?? ?? B9 05 00 00 00 E8 ?? ?? ?? ?? 85 ?? 75 ??", "MGS2_MGS3_InternalResolutionScan");
-            uint8_t* MGS2_MGS3_OutputResolution1ScanResult = Memory::PatternScan(baseModule, "40 ?? ?? 74 ?? 8B ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? EB ?? B9 06 00 00 00", "MGS2_MGS3_OutputResolution1Scan");
-            uint8_t* MGS2_MGS3_OutputResolution2ScanResult = Memory::PatternScan(baseModule, "80 ?? ?? 00 41 ?? ?? ?? ?? ?? 48 ?? ?? ?? BA ?? ?? ?? ?? 8B ??", "MGS2_MGS3_OutputResolution2Scan");
+            uint8_t* MGS2_MGS3_InternalResolutionScanResult = Memory::PatternScan(baseModule, "F2 0F 11 4B ?? B9", "MGS2_MGS3_InternalResolutionScan");
+            uint8_t* MGS2_MGS3_OutputResolution1ScanResult = Memory::PatternScan(baseModule, "40 84 F6 74 ?? 8B B5", "MGS2_MGS3_OutputResolution1Scan");
+            uint8_t* MGS2_MGS3_OutputResolution2ScanResult = Memory::PatternScan(baseModule, "80 7F ?? 00 41 BA", "MGS2_MGS3_OutputResolution2Scan");
             if (MGS2_MGS3_InternalResolutionScanResult && MGS2_MGS3_OutputResolution1ScanResult && MGS2_MGS3_OutputResolution2ScanResult)
             {
                 uint8_t* MGS2_MGS3_FSR_Result = Memory::PatternScanSilent(baseModule, "83 E8 ?? 74 ?? 83 E8 ?? 74 ?? 83 F8 ?? 75 ?? C7 06");
@@ -752,7 +752,7 @@ namespace CustomResolutionAndBorderless
 
             // Windowed framebuffer
 
-            if (uint8_t* MGS2_MGS3_WindowedFramebufferFixScanResult = Memory::PatternScan(baseModule, "?? ?? F3 0F ?? ?? 41 ?? ?? F3 0F ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??", "Windowed Framebuffer"))
+            if (uint8_t* MGS2_MGS3_WindowedFramebufferFixScanResult = Memory::PatternScan(baseModule, "?? ?? F3 0F ?? ?? 41 ?? ?? F3 0F ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F", "Windowed Framebuffer"))
             {
                 Memory::PatchBytes((uintptr_t)MGS2_MGS3_WindowedFramebufferFixScanResult, "\xEB", 1);
                 if (eGameType & MG | MGS3)
@@ -793,7 +793,7 @@ namespace CustomResolutionAndBorderless
         if (eGameType & MGS2 && bOutputResolution)
         {
             // MGS 2: Scale Effects
-            if (uint8_t* MGS2_ScaleEffectsScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? 66 ?? ?? ?? 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ??", "MGS 2: Scale Effects"))
+            if (uint8_t* MGS2_ScaleEffectsScanResult = Memory::PatternScan(baseModule, "48 8B 4D ?? 66 0F 6E C0 0F 5B C0 F3 0F 5E C8", "MGS 2: Scale Effects -> BP_RenderDmaPack_AutoPacket()"))
             {
                 float fMGS2_DefaultEffectScaleX = *reinterpret_cast<float*>(Memory::GetAbsolute((uintptr_t)MGS2_ScaleEffectsScanResult - 0x4));
                 float fMGS2_DefaultEffectScaleY = *reinterpret_cast<float*>(Memory::GetAbsolute((uintptr_t)MGS2_ScaleEffectsScanResult + 0x28));
@@ -856,7 +856,7 @@ namespace CustomResolutionAndBorderless
         if (eGameType & MGS3 && bAspectFix)
         {
             // MGS 3: Fix gameplay aspect ratio
-            if (uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? E8 ?? ?? ?? ?? 48 8D ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ??", "MGS 3: Aspect Ratio"))
+            if (uint8_t* MGS3_GameplayAspectScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? E8 ?? ?? ?? ?? 48 8D ?? ?? ?? ?? ?? F3 0F", "MGS 3: Aspect Ratio"))  // BP_GetScreenAspectX()
             {
                 DWORD64 MGS3_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS3_GameplayAspectScanResult + 0x5);
                 spdlog::info("MGS 3: Aspect Ratio: Function address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_GameplayAspectAddress - (uintptr_t)baseModule);
@@ -874,7 +874,7 @@ namespace CustomResolutionAndBorderless
         else if (eGameType & MGS2 && bAspectFix)
         {
             // MGS 2: Fix gameplay aspect ratio
-            if (uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "48 8D ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ??", "MGS 2: Aspect Ratio"))
+            if (uint8_t* MGS2_GameplayAspectScanResult = Memory::PatternScan(baseModule, "48 8D ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 44", "MGS 2: Aspect Ratio"))  // BP_GetScreenAspectX()
             {
                 DWORD64 MGS2_GameplayAspectAddress = Memory::GetAbsolute((uintptr_t)MGS2_GameplayAspectScanResult + 0xB);
                 spdlog::info("MGS 2: Aspect Ratio: Function address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_GameplayAspectAddress - (uintptr_t)baseModule);
@@ -893,7 +893,7 @@ namespace CustomResolutionAndBorderless
         if (eGameType & MGS3 && bFOVFix)
         {
             // MGS 3: FOV
-            if (uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 44 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? ?? ?? ?? E8 ?? ?? ?? ??", "MGS 3: FOV"))
+            if (uint8_t* MGS3_FOVScanResult = Memory::PatternScan(baseModule, "F3 0F 11 91 ?? ?? ?? ?? 44 0F 29 7C 24", "MGS 3: FOV"))
             {
                 static SafetyHookMid MGS3_FOVMidHook {};
                 MGS3_FOVMidHook = safetyhook::create_mid(MGS3_FOVScanResult,
@@ -938,7 +938,7 @@ namespace CustomResolutionAndBorderless
         if (eGameType & MGS2 && bHUDFix)
         {
             // MGS 2: HUD
-            uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ??");
+            uint8_t* MGS2_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "E9 ?? ?? ?? ?? F3 0F 10 47 ?? 0F 28 D7");  // BP_RenderDmaPack_AutoPacket()
             if (MGS2_HUDWidthScanResult)
             {
                 spdlog::info("MGS 2: HUD: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_HUDWidthScanResult - (uintptr_t)baseModule);
@@ -1017,7 +1017,7 @@ namespace CustomResolutionAndBorderless
 
             // MGS 2: Codec Portraits
             // TODO: Reassess this, it's not right.
-            uint8_t* MGS2_CodecPortraitsScanResult = Memory::PatternScanSilent(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? 0F ?? ??");
+            uint8_t* MGS2_CodecPortraitsScanResult = Memory::PatternScanSilent(baseModule, "F3 0F 58 40 ?? F3 0F 2C C4");
             if (MGS2_CodecPortraitsScanResult)
             {
                 spdlog::info("MGS 2: Codec Portraits: Hook address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS2_CodecPortraitsScanResult - (uintptr_t)baseModule);
@@ -1044,7 +1044,7 @@ namespace CustomResolutionAndBorderless
 
             if (fAspectRatio > fNativeAspect)
             {
-                if (uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScanSilent(baseModule, "F3 48 ?? ?? ?? ?? 48 ?? ?? ?? 48 ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ??"))
+                if (uint8_t* MGS2_MotionBlurScanResult = Memory::PatternScanSilent(baseModule, "F3 48 0F 2C 5F"))
                 {
                     Memory::PatchBytes((uintptr_t)MGS2_MotionBlurScanResult, "\x48\x31\xDB\x90\x90\x90", 6);
                 }
@@ -1054,7 +1054,7 @@ namespace CustomResolutionAndBorderless
         else if (eGameType & MGS3 && bHUDFix || eGameType & MG)
         {
             // MG1/2 | MGS 3: HUD
-            uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "0F ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 4C ?? ?? ?? ?? ?? ?? F3 44 ?? ?? ?? ?? ?? ?? ?? 41 ?? 00 02 00 00");
+            uint8_t* MGS3_HUDWidthScanResult = Memory::PatternScanSilent(baseModule, "0F 84 ?? ?? ?? ?? F3 44 0F 10 35");
             if (MGS3_HUDWidthScanResult)
             {
                 static SafetyHookMid MGS3_HUDWidthMidHook {};
@@ -1084,7 +1084,7 @@ namespace CustomResolutionAndBorderless
         if ((eGameType & (MG | MGS2 | MGS3)) && bHUDFix)
         {
             // MGS 2 | MGS 3: Letterboxing
-            uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScanSilent(baseModule, "83 ?? 01 75 ?? ?? 01 00 00 00 44 ?? ?? ?? ?? ?? ?? 89 ?? ?? ?? ?? ??");
+            uint8_t* MGS2_MGS3_LetterboxingScanResult = Memory::PatternScanSilent(baseModule, "83 F9 ?? 75 ?? BA ?? ?? ?? ?? 44 39 35");
             if (MGS2_MGS3_LetterboxingScanResult)
             {
                 DWORD64 MGS2_MGS3_LetterboxingAddress = (uintptr_t)MGS2_MGS3_LetterboxingScanResult + 0x6;

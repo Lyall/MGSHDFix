@@ -23,6 +23,27 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Verify BEFORE_COMPARISON_PICS is not defined
+      shell: bash
+      run: |
+        if grep -qE '^\s*#define\s+BEFORE_COMPARISON_PICS\b' src/resources/common.hpp; then
+          echo "::error file=src/resources/common.hpp::BEFORE_COMPARISON_PICS is defined."
+          exit 1
+        fi
+
+    - name: Verify no trailing wildcard bytes in signature patterns
+      shell: bash
+      run: |
+        matches=$(grep -rnE ' \?\?"' --include='*.cpp' --include='*.hpp' --include='*.h' src/ || true)
+        if [ -n "$matches" ]; then
+          echo "$matches" | while IFS= read -r line; do
+            file=$(echo "$line" | cut -d: -f1)
+            lineno=$(echo "$line" | cut -d: -f2)
+            echo "::error file=$file,line=$lineno:: AoB signature pattern ending with a wildcarded byte. Please refer to CONTRIBUTING.md for how to generate AoB patterns."
+          done
+          exit 1
+        fi
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 

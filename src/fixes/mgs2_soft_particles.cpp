@@ -6,10 +6,6 @@
 #include "logging.hpp"
 #include "scene_depth.hpp"
 
-#include <atomic>
-#include <mutex>
-#include <vector>
-
 // Spray puffs and lamp glows are flat sprites, so the z-test cuts them along a hard line wherever
 // they pass through water, ground or the wall they sit on. Soft particles: fade each pixel by how
 // far the scene sits behind it, as a fraction of the sprite's own radius.

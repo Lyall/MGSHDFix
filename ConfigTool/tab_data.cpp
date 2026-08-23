@@ -489,18 +489,18 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2|MGS3), ConfigKeys::DevMenuHotkey_Section, ConfigKeys::DevMenuHotkey_Setting, ConfigKeys::DevMenuHotkey_Help, ConfigKeys::DevMenuHotkey_Tooltip,
           std::make_pair(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
 
-        { (MGS3), ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { (MGS3), ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,
           Field::Int, 1, 1, 100 },
 
-        { (MGS3), ConfigKeys::OverrideMouseSensitivity_Section, "",
+        { (MGS2|MGS3), ConfigKeys::OverrideMouseSensitivity_Section, "",
           "", "",
           std::nullopt, false, Field::Spacer },
 
-        { (MGS3), ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,
           Field::Int, 1, 1, 100 },
 

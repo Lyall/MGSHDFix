@@ -5,6 +5,7 @@
 
 void TextureBufferSize::Initialize() const
 {
+    return; //ALL BELOW PATTERNS ARE CONSIDERED INVALID.
     if (iTextureBufferSizeMB > 128 && (eGameType & (MG | MGS3)))
     {
         // MG/MG2 | MGS3: texture buffer size extension
@@ -34,7 +35,7 @@ void TextureBufferSize::Initialize() const
             // CBaseTexture::Create seems to contain code that mallocs buffers based on 16MiB shifted by index of the mip being loaded
             // (ie: size = 16MiB >> mipIndex)
             // We'll make sure to increase the base 16MiB size it uses too
-            if (uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScanSilent(baseModule, "75 ?? 00 00 00 08 8B ??"))
+            if (uint8_t* MGS3_CBaseTextureMallocScanResult = Memory::PatternScanSilent(baseModule, "NEED TO REFIND"))
             {
                 uint32_t* bufferAmount = reinterpret_cast<uint32_t*>(MGS3_CBaseTextureMallocScanResult + 3);
                 spdlog::info("MG/MG2 | MGS 3: Texture Buffer Size: #{} ({:s}+{:X}) old buffer size: {}", 9, sExeName.c_str(), reinterpret_cast<uintptr_t>(MGS3_CBaseTextureMallocScanResult) - reinterpret_cast<uintptr_t>(baseModule), static_cast<uintptr_t>(*bufferAmount));

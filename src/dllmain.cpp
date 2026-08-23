@@ -141,7 +141,7 @@ static void Init_Miscellaneous()
         {
             // Launcher | MG/MG2 | MGS 2 | MGS 3: Disable mouse cursor
             // Thanks again emoose!
-            if (uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(eGameType & LAUNCHER ? unityPlayer : baseModule, "BA 00 7F 00 00 33 ?? FF ?? ?? ?? ?? ?? 48 ?? ??", "Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor"))
+            if (uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(eGameType & LAUNCHER ? unityPlayer : baseModule, "BA ?? ?? ?? ?? 33 C9 FF 15", "Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor"))
             {
                 // The game enters 32512 in the RDX register for the function USER32.LoadCursorA to load IDC_ARROW (normal select arrow in windows)
                 // Set this to 0 and no cursor icon is loaded
@@ -153,7 +153,7 @@ static void Init_Miscellaneous()
 
     if ((bDisableTextureFiltering || iAnisotropicFiltering > 0) && (eGameType & (MGS2|MGS3)))
     {
-        if (uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? ?? ?? ?? 44 39 ?? ?? 38 ?? ?? ?? 74 ?? 44 89 ?? ?? ?? ?? ?? ?? EB ?? 48 ?? ??", "MGS 2 | MGS 3: Texture Filtering"))
+        if (uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 ?? ?? ?? ?? 74 ?? 44 89 8C 01 ?? ?? ?? ?? EB ?? 48 63 C2 48 6B C8 ?? 48 8B 05 ?? ?? ?? ?? 44 39 8C 01 ?? ?? ?? ?? 74 ?? 44 89 8C 01 ?? ?? ?? ?? EB", "MGS 2 | MGS 3: Texture Filtering"))
         {
             static SafetyHookMid SetSamplerStateInsnXMidHook{};
             SetSamplerStateInsnXMidHook = safetyhook::create_mid(MGS3_SetSamplerStateInsnScanResult + 0x7,
@@ -172,13 +172,13 @@ static void Init_Miscellaneous()
 
     }
 
-    if (eGameType & MGS3 && bMouseSensitivity)
+    if ((eGameType & (MGS2|MGS3)) && bMouseSensitivity)
     {
-        // MG 1/2 | MGS 2 | MGS 3: MouseSensitivity
-        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScanSilent(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? ?? 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
+        // MGS 2 | MGS 3: MouseSensitivity
+        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScanSilent(baseModule, "F3 0F 59 43 ?? F3 0F 2C C0 66 0F 6E 43");
         if (MGS3_MouseSensitivityScanResult)
         {
-            spdlog::info("MGS 3: Mouse Sensitivity: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2 | MGS 3: Mouse Sensitivity: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MouseSensitivityXMidHook{};
             MouseSensitivityXMidHook = safetyhook::create_mid(MGS3_MouseSensitivityScanResult,
@@ -196,7 +196,7 @@ static void Init_Miscellaneous()
         }
         else if (!MGS3_MouseSensitivityScanResult)
         {
-            spdlog::error("MGS 3: Mouse Sensitivity: Pattern scan failed.");
+            spdlog::error("MGS 2 | MGS 3: Mouse Sensitivity: Pattern scan failed.");
         }
     }
 }

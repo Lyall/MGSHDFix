@@ -1,7 +1,7 @@
 #pragma once
 #include "helper.hpp"
+#include "logging.hpp"
 
-#include <map>
 
 inline std::string sExeName;
 inline std::filesystem::path sExePath;
@@ -46,7 +46,11 @@ constexpr float f_PS2_Height = 448.0f;
 
 
 //#define BEFORE_COMPARISON_PICS
+#if defined(BEFORE_COMPARISON_PICS)
 //#define DISABLE_MGS3_CUTSCENE_CAMERA_FIX
-//#define BEFORE_COMPARISON_PICS_NO_GAMMA_CORRECTION
-//#define BEFORE_COMPARISON_PICS_NO_SMAA
+#define BEFORE_COMPARISON_PICS_NO_GAMMA_CORRECTION
+#define BEFORE_COMPARISON_PICTURES_NO_TYPO_FIXES
+#define BEFORE_COMPARISON_PICS_NO_SMAA
+#endif
+
 
