@@ -411,6 +411,7 @@ namespace
         if (eGameType & MGS2)
         {
             SceneDepth::ResetStatus();
+            g_DepthOfFieldFixes.OnPresent();
             MGS2_ThirdPersonFreecam::Tick();
             MGS2_First_Person_View::Tick();
             MGS2ThermalGoggles::Tick();

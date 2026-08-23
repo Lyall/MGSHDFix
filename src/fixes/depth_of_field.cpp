@@ -18,8 +18,6 @@ namespace
     constexpr UINT kFocusPyramidMipCount = 7;
     constexpr float kMGS3FocusSpreadBoost = 2.75f;
     constexpr uint64_t kMGS3PendingNearFocusMaxFrameAge = 2;
-    constexpr float kNearFocusMinDepthSpan = 0.00025f;
-    constexpr int kNearFocusMinPlaneCount = 6;
     constexpr size_t kTrackedNearFocusPacketCount = 16;
     constexpr size_t kTrackedNearFocusWorkCount = 16;
     constexpr size_t kTrackedMGS3FocusPacketCount = 32;
@@ -37,11 +35,15 @@ namespace
     constexpr ptrdiff_t kDmapackBpRenderCallbackOffset = 0x30;
     constexpr uint32_t kNearFocusSetId = 0x00BBAD24;
     constexpr uint32_t kNearFocusDemoId = 0x01000002;
-    // f_focus.c blends each plane at FIX 128 and shifts the frame one 448-line texel per plane, so the
-    // far end is fully covered by a blur of one PS2 texel sigma.
-    constexpr int kMGS2FocusAlpha = 64;
-    constexpr int kMGS2FocusAlphaBoost = 32;   // past strength 20 the layers also thicken, up to this much at 30
-    constexpr float kMGS2FocusSpreadPerHeight = 0.005f;
+    // The PS2 blurred by drawing the frame over itself up to eight times, each copy nudged a little.
+    // These numbers describe those copies.
+    constexpr int kPs2MaxDrawPlanes = 8;
+    constexpr float kPs2DrawLines = 448.0f;
+    constexpr float kMGS2FarPlaneVariance = 0.25f;
+    constexpr float kMGS2NearPlaneVariance = 0.5f;
+    constexpr float kMGS2NearPlaneAlpha = 0.75f;          // the near copy is blended back at vertex alpha 0x60
+    constexpr float kMGS2TexelAspect = 448.0f / 384.0f;   // 512 PS2 texels across a 4:3 picture
+    constexpr float kMGS2UpsampleVariance = 0.75f;        // added by the bilinear half-to-full-res upsample
 
     using BpRbAllocFn = void*(__fastcall*)(int);
     using BpRbAddCommandFn = void(__fastcall*)(unsigned int, void*);
@@ -197,6 +199,11 @@ namespace
     bool gDofFocusHasPyramid = false;
     bool gDofFocusReady = false;
     bool gDofFocusFailed = false;
+    uint32_t gDofMGS2PassesThisFrame = 0;
+    uint64_t gDofMGS2DepthFrameIndex = UINT64_MAX;
+    ComPtr<ID3D11Resource> gDofMGS2DepthDSVResource;
+    ComPtr<ID3D11ShaderResourceView> gDofMGS2DepthSRV;
+    bool gDofMGS2DepthMultisampled = false;
 
     struct DofFocusConstants
     {
@@ -285,6 +292,11 @@ namespace
         gDofFocusSourceMipCount = 1;
         gDofFocusHasPyramid = false;
         gDofFocusReady = false;
+        gDofMGS2PassesThisFrame = 0;
+        gDofMGS2DepthFrameIndex = UINT64_MAX;
+        gDofMGS2DepthDSVResource.Reset();
+        gDofMGS2DepthSRV.Reset();
+        gDofMGS2DepthMultisampled = false;
     }
 
     bool EnsureDofRenderer()
@@ -319,7 +331,7 @@ namespace
             return false;
         }
 
-        const char* shader = R"(
+        const char* mgs3Shader = R"(
             cbuffer FocusConstants : register(b0)
             {
                 float4 sourceRect;
@@ -557,6 +569,285 @@ namespace
             }
         )";
 
+        const char* mgs2Shader = R"(
+            // MGS2's blur. For each pixel: how many of the PS2's blur planes is it behind? Blur it that
+            // much. Coverage spreads a little sideways along the same surface so a plane crossing a
+            // floor fades instead of cutting, and never over the edge of something in front.
+            cbuffer FocusConstants : register(b0)
+            {
+                float4 sourceRect;
+                float4 sourceSizeAndSpread;
+                float4 focusColor;
+                float4 planeData[2];
+                float4 depthSize;
+            };
+
+            Texture2D focusSource : register(t0);
+            Texture2D sceneDepth : register(t1);
+            Texture2D gatherSource : register(t3);
+            Texture2DMS<float> sceneDepthMS : register(t4);
+            Texture2D fullSource : register(t5);
+            SamplerState focusSampler : register(s0);
+
+            static const bool  kPlaneInterpolate = true;   // false = the PS2's integer plane steps
+            static const float kOnsetEase = 1.0;           // the first plane grows in over this much of one plane interval
+            static const float kTapVar = 0.12008;          // per-axis variance of the 13-tap ring at spread 1
+            static const float kSrcVar = 1.0 / 6.0;
+            static const float kMipLevelScale = 1.25;      // the level holds ~2/3 of the variance, so the centre tap is already soft
+            static const float kBoxMatchPlanes = 0.26;
+            static const float kSameSurface = 0.04;        // neighbours this close in depth count as one surface
+            static const float kCoverReachSigmas = 4.0;    // how far, in sigmas, coverage fades along a surface
+            static const float kCoverReachMinPx = 8.0;
+            static const float kCoverReachMaxPx = 128.0;
+
+            static const float2 kPs2Kernel[12] = {
+                float2( 0.40,  0.00), float2(-0.40,  0.00), float2( 0.00,  0.40), float2( 0.00, -0.40),
+                float2( 0.30,  0.30), float2(-0.30,  0.30), float2( 0.30, -0.30), float2(-0.30, -0.30),
+                float2( 0.78,  0.22), float2(-0.78, -0.22), float2( 0.22, -0.78), float2(-0.22,  0.78)
+            };
+
+            struct VSOut
+            {
+                float4 pos : SV_Position;
+                float2 uv : TEXCOORD0;
+            };
+
+            VSOut FocusVS(uint id : SV_VertexID)
+            {
+                float2 uv = float2((id << 1) & 2, id & 2);
+                VSOut output;
+                output.pos = float4(uv * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
+                output.uv = uv;
+                return output;
+            }
+
+            float Ps2Into(float depth, float4 stack, bool nearSide)
+            {
+                return nearSide ? depth - stack.x : stack.x - depth;
+            }
+
+            float Ps2PlaneCount(float depth, float4 stack, bool nearSide)
+            {
+                if (stack.z <= 0.0)
+                {
+                    return 0.0;
+                }
+                float into = Ps2Into(depth, stack, nearSide);
+                if (into < 0.0)
+                {
+                    return 0.0;
+                }
+                float step = max(stack.y, 1e-7);
+                float first = kOnsetEase > 0.0 ? saturate(into / (kOnsetEase * step)) : 1.0;
+                float k = min(first + into / step, stack.z);
+                return kPlaneInterpolate ? k : floor(k);
+            }
+
+            float Ps2StackVariance(float planes, float perPlane)
+            {
+                return planes > 0.0 ? perPlane * (planes + kBoxMatchPlanes * saturate(planes)) : 0.0;
+            }
+
+            float Ps2OnsetAlpha(float depth, float4 stack, bool nearSide)
+            {
+                if (stack.z <= 0.0)
+                {
+                    return 0.0;
+                }
+                float into = Ps2Into(depth, stack, nearSide);
+                if (into < 0.0)
+                {
+                    return 0.0;
+                }
+                return kOnsetEase > 0.0 ? saturate(into / (kOnsetEase * max(stack.y, 1e-7))) : 1.0;
+            }
+
+            float Ps2DepthAt(int2 px)
+            {
+                [branch]
+                if ((int(depthSize.w + 0.5) & 2) != 0)
+                {
+                    return sceneDepthMS.Load(px, 0);
+                }
+                else
+                {
+                    return sceneDepth.Load(int3(px, 0)).r;
+                }
+            }
+
+            float Ps2MipVariance(float texelPx)
+            {
+                return (1.25 / 3.0) * (texelPx * texelPx - 1.0) + kSrcVar;
+            }
+
+            struct Ps2Taps
+            {
+                float lod;
+                float useFull;
+                float2 radius;
+            };
+
+            Ps2Taps Ps2Plan(float sigmaPx, float2 sourceSize)
+            {
+                float lodBias = depthSize.z;
+                float maxMip = sourceSizeAndSpread.w;
+                float upVar = focusColor.y;
+                float ax = focusColor.x;
+                float v = sigmaPx * sigmaPx;
+                bool haveFull = (int(depthSize.w + 0.5) & 1) != 0 || lodBias < 0.5;
+                bool full = haveFull && v < Ps2MipVariance(2.0) + upVar + kTapVar;
+                Ps2Taps r;
+                float mipVar;
+                if (full)
+                {
+                    r.lod = 0.0;
+                    r.useFull = lodBias < 0.5 ? 0.0 : 1.0;
+                    mipVar = kSrcVar;
+                }
+                else
+                {
+                    float t = clamp(kMipLevelScale * sigmaPx, 2.0, exp2(maxMip + lodBias));
+                    r.lod = log2(t) - lodBias;
+                    r.useFull = 0.0;
+                    float l0 = floor(r.lod);
+                    float f = r.lod - l0;
+                    mipVar = lerp(Ps2MipVariance(exp2(l0 + lodBias)), Ps2MipVariance(exp2(l0 + 1.0 + lodBias)), f);
+                }
+                float sy = sqrt(max(v - mipVar - upVar, kTapVar) / kTapVar);
+                float sx = sqrt(max(ax * ax * v - mipVar - upVar, kTapVar) / kTapVar);
+                r.radius = float2(sx, sy) / sourceSize;
+                return r;
+            }
+
+            float3 Ps2Gather13(Texture2D tex, float2 uv, float lod, float2 radius)
+            {
+                float3 color = tex.SampleLevel(focusSampler, uv, lod).rgb * 0.16;
+                [unroll]
+                for (int i = 0; i < 8; ++i)
+                {
+                    color += tex.SampleLevel(focusSampler, uv + kPs2Kernel[i] * radius, lod).rgb * 0.08;
+                }
+                [unroll]
+                for (int j = 8; j < 12; ++j)
+                {
+                    color += tex.SampleLevel(focusSampler, uv + kPs2Kernel[j] * radius, lod).rgb * 0.05;
+                }
+                return color;
+            }
+        )"
+        R"(
+            float4 ComputeFocusSample(float2 sourceUv, float2 sourceSize)
+            {
+                float2 depthDims = max(depthSize.xy, float2(1.0, 1.0));
+                bool perPixel = (int(depthSize.w + 0.5) & 4) != 0;
+                int2 at = int2(clamp(sourceUv * depthDims, float2(0.0, 0.0), depthDims - 1.0));
+                int2 base = perPixel ? at : (at & ~1);
+                float cover = 0.0;
+                float varianceSum = 0.0;
+                [unroll]
+                for (int j = 0; j < 4; ++j)
+                {
+                    int2 px = perPixel ? base : min(base + int2(j & 1, j >> 1), int2(depthDims) - 1);
+                    float d = Ps2DepthAt(px);
+                    float a = max(Ps2OnsetAlpha(d, planeData[0], false), Ps2OnsetAlpha(d, planeData[1], true));
+                    float variance = Ps2StackVariance(Ps2PlaneCount(d, planeData[0], false), planeData[0].w)
+                        + Ps2StackVariance(Ps2PlaneCount(d, planeData[1], true), planeData[1].w);
+                    cover += a;
+                    varianceSum += a * variance;
+                }
+                float texel = sourceSizeAndSpread.z;
+                float onePlane = max(Ps2StackVariance(1.0, planeData[0].w), Ps2StackVariance(1.0, planeData[1].w));
+                float sigma = texel * sqrt(cover > 0.0 ? varianceSum / cover : onePlane);
+                Ps2Taps taps = Ps2Plan(sigma, sourceSize);
+                float here = Ps2DepthAt(base);
+                float2 reach = clamp(kCoverReachSigmas * sigma, kCoverReachMinPx, kCoverReachMaxPx) / sourceSize;
+                float ringAlpha = 0.0;
+                float ringVariance = 0.0;
+                [unroll]
+                for (int r = 0; r < 12; ++r)
+                {
+                    float w = r < 8 ? 0.08 : 0.05;
+                    float2 ruv = clamp(sourceUv + kPs2Kernel[r] * reach, float2(0.0, 0.0), float2(1.0, 1.0));
+                    int2 rpx = int2(clamp(ruv * depthDims, float2(0.0, 0.0), depthDims - 1.0));
+                    float rd = Ps2DepthAt(rpx);
+                    float same = abs(rd - here) <= kSameSurface * max(here, 1e-6) ? 1.0 : 0.0;
+                    float ra = max(Ps2OnsetAlpha(rd, planeData[0], false), Ps2OnsetAlpha(rd, planeData[1], true)) * same;
+                    float rv = Ps2StackVariance(Ps2PlaneCount(rd, planeData[0], false), planeData[0].w)
+                        + Ps2StackVariance(Ps2PlaneCount(rd, planeData[1], true), planeData[1].w);
+                    ringAlpha += ra * w;
+                    ringVariance += ra * w * rv;
+                }
+                ringAlpha /= 0.84;
+                ringVariance /= 0.84;
+                float alpha = max(cover * 0.25, ringAlpha);
+                float alphaVariance = cover > 0.0 ? varianceSum / cover * alpha : ringVariance;
+                if (alpha <= 0.0)
+                {
+                    return float4(0.0, 0.0, 0.0, 0.0);
+                }
+                sigma = texel * sqrt(alphaVariance / alpha);
+                taps = Ps2Plan(sigma, sourceSize);
+                float3 color;
+                [branch]
+                if (taps.useFull > 0.5)
+                {
+                    color = Ps2Gather13(fullSource, sourceUv, 0.0, taps.radius);
+                }
+                else
+                {
+                    color = Ps2Gather13(focusSource, sourceUv, taps.lod, taps.radius);
+                }
+                return float4(color, alpha);
+            }
+
+            float4 DepthFocusPS(VSOut input) : SV_Target
+            {
+                float2 basePixel = sourceRect.xy + input.uv * sourceRect.zw;
+                float2 sourceSize = max(sourceSizeAndSpread.xy, float2(1.0, 1.0));
+                float4 focus = ComputeFocusSample(basePixel / sourceSize, sourceSize);
+                if (focus.a < 0.004)
+                {
+                    discard; // in focus; keep the original pixel and skip the blur taps
+                }
+
+                return focus;
+            }
+
+            float4 GatherPS(VSOut input) : SV_Target
+            {
+                float2 sourceSize = max(sourceSizeAndSpread.xy, float2(1.0, 1.0));
+                float4 focus = ComputeFocusSample(input.uv, sourceSize);
+                return float4(focus.rgb * focus.a, focus.a);
+            }
+
+            float4 UpsamplePS(VSOut input) : SV_Target
+            {
+                float2 basePixel = sourceRect.xy + input.uv * sourceRect.zw;
+                float2 sourceSize = max(sourceSizeAndSpread.xy, float2(1.0, 1.0));
+                float4 blurred = gatherSource.SampleLevel(focusSampler, basePixel / sourceSize, 0);
+                if (blurred.a < 0.004)
+                {
+                    discard;
+                }
+
+                return blurred;
+            }
+
+            float4 DownsamplePS(VSOut input) : SV_Target
+            {
+                float2 size;
+                focusSource.GetDimensions(size.x, size.y);
+                float2 texel = 1.0 / max(size, float2(1.0, 1.0));
+
+                float3 color = focusSource.SampleLevel(focusSampler, input.uv + texel * float2(-1.0, -1.0), 0).rgb;
+                color += focusSource.SampleLevel(focusSampler, input.uv + texel * float2( 1.0, -1.0), 0).rgb;
+                color += focusSource.SampleLevel(focusSampler, input.uv + texel * float2(-1.0,  1.0), 0).rgb;
+                color += focusSource.SampleLevel(focusSampler, input.uv + texel * float2( 1.0,  1.0), 0).rgb;
+                return float4(color * 0.25, 1.0);
+            }
+        )";
+
+        const char* shader = (eGameType & MGS2) ? mgs2Shader : mgs3Shader;
         ComPtr<ID3DBlob> vsBlob;
         ComPtr<ID3DBlob> depthPsBlob;
         ComPtr<ID3DBlob> err;
@@ -591,12 +882,17 @@ namespace
         };
 
         if (!compilePS("DownsamplePS", gDofDownsamplePS) ||
-            !compilePS("CocPS", gDofCocPS) ||
-            !compilePS("CocMSPS", gDofCocMSPS) ||
-            !compilePS("DilateHPS", gDofDilateHPS) ||
-            !compilePS("DilateVPS", gDofDilateVPS) ||
             !compilePS("GatherPS", gDofGatherPS) ||
             !compilePS("UpsamplePS", gDofUpsamplePS))
+        {
+            return false;
+        }
+
+        if (!(eGameType & MGS2) &&
+            (!compilePS("CocPS", gDofCocPS) ||
+             !compilePS("CocMSPS", gDofCocMSPS) ||
+             !compilePS("DilateHPS", gDofDilateHPS) ||
+             !compilePS("DilateVPS", gDofDilateVPS)))
         {
             return false;
         }
@@ -1044,8 +1340,7 @@ namespace
         ID3D11Buffer* oldVertexBuffer = nullptr;
         ID3D11Buffer* oldVSConstants = nullptr;
         ID3D11Buffer* oldPSConstants = nullptr;
-        // Our passes bind color, depth, CoC, the gather and the multisampled depth at t0-t4.
-        ID3D11ShaderResourceView* oldSRV[5] = {};
+        ID3D11ShaderResourceView* oldSRV[6] = {};
         ID3D11SamplerState* oldSampler = nullptr;
         D3D11_PRIMITIVE_TOPOLOGY oldTopology {};
         D3D11_VIEWPORT oldViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE] = {};
@@ -1139,7 +1434,7 @@ namespace
         ReleaseDofPassState(state);
     }
 
-    bool BeginDofPass(DofPassState& state, bool requireDepth = true)
+    bool BeginDofPass(DofPassState& state, bool requireDepth = true, bool reuseSource = true)
     {
         ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
         if (!context || !EnsureDofRenderer())
@@ -1155,7 +1450,7 @@ namespace
         if (!state.oldRTV[0] ||
             (requireDepth && !state.oldDSV) ||
             state.oldViewportCount == 0 ||
-            !CopyDofSourceFromCurrentTarget(state.oldRTV[0], true) ||
+            !CopyDofSourceFromCurrentTarget(state.oldRTV[0], reuseSource) ||
             !gDofFocusSourceSRV)
         {
             ReleaseDofPassState(state);
@@ -1200,15 +1495,13 @@ namespace
     bool IsReasonableFocusSourcePacket(const FocusSourcePacket* packet)
     {
         return packet &&
-               packet->maxPlane >= 2 &&
-               packet->maxPlane <= 64 &&
+               Memory::IsReadable(packet, sizeof(FocusSourcePacket)) &&
+               packet->maxPlane >= 1 &&
+               packet->maxPlane <= kFocusMaxPlaneCount &&
                std::isfinite(packet->focusNear) &&
                std::isfinite(packet->focusFar) &&
-               packet->focusNear > 0.0f &&
-               packet->focusNear < 1.0f &&
-               packet->focusFar > 0.0f &&
-               packet->focusFar < 1.0f &&
-               packet->focusNear > packet->focusFar;
+               std::abs(packet->focusNear) <= 16.0f &&
+               std::abs(packet->focusFar) <= 16.0f;
     }
 
     bool IsReasonableDofFocusPacket(const DofFocusPacket* packet)
@@ -1241,82 +1534,11 @@ namespace
                packet.focusFar < 1.0f;
     }
 
-    float NormalizeDepthValue(float depth)
-    {
-        if (!std::isfinite(depth))
-        {
-            return depth;
-        }
-
-        if (depth < 0.0f)
-        {
-            depth = (depth + 1.0f) * 0.5f;
-        }
-
-        return std::clamp(depth, 0.000001f, 0.999999f);
-    }
-
     bool SameFocusPacket(const FocusSourcePacket& lhs, const FocusSourcePacket& rhs)
     {
         return lhs.maxPlane == rhs.maxPlane &&
                lhs.focusNear == rhs.focusNear &&
                lhs.focusFar == rhs.focusFar;
-    }
-
-    void WidenNearFocusPacket(FocusSourcePacket* packet)
-    {
-        if (!IsReasonableFocusSourcePacket(packet))
-        {
-            return;
-        }
-
-        const float span = std::abs(packet->focusNear - packet->focusFar);
-        if (span >= kNearFocusMinDepthSpan)
-        {
-            return;
-        }
-
-        const float center = (packet->focusNear + packet->focusFar) * 0.5f;
-        const float halfSpan = kNearFocusMinDepthSpan * 0.5f;
-        packet->focusNear = std::clamp(center + halfSpan, 0.000001f, 0.999999f);
-        packet->focusFar = std::clamp(center - halfSpan, 0.000001f, 0.999999f);
-    }
-
-    bool PrepareFocusSource(FocusSourcePacket& source)
-    {
-        if (source.maxPlane < 1 ||
-            source.maxPlane > 64 ||
-            !std::isfinite(source.focusNear) ||
-            !std::isfinite(source.focusFar))
-        {
-            return false;
-        }
-#ifndef RELEASE_BUILD
-        spdlog::info("Original focus source: maxPlane = {}, focusNear = {}, focusFar = {}", source.maxPlane, source.focusNear, source.focusFar);
-       // if (source.maxPlane == 8)
-       // {
-       //     return false;
-       // }
-#endif
-        source.maxPlane = std::max(source.maxPlane, kNearFocusMinPlaneCount);
-        source.focusNear = NormalizeDepthValue(source.focusNear);
-        source.focusFar = NormalizeDepthValue(source.focusFar);
-
-        if (source.focusNear < source.focusFar)
-        {
-            std::swap(source.focusNear, source.focusFar);
-        }
-
-        if (source.focusNear <= source.focusFar)
-        {
-            const float center = (source.focusNear + source.focusFar) * 0.5f;
-            const float halfSpan = kNearFocusMinDepthSpan * 0.5f;
-            source.focusNear = std::clamp(center + halfSpan, 0.000001f, 0.999999f);
-            source.focusFar = std::clamp(center - halfSpan, 0.000001f, 0.999999f);
-        }
-
-        WidenNearFocusPacket(&source);
-        return IsReasonableFocusSourcePacket(&source);
     }
 
     ptrdiff_t ModuleOffset(uintptr_t address)
@@ -1945,20 +2167,11 @@ namespace
 
         const int height = fullRect.y2 - fullRect.y1;
         const bool nearSide = focusSide == FocusSide::Near;
-        int focusPixelScale = 0;
-        if (eGameType & MGS2)
-        {
-            // Strength 10 is the PS2 blur; the slider scales from there.
-            focusPixelScale = std::clamp(static_cast<int>(height * kMGS2FocusSpreadPerHeight * g_DepthOfFieldFixes.fBlurUvMultiplier / 10.0f + 0.5f), 2, 80);
-        }
-        else
-        {
-            const float configuredSpread = std::clamp(g_DepthOfFieldFixes.fBlurUvMultiplier / 5.0f, 1.0f, 4.0f);
-            // ~0.6% of screen height per configured spread unit.
-            const int baseFocusPixelScale = std::clamp(static_cast<int>(height * 0.0029f * configuredSpread + 0.5f), 2, 30);
-            const float sideSpreadScale = nearSide ? 1.12f : 1.0f;
-            focusPixelScale = std::clamp(static_cast<int>(baseFocusPixelScale * sideSpreadScale * kMGS3FocusSpreadBoost + 0.5f), 2, 80);
-        }
+        const float configuredSpread = std::clamp(g_DepthOfFieldFixes.fBlurUvMultiplier / 5.0f, 1.0f, 4.0f);
+        // ~0.6% of screen height per configured spread unit.
+        const int baseFocusPixelScale = std::clamp(static_cast<int>(height * 0.0029f * configuredSpread + 0.5f), 2, 30);
+        const float sideSpreadScale = nearSide ? 1.12f : 1.0f;
+        const int focusPixelScale = std::clamp(static_cast<int>(baseFocusPixelScale * sideSpreadScale * kMGS3FocusSpreadBoost + 0.5f), 2, 80);
 
         prepared = {};
         prepared.packet = packet;
@@ -2347,6 +2560,214 @@ namespace
         InstallNearFocusDmapackCallback(work);
     }
 
+    // MGS2 depth of field. The PS2 blurred by drawing up to eight copies of the frame, each sitting
+    // at a depth across the focus range. We work out where those planes are, count how many each
+    // pixel sits behind, and blur it that much, measured in the PS2's own 448-line pixels.
+
+    // Near packets store depth backwards; flip it to match the far ones.
+    float NearWorkDepth(float depth)
+    {
+        return (std::isfinite(depth) && depth < 0.0f) ? (depth + 1.0f) * 0.5f : depth;
+    }
+
+    struct Ps2PlaneStack
+    {
+        float onset = 0.0f;
+        float step = 0.0f;
+        int count = 0;
+        float variance = 0.0f;
+    };
+
+    // Spread the planes evenly across the focus range, skipping any that land on a clip plane.
+    bool BuildPs2PlaneStack(const FocusSourcePacket& raw, FocusSide side, Ps2PlaneStack& out)
+    {
+        out = {};
+        const int planes = raw.maxPlane;
+        const float focusNear = std::max(raw.focusNear, raw.focusFar);
+        const float focusFar = std::min(raw.focusNear, raw.focusFar);
+        if (planes < 2 ||
+            planes > kFocusMaxPlaneCount ||
+            !std::isfinite(focusNear) ||
+            !std::isfinite(focusFar) ||
+            std::abs(focusNear) > 16.0f ||
+            std::abs(focusFar) > 16.0f ||
+            focusNear <= focusFar)
+        {
+            return false;
+        }
+
+        int first = -1;
+        int last = -1;
+        float zFirst = 0.0f;
+        float zLast = 0.0f;
+        const int drawn = std::min(planes, kPs2MaxDrawPlanes);
+        for (int i = 0; i < drawn; ++i)
+        {
+            float z = (focusNear - focusFar) * static_cast<float>(i) / static_cast<float>(planes - 1) + focusFar;
+            if (z < 0.0f) z = 0.0f;
+            if (z > 1.0f) z = 1.0f;
+            if (z == 1.0f || z == 0.0f)
+            {
+                continue;
+            }
+            if (first < 0)
+            {
+                first = i;
+                zFirst = z;
+            }
+            last = i;
+            zLast = z;
+        }
+
+        if (first < 0)
+        {
+            return false;
+        }
+
+        out.count = last - first + 1;
+        out.step = (focusNear - focusFar) / static_cast<float>(planes - 1);
+        out.onset = side == FocusSide::Far ? zLast : zFirst;
+        out.variance = side == FocusSide::Far ? kMGS2FarPlaneVariance : kMGS2NearPlaneVariance * kMGS2NearPlaneAlpha;
+        return true;
+    }
+
+    ID3D11ShaderResourceView* CaptureMGS2FrameDepth(ID3D11DepthStencilView* dsv)
+    {
+        ComPtr<ID3D11Resource> depthResource;
+        if (dsv)
+        {
+            dsv->GetResource(depthResource.GetAddressOf());
+        }
+        if (gDofMGS2DepthFrameIndex == gDofFrameIndex &&
+            gDofMGS2DepthSRV &&
+            depthResource &&
+            gDofMGS2DepthDSVResource.Get() == depthResource.Get())
+        {
+            gDofDepthMultisampled = gDofMGS2DepthMultisampled;
+            return gDofMGS2DepthSRV.Get();
+        }
+
+        ID3D11ShaderResourceView* depthSRV = CaptureFocusDepth(dsv);
+        gDofMGS2DepthFrameIndex = gDofFrameIndex;
+        gDofMGS2DepthDSVResource = depthResource;
+        gDofMGS2DepthSRV = depthSRV;
+        gDofMGS2DepthMultisampled = gDofDepthMultisampled;
+        return depthSRV;
+    }
+
+    // Blur at half size, then paint the result back at full size. Small screens blur at full size so
+    // we never go coarser than the PS2 did.
+    bool DrawMGS2PlaneStack(
+        const DofPassState& passState,
+        const Ps2PlaneStack* farStack,
+        const Ps2PlaneStack* nearStack,
+        ID3D11ShaderResourceView* depthSRV)
+    {
+        ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
+        const FocusRect fullRect { 0, 0, static_cast<int>(gDofFocusLogicalWidth), static_cast<int>(gDofFocusLogicalHeight) };
+        if (!context ||
+            !gDofDepthPS ||
+            !gDofFocusConstants ||
+            !gDofFocusDepthDisabledState ||
+            !gDofFocusSourceSRV ||
+            !depthSRV ||
+            !IsReasonableFocusRect(fullRect))
+        {
+            return false;
+        }
+
+        const bool gatherFull = gDofFocusLogicalHeight < static_cast<UINT>(2.0f * kPs2DrawLines);
+        const UINT gatherWidth = std::max<UINT>(gatherFull ? gDofFocusLogicalWidth : gDofFocusLogicalWidth / 2, 1);
+        const UINT gatherHeight = std::max<UINT>(gatherFull ? gDofFocusLogicalHeight : gDofFocusLogicalHeight / 2, 1);
+        const bool halfResGather = gDofGatherPS &&
+            gDofUpsamplePS &&
+            gDofFocusPremultBlendState &&
+            EnsureDofGatherTarget(g_D3D11Hooks.d3dDevice.Get(), gatherWidth, gatherHeight);
+        ID3D11ShaderResourceView* directSRV = (halfResGather && gDofFocusLodBias == 1.0f) ? gDofFocusDirectSRV.Get() : nullptr;
+
+        DofFocusConstants constants {};
+        constants.sourceRect[2] = static_cast<float>(fullRect.x2);
+        constants.sourceRect[3] = static_cast<float>(fullRect.y2);
+        constants.sourceSizeAndSpread[0] = static_cast<float>(gDofFocusLogicalWidth);
+        constants.sourceSizeAndSpread[1] = static_cast<float>(gDofFocusLogicalHeight);
+        constants.sourceSizeAndSpread[2] = static_cast<float>(gDofFocusLogicalHeight) / kPs2DrawLines * g_DepthOfFieldFixes.fBlurUvMultiplier / 10.0f;
+        constants.sourceSizeAndSpread[3] = static_cast<float>(std::max<UINT>(gDofFocusSourceMipCount, 1) - 1);
+        constants.color[0] = kMGS2TexelAspect;
+        constants.color[1] = (halfResGather && !gatherFull) ? kMGS2UpsampleVariance : 0.0f;
+
+        const auto writeStack = [&](int index, const Ps2PlaneStack* stack) {
+            if (!stack)
+            {
+                return;
+            }
+
+            constants.planeData[index][0] = stack->onset;
+            constants.planeData[index][1] = stack->step;
+            constants.planeData[index][2] = static_cast<float>(stack->count);
+            constants.planeData[index][3] = stack->variance;
+        };
+
+        writeStack(0, farStack);
+        writeStack(1, nearStack);
+
+        constants.depthSize[0] = constants.sourceSizeAndSpread[0];
+        constants.depthSize[1] = constants.sourceSizeAndSpread[1];
+        {
+            ComPtr<ID3D11Resource> depthResource;
+            depthSRV->GetResource(depthResource.GetAddressOf());
+            ComPtr<ID3D11Texture2D> depthTexture;
+            if (depthResource && SUCCEEDED(depthResource.As(&depthTexture)) && depthTexture)
+            {
+                D3D11_TEXTURE2D_DESC depthDesc {};
+                depthTexture->GetDesc(&depthDesc);
+                constants.depthSize[0] = static_cast<float>(depthDesc.Width);
+                constants.depthSize[1] = static_cast<float>(depthDesc.Height);
+            }
+        }
+        constants.depthSize[2] = gDofFocusLodBias;
+        constants.depthSize[3] = static_cast<float>((directSRV ? 1 : 0) | (gDofDepthMultisampled ? 2 : 0) | (gatherFull ? 4 : 0));
+
+        context->UpdateSubresource(gDofFocusConstants.Get(), 0, nullptr, &constants, 0, 0);
+
+        ID3D11Buffer* constantBuffer = gDofFocusConstants.Get();
+        context->PSSetConstantBuffers(0, 1, &constantBuffer);
+        context->OMSetDepthStencilState(gDofFocusDepthDisabledState.Get(), 0);
+        context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+
+        ID3D11ShaderResourceView* nullSRVs[6] = {};
+        ID3D11ShaderResourceView* depthSingle = gDofDepthMultisampled ? nullptr : depthSRV;
+        ID3D11ShaderResourceView* depthMulti = gDofDepthMultisampled ? depthSRV : nullptr;
+
+        if (halfResGather)
+        {
+            const D3D11_VIEWPORT gatherViewport { 0.0f, 0.0f, static_cast<float>(gatherWidth), static_cast<float>(gatherHeight), 0.0f, 1.0f };
+            ID3D11RenderTargetView* gatherRTV = gDofGatherRTV.Get();
+            context->PSSetShaderResources(0, 6, nullSRVs);
+            context->OMSetRenderTargets(1, &gatherRTV, nullptr);
+            context->RSSetViewports(1, &gatherViewport);
+            context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+            ID3D11ShaderResourceView* gatherSrvs[6] = { gDofFocusSourceSRV.Get(), depthSingle, nullptr, nullptr, depthMulti, directSRV };
+            context->PSSetShader(gDofGatherPS.Get(), nullptr, 0);
+            context->PSSetShaderResources(0, 6, gatherSrvs);
+            context->DrawInstanced(3, 1, 0, 0);
+        }
+
+        // A target can't be read and drawn at the same time, so unbind it before drawing into it.
+        ID3D11RenderTargetView* targetRTV = passState.oldRTV[0];
+        context->PSSetShaderResources(0, 6, nullSRVs);
+        context->OMSetRenderTargets(1, &targetRTV, passState.oldDSV);
+        context->RSSetViewports(1, passState.oldViewports);
+        context->OMSetBlendState(halfResGather ? gDofFocusPremultBlendState.Get() : gDofFocusBlendState.Get(), nullptr, 0xFFFFFFFF);
+        context->OMSetDepthStencilState(gDofFocusDepthDisabledState.Get(), 0);
+
+        ID3D11ShaderResourceView* srvs[6] = { gDofFocusSourceSRV.Get(), depthSingle, nullptr, halfResGather ? gDofGatherSRV.Get() : nullptr, depthMulti, nullptr };
+        context->PSSetShader(halfResGather ? gDofUpsamplePS.Get() : gDofDepthPS.Get(), nullptr, 0);
+        context->PSSetShaderResources(0, 6, srvs);
+
+        context->DrawInstanced(3, 1, 0, 0);
+        return true;
+    }
+
     bool BuildNearFocusSourceFromWork(uintptr_t workAddress, FocusSourcePacket& source)
     {
         if (!IsTrackedNearFocusWork(workAddress) ||
@@ -2355,11 +2776,11 @@ namespace
             return false;
         }
 
-        source.maxPlane = std::max(Memory::ReadField<int>(workAddress, kFocusWorkMaxPlaneOffset), kNearFocusMinPlaneCount);
-        source.focusNear = NormalizeDepthValue(Memory::ReadField<float>(workAddress, kFocusWorkFocusNearOffset));
-        source.focusFar = NormalizeDepthValue(Memory::ReadField<float>(workAddress, kFocusWorkFocusFarOffset));
+        source.maxPlane = Memory::ReadField<int>(workAddress, kFocusWorkMaxPlaneOffset);
+        source.focusNear = NearWorkDepth(Memory::ReadField<float>(workAddress, kFocusWorkFocusNearOffset));
+        source.focusFar = NearWorkDepth(Memory::ReadField<float>(workAddress, kFocusWorkFocusFarOffset));
 
-        return PrepareFocusSource(source);
+        return IsReasonableFocusSourcePacket(&source);
     }
 
     bool BuildNearFocusSourceFromParam(uintptr_t paramAddress, FocusSourcePacket& source)
@@ -2370,7 +2791,9 @@ namespace
         }
 
         source = *reinterpret_cast<const FocusSourcePacket*>(paramAddress);
-        return PrepareFocusSource(source);
+        source.focusNear = NearWorkDepth(source.focusNear);
+        source.focusFar = NearWorkDepth(source.focusFar);
+        return IsReasonableFocusSourcePacket(&source);
     }
 
     void TrackNearFocusPacket(const FocusSourcePacket* packet)
@@ -2424,66 +2847,45 @@ namespace
         return false;
     }
 
-    // The game asks for the far blur and the near blur separately. Each only touches its own depth
-    // range, so whichever comes first is simply drawn on its own.
+    // One draw per focus packet. A second packet in the same frame blurs on top of the first, the
+    // way the PS2's planes piled up.
     bool DrawMGS2DepthFocus(const FocusSourcePacket* packet, bool nearSide)
     {
-        if (!Memory::IsReadable(packet, sizeof(FocusSourcePacket)))
-        {
-            return false;
-        }
-        FocusSourcePacket source = *packet;
-        if (!PrepareFocusSource(source))
+        if (!Memory::IsReadable(packet, sizeof(FocusSourcePacket)) || g_DepthOfFieldFixes.fBlurUvMultiplier <= 0.0f)
         {
             return false;
         }
 
-        const float boost = std::clamp((g_DepthOfFieldFixes.fBlurUvMultiplier - 20.0f) / 10.0f, 0.0f, 1.0f);
-        const int alpha = kMGS2FocusAlpha + static_cast<int>(boost * kMGS2FocusAlphaBoost + 0.5f);
-        // The scene's own plane count sets the blur width; PrepareFocusSource pads it.
-        const DofFocusPacket focus { alpha, std::clamp(packet->maxPlane, 2, kFocusMaxPlaneCount), source.focusNear, source.focusFar };
-        if (!ShouldApplyDepthFocus(focus))
+        Ps2PlaneStack stack {};
+        if (!BuildPs2PlaneStack(*packet, nearSide ? FocusSide::Near : FocusSide::Far, stack))
         {
             return false;
         }
 
         DofPassState passState {};
-        if (!BeginDofPass(passState))
+        if (!BeginDofPass(passState, true, gDofMGS2PassesThisFrame == 0))
         {
             return false;
         }
 
         ID3D11DeviceContext* context = g_D3D11Hooks.d3dDeviceContext.Get();
-        ID3D11ShaderResourceView* depthSRV = CaptureFocusDepth(passState.oldDSV);
-        const FocusRect fullRect { 0, 0,
-            static_cast<int>(gDofFocusLogicalWidth),
-            static_cast<int>(gDofFocusLogicalHeight) };
-
-        static const DofFocusPacket inertFar { 0, 1, 0.5f, 0.4f };
-        PreparedFocusDraw farDraw {};
-        PreparedFocusDraw nearDraw {};
-        bool prepared = false;
-        if (nearSide)
-        {
-            prepared = PrepareFocusDrawRect(fullRect, &inertFar, FocusSide::Far, farDraw) &&
-                PrepareFocusDrawRect(fullRect, &focus, FocusSide::Near, nearDraw);
-        }
-        else
-        {
-            prepared = PrepareFocusDrawRect(fullRect, &focus, FocusSide::Far, farDraw);
-        }
-
-        const bool drawn = prepared && depthSRV &&
-            DrawDepthWeightedFocus(passState, farDraw, nearSide ? &nearDraw : nullptr, depthSRV);
+        ID3D11ShaderResourceView* depthSRV = CaptureMGS2FrameDepth(passState.oldDSV);
+        const bool drawn = depthSRV &&
+            DrawMGS2PlaneStack(passState, nearSide ? nullptr : &stack, nearSide ? &stack : nullptr, depthSRV);
         RestoreDofPass(context, passState);
+        if (!drawn)
+        {
+            return false;
+        }
 
+        ++gDofMGS2PassesThisFrame;
         static bool logged = false;
-        if (drawn && !logged)
+        if (!logged)
         {
             logged = true;
             spdlog::info("MGS 2: Depth of Field: depth renderer active ({}).", gDofDepthMultisampled ? "multisampled" : "single sample");
         }
-        return drawn;
+        return true;
     }
 
     void __fastcall FarFocusCommand_Hook(void* packet)
@@ -2493,7 +2895,7 @@ namespace
         const bool drawn = DrawMGS2DepthFocus(focusPacket, isNearFocusPacket);
         if (isNearFocusPacket)
         {
-            // The game's planes only know the far side; a near packet it can't draw is dropped.
+            // The game only knows far packets; near ones end here.
             ConsumeNearFocusPacket(focusPacket);
             return;
         }
@@ -2524,7 +2926,8 @@ namespace
             }
         }
 
-        if (!PrepareFocusSource(source))
+        Ps2PlaneStack stack {};
+        if (!BuildPs2PlaneStack(source, FocusSide::Near, stack))
         {
             return false;
         }
@@ -2536,7 +2939,6 @@ namespace
         }
 
         *packet = source;
-        WidenNearFocusPacket(packet);
         TrackNearFocusPacket(packet);
 
         gInsideNearFocusAddCommand = true;
@@ -2559,37 +2961,11 @@ namespace
 
     bool PrepareOriginalNearFocusCommand(FocusSourcePacket* packet)
     {
-        if (!packet || !Memory::IsReadable(packet, sizeof(FocusSourcePacket)) || !Memory::IsWritable(packet, sizeof(FocusSourcePacket)))
+        if (!IsReasonableFocusSourcePacket(packet))
         {
             return false;
         }
 
-        FocusSourcePacket source = *packet;
-        if (!PrepareFocusSource(source))
-        {
-            if (gActiveNearFocusSource)
-            {
-                source = *gActiveNearFocusSource;
-            }
-            else if (gActiveNearFocusWork)
-            {
-                if (!BuildNearFocusSourceFromWork(gActiveNearFocusWork, source))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        if (!PrepareFocusSource(source))
-        {
-            return false;
-        }
-
-        *packet = source;
         TrackNearFocusPacket(packet);
         return true;
     }
@@ -2923,6 +3299,10 @@ void DepthOfFieldFixes::OnPresent()
     ++gDofFrameIndex;
     gDofFocusSourceFrameTarget.Reset();
     gDofFocusSourceFrameIndex = UINT64_MAX;
+    gDofMGS2PassesThisFrame = 0;
+    gDofMGS2DepthFrameIndex = UINT64_MAX;
+    gDofMGS2DepthDSVResource.Reset();
+    gDofMGS2DepthSRV.Reset();
 
     // Drop the game-target SRV once DOF goes idle.
     if (gDofFocusDirectFrameIndex + 1 < gDofFrameIndex)
