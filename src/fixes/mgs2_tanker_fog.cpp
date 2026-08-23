@@ -65,8 +65,6 @@ namespace
     // along, its end is a hard line on screen and has to fade. Five cameras measure 0.62 across
     // against 0.24 and below along, so the gap is wide.
     constexpr float kFaceOn = 0.4f;
-    constexpr UINT kConstantBytes = 10240;
-    constexpr size_t kForwardFloat = 72;            // third row of gVS_Screen, which sits at c16
 
     ComPtr<ID3D11Buffer> gBandVB;
     ComPtr<ID3D11Buffer> gManhattanVB;
@@ -78,12 +76,6 @@ namespace
 
     SafetyHookInline gUpdateSubHook{};
     SafetyHookInline gDrawIndexedHook{};
-    SafetyHookInline gMapHook{};
-    SafetyHookInline gUnmapHook{};
-
-    ID3D11Resource* gConstants = nullptr;
-    void* gConstantData = nullptr;
-    float gCameraForward[3] = { 0.0f, 0.0f, 1.0f };
 
     // w00_fog_fader_alp hash
     constexpr uint64_t kFogMaskHash = 0xb766ba4ac57cd459ull;
@@ -102,55 +94,19 @@ namespace
         return Util::HashTexels(data, rowPitch, desc.Width, desc.Height) == kFogMaskHash;
     }
 
-    // The camera only reaches us through the constants the game maps every pass.
-    HRESULT STDMETHODCALLTYPE HookedMap(ID3D11DeviceContext* ctx, ID3D11Resource* res, UINT sub,
-        D3D11_MAP type, UINT flags, D3D11_MAPPED_SUBRESOURCE* mapped)
-    {
-        const HRESULT hr = gMapHook.stdcall<HRESULT>(ctx, res, sub, type, flags, mapped);
-        if (FAILED(hr) || !res || !mapped)
-        {
-            return hr;
-        }
-
-        if (res == gConstants)
-        {
-            gConstantData = mapped->pData;
-        }
-        else if (!gConstants)
-        {
-            ComPtr<ID3D11Buffer> buffer;
-            if (SUCCEEDED(res->QueryInterface(IID_PPV_ARGS(buffer.GetAddressOf()))) && buffer)
-            {
-                D3D11_BUFFER_DESC desc{};
-                buffer->GetDesc(&desc);
-                if (desc.ByteWidth == kConstantBytes && (desc.BindFlags & D3D11_BIND_CONSTANT_BUFFER))
-                {
-                    gConstants = res;
-                    gConstantData = mapped->pData;
-                }
-            }
-        }
-        return hr;
-    }
-
-    void STDMETHODCALLTYPE HookedUnmap(ID3D11DeviceContext* ctx, ID3D11Resource* res, UINT sub)
-    {
-        if (res && res == gConstants && gConstantData)
-        {
-            memcpy(gCameraForward, static_cast<const float*>(gConstantData) + kForwardFloat,
-                sizeof(gCameraForward));
-            gConstantData = nullptr;
-        }
-        gUnmapHook.stdcall<void>(ctx, res, sub);
-    }
-
     bool LooksAcrossWall(const FogVertex (&strip)[6])
     {
+        // Where the camera looks: row 2 of the channel's eye matrix, the axis the engine pans sound with.
+        const DG_CHANL* chanl = g_GameVars.DG_Chanl(0);
+        if (!chanl)
+        {
+            return false;
+        }
         const float dx = strip[4].x - strip[0].x;
         const float dz = strip[4].z - strip[0].z;
         const float wall = std::sqrt(dx * dx + dz * dz);
-        const float fx = gCameraForward[0];
-        const float fz = gCameraForward[2];
+        const float fx = chanl->eye.m[2][0];
+        const float fz = chanl->eye.m[2][2];
         const float view = std::sqrt(fx * fx + fz * fz);
         if (wall < 1.0f || view < 1e-4f)
         {
@@ -504,11 +460,7 @@ void MGS2TankerFog::OnDeviceReady()
     void** vtable = *reinterpret_cast<void***>(ctx);
     gDrawIndexedHook = safetyhook::create_inline(vtable[12], reinterpret_cast<void*>(HookedDrawIndexed));
     gUpdateSubHook = safetyhook::create_inline(vtable[48], reinterpret_cast<void*>(HookedUpdateSubresource));
-    gMapHook = safetyhook::create_inline(vtable[14], reinterpret_cast<void*>(HookedMap));
-    gUnmapHook = safetyhook::create_inline(vtable[15], reinterpret_cast<void*>(HookedUnmap));
     LOG_HOOK(gDrawIndexedHook, "MGS 2: Tanker sea fog: DrawIndexed");
     LOG_HOOK(gUpdateSubHook, "MGS 2: Tanker sea fog: UpdateSubresource");
-    LOG_HOOK(gMapHook, "MGS 2: Tanker sea fog: Map");
-    LOG_HOOK(gUnmapHook, "MGS 2: Tanker sea fog: Unmap");
     BuildBands();
 }
