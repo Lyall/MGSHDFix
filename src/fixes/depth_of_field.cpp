@@ -599,6 +599,7 @@ namespace
             static const float kCoverReachSigmas = 4.0;    // how far, in sigmas, coverage fades along a surface
             static const float kCoverReachMinPx = 8.0;
             static const float kCoverReachMaxPx = 128.0;
+            static const float kCopyLoss = 1.0 / 255.0;
 
             static const float2 kPs2Kernel[12] = {
                 float2( 0.40,  0.00), float2(-0.40,  0.00), float2( 0.00,  0.40), float2( 0.00, -0.40),
@@ -638,6 +639,12 @@ namespace
                     return 0.0;
                 }
                 float step = max(stack.y, 1e-7);
+                if (nearSide)
+                {
+                    // Near planes count whole, so a focus rack (P010_05_P03, "Take a look") steps in
+                    // and out the way it did on the PS2 instead of gliding.
+                    return min(1.0 + floor(into / step), stack.z);
+                }
                 float first = kOnsetEase > 0.0 ? saturate(into / (kOnsetEase * step)) : 1.0;
                 float k = min(first + into / step, stack.z);
                 return kPlaneInterpolate ? k : floor(k);
@@ -658,6 +665,10 @@ namespace
                 if (into < 0.0)
                 {
                     return 0.0;
+                }
+                if (nearSide)
+                {
+                    return 1.0;
                 }
                 return kOnsetEase > 0.0 ? saturate(into / (kOnsetEase * max(stack.y, 1e-7))) : 1.0;
             }
@@ -744,16 +755,19 @@ namespace
                 int2 base = perPixel ? at : (at & ~1);
                 float cover = 0.0;
                 float varianceSum = 0.0;
+                float copies = 0.0;
                 [unroll]
                 for (int j = 0; j < 4; ++j)
                 {
                     int2 px = perPixel ? base : min(base + int2(j & 1, j >> 1), int2(depthDims) - 1);
                     float d = Ps2DepthAt(px);
                     float a = max(Ps2OnsetAlpha(d, planeData[0], false), Ps2OnsetAlpha(d, planeData[1], true));
-                    float variance = Ps2StackVariance(Ps2PlaneCount(d, planeData[0], false), planeData[0].w)
-                        + Ps2StackVariance(Ps2PlaneCount(d, planeData[1], true), planeData[1].w);
+                    float farPlanes = Ps2PlaneCount(d, planeData[0], false);
+                    float nearPlanes = Ps2PlaneCount(d, planeData[1], true);
+                    float variance = Ps2StackVariance(farPlanes, planeData[0].w) + Ps2StackVariance(nearPlanes, planeData[1].w);
                     cover += a;
                     varianceSum += a * variance;
+                    copies += a * (farPlanes + 2.0 * nearPlanes);
                 }
                 float texel = sourceSizeAndSpread.z;
                 float onePlane = max(Ps2StackVariance(1.0, planeData[0].w), Ps2StackVariance(1.0, planeData[1].w));
@@ -797,6 +811,10 @@ namespace
                 {
                     color = Ps2Gather13(focusSource, sourceUv, taps.lod, taps.radius);
                 }
+                // The PS2 rounded down a little on every copy of the frame, and a near plane copies
+                // twice. With eight near planes over the whole screen (the P010_05_P03 rack) the
+                // picture dips a few percent, then comes back as the planes drop.
+                color *= 1.0 - kCopyLoss * (cover > 0.0 ? copies / cover : 0.0);
                 return float4(color, alpha);
             }
 
