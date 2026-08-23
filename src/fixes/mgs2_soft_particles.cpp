@@ -6,6 +6,8 @@
 #include "logging.hpp"
 #include "scene_depth.hpp"
 
+#include "expand_bp_assets.hpp"
+
 // Spray puffs and lamp glows are flat sprites, so the z-test cuts them along a hard line wherever
 // they pass through water, ground or the wall they sit on. Soft particles: fade each pixel by how
 // far the scene sits behind it, as a fraction of the sprite's own radius.
@@ -14,23 +16,63 @@ namespace
 {
     struct SoftTexture
     {
-        uint64_t hash;
-        UINT size;
-        float fade;      // fade span as a fraction of the half-size
-        float feather;   // and never narrower than this many pixels
-        float bias;      // glows are volumes: start the fade this many half-sizes behind the surface, no z-test
+        const char* path;
+        float fade;          // fade span as a fraction of the half-size
+        float feather;       // and never narrower than this many pixels
+        float bias;          // glows are volumes: start the fade this many half-sizes behind the surface, no z-test
+        uint64_t hash = 0;
+        UINT size = 0;
     };
 
-    constexpr SoftTexture kSoftTextures[] = {
-        { 0x13de2bb7654dd64eull, 64, 0.5f, 8.0f, 0.0f },   // splash03_alp   user\morita\splash\splash.c
-        { 0x29e8ce42c45836c5ull, 64, 0.5f, 8.0f, 0.0f },   // splash05_alp   user\morita\splash\splash.c
-        { 0x812baf1662a8d98cull, 64, 0.5f, 8.0f, 0.0f },   // bombgas6_alp   user\okajima\effect\bomb_gas.c
-        { 0x2da04743caa928e5ull, 64, 2.0f, 0.0f, 1.0f },   // xlit04a_alp    user\skoba\test\c4_eff.c (the C4 lamp)
-        { 0xac9aef320ed7b850ull, 32, 2.0f, 0.0f, 1.0f },   // drop01_msk     user\shibata\effect\cam_lamp.c
-        { 0xd1d6b062c0903383ull, 64, 2.0f, 0.0f, 1.0f },   // ray_eye_bonbori_alp  user\kunibe\effect\cypher_light.c (camera lamp)
-        { 0xa661471843db65d7ull, 64, 2.0f, 0.0f, 1.0f },   // xlit01b_msk    user\okajima\t_irs\trap_c4.c, irs.c (bomb panel and IR sensor lamps)
+    SoftTexture kSoftTextures[] = {
+        { "textures/flatlist/_win/splash03_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\morita\splash\splash.c
+        { "textures/flatlist/_win/splash05_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\morita\splash\splash.c
+        { "textures/flatlist/_win/bombgas6_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\okajima\effect\bomb_gas.c
+        { "textures/flatlist/_win/xlit04a_alp.bmp.ctxr", 2.0f, 0.0f, 1.0f },           // user\skoba\test\c4_eff.c (the C4 lamp)
+        { "textures/flatlist/_win/drop01_msk.bmp.ctxr", 2.0f, 0.0f, 1.0f },            // user\shibata\effect\cam_lamp.c
+        { "textures/flatlist/_win/ray_eye_bonbori_alp.bmp.ctxr", 2.0f, 0.0f, 1.0f },   // user\kunibe\effect\cypher_light.c (camera lamp)
+        { "textures/flatlist/_win/xlit01b_msk.bmp.ctxr", 2.0f, 0.0f, 1.0f },           // user\okajima\t_irs\trap_c4.c, irs.c (bomb panel and IR sensor lamps)
     };
     constexpr int kSoftTextureCount = static_cast<int>(std::size(kSoftTextures));
+
+    std::atomic<bool> gHashesReady{ false };
+
+    void PopulateSoftTexture(SoftTexture& tex)
+    {
+        const std::filesystem::path path = BP_FileSys::GetActiveAssetPath(tex.path);
+        if (!std::filesystem::exists(path))
+        {
+            spdlog::warn("MGS2SoftParticles: {} does not exist.", path.string());
+            return;
+        }
+
+        const auto header = BP_FileSys::ReadCTXRHeader(path);
+        const auto hash = BP_FileSys::HashCTXRTexture(path);
+        if (!header || !hash)
+        {
+            spdlog::warn("MGS2SoftParticles: failed to read {}.", path.string());
+            return;
+        }
+
+        tex.hash = *hash;
+        tex.size = header->width;
+        spdlog::info("MGS2SoftParticles: {} -> {}x{} hash={:#x}", path.string(), header->width, header->height, *hash);
+    }
+
+    void PopulateSoftTextureHashes()
+    {
+        std::vector<std::thread> workers;
+        workers.reserve(kSoftTextureCount);
+        for (SoftTexture& tex : kSoftTextures)
+        {
+            workers.emplace_back(PopulateSoftTexture, std::ref(tex));
+        }
+        for (std::thread& worker : workers)
+        {
+            worker.join();
+        }
+        gHashesReady.store(true, std::memory_order_release);
+    }
 
     // Prim.fx's textured sprite and poly paths (FOG=1 when the game's fog build is bound), plus the
     // sprite's true half-size in TEXCOORD0.z for the fade; a poly has no radius and feathers by pixels.
@@ -113,7 +155,7 @@ namespace
 
     int SoftTextureEntry(const D3D11_TEXTURE2D_DESC& desc, const void* data, UINT rowPitch)
     {
-        if (desc.Width != desc.Height || rowPitch < desc.Width * 4
+        if (!gHashesReady.load(std::memory_order_acquire) || desc.Width != desc.Height || rowPitch < desc.Width * 4
             || (desc.Format != DXGI_FORMAT_B8G8R8A8_UNORM && desc.Format != DXGI_FORMAT_R8G8B8A8_UNORM))
         {
             return -1;
@@ -337,6 +379,8 @@ void MGS2SoftParticles::OnDeviceReady()
         spdlog::error("MGS2SoftParticles: no device context.");
         return;
     }
+
+    PopulateSoftTextureHashes();
 
     void** vtable = *reinterpret_cast<void***>(ctx);
     gDrawIndexedHook = safetyhook::create_inline(vtable[12], reinterpret_cast<void*>(HookedDrawIndexed));

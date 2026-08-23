@@ -1,10 +1,13 @@
 #include "stdafx.h"
 
+#include <cstdlib>
 
 #include "expand_bp_assets.hpp"
 
 #include "common.hpp"
 #include "logging.hpp"
+
+#include "game_funcs.hpp"
 
 
 namespace {
@@ -391,7 +394,7 @@ namespace {
 
 }
 
-void BP_FilesysChanges::AddUniversalStageLines(std::vector<std::string> manifestLines, std::vector<std::string> bpAssetsLines)
+void BP_FileSys::AddUniversalStageLines(std::vector<std::string> manifestLines, std::vector<std::string> bpAssetsLines)
 {
 	for (auto& l : manifestLines) gUniversalManifest.push_back(std::move(l));
 	for (auto& l : bpAssetsLines) gUniversalBpAssets.push_back(std::move(l));
@@ -443,3 +446,167 @@ void BP_FilesysChanges::Initialize() {
 		});
 	}
 }
+
+#pragma region unused_debugging
+
+	/*
+
+	SafetyHookInline BP_GetPathPlatformSKUOverride_hook {};
+
+	void __fastcall BP_GetPathPlatformSKUOverride(char* loadPath, char* commonLoadPath)
+	{
+		spdlog::info("BP_GetPathPlatformSKUOverride called with loadPath: {}, commonLoadPath: {}", loadPath, commonLoadPath);
+		BP_GetPathPlatformSKUOverride_hook.fastcall<void>(loadPath, commonLoadPath);
+		spdlog::info("BP_GetPathPlatformSKUOverride returned loadPath: {}", loadPath);
+	}
+
+
+	SafetyHookInline BP_GetAssetLoadFullPath_hook {};
+
+	void __fastcall BP_GetAssetLoadFullPath(char* fullPath, char* unifiedFullPath, const char* manifestLoadPath, const char* manifestUnifiedPath)
+	{
+		spdlog::info("BP_GetAssetLoadFullPath called with manifestLoadPath: {}, manifestUnifiedPath: {}", manifestLoadPath, manifestUnifiedPath);
+		BP_GetAssetLoadFullPath_hook.fastcall<void>(fullPath, unifiedFullPath, manifestLoadPath, manifestUnifiedPath);
+		spdlog::info("BP_GetAssetLoadFullPath returned fullPath: {}, unifiedFullPath: {}", fullPath, unifiedFullPath);
+	}
+	*/
+
+
+
+
+	/*
+
+
+	//BP_FileExists*
+	//_BP_GetAssetLoadFullPath+349
+	uintptr_t BP_GetPathPlatformSKUOverride_scan = Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8B 8C 24 ?? ?? ?? ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 49 8B 6B ?? 49 8B E3", "MGS 2: Log BP_GetPathPlatformSKUOverride args/result: mgs2x\\source\\system\\libfs\\loader_flatfs.cpp -> BP_GetAssetLoadFullPath() -> BP_GetPathPlatformSKUOverride() | @l753: "), 1, 5);
+
+	if(!BP_GetPathPlatformSKUOverride_scan)
+	{
+		spdlog::error("BP_FileSys: Failed to find BP_GetPathPlatformSKUOverride_scan");
+		return;
+	}
+
+		BP_GetPathPlatformSKUOverride_hook = safetyhook::create_inline(reinterpret_cast<void*>(BP_GetPathPlatformSKUOverride_scan), reinterpret_cast<void*>(BP_GetPathPlatformSKUOverride));
+	spdlog::info("BP_FileSys: Successfully hooked BP_GetPathPlatformSKUOverride");
+
+
+
+	//call-site trampoline: resolves the E8 call to _BP_GetAssetLoadFullPath immediately preceding the BP_OpenFile arg setup
+	uintptr_t BP_GetAssetLoadFullPath_scan = Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8D 95 ?? ?? ?? ?? 48 8D 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B C8", "MGS 2: Log BP_GetAssetLoadFullPath args/result: mgs2x\\source\\system\\libfs\\stage_flatfs.cpp -> stage_begin_load_kp_file() -> BP_GetAssetLoadFullPath() | @l475: "), 1, 5);
+
+	if(!BP_GetAssetLoadFullPath_scan)
+	{
+		spdlog::error("BP_FileSys: Failed to find BP_GetAssetLoadFullPath_scan");
+		return;
+	}
+
+	BP_GetAssetLoadFullPath_hook = safetyhook::create_inline(reinterpret_cast<void*>(BP_GetAssetLoadFullPath_scan), reinterpret_cast<void*>(BP_GetAssetLoadFullPath));
+	spdlog::info("BP_FileSys: Successfully hooked BP_GetAssetLoadFullPath");
+
+	*/
+/*
+[2026-08-23 05:01:35.045] [info] BP_GetPathPlatformSKUOverride called with loadPath: textures/flatlist/_win/nom_b_alp_ovl.bmp.ctxr, commonLoadPath: textures/flatlist/_win/nom_b_alp_ovl.bmp.ctxr
+[2026-08-23 05:01:35.045] [info] BP_GetPathPlatformSKUOverride returned loadPath: textures/flatlist/ovr_stm/_win/nom_b_alp_ovl.bmp.ctxr
+*/
+
+#pragma endregion unused_debugging
+
+std::filesystem::path BP_FileSys::GetActiveAssetPath(const std::string& relativePath)
+{
+	if (!Shared_Gamefuncs::BP_GetAssetLoadFullPath)
+	{
+		spdlog::error("BP_FileSys: BP_GetAssetLoadFullPath is not initialized.");
+		return {};
+	}
+
+	char fullPath[512] {};
+	char unifiedFullPath[512] {};
+	Shared_Gamefuncs::BP_GetAssetLoadFullPath(fullPath, unifiedFullPath, relativePath.c_str(), relativePath.c_str());
+
+	return (sExePath / fullPath).make_preferred();
+}
+
+namespace
+{
+	constexpr size_t kCTXRHeaderSize = 128;
+
+	uint16_t ReadBE16(const uint8_t* p)
+	{
+		uint16_t v;
+		memcpy(&v, p, sizeof(v));
+		return _byteswap_ushort(v);
+	}
+
+	uint32_t ReadBE32(const uint8_t* p)
+	{
+		uint32_t v;
+		memcpy(&v, p, sizeof(v));
+		return _byteswap_ulong(v);
+	}
+
+	// buf must be at least kCTXRHeaderSize bytes and start with the "TXTR" magic.
+	BP_FileSys::CTXRHeader ParseCTXRHeader(const uint8_t* buf)
+	{
+		BP_FileSys::CTXRHeader h;
+		h.version         = ReadBE32(buf + 0x04);
+		h.width           = ReadBE16(buf + 0x08);
+		h.height          = ReadBE16(buf + 0x0A);
+		h.depth           = ReadBE16(buf + 0x0C);
+		h.format          = ReadBE32(buf + 0x0E);
+		h.hasAlpha        = buf[0x12] != 0;
+		h.additionalFlags = ReadBE32(buf + 0x13);
+		h.minRGBA         = ReadBE32(buf + 0x17);
+		h.maxRGBA         = ReadBE32(buf + 0x1B);
+		h.filterHint      = static_cast<int8_t>(buf[0x1F]);
+		h.alphaRefValue   = buf[0x20];
+		h.maxLODOffset    = static_cast<int8_t>(buf[0x21]);
+		h.type            = ReadBE32(buf + 0x22);
+		h.numLevels       = buf[0x26];
+		return h;
+	}
+}
+
+std::optional<BP_FileSys::CTXRHeader> BP_FileSys::ReadCTXRHeader(const std::filesystem::path& path)
+{
+	std::ifstream f(path, std::ios::binary);
+	uint8_t buf[kCTXRHeaderSize];
+	if (!f || !f.read(reinterpret_cast<char*>(buf), sizeof(buf)) || memcmp(buf, "TXTR", 4) != 0)
+	{
+		return std::nullopt;
+	}
+
+	return ParseCTXRHeader(buf);
+}
+
+std::optional<uint64_t> BP_FileSys::HashCTXRTexture(const std::filesystem::path& path)
+{
+	std::ifstream f(path, std::ios::binary);
+	if (!f)
+	{
+		return std::nullopt;
+	}
+
+	std::vector<uint8_t> data((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+	if (data.size() < kCTXRHeaderSize + 4 || memcmp(data.data(), "TXTR", 4) != 0)
+	{
+		return std::nullopt;
+	}
+
+	const CTXRHeader header = ParseCTXRHeader(data.data());
+	if (header.numLevels == 0)
+	{
+		return std::nullopt;
+	}
+
+	const size_t mip0Size = ReadBE32(&data[kCTXRHeaderSize]);
+	const size_t mip0Start = kCTXRHeaderSize + 4;
+	if (mip0Start + mip0Size > data.size())
+	{
+		spdlog::error("BP_FileSys: {} mip 0 payload truncated (size={}, remaining={})", path.string(), mip0Size, data.size() - mip0Start);
+		return std::nullopt;
+	}
+
+	return Util::HashTexels(data.data() + mip0Start, static_cast<size_t>(header.width) * 4, header.width, header.height);
+}
+

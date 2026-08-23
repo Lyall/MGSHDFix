@@ -38,7 +38,7 @@ jobs:
           echo "$matches" | while IFS= read -r line; do
             file=$(echo "$line" | cut -d: -f1)
             lineno=$(echo "$line" | cut -d: -f2)
-            echo "::error file=$file,line=$lineno::AoB signature pattern ending with a wildcarded byte. Please refer to CONTRIBUTING.md for how to generate AoB patterns."
+            echo "::error file=$file,line=$lineno: AoB signature pattern ending with a wildcarded byte. Please refer to CONTRIBUTING.md for how to generate AoB patterns."
           done
           exit 1
         fi

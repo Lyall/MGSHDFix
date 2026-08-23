@@ -440,7 +440,7 @@ void MGS2BladeAnywhere::Initialize()
     });
 
     // The blade's whole per-stage kit, as w45a registers it; the merge dedups against stages with it.
-    BP_FilesysChanges::AddUniversalStageLines(
+    BP_FileSys::AddUniversalStageLines(
         {
             "assets/mar/us/rai_blade.mar,us/stage/%S%/cache/00ccb3e9.mar,cache/00ccb3e9.mar",
             "assets/sar/us/rai_blade.sar,us/stage/%S%/cache/00ccb3e9.sar,cache/00ccb3e9.sar",

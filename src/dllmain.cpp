@@ -53,7 +53,6 @@
 #include "mgs2_hair_layering.hpp"
 #include "mgs2_rotor_procession.hpp"
 #include "mgs2_reverb_wet_level.hpp"
-#include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_flare_occlusion.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
@@ -91,7 +90,7 @@
 
 ///WIP
 #include "depth_of_field.hpp"
-#include "mg1_custom_loading_screens.hpp"
+//#include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs2_ntsc_timing_fixes.hpp"
 #include "mgs2_preshade_lights.hpp"
