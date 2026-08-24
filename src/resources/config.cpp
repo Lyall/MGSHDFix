@@ -761,7 +761,6 @@ void Config::Read()
                 &MGS2TankerSnakeSnap::bEnabled,
                 &MGS2HairLayering::bEnabled,
                 &MGS2_CodecBackground::bEnabled,
-                &MGS2BandanaMass::bEnabled,
                 &MGS2CodecBand::bEnabled,
                 &MGS2FixedAlpha::bEnabled,
                 &MGS2TankerFog::bEnabled,
@@ -772,6 +771,11 @@ void Config::Read()
 
             ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
             LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
+
+            
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, MGS2BandanaMass::bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, MGS2BandanaMass::bEnabled);
+
 
             std::string sMotionBlur;
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);

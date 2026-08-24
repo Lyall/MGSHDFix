@@ -93,9 +93,7 @@ namespace ConfigKeys
     constexpr const char* PhotoCamera_Setting = "Digital Camera Steam Screenshots";
     constexpr const char* PhotoCamera_Help = "";
     constexpr const char* PhotoCamera_Tooltip =
-        "Every photo taken with the in-game camera also lands in your Steam screenshot\n"
-        "library at full resolution, alongside the tiny save-file photo the game keeps\n"
-        "for itself. MGS 2's digital camera and MGS 3's camera, ghosts included.";
+        "Makes photos taken with the digital camera automatically get saved as Steam screenshots.";
 
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
@@ -342,6 +340,14 @@ namespace ConfigKeys
         "\n"
         "This option fades them out against nearby surfaces instead.";
 
+
+
+    constexpr const char* MGS2_HeavyBandana_Section = "Model Quality && Level of Detail Enhancements";
+    constexpr const char* MGS2_HeavyBandana_Setting = "Make Snake's Bandana Heavier";
+    constexpr const char* MGS2_HeavyBandana_Help = "";
+    constexpr const char* MGS2_HeavyBandana_Tooltip = "Makes Snake's bandana in cutscenes use its heavier version to reduce jittering during parts with heavy wind.";
+
+
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Section = "Bugfixes";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Setting = "Fix M92 Laser Origin in FPV";
     constexpr const char* MGS2_LaserOriginFix_FixM9FPV_Help = "";
@@ -376,6 +382,7 @@ namespace ConfigKeys
     constexpr const char* MGS2_Restore_VFX_Tooltip = "Restores numerous broken visual effects that were broken by the HD Collection / Master Collection.\n"
                                                      "\n"
                                                      "These effects range from vector effect scaling (ie lasers, rain, UI line elements), water distortion, stealth camoflauge refraction, water droplets on the camera, blood stains on enemy clothing, underwater distortion, and many more.";
+
 
     constexpr const char* MGS2_RestorePhotosensitiveEffects_Section = EnableSMAA_Section;
     constexpr const char* MGS2_RestorePhotosensitiveEffects_Setting = "Reduce Photosensitive Effects";
@@ -819,7 +826,7 @@ namespace ConfigKeys
 
 
     constexpr const char* ShowPressureLevels_Section = "Speedrunner Settings";
-    constexpr const char* ShowPressureLevels_Setting = "Show Pressure Levels";
+    constexpr const char* ShowPressureLevels_Setting = "Show Pressure Level Overlay";
     constexpr const char* ShowPressureLevels_Help = "";
     constexpr const char* ShowPressureLevels_Tooltip = "Adds a pressure meter for each face button and direction under the stats overlay.\n"
                                                       "\n"
