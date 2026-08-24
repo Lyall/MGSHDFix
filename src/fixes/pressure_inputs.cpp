@@ -6,7 +6,6 @@
 #include "gamevars.hpp"
 
 #include <hidsdi.h>
-#include <limits>
 #pragma comment(lib, "hid.lib")
 
 // libgv\pad.c -> setup_pressure() flattens GV_PAD.pressure[12] to 0xFF/0x00 for any pad the engine
@@ -742,7 +741,7 @@ namespace
     void InitializeMGS3()
     {
         // The last store gives the array via its own displacement. Land past the memcmp after it.
-        if (uint8_t* address = Memory::PatternScan(baseModule, "0F B6 C3 66 89 05 ?? ?? ?? ?? E8",
+        if (uint8_t* address = Memory::PatternScan(baseModule, "0F B6 C3 66 89 05",
             "MGS 3: Pressure Inputs - Pad Writer | libgv\\pad.c -> setup_pressure()"))
         {
             const int32_t displacement = *reinterpret_cast<int32_t*>(address + 6);
@@ -774,8 +773,7 @@ namespace
 
         // Anchored on the prologue, so the entry point is the match and not a back-offset.
         gControlConfigInit = reinterpret_cast<ControlConfigInit>(Memory::PatternScan(baseModule,
-            "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 41 54 41 55 41 56 41 57 48 83 EC 30 "
-            "45 33 F6 41 8B FE 41 8B DE 8D 4B 2B",
+            "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 F6",
             "MGS 3: Pressure Inputs - Control Config Init"));
 
         // The copy is unrolled and repeats for a second table; ours reads .data and writes it back
@@ -799,9 +797,7 @@ namespace
         }
 
         // `test [pad], eax` on the gameplay pad - the pressure bytes sit a fixed 0x0C into it.
-        if (uint8_t* address = Memory::PatternScan(baseModule,
-            "8B 87 C4 00 00 00 85 05 ?? ?? ?? ?? 74 32 33 C9",
-            "MGS 3: Pressure Inputs - Gameplay Pad"))
+        if (uint8_t* address = Memory::PatternScan(baseModule, "8B 87 ?? ?? ?? ?? 85 05 ?? ?? ?? ?? 74", "MGS 3: Pressure Inputs - Gameplay Pad | NewSphericalCamera -> Act()"))
         {
             gPadPressure = address + 12 + *reinterpret_cast<int32_t*>(address + 8)
                 + kPadPressureOffset;
@@ -815,9 +811,7 @@ namespace
 
         // End of the input tick, past the builder's own copy, so the bytes we fill are the ones
         // gameplay goes on to read.
-        if (uint8_t* address = Memory::PatternScan(baseModule,
-            "85 C0 74 11 8B CB E8 ?? ?? ?? ?? 48 83 C4 20 5B",
-            "MGS 3: Pressure Inputs - Input Tick"))
+        if (uint8_t* address = Memory::PatternScan(baseModule, "85 C0 74 ?? 8B CB E8 ?? ?? ?? ?? 48 83 C4", "MGS 3: Pressure Inputs - Input Tick"))
         {
             static SafetyHookMid tickHook {};
             tickHook = safetyhook::create_mid(address + 11, [](SafetyHookContext&)
@@ -830,14 +824,12 @@ namespace
 
         // The cutscene zoom: TRIANGLE on PS2, R2 in MC, chosen by the cmov above. It reads a pad
         // we do not fill.
-        if (uint8_t* address = Memory::PatternScan(baseModule,
-            "48 8D 0D ?? ?? ?? ?? 45 0F 57 E4 E8",
-            "MGS 3: Pressure Inputs - Demo Camera Pad | demo\\cam_act.c -> Act()"))
+        if (uint8_t* address = Memory::PatternScan(baseModule, "48 8D 0D ?? ?? ?? ?? 45 0F 57 E4 E8", "MGS 3: Pressure Inputs - Demo Camera Pad | demo\\cam_act.c -> Act()"))
         {
             gMgs3DemoPad = address + 7 + *reinterpret_cast<int32_t*>(address + 3);
         }
 
-        MAKE_HOOK_MID(baseModule, "33 DB 83 F8 1E 7E ?? 83 C0 E2 69 C8 FF 00 00 00",
+        MAKE_HOOK_MID(baseModule, "33 DB 83 F8 ?? 7E",
             "MGS 3: Pressure Inputs - Demo Zoom Amount | demo\\cam_act.c -> Act()",
         {
             if (gHavePad.load() && gMgs3DemoPad != nullptr)
@@ -855,14 +847,14 @@ namespace
         // Both sit in the one input handler; the mask is the imm32 the press is tested against.
         // Wildcarded imm so the scan still matches once we have patched it.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "BE ?? 01 00 00 85 B7 F0 07 00 00",
+            "BE ?? ?? ?? ?? 85 B7",
             "MGS 3: Pressure Inputs - Interrogate Entry"))
         {
             gCqcInterrogateEntry = reinterpret_cast<uintptr_t>(address);
         }
 
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "F7 87 EC 07 00 00 ?? 01 00 00",
+            "F7 87 ?? ?? ?? ?? ?? ?? ?? ?? 74 ?? 48 8D 05 ?? ?? ?? ?? EB ?? 48 8D 05",
             "MGS 3: Pressure Inputs - Interrogate Exit"))
         {
             gCqcInterrogateExit = reinterpret_cast<uintptr_t>(address) + 6;
@@ -870,14 +862,14 @@ namespace
 
         // L3 faking a SQUARE press: one site per edge, both needed.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "F6 05 ?? ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? F7 05 ?? ?? ?? ?? 00 80 00 00",
+            "F6 05 ?? ?? ?? ?? ?? 0F 85 ?? ?? ?? ?? F7 05",
             "MGS 3: Pressure Inputs - Holster Edge"))
         {
             gHolsterEdge = reinterpret_cast<uintptr_t>(address) + 6;
         }
 
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "B8 01 00 00 00 83 E1 ?? 41 BF 07 00 00 00 0F 45 F0",
+            "B8 ?? ?? ?? ?? 83 E1 ?? 41 BF",
             "MGS 3: Pressure Inputs - Draw Edge"))
         {
             gDrawEdge = reinterpret_cast<uintptr_t>(address) + 7;
@@ -885,7 +877,7 @@ namespace
 
         // Anchored on the comiss: -0x0A is the movss that loads the timer, +19 the TRIANGLE je.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "0F 2F 05 ?? ?? ?? ?? 72 10 F7 05 ?? ?? ?? ?? 00 10 00 00 74 04 4C 89 63 58",
+            "0F 2F 05 ?? ?? ?? ?? 72 ?? F7 05 ?? ?? ?? ?? ?? ?? ?? ?? 74 ?? 4C 89 63",
             "MGS 3: Pressure Inputs - CQC Slit Test"))
         {
             gTriangleBranch = reinterpret_cast<uintptr_t>(address) + 19;
@@ -904,8 +896,8 @@ namespace
         }
 
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "83 3D ?? ?? ?? ?? 00 48 8B DA 48 8B F9 74 12 83 3D ?? ?? ?? ?? 00",
-            "MGS 3: Pressure Inputs - Knife Hard Stab"))
+            "83 3D ?? ?? ?? ?? 00 48 8B DA 48 8B F9 74 ?? 83 3D ?? ?? ?? ?? 00",
+            "MGS 3: Pressure Inputs - Knife Hard Stab | -> PL_PLG_ActAttackPlugin() -> ActKnifeAttack()"))
         {
             gKnifeBranch = reinterpret_cast<uintptr_t>(address) + 13;
         }
@@ -945,8 +937,8 @@ namespace
 
         // The weapon state machine, for the wind-up peak.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "56 57 41 55 41 57 48 81 EC A8 00 00 00 48 8B FA 48 8B F1",
-            "MGS 3: Pressure Inputs - Weapon State"))
+            "40 56 57 41 55 41 57",
+            "MGS 3: Pressure Inputs - Weapon State | PL_PLG_ActAttackPlugin() -> ActGrenadeAttack()"))
         {
             static SafetyHookMid weaponHook {};
             weaponHook = safetyhook::create_mid(address - 1,
@@ -957,16 +949,13 @@ namespace
         // One of two Acts a throw registers under. It has a byte-identical twin, so the pattern
         // runs past the branch that separates them.
         MAKE_HOOK_MID(baseModule,
-            "48 89 5C 24 20 57 48 81 EC 80 00 00 00 0F 29 74 24 70 48 8B 05 ?? ?? ?? ?? "
-            "48 33 C4 48 89 44 24 60 81 A1 A8 03 00 00 FF 7F FF FF "
-            "BA FF FF FF FF 48 8B D9 8D 4A 08 E8 ?? ?? ?? ?? 8B 93 A8 03 00 00 8B CA 83 C9 02 "
-            "83 E2 FD 85 C0 0F 45 D1 89 93 A8 03 00 00 F6 C2 04 0F 84 29 01 00 00",
-            "MGS 3: Pressure Inputs - Projectile Act",
+            "48 89 5C 24 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 74 24 ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 81 A1 ?? ?? ?? ?? ?? ?? ?? ?? BA ?? ?? ?? ?? 48 8B D9 8D 4A ?? E8 ?? ?? ?? ?? 8B 93 ?? ?? ?? ?? 8B CA 83 C9 ?? 83 E2 ?? 85 C0 0F 45 D1 89 93 ?? ?? ?? ?? F6 C2 ?? 0F 84 ?? ?? ?? ?? F7 83 ?? ?? ?? ?? ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 0F 85 ?? ?? ?? ?? 8B 93 ?? ?? ?? ?? 8B CA 48 89 AC 24",
+            "MGS 3: Pressure Inputs - Projectile Act | NewRGD5Grenade()",
         {
             ScaleThrownGrenade(ctx.rcx);
         });
 
-        MAKE_HOOK_MID(baseModule, "48 89 5C 24 08 57 48 83 EC 30 B8 FF 7F 00 00 48 8B D9 66 21",
+        MAKE_HOOK_MID(baseModule, "48 89 5C 24 ?? 57 48 83 EC 30 B8 FF 7F 00 00",
             "MGS 3: Pressure Inputs - Projectile Act 2",
         {
             ScaleThrownGrenade(ctx.rcx);
@@ -976,7 +965,7 @@ namespace
     void InitializeMGS2()
     {
         // Straight after the pad writer calls setup_pressure(), pad in r9.
-        MAKE_HOOK_MID(baseModule, "41 F7 41 24 2F 01 00 00 74 0C 49",
+        MAKE_HOOK_MID(baseModule, "41 F7 41 ?? ?? ?? ?? ?? 74",
             "MGS 2: Pressure Inputs - Pad Writer | libgv\\pad.c -> setup_pressure()",
         {
             gDirectPressure = reinterpret_cast<uint8_t*>(ctx.r9 + 0x18);
@@ -985,7 +974,7 @@ namespace
 
         // MSVC inlined pad.c's second UpdatePad, so the hook above only sees GV_PadDataDirect,
         // which only the demo camera reads. Pad in rbx here.
-        MAKE_HOOK_MID(baseModule, "41 83 E2 DF 44 89 15",
+        MAKE_HOOK_MID(baseModule, "41 83 E2 ?? 44 89 15",
             "MGS 2: Pressure Inputs - Gameplay Pad | libgv\\pad.c -> GV_PadData",
         {
             // A pad demo replays its own recorded pressure into this pad, and the controller it was
@@ -999,7 +988,7 @@ namespace
 
         // The right stick's deflection, on its way to the locker's speed choice.
         MAKE_HOOK_MID(baseModule,
-            "66 0F 6E C0 0F 5B C0 F3 0F 5C C8 F3 0F 5C 0D ?? ?? ?? ?? F3 0F 59 0D",
+            "66 0F 6E C0 0F 5B C0 F3 0F 5C C8 F3 0F 5C 0D",
             "MGS 2: Pressure Inputs - Locker Lean | plugin\\locker2.c",
         {
             if (gHavePad.load())
@@ -1009,7 +998,7 @@ namespace
         });
 
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "44 39 25 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 0F 29 BC 24 10 01 00 00 48 8B CF",
+            "44 39 25 ?? ?? ?? ?? 0F 84",
             "MGS 2: Pressure Inputs - Weapon Pad Override | raiden\\raiden.c"))
         {
             gWeaponOverride = reinterpret_cast<uintptr_t>(address) + 7;
@@ -1017,7 +1006,7 @@ namespace
 
         // The je is a few instructions after its cmp; the flags survive the stick reads.
         if (uint8_t* address = Memory::PatternScan(baseModule,
-            "F3 0F 5C F9 F3 0F 5C F1 74 0C 83 BD ?? ?? ?? ?? 0E 75 03 0F 57 F6",
+            "F3 0F 5C F9 F3 0F 5C F1 74",
             "MGS 2: Pressure Inputs - Spray Camera Pitch | raiden\\subject.c"))
         {
             gSprayPitch = reinterpret_cast<uintptr_t>(address) + 8;
@@ -1026,16 +1015,12 @@ namespace
         // PressureToZoomIn/OutSpeed, inlined into the zoom camera's Act(). Identical but for the
         // register the speed lands in, so the pattern runs to the mulss that separates them.
         {
-            constexpr const char* kZoom =
-                "F3 0F 2C C8 74 13 85 C9 74 0A F3 0F 10 0D ?? ?? ?? ?? EB 25 0F 57 C9 EB 20 "
-                "83 F9 3C 7C 14 B8 89 88 88 88 F7 E9 8D 3C 11 C1 FF 05 8B C7 C1 E8 1F 03 F8 "
-                "66 0F 6E CF 0F 5B C9 F3 41 0F 59 ";
-            if (uint8_t* address = Memory::PatternScan(baseModule, (std::string(kZoom) + "C9").c_str(),
+            if (uint8_t* address = Memory::PatternScan(baseModule, "F3 0F 2C C8 74 ?? 85 C9 74 ?? F3 0F 10 0D ?? ?? ?? ?? EB ?? 0F 57 C9 EB ?? 83 F9 ?? 7C ?? B8 ?? ?? ?? ?? F7 E9 ?? ?? ?? C1 FF ?? 8B C7 C1 E8 ?? 03 F8 66 0F 6E CF 0F 5B C9 F3 41 0F 59 C9",
                 "MGS 2: Pressure Inputs - Scope Zoom In | etc\\zoomcam.c -> Act()"))
             {
                 gScopeZoomIn = reinterpret_cast<uintptr_t>(address) + 4;
             }
-            if (uint8_t* address = Memory::PatternScan(baseModule, (std::string(kZoom) + "C8").c_str(),
+            if (uint8_t* address = Memory::PatternScan(baseModule, "F3 0F 2C C8 74 ?? 85 C9 74 ?? F3 0F 10 0D ?? ?? ?? ?? EB ?? 0F 57 C9 EB ?? 83 F9 ?? 7C ?? B8 ?? ?? ?? ?? F7 E9 ?? ?? ?? C1 FF ?? 8B C7 C1 E8 ?? 03 F8 66 0F 6E CF 0F 5B C9 F3 41 0F 59 C8",
                 "MGS 2: Pressure Inputs - Scope Zoom Out | etc\\zoomcam.c -> Act()"))
             {
                 gScopeZoomOut = reinterpret_cast<uintptr_t>(address) + 4;
@@ -1045,7 +1030,7 @@ namespace
         // Both of Bluepoint's zoom reads, the switch case and the R1-gated one. The byte we move
         // is the low half of the RIP displacement, so scan to the instruction and step in 3.
         // Where both of Bluepoint's zoom branches meet, with the pressure they chose in eax.
-        MAKE_HOOK_MID(baseModule, "66 44 0F 6E C0 49 8B 46 58 45 0F 5B C0",
+        MAKE_HOOK_MID(baseModule, "66 44 0F 6E C0 49 8B 46",
             "MGS 2: Pressure Inputs - Demo Zoom Amount | demo\\cam_act.c -> Act()",
         {
             if (gHavePad.load() && gDirectPressure != nullptr)
@@ -1057,13 +1042,13 @@ namespace
         });
 
         gThoughtGate = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "48 8B 43 58 F6 40 08 0A",
+            "48 8B 43 ?? F6 40 ?? ?? 74",
             "MGS 2: Pressure Inputs - Thought Gate | codec\\cdc_mind.c"));
         gThoughtPick = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "41 84 C9 74 ?? 44 0F B6 40 23",
+            "41 84 C9",
             "MGS 2: Pressure Inputs - Thought Select | codec\\cdc_mind.c"));
         gThoughtHold = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "74 ?? 0F B6 40 21 EB ?? 0F B6 40 23",
+            "74 ?? 0F B6 40 ?? EB ?? 0F B6 40",
             "MGS 2: Pressure Inputs - Thought Hold | codec\\cdc_mind.c"));
 
         // The mask, adjusted at the store: the register that builds it is also the codec state.
@@ -1090,7 +1075,7 @@ namespace
         });
 
         // With both buttons live the game still reads one slot, so give it the harder press.
-        MAKE_HOOK_MID(baseModule, "44 0F B6 40 23 41 3B D0",
+        MAKE_HOOK_MID(baseModule, "44 0F B6 40 ?? 41 3B D0",
             "MGS 2: Pressure Inputs - Thought Pressure | codec\\cdc_mind.c",
         {
             // The load would overwrite r8, so redirect what it reads. rax dies two on.
@@ -1121,7 +1106,7 @@ namespace
         });
 
         // The chosen button shares a register with the next step value, so fix it at the store.
-        MAKE_HOOK_MID(baseModule, "48 89 83 B0 00 00 00 89 8B A4 00 00 00",
+        MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? 89 8B ?? ?? ?? ?? EB",
             "MGS 2: Pressure Inputs - Thought Button | codec\\cdc_mind.c",
         {
             if (gThoughtRebound.load() && ctx.rax == 2)

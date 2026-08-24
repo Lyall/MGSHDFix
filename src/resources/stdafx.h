@@ -43,6 +43,8 @@
 #include <unordered_map>
 #include <numbers>
 #include <bcrypt.h> //sha256
+#include <limits>
+
 
 #include <shellapi.h> //ShellExecuteA
 

@@ -682,12 +682,13 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
     LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+    Ds3Rumble::bEnabled = PressureInputs::bEnabled;
 
     ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
     LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
-
-    ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
-    LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+    
+    //ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
+    //LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
     Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
