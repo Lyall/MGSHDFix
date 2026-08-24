@@ -46,44 +46,34 @@ void AdjustableCaptions::Apply()
         static const float percentage = (static_cast<float>(fSubtitleScale) * 0.01f);
         if (eGameType & MGS2)
         {
+            // Work.rate @ +0x40, game\jimaku.c -> set_pos()
             MAKE_HOOK_MID(baseModule, "48 8B C4 48 89 58 ?? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? F3 0F 10 05 ?? ?? ?? ?? 48 8B F1", "Adjustable Captions: Scale", {
-                *reinterpret_cast<int*>(ctx.rcx + 0x40) = static_cast<int>(256 * percentage);
+                int* rate = reinterpret_cast<int*>(ctx.rcx + 0x40);
+                *rate = static_cast<int>(*rate * percentage);
                           });
         }
         else // eGameType & MGS3
         {
+            // Work.rate @ +0x58, game\jimaku.c -> set_pos()
             MAKE_HOOK_MID(baseModule, "40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC ?? 8B 41", "Adjustable Captions: Scale", {
-                *reinterpret_cast<int*>(ctx.rcx + 0x58) = static_cast<int>(256 * percentage);
+                int* rate = reinterpret_cast<int*>(ctx.rcx + 0x58);
+                *rate = static_cast<int>(*rate * percentage);
                           });
         }
     }
 
+    if (eGameType & MGS2)
     {
-        constexpr float kSubtitleYOffsetPerPercent = 8.0f / 30.0f;
-        static const int32_t subtitleYOffset = static_cast<int32_t>(std::lround((100 - fSubtitleScale) * kSubtitleYOffsetPerPercent));
-        if (eGameType & MGS2)
-        {
-            MAKE_HOOK_MID(baseModule, "C1 E0 ?? 99 81 E2 ?? ?? ?? ?? 03 C2 C1 F8 ?? 2B C8", "MGS2: game\\jimaku.c -> set_pos()", {
-                if (MGS2_RestoreActionLevelSelection::IsActionLevelCaptionActive())
+        MAKE_HOOK_MID(baseModule, "C1 E0 ?? 99 81 E2 ?? ?? ?? ?? 03 C2 C1 F8 ?? 2B C8", "MGS2: game\\jimaku.c -> set_pos()", {
+            if (MGS2_RestoreActionLevelSelection::IsActionLevelCaptionActive())
+            {
+                const int32_t captionY = MGS2_RestoreActionLevelSelection::kActionLevelCaptionY - (Util::IsJapanese() ? MGS2_RestoreActionLevelSelection::kJapaneseActionLevelCaptionYOffset : 0);
+                if (static_cast<int32_t>(ctx.rcx) > captionY)
                 {
-                    const int32_t captionY = MGS2_RestoreActionLevelSelection::kActionLevelCaptionY - (Util::IsJapanese() ? MGS2_RestoreActionLevelSelection::kJapaneseActionLevelCaptionYOffset : 0);
-                    if (static_cast<int32_t>(ctx.rcx) > captionY)
-                    {
-                        ctx.rcx = static_cast<uint32_t>(captionY);
-                    }
-                    //spdlog::info("MGS2: game\\jimaku.c -> set_pos() - Adjusted caption Y position to {}", ctx.rcx);
-                    ctx.rcx += subtitleYOffset;
+                    ctx.rcx = static_cast<uint32_t>(captionY);
                 }
-                          });
-        }
-        else //eGameType & MGS3
-        {
-            MAKE_HOOK_MID(baseModule, "99 81 E2 ?? ?? ?? ?? ?? ?? ?? ?? B8 ?? ?? ?? ?? F7 E9 41 C1 F8 ?? ?? ?? ?? C1 FB ?? 8B F3", "MGS3: game\\jimaku.c -> set_pos()", {
-                ctx.rcx += subtitleYOffset;
-                          });
-        }
+            }
+                      });
     }
-
-
 
 }
