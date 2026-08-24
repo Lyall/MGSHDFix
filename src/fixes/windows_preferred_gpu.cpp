@@ -6,7 +6,7 @@
 
 void HighPerformanceGpu::Fix()
 {
-    if (Util::IsSteamOS() || !(eGameType & (MG | MGS2 | MGS3)))
+    if (Util::IsSteamOS() || !(eGameType & (LAUNCHER | MG | MGS2 | MGS3)))
     {
         return;
     }
