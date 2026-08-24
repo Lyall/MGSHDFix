@@ -52,3 +52,21 @@ void Initialize(const char* name, Func&& func)
 }
 
 #define INITIALIZE(expr) Initialize(#expr, [&] { expr; })
+
+
+template <typename Func>
+void InitializeDLL(const char* name, Func&& func)
+{
+    using namespace std::chrono;
+
+    spdlog::info("---------- DLL Callback: {} ----------", name);
+    auto start = high_resolution_clock::now();
+
+    std::forward<Func>(func)();
+
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
+
+    spdlog::info("---------- {} loaded in: {} ms. ----------", name, duration);
+}
+
+#define INITIALIZEDLL(expr) InitializeDLL(#expr, [&] { expr; })

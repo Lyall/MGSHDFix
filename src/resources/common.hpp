@@ -32,6 +32,15 @@ enum MgsGame : std::uint8_t
 };
 inline MgsGame eGameType = UNKNOWN;
 
+
+enum class MgSubGame : std::uint8_t
+{
+    NONE = 0,
+    MG1,
+    MG2
+};
+inline MgSubGame eMgSubGame = MgSubGame::NONE;
+
 inline const std::map<MgsGame, GameInfo> kGames = {
     {MGS2, {"Metal Gear Solid 2 MC", "METAL GEAR SOLID2.exe", 2131640}},
     {MGS3, {"Metal Gear Solid 3 MC", "METAL GEAR SOLID3.exe", 2131650}},

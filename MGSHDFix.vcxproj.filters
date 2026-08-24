@@ -844,6 +844,12 @@
     <ClInclude Include="src\fixes\mgs3_map_relight.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\mg2_linkvarbuf.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mg1_linkvarbuf.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\mgshdfix.ico">

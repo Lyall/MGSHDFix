@@ -7,6 +7,7 @@
 #include "config_keys.hpp"
 
 ///Resources
+#include "callbacks.hpp"
 #include "d3d11_api.hpp"
 #include "gamevars.hpp"
 #include "steamworks_api.hpp"
@@ -121,12 +122,27 @@
 #include "mgs2_bandana_mass.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
+#include "mg1_linkvarbuf.hpp"
+#include "mg2_linkvarbuf.hpp"
 #include "screenspace_fixes.hpp"
 #include "windows_preferred_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
+namespace
+{
 
+    void InitMG1()
+    {
+        MG1_LinkVarBuf::Initialize();
+    }
+
+    void InitMG2()
+    {
+        MG2_LinkVarBuf::Initialize();
+    }
+
+}
 
 #if !defined(RELEASE_BUILD)
 #include "unit_tests.hpp"
@@ -436,6 +452,23 @@ static bool DetectGame()
             {
                 spdlog::error("Failed to get Engine.dll module handle");
             }
+
+            if (eGameType & MG)
+            {
+                //MG1 / MG2's dlls late load as part of user\subsistence\ps2\mg_draw.c
+                ModuleLoadCallbacks::RegisterModuleLoadCallback(L"mg1.dll", []
+                {
+                    eMgSubGame = MgSubGame::MG1;
+                    INITIALIZEDLL(InitMG1());
+                });
+
+                ModuleLoadCallbacks::RegisterModuleLoadCallback(L"mg2.dll", []
+                {
+                    eMgSubGame = MgSubGame::MG2;
+                    INITIALIZEDLL(InitMG2());
+                });
+            }
+
             return true;
         }
     }

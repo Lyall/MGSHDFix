@@ -46,8 +46,6 @@
 
 #include <shellapi.h> //ShellExecuteA
 
-#include <d3d11.h>
-#include <dxgi.h>
-#include <wrl/client.h>
-
 #include <future>
+#include <subauth.h>
+#include <string_view>

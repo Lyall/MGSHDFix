@@ -493,7 +493,7 @@ namespace MGS3_LinkVarBuf
     inline LinkVarValue<unsigned char, 62>  GM_KerotanFlag;
     inline LinkVarValue<unsigned char, 63>  GM_UniqueFoodCollectedCount;
     inline LinkVarValue<short, 64>          GM_InjuryCount;
-    inline LinkVarValue<short, 66>          GM_Unknown_66;
+    inline LinkVarValue<short, 66>          GM_Vitality;
     inline LinkVarValue<short, 68>          GM_LifebarDamageCount;
     inline LinkVarValue<short, 70>          GM_MealCount;
     inline LinkVarValue<int, 72>            GM_StagePlayTime;
@@ -619,11 +619,14 @@ namespace MGS3_LinkVarBuf
     };
     inline LinkVarValue<unsigned int, 6300> GM_SpecialAnimalCaptureFlags;
 
+    //inline LinkVarPointer<unsigned char, 6304>  GM_CaptureMask;
     inline LinkVarValue<unsigned int, 6304> GM_FoodCaptureFlagsLow;
     inline LinkVarValue<unsigned int, 6308> GM_FoodCaptureFlagsHigh;
 
 
 
     inline LinkVarValue<short, 11024>    GM_ResetLoadCount;
+    inline LinkVarPointer<unsigned char, 12758> GM_KerotanFlags;
+
 }
 
