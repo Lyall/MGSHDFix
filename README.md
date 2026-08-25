@@ -31,7 +31,6 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
 - Borderless/windowed mode.
 - DualShock 2 / 3 support (pressure-sensitive / analog controller face buttons)
-	- This feature requires DsHidMini, and for DsHidMini to be set to either SDF or SXS mode (the same settings as needed for PCSX2.)
 - Mouse cursor toggle.
 - Launcher skips (see Config Tool to configure).
 - Option to disable pausing on alt-tab.
@@ -229,6 +228,27 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 ### Configuration
 
 - See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
+
+
+### DualShock 2 / 3 Setup
+- Windows: 
+	- Download and install DsHidMini.
+	- Set DsHidMini to SXS mode.
+	(This matches the configuration required for PCSX2. If your DS2/DS3 controller is already set up properly with PCSX2, then you're already good to go!)
+ 
+- Steam Deck / Linux:
+> [!NOTE]
+**🚩 These steps are only needed if you’re on Steam Deck/Linux. Skip if you’re using Windows.**
+
+  - Open up the game properties of either MGS2/MGS3 in Steam and set the following line to the launch options:
+
+      SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
+
+  - This will block out all other controller inputs while in use. If you switch to a different controller, don't forget to set the command line back to the normal one in the installation instructions above.
+
+
+
+
 
 ## Support
 Please report any issues you notice on our Github [here](https://github.com/ShizCalev/MGSHDFix/issues/new/choose).

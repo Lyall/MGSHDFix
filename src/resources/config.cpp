@@ -714,10 +714,17 @@ void Config::Read()
             ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
             LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
 
-            ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
-            Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
-            Ds3Rumble::bEnabled = (Ds3Rumble::iStrength > 0);
-            LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+            if (!Util::IsSteamOS())
+            {
+                ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+                Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
+                Ds3Rumble::bEnabled = (Ds3Rumble::iStrength > 0);
+                LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+            }
+            else
+            {
+                Ds3Rumble::bEnabled = false;
+            }
         }
 
         bool bRestoreVFX = true;

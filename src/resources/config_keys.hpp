@@ -90,10 +90,10 @@ namespace ConfigKeys
 
 
     constexpr const char* PhotoCamera_Section = "Various";
-    constexpr const char* PhotoCamera_Setting = "Digital Camera Steam Screenshots";
+    constexpr const char* PhotoCamera_Setting = "Camera Triggers Steam Screenshot";
     constexpr const char* PhotoCamera_Help = "";
     constexpr const char* PhotoCamera_Tooltip =
-        "Makes photos taken with the digital camera automatically get saved as Steam screenshots.";
+        "Makes photos taken with the camera automatically get saved as Steam screenshots.";
 
     constexpr const char* DisableTextureFiltering_Section = "Enhancements and Tweaks";
     constexpr const char* DisableTextureFiltering_Setting = "Nearest Neighbor Texture Filtering";
@@ -668,11 +668,8 @@ namespace ConfigKeys
     constexpr const char* PressureSensitiveFacebuttons_Section = "Controller Settings";
     constexpr const char* PressureSensitiveFacebuttons_Setting = "Dualshock 2 && 3 Controller Support";
     constexpr const char* PressureSensitiveFacebuttons_Help = "(Pressure Sensitive Buttons)\n"
-                                                              "(Experimental - WINDOWS ONLY)";
+                                                              "(Experimental)";
     constexpr const char* PressureSensitiveFacebuttons_Tooltip =
-        "Requires a DualShock 2 or 3 w/ DsHidMini in SDF or SXS mode.\n"
-        "(Same settings as PCSX2.)\n"
-        "\n"
         "Enables support for Dualshock 2 / 3 Controllers, complete with\n"
         "pressure sensitive facebutton support.\n"
         "\n"
@@ -680,15 +677,17 @@ namespace ConfigKeys
         "throats with a hard-press of circle while being held, grenade throw distance,\n"
         "locker lean, coolant spray pressure, and Codec good / bad thoughts.\n"
         "\n"
+        "Refer to MGSHDFix's readme for setup instructions.\n"
+        "\n"
         "Support will not be provided for controller setup / connection issues,\n"
-        "use PCSX2 to verify that your controller is properly set up if needed.\n"
+        "use PCSX2 to verify that your controller is set up properly if needed.\n"
         "\n"
         "Has no effect with standard controllers.";
 
 
     constexpr const char* Ds3RumbleStrength_Section = "Controller Settings";
     constexpr const char* Ds3RumbleStrength_Setting = "DualShock Rumble Strength (%)";
-    constexpr const char* Ds3RumbleStrength_Help = "";
+    constexpr const char* Ds3RumbleStrength_Help = "(Windows Only)";
     constexpr const char* Ds3RumbleStrength_Tooltip =
         "Scales rumble strength, up to 200%.";
 
