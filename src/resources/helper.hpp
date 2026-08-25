@@ -244,7 +244,7 @@ namespace Util
  * });
  *
  * Example:
- * MAKE_HOOK_MID(baseModule, "74 ?? B9 ?? ?? ?? ??", "completion check", {
+ * MAKE_HOOK_MID(baseModule, "74 ?? B9 ?? ?? ?? ?? C7", "completion check", {
  *     ctx.rax = 0;
  *     reghelpers::SetZF(ctx, false);
  * });
@@ -291,7 +291,7 @@ namespace Util
    * });
    *
    * Example:
-   * MAKE_HOOK_TRAMPOLINE(baseModule, "E8 ?? ?? ?? ??", "feature toggle", bool, {
+   * MAKE_HOOK_TRAMPOLINE(baseModule, "E8 ?? ?? ?? ?? C7", "feature toggle", bool, {
    *     if (shouldEnableFeature())
    *         return true;
    *     return trampoline(ctx);

@@ -31,7 +31,7 @@ namespace
 void MGS3FixCameraOffset::Activate()
 {
 #if defined(DISABLE_MGS3_CUTSCENE_CAMERA_FIX)
-    spdlog::info("DISABLE_MGS3_CUTSCENE_CAMERA_FIX | MGS3 CUTSCENE VIEWPORT FIX IS DISABLED.")
+    spdlog::info("DISABLE_MGS3_CUTSCENE_CAMERA_FIX | MGS3 CUTSCENE VIEWPORT FIX IS DISABLED.");
     return;
 #endif
     if (!(eGameType & MGS3))

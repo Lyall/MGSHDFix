@@ -27,7 +27,8 @@ namespace Shared_Gamefuncs
     using GCL_ChangeSenerioCode_t = void(__fastcall*)(int code);
     inline GCL_ChangeSenerioCode_t GCL_ChangeSenerioCode = nullptr;
 
-
+    using BP_GetAssetLoadFullPath_t = void(__fastcall*)(char* fullPath, char* unifiedFullPath, const char* manifestLoadPath, const char* manifestUnifiedPath);
+    inline BP_GetAssetLoadFullPath_t BP_GetAssetLoadFullPath = nullptr;
 };
 
 

@@ -679,20 +679,6 @@ void Config::Read()
     // Launcher settings
     std::string sLauncherConfigCtrlType = *std::next(kLauncherConfigCtrlTypes.begin(), 5);
 
-
-    ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
-    LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
-    LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
-
-    ConfigHelper::getValue(ini, ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
-    LOG_CONFIG(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, Ds3Rumble::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
-    Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
-    LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
-
     ConfigHelper::getValue(ini, ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, sLauncherConfigCtrlType);
     iLauncherConfigCtrlType = Util::findStringInVector(sLauncherConfigCtrlType, kLauncherConfigCtrlTypes);
 
@@ -720,6 +706,26 @@ void Config::Read()
 
     if (eGameType & (MGS2 | MGS3))
     {
+
+        ConfigHelper::getValue(ini, ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+        LOG_CONFIG(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, PressureInputs::bEnabled);
+        if (PressureInputs::bEnabled)
+        {
+            ConfigHelper::getValue(ini, ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+            LOG_CONFIG(ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, PressureInputs::bSuppressAlternates);
+
+            if (!Util::IsSteamOS())
+            {
+                ConfigHelper::getValue(ini, ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+                Ds3Rumble::iStrength = std::clamp(Ds3Rumble::iStrength, 0, 200);
+                Ds3Rumble::bEnabled = (Ds3Rumble::iStrength > 0);
+                LOG_CONFIG(ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, Ds3Rumble::iStrength);
+            }
+            else
+            {
+                Ds3Rumble::bEnabled = false;
+            }
+        }
 
         bool bRestoreVFX = true;
         ConfigHelper::getValue(ini, ConfigKeys::MGS2_Restore_VFX_Section, ConfigKeys::MGS2_Restore_VFX_Setting, bRestoreVFX);
@@ -762,7 +768,6 @@ void Config::Read()
                 &MGS2TankerSnakeSnap::bEnabled,
                 &MGS2HairLayering::bEnabled,
                 &MGS2_CodecBackground::bEnabled,
-                &MGS2BandanaMass::bEnabled,
                 &MGS2CodecBand::bEnabled,
                 &MGS2FixedAlpha::bEnabled,
                 &MGS2TankerFog::bEnabled,
@@ -774,10 +779,15 @@ void Config::Read()
             ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
             LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MGS2_RestorePhotosensitiveEffects::bEnabled);
 
+            
+            ConfigHelper::getValue(ini, ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, MGS2BandanaMass::bEnabled);
+            LOG_CONFIG(ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, MGS2BandanaMass::bEnabled);
+
+
             std::string sMotionBlur;
             ConfigHelper::getValue(ini, ConfigKeys::MotionBlur_Section, ConfigKeys::MotionBlur_Setting, sMotionBlur);
 #if defined(BEFORE_COMPARISON_PICS)
-            sMotionBlur = MotionBlur_Option_Disabled;
+            sMotionBlur = ConfigKeys::MotionBlur_Option_Disabled;
 #endif
             if (sMotionBlur != ConfigKeys::MotionBlur_Option_Disabled &&
                 sMotionBlur != ConfigKeys::MotionBlur_Option_CutscenesOnly &&

@@ -1,38 +1,41 @@
 #include "stdafx.h"
-#include <filesystem>
-#include <string>
-#include <vector>
-#include <algorithm>
+
+#include <cstdlib>
 
 #include "expand_bp_assets.hpp"
 
 #include "common.hpp"
 #include "logging.hpp"
 
-typedef long long (__fastcall* FASTCALL_1IN1OUT)(void*);
-typedef void* (__fastcall* FASTCALL_2IN1OUT)(void*, size_t);
-typedef void* (__fastcall* FASTCALL_3IN1OUT)(void*, void*, size_t);
+#include "game_funcs.hpp"
+
+
+namespace {
+
+	typedef long long(__fastcall* FASTCALL_1IN1OUT)(void*);
+	typedef void* (__fastcall* FASTCALL_2IN1OUT)(void*, size_t);
+	typedef void* (__fastcall* FASTCALL_3IN1OUT)(void*, void*, size_t);
 
 #define debug(...) do { if (g_Logging.bVerboseLogging) { spdlog::info("BPFilesysChanges: " __VA_ARGS__); } } while (0)
 
 // core components of struct; original definition in system/libfs/loader_flatfs.h
-typedef struct {
-	unsigned int loadState;
-	char manifestPath[260];
-	char* manifestBuffer;
-	char field_110[8]; // irrelevant
-	char bpAssetsPath[260];
-	char field_21C[4]; // padding
-	char* bpAssetsBuffer;
-	char field_228[16 + 260 * 3 + 4]; // irrelevant
-	// begin sub-struct "pManifestFileState"/"pBPAssetsFileState"
-	void* currentFileHandle;
-	void* operatingFileHandle; // duplicate?
-	char* currentFileBuffer; // only used for individual cmdl/ctxr files
-	size_t currentFileSize;
-} BPLoadFileState;
+	typedef struct {
+		unsigned int loadState;
+		char manifestPath[260];
+		char* manifestBuffer;
+		char field_110[8]; // irrelevant
+		char bpAssetsPath[260];
+		char field_21C[4]; // padding
+		char* bpAssetsBuffer;
+		char field_228[16 + 260 * 3 + 4]; // irrelevant
+		// begin sub-struct "pManifestFileState"/"pBPAssetsFileState"
+		void* currentFileHandle;
+		void* operatingFileHandle; // duplicate?
+		char* currentFileBuffer; // only used for individual cmdl/ctxr files
+		size_t currentFileSize;
+	} BPLoadFileState;
 
-namespace {
+
 	FASTCALL_1IN1OUT BPOpenFile;
 	FASTCALL_1IN1OUT BPGetFileSize;
 	//FASTCALL_3IN1OUT BPReadFile;
@@ -40,313 +43,364 @@ namespace {
 	//FASTCALL_1IN1OUT BPIsReadDone;
 	FASTCALL_1IN1OUT* MGSMalloc;
 	//FASTCALL_1IN1OUT* MGSFree;
-}
+
 
 // Helper for optimized file buffer allocation
-static inline size_t RoundUp(size_t size) {
-	size_t ret = 1;
-	while (ret < size)
-		ret <<= 1;
-	return ret;
-}
-
-static inline void* MGSRealloc(void* oldBuf, size_t newSize) {
-	//void* newBuf = (void*)(*MGSMalloc)((void*)newSize);
-	//memcpy(newBuf, oldBuf, oldSize);
-	//(*MGSFree)(oldBuf);
-	//return newBuf;
-	// 
-	// Get game realloc function relatively from the table that holds malloc.
-	return ((FASTCALL_2IN1OUT)(MGSMalloc[2]))(oldBuf, newSize);
-}
-
-// Key on the cache fields, not the source path. One texture can be registered against
-// several tri groups, and those lines differ only in the last field.
-static inline std::string_view CacheKey(const std::string& line) {
-	const size_t comma = line.find(',');
-	return comma == std::string::npos ? std::string_view(line) : std::string_view(line).substr(comma + 1);
-}
-
-static inline std::string_view GetExtension(const std::string& line) {
-	const size_t period = line.find_last_of('.');
-	if (period == std::string::npos) {
-		return std::string_view(line);
+	size_t RoundUp(size_t size)
+	{
+		size_t ret = 1;
+		while (ret < size)
+			ret <<= 1;
+		return ret;
 	}
-	else {
-		return std::string_view(line).substr(period + 1);
-	}
-}
 
-static void SplitLines(const char* data, size_t size, std::vector<std::string>& out) {
-	size_t start = 0;
-	for (size_t i = 0; i <= size; i++) {
-		if (i != size && data[i] != '\n') {
-			continue;
-		}
-		size_t end = i;
-		while (end > start && (data[end - 1] == '\r' || data[end - 1] == '\n')) {
-			end--;
-		}
-		if (end > start) {
-			out.emplace_back(data + start, end - start);
-		}
-		start = i + 1;
+	void* MGSRealloc(void* oldBuf, size_t newSize)
+	{
+//void* newBuf = (void*)(*MGSMalloc)((void*)newSize);
+//memcpy(newBuf, oldBuf, oldSize);
+//(*MGSFree)(oldBuf);
+//return newBuf;
+// 
+// Get game realloc function relatively from the table that holds malloc.
+		return ((FASTCALL_2IN1OUT)(MGSMalloc[2]))(oldBuf, newSize);
 	}
-}
 
-namespace {
+	// Key on the cache fields, not the source path. One texture can be registered against
+	// several tri groups, and those lines differ only in the last field.
+	std::string_view CacheKey(const std::string& line)
+	{
+		const size_t comma = line.find(',');
+		return comma == std::string::npos ? std::string_view(line) : std::string_view(line).substr(comma + 1);
+	}
+
+	std::string_view GetExtension(const std::string& line)
+	{
+		const size_t period = line.find_last_of('.');
+		if (period == std::string::npos)
+		{
+			return std::string_view(line);
+		}
+		else
+		{
+			return std::string_view(line).substr(period + 1);
+		}
+	}
+
+	void SplitLines(const char* data, size_t size, std::vector<std::string>& out)
+	{
+		size_t start = 0;
+		for (size_t i = 0; i <= size; i++)
+		{
+			if (i != size && data[i] != '\n')
+			{
+				continue;
+			}
+			size_t end = i;
+			while (end > start && (data[end - 1] == '\r' || data[end - 1] == '\n'))
+			{
+				end--;
+			}
+			if (end > start)
+			{
+				out.emplace_back(data + start, end - start);
+			}
+			start = i + 1;
+		}
+	}
+
 	std::vector<std::string> gUniversalManifest;
 	std::vector<std::string> gUniversalBpAssets;
+
+
+
+
+// "<region>/stage/<stage>/manifest.txt" -> the expanded universal lines, or empty when the
+// path is a codec cache or a resident (r_*) pack.
+	std::string UniversalLinesFor(const char* filePath, bool isBPAssets)
+	{
+		const auto& tmpl = isBPAssets ? gUniversalBpAssets : gUniversalManifest;
+		if (tmpl.empty())
+		{
+			return {};
+		}
+		std::string p(filePath);
+		for (auto& c : p) if (c == '\\') c = '/';
+		const size_t st = p.find("/stage/");
+		if (st == std::string::npos)
+		{
+			return {};
+		}
+		const std::string region = p.substr(p.rfind('/', st - 1) + 1, st - (p.rfind('/', st - 1) + 1));
+		const size_t ss = st + 7;
+		const std::string stage = p.substr(ss, p.find('/', ss) - ss);
+		if (stage.rfind("r_", 0) == 0)
+		{
+			return {};   // resident packs use resident/ paths; these templates are cache/ form
+		}
+		std::string out;
+		for (const std::string& t : tmpl)
+		{
+			std::string line = t;
+			for (size_t i; (i = line.find("%S%")) != std::string::npos;) line.replace(i, 3, stage);
+			for (size_t i; (i = line.find("%R%")) != std::string::npos;) line.replace(i, 3, region);
+			out += line;
+			out += '\n';
+		}
+		return out;
+	}
+
+	// Ultimate ASI Loader redirects opens into its overload folder, but these lists are found
+	// by scanning a directory rather than opened by name, so a mod's copies there are never
+	// seen. Ask the loader where that folder is and scan it too. No loader, no change.
+	typedef bool (WINAPI* GetOverloadPathWFn)(wchar_t*, size_t);
+
+	const std::filesystem::path& OverloadRoot()
+	{
+		static std::filesystem::path root;
+		static bool resolved = false;
+		if (resolved)
+		{
+			return root;
+		}
+		resolved = true;
+
+		HMODULE mods[256];
+		DWORD needed = 0;
+		if (K32EnumProcessModules(GetCurrentProcess(), mods, sizeof(mods), &needed))
+		{
+			const size_t count = std::min<size_t>(needed / sizeof(HMODULE), std::size(mods));
+			for (size_t i = 0; i < count; i++)
+			{
+				auto fn = (GetOverloadPathWFn)GetProcAddress(mods[i], "GetOverloadPathW");
+				if (!fn)
+				{
+					continue;
+				}
+				wchar_t buf[MAX_PATH] {};
+				if (fn(buf, std::size(buf)) && buf[0])
+				{
+					root = buf;
+					spdlog::info("BP_FilesysChanges: loader overload folder is {}", root.string());
+				}
+				break;
+			}
+		}
+		return root;
+	}
+
+	// The same stage folder inside the overload root, or empty when there is no loader.
+	std::filesystem::path OverloadMirror(const std::filesystem::path& directory)
+	{
+		const std::filesystem::path& root = OverloadRoot();
+		if (root.empty())
+		{
+			return {};
+		}
+		std::error_code ec;
+		std::filesystem::path rel = std::filesystem::relative(directory, sExePath.parent_path(), ec);
+		if (ec || rel.empty() || *rel.begin() == "..")
+		{
+			return {};
+		}
+		return root / rel;
+	}
+
+	void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets)
+	{
+#define match_substr (isBPAssets ? "bp_assets_" : "manifest_")
+		debug("loading a {}", isBPAssets ? "bp_assets" : "manifest");
+
+		// Find files similar to the currently used path.
+		const char* filePath = isBPAssets ? state->bpAssetsPath : state->manifestPath;
+		std::filesystem::path directory = std::filesystem::path(filePath).parent_path();
+		char** buffer = isBPAssets ? &state->bpAssetsBuffer : &state->manifestBuffer;
+
+		// Avoid realloc when reasonable
+		size_t prevBufferSize = state->currentFileSize + 1;
+		// For after the loop
+		size_t originalFileSize = state->currentFileSize;
+
+		std::vector<std::filesystem::path> entries;
+		std::error_code ec;
+		for (auto const& d : { directory, OverloadMirror(directory) })
+		{
+			if (d.empty() || !std::filesystem::is_directory(d, ec))
+			{
+				continue;
+			}
+			for (auto const& dir_entry : std::filesystem::directory_iterator(d, ec))
+			{
+				if (dir_entry.is_regular_file(ec))
+				{
+					entries.push_back(dir_entry.path());
+				}
+			}
+		}
+
+		for (auto const& entry_path : entries)
+		{
+			if (entry_path.stem().string().starts_with(match_substr)
+				&& entry_path.extension() == ".txt")
+			{
+// Match found, load it
+// Need to update: buffer, file size, NOT file handle
+//BPCloseFile(state->currentFileHandle);
+//state->currentFileHandle = (void*)BPOpenFile((void*)entry_path.string().c_str());
+// The Master Collection file reader is asynchronous. We need more consistency than that.
+				FILE* fp = _wfopen(entry_path.c_str(), L"rb");
+				if (!fp)
+				{
+					spdlog::warn("BPFilesysChanges: Failed to open {} with error \"{}\". Skipping.", entry_path.string(), strerror(errno));
+					continue;
+				}
+				fseek(fp, 0, SEEK_END);
+				size_t newFileSize = ftell(fp);
+				fseek(fp, 0, SEEK_SET);
+				// In case a file is missing its trailing newline, make sure to insert that before it causes problems.
+				bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
+				size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1 + needNewline);
+				if (newBufferSize > prevBufferSize)
+				{
+					debug("reallocing");
+					char* oldBuf = *buffer;
+					*buffer = (char*)MGSRealloc(oldBuf, newBufferSize);
+					debug("buffer for {} was at {}, now {}", filePath, (void*)oldBuf, (void*)*buffer);
+					(*buffer)[state->currentFileSize + newFileSize] = '\0';
+				}
+				prevBufferSize = newBufferSize;
+				// And read the new file, of course.
+				if (needNewline)
+				{
+					debug("Newline added.");
+					(*buffer)[state->currentFileSize] = '\n';
+					state->currentFileSize++;
+				}
+				fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
+				fclose(fp);
+
+				if ((*buffer)[state->currentFileSize] == '\0')
+				{
+					// ??? mission failed? what?
+					spdlog::warn("Failed to load a text file ({} supplementing {}), the simplest file load possible?", entry_path.string(), filePath);
+					continue;
+				}
+				state->currentFileSize += newFileSize;
+			}
+		}
+
+		// Feature-registered lines (e.g. the blade kit) merge into every gameplay stage the
+		// same way an on-disk supplement would.
+		const std::string universal = UniversalLinesFor(filePath, isBPAssets);
+		if (!universal.empty())
+		{
+			bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
+			size_t newBufferSize = RoundUp(state->currentFileSize + universal.size() + 1 + needNewline);
+			if (newBufferSize > prevBufferSize)
+			{
+				*buffer = (char*)MGSRealloc(*buffer, newBufferSize);
+				prevBufferSize = newBufferSize;
+			}
+			if (needNewline)
+			{
+				(*buffer)[state->currentFileSize++] = '\n';
+			}
+			memcpy(&(*buffer)[state->currentFileSize], universal.data(), universal.size());
+			state->currentFileSize += universal.size();
+			(*buffer)[state->currentFileSize] = '\0';
+		}
+
+		// Merge instead of prepending. A cache path the stage already lists replaces it in
+		// place, since loading an asset twice starves the streamer and runs the stage in slow
+		// motion. New entries go on the end: the list is in dependency order.
+		size_t newFilesSize = state->currentFileSize - originalFileSize;
+		if (newFilesSize)
+		{
+			std::vector<std::string> lines;
+			SplitLines(*buffer, state->currentFileSize, lines);
+
+			// Sort lines by asset type and remove duplicates (later entry prioritized)
+			typedef std::pair<std::string, std::vector<std::string>> LineGroup;
+			std::vector<LineGroup> sortedLines = {
+				{"tri", {}},
+				{"hzx", {}},
+				{"var", {}},
+				{"sar", {}},
+				{"row", {}},
+				{"mar", {}},
+				{"lt2", {}},
+				{"kms", {}},
+				{"evm", {}},
+				{"cv2", {}},
+				{"gcx", {}},
+				{"ctxr", {}},
+				{"cmdl", {}},
+				{"other", {}} // Extension-match iterator defaults to this
+			};
+
+			size_t replaced = 0, added = 0;
+			for (const std::string& line : lines)
+			{
+// Get appropriate vector 
+				const std::string_view extension = GetExtension(line);
+				// std::prev causes fallback case to be "other" rather than sortedLines.end()
+				auto matchGroup = std::find_if(sortedLines.begin(), std::prev(sortedLines.end()),
+											   [&](const LineGroup& v) { return v.first == extension; });
+				std::vector<std::string>& lineVec = (*matchGroup).second;
+
+				// Insert into vector, with duplicate cleanup
+				const std::string_view key = CacheKey(line);
+				auto match = std::find_if(lineVec.begin(), lineVec.end(),
+										  [&](const std::string& v) { return CacheKey(v) == key; });
+				if (match != lineVec.end())
+				{
+					*match = line;
+					replaced++;
+				}
+				else
+				{
+					added++;
+					lineVec.push_back(line);
+				}
+			}
+
+			std::string merged;
+			merged.reserve(state->currentFileSize + lines.size() + 1);
+			for (const LineGroup& group : sortedLines)
+			{
+				for (const std::string& line : group.second)
+				{
+					merged += line;
+					// Unix newline is slightly more optimal as the game's parser discards CR.
+					merged += "\n";
+				}
+			}
+
+			const size_t needed = RoundUp(merged.size() + 1);
+			if (needed > prevBufferSize)
+			{
+				spdlog::warn("BPFilesysChanges: Unexpected reallocation (should have had space already?)");
+				*buffer = (char*)MGSRealloc(*buffer, needed);
+			}
+			memcpy(*buffer, merged.data(), merged.size());
+			(*buffer)[merged.size()] = '\0';
+			state->currentFileSize = merged.size();
+			spdlog::info("{}: merged {} supplementary entries ({} replaced, {} added)",
+						 std::filesystem::path(filePath).filename().string(), replaced + added, replaced, added);
+		}
+
+		return state->currentFileHandle;
+	}
+
+
 }
 
-void BP_FilesysChanges::AddUniversalStageLines(std::vector<std::string> manifestLines,
-                                               std::vector<std::string> bpAssetsLines) {
+void BP_FileSys::AddUniversalStageLines(std::vector<std::string> manifestLines, std::vector<std::string> bpAssetsLines)
+{
 	for (auto& l : manifestLines) gUniversalManifest.push_back(std::move(l));
 	for (auto& l : bpAssetsLines) gUniversalBpAssets.push_back(std::move(l));
 }
 
-// "<region>/stage/<stage>/manifest.txt" -> the expanded universal lines, or empty when the
-// path is a codec cache or a resident (r_*) pack.
-static std::string UniversalLinesFor(const char* filePath, bool isBPAssets) {
-	const auto& tmpl = isBPAssets ? gUniversalBpAssets : gUniversalManifest;
-	if (tmpl.empty()) {
-		return {};
-	}
-	std::string p(filePath);
-	for (auto& c : p) if (c == '\\') c = '/';
-	const size_t st = p.find("/stage/");
-	if (st == std::string::npos) {
-		return {};
-	}
-	const std::string region = p.substr(p.rfind('/', st - 1) + 1, st - (p.rfind('/', st - 1) + 1));
-	const size_t ss = st + 7;
-	const std::string stage = p.substr(ss, p.find('/', ss) - ss);
-	if (stage.rfind("r_", 0) == 0) {
-		return {};   // resident packs use resident/ paths; these templates are cache/ form
-	}
-	std::string out;
-	for (const std::string& t : tmpl) {
-		std::string line = t;
-		for (size_t i; (i = line.find("%S%")) != std::string::npos;) line.replace(i, 3, stage);
-		for (size_t i; (i = line.find("%R%")) != std::string::npos;) line.replace(i, 3, region);
-		out += line;
-		out += '\n';
-	}
-	return out;
-}
 
-// Ultimate ASI Loader redirects opens into its overload folder, but these lists are found
-// by scanning a directory rather than opened by name, so a mod's copies there are never
-// seen. Ask the loader where that folder is and scan it too. No loader, no change.
-typedef bool (WINAPI* GetOverloadPathWFn)(wchar_t*, size_t);
-
-static const std::filesystem::path& OverloadRoot() {
-	static std::filesystem::path root;
-	static bool resolved = false;
-	if (resolved) {
-		return root;
-	}
-	resolved = true;
-
-	HMODULE mods[256];
-	DWORD needed = 0;
-	if (K32EnumProcessModules(GetCurrentProcess(), mods, sizeof(mods), &needed)) {
-		const size_t count = std::min<size_t>(needed / sizeof(HMODULE), std::size(mods));
-		for (size_t i = 0; i < count; i++) {
-			auto fn = (GetOverloadPathWFn)GetProcAddress(mods[i], "GetOverloadPathW");
-			if (!fn) {
-				continue;
-			}
-			wchar_t buf[MAX_PATH] {};
-			if (fn(buf, std::size(buf)) && buf[0]) {
-				root = buf;
-				spdlog::info("BP_FilesysChanges: loader overload folder is {}", root.string());
-			}
-			break;
-		}
-	}
-	return root;
-}
-
-// The same stage folder inside the overload root, or empty when there is no loader.
-static std::filesystem::path OverloadMirror(const std::filesystem::path& directory) {
-	const std::filesystem::path& root = OverloadRoot();
-	if (root.empty()) {
-		return {};
-	}
-	std::error_code ec;
-	std::filesystem::path rel = std::filesystem::relative(directory, sExePath.parent_path(), ec);
-	if (ec || rel.empty() || *rel.begin() == "..") {
-		return {};
-	}
-	return root / rel;
-}
-
-static inline void* LoadSimilarFiles(BPLoadFileState* state, bool isBPAssets) {
-#define match_substr (isBPAssets ? "bp_assets_" : "manifest_")
-	debug("loading a {}", isBPAssets ? "bp_assets" : "manifest");
-
-	// Find files similar to the currently used path.
-	const char* filePath = isBPAssets ? state->bpAssetsPath : state->manifestPath;
-	std::filesystem::path directory = std::filesystem::path(filePath).parent_path();
-	char** buffer = isBPAssets ? &state->bpAssetsBuffer : &state->manifestBuffer;
-
-	// Avoid realloc when reasonable
-	size_t prevBufferSize = state->currentFileSize + 1;
-	// For after the loop
-	size_t originalFileSize = state->currentFileSize;
-
-	std::vector<std::filesystem::path> entries;
-	std::error_code ec;
-	for (auto const& d : { directory, OverloadMirror(directory) }) {
-		if (d.empty() || !std::filesystem::is_directory(d, ec)) {
-			continue;
-		}
-		for (auto const& dir_entry : std::filesystem::directory_iterator(d, ec)) {
-			if (dir_entry.is_regular_file(ec)) {
-				entries.push_back(dir_entry.path());
-			}
-		}
-	}
-
-	for (auto const& entry_path : entries) {
-		if (entry_path.stem().string().starts_with(match_substr)
-			&& entry_path.extension() == ".txt") {
-			// Match found, load it
-			// Need to update: buffer, file size, NOT file handle
-			//BPCloseFile(state->currentFileHandle);
-			//state->currentFileHandle = (void*)BPOpenFile((void*)entry_path.string().c_str());
-			// The Master Collection file reader is asynchronous. We need more consistency than that.
-			FILE* fp = _wfopen(entry_path.c_str(), L"rb");
-			if (!fp) {
-				spdlog::warn("BPFilesysChanges: Failed to open {} with error \"{}\". Skipping.", entry_path.string(), strerror(errno));
-				continue;
-			}
-			fseek(fp, 0, SEEK_END);
-			size_t newFileSize = ftell(fp);
-			fseek(fp, 0, SEEK_SET);
-			// In case a file is missing its trailing newline, make sure to insert that before it causes problems.
-			bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
-			size_t newBufferSize = RoundUp(state->currentFileSize + newFileSize + 1 + needNewline);
-			if (newBufferSize > prevBufferSize) {
-				debug("reallocing");
-				char* oldBuf = *buffer;
-				*buffer = (char*)MGSRealloc(oldBuf, newBufferSize);
-				debug("buffer for {} was at {}, now {}", filePath, (void*)oldBuf, (void*)*buffer);
-				(*buffer)[state->currentFileSize + newFileSize] = '\0';
-			}
-			prevBufferSize = newBufferSize;
-			// And read the new file, of course.
-			if (needNewline) {
-				debug("Newline added.");
-				(*buffer)[state->currentFileSize] = '\n';
-				state->currentFileSize++;
-			}
-			fread(&(*buffer)[state->currentFileSize], newFileSize, 1, fp);
-			fclose(fp);
-
-			if ((*buffer)[state->currentFileSize] == '\0')
-			{
-				// ??? mission failed? what?
-				spdlog::warn("Failed to load a text file ({} supplementing {}), the simplest file load possible?", entry_path.string(), filePath);
-				continue;
-			}
-			state->currentFileSize += newFileSize;
-		}
-	}
-	
-	// Feature-registered lines (e.g. the blade kit) merge into every gameplay stage the
-	// same way an on-disk supplement would.
-	const std::string universal = UniversalLinesFor(filePath, isBPAssets);
-	if (!universal.empty()) {
-		bool needNewline = state->currentFileSize && (*buffer)[state->currentFileSize - 1] != '\n';
-		size_t newBufferSize = RoundUp(state->currentFileSize + universal.size() + 1 + needNewline);
-		if (newBufferSize > prevBufferSize) {
-			*buffer = (char*)MGSRealloc(*buffer, newBufferSize);
-			prevBufferSize = newBufferSize;
-		}
-		if (needNewline) {
-			(*buffer)[state->currentFileSize++] = '\n';
-		}
-		memcpy(&(*buffer)[state->currentFileSize], universal.data(), universal.size());
-		state->currentFileSize += universal.size();
-		(*buffer)[state->currentFileSize] = '\0';
-	}
-
-	// Merge instead of prepending. A cache path the stage already lists replaces it in
-	// place, since loading an asset twice starves the streamer and runs the stage in slow
-	// motion. New entries go on the end: the list is in dependency order.
-	size_t newFilesSize = state->currentFileSize - originalFileSize;
-	if (newFilesSize) {
-		std::vector<std::string> lines;
-		SplitLines(*buffer, state->currentFileSize, lines);
-
-		// Sort lines by asset type and remove duplicates (later entry prioritized)
-		typedef std::pair<std::string, std::vector<std::string>> LineGroup;
-		std::vector<LineGroup> sortedLines = {
-			{"tri", {}},
-			{"hzx", {}},
-			{"var", {}},
-			{"sar", {}},
-			{"row", {}},
-			{"mar", {}},
-			{"lt2", {}},
-			{"kms", {}},
-			{"evm", {}},
-			{"cv2", {}},
-			{"gcx", {}},
-			{"ctxr", {}},
-			{"cmdl", {}},
-			{"other", {}} // Extension-match iterator defaults to this
-		};
-
-		size_t replaced = 0, added = 0;
-		for (const std::string& line : lines) {
-			// Get appropriate vector 
-			const std::string_view extension = GetExtension(line);
-			// std::prev causes fallback case to be "other" rather than sortedLines.end()
-			auto matchGroup = std::find_if(sortedLines.begin(), std::prev(sortedLines.end()),
-				[&](const LineGroup& v) { return v.first == extension; });
-			std::vector<std::string>& lineVec = (*matchGroup).second;
-
-			// Insert into vector, with duplicate cleanup
-			const std::string_view key = CacheKey(line);
-			auto match = std::find_if(lineVec.begin(), lineVec.end(),
-				[&](const std::string& v) { return CacheKey(v) == key; });
-			if (match != lineVec.end()) {
-				*match = line;
-				replaced++;
-			}
-			else {
-				added++;
-				lineVec.push_back(line);
-			}
-		}
-
-		std::string merged;
-		merged.reserve(state->currentFileSize + lines.size() + 1);
-		for (const LineGroup& group : sortedLines) {
-			for (const std::string& line : group.second) {
-				merged += line;
-				// Unix newline is slightly more optimal as the game's parser discards CR.
-				merged += "\n";
-			}
-		}
-
-		const size_t needed = RoundUp(merged.size() + 1);
-		if (needed > prevBufferSize) {
-			spdlog::warn("BPFilesysChanges: Unexpected reallocation (should have had space already?)");
-			*buffer = (char*)MGSRealloc(*buffer, needed);
-		}
-		memcpy(*buffer, merged.data(), merged.size());
-		(*buffer)[merged.size()] = '\0';
-		state->currentFileSize = merged.size();
-		spdlog::info("{}: merged {} supplementary entries ({} replaced, {} added)",
-			std::filesystem::path(filePath).filename().string(), replaced + added, replaced, added);
-	}
-
-	return state->currentFileHandle;
-}
 
 void BP_FilesysChanges::Initialize() {
 
@@ -392,3 +446,167 @@ void BP_FilesysChanges::Initialize() {
 		});
 	}
 }
+
+#pragma region unused_debugging
+
+	/*
+
+	SafetyHookInline BP_GetPathPlatformSKUOverride_hook {};
+
+	void __fastcall BP_GetPathPlatformSKUOverride(char* loadPath, char* commonLoadPath)
+	{
+		spdlog::info("BP_GetPathPlatformSKUOverride called with loadPath: {}, commonLoadPath: {}", loadPath, commonLoadPath);
+		BP_GetPathPlatformSKUOverride_hook.fastcall<void>(loadPath, commonLoadPath);
+		spdlog::info("BP_GetPathPlatformSKUOverride returned loadPath: {}", loadPath);
+	}
+
+
+	SafetyHookInline BP_GetAssetLoadFullPath_hook {};
+
+	void __fastcall BP_GetAssetLoadFullPath(char* fullPath, char* unifiedFullPath, const char* manifestLoadPath, const char* manifestUnifiedPath)
+	{
+		spdlog::info("BP_GetAssetLoadFullPath called with manifestLoadPath: {}, manifestUnifiedPath: {}", manifestLoadPath, manifestUnifiedPath);
+		BP_GetAssetLoadFullPath_hook.fastcall<void>(fullPath, unifiedFullPath, manifestLoadPath, manifestUnifiedPath);
+		spdlog::info("BP_GetAssetLoadFullPath returned fullPath: {}, unifiedFullPath: {}", fullPath, unifiedFullPath);
+	}
+	*/
+
+
+
+
+	/*
+
+
+	//BP_FileExists*
+	//_BP_GetAssetLoadFullPath+349
+	uintptr_t BP_GetPathPlatformSKUOverride_scan = Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8B 8C 24 ?? ?? ?? ?? 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 ?? ?? ?? ?? 49 8B 5B ?? 49 8B 6B ?? 49 8B E3", "MGS 2: Log BP_GetPathPlatformSKUOverride args/result: mgs2x\\source\\system\\libfs\\loader_flatfs.cpp -> BP_GetAssetLoadFullPath() -> BP_GetPathPlatformSKUOverride() | @l753: "), 1, 5);
+
+	if(!BP_GetPathPlatformSKUOverride_scan)
+	{
+		spdlog::error("BP_FileSys: Failed to find BP_GetPathPlatformSKUOverride_scan");
+		return;
+	}
+
+		BP_GetPathPlatformSKUOverride_hook = safetyhook::create_inline(reinterpret_cast<void*>(BP_GetPathPlatformSKUOverride_scan), reinterpret_cast<void*>(BP_GetPathPlatformSKUOverride));
+	spdlog::info("BP_FileSys: Successfully hooked BP_GetPathPlatformSKUOverride");
+
+
+
+	//call-site trampoline: resolves the E8 call to _BP_GetAssetLoadFullPath immediately preceding the BP_OpenFile arg setup
+	uintptr_t BP_GetAssetLoadFullPath_scan = Memory::GetRipRelativeAddress(Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8D 95 ?? ?? ?? ?? 48 8D 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B C8", "MGS 2: Log BP_GetAssetLoadFullPath args/result: mgs2x\\source\\system\\libfs\\stage_flatfs.cpp -> stage_begin_load_kp_file() -> BP_GetAssetLoadFullPath() | @l475: "), 1, 5);
+
+	if(!BP_GetAssetLoadFullPath_scan)
+	{
+		spdlog::error("BP_FileSys: Failed to find BP_GetAssetLoadFullPath_scan");
+		return;
+	}
+
+	BP_GetAssetLoadFullPath_hook = safetyhook::create_inline(reinterpret_cast<void*>(BP_GetAssetLoadFullPath_scan), reinterpret_cast<void*>(BP_GetAssetLoadFullPath));
+	spdlog::info("BP_FileSys: Successfully hooked BP_GetAssetLoadFullPath");
+
+	*/
+/*
+[2026-08-23 05:01:35.045] [info] BP_GetPathPlatformSKUOverride called with loadPath: textures/flatlist/_win/nom_b_alp_ovl.bmp.ctxr, commonLoadPath: textures/flatlist/_win/nom_b_alp_ovl.bmp.ctxr
+[2026-08-23 05:01:35.045] [info] BP_GetPathPlatformSKUOverride returned loadPath: textures/flatlist/ovr_stm/_win/nom_b_alp_ovl.bmp.ctxr
+*/
+
+#pragma endregion unused_debugging
+
+std::filesystem::path BP_FileSys::GetActiveAssetPath(const std::string& relativePath)
+{
+	if (!Shared_Gamefuncs::BP_GetAssetLoadFullPath)
+	{
+		spdlog::error("BP_FileSys: BP_GetAssetLoadFullPath is not initialized.");
+		return {};
+	}
+
+	char fullPath[512] {};
+	char unifiedFullPath[512] {};
+	Shared_Gamefuncs::BP_GetAssetLoadFullPath(fullPath, unifiedFullPath, relativePath.c_str(), relativePath.c_str());
+
+	return (sExePath / fullPath).make_preferred();
+}
+
+namespace
+{
+	constexpr size_t kCTXRHeaderSize = 128;
+
+	uint16_t ReadBE16(const uint8_t* p)
+	{
+		uint16_t v;
+		memcpy(&v, p, sizeof(v));
+		return _byteswap_ushort(v);
+	}
+
+	uint32_t ReadBE32(const uint8_t* p)
+	{
+		uint32_t v;
+		memcpy(&v, p, sizeof(v));
+		return _byteswap_ulong(v);
+	}
+
+	// buf must be at least kCTXRHeaderSize bytes and start with the "TXTR" magic.
+	BP_FileSys::CTXRHeader ParseCTXRHeader(const uint8_t* buf)
+	{
+		BP_FileSys::CTXRHeader h;
+		h.version         = ReadBE32(buf + 0x04);
+		h.width           = ReadBE16(buf + 0x08);
+		h.height          = ReadBE16(buf + 0x0A);
+		h.depth           = ReadBE16(buf + 0x0C);
+		h.format          = ReadBE32(buf + 0x0E);
+		h.hasAlpha        = buf[0x12] != 0;
+		h.additionalFlags = ReadBE32(buf + 0x13);
+		h.minRGBA         = ReadBE32(buf + 0x17);
+		h.maxRGBA         = ReadBE32(buf + 0x1B);
+		h.filterHint      = static_cast<int8_t>(buf[0x1F]);
+		h.alphaRefValue   = buf[0x20];
+		h.maxLODOffset    = static_cast<int8_t>(buf[0x21]);
+		h.type            = ReadBE32(buf + 0x22);
+		h.numLevels       = buf[0x26];
+		return h;
+	}
+}
+
+std::optional<BP_FileSys::CTXRHeader> BP_FileSys::ReadCTXRHeader(const std::filesystem::path& path)
+{
+	std::ifstream f(path, std::ios::binary);
+	uint8_t buf[kCTXRHeaderSize];
+	if (!f || !f.read(reinterpret_cast<char*>(buf), sizeof(buf)) || memcmp(buf, "TXTR", 4) != 0)
+	{
+		return std::nullopt;
+	}
+
+	return ParseCTXRHeader(buf);
+}
+
+std::optional<uint64_t> BP_FileSys::HashCTXRTexture(const std::filesystem::path& path)
+{
+	std::ifstream f(path, std::ios::binary);
+	if (!f)
+	{
+		return std::nullopt;
+	}
+
+	std::vector<uint8_t> data((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+	if (data.size() < kCTXRHeaderSize + 4 || memcmp(data.data(), "TXTR", 4) != 0)
+	{
+		return std::nullopt;
+	}
+
+	const CTXRHeader header = ParseCTXRHeader(data.data());
+	if (header.numLevels == 0)
+	{
+		return std::nullopt;
+	}
+
+	const size_t mip0Size = ReadBE32(&data[kCTXRHeaderSize]);
+	const size_t mip0Start = kCTXRHeaderSize + 4;
+	if (mip0Start + mip0Size > data.size())
+	{
+		spdlog::error("BP_FileSys: {} mip 0 payload truncated (size={}, remaining={})", path.string(), mip0Size, data.size() - mip0Start);
+		return std::nullopt;
+	}
+
+	return Util::HashTexels(data.data() + mip0Start, static_cast<size_t>(header.width) * 4, header.width, header.height);
+}
+

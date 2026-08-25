@@ -165,21 +165,21 @@ void OpticalCamoFix::Initialize() const
 
     constexpr ptrdiff_t kExtentsCallOffset = 0x16;
     uint8_t* extentsUpload = Memory::PatternScan(baseModule,
-        "BA 06 00 00 00 F3 0F 11 ?? ?? 48 C7 45 ?? ?? ?? ?? ?? 44 8D 42 FC E8 ?? ?? ?? ??",
+        "BA ?? ?? ?? ?? F3 0F 11 45 ?? 48 C7 45 ?? 00 00 00 00",
         "MGS 2: Optical Camo Fix: BP_Obj_OptCmf_InitPacket() -> source extents");
 
     constexpr ptrdiff_t kRefractionCallOffset = 0x17;
     uint8_t* refractionUpload = Memory::PatternScan(baseModule,
-        "4C 8D 8E E0 00 00 00 BA 08 00 00 00 44 8D 42 FA 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ??",
+        "4C 8D 8E ?? ?? ?? ?? BA ?? ?? ?? ?? 44 8D 42 ?? 48 8B 0D",
         "MGS 2: Optical Camo Fix: BP_Obj_OptCmf_Render() -> camo rows");
 
     constexpr ptrdiff_t kEyeInvCallOffset = 0x39;
     uint8_t* eyeInvUpload = Memory::PatternScan(baseModule,
-        "F3 0F 10 47 4C F3 0F 11 4D ?? F3 0F 10 4F 5C F3 0F 11 85 ?? ?? ?? ?? F3 0F 10 47 6C F3 0F 11 8D ?? ?? ?? ?? F3 0F 10 4F 7C F3 0F 11 85 ?? ?? ?? ?? F3 0F 11 8D ?? ?? ?? ?? E8 ?? ?? ?? ??",
+        "F3 0F 10 47 ?? F3 0F 11 4D ?? F3 0F 10 4F ?? F3 0F 11 85",
         "MGS 2: Optical Camo Fix: BP_Obj_OptCmf_InitPacket() -> eye_inv");
 
     uint8_t* rotMatCapture = Memory::PatternScan(baseModule,
-        "49 8B 87 A8 00 00 00 48 89 5C ?? ?? 49 8D 9F 10 01 00 00 4C 89 74 ?? ?? 45 8B F4 0F 28 40 40 0F 29 05 ?? ?? ?? ??",
+        "49 8B 87 ?? ?? ?? ?? 48 89 5C 24",
         "MGS 2: Optical Camo Fix: ChainObjs() -> objs->extend_data[1]");
 
     if (!extentsUpload || !refractionUpload || !eyeInvUpload || !rotMatCapture)

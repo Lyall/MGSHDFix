@@ -6,6 +6,9 @@
 
 void MGS3HudFixes::Initialize()
 {
+#if defined(BEFORE_COMPARISON_PICTURES)
+    return;
+#endif
     if (!(eGameType & MGS3))
     {
         return;

@@ -1071,11 +1071,10 @@ bool EffectSpeedFix::IsFeedbackHoldTick()
 
     static std::atomic<int> s_lastAutomatic30 { -1 };
     const int previousAutomatic30 = s_lastAutomatic30.exchange(automatic30 ? 1 : 0, std::memory_order_relaxed);
-    if (previousAutomatic30 != static_cast<int>(automatic30))
-    {
-        spdlog::info("MGS 2: Effect Speed Fix: feedback cadence limiter {}.",
-                     automatic30 ? "enabled" : "disabled");
-    }
+   if (g_Logging.bVerboseLogging && (previousAutomatic30 != static_cast<int>(automatic30)))
+   {
+       spdlog::info("MGS 2: Effect Speed Fix: feedback cadence limiter {}.", automatic30 ? "enabled" : "disabled");
+   }
 
     return (In30fpsWindow() || automatic30) && (g_GameVars.DG_Clock() & 1) != 0;
 }
@@ -1282,19 +1281,19 @@ void EffectSpeedFix::Initialize()
         LOG_HOOK(cigaretteMouthSmokeEmitTimerHook, "MGS 2: Effect Speed Fix: Cigarette mouth smoke emit lifetime")
     }
 
-    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 4C 24 ?? F3 0F 11 43 ??", "MGS 2: Effect Speed Fix: Cigarette mouth smoke X movement", {
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 4C 24", "MGS 2: Effect Speed Fix: Cigarette mouth smoke X movement", {
             ctx.xmm0.f32[0] *= 0.5f;
         });
 
-    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 58 64 24 ?? F3 0F 11 03", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Y movement", {
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 58 64 24", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Y movement", {
             ctx.xmm0.f32[0] *= 0.5f;
         });
 
-    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 6C 24 ?? F3 0F 11 43 ??", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Z movement", {
+    MAKE_HOOK_MID(baseModule, "F3 0F 58 83 ?? ?? ?? ?? F3 0F 59 6C 24", "MGS 2: Effect Speed Fix: Cigarette mouth smoke Z movement", {
             ctx.xmm0.f32[0] *= 0.5f;
         });
 
-    if (uint8_t* cigaretteMouthSmokeSpawn = Memory::PatternScan(baseModule, "41 8B 86 08 28 00 00 25 3F 00 00 80 7D 07 FF C8 83 C8 C0 FF C0 03 C0 48 8D 0D ?? ?? ?? ?? 48 63 F0", "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence"))
+    if (uint8_t* cigaretteMouthSmokeSpawn = Memory::PatternScan(baseModule, "41 8B 86 ?? ?? ?? ?? 25 ?? ?? ?? ?? 7D", "MGS 2: Effect Speed Fix: Cigarette mouth smoke spawn cadence"))
     {
         cigaretteMouthSmokeSpawnAfterLoad = reinterpret_cast<uintptr_t>(cigaretteMouthSmokeSpawn) + 7;
         cigaretteMouthSmokeSpawnAfterInit = reinterpret_cast<uintptr_t>(cigaretteMouthSmokeSpawn) + 0x1CA;

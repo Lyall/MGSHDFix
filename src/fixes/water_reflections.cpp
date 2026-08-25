@@ -17,9 +17,13 @@ int64_t __fastcall MGS3_RenderWaterSurface(int64_t work)
 
 void WaterReflectionFix::Initialize() const
 {
+#if defined(BEFORE_COMPARISON_PICS)
+    spdlog::info("BEFORE_COMPARISON_PICS | MGS3 WATER SURFACE RENDERING FIX IS DISABLED.");
+    return;
+#endif
     if (eGameType & MGS3)
     {
-        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScanSilent(baseModule, "0F 57 ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B ?? ?? ?? 48 89 ?? ?? ?? ?? ??");
+        uint8_t* MGS3_RenderWaterSurfaceScanResult = Memory::PatternScanSilent(baseModule, "0F 57 15 ?? ?? ?? ?? F3 0F 11 96");
         uintptr_t MGS3_RenderWaterSurfaceScanAddress = Memory::GetAbsolute((uintptr_t)MGS3_RenderWaterSurfaceScanResult + 0x10);
         if (MGS3_RenderWaterSurfaceScanResult && MGS3_RenderWaterSurfaceScanAddress)
         {

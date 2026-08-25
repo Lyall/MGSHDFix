@@ -172,6 +172,8 @@
     <ClInclude Include="src\fixes\mgs2_glass_dmapack_overflow.hpp" />
     <ClInclude Include="src\resources\game_strings.hpp" />
     <ClInclude Include="src\fixes\caption_replacements.hpp" />
+    <ClInclude Include="src\resources\mg1_linkvarbuf.hpp" />
+    <ClInclude Include="src\resources\mg2_linkvarbuf.hpp" />
     <ClInclude Include="src\resources\mgs3_status_flags.hpp" />
     <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp" />
     <ClInclude Include="src\features\mg1_display_scaling.hpp" />

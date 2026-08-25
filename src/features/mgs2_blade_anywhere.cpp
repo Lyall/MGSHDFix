@@ -297,7 +297,7 @@ void MGS2BladeAnywhere::Initialize()
     // blade. Miss on the two upright stances and the draw is instant, so a pad demo survives it.
     // Crouch and prone keep theirs: those animations end in PL_StillMode[STAND] and are the only thing
     // standing the player back up, so skipping them leaves him on the floor.
-    MAKE_HOOK_MID(baseModule, "C7 05 ?? ?? ?? ?? 01 00 00 00 3D 44 D6 42 00",
+    MAKE_HOOK_MID(baseModule, "C7 05 ?? ?? ?? ?? ?? ?? ?? ?? 3D",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> CheckBladePullOut() | draw stance",
     {
         if (ctx.rax == kStandStill || ctx.rax == kStandRun) { ctx.rax = 0; }
@@ -306,7 +306,7 @@ void MGS2BladeAnywhere::Initialize()
     // Same on the way back in, and a crouch joins them: putting it away has no reason to stand him up,
     // which is what BMputback ends on. A slash keeps its animation - that one is matched against
     // work->action rather than the stance, so it is out of reach here and better left alone.
-    MAKE_HOOK_MID(baseModule, "41 81 F8 44 D6 42 00",
+    MAKE_HOOK_MID(baseModule, "41 81 F8 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 41 81 F8 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 41 81 F8 ?? ?? ?? ?? 0F 84 ?? ?? ?? ?? 4C 8B 8B",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> CheckBladePullOut() | sheathe stance",
     {
         if (ctx.r8 == kStandStill || ctx.r8 == kSquatStill || ctx.r8 == kStandRun) { ctx.r8 = 0; }
@@ -315,7 +315,7 @@ void MGS2BladeAnywhere::Initialize()
     // bladeply.c CheckBladePullOut(), where it puts his own arc back: work->current_mar, then
     // work->org_motion into PL_ChangeMotionArc.
     if (uint8_t* arc = Memory::PatternScan(baseModule,
-        "39 83 ?? ?? ?? ?? 75 ?? 8B 93 ?? ?? ?? ?? 48 8B CB E8 ?? ?? ?? ??",
+        "39 83 ?? ?? ?? ?? 75 ?? 8B 93",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> CheckBladePullOut() | motion arc restore"))
     {
         g_curMar = *reinterpret_cast<int32_t*>(arc + 2);
@@ -352,7 +352,7 @@ void MGS2BladeAnywhere::Initialize()
     // had already eaten the damage before this test, so lending them a bullet's bit only adds the
     // spark, the ring and the guard reaction.
     HookWeaponRead(
-        "48 8B 87 ?? ?? ?? ?? 48 B9 1C 80 04 00 00 00 08 00 48 85 C1 0F 84 ?? ?? ?? ?? F3 0F 10 47",
+        "48 8B 87 ?? ?? ?? ?? 48 B9 ?? ?? ?? ?? ?? ?? ?? ?? 48 85 C1 0F 84 ?? ?? ?? ?? F3 0F 10 47",
         "MGS2: Blade Anywhere: sonoyama\\plugin\\bladeply.c -> Hitted() | guarded weapon", 1,
         [](SafetyHookContext& ctx) { if (ctx.rax & kWpNikitaBit) { ctx.rax |= kWpUspBit; } });
 
@@ -440,7 +440,7 @@ void MGS2BladeAnywhere::Initialize()
     });
 
     // The blade's whole per-stage kit, as w45a registers it; the merge dedups against stages with it.
-    BP_FilesysChanges::AddUniversalStageLines(
+    BP_FileSys::AddUniversalStageLines(
         {
             "assets/mar/us/rai_blade.mar,us/stage/%S%/cache/00ccb3e9.mar,cache/00ccb3e9.mar",
             "assets/sar/us/rai_blade.sar,us/stage/%S%/cache/00ccb3e9.sar,cache/00ccb3e9.sar",

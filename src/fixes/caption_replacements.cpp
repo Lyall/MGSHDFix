@@ -231,6 +231,9 @@ namespace
 
     char const* __fastcall BP_LookupStringOveride_hk(uint32_t hash, char isMouseAndKeyboard)
     {
+#if defined(BEFORE_COMPARISON_PICTURES_NO_TYPO_FIXES)
+    return BP_LookupStringOveride_hook.fastcall<char const *>(hash, isMouseAndKeyboard);
+#endif
         const CaptionOverrideTables& tables = (eGameType & MGS2) ? g_MGS2CaptionOverrides : g_MGS3CaptionOverrides;
 
         if (auto const it = tables.entries.find(hash); it != tables.entries.end())

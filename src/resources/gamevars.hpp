@@ -138,6 +138,7 @@ public:
     [[nodiscard]] int64_t DG_UnDrawFrameCount() const; // Frames still scheduled undrawn.
     [[nodiscard]] uint8_t* DG_InitChanlSystem_ObjQueueInit() const { return p_DG_ObjQueueInit; }
 
+    ///Note: only accepts ASCII. If you need to use EUC-JP (any japanese characters), ask Afevis for their python hash generator.
     [[nodiscard]] static constexpr uint32_t GV_StrCode(const char* inputString)
     {
         constexpr uint32_t kBitLength = 24;

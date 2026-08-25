@@ -86,18 +86,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MG|MGS2|MGS3), ConfigKeys::Language_Section, ConfigKeys::Language_Setting, ConfigKeys::Language_Help, ConfigKeys::Language_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, "", {} },
 
-        { (MGS2 | MGS3), ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, ConfigKeys::PressureSensitiveFacebuttons_Help, ConfigKeys::PressureSensitiveFacebuttons_Tooltip,
-          std::nullopt, false, Field::Bool, false },
-
-        { (MGS2 | MGS3), ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, ConfigKeys::SuppressAlternativeActions_Help, ConfigKeys::SuppressAlternativeActions_Tooltip,
-          std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
-
-        { (MGS2 | MGS3), ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting, ConfigKeys::Ds3Rumble_Help, ConfigKeys::Ds3Rumble_Tooltip,
-          std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
-
-        { (MGS2 | MGS3), ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, ConfigKeys::Ds3RumbleStrength_Help, ConfigKeys::Ds3RumbleStrength_Tooltip,
-          std::make_pair(ConfigKeys::Ds3Rumble_Section, ConfigKeys::Ds3Rumble_Setting), false, Field::Int, 100, 0, 200 },
-
         { (MG|MGS2|MGS3), ConfigKeys::CtrlType_Section, ConfigKeys::CtrlType_Setting, ConfigKeys::CtrlType_Help, ConfigKeys::CtrlType_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, *std::next(kLauncherConfigCtrlTypes.begin(), 5),
           { std::begin(kLauncherConfigCtrlTypes), std::end(kLauncherConfigCtrlTypes) } },
@@ -105,10 +93,20 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MGS2), ConfigKeys::MenuButton_Section, ConfigKeys::MenuButton_Setting, ConfigKeys::MenuButton_Help, ConfigKeys::MenuButton_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, "", {ConfigKeys::MenuButton_Option_Default, ConfigKeys::MenuButton_Option_EastForOK, ConfigKeys::MenuButton_Option_SouthForOK} },
 
-
-        { (MG|MGS2|MGS3), ConfigKeys::CtrlType_Section, "",
+        { (MGS3), ConfigKeys::PressureSensitiveFacebuttons_Section, "",
           "", "",
-          std::nullopt, false, Field::Spacer }
+          std::nullopt, false, Field::Spacer },
+
+
+        { (MGS2 | MGS3), ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting, ConfigKeys::PressureSensitiveFacebuttons_Help, ConfigKeys::PressureSensitiveFacebuttons_Tooltip,
+std::nullopt, false, Field::Bool, false},
+
+        { (MGS2 | MGS3), ConfigKeys::Ds3RumbleStrength_Section, ConfigKeys::Ds3RumbleStrength_Setting, ConfigKeys::Ds3RumbleStrength_Help, ConfigKeys::Ds3RumbleStrength_Tooltip,
+        std::nullopt, false, Field::Int, 100, 0, 200 },
+
+        { (MGS2 | MGS3), ConfigKeys::SuppressAlternativeActions_Section, ConfigKeys::SuppressAlternativeActions_Setting, ConfigKeys::SuppressAlternativeActions_Help, ConfigKeys::SuppressAlternativeActions_Tooltip,
+        std::make_pair(ConfigKeys::PressureSensitiveFacebuttons_Section, ConfigKeys::PressureSensitiveFacebuttons_Setting), false, Field::Bool, false },
+
     }},
     { wxString("Graphics"), {
         
@@ -188,6 +186,10 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
         { (MGS2), ConfigKeys::MGS2_SoftParticles_Section, ConfigKeys::MGS2_SoftParticles_Setting, ConfigKeys::MGS2_SoftParticles_Help, ConfigKeys::MGS2_SoftParticles_Tooltip,
           std::nullopt, false, Field::Bool, true },
+
+        { (MGS2), ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, ConfigKeys::MGS2_HeavyBandana_Help, ConfigKeys::MGS2_HeavyBandana_Tooltip,
+          std::nullopt, false, Field::Bool, false },
+
 
 
 
@@ -489,18 +491,18 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2|MGS3), ConfigKeys::DevMenuHotkey_Section, ConfigKeys::DevMenuHotkey_Setting, ConfigKeys::DevMenuHotkey_Help, ConfigKeys::DevMenuHotkey_Tooltip,
           std::make_pair(ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
 
-        { (MGS3), ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting, ConfigKeys::OverrideMouseSensitivity_Help, ConfigKeys::OverrideMouseSensitivity_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { (MGS3), ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::MouseSensitivity_XMultiplier_Section, ConfigKeys::MouseSensitivity_XMultiplier_Setting, ConfigKeys::MouseSensitivity_XMultiplier_Help, ConfigKeys::MouseSensitivity_XMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,
           Field::Int, 1, 1, 100 },
 
-        { (MGS3), ConfigKeys::OverrideMouseSensitivity_Section, "",
+        { (MGS2|MGS3), ConfigKeys::OverrideMouseSensitivity_Section, "",
           "", "",
           std::nullopt, false, Field::Spacer },
 
-        { (MGS3), ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
+        { (MGS2|MGS3), ConfigKeys::MouseSensitivity_YMultiplier_Section, ConfigKeys::MouseSensitivity_YMultiplier_Setting, ConfigKeys::MouseSensitivity_YMultiplier_Help, ConfigKeys::MouseSensitivity_YMultiplier_Tooltip,
           std::make_pair(ConfigKeys::OverrideMouseSensitivity_Section, ConfigKeys::OverrideMouseSensitivity_Setting), false,
           Field::Int, 1, 1, 100 },
 

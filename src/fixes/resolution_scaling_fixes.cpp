@@ -407,22 +407,24 @@ void MGS2Fixes()
     }
 #endif  
 
+    if (!Util::IsJapanese())
+    {
+        //_MENU_PutExplainText+1F6
+        MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? 0F 57 D2 0F 57 C9 F3 44 0F 11 4C 24 ?? 48 8B C8 48 89 86", "MGS 2: Weapon & Item Description Text Aspect Fix: mgs2x\\source\\user\\mode\\menu\\xmenusub.c -> MENU_PutExplainText() | @l1528: ", {
+                constexpr float kWidthScale = 475.0f / 400.0f; // "magazine" is 400px @ 4k in mc, pcsx2 is 475px
 
-                      //_MENU_PutExplainText+1F6
-    MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? F3 0F 10 1D ?? ?? ?? ?? 0F 57 D2 0F 57 C9 F3 44 0F 11 4C 24 ?? 48 8B C8 48 89 86", "MGS 2: Weapon & Item Description Text Aspect Fix: mgs2x\\source\\user\\mode\\menu\\xmenusub.c -> MENU_PutExplainText() | @l1528: ", {
-            constexpr float kWidthScale = 475.0f / 400.0f; // "magazine" is 400px @ 4k in mc, pcsx2 is 475px
+                // resize the actual quad the text is drawing on.
+                float const posX = ctx.xmm1.f32[0];
+                float* const rightEdge = reinterpret_cast<float*>(ctx.rsp + 0x28);
 
-            // resize the actual quad the text is drawing on.
-            float const posX = ctx.xmm1.f32[0];
-            float* const rightEdge = reinterpret_cast<float*>(ctx.rsp + 0x28);
+                *rightEdge = posX + (*rightEdge - posX) * kWidthScale;
 
-            *rightEdge = posX + (*rightEdge - posX) * kWidthScale;
-
-             //position
-            constexpr float kXOffset = -20.0f * (512.0f / 3840.0f); //pixel offset @ 4k
-            ctx.xmm1.f32[0] = posX + kXOffset;
-            *rightEdge += kXOffset;
-                  });
+                 //position
+                constexpr float kXOffset = -20.0f * (512.0f / 3840.0f); //pixel offset @ 4k
+                ctx.xmm1.f32[0] = posX + kXOffset;
+                *rightEdge += kXOffset;
+                      });
+    }
 
 
 

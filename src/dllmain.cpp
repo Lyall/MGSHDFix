@@ -7,6 +7,7 @@
 #include "config_keys.hpp"
 
 ///Resources
+#include "callbacks.hpp"
 #include "d3d11_api.hpp"
 #include "gamevars.hpp"
 #include "steamworks_api.hpp"
@@ -53,7 +54,6 @@
 #include "mgs2_hair_layering.hpp"
 #include "mgs2_rotor_procession.hpp"
 #include "mgs2_reverb_wet_level.hpp"
-#include "mgs2_railgun_beam.hpp"
 #include "mgs2_demo_blur.hpp"
 #include "mgs2_flare_occlusion.hpp"
 #include "mgs2_tanker_snake_snap.hpp"
@@ -91,7 +91,7 @@
 
 ///WIP
 #include "depth_of_field.hpp"
-#include "mg1_custom_loading_screens.hpp"
+//#include "mg1_custom_loading_screens.hpp"
 #include "mgs2_kirari_sun2_fix.hpp"
 #include "mgs2_ntsc_timing_fixes.hpp"
 #include "mgs2_preshade_lights.hpp"
@@ -122,12 +122,27 @@
 #include "mgs2_bandana_mass.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
+#include "mg1_linkvarbuf.hpp"
+#include "mg2_linkvarbuf.hpp"
 #include "screenspace_fixes.hpp"
 #include "windows_preferred_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
 
 
+namespace
+{
 
+    void InitMG1()
+    {
+        MG1_LinkVarBuf::Initialize();
+    }
+
+    void InitMG2()
+    {
+        MG2_LinkVarBuf::Initialize();
+    }
+
+}
 
 #if !defined(RELEASE_BUILD)
 #include "unit_tests.hpp"
@@ -141,7 +156,7 @@ static void Init_Miscellaneous()
         {
             // Launcher | MG/MG2 | MGS 2 | MGS 3: Disable mouse cursor
             // Thanks again emoose!
-            if (uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(eGameType & LAUNCHER ? unityPlayer : baseModule, "BA 00 7F 00 00 33 ?? FF ?? ?? ?? ?? ?? 48 ?? ??", "Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor"))
+            if (uint8_t* MGS2_MGS3_MouseCursorScanResult = Memory::PatternScan(eGameType & LAUNCHER ? unityPlayer : baseModule, "BA ?? ?? ?? ?? 33 C9 FF 15", "Launcher | MG/MG2 | MGS 2 | MGS 3: Mouse Cursor"))
             {
                 // The game enters 32512 in the RDX register for the function USER32.LoadCursorA to load IDC_ARROW (normal select arrow in windows)
                 // Set this to 0 and no cursor icon is loaded
@@ -153,7 +168,7 @@ static void Init_Miscellaneous()
 
     if ((bDisableTextureFiltering || iAnisotropicFiltering > 0) && (eGameType & (MGS2|MGS3)))
     {
-        if (uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B ?? ?? ?? ?? ?? 44 39 ?? ?? 38 ?? ?? ?? 74 ?? 44 89 ?? ?? ?? ?? ?? ?? EB ?? 48 ?? ??", "MGS 2 | MGS 3: Texture Filtering"))
+        if (uint8_t* MGS3_SetSamplerStateInsnScanResult = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 44 39 8C 01 ?? ?? ?? ?? 74 ?? 44 89 8C 01 ?? ?? ?? ?? EB ?? 48 63 C2 48 6B C8 ?? 48 8B 05 ?? ?? ?? ?? 44 39 8C 01 ?? ?? ?? ?? 74 ?? 44 89 8C 01 ?? ?? ?? ?? EB", "MGS 2 | MGS 3: Texture Filtering"))
         {
             static SafetyHookMid SetSamplerStateInsnXMidHook{};
             SetSamplerStateInsnXMidHook = safetyhook::create_mid(MGS3_SetSamplerStateInsnScanResult + 0x7,
@@ -172,13 +187,13 @@ static void Init_Miscellaneous()
 
     }
 
-    if (eGameType & MGS3 && bMouseSensitivity)
+    if ((eGameType & (MGS2|MGS3)) && bMouseSensitivity)
     {
-        // MG 1/2 | MGS 2 | MGS 3: MouseSensitivity
-        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScanSilent(baseModule, "F3 0F ?? ?? ?? F3 0F ?? ?? 66 0F ?? ?? ?? 0F ?? ?? 66 0F ?? ?? 8B ?? ??");
+        // MGS 2 | MGS 3: MouseSensitivity
+        uint8_t* MGS3_MouseSensitivityScanResult = Memory::PatternScanSilent(baseModule, "F3 0F 59 43 ?? F3 0F 2C C0 66 0F 6E 43");
         if (MGS3_MouseSensitivityScanResult)
         {
-            spdlog::info("MGS 3: Mouse Sensitivity: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
+            spdlog::info("MGS 2 | MGS 3: Mouse Sensitivity: Address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)MGS3_MouseSensitivityScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid MouseSensitivityXMidHook{};
             MouseSensitivityXMidHook = safetyhook::create_mid(MGS3_MouseSensitivityScanResult,
@@ -196,7 +211,7 @@ static void Init_Miscellaneous()
         }
         else if (!MGS3_MouseSensitivityScanResult)
         {
-            spdlog::error("MGS 3: Mouse Sensitivity: Pattern scan failed.");
+            spdlog::error("MGS 2 | MGS 3: Mouse Sensitivity: Pattern scan failed.");
         }
     }
 }
@@ -437,6 +452,23 @@ static bool DetectGame()
             {
                 spdlog::error("Failed to get Engine.dll module handle");
             }
+
+            if (eGameType & MG)
+            {
+                //MG1 / MG2's dlls late load as part of user\subsistence\ps2\mg_draw.c
+                ModuleLoadCallbacks::RegisterModuleLoadCallback(L"mg1.dll", []
+                {
+                    eMgSubGame = MgSubGame::MG1;
+                    INITIALIZEDLL(InitMG1());
+                });
+
+                ModuleLoadCallbacks::RegisterModuleLoadCallback(L"mg2.dll", []
+                {
+                    eMgSubGame = MgSubGame::MG2;
+                    INITIALIZEDLL(InitMG2());
+                });
+            }
+
             return true;
         }
     }

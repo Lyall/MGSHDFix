@@ -1,7 +1,7 @@
 #pragma once
 #include "helper.hpp"
+#include "logging.hpp"
 
-#include <map>
 
 inline std::string sExeName;
 inline std::filesystem::path sExePath;
@@ -32,6 +32,15 @@ enum MgsGame : std::uint8_t
 };
 inline MgsGame eGameType = UNKNOWN;
 
+
+enum class MgSubGame : std::uint8_t
+{
+    NONE = 0,
+    MG1,
+    MG2
+};
+inline MgSubGame eMgSubGame = MgSubGame::NONE;
+
 inline const std::map<MgsGame, GameInfo> kGames = {
     {MGS2, {"Metal Gear Solid 2 MC", "METAL GEAR SOLID2.exe", 2131640}},
     {MGS3, {"Metal Gear Solid 3 MC", "METAL GEAR SOLID3.exe", 2131650}},
@@ -46,7 +55,11 @@ constexpr float f_PS2_Height = 448.0f;
 
 
 //#define BEFORE_COMPARISON_PICS
+#if defined(BEFORE_COMPARISON_PICS)
 //#define DISABLE_MGS3_CUTSCENE_CAMERA_FIX
 //#define BEFORE_COMPARISON_PICS_NO_GAMMA_CORRECTION
-//#define BEFORE_COMPARISON_PICS_NO_SMAA
+#define BEFORE_COMPARISON_PICTURES_NO_TYPO_FIXES
+#define BEFORE_COMPARISON_PICS_NO_SMAA
+#endif
+
 

@@ -299,19 +299,19 @@ namespace
 
     const GateSpec kGates[] =
     {
-        { "49 8B 6E 18 F3 0F 10 36 F3 44 0F 10 46 04 F3 44 0F 10 4E 08",
+        { "49 8B 6E ?? ?? ?? ?? ?? F3 44 0F 10 46 ?? F3 44 0F 10 4E ?? F3 0F 5C 74 2F ?? F3 44 0F 5C 44 2F ?? F3 44 0F 5C 4C 2F ?? 0F 28 C6 41 0F 28 D0 F3 0F 59 C6 F3 41 0F 59 D0 41 0F 28 C9 F3 41 0F 59 C9 F3 0F 58 D0 F3 0F 58 D1 0F 2F 54 2F ?? 0F 83 ?? ?? ?? ?? 0F 57 C0 0F 2E C2 77 ?? 0F 57 E4 F3 0F 51 E2 EB ?? 0F 28 C2 E8 ?? ?? ?? ?? 0F 28 E0 41 0F 28 D2 F3 0F 5E D4 0F 28 EA",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> spot light bound",
-          "41 FF C7 48 81 C7 B0 00 00 00 45 3B 7E 10 0F 8C ?? ?? ?? ??",
+          "41 FF C7 48 81 C7 ?? ?? ?? ?? 45 3B 7E ?? 0F 8C ?? ?? ?? ?? 45 8B FD",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> spot light loop next",
           &gSpot, &gSkipSpot, Spot_Hook },
-        { "49 8B 6E 28 F3 0F 10 76 04 F3 44 0F 10 06 F3 44 0F 10 4E 08",
+        { "49 8B 6E ?? F3 0F 10 76",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> line light bound",
-          "41 FF C7 48 81 C7 90 00 00 00 45 3B 7E 20 0F 8C ?? ?? ?? ??",
+          "41 FF C7 48 81 C7 ?? ?? ?? ?? 45 3B 7E ?? 0F 8C ?? ?? ?? ?? 44 0F 28 5C 24",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> line light loop next",
           &gLine, &gSkipLine, Line_Hook },
-        { "49 8B 6E 38 F3 0F 10 0E F3 0F 10 56 04 F3 0F 10 46 08",
+        { "49 8B 6E ?? ?? ?? ?? ?? F3 0F 10 56",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> black light bound",
-          "41 FF C5 48 83 C7 40 44 3B E8 7C ??",
+          "41 FF C5 48 83 C7 ?? 44 3B E8",
           "MGS 3: Map Relight: system\\libdg\\pshade.c -> black light loop next",
           &gBlack, &gSkipBlack, Black_Hook },
     };
@@ -345,17 +345,16 @@ void MGS3MapRelight::Initialize()
 
     // ---- pshade.c hit_flag: only re-light models a changing light group reaches ----
     uint8_t* selEntry = Memory::PatternScan(baseModule,
-        "48 8B C4 4C 89 40 18 53 56 57 41 55 41 56 48 81 EC 90 00 00 00",
+        "48 8B C4 4C 89 40 ?? 53",
         "MGS 3: Map Relight: system\\libdg\\pshade.c -> CreateLightBuffer()");
     uint8_t* groupPass = Memory::PatternScan(baseModule,
-        "41 8B 6D 08 49 8B 75 10 85 ED 0F 8E ?? ?? ?? ??",
+        "41 8B 6D ?? 49 8B 75",
         "MGS 3: Map Relight: system\\libdg\\pshade.c -> CreateLightBuffer() group accepted");
-    uint8_t* modelGate = Memory::PatternScan(baseModule,
-        "41 8B 46 F8 4D 8B 3E 89 44 24 74 85 C0 0F 8E ?? ?? ?? ??",
+    uint8_t* modelGate = Memory::PatternScan(baseModule, "41 8B 46 ?? ?? ?? ?? 89 44 24",
         "MGS 3: Map Relight: system\\libdg\\pshade.c -> ReshadeRGB() hit_flag");
     // Not the instruction before this one - the bake jumps there, into the middle of the patch.
     uint8_t* skipTo = Memory::PatternScan(baseModule,
-        "41 FF CD 49 83 C1 50 44 89 6C 24 70",
+        "41 FF CD 49 83 C1",
         "MGS 3: Map Relight: system\\libdg\\pshade.c -> ReshadeRGB() next model");
     if (uint8_t* bakeExit = Memory::PatternScan(baseModule,
         "48 8B 8D 90 00 00 00 48 33 CC E8 ?? ?? ?? ?? 4C 8D 9C 24 40 02 00 00 49 8B 5B 50 41 0F 28 73 F0",
@@ -367,7 +366,7 @@ void MGS3MapRelight::Initialize()
     }
 
     if (uint8_t* bakeEntry = Memory::PatternScan(baseModule,
-        "4C 8B DC 49 89 5B 18 55 56 57 41 54 41 55 41 56 41 57 49 8D AB 88 FE FF FF",
+        "4C 8B DC 49 89 5B ?? 55 56 57 41 54 41 55 41 56 41 57 49 8D AB ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? 41 0F 29 73",
         "MGS 3: Map Relight: system\\libdg\\pshade.c -> ShadeRGB() bake"))
     {
         static SafetyHookMid bake{};

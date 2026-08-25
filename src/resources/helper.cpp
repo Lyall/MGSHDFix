@@ -1097,4 +1097,9 @@ namespace Util
     {
         return sSkipLauncherLanguage == "jp" || sSkipLauncherRegion == "jp";
     }
+
+
+
+
+
 }

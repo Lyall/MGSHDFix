@@ -168,11 +168,8 @@ void MGS2_GameFuncs::HookGameFuncs()
     GV_DestroyActor = reinterpret_cast<GV_DestroyActor_t>(Memory::ResolveCall(GV_DestroyActor_scan));
     spdlog::info("MGS2_GameFuncs: GV_DestroyActor address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)GV_DestroyActor - (uintptr_t)baseModule);
 
-    HZX_OnlineHazardCheck = reinterpret_cast<HZX_OnlineHazardCheck_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 48 8B F2 8B E9 33 D2 41 B8 ?? ?? ?? ??", "HZX_OnlineHazardCheck"));
+    HZX_OnlineHazardCheck = reinterpret_cast<HZX_OnlineHazardCheck_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 49 8B F8 48 8B F2", "HZX_OnlineHazardCheck"));
     spdlog::info("MGS2_GameFuncs: HZX_OnlineHazardCheck address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)HZX_OnlineHazardCheck - (uintptr_t)baseModule);
-
-
-
 
     if (StartInDebugMode)
     {
@@ -355,7 +352,15 @@ void Shared_Gamefuncs::HookFuncs()
         uint8_t* BP_AdjustTick_scan = Memory::PatternScan(baseModule, (eGameType & MGS2) ? "E8 ?? ?? ?? ?? 8B F8 B1 ?? E8 ?? ?? ?? ?? 48 85 C0 74 ?? E8 ?? ?? ?? ?? 48 8B E8" : "E8 ?? ?? ?? ?? 48 63 97 ?? ?? ?? ?? 48 8D 4C 24", "BP_AdjustTick call site (delay.c -> NewDelay())");
         Shared_Gamefuncs::BP_AdjustTick = reinterpret_cast<Shared_Gamefuncs::BP_AdjustTick_t>(Memory::ResolveCall(BP_AdjustTick_scan));
         spdlog::info("Shared_GameFuncs: BP_AdjustTick address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)Shared_Gamefuncs::BP_AdjustTick - (uintptr_t)baseModule);
+
     }
+
+    //stage_flatfs.cpp -> stage_begin_load_kp_file() | @l475
+    uint8_t* BP_GetAssetLoadFullPath_scan = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 48 8D 95 ?? ?? ?? ?? 48 8D 8D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B C8", "BP_GetAssetLoadFullPath call site");
+    BP_GetAssetLoadFullPath = reinterpret_cast<BP_GetAssetLoadFullPath_t>(Memory::ResolveCall(BP_GetAssetLoadFullPath_scan));
+    spdlog::info("Shared_GameFuncs: BP_GetAssetLoadFullPath address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)BP_GetAssetLoadFullPath - (uintptr_t)baseModule);
+
+
 
 #if !defined(RELEASE_BUILD)
 

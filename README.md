@@ -4,7 +4,7 @@
 [![Discord](https://img.shields.io/discord/1116856754920226876?logo=discord&logoColor=white&label=Metal%20Gear%20Network%20-%20%23HDFix&color=7289DA)](https://discord.gg/bFv9bZmWDV)
 
 
-[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | [GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/)<br />
+[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | [GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/) | [Media / Screenshot Repo](https://github.com/dotlessone/MGSHDFix-Media)<br />
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
@@ -30,6 +30,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Custom resolution/ultrawide support.
 - Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
 - Borderless/windowed mode.
+- DualShock 2 / 3 support (pressure-sensitive / analog controller face buttons)
 - Mouse cursor toggle.
 - Launcher skips (see Config Tool to configure).
 - Option to disable pausing on alt-tab.
@@ -75,6 +76,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to restore Sons of Liberty's elevator glitch, for speedrunners that want to practice old strats that were patched out.
 - Option to make punches count as non-lethal damage against Vamp instead of doing lethal damage.
 - Option to force all NPCs to always use their highest quality polygon/LOD model.
+- Option to use the High Frequency blade anywhere.
+- Option to restore several flashing effects (ie explosion flashes) which were censored in the Master Collection for photosensitivity reasons.
 
 
 #### MGS3 Specific Features:
@@ -111,7 +114,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes in-game timer not pausing during loading times. (This was a HD Collection regression. IGT behavior now matches with Substance. Can be disabled for those that want the vanilla/broken behavior.)
 - Fixes Depth of Field / blur post processing effects not scaling with resolution. [PR #248](https://github.com/ShizCalev/MGSHDFix/pull/248)
 - Fixes shadow resolution not scaling with game resolution. (It was hard-coded to 256x256 / PS2 resolution.)
+- Fixes English item / weapon descriptions in the item/weapon menus being squished horizontally.
 - Fixes incorrectly positioning "Metal Gear Solid 2" title card during the start of Tanker when playing in Letterbox mode. [Example](https://imgur.com/a/bGkGwJ9)
+- Fixes Stillman crash/hang in Strut C.
 - Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
 - Fixes bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
@@ -160,7 +165,16 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixed a broken voice line in Deck 2's pipe-falling mini-cutscene.
 - Made Snake's holster functional. (His holster always had an extra handgun in it, even when unarmed. Requires MGS2 Community Bugfix Compilation)
 - Fixed Solidus not being visible when viewed from a malfunctioning RAY unit's POV.
-
+- Fixed certain sprite particle effects having visible clipping with models / not fading out properly.
+- Fixed visible gaps at the edges of the water during the Tanker exterior cutscenes.
+- Fixed a crash which would occur when trying to watch low-polygon versions of cutscenes from the developer menu.
+- Restores the Codec screen's background to have its intended cyan hue.
+- Restores the game's on-demand slowdown effect (ie when defeating Olga), which was left unimplemented by Bluepoint.
+- Fixes several scripted sequences where the game takes control of the player incorrectly using PAL (50 Hz / 50 FPS) timings.
+- Fixes incorrect framing during cutscenes where Raiden is aiming down the PSG-1's scope.
+- Fixes codec's CRT vertical scanline effect running at the wrong speed.
+- Softens shadow edges to match their appearance on the PS2.
+- Fixed incorrect scanline effect scaling & color during several cutscenes.
 
 #### MGS3 Specific Bug Fixes:
 - Restores the PlayStation 2's original cutscene camera/viewport height, fixing the 2011 HD Collection bug that cropped roughly the bottom 10% of the image in all cutscenes. (Notably, this issue was officially fixed in both the 3DS remake and Delta.)
@@ -170,6 +184,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Restored cutscene film-grain rendering during low-light camera shots.
 - Fixes misaligned NVG crosshairs.
 - Fixes misaligned NVG & Thermal goggle angle indicator.
+- Fixes MGS3's broken lighting system.
+- Fixes light emitting textures not working.
+- Fixed godrays not blending properly.
 
 
 ## Logging / Warnings for Common Configuration Issues
@@ -212,6 +229,24 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 - See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
 
+
+### DualShock 2 / 3 Setup
+- Windows: 
+	- Download and install DsHidMini.
+	- Set DsHidMini to SXS mode.
+	(This matches the configuration required for PCSX2. If your DS2/DS3 controller is already set up properly with PCSX2, then you're already good to go!)
+ 
+- Steam Deck / Linux:
+> [!NOTE]
+**🚩 These steps are only needed if you’re on Steam Deck/Linux. Skip if you’re using Windows.**
+
+  - Open up the game properties of either MGS2/MGS3 in Steam and set the following line to the launch options:
+
+      SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
+
+
+
+
 ## Support
 Please report any issues you notice on our Github [here](https://github.com/ShizCalev/MGSHDFix/issues/new/choose).
 
@@ -232,51 +267,54 @@ This list will contain bugs which may or may not be fixed.
 - A detailed tracker which catalogs all of the known Master Collection bugs (including issues fixed by MGSHDFix) can be located [here](https://docs.google.com/spreadsheets/d/1WhQSRpkC_A9wBDV0o-Pohh1dMhL1H6nbVzvdluIVWrw/edit?gid=0#gid=0).
 - To submit new entries to the tracker, either report a new issue on the MGSHDFix [Github](https://github.com/ShizCalev/MGSHDFix/issues/new/choose), or use [this form](https://docs.google.com/forms/d/e/1FAIpQLSef8Vx38tHpBsR-dXnawF6X0iad3XU7vmDX29pcmjbaZhQiew/viewform).
 
-## Examples
+## Screenshots / Examples
 
-| ![MGS2 widescreen cutscene preview](screenshots/after/mgs2%20-%20widescreen.gif) |
+> [!NOTE]
+Additional screenshots & uncompressed 4K versions can be found at our Media repo: https://github.com/dotlessone/MGSHDFix-Media
+
+| ![MGS2 widescreen cutscene preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20widescreen.gif) |
 |:--:|
 
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/tanker_snake_shot.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/tanker_snake_shot.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2_w24c_color_filter.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2_w24c_color_filter.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20d00t%20-%20rain%201.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w32a%20-%20scope.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w32a%20-%20scope.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w32a%20-%20thermals.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w32a%20-%20thermals.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20codec.png" />                       | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20codec.png" />                       |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w00a%20-%20aiming.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w00a%20-%20aiming.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/solidus%20-%20d080p01.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/solidus%20-%20d080p01.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/tanker_snake_shot.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/tanker_snake_shot.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2_w24c_color_filter.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2_w24c_color_filter.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20d00t%20-%20rain%201.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w32a%20-%20scope.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w32a%20-%20scope.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w32a%20-%20thermals.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w32a%20-%20thermals.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20codec.png" />                       | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20codec.png" />                       |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w00a%20-%20aiming.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w00a%20-%20aiming.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/solidus%20-%20d080p01.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/solidus%20-%20d080p01.png" />            |
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
 
-| ![MGS3 widescreen gameplay preview](screenshots/after/mgs3%20-%20widescreen.gif) |
+| ![MGS3 widescreen gameplay preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20widescreen.gif) |
 |:--:|
 
 | Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix                                                                                                              |
 | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20thermals.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20thermals.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20radio%20menu.png" />     | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20radio%20menu.png" />     |
-| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20wig%20reflection.gif" />   | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20wig%20reflection.gif" />   |
-| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20thermals.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20thermals.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20radio%20menu.png" />     | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20radio%20menu.png" />     |
+| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20wig%20reflection.gif" />   | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20wig%20reflection.gif" />   |
+| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
 | Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix |
 
-![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGS3%20Reference%20Pictures%20and%20Video/MGS3_cutscene_framing.png)
 
-![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing_2.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGS3%20Reference%20Pictures%20and%20Video/MGS3_cutscene_framing_2.png)
 
-![MGS3 - Correctly scaled rain on bridge scene](screenshots/after/mgs3%20-%20bridge%20rain.png)
+![MGS3 - Correctly scaled rain on bridge scene](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20bridge%20rain.png)
 
-![MGS3 - Correctly scaled rain in The Sorrow's river](screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
+![MGS3 - Correctly scaled rain in The Sorrow's river](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
 
-![MGS3 - Wireframe mode visual](screenshots/after/mgs3%20-%20wireframe.png)
+![MGS3 - Wireframe mode visual](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20wireframe.png)
 
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
-- MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
-- MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
+- MGS3 - Fix Knife Not Appearing in Chest Sheath After Torture (2004 Snake Eater)
+- MGS3 - Correct More Sped Up Effects (2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
 
 ## Building
@@ -291,7 +329,7 @@ wxWidgets has nested Git submodules; `git config submodule.recurse true` ensures
 
 wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio build process. They can also be manually rebuilt from a Visual Studio Developer Command Prompt using `build_wx.cmd`, `build_sdl3.cmd`, or `build_zydis.cmd` respectively.
 
-### Requirements
+### Build Requirements
 
 - Visual Studio 2026
 - MSVC v145

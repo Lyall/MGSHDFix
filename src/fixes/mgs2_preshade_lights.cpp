@@ -4,7 +4,6 @@
 
 #include "common.hpp"
 #include "logging.hpp"
-#include <cmath>
 
 #include "gamevars.hpp"
 

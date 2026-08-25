@@ -6,6 +6,7 @@
 #include "gamevars.hpp"
 #include "logging.hpp"
 #include "mgs2_first_person_view_mode.hpp"
+#include "pressure_inputs.hpp"
 
 /// Originally made by Zenf as part of the Keep Aiming mod for MGS3.
 
@@ -46,6 +47,10 @@ void KeepAimingAfterFiring::Initialize()
         using namespace MGS2_StatusFlags;
 
         MAKE_HOOK_MID(baseModule, "4C 89 25 ?? ?? ?? ?? EB", "MGS 2: Keep Aiming After Firing", {
+            if (PressureInputs::HavePad())
+            {
+                return;
+            }
             switch (ctx.rsi)
             {
                 case MGS2_WEAPON_INDEX_AKS74U:
@@ -89,6 +94,11 @@ void KeepAimingAfterFiring::Initialize()
     }
     else if (eGameType & MGS3)
     {
+        if (PressureInputs::HavePad())
+        {
+            return;
+        }
+
         MAKE_HOOK_MID(baseModule, "48 89 1D ?? ?? ?? ?? 4C 8D 15", "MGS 3: Keep Aiming After Firing", {
             switch (ctx.r9)
             {
@@ -126,6 +136,11 @@ void KeepAimingAfterFiring::Initialize()
         if (g_KeepAimingAfterFiring.bAlwaysKeepAiming)
         {
             MAKE_HOOK_MID(baseModule, "4C 8D 15 ?? ?? ?? ?? 4C 8B A4 24", "MGS 3: Keep Aiming After Firing 2", {
+                if (PressureInputs::HavePad())
+                {
+                    return;
+                }
+
                 if (!g_KeepAimingAfterFiring.bOverrodeState)
                 {
                     return;
