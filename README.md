@@ -295,8 +295,8 @@ Uncompressed 4K screenshots for media use can be found at our media repo here: h
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
-- MGS3 - Fix Weapons Not Appearing in Holster After Torture (2004 Snake Eater)
-- MGS2 / MGS3 - Correct More Sped Up Effects (2002 Xbox / 2011 HDC)
+- MGS3 - Fix Knife Not Appearing in Chest Sheath After Torture (2004 Snake Eater)
+- MGS3 - Correct More Sped Up Effects (2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
 
 ## Building
@@ -311,7 +311,7 @@ wxWidgets has nested Git submodules; `git config submodule.recurse true` ensures
 
 wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio build process. They can also be manually rebuilt from a Visual Studio Developer Command Prompt using `build_wx.cmd`, `build_sdl3.cmd`, or `build_zydis.cmd` respectively.
 
-### Requirements
+### Build Requirements
 
 - Visual Studio 2026
 - MSVC v145

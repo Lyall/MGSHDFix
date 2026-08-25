@@ -858,7 +858,9 @@ namespace
 
 void D3D11TextOverlay::Setup()
 {
-
+#if defined(BEFORE_COMPARISON_PICS)
+    bShowSpeedrunnerStats = false;
+#endif 
     if (!g_D3D11Hooks.D3DCompileFunc)
     {
         spdlog::error("D3D11TextOverlay: Failed to get D3DCompile");
