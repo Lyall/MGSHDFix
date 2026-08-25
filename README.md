@@ -244,9 +244,6 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
       SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
 
-  - This will block out all other controller inputs while in use. If you switch to a different controller, don't forget to set the command line back to the normal one in the installation instructions above.
-
-
 
 
 
