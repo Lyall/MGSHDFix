@@ -272,7 +272,8 @@ This list will contain bugs which may or may not be fixed.
 
 ## Screenshots / Examples
 
-Uncompressed 4K screenshots for media use can be found at our media repo here: https://github.com/dotlessone/MGSHDFix-Media
+> [!NOTE]
+Additional screenshots & uncompressed 4K versions can be found at our Media repo: https://github.com/dotlessone/MGSHDFix-Media
 
 | ![MGS2 widescreen cutscene preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20widescreen.gif) |
 |:--:|
