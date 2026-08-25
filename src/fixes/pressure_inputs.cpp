@@ -1119,16 +1119,6 @@ namespace
                 ctx.xmm7.f32[0] = std::max(ctx.xmm7.f32[0], squeeze);
             }
         });
-
-        // The chosen button shares a register with the next step value, so fix it at the store.
-        MAKE_HOOK_MID(baseModule, "48 89 83 B0 00 00 00 89 8B A4 00 00 00",
-            "MGS 2: Pressure Inputs - Thought Button | codec\\cdc_mind.c",
-        {
-            if (gThoughtRebound.load() && ctx.rax == 2)
-            {
-                ctx.rax = 4;
-            }
-        });
     }
 }
 
