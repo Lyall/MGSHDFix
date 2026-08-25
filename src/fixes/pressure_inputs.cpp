@@ -1105,15 +1105,6 @@ namespace
             }
         });
 
-        // The chosen button shares a register with the next step value, so fix it at the store.
-        MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? 89 8B ?? ?? ?? ?? EB",
-            "MGS 2: Pressure Inputs - Thought Button | codec\\cdc_mind.c",
-        {
-            if (gThoughtRebound.load() && ctx.rax == 2)
-            {
-                ctx.rax = 4;
-            }
-        });
     }
 }
 
