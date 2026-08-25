@@ -30,6 +30,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Custom resolution/ultrawide support.
 - Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
 - Borderless/windowed mode.
+- DualShock 2 / 3 support (pressure-sensitive / analog controller face buttons)
+	- This feature requires DsHidMini, and for DsHidMini to be set to either SDF or SXS mode (the same settings as needed for PCSX2.)
 - Mouse cursor toggle.
 - Launcher skips (see Config Tool to configure).
 - Option to disable pausing on alt-tab.
@@ -75,6 +77,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to restore Sons of Liberty's elevator glitch, for speedrunners that want to practice old strats that were patched out.
 - Option to make punches count as non-lethal damage against Vamp instead of doing lethal damage.
 - Option to force all NPCs to always use their highest quality polygon/LOD model.
+- Option to use the High Frequency blade anywhere.
+- Option to restore several flashing effects (ie explosion flashes) which were censored in the Master Collection for photosensitivity reasons.
 
 
 #### MGS3 Specific Features:
@@ -111,7 +115,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes in-game timer not pausing during loading times. (This was a HD Collection regression. IGT behavior now matches with Substance. Can be disabled for those that want the vanilla/broken behavior.)
 - Fixes Depth of Field / blur post processing effects not scaling with resolution. [PR #248](https://github.com/ShizCalev/MGSHDFix/pull/248)
 - Fixes shadow resolution not scaling with game resolution. (It was hard-coded to 256x256 / PS2 resolution.)
+- Fixes English item / weapon descriptions in the item/weapon menus being squished horizontally.
 - Fixes incorrectly positioning "Metal Gear Solid 2" title card during the start of Tanker when playing in Letterbox mode. [Example](https://imgur.com/a/bGkGwJ9)
+- Fixes Stillman crash/hang in Strut C.
 - Fixes crashes, audio desync, timer delays, and broken loading zones bugs caused by alt-tabbing the game. (For speedrunners who utilize this bug to skip forced codec calls, this bugfix can be forced off in the ini.)
 - Fixes the Steam Cloud related ["DAMAGED SAVE" / "CORRUPT SAVE"](https://www.pcgamingwiki.com/wiki/Metal_Gear_Solid_2:_Sons_of_Liberty_-_Master_Collection_Version#Save_File_Appears_as_DAMAGED_FILE) issue. 
 - Fixes bug where your character would stop aiming their gun while holding L1 when you fully tilt your joystick.
@@ -160,7 +166,16 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixed a broken voice line in Deck 2's pipe-falling mini-cutscene.
 - Made Snake's holster functional. (His holster always had an extra handgun in it, even when unarmed. Requires MGS2 Community Bugfix Compilation)
 - Fixed Solidus not being visible when viewed from a malfunctioning RAY unit's POV.
-
+- Fixed certain sprite particle effects having visible clipping with models / not fading out properly.
+- Fixed visible gaps at the edges of the water during the Tanker exterior cutscenes.
+- Fixed a crash which would occur when trying to watch low-polygon versions of cutscenes from the developer menu.
+- Restores the Codec screen's background to have its intended cyan hue.
+- Restores the game's on-demand slowdown effect (ie when defeating Olga), which was left unimplemented by Bluepoint.
+- Fixes several scripted sequences where the game takes control of the player incorrectly using PAL (50 Hz / 50 FPS) timings.
+- Fixes incorrect framing during cutscenes where Raiden is aiming down the PSG-1's scope.
+- Fixes codec's CRT vertical scanline effect running at the wrong speed.
+- Softens shadow edges to match their appearance on the PS2.
+- Fixed incorrect scanline effect scaling & color during several cutscenes.
 
 #### MGS3 Specific Bug Fixes:
 - Restores the PlayStation 2's original cutscene camera/viewport height, fixing the 2011 HD Collection bug that cropped roughly the bottom 10% of the image in all cutscenes. (Notably, this issue was officially fixed in both the 3DS remake and Delta.)
@@ -170,6 +185,9 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Restored cutscene film-grain rendering during low-light camera shots.
 - Fixes misaligned NVG crosshairs.
 - Fixes misaligned NVG & Thermal goggle angle indicator.
+- Fixes MGS3's broken lighting system.
+- Fixes light emitting textures not working.
+- Fixed godrays not blending properly.
 
 
 ## Logging / Warnings for Common Configuration Issues

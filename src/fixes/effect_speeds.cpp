@@ -1034,11 +1034,10 @@ bool EffectSpeedFix::IsFeedbackHoldTick()
 
     static std::atomic<int> s_lastAutomatic30 { -1 };
     const int previousAutomatic30 = s_lastAutomatic30.exchange(automatic30 ? 1 : 0, std::memory_order_relaxed);
-    if (previousAutomatic30 != static_cast<int>(automatic30))
-    {
-        spdlog::info("MGS 2: Effect Speed Fix: feedback cadence limiter {}.",
-                     automatic30 ? "enabled" : "disabled");
-    }
+   if (g_Logging.bVerboseLogging && (previousAutomatic30 != static_cast<int>(automatic30)))
+   {
+       spdlog::info("MGS 2: Effect Speed Fix: feedback cadence limiter {}.", automatic30 ? "enabled" : "disabled");
+   }
 
     return (In30fpsWindow() || automatic30) && (g_GameVars.DG_Clock() & 1) != 0;
 }
