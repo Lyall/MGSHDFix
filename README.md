@@ -4,7 +4,7 @@
 [![Discord](https://img.shields.io/discord/1116856754920226876?logo=discord&logoColor=white&label=Metal%20Gear%20Network%20-%20%23HDFix&color=7289DA)](https://discord.gg/bFv9bZmWDV)
 
 
-[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | [GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/)<br />
+[MG1 / MG2 Nexus Page](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/9) | [MGS2 Nexus Page](https://www.nexusmods.com/metalgearsolid2mc/mods/49) | [MGS3 Nexus Page](https://www.nexusmods.com/metalgearsolid3mc/mods/139) | **GitHub Repo (You're already here!)** | [GitLab Repo Mirror](https://gitlab.com/ShizCalev/MGSHDFix/) | [Media / Screenshot Repo](https://github.com/dotlessone/MGSHDFix-Media)<br />
 
 This is a fix that adds custom resolutions, ultrawide support and much more to the Metal Gear Solid Master Collection.<br />
 
@@ -250,7 +250,9 @@ This list will contain bugs which may or may not be fixed.
 - A detailed tracker which catalogs all of the known Master Collection bugs (including issues fixed by MGSHDFix) can be located [here](https://docs.google.com/spreadsheets/d/1WhQSRpkC_A9wBDV0o-Pohh1dMhL1H6nbVzvdluIVWrw/edit?gid=0#gid=0).
 - To submit new entries to the tracker, either report a new issue on the MGSHDFix [Github](https://github.com/ShizCalev/MGSHDFix/issues/new/choose), or use [this form](https://docs.google.com/forms/d/e/1FAIpQLSef8Vx38tHpBsR-dXnawF6X0iad3XU7vmDX29pcmjbaZhQiew/viewform).
 
-## Examples
+## Screenshots / Examples
+
+Uncompressed 4K screenshots for media use can be found at our media repo here: https://github.com/dotlessone/MGSHDFix-Media
 
 | ![MGS2 widescreen cutscene preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20widescreen.gif) |
 |:--:|
@@ -280,9 +282,9 @@ This list will contain bugs which may or may not be fixed.
 | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
 | Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix |
 
-![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/MGS3_cutscene_framing.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGS3%20Reference%20Pictures%20and%20Video/MGS3_cutscene_framing.png)
 
-![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/MGS3_cutscene_framing_2.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGS3%20Reference%20Pictures%20and%20Video/MGS3_cutscene_framing_2.png)
 
 ![MGS3 - Correctly scaled rain on bridge scene](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20bridge%20rain.png)
 
