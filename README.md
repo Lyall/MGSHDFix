@@ -252,43 +252,43 @@ This list will contain bugs which may or may not be fixed.
 
 ## Examples
 
-| ![MGS2 widescreen cutscene preview](screenshots/after/mgs2%20-%20widescreen.gif) |
+| ![MGS2 widescreen cutscene preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20widescreen.gif) |
 |:--:|
 
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/tanker_snake_shot.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/tanker_snake_shot.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2_w24c_color_filter.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2_w24c_color_filter.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20d00t%20-%20rain%201.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w32a%20-%20scope.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w32a%20-%20scope.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w32a%20-%20thermals.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w32a%20-%20thermals.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20codec.png" />                       | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20codec.png" />                       |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs2%20-%20w00a%20-%20aiming.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs2%20-%20w00a%20-%20aiming.png" />            |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/solidus%20-%20d080p01.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/solidus%20-%20d080p01.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/tanker_snake_shot.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/tanker_snake_shot.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2_w24c_color_filter.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2_w24c_color_filter.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20d00t%20-%20rain%201.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20d00t%20-%20rain%201.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20d05t%20-%20rain%20(olga).png" />    |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w24a%20-%20solidus%20flames%202.png" /> |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w32a%20-%20scope.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w32a%20-%20scope.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w32a%20-%20thermals.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w32a%20-%20thermals.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20codec.png" />                       | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20codec.png" />                       |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs2%20-%20w00a%20-%20aiming.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs2%20-%20w00a%20-%20aiming.png" />            |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/solidus%20-%20d080p01.png" />            | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/solidus%20-%20d080p01.png" />            |
 | Unmodded Metal Gear Solid 2                                                                                                       | MGSHDFix                                                                                                                         |
 
-| ![MGS3 widescreen gameplay preview](screenshots/after/mgs3%20-%20widescreen.gif) |
+| ![MGS3 widescreen gameplay preview](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20widescreen.gif) |
 |:--:|
 
 | Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix                                                                                                              |
 | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20thermals.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20thermals.png" />         |
-| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20radio%20menu.png" />     | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20radio%20menu.png" />     |
-| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20wig%20reflection.gif" />   | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20wig%20reflection.gif" />   |
-| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20thermals.png" />         | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20thermals.png" />         |
+| <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20radio%20menu.png" />     | <img width="3840" height="2160" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20radio%20menu.png" />     |
+| <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20wig%20reflection.gif" />   | <img width="389" height="219" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20wig%20reflection.gif" />   |
+| <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/before/mgs3%20-%20river%20reflection.jpg" /> | <img width="389" height="291" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20river%20reflection.jpg" /> |
 | Unmodded Metal Gear Solid 3                                                                                            | MGSHDFix |
 
-![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/MGS3_cutscene_framing.png)
 
-![MGS3 - Corrected cutscene framing](screenshots/MGS3_cutscene_framing_2.png)
+![MGS3 - Corrected cutscene framing](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/MGS3_cutscene_framing_2.png)
 
-![MGS3 - Correctly scaled rain on bridge scene](screenshots/after/mgs3%20-%20bridge%20rain.png)
+![MGS3 - Correctly scaled rain on bridge scene](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20bridge%20rain.png)
 
-![MGS3 - Correctly scaled rain in The Sorrow's river](screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
+![MGS3 - Correctly scaled rain in The Sorrow's river](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20sorrow%20rain%202.png)
 
-![MGS3 - Wireframe mode visual](screenshots/after/mgs3%20-%20wireframe.png)
+![MGS3 - Wireframe mode visual](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20wireframe.png)
 
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
