@@ -244,7 +244,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
  Step 1) 
   - Open up the game properties of either MGS2/MGS3 in Steam and set the following line to the launch options:
 
-      SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
+   SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
 
  Step 2)
   - Open the Steam overlay while the game is running.
