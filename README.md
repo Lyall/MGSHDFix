@@ -240,10 +240,21 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 > [!NOTE]
 **🚩 These steps are only needed if you’re on Steam Deck/Linux. Skip if you’re using Windows.**
 
+ Step 1) 
   - Open up the game properties of either MGS2/MGS3 in Steam and set the following line to the launch options:
 
       SDL_GAMECONTROLLER_IGNORE_DEVICES= PROTON_ENABLE_HIDRAW=0x054C/0x0268 WINEDLLOVERRIDES="wininet,winhttp=n,b" %command%
+  Step 2)
+  - Open the Steam overlay while the game is running.
+  - Open controller settings
+  - Click reorder controllers
+  
+  <img width="600" height="300" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%201.png" />
 
+  Step 3)
+  - Set the PS3 controller as your primary device.
+  
+  <img width="400" height="200" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%202.png" />
 
 
 
