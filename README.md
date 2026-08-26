@@ -249,12 +249,12 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
   - Open controller settings
   - Click reorder controllers
   
-  <img width="600" height="300" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%201.png" />
+  <img width="600" height="400" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%201.png" />
 
   Step 3)
   - Set the PS3 controller as your primary device.
   
-  <img width="400" height="200" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%202.png" />
+  <img width="400" height="250" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%202.png" />
 
 
 
