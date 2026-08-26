@@ -230,13 +230,13 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
 
 
-### DualShock 2 / 3 Setup
-- Windows: 
+## DualShock 2 / 3 Setup
+### Windows: 
 	- Download and install DsHidMini.
 	- Set DsHidMini to SXS mode.
 	(This matches the configuration required for PCSX2. If your DS2/DS3 controller is already set up properly with PCSX2, then you're already good to go!)
  
-- Steam Deck / Linux:
+### Steam Deck / Linux:
 > [!NOTE]
 **🚩 These steps are only needed if you’re on Steam Deck/Linux. Skip if you’re using Windows.**
 
