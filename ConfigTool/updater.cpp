@@ -392,7 +392,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hSession)
     {
-        wxLogError("Version Check: WinHttpOpen failed with error: %s", GetLastError());
+        wxLogError("Version Check: WinHttpOpen failed with error: %lu", GetLastError());
         return false;
     }
 
@@ -411,7 +411,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hConnect)
     {
-        wxLogError("Version Check: WinHttpConnect failed with error: %s", GetLastError());
+        wxLogError("Version Check: WinHttpConnect failed with error: %lu", GetLastError());
         WinHttpCloseHandle(hSession);
         return false;
     }
@@ -427,7 +427,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
 
     if (!hRequest)
     {
-        wxLogError("Version Check: WinHttpOpenRequest failed with error: %s", GetLastError());
+        wxLogError("Version Check: WinHttpOpenRequest failed with error: %lu", GetLastError());
         WinHttpCloseHandle(hConnect);
         WinHttpCloseHandle(hSession);
         return false;
@@ -437,7 +437,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
     std::wstring userAgentHeader = L"User-Agent: " + buildUserAgent();
     if (!WinHttpAddRequestHeaders(hRequest, userAgentHeader.c_str(), (DWORD)-1, WINHTTP_ADDREQ_FLAG_ADD))
     {
-        wxLogError("Version Check: WinHttpAddRequestHeaders failed with error: %s", GetLastError());
+        wxLogError("Version Check: WinHttpAddRequestHeaders failed with error: %lu", GetLastError());
         WinHttpCloseHandle(hRequest);
         WinHttpCloseHandle(hConnect);
         WinHttpCloseHandle(hSession);
@@ -459,7 +459,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
         {
             if (statusCode < 200 || statusCode >= 300)
             {
-                wxLogError("Version Check: %s responded with HTTP %s", repoInfo.displayName, statusCode);
+                wxLogError("Version Check: %s responded with HTTP %lu", repoInfo.displayName, statusCode);
                 WinHttpCloseHandle(hRequest);
                 WinHttpCloseHandle(hConnect);
                 WinHttpCloseHandle(hSession);
@@ -473,7 +473,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
             DWORD downloaded = 0;
             if (!WinHttpQueryDataAvailable(hRequest, &avail))
             {
-                wxLogError("Version Check: WinHttpQueryDataAvailable failed with error: %s", GetLastError());
+                wxLogError("Version Check: WinHttpQueryDataAvailable failed with error: %lu", GetLastError());
                 break;
             }
             if (!avail)
@@ -484,7 +484,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
             std::string buffer(avail, 0);
             if (!WinHttpReadData(hRequest, &buffer[0], avail, &downloaded))
             {
-                wxLogError("Version Check: WinHttpReadData failed with error: %s", GetLastError());
+                wxLogError("Version Check: WinHttpReadData failed with error: %lu", GetLastError());
                 break;
             }
             response.append(buffer, 0, downloaded);
@@ -492,7 +492,7 @@ bool LatestVersionChecker::queryLatestVersion(const RepoInfo& repoInfo, std::str
     }
     else
     {
-        wxLogError("Version Check: WinHttpSendRequest or WinHttpReceiveResponse failed with error: %s", GetLastError());
+        wxLogError("Version Check: WinHttpSendRequest or WinHttpReceiveResponse failed with error: %lu", GetLastError());
     }
 
     WinHttpCloseHandle(hRequest);
