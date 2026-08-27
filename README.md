@@ -19,6 +19,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 ## Other Metal Gear Fix Projects
 - MGS Master Collection - Metal Gear Solid 1 and Bonus Content (MG1/2 NES) | MGSM2Fix - [Repo](https://github.com/nuggslet/MGSM2Fix) / [Nexus Page](https://www.nexusmods.com/metalgearsolidmc/mods/5)
+- MGS Master Collection - Metal Gear Solid 4 and Peace Walker | MGSPatriotFix - [Repo](https://github.com/ShizCalev/MGSPatriotFix)
 - Metal Gear Solid V: The Phantom Pain | MGSVFix - [Repo](https://codeberg.org/Lyall/MGSVFix)
 - Metal Gear Solid Delta: Snake Eater | MGSDeltaFix - [Repo](https://codeberg.org/Lyall/MGSDeltaFix) / [Nexus Page](https://www.nexusmods.com/metalgearsoliddeltasnakeeater/mods/27)
 
