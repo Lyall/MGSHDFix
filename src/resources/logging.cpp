@@ -22,7 +22,7 @@ public:
     {
         truncate_log_file();
 
-        _file.open(_filename, std::ios::app);
+        _file.open(_filename, std::ios::app | std::ios::binary);
         if (!_file.is_open())
         {
             throw spdlog::spdlog_ex("Failed to open log file " + filename);
@@ -58,7 +58,7 @@ private:
     {
         if (std::filesystem::exists(_filename))
         {
-            std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::trunc);
+            std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::trunc | std::ios::binary);
             ofs.close();
         }
     }
