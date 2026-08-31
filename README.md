@@ -11,17 +11,22 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 **Featured by**:  
 [IGN (Video Guide)](https://www.ign.com/videos/how-to-fix-the-metal-gear-solid-master-collection-on-pc-with-mods) • [IGN (Best Mods List)](https://www.ign.com/wikis/metal-gear-solid-master-collection-vol-1/Best_Mods) • [Digital Foundry / Eurogamer](https://youtu.be/zkdxOQ2kGMc?t=536) • [PC Gamer](https://www.pcgamer.com/it-only-took-hours-for-modders-to-crowbar-4k-support-into-the-metal-gear-solid-master-collectionnow-theyve-added-ultrawide-high-res-ui-support-and-more/) • [Rock Paper Shotgun](https://www.rockpapershotgun.com/modders-polish-metal-gear-solids-pc-master-collection-with-ultrawide-support-sharper-textures-and-more) • [Ocelot (YouTube)](https://www.youtube.com/watch?v=CwgWJgc58_4) • [GamingOnLinux](https://www.gamingonlinux.com/2023/11/modders-already-improving-the-metal-gear-solid-master-collection/) • [Dextero](https://www.dexerto.com/tech/metal-gear-solid-master-collection-pc-modders-are-fixing-konamis-mistakes-2380637/)
 
+<br />
 
 ## Games Supported
 - Metal Gear 1/2 (MSX)
 - Metal Gear Solid 2
 - Metal Gear Solid 3
 
+<br />
+
 ## Other Metal Gear Fix Projects
 - MGS Master Collection - Metal Gear Solid 1 and Bonus Content (MG1/2 NES) | MGSM2Fix - [Repo](https://github.com/nuggslet/MGSM2Fix) / [Nexus Page](https://www.nexusmods.com/metalgearsolidmc/mods/5)
 - MGS Master Collection - Metal Gear Solid 4 and Peace Walker | MGSPatriotFix - [Repo](https://github.com/ShizCalev/MGSPatriotFix)
 - Metal Gear Solid V: The Phantom Pain | MGSVFix - [Repo](https://codeberg.org/Lyall/MGSVFix)
 - Metal Gear Solid Delta: Snake Eater | MGSDeltaFix - [Repo](https://codeberg.org/Lyall/MGSDeltaFix) / [Nexus Page](https://www.nexusmods.com/metalgearsoliddeltasnakeeater/mods/27)
+
+<br />
 
 ## Features
 > [!NOTE]
@@ -84,6 +89,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 #### MGS3 Specific Features:
 - Option to force grass to render at all distances.
 - Mouse sensitivity adjustment.
+
+<br />
 
 
 ## Bug Fixes
@@ -189,6 +196,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Fixes light emitting textures not working.
 - Fixed godrays not blending properly.
 
+<br />
 
 ## Logging / Warnings for Common Configuration Issues
 - Warnings for common mod compatibility & installation issues - which often result in crashes.
@@ -196,6 +204,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Logging for Steam Input's controller status (ie detected controllers, keybinds, ect.)
 - Added a warning if Windows Multi-Plane Overlay is disabled, which can cause DirectX games to freeze/crash when alt-tabbing.
 
+<br />
 
 ## Installation
 
@@ -230,6 +239,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 
 - See **MGSHDFix Config Tool.exe** in the `/plugins` folder to adjust settings for the fix.
 
+<br />
+
 
 ## DualShock 2 / 3 Setup
 ### Windows: 
@@ -260,12 +271,15 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
   
   <img width="400" height="250" alt="mgs2 - d00t - rain 1" src="https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/MGSHDFix%20Features/Dualshock%202-3/controller%20order%202.png" />
 
+<br />
 
 
 ## Support
 Please report any issues you notice on our Github [here](https://github.com/ShizCalev/MGSHDFix/issues/new/choose).
 
 For more immediate problems, you can contact us in the [#HDFix](https://discord.gg/bFv9bZmWDV) channel of the Metal Gear Network Discord.
+
+<br />
 
 ## Known Issues
 This list will contain bugs which may or may not be fixed.
@@ -279,6 +293,8 @@ This list will contain bugs which may or may not be fixed.
 ### MGS Master Collection - Community Bug Tracker
 - A detailed tracker which catalogs all of the known Master Collection bugs (including issues fixed by MGSHDFix) can be located [here](https://docs.google.com/spreadsheets/d/1WhQSRpkC_A9wBDV0o-Pohh1dMhL1H6nbVzvdluIVWrw/edit?gid=0#gid=0).
 - To submit new entries to the tracker, either report a new issue on the MGSHDFix [Github](https://github.com/ShizCalev/MGSHDFix/issues/new/choose), or use [this form](https://docs.google.com/forms/d/e/1FAIpQLSef8Vx38tHpBsR-dXnawF6X0iad3XU7vmDX29pcmjbaZhQiew/viewform).
+
+<br />
 
 ## Screenshots / Examples
 
@@ -323,12 +339,16 @@ Additional screenshots & uncompressed 4K versions can be found at our Media repo
 
 ![MGS3 - Wireframe mode visual](https://raw.githubusercontent.com/dotlessone/MGSHDFix-Media/refs/heads/main/screenshots/after/mgs3%20-%20wireframe.png)
 
+<br />
+
 ## Upcoming Fix/Feature Roadmap - (Version Problem Originated)
 - MG1 / MG2 - Add Custom Loading Screen Support (2023 MC)
 - MGS2 - Make the in-game Radar, Cutscene Letterboxing, and Previous Missions reading progress persistent across game sessions. (2001 SoL)
 - MGS3 - Fix Knife Not Appearing in Chest Sheath After Torture (2004 Snake Eater)
 - MGS3 - Correct More Sped Up Effects (2011 HDC)
 - MGS3 - Swap X/O Buttons on Controller in Menus (2011 HDC)
+
+<br />
 
 ## Building
 ```bash
@@ -352,6 +372,8 @@ wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio 
  
 ### Windows
 Open MGSHDFix.sln in Visual Studio (2026) and build.
+
+<br />
 
 ## Credits
 Maintained by [@ShizCalev/Afevis](https://github.com/shizcalev) (taking over the project in early 2025).<br />
