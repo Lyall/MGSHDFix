@@ -935,13 +935,12 @@ namespace
             LOG_HOOK(stampHook, "MGS 3: Pressure Inputs - Throwable Pressure | player pad, the SQUARE stamp for throwables")
         }
 
-        // The weapon state machine, for the wind-up peak.
         if (uint8_t* address = Memory::PatternScan(baseModule,
             "40 56 57 41 55 41 57",
             "MGS 3: Pressure Inputs - Weapon State | PL_PLG_ActAttackPlugin() -> ActGrenadeAttack()"))
         {
             static SafetyHookMid weaponHook {};
-            weaponHook = safetyhook::create_mid(address - 1,
+            weaponHook = safetyhook::create_mid(address,
                 [](SafetyHookContext& ctx) { TrackThrowPeak(ctx.rdx); });
             LOG_HOOK(weaponHook, "MGS 3: Pressure Inputs - Weapon State")
         }
