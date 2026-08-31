@@ -354,9 +354,11 @@ wxWidgets, SDL3, and Zydis are built automatically as part of the Visual Studio 
 Open MGSHDFix.sln in Visual Studio (2026) and build.
 
 ## Credits
-[@Lyall](https://codeberg.org/Lyall) for their amazing work making widescreen fix mods, and most importantly, the original creation of this mod!<br />
-[@ShizCalev/Afevis](https://github.com/shizcalev) for long-term maintenance (taking over the project in early 2025), and contributing fixes.<br />
-[@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), [@SpaceCore](https://github.com/Jacky720), [@gibletto](https://github.com/gibletto) and [Zenf0](https://next.nexusmods.com/profile/zenf0) for contributing fixes/features. <br />
+Maintained by [@ShizCalev/Afevis](https://github.com/shizcalev) (taking over the project in early 2025).<br />
+Originally made by [@Lyall](https://codeberg.org/Lyall).<br />
+With more amazing features and fixes contributed by [@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), [@SpaceCore](https://github.com/Jacky720), [@gibletto](https://github.com/gibletto) and [Zenf0](https://next.nexusmods.com/profile/zenf0)<br />
+
+#### Used Libraries & Software:
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
 [inipp](https://github.com/mcmtroffaes/inipp) for ini reading. <br />
 [spdlog](https://github.com/gabime/spdlog) for logging. <br />
@@ -364,4 +366,4 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 [stb](https://github.com/nothings/stb) for png decoding. <br />
 Gamma correction based off [SweetFX Shader Suite by CeeJay.dk](https://github.com/CeeJayDK/SweetFX). <br />
 SMAA made by [Jorge Jimenez, Jose I. Echevarria, Belen Masia, Fernando Navarro, Diego Gutierrez](https://www.iryoku.com/smaa/). <br />
-Universal Config Tool (made by ShizCalev/Afevis. Powered by SDL3.)
+Universal Config Tool (made by [@ShizCalev/Afevis](https://github.com/shizcalev). Powered by [SDL3](https://www.libsdl.org/).)
