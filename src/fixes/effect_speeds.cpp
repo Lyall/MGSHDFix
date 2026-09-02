@@ -191,7 +191,6 @@ private:
     X(NewSpark2, "48 89 5C 24 ?? 56 48 83 EC ?? FF 49", "MGS 2 : user\\okajima\\t_effect\\spark.c -> NewSpark2() | NewSpark()") \
     X(NewFootSplash, "40 53 48 83 EC ?? 48 83 B9 ?? ?? ?? ?? 00 48 8B D9 0F 84 ?? ?? ?? ?? 48 83 B9 ?? ?? ?? ?? 00", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\ft_splsh.c -> NewFootSplash()") \
     X(NewBodySplash, "40 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 48 83 79 ?? 00 48 8B F1 74", "MGS 2: Effect Speed Fix : user\\okajima\\effect\\body_sph.c -> NewBodySplashScn() | NewBodySplash() | NewBodySplash2() | NewBodySplash3()") \
-    X(NewRayEye, "F6 41 ?? ?? 0F 85 ?? ?? ?? ?? E9", "MGS 2: Effect Speed Fix : user\\shibata\\effect\\ray_eye.c -> NewRayEye()") \
     X(NewDemoHarrierDamageSmoke, "4C 8B DC 53 57 48 81 EC ?? ?? ?? ?? 45 0F 29 53", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\harrier_damage_smoke.c-> NewDemoHarrierDamageSmoke()") \
     X(NewDemoBladeSpark, "40 53 48 83 EC ?? 48 8B 51 ?? 41 B9 ?? ?? ?? ?? 41 8B C1 0F 29 74 24", "MGS 2: Effect Speed Fix : user\\kunibe\\effect\\blade_spark.c -> NewDemoBladeSpark()") \
     X(NewLightSpark, "48 89 74 24 ?? 57 48 83 EC ?? F3 0F 10 89", "MGS 2 : Effect Speed Fix : user\\kunibe\\effect\\light_spark.c -> NewLightSpark()") \
@@ -726,6 +725,19 @@ namespace
         ctx.rip = SkipFrameWindow() ? g_trafficActHold : g_trafficActRun;
     }
 
+    // Hold RAY's eye every other demo tick, but still read its messages or it never turns on.
+    SafetyHookInline h_RayEyeAct {};
+    int64_t(__fastcall* g_rayEyeReadMessages)(int64_t work) = nullptr;   // ray_eye.c CheckMesgParam()
+
+    int64_t __fastcall RayEyeAct_hook(int64_t work)
+    {
+        if (SkipFrame())
+        {
+            return g_rayEyeReadMessages(work);
+        }
+        return h_RayEyeAct.call<int64_t>(work);
+    }
+
     // Demo lightning: the bolt's life and its blink are both counted in frames, so at 60 it dies
     // twice as fast and flickers twice as quickly.
     SafetyHookMid h_ThunderLife {};
@@ -1189,6 +1201,18 @@ void EffectSpeedFix::Initialize()
 
         h_TrafficDemoAct = safetyhook::create_mid(je, TrafficDemoAct_hook);
         LOG_HOOK(h_TrafficDemoAct, "MGS 2: Effect Speed Fix : traffic.c -> Act()")
+    }
+
+    if (uint8_t* call = Memory::PatternScan(baseModule, "E8 ?? ?? ?? ?? 44 8B 45 ?? 45 33 ED",
+        "MGS 2: Effect Speed Fix : user\\shibata\\effect\\ray_eye.c -> TaileAct_NoCheck() [CheckMesgParam() call]"))
+    {
+        if (uint8_t* act = Memory::PatternScan(baseModule, "F6 41 ?? ?? 0F 85 ?? ?? ?? ?? E9",
+            "MGS 2: Effect Speed Fix : user\\shibata\\effect\\ray_eye.c -> Act()"))
+        {
+            g_rayEyeReadMessages = reinterpret_cast<decltype(g_rayEyeReadMessages)>(Memory::GetRipRelativeAddress(call, 1, 5));
+            h_RayEyeAct = safetyhook::create_inline(act, RayEyeAct_hook);
+            LOG_HOOK(h_RayEyeAct, "MGS 2: Effect Speed Fix : ray_eye.c -> Act()")
+        }
     }
 
 #define INSTALL_MGS2_FRAMESKIP_HOOK(name, pattern, label) \

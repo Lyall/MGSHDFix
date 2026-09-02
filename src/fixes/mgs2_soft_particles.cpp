@@ -8,9 +8,8 @@
 
 #include "expand_bp_assets.hpp"
 
-// Spray puffs and lamp glows are flat sprites, so the z-test cuts them along a hard line wherever
-// they pass through water, ground or the wall they sit on. Soft particles: fade each pixel by how
-// far the scene sits behind it, as a fraction of the sprite's own radius.
+// Sprites get sliced by the z-test. Puffs fade out near the scene behind them.
+// A lamp stays whole as long as its light can be seen.
 
 namespace
 {
@@ -19,7 +18,7 @@ namespace
         const char* path;
         float fade;          // fade span as a fraction of the half-size
         float feather;       // and never narrower than this many pixels
-        float bias;          // glows are volumes: start the fade this many half-sizes behind the surface, no z-test
+        float bias;          // lamps: how far in front of the light something must be to hide it
         uint64_t hash = 0;
         UINT size = 0;
     };
@@ -28,10 +27,10 @@ namespace
         { "textures/flatlist/_win/splash03_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\morita\splash\splash.c
         { "textures/flatlist/_win/splash05_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\morita\splash\splash.c
         { "textures/flatlist/_win/bombgas6_alp.bmp.ctxr", 0.5f, 8.0f, 0.0f },          // user\okajima\effect\bomb_gas.c
-        { "textures/flatlist/_win/xlit04a_alp.bmp.ctxr", 2.0f, 0.0f, 1.0f },           // user\skoba\test\c4_eff.c (the C4 lamp)
-        { "textures/flatlist/_win/drop01_msk.bmp.ctxr", 2.0f, 0.0f, 1.0f },            // user\shibata\effect\cam_lamp.c
-        { "textures/flatlist/_win/ray_eye_bonbori_alp.bmp.ctxr", 2.0f, 0.0f, 1.0f },   // user\kunibe\effect\cypher_light.c (camera lamp)
-        { "textures/flatlist/_win/xlit01b_msk.bmp.ctxr", 2.0f, 0.0f, 1.0f },           // user\okajima\t_irs\trap_c4.c, irs.c (bomb panel and IR sensor lamps)
+        { "textures/flatlist/_win/xlit04a_alp.bmp.ctxr", 0.1f, 0.0f, 0.1f },           // user\skoba\test\c4_eff.c (the C4 lamp)
+        { "textures/flatlist/_win/drop01_msk.bmp.ctxr", 0.1f, 0.0f, 0.1f },            // user\shibata\effect\cam_lamp.c
+        { "textures/flatlist/_win/ray_eye_bonbori_alp.bmp.ctxr", 0.1f, 0.0f, 0.1f },   // user\kunibe\effect\cypher_light.c (camera lamp)
+        { "textures/flatlist/_win/xlit01b_msk.bmp.ctxr", 0.1f, 0.0f, 0.1f },           // user\okajima\t_irs\trap_c4.c, irs.c (bomb panel and IR sensor lamps)
     };
     constexpr int kSoftTextureCount = static_cast<int>(std::size(kSoftTextures));
 
@@ -74,8 +73,7 @@ namespace
         gHashesReady.store(true, std::memory_order_release);
     }
 
-    // Prim.fx's textured sprite and poly paths (FOG=1 when the game's fog build is bound), plus the
-    // sprite's true half-size in TEXCOORD0.z for the fade; a poly has no radius and feathers by pixels.
+    // The game's sprite and poly shaders, plus the sprite's half-size in TEXCOORD0.z for the fade.
     const char* kShader = R"(
     cbuffer Globals : register(b0) { float4 c[486]; }
     cbuffer Soft    : register(b1) { float fadeRadius; float featherPixels; float biasRadius; }
@@ -84,13 +82,15 @@ namespace
     SamplerState     samp       : register(s0);
 
     struct VSIn { float3 pos : POSITION; int4 uvdxdy : TEXCOORD0; float4 col : TEXCOORD1; };
-    struct PSIn { float4 pos : SV_Position; float4 uv : TEXCOORD0; float4 col : TEXCOORD1; };
+    struct PSIn { float4 pos : SV_Position; float4 uv : TEXCOORD0; float4 col : TEXCOORD1; nointerpolation float4 light : TEXCOORD2; };
 
     PSIn VS(VSIn i)
     {
         PSIn o;
         float4 p = float4(i.pos, 1.0);
         float4 s = float4(dot(c[16], p), dot(c[17], p), dot(c[18], p), dot(c[19], p));
+        float4 l = float4(dot(c[20], s), dot(c[21], s), dot(c[22], s), dot(c[23], s));
+        o.light = float4(l.xy / l.w, 0.0, 0.0);   // where the light is on screen
 #ifdef POLY
         o.uv.xy = float2(i.uvdxdy.xy) / float(i.uvdxdy.z) * c[24].xy + c[24].zw;
         o.uv.z = 0.0;
@@ -99,6 +99,7 @@ namespace
         o.uv.xy = float2(i.uvdxdy.xy) * c[24].xy / 4096.0 + c[24].zw;
         // A scaled custom world shrinks the whole view vector, so the half-size comes back out by w.
         o.uv.z = max(abs(float(i.uvdxdy.z)), abs(float(i.uvdxdy.w))) / s.w;
+        o.light.z = o.uv.z * s.w * abs(c[20].x) / l.w;   // how wide the sprite is on screen
 #endif
         o.pos = float4(dot(c[20], s), dot(c[21], s), dot(c[22], s), dot(c[23], s));
         o.uv.w = 0.0;
@@ -116,12 +117,28 @@ namespace
         float4 o = saturate(tex.Sample(samp, i.uv.xy) * i.col);
         o.rgb = lerp(o.rgb, c[485].rgb, i.uv.w);
         o.a *= 2.0;
-        // The pixel floor keeps a grazing puff from cutting hard. The slope is the smaller one-sided
-        // difference per axis, so a silhouette jump never counts as slope.
         uint w, h;
         sceneDepth.GetDimensions(w, h);
-        int2 px = int2(i.pos.xy);
         float zp = LinearZ(i.pos.z);
+        float slack = i.uv.z * biasRadius;
+        if (slack > 0.0)
+        {
+            // Is the light itself covered? Nine taps so it fades instead of blinking.
+            float2 centre = (i.light.xy * float2(0.5, -0.5) + 0.5) * float2(w, h);
+            float spread = max(1.0, i.light.z * 0.5 * w / 16.0);
+            float seen = 0.0;
+            [unroll] for (int y = -1; y <= 1; y++)
+            [unroll] for (int x = -1; x <= 1; x++)
+            {
+                int2 px = clamp(int2(centre + float2(x, y) * spread), int2(0, 0), int2(w, h) - 1);
+                seen += saturate((LinearZ(sceneDepth.Load(int3(px, 0))) - zp + slack) / slack);
+            }
+            float here = saturate((LinearZ(sceneDepth.Load(int3(int2(i.pos.xy), 0))) - zp + slack) / slack);
+            o.a *= max(seen / 9.0, here);
+            return o;
+        }
+        // Fade over pixels too, so a skimming puff does not cut hard.
+        int2 px = int2(i.pos.xy);
         float dc = LinearZ(sceneDepth.Load(int3(px, 0))) - zp;
         float dl = LinearZ(sceneDepth.Load(int3(max(px.x - 1, 0), px.y, 0))) - zp;
         float dr = LinearZ(sceneDepth.Load(int3(min(px.x + 1, int(w) - 1), px.y, 0))) - zp;
@@ -129,7 +146,7 @@ namespace
         float dd = LinearZ(sceneDepth.Load(int3(px.x, min(px.y + 1, int(h) - 1), 0))) - zp;
         float slope = min(abs(dc - dl), abs(dr - dc)) + min(abs(dc - du), abs(dd - dc));
         float feather = max(max(i.uv.z * fadeRadius, slope * featherPixels), 1e-3);
-        o.a *= saturate((dc + i.uv.z * biasRadius) / feather);
+        o.a *= saturate(dc / feather);
         return o;
     }
     )";
@@ -315,7 +332,13 @@ namespace
             ctx->VSGetShader(theirVS.GetAddressOf(), nullptr, nullptr);
         }
         const D3D11Hooks::StockVS kind = D3D11Hooks::GetStockVS(theirVS.Get());
-        const int entry = kind != D3D11Hooks::StockVS::None ? BoundSoftTexture(ctx) : -1;
+        int entry = kind != D3D11Hooks::StockVS::None ? BoundSoftTexture(ctx) : -1;
+        // Lamps are sprites. The same texture on a poly is not a glow, leave it stock.
+        const bool poly = kind == D3D11Hooks::StockVS::Poly || kind == D3D11Hooks::StockVS::PolyFog;
+        if (entry >= 0 && poly && kSoftTextures[entry].bias > 0.0f)
+        {
+            entry = -1;
+        }
         ID3D11ShaderResourceView* depth = entry >= 0 ? SceneDepthForFrame(ctx) : nullptr;
         if (!depth || !EnsureShaders())
         {
@@ -330,7 +353,7 @@ namespace
         ctx->PSGetShaderResources(1, 1, theirSlot1.GetAddressOf());
         ctx->PSGetConstantBuffers(1, 1, theirCB1.GetAddressOf());
 
-        // A glow occludes by its own sphere in the shader, so the z-test would only cut it.
+        // The shader does the lamp's z-test.
         ComPtr<ID3D11DepthStencilState> theirDSS;
         UINT theirStencilRef = 0;
         const bool volume = kSoftTextures[entry].bias > 0.0f;
