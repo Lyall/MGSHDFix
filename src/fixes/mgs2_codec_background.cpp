@@ -6,15 +6,10 @@
 
 #include "logging.hpp"
 
-#include <atomic>
 
 // The codec background was modulated by cyan in past implementations.
 // However, HDC/MC uses kST_GrayScale (EngineSupport\Shaders\FX.fx -> ps_grayscale()), which is shared with the VR mission clear effect, and thus lacks modulation.
 // To avoid affecting the VR effect, hook BP_PostFX_MGS2_CodexInOut() and swap the binding only during that period.
-//
-// The backdrop is a snapshot the codec asks for once, through a render packet. A cutscene ending parks the renderer and
-// the scripted call that follows un-parks it, so that one packet can land on a frame that never draws and gets thrown
-// away. The codec then shows whatever was left in the snapshot buffer. If that happens, ask again.
 
 namespace
 {
