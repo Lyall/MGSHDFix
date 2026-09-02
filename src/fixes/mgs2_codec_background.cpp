@@ -6,6 +6,7 @@
 
 #include "logging.hpp"
 
+
 // The codec background was modulated by cyan in past implementations.
 // However, HDC/MC uses kST_GrayScale (EngineSupport\Shaders\FX.fx -> ps_grayscale()), which is shared with the VR mission clear effect, and thus lacks modulation.
 // To avoid affecting the VR effect, hook BP_PostFX_MGS2_CodexInOut() and swap the binding only during that period.
@@ -47,10 +48,24 @@ namespace
     // (CCompiledShader::BeginPass passes them to VSSetShader / PSSetShader respectively).
     constexpr ptrdiff_t kCompiledShaderPixelShaderOffset = 0x08;
 
+    // SBP_PFX_CodexInOut::needPreviousFrameCopy, set on exactly one packet per codec session.
+    constexpr ptrdiff_t kNeedPreviousFrameCopyOffset = 0x20;
+
     safetyhook::InlineHook codexInOutHook;
+    SafetyHookMid          copyArmHook {};
+
+    // Set when c_indemo GetResources() asks for the snapshot, cleared by the first pass that actually runs.
+    std::atomic<bool> copyArmed { false };
 
     void __fastcall MGS2_CodexInOut(void* pData)
     {
+        int& needCopy = *reinterpret_cast<int*>(static_cast<uint8_t*>(pData) + kNeedPreviousFrameCopyOffset);
+        if (copyArmed.exchange(false, std::memory_order_relaxed) && needCopy == 0)
+        {
+            needCopy = 1;
+            spdlog::info("MGS2_CodecBackground: backdrop snapshot was dropped by an undrawn frame, asked again.");
+        }
+
         void* compiledShader = grayShaderSlotAddress ? *reinterpret_cast<void**>(grayShaderSlotAddress) : nullptr;
 
         void** pixelShaderField = nullptr;
@@ -96,6 +111,12 @@ void MGS2_CodecBackground::Setup()
     {
         spdlog::error("MGS2_CodecBackground: Failed to locate BP_PostFX_MGS2_CodexInOut.");
         return;
+    }
+
+    if (uint8_t* armResult = Memory::PatternScan(baseModule, "C7 86 ?? ?? ?? ?? ?? ?? ?? ?? 48 85 C9", "mgs2x\\source\\user\\mode\\codec\\c_indemo.c -> GetResources() [needPreviousFrameCopy]"))
+    {
+        copyArmHook = safetyhook::create_mid(armResult, [](SafetyHookContext&) { copyArmed.store(true, std::memory_order_relaxed); });
+        LOG_HOOK(copyArmHook, "MGS2_CodecBackground: mgs2x/source/user/mode/codec/c_indemo.c -> GetResources() [needPreviousFrameCopy]")
     }
 
     if (uint8_t* grayShaderSlotResult = Memory::PatternScan(baseModule, "48 8B 0D ?? ?? ?? ?? 45 33 C0 33 D2 E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 33 D2 E8 ?? ?? ?? ?? 48 8B 0D", "bp\\shared\\BP_RenderFX.cpp -> BP_PostFX_MGS2_CodexInOut() [FX::kST_GrayScale shader slot]"))
