@@ -18,31 +18,57 @@ namespace
     constexpr const char* kActSig =
         "48 8B C4 48 89 58 ?? 57 48 81 EC ?? ?? ?? ?? 0F 29 70 ?? 48 8D 50";
     constexpr ptrdiff_t kWorkDmapack = 0x60;
+    constexpr ptrdiff_t kWorkIntense = 0x78;
     constexpr ptrdiff_t kDmapackAutopacket = 0x38;
     constexpr uint8_t kOpEnd = 0x1e;
 
+    // blur_timer.c Act(), the Stinger's screen yank. Its fields sit 8 bytes below blur.c's.
+    constexpr const char* kTimerActSig =
+        "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00 48 8B D9 74 ?? 48 83 C4 ?? 5B";
+    constexpr ptrdiff_t kTimerDmapack = 0x58;
+    constexpr ptrdiff_t kTimerIntense = 0x70;
+
+    // It blits the last frame oversize, 519x455 from 512x448. That shove is the yank.
+    // blur.c draws 1:1 so it stays at 1.
+    constexpr float kTimerMagX = 519.0f / 512.0f;
+    constexpr float kTimerMagY = 455.0f / 448.0f;
+
     SafetyHookInline g_actHook {};
+    SafetyHookInline g_timerActHook {};
 
     // Several blur actors can run at once; the game draws each one's blend in sequence. Equivalent
     // single factor: 1 - prod(1 - intense_i/128), accumulated across the frame's Act calls.
     std::atomic<float>     g_factor { 0.0f };
+    std::atomic<float>     g_magX { 1.0f };
+    std::atomic<float>     g_magY { 1.0f };
     std::atomic<ULONGLONG> g_lastActMs { 0 };
 
-    void ReadInstance(uintptr_t work)
+    void ReadInstance(uintptr_t work, ptrdiff_t dmapackOff = kWorkDmapack, ptrdiff_t intenseOff = kWorkIntense,
+                      float magX = 1.0f, float magY = 1.0f)
     {
         static int   s_clock = -0x7fffffff;
         static float s_keep = 1.0f;
+        static float s_loudest = 0.0f;
         if (const int clock = g_GameVars.DG_Clock(); clock != s_clock)
         {
             s_clock = clock;
             s_keep = 1.0f;
+            s_loudest = 0.0f;
         }
 
-        const float intense = *reinterpret_cast<const float*>(work + 0x78);
-        const uintptr_t packet = *reinterpret_cast<const uintptr_t*>(work + kWorkDmapack);
+        const float intense = *reinterpret_cast<const float*>(work + intenseOff);
+        const uintptr_t packet = *reinterpret_cast<const uintptr_t*>(work + dmapackOff);
         const bool hidden = !packet || (*reinterpret_cast<const uint32_t*>(packet) & 0x100) != 0;
         if (!hidden && intense > 0.5f)
+        {
             s_keep *= 1.0f - std::min(intense, 128.0f) / 128.0f;
+            if (intense > s_loudest)   // one pass for all of them so the loudest wins
+            {
+                s_loudest = intense;
+                g_magX.store(magX, std::memory_order_relaxed);
+                g_magY.store(magY, std::memory_order_relaxed);
+            }
+        }
         g_factor.store(1.0f - s_keep, std::memory_order_relaxed);
         g_lastActMs.store(GetTickCount64(), std::memory_order_relaxed);
     }
@@ -77,19 +103,28 @@ namespace
         __except (EXCEPTION_EXECUTE_HANDLER) {}
     }
 
+    void __fastcall TimerAct_Detour(uintptr_t work)
+    {
+        g_timerActHook.fastcall<void>(work);
+        if (!work) return;
+        // Nothing to suppress. This one writes a PS2 register the port never reads.
+        __try { ReadInstance(work, kTimerDmapack, kTimerIntense, kTimerMagX, kTimerMagY); }
+        __except (EXCEPTION_EXECUTE_HANDLER) {}
+    }
+
     const char* kShader = R"(
     Texture2D    prevTex : register(t0);
     SamplerState sampLin : register(s0);
-    cbuffer CB : register(b0) { float gFactor; float3 _pad; }
+    cbuffer CB : register(b0) { float gFactor; float2 gMag; float _pad; }
     void VS(uint id : SV_VertexID, out float4 pos : SV_Position, out float2 uv : TEXCOORD0) {
         uv  = float2((id << 1) & 2, id & 2);
         pos = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 0.0, 1.0);
     }
     float4 PS(float4 p : SV_Position, float2 uv : TEXCOORD0) : SV_Target {
-        // out = (prev - cur) * intense/128 + cur, with prev sampled half a 512x448 texel offset - the
-        // same bilinear spread the original picked up per iteration, independent of render resolution.
+        // Read inward by gMag for the oversize blit. The half texel is the source rect nudge.
         const float2 kOffset = float2(0.5 / 512.0, 0.5 / 448.0);
-        return float4(prevTex.Sample(sampLin, uv + kOffset).rgb, gFactor);
+        float2 src = (uv - 0.5) / gMag + 0.5 + kOffset;
+        return float4(prevTex.Sample(sampLin, src).rgb, gFactor);
     }
     )";
 
@@ -177,13 +212,8 @@ namespace
         return g_d3dInit;
     }
 
-    bool EnsurePrevTexture(ID3D11Device* dev, ID3D11RenderTargetView* sceneColor,
-                           const D3D11_TEXTURE2D_DESC& sceneDesc)
+    bool EnsurePrevTexture(ID3D11Device* dev, DXGI_FORMAT viewFormat, const D3D11_TEXTURE2D_DESC& sceneDesc)
     {
-        D3D11_RENDER_TARGET_VIEW_DESC rtvDesc {};
-        sceneColor->GetDesc(&rtvDesc);
-        const DXGI_FORMAT viewFormat = rtvDesc.Format != DXGI_FORMAT_UNKNOWN ? rtvDesc.Format : sceneDesc.Format;
-
         if (g_prevTex && g_prevSRV && g_prevW == sceneDesc.Width && g_prevH == sceneDesc.Height &&
             g_prevFormat == sceneDesc.Format && g_prevViewFormat == viewFormat)
         {
@@ -223,6 +253,15 @@ namespace
         spdlog::info("MGS 2: Demo Blur: history target {}x{}, resource format {}, view format {}.",
                      g_prevW, g_prevH, static_cast<int>(g_prevFormat), static_cast<int>(g_prevViewFormat));
         return true;
+    }
+
+    bool EnsurePrevTexture(ID3D11Device* dev, ID3D11RenderTargetView* sceneColor,
+                           const D3D11_TEXTURE2D_DESC& sceneDesc)
+    {
+        D3D11_RENDER_TARGET_VIEW_DESC rtvDesc {};
+        sceneColor->GetDesc(&rtvDesc);
+        return EnsurePrevTexture(dev, rtvDesc.Format != DXGI_FORMAT_UNKNOWN ? rtvDesc.Format : sceneDesc.Format,
+                                 sceneDesc);
     }
 }
 
@@ -288,7 +327,9 @@ void MGS2DemoBlur::DrawInto(ID3D11RenderTargetView* sceneColor, ID3D11ShaderReso
             D3D11_MAPPED_SUBRESOURCE m;
             if (SUCCEEDED(ctx->Map(g_cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
             {
-                const float cb[4] = { factor, 0, 0, 0 };
+                const float cb[4] = { factor,
+                                      g_magX.load(std::memory_order_relaxed),
+                                      g_magY.load(std::memory_order_relaxed), 0 };
                 memcpy(m.pData, cb, sizeof(cb));
                 ctx->Unmap(g_cb.Get(), 0);
             }
@@ -345,9 +386,10 @@ bool MGS2DemoBlur::IsFeedbackActive()
            g_factor.load(std::memory_order_relaxed) > 0.003f;
 }
 
-void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11ShaderResourceView*)
+// The original read the last displayed frame. Present is where we get it, HUD and all.
+void MGS2DemoBlur::CaptureComposited(IDXGISwapChain* swapChain)
 {
-    if (!(eGameType & MGS2) || !bEnabled || !sceneColor) return;
+    if (!(eGameType & MGS2) || !bEnabled || !swapChain) return;
 
     if (g_GameVars.GM_MenuStatus() & MENU_RADIO_ON) { g_havePrev = false; return; }
 
@@ -357,16 +399,18 @@ void MGS2DemoBlur::CaptureFrame(ID3D11RenderTargetView* sceneColor, ID3D11Shader
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     if (!dev || !ctx || !EnsureD3D(dev)) return;
 
-    ComPtr<ID3D11Resource> colorRes;
-    sceneColor->GetResource(colorRes.GetAddressOf());
-    ComPtr<ID3D11Texture2D> sceneTex;
-    if (!colorRes || FAILED(colorRes.As(&sceneTex)) || !sceneTex) return;
+    ComPtr<ID3D11Texture2D> backbuf;
+    if (FAILED(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+                                    reinterpret_cast<void**>(backbuf.GetAddressOf()))) || !backbuf)
+    {
+        return;
+    }
 
     D3D11_TEXTURE2D_DESC desc {};
-    sceneTex->GetDesc(&desc);
-    if (desc.SampleDesc.Count != 1 || !EnsurePrevTexture(dev, sceneColor, desc)) return;
+    backbuf->GetDesc(&desc);
+    if (desc.SampleDesc.Count != 1 || !EnsurePrevTexture(dev, desc.Format, desc)) return;
 
-    ctx->CopyResource(g_prevTex.Get(), sceneTex.Get());
+    ctx->CopyResource(g_prevTex.Get(), backbuf.Get());
     g_havePrev = true;
 }
 
@@ -383,11 +427,20 @@ void MGS2DemoBlur::Initialize()
     {
         g_actHook = safetyhook::create_inline(act, reinterpret_cast<void*>(Act_Detour));
         LOG_HOOK(g_actHook, "MGS 2: Demo Blur - Act");
-        SceneDepth::SetEndOf3DCallback(&MGS2DemoBlur::DrawInto, SceneDepth::PRIORITY_DEMO_BLUR);
-        SceneDepth::SetEndOf3DCallback(&MGS2DemoBlur::CaptureFrame, SceneDepth::PRIORITY_DEMO_BLUR_CAPTURE);
     }
     else
     {
         spdlog::error("MGS 2: Demo Blur: Act pattern scan failed.");
+    }
+
+    if (uint8_t* timer = Memory::PatternScan(baseModule, kTimerActSig, "MGS 2: Demo Blur -> blur_timer.c Act()"))
+    {
+        g_timerActHook = safetyhook::create_inline(timer, reinterpret_cast<void*>(TimerAct_Detour));
+        LOG_HOOK(g_timerActHook, "MGS 2: Demo Blur - Stinger Yank Act");
+    }
+
+    if (g_actHook || g_timerActHook)
+    {
+        SceneDepth::SetEndOf3DCallback(&MGS2DemoBlur::DrawInto, SceneDepth::PRIORITY_DEMO_BLUR);
     }
 }
