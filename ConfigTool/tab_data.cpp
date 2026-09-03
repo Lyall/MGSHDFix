@@ -185,7 +185,7 @@ std::nullopt, false, Field::Bool, false},
           std::nullopt, false, Field::Bool, true },
 
         { (MGS2), ConfigKeys::MGS2_SoftParticles_Section, ConfigKeys::MGS2_SoftParticles_Setting, ConfigKeys::MGS2_SoftParticles_Help, ConfigKeys::MGS2_SoftParticles_Tooltip,
-          std::nullopt, false, Field::Bool, true },
+          std::nullopt, false, Field::Bool, false },
 
         { (MGS2), ConfigKeys::MGS2_HeavyBandana_Section, ConfigKeys::MGS2_HeavyBandana_Setting, ConfigKeys::MGS2_HeavyBandana_Help, ConfigKeys::MGS2_HeavyBandana_Tooltip,
           std::nullopt, false, Field::Bool, false },
