@@ -377,6 +377,7 @@ namespace
             MGS3MapRelight::OnDeviceReady();
             MGS3GlowOverbright::OnDeviceReady(g_D3D11Hooks.d3dDevice.Get());
             MGS2TankerFog::OnDeviceReady();
+            g_DepthOfFieldFixes.OnDeviceReady();
             MGS2SoftParticles::OnDeviceReady();
             if (eGameType & (MGS2 | MGS3))
             {
