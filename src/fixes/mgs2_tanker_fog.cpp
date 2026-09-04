@@ -248,42 +248,63 @@ namespace
         }
     }
 
-    // Staging copy because the game's buffer is write-only. Callers cache the answer.
-    bool ReadStrip(ID3D11DeviceContext* ctx, ID3D11Buffer* vb, UINT vbOffset, UINT firstVertex,
-        FogVertex (&strip)[6])
+    // Reading the vertices back the same frame means waiting on the GPU, 4ms a frame on a Deck.
+    // So copy now and read next frame.
+    constexpr UINT kMaxCurtains = 8;
+
+    ComPtr<ID3D11Buffer> gStaging[kMaxCurtains][2];
+    FogVertex gStrip[kMaxCurtains][6]{};
+    bool gStripReady[kMaxCurtains]{};
+    UINT gCurtain = 0;
+    UINT gWrite = 0;
+
+    void QueueStrip(ID3D11DeviceContext* ctx, UINT slot, ID3D11Buffer* vb, UINT vbOffset, UINT firstVertex)
     {
         auto* dev = g_D3D11Hooks.d3dDevice.Get();
         if (!dev)
         {
-            return false;
+            return;
         }
 
-        D3D11_BUFFER_DESC desc{};
-        desc.ByteWidth = 6 * kFogVertexStride;
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-        ComPtr<ID3D11Buffer> staging;
-        if (FAILED(dev->CreateBuffer(&desc, nullptr, staging.GetAddressOf())))
+        ComPtr<ID3D11Buffer>& staging = gStaging[slot][gWrite];
+        if (!staging)
         {
-            return false;
+            D3D11_BUFFER_DESC desc{};
+            desc.ByteWidth = 6 * kFogVertexStride;
+            desc.Usage = D3D11_USAGE_STAGING;
+            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            if (FAILED(dev->CreateBuffer(&desc, nullptr, staging.GetAddressOf())))
+            {
+                return;
+            }
         }
 
         D3D11_BOX box{};
         box.left = vbOffset + firstVertex * kFogVertexStride;
-        box.right = box.left + desc.ByteWidth;
+        box.right = box.left + 6 * kFogVertexStride;
         box.bottom = 1;
         box.back = 1;
         ctx->CopySubresourceRegion(staging.Get(), 0, 0, 0, 0, vb, 0, &box);
+    }
 
-        D3D11_MAPPED_SUBRESOURCE mapped{};
-        if (FAILED(ctx->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+    void CollectStrips(ID3D11DeviceContext* ctx)
+    {
+        for (UINT slot = 0; slot < kMaxCurtains; slot++)
         {
-            return false;
+            ID3D11Buffer* staging = gStaging[slot][gWrite].Get();
+            if (!staging)
+            {
+                continue;
+            }
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (FAILED(ctx->Map(staging, 0, D3D11_MAP_READ, D3D11_MAP_FLAG_DO_NOT_WAIT, &mapped)))
+            {
+                continue;
+            }
+            memcpy(gStrip[slot], mapped.pData, sizeof(gStrip[slot]));
+            ctx->Unmap(staging, 0);
+            gStripReady[slot] = true;
         }
-        memcpy(strip, mapped.pData, sizeof(strip));
-        ctx->Unmap(staging.Get(), 0);
-        return true;
     }
 
     void Bounds(const FogVertex (&strip)[6], float& lowX, float& highX, float& lowZ, float& highZ)
@@ -381,13 +402,15 @@ namespace
             return;
         }
 
-        // Each curtain draws once a frame, so there is nothing to gain by remembering the answer -
-        // and the offset it would have to be remembered against is one the game recycles.
+        // Curtains draw in the same order every frame, so slot N is always the same curtain.
+        const UINT slot = std::min(gCurtain++, kMaxCurtains - 1);
+        QueueStrip(ctx, slot, vb.Get(), vbOffset, static_cast<UINT>(std::max(0, baseVertex)));
+
         bool sea = false;
         ComPtr<ID3D11Buffer> remapped;
-        FogVertex strip[6]{};
-        if (ReadStrip(ctx, vb.Get(), vbOffset, static_cast<UINT>(std::max(0, baseVertex)), strip))
+        if (gStripReady[slot])
         {
+            const FogVertex (&strip)[6] = gStrip[slot];
             sea = IsSeaCurtain(strip);
             // Cutscenes only - their framing is authored, so the wall is either hiding the city or
             // showing its edge. In gameplay the player swings the camera through both and it pops.
@@ -441,6 +464,13 @@ namespace
 void MGS2TankerFog::OnPresent()
 {
     gBandsDrawn.store(false, std::memory_order_relaxed);
+    gCurtain = 0;
+
+    gWrite ^= 1;
+    if (auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get())
+    {
+        CollectStrips(ctx);
+    }
 }
 
 void MGS2TankerFog::OnDeviceReady()
