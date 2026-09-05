@@ -582,6 +582,7 @@ static void InitializeSubsystems()
     //INITIALIZE(g_TextureBufferSize.Initialize());
     INITIALIZE(PressureInputs::Initialize());
     INITIALIZE(Ds3Rumble::Initialize());
+    INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
 
     if (eGameType & MGS2)
     {
@@ -594,7 +595,6 @@ static void InitializeSubsystems()
         INITIALIZE(MGS2_RestoreActionLevelSelection::Apply());
         INITIALIZE(MGS2_RestoreSoLRadar::Apply());
         INITIALIZE(MGS2_RestoreElevatorGlitch::Initialize());
-        INITIALIZE(SwapMenuButtons::SetMenuButtonInputs());
         INITIALIZE(MGS2_ThirdPersonFreecam::Activate());
         INITIALIZE(MGS2_Hostage_Type_Easter_Egg::Force());
         INITIALIZE(MGS2_First_Person_View::Activate());
