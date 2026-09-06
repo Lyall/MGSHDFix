@@ -338,7 +338,10 @@ namespace ConfigKeys
     constexpr const char* MGS2_SoftParticles_Help = "";
     constexpr const char* MGS2_SoftParticles_Tooltip = "Spray and dust puffs are flat sprites, so they cut off along a hard line wherever they pass through water or ground.\n"
         "\n"
-        "This option fades them out against nearby surfaces instead.";
+        "This option fades them out against nearby surfaces instead.\n"
+        "\n"
+        "Off by default: it reads the scene's depth for every particle pixel, which costs a few\n"
+        "milliseconds a frame on a Steam Deck.";
 
 
 
