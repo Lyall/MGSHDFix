@@ -424,6 +424,7 @@ namespace
             MGS2_AiRayVision::OnPresent();
             MGS2TankerFog::OnPresent();
             MGS2_Crossfade::OnPresent(pSwapChain);
+            MGS2DemoBlur::CaptureComposited(pSwapChain);   // the frame as displayed, HUD included
         }
         else if (eGameType & MGS3)
         {

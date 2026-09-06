@@ -24,16 +24,37 @@ namespace
     constexpr float       kAlphaCap         = 1.0f;
     constexpr float       kFeedbackGain     = 1.0f;
 
+    // Runs long. Another actor has the same prologue.
     constexpr const char* kDieSig =
-        "48 89 5C 24 08 57 48 83 EC 20 48 8B 59 60 48 8B F9 48 85 DB 74 10 48 8B CB";
+        "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B 59 60 48 8B F9 48 85 DB 74 ?? 48 8B CB E8 ?? ?? ?? ?? "
+        "48 8B CB E8 ?? ?? ?? ?? 48 8B 5F 68";
 
     // smk_blur Act - fills the prim2 vertices each frame; we read them.
     constexpr const char* kActSig =
         "4C 8B DC 49 89 5B 18 49 89 73 20 55 57 41 54 41 55 41 56 49 8D 6B 98 48 81 EC 40 01 00 00";
+
+    // The Stinger's muzzle warp. smk_blur.c is a copy of this file so the puffs match.
+    constexpr const char* kStgSig =
+        "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 8B 7C 24 ?? 41 8B E8 "
+        "41 8B F1 44 8B F2 45 33 C9 4C 8B F9 BA 00 10 00 00";
+    constexpr const char* kStgActSig =
+        "4C 8B DC 55 41 56 49 8D 6B ?? 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ?? "
+        "83 3D ?? ?? ?? ?? 00 4C 8B F1 0F 85 ?? ?? ?? ?? 49 89 5B 10";
+    constexpr const char* kStgDieSig =
+        "40 53 48 83 EC ?? 48 8B D9 48 8B 49 60 E8 ?? ?? ?? ?? 48 8B 4B 68 48 89 43 60 E8 ?? ?? ?? ?? "
+        "48 89 43 68 48 83 C4 ?? 5B";
+
     constexpr ptrdiff_t kWork_Clock    = 0x1c8;
-    constexpr ptrdiff_t kWork_StartSpeed = 0x1d0;
     constexpr ptrdiff_t kWork_PrimBase = 0x60;
-    constexpr ptrdiff_t kWork_NPrims   = 0x1e8;
+
+    struct BlurSource
+    {
+        ptrdiff_t startSpeed;   // stg_blur has no disable_flag so its fields sit 4 bytes lower
+        ptrdiff_t nPrims;
+        float     vScale;       // stg_blur's V covers a 512 tall page, smk_blur's covers the screen
+    };
+    constexpr BlurSource kSmoke   { 0x1d0, 0x1e8, 1.0f };
+    constexpr BlurSource kStinger { 0x1cc, 0x1e4, 512.0f / 448.0f };
     constexpr ptrdiff_t kPrim_PosBuf   = 0xc0;    // FVECTOR* pos[] (world-space vertex positions)
     constexpr ptrdiff_t kPrim_UvrgbBuf = 0xd0;
     constexpr ptrdiff_t kPrim_FlagBuf  = 0x268;
@@ -55,6 +76,9 @@ namespace
     SafetyHookMid    g_alphaHook{};
     SafetyHookInline g_actHook{};
     SafetyHookInline g_dieHook{};
+    SafetyHookInline g_stgHook{};
+    SafetyHookInline g_stgActHook{};
+    SafetyHookInline g_stgDieHook{};
     SafetyHookInline g_primRenderHook{};
 
     int g_lastClock   = -0x7fffffff;
@@ -141,7 +165,10 @@ namespace
             {
                 const char c = fname[i];
                 if (c == '\\' || c == '/') base = fname + i + 1;
-                if (c == '\0') return _stricmp(base, "smk_blur.c") == 0;
+                if (c == '\0')
+                {
+                    return _stricmp(base, "smk_blur.c") == 0 || _stricmp(base, "stg_blur.c") == 0;
+                }
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {}
@@ -200,10 +227,10 @@ namespace
     }
 
     // ---- read the prim and build CPU triangles ----------------------------------------------------
-    void AppendInstance(uintptr_t work)
+    void AppendInstance(uintptr_t work, const BlurSource& src)
     {
         int clock  = *reinterpret_cast<int*>(work + kWork_Clock);
-        int nprims = *reinterpret_cast<int*>(work + kWork_NPrims);
+        int nprims = *reinterpret_cast<int*>(work + src.nPrims);
         uintptr_t prim = *reinterpret_cast<uintptr_t*>(work + kWork_PrimBase + (ptrdiff_t)clock * 8);
         if (!prim || nprims <= 0) return;
         uintptr_t uvBuf   = *reinterpret_cast<uintptr_t*>(prim + kPrim_UvrgbBuf);
@@ -234,7 +261,7 @@ namespace
                     int ui = *reinterpret_cast<const int16_t*>(uv + 8);
                     int vi = *reinterpret_cast<const int16_t*>(uv + 0xa);
                     float un = ui * kUv2Norm;
-                    float vn = vi * kUv2Norm;
+                    float vn = vi * kUv2Norm * src.vScale;
                     int a = (int)(uv[6] * kAlphaGain) + kAlphaFloor;
                     int cap = (int)(kAlphaCap * 255.0f);
                     if (a > cap) a = cap;
@@ -272,7 +299,7 @@ namespace
         }
     }
 
-    void BuildSmoke(uintptr_t work)
+    void BuildSmoke(uintptr_t work, const BlurSource& src)
     {
         if (const int clock = g_GameVars.DG_Clock(); clock != g_lastClock)
         {
@@ -281,7 +308,7 @@ namespace
             std::lock_guard<std::mutex> lk(g_vmtx);
             g_verts.clear();
         }
-        AppendInstance(work);
+        AppendInstance(work, src);
     }
 
 
@@ -291,7 +318,16 @@ namespace
         g_actUpdated = !EffectSpeedFix::IsFeedbackHoldTick();
         if (g_actUpdated) g_actHook.fastcall<void>(work);
         if (!work) return;
-        __try { BuildSmoke(work); }   // re-read even when held: the frozen prims still draw this frame
+        __try { BuildSmoke(work, kSmoke); }   // re-read even when held: the frozen prims still draw this frame
+        __except (EXCEPTION_EXECUTE_HANDLER) {}
+    }
+
+    void __fastcall StgAct_Detour(uintptr_t work)
+    {
+        g_actUpdated = !EffectSpeedFix::IsFeedbackHoldTick();
+        if (g_actUpdated) g_stgActHook.fastcall<void>(work);
+        if (!work) return;
+        __try { BuildSmoke(work, kStinger); }
         __except (EXCEPTION_EXECUTE_HANDLER) {}
     }
 
@@ -306,22 +342,44 @@ namespace
             // Avoid the port's divide by zero without moving the puff.
             if (start_speed == 0)
             {
-                *reinterpret_cast<float*>(static_cast<uint8_t*>(work) + kWork_StartSpeed) = 1.0e-7f;
+                *reinterpret_cast<float*>(static_cast<uint8_t*>(work) + kSmoke.startSpeed) = 1.0e-7f;
             }
             g_activeCount.fetch_add(1, std::memory_order_relaxed);
         }
         return work;
     }
 
-    void __fastcall Die_Detour(uintptr_t actor)
+    void* __fastcall NewStgBlur_Detour(uintptr_t world, int start_speed, int end_speed, int start_size,
+                                       int end_size, int spot_size, int spot_angle, int n_prims,
+                                       int interval, int color, int flag, int life)
     {
-        g_dieHook.fastcall<void>(actor);
+        void* work = g_stgHook.fastcall<void*>(world, start_speed, end_speed, start_size, end_size, spot_size,
+                                               spot_angle, n_prims, interval, color, flag, life);
+        if (work) g_activeCount.fetch_add(1, std::memory_order_relaxed);
+        return work;
+    }
+
+    // Last puff out clears the triangles or they redraw forever.
+    void ReleaseInstance()
+    {
         if (g_activeCount.fetch_sub(1, std::memory_order_relaxed) <= 1)
         {
             g_activeCount.store(0, std::memory_order_relaxed);
             std::lock_guard<std::mutex> lk(g_vmtx);
             g_verts.clear();
         }
+    }
+
+    void __fastcall Die_Detour(uintptr_t actor)
+    {
+        g_dieHook.fastcall<void>(actor);
+        ReleaseInstance();
+    }
+
+    void __fastcall StgDie_Detour(uintptr_t actor)
+    {
+        g_stgDieHook.fastcall<void>(actor);
+        ReleaseInstance();
     }
 
     bool EnsureD3D(ID3D11Device* dev)
@@ -684,6 +742,24 @@ void MGS2GasHaze::Initialize()
     {
         g_dieHook = safetyhook::create_inline(die, reinterpret_cast<void*>(Die_Detour));
         LOG_HOOK(g_dieHook, "MGS 2: Gas Haze - Die");
+    }
+
+    if (uint8_t* stg = Memory::PatternScan(baseModule, kStgSig, "MGS 2: Gas Haze - NewSTG_SmokeBlurEffect"))
+    {
+        g_stgHook = safetyhook::create_inline(stg, reinterpret_cast<void*>(NewStgBlur_Detour));
+        LOG_HOOK(g_stgHook, "MGS 2: Gas Haze - NewSTG_SmokeBlurEffect");
+    }
+
+    if (uint8_t* stgAct = Memory::PatternScan(baseModule, kStgActSig, "MGS 2: Gas Haze - Stinger Act"))
+    {
+        g_stgActHook = safetyhook::create_inline(stgAct, reinterpret_cast<void*>(StgAct_Detour));
+        LOG_HOOK(g_stgActHook, "MGS 2: Gas Haze - Stinger Act");
+    }
+
+    if (uint8_t* stgDie = Memory::PatternScan(baseModule, kStgDieSig, "MGS 2: Gas Haze - Stinger Die"))
+    {
+        g_stgDieHook = safetyhook::create_inline(stgDie, reinterpret_cast<void*>(StgDie_Detour));
+        LOG_HOOK(g_stgDieHook, "MGS 2: Gas Haze - Stinger Die");
     }
 
     if (uint8_t* primRender = Memory::PatternScan(

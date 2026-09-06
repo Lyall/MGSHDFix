@@ -3,6 +3,7 @@
 struct ID3D11RenderTargetView;
 struct ID3D11ShaderResourceView;
 
+// Draws the puffs that bend the framebuffer. Helicopter downwash and the Stinger muzzle.
 namespace MGS2GasHaze
 {
     void Initialize();
