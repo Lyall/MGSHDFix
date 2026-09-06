@@ -3307,7 +3307,6 @@ void DepthOfFieldFixes::HandleLevelTransition() const
     bIsD12T3 = (eGameType & MGS2) && g_GameVars.IsStage(MGS2Stages::D12T3);
 }
 
-// Build the shaders now. Left to the first draw they land mid cutscene and knock the sound out of sync.
 void DepthOfFieldFixes::OnDeviceReady()
 {
     if (!(eGameType & (MGS2 | MGS3)) || !bEnabled)
