@@ -295,63 +295,6 @@ namespace
     }
 
     // ---- MGS 2 ------------------------------------------------------------------------------
-    // The negative inner thought is L1 on PS2, R2 in MC. Rebound only while a pad is present.
-    // The read is redirected here so the game loads our value.
-    uint8_t gThoughtScratch = 0;
-
-    uintptr_t gThoughtGate = 0;
-    uintptr_t gThoughtPick = 0;
-    uintptr_t gThoughtHold = 0;
-    std::atomic<bool> gThoughtRebound = false;
-
-    std::atomic<bool> gThoughtOnlyL1 = false;
-
-    void RebindNegativeThought(bool on)
-    {
-        if (on == gThoughtRebound.load()
-            && (!on || PressureInputs::bSuppressAlternates == gThoughtOnlyL1.load()))
-        {
-            return;
-        }
-        gThoughtRebound = on;
-        gThoughtOnlyL1 = PressureInputs::bSuppressAlternates;
-
-        if (!on)                                                      // back to MC's own R2
-        {
-            if (gThoughtGate != 0)
-            {
-                Memory::PatchBytes(gThoughtGate + 7, "\x0A", 1);
-            }
-            if (gThoughtPick != 0)
-            {
-                Memory::PatchBytes(gThoughtPick, "\x45\x84\xC9", 3);
-            }
-            if (gThoughtHold != 0)
-            {
-                Memory::PatchBytes(gThoughtHold + 11, "\x23", 1);
-            }
-            return;
-        }
-
-        // Suppressed: L1 alone, as PS2. Otherwise MC's R2 stays live and L1 joins it.
-        const bool only = PressureInputs::bSuppressAlternates;
-        if (gThoughtGate != 0)
-        {
-            Memory::PatchBytes(gThoughtGate + 7, only ? "\x0C" : "\x0E", 1);   // R1|L1 (|R2)
-        }
-        if (gThoughtPick != 0)
-        {
-            // Only the button test: +9 is the last byte of the instruction the hook sits on.
-            Memory::PatchBytes(gThoughtPick, only ? "\xF6\xC1\x04" : "\xF6\xC1\x06", 3);
-        }
-        if (gThoughtHold != 0)
-        {
-            Memory::PatchBytes(gThoughtHold + 11, only ? "\x20" : "\x23", 1);
-        }
-        spdlog::info("MGS 2: Pressure Inputs - Negative inner thought bound to {}.",
-            only ? "L1" : "L1 and R2");
-    }
-
     // On PS2, pressure[PL_PAD_PRESS_LOCKER] > 128 snaps the camera in and overshoots into the
     // poster kiss or the head bang. Bluepoint eases off the right stick, so it never can.
     // MC takes the locker's zoom speed from the right stick, so make its deflection out of R1's
@@ -449,12 +392,10 @@ namespace
         {
             SetScopeAnalogue(false);
             SetAlternatesSuppressed(false);
-            RebindNegativeThought(false);
             return;
         }
         SetScopeAnalogue(true);
         SetAlternatesSuppressed(PressureInputs::bSuppressAlternates);
-        RebindNegativeThought(true);
 
         uint8_t now[kSlots];
         ReadPad(now);
@@ -1039,54 +980,6 @@ namespace
                 ctx.rax = PressureInputs::bSuppressAlternates ? r1 : std::max(r1, r2);
             }
         });
-
-        gThoughtGate = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "48 8B 43 ?? F6 40 ?? ?? 74",
-            "MGS 2: Pressure Inputs - Thought Gate | codec\\cdc_mind.c"));
-        gThoughtPick = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "41 84 C9",
-            "MGS 2: Pressure Inputs - Thought Select | codec\\cdc_mind.c"));
-        gThoughtHold = reinterpret_cast<uintptr_t>(Memory::PatternScan(baseModule,
-            "74 ?? 0F B6 40 ?? EB ?? 0F B6 40",
-            "MGS 2: Pressure Inputs - Thought Hold | codec\\cdc_mind.c"));
-
-        // The mask, adjusted at the store: the register that builds it is also the codec state.
-        MAKE_HOOK_MID(baseModule, "48 89 83 ?? ?? ?? ?? 89 8B ?? ?? ?? ?? EB",
-            "MGS 2: Pressure Inputs - Thought Held Mask | codec\\cdc_mind.c",
-        {
-            if (gHavePad.load() && gThoughtRebound.load() && ctx.rax == 2)
-            {
-                ctx.rax = PressureInputs::bSuppressAlternates ? 4 : 6;    // L1, or L1|R2
-            }
-        });
-
-        // The peak tracker reads the slot the mask implies, so feed it the same value.
-        MAKE_HOOK_MID(baseModule, "3B 8B ?? ?? ?? ?? 7E ?? 89 8B",
-            "MGS 2: Pressure Inputs - Thought Peak | codec\\cdc_mind.c",
-        {
-            if (gHavePad.load() && gDirectPressure != nullptr && gThoughtRebound.load()
-                && (*reinterpret_cast<const uint32_t*>(ctx.rbx + 0xb0) & 8) == 0)
-            {
-                ctx.rcx = PressureInputs::bSuppressAlternates
-                    ? gDirectPressure[kL1]
-                    : std::max(gDirectPressure[kL1], gDirectPressure[kR2]);
-            }
-        });
-
-        // With both buttons live the game still reads one slot, so give it the harder press.
-        MAKE_HOOK_MID(baseModule, "44 0F B6 40 ?? 41 3B D0",
-            "MGS 2: Pressure Inputs - Thought Pressure | codec\\cdc_mind.c",
-        {
-            // The load would overwrite r8, so redirect what it reads. rax dies two on.
-            if (gHavePad.load() && gDirectPressure != nullptr && gThoughtRebound.load())
-            {
-                gThoughtScratch = PressureInputs::bSuppressAlternates
-                    ? gDirectPressure[kL1]
-                    : std::max(gDirectPressure[kL1], gDirectPressure[kR2]);
-                ctx.rax = reinterpret_cast<uintptr_t>(&gThoughtScratch) - 0x23;
-            }
-        });
-
 
         // WP_ColdSpray clamps the right stick to 0..1 and uses that one float for both the fire
         // gate (0 strips PL_PAD_WEAPON) and the jet thickness, so the button does nothing. Take
