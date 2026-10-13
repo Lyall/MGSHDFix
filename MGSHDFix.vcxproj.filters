@@ -479,6 +479,9 @@
     <ClCompile Include="src\fixes\ds3_rumble.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mgs2_sprite_position_fixes.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\fixes\mgs2_effect_speeds.hpp">
@@ -990,6 +993,9 @@
     </ClInclude>
     <ClInclude Include="src\resources\mg1_linkvarbuf.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mgs2_sprite_position_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

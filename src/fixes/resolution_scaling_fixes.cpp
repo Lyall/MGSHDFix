@@ -238,32 +238,6 @@ void MGS2Fixes()
                   });
 
 
-    MAKE_HOOK_MID(baseModule, "66 0F 6E F1 48 8B 4E", "MGS2: user\\shibata\\effect\\2d_sprt.c -> New2dSprite() -> GetResources() @l252 | tanker MGS2 logo", {
-            if (ctx.rdi != 0xA57131 || ctx.rcx != 519 || ctx.rax != 125)
-            {
-                //spdlog::info("rdi {}, rcx {}, rax {}", ctx.rdi, ctx.rcx, ctx.rax);
-                return;
-            }
-
-            if (!(MGS2_LinkVarBuf::GM_Configuration & MGS2_LinkVarBuf::GM_CONFIG_CUTSCENES_LETTERBOXED))
-            {
-                return;
-            }
-
-            //FULLSCREEN SETTINGS
-            //ctx.rcx = 519;                                        // w
-            //ctx.rax = 125;                                        // h
-            //*reinterpret_cast<float*>(ctx.rsp + 0x30) = 0.0f;    // pos.x
-            //*reinterpret_cast<float*>(ctx.rsp + 0x34) = 20.0f;   // pos.y
-
-            ctx.rcx = 346; // width
-            ctx.rax = 83; // height
-            *reinterpret_cast<float*>(ctx.rsp + 0x30) = 83.0f;    // pos.x
-            *reinterpret_cast<float*>(ctx.rsp + 0x34) = 40.0f;   // pos.y
-
-
-                  });
-
     if (bIncreaseShadowResolution)
     {
         MAKE_HOOK_MID(baseModule, "E8 ?? ?? ?? ?? 48 89 84 FE ?? ?? ?? ?? 48 FF C7", "MGS2: shadow res", { ///todo - port to mgs3
