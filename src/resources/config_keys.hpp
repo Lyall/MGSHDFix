@@ -125,6 +125,11 @@ namespace ConfigKeys
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "";
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Tooltip = "Corrects the viewport's dimensions from the MSX2's raw internal aspect ratio (64:53 / 256x212) to the intended CRT aspect ratio of 4:3.";
 
+    constexpr const char* MG1_Scorpions_Section = "Bugfixes";
+    constexpr const char* MG1_Scorpions_Setting = "Fix Scorpion Pathing (MG1)";
+    constexpr const char* MG1_Scorpions_Help = "";
+    constexpr const char* MG1_Scorpions_Tooltip = "Fixes a off-by-one typo with scorpion pathfinding which resulted in them always getting stuck in the lower-right hand corner of the screen.";
+
 
     constexpr const char* MG1_Door_Cards_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* MG1_Door_Cards_Enabled_Setting = "Doors Check Inventory for Keycards (MG1)";

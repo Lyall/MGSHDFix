@@ -398,6 +398,9 @@
     <ClCompile Include="src\features\mg1_door_cards.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg1_scorpions.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg_vector_font.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -956,6 +959,9 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_door_cards.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_scorpions.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\loose_audio_overrides.hpp">

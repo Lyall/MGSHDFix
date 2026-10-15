@@ -73,12 +73,15 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
 
 
+        { (MG), ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, ConfigKeys::MG1_Scorpions_Help, ConfigKeys::MG1_Scorpions_Tooltip, std::nullopt, false, Field::Bool, true },
+
         { (MG), ConfigKeys::LooseAudioOverrides_Section, ConfigKeys::LooseAudioOverrides_Setting, ConfigKeys::LooseAudioOverrides_Help, ConfigKeys::LooseAudioOverrides_Tooltip,
             std::nullopt, false, Field::Bool, true },
 
 
         { (MG), ConfigKeys::LooseAudioOverrides_Section, ConfigKeys::LooseAudioLoudness_Setting, "", ConfigKeys::LooseAudioLoudness_Tooltip, std::nullopt,
             false, Field::Choice, 0, 0, 0, ConfigKeys::LooseAudioLoudness_Limiter, {ConfigKeys::LooseAudioLoudness_Off, ConfigKeys::LooseAudioLoudness_Gain, ConfigKeys::LooseAudioLoudness_Limiter} },
+
 
         { (MG), ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, ConfigKeys::pszMG_Vector_Font_Enabled_Help, ConfigKeys::pszMG_Vector_Font_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, true },

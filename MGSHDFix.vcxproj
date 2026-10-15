@@ -13,6 +13,7 @@
     <ClCompile Include="src\fixes\caption_replacements.cpp" />
     <ClCompile Include="src\features\mg1_display_scaling.cpp" />
     <ClCompile Include="src\features\mg1_door_cards.cpp" />
+    <ClCompile Include="src\features\mg1_scorpions.cpp" />
     <ClCompile Include="src\features\loose_audio_overrides.cpp" />
     <ClCompile Include="src\features\mg_vector_font.cpp" />
     <ClCompile Include="src\features\mgs_smaa.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="src\resources\mgs3_linkvarbuf.hpp" />
     <ClInclude Include="src\features\mg1_display_scaling.hpp" />
     <ClInclude Include="src\features\mg1_door_cards.hpp" />
+    <ClInclude Include="src\features\mg1_scorpions.hpp" />
     <ClInclude Include="src\features\loose_audio_overrides.hpp" />
     <ClInclude Include="src\features\loose_audio_overrides_data.hpp" />
     <ClInclude Include="external\dr_libs\dr_flac.h" />
