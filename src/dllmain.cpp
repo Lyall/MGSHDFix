@@ -150,6 +150,7 @@
 #include "mg1_door_cards.hpp"
 #include "mg1_scorpions.hpp"
 #include "mg1_telescope_hud_fix.hpp"
+#include "mg2_door_cards.hpp"
 #include "mg_vector_font.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "loose_audio_overrides.hpp"
@@ -198,6 +199,7 @@ namespace
         }
         MG2_LinkVarBuf::Initialize();
         MG2_Gamefuncs::HookDllGameFuncs();
+        MG2_DoorCards::Initialize();
         LooseAudioOverrides::Initialize();
         MG_VectorFont::InitializeMG2();
     }

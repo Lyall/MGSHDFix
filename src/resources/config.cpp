@@ -97,6 +97,7 @@
 #include "mg1_display_scaling.hpp"
 #include "mg1_door_cards.hpp"
 #include "mg1_scorpions.hpp"
+#include "mg2_door_cards.hpp"
 #include "mg_vector_font.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -1361,8 +1362,10 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
 
-    ConfigHelper::getValue(ini, ConfigKeys::MG1_Door_Cards_Enabled_Section, ConfigKeys::MG1_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG1_Door_Cards_Enabled_Section, ConfigKeys::MG1_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+    MG2_DoorCards::bEnabled = MG1_DoorCards::bEnabled;
+    LOG_CONFIG(ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+
 
     ConfigHelper::getValue(ini, ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
     LOG_CONFIG(ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);

@@ -131,10 +131,10 @@ namespace ConfigKeys
     constexpr const char* MG1_Scorpions_Tooltip = "Fixes a off-by-one typo with scorpion pathfinding which resulted in them always getting stuck in the lower-right hand corner of the screen.";
 
 
-    constexpr const char* MG1_Door_Cards_Enabled_Section = "Tweaks and Restoration";
-    constexpr const char* MG1_Door_Cards_Enabled_Setting = "Doors Check Inventory for Keycards (MG1)";
-    constexpr const char* MG1_Door_Cards_Enabled_Help = "(Suggested ON)";
-    constexpr const char* MG1_Door_Cards_Enabled_Tooltip = "Makes doors automatically open up based on the keycards in your inventory (the same way keycards work in MGS1/MGS2), instead of only for the card you have equipped.\n"
+    constexpr const char* MG_Door_Cards_Enabled_Section = "Tweaks and Restoration";
+    constexpr const char* MG_Door_Cards_Enabled_Setting = "Doors Check Inventory for Keycards";
+    constexpr const char* MG_Door_Cards_Enabled_Help = "(Suggested ON)";
+    constexpr const char* MG_Door_Cards_Enabled_Tooltip = "Makes doors automatically open up based on the keycards in your inventory (the same way keycards work in MGS1/MGS2), instead of only for the card you have equipped.\n"
         "\n"
         "This is obviously significantly faster (and safer in gas areas) than doing manual inventory management, so check if your speedrunning category's rules allow it.";
 

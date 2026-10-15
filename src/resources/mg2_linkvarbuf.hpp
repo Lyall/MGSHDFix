@@ -21,6 +21,14 @@ namespace MG2_LinkVarBuf
 
     static_assert(sizeof(PlayStats) == 0x1C, "PlayStats size");
 
+    struct DoorState
+    {
+        int anReserved[4];
+        int nCardLevel;
+    };
+
+    static_assert(offsetof(DoorState, nCardLevel) == 0x10);
+
     struct Sprite
     {
         int nFlags;
