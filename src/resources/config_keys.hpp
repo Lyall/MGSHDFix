@@ -1000,9 +1000,9 @@ namespace ConfigKeys
     constexpr const char* ShowSpeedrunnerOverlay_Section = "Speedrunner Settings";
     constexpr const char* ShowSpeedrunnerOverlay_Setting = "Gameplay Stats Overlay";
     constexpr const char* ShowSpeedrunnerOverlay_Help = "";
-    constexpr const char* ShowSpeedrunnerOverlay_Tooltip = "Displays an overlay with current stage time / in-game timer (IGT) / elasped time.\n"
+    constexpr const char* ShowSpeedrunnerOverlay_Tooltip = "Displays an overlay with current stage time / in-game timer (IGT) / elapsed time.\n"
                                                            "\n"
-                                                           "Extended stats are also shown while the game is paused.";
+                                                           "Extended stats are only shown while the game is paused.";
     constexpr const char* ShowSpeedrunnerOverlay_Option_Disabled = "Disabled";
     constexpr const char* ShowSpeedrunnerOverlay_Option_TopLeft = "Top Left";
     constexpr const char* ShowSpeedrunnerOverlay_Option_TopRight = "Top Right";

@@ -989,6 +989,13 @@ void Config::Read()
         }
 
 
+        ConfigHelper::getValue(ini, ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
+        LOG_CONFIG(ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
+
+    }
+
+    if (eGameType & (MG | MGS2 | MGS3))
+    {
         std::string sSpeedrunnerOverlay;
         ConfigHelper::getValue(ini, ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, sSpeedrunnerOverlay);
         if (sSpeedrunnerOverlay != ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled &&
@@ -1023,10 +1030,6 @@ void Config::Read()
             }
         }
         LOG_CONFIG(ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, sSpeedrunnerOverlay);
-
-        ConfigHelper::getValue(ini, ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
-        LOG_CONFIG(ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
-
     }
 
     ConfigHelper::getValue(ini, ConfigKeys::DisableFullscreenOptimization_Section, ConfigKeys::DisableFullscreenOptimization_Setting, g_FixFullscreenOptimization.enabled);

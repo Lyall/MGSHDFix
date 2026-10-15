@@ -12,6 +12,8 @@
 #include "common.hpp"
 #include "gamevars.hpp"
 #include "mg1_display_scaling.hpp"
+#include "mg1_linkvarbuf.hpp"
+#include "mg2_linkvarbuf.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
 #include "mgs3_linkvarbuf.hpp"
@@ -798,9 +800,84 @@ namespace
         }
     }
 
+    struct MGOverlayState
+    {
+        MgSubGame eGame = MgSubGame::NONE;
+        int nArea = -1;
+        int nRoom = -1;
+        int nPreviousTicks = 0;
+        int nRoomStartTicks = 0;
+        bool bActive = false;
+    };
+
+    MGOverlayState s_stMGOverlay;
+
+    template <typename T>
+    std::string GetMGStatOverlay(const T& stStats, int nArea, int nRoom, bool bGameplay, bool bTitle, bool bPaused)
+    {
+        auto& stOverlay = s_stMGOverlay;
+        if (stOverlay.eGame != eMgSubGame || bTitle)
+        {
+            stOverlay = {};
+            stOverlay.eGame = eMgSubGame;
+        }
+        if (!stOverlay.bActive && !bGameplay)
+        {
+            return {};
+        }
+        const int nTicks = std::max(0, stStats.GM_PlayTime);
+        if (!stOverlay.bActive || nTicks < stOverlay.nPreviousTicks)
+        {
+            ResetRealElapsedTime();
+            stOverlay.nRoomStartTicks = nTicks;
+            stOverlay.bActive = true;
+        }
+        if (stOverlay.nArea != nArea || stOverlay.nRoom != nRoom)
+        {
+            stOverlay.nRoomStartTicks = nTicks;
+            stOverlay.nArea = nArea;
+            stOverlay.nRoom = nRoom;
+        }
+        stOverlay.nPreviousTicks = nTicks;
+        std::string sText = FormatFrameTime(nTicks - stOverlay.nRoomStartTicks, 15) + " / " + FormatFrameTime(nTicks, 15) + " / " + GetRealElapsedTime();
+        if (bPaused)
+        {
+            sText += std::format("\nAlerts: {}\nContinues: {}\nKills: {}\nSaves: {}\nRations: {}", stStats.GM_AlertCount, stStats.GM_ContinueCount, stStats.GM_KillCount, stStats.GM_SaveCount, stStats.GM_RationUseCount);
+            if (stStats.GM_SpecialItemUsed)
+            {
+                sText += "\nSpecial item used: Yes";
+            }
+            if (D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomLeft || D3D11TextOverlay::iStatsPosition == D3D11TextOverlay::BottomRight)
+            {
+                ReverseStatLines(sText);
+            }
+        }
+        return sText;
+    }
+
     const char* GetStatOverlay()
     {
         static std::string text;
+        if (eGameType & MG)
+        {
+            text.clear();
+            if (eMgSubGame == MgSubGame::MG1 && MG1_LinkVarBuf::playStats && MG1_LinkVarBuf::roomPosition && MG1_LinkVarBuf::sceneState)
+            {
+                const auto& stRoom = *MG1_LinkVarBuf::roomPosition;
+                const int nScene = MG1_LinkVarBuf::sceneState->GM_CurrentScene;
+                text = GetMGStatOverlay(*MG1_LinkVarBuf::playStats, stRoom.GM_Stage, stRoom.GM_Room, nScene == MG1_SCENE_GAMEPLAY, nScene == MG1_SCENE_TITLE_MENU, nScene == MG1_SCENE_PAUSE);
+            }
+            else if (eMgSubGame == MgSubGame::MG2 && MG2_LinkVarBuf::playStats && MG2_LinkVarBuf::pScriptGlobals)
+            {
+                const int nScene = MG2_LinkVarBuf::GM_Scene;
+                text = GetMGStatOverlay(*MG2_LinkVarBuf::playStats, MG2_LinkVarBuf::GM_Area, MG2_LinkVarBuf::GM_Room, nScene == MG2_SCENE_GAMEPLAY, nScene < MG2_SCENE_PAUSE || nScene > MG2_SCENE_RESULTS, nScene == MG2_SCENE_PAUSE);
+            }
+            else
+            {
+                s_stMGOverlay = {};
+            }
+            return text.c_str();
+        }
         if (eGameType & MGS2)
         {
             using namespace MGS2_StatusFlags;
@@ -1099,7 +1176,7 @@ void D3D11TextOverlay::Tick()
         }
     }
 
-    if (bShowSpeedrunnerStats && !isCurrentlyMenu)
+    if (bShowSpeedrunnerStats && ((eGameType & MG) || !isCurrentlyMenu))
     {
         float x = 3830.0f;
         float y = 20.0f;
