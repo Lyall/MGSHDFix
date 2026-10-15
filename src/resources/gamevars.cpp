@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "common.hpp"
 #include "gamevars.hpp"
+#include "mg2_elevators.hpp"
 
 #include "d3d11_text_overlay.hpp"
 #include "depth_of_field.hpp"
@@ -306,12 +307,14 @@ bool GameVars::MGS3IsHoldingFirstPerson() const
 
 void GameVars::OnLevelTransition()
 {
+
+
     g_StatPersistence.SaveStats();
     
-    KeepAimingAfterFiring::HandleLevelTransition();
 
     if (eGameType & MGS2)
     {
+        KeepAimingAfterFiring::HandleLevelTransition();
         MGS2_First_Person_View::HandleLevelTransition();
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
@@ -330,8 +333,14 @@ void GameVars::OnLevelTransition()
     }
     else if (eGameType & MGS3)
     {
+        KeepAimingAfterFiring::HandleLevelTransition();
         D3D11TextOverlay::HandleLevelTransition();
     }
+    else if (eGameType & MG)
+    {
+        MG2_Elevators::HandleLevelTransition();
+    }
+
 }
 
 

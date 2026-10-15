@@ -89,6 +89,9 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MG), ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, ConfigKeys::pszMG_Vector_Font_Enabled_Help, ConfigKeys::pszMG_Vector_Font_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
+
+
 
 
 
@@ -335,6 +338,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
     }},
     { wxString("Speedrunner"), {
+
         { (MGS2 | MGS3), ConfigKeys::ShowSpeedrunnerOverlay_Section, ConfigKeys::ShowSpeedrunnerOverlay_Setting, ConfigKeys::ShowSpeedrunnerOverlay_Help, ConfigKeys::ShowSpeedrunnerOverlay_Tooltip,
           std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled, {ConfigKeys::ShowSpeedrunnerOverlay_Option_Disabled, ConfigKeys::ShowSpeedrunnerOverlay_Option_TopLeft, ConfigKeys::ShowSpeedrunnerOverlay_Option_TopRight, ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomLeft, ConfigKeys::ShowSpeedrunnerOverlay_Option_BottomRight} },
 
@@ -364,6 +368,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MGS2), ConfigKeys::MGS2_SkipEnding_Section, ConfigKeys::MGS2_SkipEnding_Setting, ConfigKeys::MGS2_SkipEnding_Help, ConfigKeys::MGS2_SkipEnding_Tooltip,
           std::nullopt, false, Field::Bool, false },
+
+        { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
 
     }},
     { wxString("Restoration"), {

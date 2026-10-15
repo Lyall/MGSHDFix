@@ -122,6 +122,17 @@ namespace MG2_Gamefuncs
     using AVS_GetLocalizedString_t = const char* (__fastcall*)(unsigned int nBlock, int nIndex, int* pLength);
     inline AVS_GetLocalizedString_t pfnAVS_GetLocalizedString = nullptr;
 
+    using ScriptRun_t = void(__fastcall*)(int* pScript);
+    inline ScriptRun_t pfnScriptRun = nullptr;
+    using DrawSprites_t = void(__fastcall*)();
+    inline DrawSprites_t pfnDrawSprites = nullptr;
+    using LayerFillRect_t = void(__fastcall*)(int nLayer, const int* pRectangle);
+    inline LayerFillRect_t pfnLayerFillRect = nullptr;
+    using SetDrawColor_t = void(__fastcall*)(int nLayer, int nColour);
+    inline SetDrawColor_t pfnSetDrawColor = nullptr;
+    using RequestSound_t = void(__fastcall*)(int nSound);
+    inline RequestSound_t pfnRequestSound = nullptr;
+
     using ScriptCommand_t = int(__fastcall*)(int* pScript, uint8_t nCommand, int* pArgs, char* pStrings, int nCount);
     inline ScriptCommand_t pfnScriptCommand = nullptr;
 

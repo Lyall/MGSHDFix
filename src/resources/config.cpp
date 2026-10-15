@@ -98,6 +98,7 @@
 #include "mg1_door_cards.hpp"
 #include "mg1_scorpions.hpp"
 #include "mg2_door_cards.hpp"
+#include "mg2_elevators.hpp"
 #include "mg_vector_font.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -1365,6 +1366,12 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
     MG2_DoorCards::bEnabled = MG1_DoorCards::bEnabled;
     LOG_CONFIG(ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
+    LOG_CONFIG(ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
+    LOG_CONFIG(ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
 
 
     ConfigHelper::getValue(ini, ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);

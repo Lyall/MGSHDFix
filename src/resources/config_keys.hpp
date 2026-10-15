@@ -131,6 +131,7 @@ namespace ConfigKeys
     constexpr const char* MG1_Scorpions_Tooltip = "Fixes a off-by-one typo with scorpion pathfinding which resulted in them always getting stuck in the lower-right hand corner of the screen.";
 
 
+
     constexpr const char* MG_Door_Cards_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* MG_Door_Cards_Enabled_Setting = "Doors Check Inventory for Keycards";
     constexpr const char* MG_Door_Cards_Enabled_Help = "(Suggested ON)";
@@ -139,6 +140,24 @@ namespace ConfigKeys
         "This is obviously significantly faster (and safer in gas areas) than doing manual inventory management, so check if your speedrunning category's rules allow it.";
 
 
+
+    constexpr const char* MG2_Elevator_Lamps_Section = "Tweaks and Restoration";
+    constexpr const char* MG2_Elevator_Lamps_Setting = "Restore Elevator Floor Lamps (MG2)";
+    constexpr const char* MG2_Elevator_Lamps_Help = "";
+    constexpr const char* MG2_Elevator_Lamps_Tooltip = "Restores the floor indicators above the Zanzibar Building 1's elevator doors.";
+
+    constexpr const char* MG2_Elevator_Timings_Section = "Tweaks and Restoration";
+    constexpr const char* MG2_Elevator_Timings_Setting = "Restore Elevator Timings (MG2)";
+    constexpr const char* MG2_Elevator_Timings_Help = "";
+    constexpr const char* MG2_Elevator_Timings_Tooltip = "Restores idle elevators moving between floors on their own, distance-based call waits, travel times between floors, and door timings from the original MSX2 version.\n"
+                                                         "\n"
+                                                         "Speedrunner Notes: MC elevators unconditionally start opening 64 ticks (4.27 seconds) after pressing the call button outside them."
+                                                         "\n"
+                                                         "With this enabled, they start opening 32 ticks (2.13 seconds) after the car arrives. Cars move one stop every 32 ticks; the first step depends on the car's current timer. Calls can therefore be faster OR slower than MC depending on the car's current position and timer.\n"
+                                                         "\n"
+                                                         "Ride and door timings also change. Travel takes 24 ticks per floor (or 12 ticks for Building 2's elevators), instead of MC's 16 ticks per floor.\n"
+                                                         "\n"
+                                                         "Check that your category allows this.";
 
     constexpr const char* pszMG_Vector_Font_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* pszMG_Vector_Font_Enabled_Setting = "High Resolution Font";

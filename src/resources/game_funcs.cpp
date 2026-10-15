@@ -288,12 +288,26 @@ void MG1_Gamefuncs::HookDllGameFuncs()
 
 void MG2_Gamefuncs::HookDllGameFuncs()
 {
+    MAKE_HOOK_MID(mg2Module, "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 20", "MG2: Level Transition : GotoRoom()+0xB6", {
+        GameVars::OnLevelTransition();
+    });
+
     pfnDrawTextItem = reinterpret_cast<DrawTextItem_t>(Memory::PatternScan(mg2Module, "40 53 55 56 57 41 55 48 81 EC", "MG2: DrawTextItem()"));
     pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG2: sub_180024460() : compose text layer"));
     pfnMeasureTextFont = reinterpret_cast<MeasureTextFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 4D 63 F1", "MG2: sub_1800242F0() : measure text"));
     pfnUploadTexture = reinterpret_cast<UploadTexture_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 33 C0 4C 8D 44 24", "MG2: sub_140025F80() : upload texture"));
 
     pfnAVS_GetLocalizedString = reinterpret_cast<AVS_GetLocalizedString_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B FA", "MG2: AVS_GetLocalizedString()"));
+    pfnScriptRun = reinterpret_cast<ScriptRun_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B D9", "MG2: ScriptRun()"));
+    pfnDrawSprites = reinterpret_cast<DrawSprites_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? E8", "MG2: DrawSprites()"));
+    pfnLayerFillRect = reinterpret_cast<LayerFillRect_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 41 54", "MG2: LayerFillRect()"));
+    pfnRequestSound = reinterpret_cast<RequestSound_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 57 48 83 EC ?? 48 63 F9", "MG2: RequestSound()"));
+    uint8_t* pSetDrawColor = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 8B 74 24", "MG2: DrawRadar()+0x34B : SetDrawColor() call");
+    if (pSetDrawColor)
+    {
+        pfnSetDrawColor = reinterpret_cast<SetDrawColor_t>(Memory::ResolveCall(pSetDrawColor));
+    }
+
     pfnScriptCommand = reinterpret_cast<ScriptCommand_t>(Memory::PatternScan(mg2Module, "40 55 53 56", "MG2: ScriptCommand()"));
 
     HasItem = reinterpret_cast<HasItem_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B D9 83 F9 ?? 48 8B 0D ?? ?? ?? ?? 7D ?? E8 ?? ?? ?? ?? 8B CB", "MG2: HasItem()"));

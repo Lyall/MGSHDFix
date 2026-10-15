@@ -27,6 +27,63 @@ enum MG2Scene : uint8_t
     MG2_SCENE_RESULTS = 25,
 };
 
+enum MG2Sound : int
+{
+    MG2_SOUND_ELEVATOR_ARRIVAL = 97,
+};
+
+enum MG2DrawLayer : int
+{
+    MG2_LAYER_ROOM = 0,
+};
+
+enum MG2ElevatorCar : int
+{
+    MG2_ELEVATOR_CAR_1 = 0,
+    MG2_ELEVATOR_CAR_2 = 1,
+    MG2_ELEVATOR_CAR_3 = 2,
+    MG2_ELEVATOR_CAR_4 = 3,
+    MG2_ELEVATOR_CAR_5 = 4,
+    MG2_ELEVATOR_CAR_6 = 5,
+    MG2_ELEVATOR_CAR_7 = 6,
+    MG2_ELEVATOR_CAR_8 = 7,
+    MG2_ELEVATOR_CAR_9 = 8,
+    MG2_ELEVATOR_CAR_10 = 9,
+};
+
+// Floor labels use the displayed floor number + 2; basements occupy 0 -> 2.
+enum MG2ElevatorFloor : int
+{
+    MG2_ELEVATOR_FLOOR_B3 = 0,
+    MG2_ELEVATOR_FLOOR_B2 = 1,
+    MG2_ELEVATOR_FLOOR_B1 = 2,
+    MG2_ELEVATOR_FLOOR_1F = 3,
+    MG2_ELEVATOR_FLOOR_2F = 4,
+    MG2_ELEVATOR_FLOOR_3F = 5,
+    MG2_ELEVATOR_FLOOR_4F = 6,
+    MG2_ELEVATOR_FLOOR_10F = 12,
+    MG2_ELEVATOR_FLOOR_19F = 21,
+    MG2_ELEVATOR_FLOOR_20F = 22,
+    MG2_ELEVATOR_FLOOR_30F = 32,
+};
+
+enum MG2ElevatorState : int
+{
+    MG2_ELEVATOR_IDLE = 0,
+    MG2_ELEVATOR_CALLED = 1,
+    MG2_ELEVATOR_OPENING = 2,
+    MG2_ELEVATOR_OPEN = 3,
+    MG2_ELEVATOR_CLOSING = 4,
+    MG2_ELEVATOR_DEPARTING = 5,
+    MG2_ELEVATOR_MOVING = 6,
+    MG2_ELEVATOR_ARRIVING = 7,
+};
+
+enum MG2ScriptId : int
+{
+    MG2_SCRIPT_ELEVATORS = 135,
+};
+
 enum MG2AlertMode : uint8_t
 {
     MG2_ALERT_MODE_NORMAL = 0,
@@ -45,6 +102,7 @@ enum MG2ScriptCommand : uint8_t
 // Word indices in the ScriptRun interpreter state.
 enum MG2ScriptStateWord : int
 {
+    MG2_SCRIPT_SLOT = 2,
     MG2_SCRIPT_PROG_COUNT = 4,
     MG2_SCRIPT_INSTRUCTION_PROG_COUNT = 7,
 };

@@ -195,8 +195,9 @@ public:
     [[nodiscard]] bool IsMouseInputActive() const { return p_KeyboardMouseInputActive != nullptr && *p_KeyboardMouseInputActive != 0 && p_MouseMovementActive != nullptr && *p_MouseMovementActive != 0; }
 
 
-private:
     static void OnLevelTransition();
+
+private:
 
     uint64_t* aimingState = nullptr;
     int* cutsceneFlag = nullptr;

@@ -46,6 +46,10 @@ namespace MG2_LinkVarBuf
     inline uintptr_t* stateSlot = nullptr;
     inline PlayStats* playStats = nullptr;
     inline int32_t* pScriptGlobals = nullptr;
+    inline const uintptr_t* pLoadedScripts = nullptr;
+    inline const uintptr_t* pRunningScriptCode = nullptr;
+    constexpr int nScriptSlotCount = 20;
+    constexpr int nScriptCount = 164;
     inline uintptr_t* pSpriteLists = nullptr;
     inline int* pTextFade = nullptr;
 
@@ -126,6 +130,24 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<77>   GM_SnakeRoomX;
     inline ScriptGlobalValue<78>   GM_SnakeRoomY;
     inline ScriptGlobalValue<79>   GM_SnakeRoom;
+    inline ScriptGlobalValue<95>   GM_ElevatorCar;
+    inline ScriptGlobalValue<96>   GM_ElevatorState;
+    inline ScriptGlobalValue<97>   GM_ElevatorTimer;
+
+	/* Car service floors
+	     1: B2/B1/2F
+	     2: 1F/2F/3F/4F
+         3: B3/4F
+         4: 1F/10F
+         5: B1/1F/20F (19F = ultrabox fight)
+         6: 1F/30F
+         7 -> 10: B3/1F
+	*/
+
+	inline ScriptGlobalValue<98>   GM_ElevatorFloor;
+    inline ScriptGlobalValue<99>   GM_ElevatorDoor;
+    inline ScriptGlobalValue<100>  GM_ElevatorDestination; // Target floor label (MG2ElevatorFloor)
+    inline ScriptGlobalValue<101>  GM_InsideElevator;
     inline ScriptGlobalValue<219>  GM_ScriptedCall;
     inline ScriptGlobalValue<222>  GM_Frequency;
     inline ScriptGlobalValue<223>  GM_ContactSlot;
@@ -173,6 +195,16 @@ namespace MG2_LinkVarBuf
         return *reinterpret_cast<Sprite**>(hSprite);
     }
 
+    [[nodiscard]] inline bool IsScript(const int* pScript, int nScript)
+    {
+        if (!pScript || !pLoadedScripts || !pRunningScriptCode || nScript < 0 || nScript >= nScriptCount)
+        {
+            return false;
+        }
+        const int nSlot = pScript[MG2_SCRIPT_SLOT];
+        return nSlot >= 0 && nSlot < nScriptSlotCount && pLoadedScripts[nScript] != 0 && pRunningScriptCode[nSlot] == pLoadedScripts[nScript];
+    }
+
     [[nodiscard]] inline bool IsAlert()
     {
         return GM_AlertMode == MG2_ALERT_MODE_ALERT;
@@ -180,7 +212,28 @@ namespace MG2_LinkVarBuf
 
     [[nodiscard]] inline bool IsArea(int nArea)
     {
-        return GM_Area == nArea;
+        return pScriptGlobals && GM_Area == nArea;
+    }
+
+    [[nodiscard]] inline bool IsAnyArea(std::initializer_list<int> anAreas)
+    {
+        return std::any_of(anAreas.begin(), anAreas.end(), [](int nArea) { return IsArea(nArea); });
+    }
+
+    struct AreaRoom
+    {
+        int nArea;
+        int nRoom;
+    };
+
+    [[nodiscard]] inline bool IsRoom(int nArea, int nRoom)
+    {
+        return pScriptGlobals && IsArea(nArea) && GM_Room == nRoom;
+    }
+
+    [[nodiscard]] inline bool IsAnyRoom(std::initializer_list<AreaRoom> astRooms)
+    {
+        return std::any_of(astRooms.begin(), astRooms.end(), [](const AreaRoom& stRoom) { return IsRoom(stRoom.nArea, stRoom.nRoom); });
     }
 
     [[nodiscard]] inline std::string GetRichPresenceString()
@@ -213,6 +266,17 @@ namespace MG2_LinkVarBuf
         pScriptGlobals = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(mg2Module, "4C 8D 25 ?? ?? ?? ?? 8D 42", "MG2: pScriptGlobals (GM_Scene)") + 3));
 
         pSpriteLists = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(mg2Module, "48 8D 05 ?? ?? ?? ?? 48 63 DA", "MG2: pSpriteLists (GetSprite)") + 3));
+
+        uint8_t* pLoadedScriptsScan = Memory::PatternScan(mg2Module, "48 8D 0D ?? ?? ?? ?? ?? ?? ?? ?? 48 85 C9 75", "MG2: pLoadedScripts (StartScript)");
+        if (pLoadedScriptsScan)
+        {
+            pLoadedScripts = reinterpret_cast<const uintptr_t*>(Memory::GetRipRelativeAddress(pLoadedScriptsScan, 3, 7));
+        }
+        uint8_t* pRunningScriptCodeScan = Memory::PatternScan(mg2Module, "48 8D 35 ?? ?? ?? ?? 48 8B C6", "MG2: pRunningScriptCode (ScriptAcquireSlot)");
+        if (pRunningScriptCodeScan)
+        {
+            pRunningScriptCode = reinterpret_cast<const uintptr_t*>(Memory::GetRipRelativeAddress(pRunningScriptCodeScan, 3, 7));
+        }
 
         uint8_t* pTextFadeScan = Memory::PatternScan(mg2Module, "44 8B 0D ?? ?? ?? ?? 41 81 F9", "MG2: text layer fade");
         if (pTextFadeScan)
