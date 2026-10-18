@@ -99,6 +99,7 @@
 #include "mg1_scorpions.hpp"
 #include "mg2_door_cards.hpp"
 #include "mg2_outdoor_palettes.hpp"
+#include "mg2_outdoor_tiles.hpp"
 #include "mg2_elevators.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
@@ -1388,6 +1389,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
     LOG_CONFIG(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);

@@ -121,6 +121,9 @@ namespace MG1_Gamefuncs
 
 namespace MG2_Gamefuncs
 {
+    using IsBossSurvival_t = int(__fastcall*)();
+    inline IsBossSurvival_t pfnIsBossSurvival = nullptr;
+
     using SetFont_t = MG_Gamefuncs::SetFont_t;
     inline SetFont_t pfnSetFont = nullptr;
 

@@ -381,6 +381,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
 
+        { (MG), ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, ConfigKeys::MG2_Outdoor_Artwork_Help, ConfigKeys::MG2_Outdoor_Artwork_Tooltip, std::nullopt, false, Field::Bool, true },
+
         { (MGS2|MGS3), ConfigKeys::Restore_VFX_Section, ConfigKeys::Restore_VFX_Setting, ConfigKeys::Restore_VFX_Help, ConfigKeys::Restore_VFX_Tooltip,
           std::nullopt, false, Field::Bool, true },
 

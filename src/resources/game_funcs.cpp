@@ -291,6 +291,7 @@ void MG1_Gamefuncs::HookDllGameFuncs()
 
 void MG2_Gamefuncs::HookDllGameFuncs()
 {
+    pfnIsBossSurvival = reinterpret_cast<IsBossSurvival_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: IsBossSurvival()"));
     MAKE_HOOK_MID(mg2Module, "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 20", "MG2: Level Transition : GotoRoom()+0xB6", {
         GameVars::OnLevelTransition();
     });

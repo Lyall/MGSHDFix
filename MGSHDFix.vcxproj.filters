@@ -416,6 +416,9 @@
     <ClCompile Include="src\features\mg2_outdoor_palettes.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg2_outdoor_tiles.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg_vector_font.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -1007,6 +1010,12 @@
       <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_outdoor_tiles.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_outdoor_tiles_data.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font.hpp">

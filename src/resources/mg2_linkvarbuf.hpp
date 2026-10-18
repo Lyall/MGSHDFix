@@ -8,6 +8,11 @@
 
 namespace MG2_LinkVarBuf
 {
+    constexpr int nRoomWidth = 192;
+    constexpr int nRoomHeight = 192;
+    constexpr int nRoomCellSize = 8;
+    constexpr int nRoomCellColumns = nRoomWidth / nRoomCellSize;
+
     struct PlayStats
     {
         int GM_PlayTime;
@@ -28,6 +33,21 @@ namespace MG2_LinkVarBuf
     };
 
     static_assert(offsetof(DoorState, nCardLevel) == 0x10);
+
+    struct DrawLayer
+    {
+        uintptr_t hPixels;
+        int nWidth;
+        int nHeight;
+        int nColour;
+        int nClipLeft;
+        int nClipTop;
+        int nClipRight;
+        int nClipBottom;
+        int nReserved;
+    };
+
+    static_assert(sizeof(DrawLayer) == 0x28);
 
     struct Sprite
     {

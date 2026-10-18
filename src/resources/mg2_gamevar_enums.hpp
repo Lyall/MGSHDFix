@@ -125,7 +125,14 @@ enum MG2SpriteSheet : int
 {
     MG2_SPRITE_SHEET_GUARD = 20,
     MG2_SPRITE_SHEET_PORTRAITS = 25,
+    MG2_SPRITE_SHEET_DOORS = 35,
     MG2_SPRITE_SHEET_TRANSCEIVER = 38,
+};
+
+enum MG2DoorAnimation : int
+{
+    MG2_DOOR_ANIM_OUTDOOR_OPEN = 22,
+    MG2_DOOR_ANIM_OUTDOOR_CLOSE = 23,
 };
 
 enum MG2SpriteList : int
