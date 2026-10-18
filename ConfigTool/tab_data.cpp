@@ -684,6 +684,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MG), ConfigKeys::LooseAudioDebugLogging_Section, ConfigKeys::LooseAudioDebugLogging_Setting, ConfigKeys::LooseAudioDebugLogging_Help, ConfigKeys::LooseAudioDebugLogging_Tooltip, std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::LooseAudioDebugLogging_Disabled, {ConfigKeys::LooseAudioDebugLogging_Disabled, ConfigKeys::LooseAudioDebugLogging_Trims, ConfigKeys::LooseAudioDebugLogging_Full} },
 
+        { (MG), ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, ConfigKeys::MG_Developer_Menu_Help, ConfigKeys::MG_Developer_Menu_Tooltip, std::nullopt, false, Field::Bool, false },
+        { (MG), ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, ConfigKeys::MG_Developer_Menu_Hotkey_Help, ConfigKeys::MG_Developer_Menu_Hotkey_Tooltip, std::make_pair(ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
+
         { (MGS2|MGS3), ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, ConfigKeys::Debugging_Start_In_Dev_Menu_Help, ConfigKeys::Debugging_Start_In_Dev_Menu_Tooltip,
           std::nullopt, false, Field::Bool, false },
 

@@ -7,6 +7,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\resources\mg_developer_menu.cpp" />
+    <ClCompile Include="src\features\mg_inventory_menu.cpp" />
+    <ClCompile Include="src\features\mg_stage_select.cpp" />
+    <ClCompile Include="src\features\mg2_stage_select.cpp" />
+    <ClCompile Include="src\features\mg1_stage_select.cpp" />
     <ClCompile Include="src\fixes\mgs2_codec_background.cpp" />
     <ClCompile Include="src\fixes\mgs2_ntsc_timing_fixes.cpp" />
     <ClCompile Include="src\fixes\screenspace_fixes.cpp" />
@@ -198,6 +203,10 @@
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\resources\mg_developer_menu.hpp" />
+    <ClInclude Include="src\features\mg_inventory_menu.hpp" />
+    <ClInclude Include="src\features\mg_stage_select_data.hpp" />
+    <ClInclude Include="src\features\mg_stage_select.hpp" />
     <ClInclude Include="src\fixes\mgs2_codec_background.hpp" />
     <ClInclude Include="src\fixes\mgs2_ntsc_timing_fixes.hpp" />
     <ClInclude Include="src\fixes\screenspace_fixes.hpp" />

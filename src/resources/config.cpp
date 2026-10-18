@@ -104,6 +104,7 @@
 #include "mg2_elevators.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
+#include "mg_developer_menu.hpp"
 #include "mg_cigarette_damage.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
@@ -1377,6 +1378,14 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
     MG2_DoorCards::bEnabled = MG1_DoorCards::bEnabled;
     LOG_CONFIG(ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, MG_DeveloperMenu::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, MG_DeveloperMenu::bEnabled);
+    if ((eGameType & MG) && MG_DeveloperMenu::bEnabled)
+    {
+        InputHandler::GetKeybind(ini, ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, MG_DeveloperMenu::nHotkey);
+    }
+
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
     LOG_CONFIG(ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);

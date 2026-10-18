@@ -158,6 +158,7 @@
 #include "mg2_door_cards.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
+#include "mg_stage_select.hpp"
 #include "mg_cigarette_damage.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "loose_audio_overrides.hpp"
@@ -197,6 +198,7 @@ namespace
         MG1_TelescopeHudFix::Apply();
         MG_Cigarettes::InitializeMG1();
         MG_VectorFont::InitializeMG1();
+        MG_StageSelect::InitializeMG1();
     }
 
     void InitMG2()
@@ -216,6 +218,7 @@ namespace
         LooseAudioOverrides::Initialize();
         MG_Cigarettes::InitializeMG2();
         MG_VectorFont::InitializeMG2();
+        MG_StageSelect::InitializeMG2();
         MG2_SpritePatcher::Initialize(); // Keep last!!!
     }
 

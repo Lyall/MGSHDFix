@@ -184,6 +184,17 @@ namespace ConfigKeys
     constexpr const char* MG2_Truckyard_Fence_Help = "";
     constexpr const char* MG2_Truckyard_Fence_Tooltip = "Restores the truckyard fence, blocking access until after the Bridge of Sorrow cutscene has played, as in the original MSX2 version.";
 
+    constexpr const char* MG_Developer_Menu_Section = "Debugging";
+    constexpr const char* MG_Developer_Menu_Setting = "Developer Menu";
+    constexpr const char* MG_Developer_Menu_Help = "";
+    constexpr const char* MG_Developer_Menu_Tooltip = "Opens the developer menu during normal gameplay, including stage select.\n"
+                                                         "\n"
+                                                         "Gameplay pauses while the menu is open. Inventory and story progress are kept, so some events still depend on your current progress.";
+    constexpr const char* MG_Developer_Menu_Hotkey_Section = "Hotkeys";
+    constexpr const char* MG_Developer_Menu_Hotkey_Setting = "Open Developer Menu";
+    constexpr const char* MG_Developer_Menu_Hotkey_Help = "";
+    constexpr const char* MG_Developer_Menu_Hotkey_Tooltip = "Opens the developer menu. Use Up/Down to select a page, Enter to open it and Escape to go back.";
+
     constexpr const char* MG_Vector_Font_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* MG_Vector_Font_Enabled_Setting = "High Resolution Font";
     constexpr const char* MG_Vector_Font_Enabled_Help = "";

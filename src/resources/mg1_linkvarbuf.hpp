@@ -24,7 +24,11 @@ namespace MG1_LinkVarBuf
     {
         int GM_Stage;
         int GM_Room;
+        int anReserved[10];
+        int GM_EntranceKind;
     };
+
+    static_assert(offsetof(RoomPosition, GM_EntranceKind) == 0x30);
 
     struct SceneState
     {
@@ -209,6 +213,21 @@ namespace MG1_LinkVarBuf
         return pRecord ? reinterpret_cast<int32_t*>(pRecord + kItemStocksOffsetInRecord + eItem * sizeof(int32_t)) : nullptr;
     }
 
+    inline constexpr uintptr_t kItemFlagsOffsetInRecord = 0xDC;
+
+    inline void SetItemOwned(MG1ItemIndex eItem, bool bOwned)
+    {
+        uint8_t* pRecord = GetGameRecord();
+        if (!pRecord || eItem > MG1_ITEM_INDEX_CARD_8)
+        {
+            return;
+        }
+        const unsigned int nFlag = static_cast<unsigned int>(eItem) + 1;
+        auto* pFlags = reinterpret_cast<uint32_t*>(pRecord + kItemFlagsOffsetInRecord);
+        const uint32_t nMask = 1u << (nFlag & 7);
+        pFlags[nFlag >> 3] = bOwned ? pFlags[nFlag >> 3] | nMask : pFlags[nFlag >> 3] & ~nMask;
+    }
+
     [[nodiscard]] inline bool HasItem(MG1ItemIndex eItem)
     {
         return MG1_Gamefuncs::TestFlag(eItem + 1);
@@ -222,6 +241,136 @@ namespace MG1_LinkVarBuf
     [[nodiscard]] inline MG1ItemIndex GetCardItemIndex(int nLevel)
     {
         return nLevel == 1 ? MG1_ITEM_INDEX_CARD_1 : static_cast<MG1ItemIndex>(MG1_ITEM_INDEX_CARD_2 + nLevel - 2);
+    }
+
+    enum class InventoryChangeResult
+    {
+        Changed,
+        InventoryFull,
+    };
+
+    [[nodiscard]] inline int GetInventoryQuantity(int nId, bool bWeapons)
+    {
+        if (nId == MG1_ITEM_INDEX_RATIONS)
+        {
+            return GM_RationCount;
+        }
+        if (!HasItem(static_cast<MG1ItemIndex>(nId)))
+        {
+            return 0;
+        }
+        return bWeapons && nId != MG1_ITEM_INDEX_SUPPRESSOR ? *GetItemStock(static_cast<MG1ItemIndex>(nId)) : 1;
+    }
+
+    [[nodiscard]] inline InventoryChangeResult ChangeInventory(int nId, bool bWeapons, bool bAdd)
+    {
+        const auto eItem = static_cast<MG1ItemIndex>(nId);
+        const bool bOwned = nId == MG1_ITEM_INDEX_RATIONS ? GM_RationCount > 0 : HasItem(eItem);
+        if (!bAdd && !bOwned)
+        {
+            return InventoryChangeResult::Changed;
+        }
+        const bool bCard = nId == MG1_ITEM_INDEX_CARD_1 || nId >= MG1_ITEM_INDEX_CARD_2;
+        const int nIcon = bCard ? MG1_ITEM_INDEX_CARD_1 : nId;
+        const bool bStock = bWeapons && nId != MG1_ITEM_INDEX_SUPPRESSOR;
+        const bool bRation = nId == MG1_ITEM_INDEX_RATIONS;
+        int32_t* pSlots = GetItemSlots();
+        if (bAdd && !bOwned && !bWeapons && nId != MG1_ITEM_INDEX_CIGARETTES)
+        {
+            int nSlot = 1;
+            while (nSlot < static_cast<int>(kItemSlotCount) && pSlots[nSlot] != 0)
+            {
+                nSlot++;
+            }
+            if (nSlot == kItemSlotCount)
+            {
+                return InventoryChangeResult::InventoryFull;
+            }
+            pSlots[nSlot] = nIcon;
+            if (bRation)
+            {
+                GM_RationSlotIndex = nSlot;
+            }
+            if (nId == MG1_ITEM_INDEX_TRANSMITTER)
+            {
+                GM_TransmitterSlotIndex = nSlot;
+            }
+        }
+        if (bStock)
+        {
+            int* pStock = GetItemStock(eItem);
+            const int nClass = std::clamp(static_cast<int>(GM_Class), 0, 3);
+            const int nMultiplier = GM_Difficulty == 0 ? 2 : 1;
+            int nMaximum = (nClass + 1) * 5;
+            if (nId == MG1_ITEM_INDEX_HANDGUN || nId == MG1_ITEM_INDEX_SUBMACHINE_GUN)
+            {
+                nMaximum = nClass == 0 ? 50 : nClass * 100;
+            }
+            else if (nId == MG1_ITEM_INDEX_GRENADE_LAUNCHER)
+            {
+                nMaximum = nClass == 0 ? 15 : nClass * 30;
+            }
+            else if (nId == MG1_ITEM_INDEX_ROCKET_LAUNCHER)
+            {
+                nMaximum = nClass == 0 ? 5 : nClass * 10;
+            }
+            *pStock = bAdd ? std::min(std::max(0, *pStock) + 1, nMaximum * nMultiplier) : 0;
+        }
+        if (bRation)
+        {
+            const int nMaximum = (std::clamp(static_cast<int>(GM_Class), 0, 3) + 1) * (GM_Difficulty == 0 ? 2 : 1) * 3;
+            GM_RationCount = bAdd ? std::min(static_cast<int>(GM_RationCount) + 1, nMaximum) : 0;
+        }
+        SetItemOwned(eItem, bAdd);
+        if (!bAdd)
+        {
+            if (!bWeapons)
+            {
+                for (size_t nSlot = 1; nSlot < kItemSlotCount; nSlot++)
+                {
+                    if (pSlots[nSlot] == nIcon)
+                    {
+                        pSlots[nSlot] = 0;
+                        if (bCard)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (GM_SelectedEquipIconId == nIcon)
+                {
+                    GM_SelectedEquipIconId = 0;
+                }
+            }
+            else if (GM_SelectedWeaponIconId == nId)
+            {
+                GM_SelectedWeaponIconId = 0;
+            }
+            if (bRation)
+            {
+                GM_RationSlotIndex = 0;
+            }
+            if (nId == MG1_ITEM_INDEX_TRANSMITTER)
+            {
+                GM_TransmitterSlotIndex = 0;
+            }
+        }
+        if (bCard)
+        {
+            int nCards = 0;
+            for (int nLevel = 1; nLevel <= MG1_ITEM_INDEX_MAX_CARD_LEVEL; nLevel++)
+            {
+                nCards += HasItem(GetCardItemIndex(nLevel)) ? 1 : 0;
+            }
+            GM_CardsHeld = nCards;
+            GM_EquippedCardNumber = 0;
+            GM_SelectedEquipIconId = 0;
+        }
+        GM_EquipCursorCol = 0;
+        GM_EquipCursorRow = 0;
+        GM_WeaponCursorCol = 0;
+        GM_WeaponCursorRow = 0;
+        return InventoryChangeResult::Changed;
     }
 
     [[nodiscard]] inline int GetHighestCardLevel()
@@ -274,17 +423,13 @@ namespace MG1_LinkVarBuf
         }
 
         const int nStage = roomPosition->GM_Stage;
-        if (nStage < 0 || nStage >= static_cast<int>(std::size(g_MG1StageNames)))
+        const int nRoom = roomPosition->GM_Room;
+        const MGRoomName* pRoom = FindMGRoomName(false, nStage, nRoom);
+        if (!pRoom)
         {
-            return "Unknown Stage (" + std::to_string(nStage) + ")";
+            return "Metal Gear: Area " + std::to_string(nStage) + ", Room " + std::to_string(nRoom);
         }
-
-        if (!*g_MG1StageNames[nStage])
-        {
-            return "Metal Gear: Stage " + std::to_string(nStage);
-        }
-
-        return std::string("Metal Gear: ") + g_MG1StageNames[nStage];
+        return "Metal Gear: " + GetMGRoomName(false, nStage, nRoom);
     }
 
     inline void Initialize()

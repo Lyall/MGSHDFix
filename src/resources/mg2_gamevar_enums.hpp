@@ -46,6 +46,7 @@ enum MG2PortraitFrame : uint8_t
 enum MG2Scene : uint8_t
 {
     MG2_SCENE_PAUSE = 10,
+    MG2_SCENE_LOAD_AREA = 16,
     MG2_SCENE_GAMEPLAY = 18,
     MG2_SCENE_TRANSCEIVER = 20,
     MG2_SCENE_RESULTS = 25,

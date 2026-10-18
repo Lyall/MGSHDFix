@@ -14,6 +14,7 @@
 #include "mg1_display_scaling.hpp"
 #include "mg1_linkvarbuf.hpp"
 #include "mg2_linkvarbuf.hpp"
+#include "mg_developer_menu.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs2_status_flags.hpp"
 #include "mgs3_linkvarbuf.hpp"
@@ -148,11 +149,6 @@ namespace
 
         const auto addVertex = [&](const EasyFontVertex& source)
             {
-                if (textVertices.size() >= MaxTextVertices)
-                {
-                    return;
-                }
-
                 TextVertex vertex = {};
                 vertex.x = x + source.x * scale;
                 vertex.y = y + source.y * scale;
@@ -166,6 +162,10 @@ namespace
 
         for (int i = 0; i < quadCount; i++)
         {
+            if (textVertices.size() + 6 > MaxTextVertices)
+            {
+                FlushGeometry();
+            }
             const EasyFontVertex* quad = &sourceVertices[i * 4];
 
             addVertex(quad[0]);
@@ -1142,11 +1142,69 @@ void D3D11TextOverlay::HandleLevelTransition()
 
 
 
+float D3D11TextOverlay::GetTextWidth(const char* pszText)
+{
+    return static_cast<float>(stb_easy_font_width(const_cast<char*>(pszText)));
+}
+
 void D3D11TextOverlay::Tick()
 {
     if (!bShaderLoaded || !g_D3D11Hooks.swapChain)
     {
         return;
+    }
+
+    if (eGameType & MG)
+    {
+        std::vector<MG_DeveloperMenu::Column> vMenuColumns;
+        const std::string sDeveloperMenu = MG_DeveloperMenu::Tick(&vMenuColumns);
+        if (!sDeveloperMenu.empty())
+        {
+            Draw(sDeveloperMenu.c_str(), 1920.0f, 420.0f, 5.0f, 4.0f, { 255, 255, 255, 255 }, { 0, 0, 0, 255 }, TextHorizontalAlignment::Center);
+        }
+        constexpr float kColumnGap = 60.0f;
+        constexpr float kMaxColumnsWidth = 2800.0f;
+        float fTextWidth = 0.0f;
+        for (const auto& stColumn : vMenuColumns)
+        {
+            fTextWidth += stColumn.fWidth > 0.0f ? stColumn.fWidth : GetTextWidth(stColumn.sText.c_str());
+        }
+        const float fGapWidth = kColumnGap * std::max(0, static_cast<int>(vMenuColumns.size()) - 1);
+        const float fFontSize = std::min(4.0f, (kMaxColumnsWidth - fGapWidth) / std::max(1.0f, fTextWidth));
+        float fColumnX = 1920.0f - (fTextWidth * fFontSize + fGapWidth) * 0.5f;
+        for (const auto& stColumn : vMenuColumns)
+        {
+            TextColor stColor = { 150, 210, 235, 255 };
+            if (stColumn.eColor == MG_DeveloperMenu::ColumnColor::Active)
+            {
+                stColor = { 255, 220, 100, 255 };
+            }
+            else if (stColumn.eColor == MG_DeveloperMenu::ColumnColor::SingleEntry)
+            {
+                stColor = { 120, 240, 150, 255 };
+            }
+            std::istringstream stLines(stColumn.sText);
+            std::string sLine;
+            int nLine = 0;
+            constexpr float kLineHeight = 12.0f;
+            constexpr float kOutlineWidth = 4.0f;
+            while (std::getline(stLines, sLine))
+            {
+                TextColor stLineColor = stColor;
+                if (nLine == stColumn.nSelectedLine && stColumn.eColor != MG_DeveloperMenu::ColumnColor::SingleEntry)
+                {
+                    stLineColor = stColumn.bYellowSelection ? TextColor { 255, 220, 100, 255 } : TextColor { 255, 255, 255, 255 };
+                }
+                const float fLineY = 1160.0f + nLine * kLineHeight * fFontSize;
+                Draw(sLine.c_str(), fColumnX, fLineY, fFontSize, kOutlineWidth, stLineColor, { 0, 0, 0, 255 }, TextHorizontalAlignment::Left);
+                if (nLine == 0)
+                {
+                    Draw(sLine.c_str(), fColumnX + 1.5f, fLineY, fFontSize, 0.0f, stLineColor, { 0, 0, 0, 0 }, TextHorizontalAlignment::Left);
+                }
+                ++nLine;
+            }
+            fColumnX += (stColumn.fWidth > 0.0f ? stColumn.fWidth : GetTextWidth(stColumn.sText.c_str())) * fFontSize + kColumnGap;
+        }
     }
 
 

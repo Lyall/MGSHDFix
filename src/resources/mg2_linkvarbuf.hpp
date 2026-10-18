@@ -8,16 +8,71 @@
 
 namespace MG2_LinkVarBuf
 {
+    constexpr int nFixedPointOne = 1 << 16;
     constexpr int nRoomWidth = 192;
     constexpr int nRoomHeight = 192;
     constexpr int nRoomCellSize = 8;
     constexpr int nRoomCellColumns = nRoomWidth / nRoomCellSize;
-
     constexpr int nRoomCellEntry = 6;
     constexpr unsigned int nRoomCellMapSize = nRoomCellColumns * (nRoomHeight / nRoomCellSize) * sizeof(uint16_t);
     constexpr size_t nPaletteSlotCount = 256;
     constexpr size_t nImageBlobHeaderSize = 8;
     constexpr size_t nImageBlobHeightOffset = 4;
+    struct ObjectPosition
+    {
+        int anReserved[3];
+        int nState;
+        int nX;
+        int nY;
+        int nDirectionX;
+        int nDirectionY;
+        int nSpeed;
+        int nWalkSpeed;
+        int anReserved10[16];
+        int nMovementInput;
+    };
+
+    static_assert(offsetof(ObjectPosition, nState) == 0x0C);
+    static_assert(offsetof(ObjectPosition, nX) == 0x10);
+    static_assert(offsetof(ObjectPosition, nY) == 0x14);
+    static_assert(offsetof(ObjectPosition, nSpeed) == 0x20);
+    static_assert(offsetof(ObjectPosition, nMovementInput) == 0x68);
+
+    struct EngineState
+    {
+        int anReserved[3];
+        int nTurnState;
+        int anReserved4[2];
+        int GM_Facing;
+        int GM_SelectedWeapon;
+        int GM_SelectedItem;
+        uint32_t nWeaponBits;
+        uint32_t anItemBits[2];
+        int anWeaponStock[10];
+        int anRationStock[3];
+        int anReserved25[7];
+        int GM_NextArea;
+        int GM_NextEntrance;
+        int anReserved34[2];
+        int nMovementBlocked;
+        int anReserved37[4];
+        int anCompanionFollow[3];
+        int anReserved44[11];
+        int nMovementDirection;
+    };
+
+    static_assert(offsetof(EngineState, nTurnState) == 0x0C);
+    static_assert(offsetof(EngineState, nMovementBlocked) == 0x90);
+    static_assert(offsetof(EngineState, anCompanionFollow) == 0xA4);
+    static_assert(offsetof(EngineState, nMovementDirection) == 0xDC);
+    static_assert(offsetof(EngineState, GM_Facing) == 0x18);
+    static_assert(offsetof(EngineState, GM_SelectedWeapon) == 0x1C);
+    static_assert(offsetof(EngineState, nWeaponBits) == 0x24);
+    static_assert(offsetof(EngineState, anItemBits) == 0x28);
+    static_assert(offsetof(EngineState, anWeaponStock) == 0x30);
+    static_assert(offsetof(EngineState, anRationStock) == 0x58);
+    static_assert(offsetof(EngineState, GM_NextArea) == 0x80);
+    static_assert(offsetof(EngineState, GM_NextEntrance) == 0x84);
 
     struct PlayStats
     {
@@ -142,6 +197,7 @@ namespace MG2_LinkVarBuf
 
     inline StateVarValue<uint32_t, 0x88> GM_Difficulty;
 
+    inline ScriptGlobalValue<0>    GM_SceneChangePending;
     inline ScriptGlobalValue<1>    GM_Scene;
     inline ScriptGlobalValue<2>    GM_NextScene;
     inline ScriptGlobalValue<8>    GM_GameplayHalt;
@@ -165,6 +221,9 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<64>   GM_AlertCountdown;
     inline ScriptGlobalValue<66>   GM_SoldiersInRoom;
     inline ScriptGlobalValue<67>   GM_SoldiersDowned;
+    inline ScriptGlobalValue<69>   GM_EntryX;
+    inline ScriptGlobalValue<70>   GM_EntryY;
+    inline ScriptGlobalValue<71>   GM_EntryFacing;
     inline ScriptGlobalValue<73>   GM_ScriptedAlarm;
     inline ScriptGlobalValue<77>   GM_SnakeRoomX;
     inline ScriptGlobalValue<78>   GM_SnakeRoomY;
@@ -187,6 +246,7 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<99>   GM_ElevatorDoor;
     inline ScriptGlobalValue<100>  GM_ElevatorDestination; // Target floor label (MG2ElevatorFloor)
     inline ScriptGlobalValue<101>  GM_InsideElevator;
+    inline ScriptGlobalValue<199>  GM_InputMode; // 0 while the player controls Snake.
     inline ScriptGlobalValue<219>  GM_ScriptedCall;
     inline ScriptGlobalValue<222>  GM_Frequency;
     inline ScriptGlobalValue<223>  GM_ContactSlot;
@@ -204,6 +264,91 @@ namespace MG2_LinkVarBuf
     [[nodiscard]] inline bool HasCardForLevel(int nLevel)
     {
         return MG2_Gamefuncs::HasItem(MG2_ITEM_INDEX_CARD_1 + nLevel - 1) || MG2_Gamefuncs::HasItem(GetMasterCardForLevel(nLevel));
+    }
+
+    enum class InventoryChangeResult
+    {
+        Changed,
+        Unavailable,
+        InventoryFull,
+        WeaponsFull,
+    };
+
+    [[nodiscard]] inline int GetInventoryQuantity(int nId, bool bWeapons)
+    {
+        const auto* pState = MG2_Gamefuncs::pfnGetEngineState();
+        if (!pState)
+        {
+            return 0;
+        }
+        const bool bOwned = bWeapons ? (pState->nWeaponBits & (1u << nId)) != 0 : (pState->anItemBits[nId / 32] & (1u << (nId % 32))) != 0;
+        if (!bOwned)
+        {
+            return 0;
+        }
+        if (bWeapons && nId <= MG2_WEAPON_INDEX_MOUSE)
+        {
+            return pState->anWeaponStock[nId];
+        }
+        return !bWeapons && nId >= MG2_ITEM_INDEX_RATION_B1 ? pState->anRationStock[nId - MG2_ITEM_INDEX_RATION_B1] : 1;
+    }
+
+    [[nodiscard]] inline InventoryChangeResult ChangeInventory(int nId, bool bWeapons, bool bAdd)
+    {
+        auto* pState = MG2_Gamefuncs::pfnGetEngineState();
+        if (!pState)
+        {
+            return InventoryChangeResult::Unavailable;
+        }
+        uint32_t& nBits = bWeapons ? pState->nWeaponBits : pState->anItemBits[nId / 32];
+        const uint32_t nMask = 1u << (nId % 32);
+        if (bAdd && !bWeapons && !(nBits & nMask))
+        {
+            int nCount = 0;
+            for (int nItem = 0; nItem < 35; nItem++)
+            {
+                nCount += (pState->anItemBits[nItem / 32] >> (nItem % 32)) & 1u;
+            }
+            if (nCount >= 30)
+            {
+                return InventoryChangeResult::InventoryFull;
+            }
+        }
+        if (bAdd && bWeapons && nId != MG2_WEAPON_INDEX_SUPPRESSOR && !(nBits & nMask))
+        {
+            int nCount = 0;
+            for (int nWeapon = 0; nWeapon < 14; nWeapon++)
+            {
+                if (nWeapon != MG2_WEAPON_INDEX_SUPPRESSOR)
+                {
+                    nCount += (pState->nWeaponBits >> nWeapon) & 1u;
+                }
+            }
+            if (nCount >= 12)
+            {
+                return InventoryChangeResult::WeaponsFull;
+            }
+        }
+        nBits = bAdd ? nBits | nMask : nBits & ~nMask;
+        int* pStock = nullptr;
+        if (bWeapons && nId <= MG2_WEAPON_INDEX_MOUSE)
+        {
+            pStock = &pState->anWeaponStock[nId];
+        }
+        else if (!bWeapons && nId >= MG2_ITEM_INDEX_RATION_B1)
+        {
+            pStock = &pState->anRationStock[nId - MG2_ITEM_INDEX_RATION_B1];
+        }
+        if (pStock)
+        {
+            *pStock = bAdd ? std::min(std::max(0, *pStock) + 1, 999) : 0;
+        }
+        int& nEquipped = bWeapons ? pState->GM_SelectedWeapon : pState->GM_SelectedItem;
+        if (!bAdd && nEquipped == nId)
+        {
+            nEquipped = -1;
+        }
+        return InventoryChangeResult::Changed;
     }
 
     [[nodiscard]] inline Sprite* GetSprite(int nList, int nSlot)
@@ -282,18 +427,12 @@ namespace MG2_LinkVarBuf
             return "Metal Gear 2: Results";
         }
 
-        const int nArea = GM_Area;
-        if (nArea < 0 || nArea >= static_cast<int>(std::size(g_MG2AreaNames)))
+        const MGRoomName* pRoom = FindMGRoomName(true, GM_Area, GM_Room);
+        if (!pRoom)
         {
-            return "Unknown Area (" + std::to_string(nArea) + ")";
+            return "Metal Gear 2: Area " + std::to_string(static_cast<int>(GM_Area)) + ", Room " + std::to_string(static_cast<int>(GM_Room));
         }
-
-        if (!*g_MG2AreaNames[nArea])
-        {
-            return "Metal Gear 2: Area " + std::to_string(nArea);
-        }
-
-        return std::string("Metal Gear 2: ") + g_MG2AreaNames[nArea];
+        return "Metal Gear 2: " + GetMGRoomName(true, GM_Area, GM_Room);
     }
 
     inline void Initialize()

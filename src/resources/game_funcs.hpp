@@ -92,10 +92,18 @@ namespace MG_Gamefuncs
 
 namespace MG1_Gamefuncs
 {
+    using SceneTick_t = void(__fastcall*)();
+    inline SceneTick_t pfnSceneTick = nullptr;
+
     using ShowMessage_t = void(__fastcall*)(int nChunk, int nRecord, int nAutoAdvance, int nReturnScene, int nScriptSlot);
     inline ShowMessage_t pfnShowMessage = nullptr;
     using BlitImage_t = void(__fastcall*)(int nLayer, const MG1_LinkVarBuf::DrawLayer* pImage, const int* pSourceRect, int nX, int nY);
     inline BlitImage_t pfnBlitImage = nullptr;
+
+    using GotoStage_t = void(__fastcall*)(int nStage, int nRoom);
+    inline GotoStage_t pfnGotoStage = nullptr;
+    using SwitchScene_t = void(__fastcall*)();
+    inline SwitchScene_t pfnSwitchScene = nullptr;
 
     using SetFont_t = MG_Gamefuncs::SetFont_t;
     inline SetFont_t pfnSetFont = nullptr;
@@ -119,8 +127,33 @@ namespace MG1_Gamefuncs
 
 
 
+namespace MG2_LinkVarBuf
+{
+    struct EngineState;
+    struct ObjectPosition;
+    struct Sprite;
+}
+
 namespace MG2_Gamefuncs
 {
+    using SceneTick_t = void(__fastcall*)();
+    inline SceneTick_t pfnSceneTick = nullptr;
+
+    using GetEngineState_t = MG2_LinkVarBuf::EngineState* (__fastcall*)();
+    inline GetEngineState_t pfnGetEngineState = nullptr;
+    using GetPlayer_t = MG2_LinkVarBuf::ObjectPosition* (__fastcall*)();
+    inline GetPlayer_t pfnGetPlayer = nullptr;
+    using GetObjectSprite_t = MG2_LinkVarBuf::Sprite* (__fastcall*)(void* pObject);
+    inline GetObjectSprite_t pfnGetObjectSprite = nullptr;
+    using PrepareRoomEntry_t = void(__fastcall*)(void* pPlayer, MG2_LinkVarBuf::EngineState* pState, MG2_LinkVarBuf::Sprite* pSprite, int nEntrance, int nKeepSnakeRoom, unsigned int nEntryMode);
+    inline PrepareRoomEntry_t pfnPrepareRoomEntry = nullptr;
+    using RequestScene_t = void(__fastcall*)(int nScene);
+    inline RequestScene_t pfnRequestScene = nullptr;
+    using RunSceneTransition_t = void(__fastcall*)();
+    inline RunSceneTransition_t pfnRunSceneTransition = nullptr;
+    using IsGameplayActive_t = int(__fastcall*)();
+    inline IsGameplayActive_t pfnIsGameplayActive = nullptr;
+
     using TestFlag_t = int(__fastcall*)(int nFlag);
     inline TestFlag_t pfnTestFlag = nullptr;
     using LoadImageBlob_t = void(__fastcall*)(void* pImageSlot, const uint8_t* pBlob);
