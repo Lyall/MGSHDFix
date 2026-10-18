@@ -306,8 +306,9 @@ namespace LooseAudioOverridesData
         return stGameRoot / stRelative;
     }
 
-    inline std::filesystem::path FindReplacementAudio(const std::filesystem::path& stGameRoot, const std::filesystem::path& stOverloadRoot, const std::filesystem::path& stRelative, size_t nTrack)
+    inline std::filesystem::path FindReplacementAudio(const std::filesystem::path& stGameRoot, const std::filesystem::path& stOverloadRoot, const std::filesystem::path& stRelative, size_t nTrack, std::wstring_view svVariant = {})
     {
+        const std::wstring sVariant = svVariant.empty() ? std::wstring() : L"." + std::wstring(svVariant);
         for (const auto& stRoot : { stOverloadRoot, stGameRoot })
         {
             if (stRoot.empty())
@@ -316,7 +317,7 @@ namespace LooseAudioOverridesData
             }
             for (const auto* pszExtension : { L".flac", L".wav", L".ogg", L".mp3" })
             {
-                const auto stPath = stRoot / stRelative.parent_path() / (stRelative.stem().wstring() + L".track" + std::to_wstring(nTrack) + pszExtension);
+                const auto stPath = stRoot / stRelative.parent_path() / (stRelative.stem().wstring() + sVariant + L".track" + std::to_wstring(nTrack) + pszExtension);
                 if (std::filesystem::is_regular_file(stPath))
                 {
                     return stPath;
@@ -519,7 +520,34 @@ namespace LooseAudioOverridesData
         std::array<std::vector<int16_t>, nMaxTracks> avPcm;
         std::array<LoopPoints, nMaxTracks> astLoops {};
         bool bStreamLoops = false;
+        // Audio to play after the variant; empty tracks resume MC audio.
+        bool bVariant = false;
+        std::array<bool, nMaxTracks> abVariantTracks {};
+        std::array<std::vector<int16_t>, nMaxTracks> avAfterPcm;
+        std::array<LoopPoints, nMaxTracks> astAfterLoops {};
+        std::array<std::vector<int16_t>, nMaxTracks> avFadePcm;
+        std::array<LoopPoints, nMaxTracks> astFadeLoops {};
+        std::array<size_t, nMaxTracks> anFadeCursors {};
+        std::array<size_t, nMaxTracks> anFadeLeft {};
     };
+
+    constexpr size_t nVariantCrossfadeFrames = 720; // 15 ms at 48 kHz
+
+    inline void SwitchToAfter(Replacement& stAudio, size_t nTrack, bool bCrossfade = false, size_t nCursor = 0)
+    {
+        stAudio.avFadePcm[nTrack].clear();
+        stAudio.anFadeLeft[nTrack] = 0;
+        if (bCrossfade)
+        {
+            stAudio.avFadePcm[nTrack] = std::move(stAudio.avPcm[nTrack]);
+            stAudio.astFadeLoops[nTrack] = stAudio.astLoops[nTrack];
+            stAudio.anFadeCursors[nTrack] = nCursor;
+            stAudio.anFadeLeft[nTrack] = nVariantCrossfadeFrames;
+        }
+        stAudio.avPcm[nTrack] = std::move(stAudio.avAfterPcm[nTrack]);
+        stAudio.avAfterPcm[nTrack].clear();
+        stAudio.astLoops[nTrack] = stAudio.astAfterLoops[nTrack];
+    }
 
     inline uint32_t Read32(const uint8_t* pData)
     {
@@ -854,7 +882,7 @@ namespace LooseAudioOverridesData
         return true;
     }
 
-    inline bool CopyBlock(const Replacement& stAudio, const uint8_t* pUnit, int16_t* pPcm, size_t nTrack = 0, size_t* pCursor = nullptr)
+    inline bool CopyBlock(Replacement& stAudio, const uint8_t* pUnit, int16_t* pPcm, size_t nTrack = 0, size_t* pCursor = nullptr)
     {
         if (nTrack >= stAudio.nTracks || stAudio.nTracks > nMaxTracks || stAudio.avPcm[nTrack].empty())
         {
@@ -887,6 +915,27 @@ namespace LooseAudioOverridesData
                 if (++*pCursor == stLoop.nEnd)
                 {
                     *pCursor = static_cast<size_t>(stLoop.nStart);
+                }
+                if (stAudio.anFadeLeft[nTrack])
+                {
+                    const auto& vFade = stAudio.avFadePcm[nTrack];
+                    const auto& stFadeLoop = stAudio.astFadeLoops[nTrack];
+                    auto& nFadeCursor = stAudio.anFadeCursors[nTrack];
+                    const double fPhase = double(nVariantCrossfadeFrames - stAudio.anFadeLeft[nTrack]) / nVariantCrossfadeFrames * std::numbers::pi / 2;
+                    for (size_t nChannel = 0; nChannel < 2; ++nChannel)
+                    {
+                        auto& nSample = pPcm[nChannel * nFramesPerUnit + nFrame];
+                        const double fMixed = vFade[nFadeCursor * 2 + nChannel] * std::cos(fPhase) + nSample * std::sin(fPhase);
+                        nSample = static_cast<int16_t>(std::clamp(std::lround(fMixed), -32768L, 32767L));
+                    }
+                    if (++nFadeCursor == stFadeLoop.nEnd)
+                    {
+                        nFadeCursor = static_cast<size_t>(stFadeLoop.nStart);
+                    }
+                    if (--stAudio.anFadeLeft[nTrack] == 0)
+                    {
+                        stAudio.avFadePcm[nTrack].clear();
+                    }
                 }
             }
             return true;
@@ -933,6 +982,32 @@ namespace LooseAudioOverridesData
             }
             bSelected = pAudio && pHeader && memcmp(pHeader, pAudio->aHeader.data(), nHeaderBytes) == 0;
             const bool bResult = bSelected;
+            stGate.clear(std::memory_order_release);
+            return bResult;
+        }
+
+        bool EndVariant(const Header& aHeader)
+        {
+            while (stGate.test_and_set(std::memory_order_acquire))
+            {
+                std::this_thread::yield();
+            }
+            const bool bResult = pAudio && pAudio->bVariant && pAudio->aHeader == aHeader;
+            if (bResult)
+            {
+                pAudio->bVariant = false;
+                for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
+                {
+                    if (!pAudio->abVariantTracks[nTrack])
+                    {
+                        continue;
+                    }
+                    pAudio->abVariantTracks[nTrack] = false;
+                    const bool bCrossfade = !pAudio->avPcm[nTrack].empty() && pAudio->astLoops[nTrack].nEnd && !pAudio->avAfterPcm[nTrack].empty();
+                    SwitchToAfter(*pAudio, nTrack, bCrossfade, anCursors[nTrack]);
+                    anCursors[nTrack] = 0;
+                }
+            }
             stGate.clear(std::memory_order_release);
             return bResult;
         }

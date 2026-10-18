@@ -4,6 +4,9 @@
     <ClCompile Include="src\resources\mg_developer_menu.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg2_opening_call_music.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg_inventory_menu.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -531,6 +534,9 @@
   <ItemGroup>
     <ClInclude Include="src\resources\mg_developer_menu.hpp">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_opening_call_music.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_inventory_menu.hpp">
       <Filter>Features</Filter>

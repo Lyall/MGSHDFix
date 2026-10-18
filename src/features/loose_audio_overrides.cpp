@@ -28,6 +28,63 @@ namespace
     constexpr size_t nDriverTypeOffset = 0x50;
     constexpr size_t nDriverMovieOffset = 0x58;
 
+    struct Variant
+    {
+        std::wstring_view svAsset;
+        std::wstring_view svVariant;
+    };
+    constexpr Variant astVariants[] =
+    {
+        { L"mg2_bgm29_startmusen", L"before_radar" },
+    };
+    std::map<std::wstring, Header> s_stVariantHeaders;
+
+    std::wstring LowerStem(const std::filesystem::path& stPath)
+    {
+        auto sStem = stPath.stem().wstring();
+        std::transform(sStem.begin(), sStem.end(), sStem.begin(), [](wchar_t nChar) { return static_cast<wchar_t>(std::towlower(nChar)); });
+        return sStem;
+    }
+
+    const Variant* FindVariant(const std::filesystem::path& stRelative)
+    {
+        const auto sStem = LowerStem(stRelative);
+        for (const auto& stVariant : astVariants)
+        {
+            if (sStem == stVariant.svAsset)
+            {
+                return &stVariant;
+            }
+        }
+        return nullptr;
+    }
+
+    bool HasVariantAudio(const std::filesystem::path& stRelative, const Variant* pVariant)
+    {
+        if (!pVariant)
+        {
+            return false;
+        }
+        for (size_t nTrack = 0; nTrack < nMaxTracks; ++nTrack)
+        {
+            if (!FindReplacementAudio(sExePath, s_stOverloadRoot, stRelative, nTrack, pVariant->svVariant).empty())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Use loader cursors so the next arrangement starts at frame zero.
+    void UseCursorPlayback(const std::vector<int16_t>& vPcm, LoopPoints& stLoop)
+    {
+        if (!stLoop.nEnd && !vPcm.empty())
+        {
+            stLoop = {};
+            stLoop.nEnd = vPcm.size() / 2;
+        }
+    }
+
     void Load_hook(SafetyHookContext& ctx)
     {
         const auto* pDriver = reinterpret_cast<const uint8_t*>(ctx.rbx);
@@ -100,6 +157,37 @@ namespace
                 else if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
                 {
                     spdlog::info("MG1/2: Loose Audio : Loaded on demand {} ({:.6f}s)", stAudioPath.string(), stLength.fExpectedSeconds);
+                }
+            }
+            const auto* pVariant = FindVariant(stPath);
+            if (HasVariantAudio(stPath, pVariant))
+            {
+                for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
+                {
+                    const auto stVariantPath = FindReplacementAudio(sExePath, s_stOverloadRoot, stPath, nTrack, pVariant->svVariant);
+                    if (stVariantPath.empty())
+                    {
+                        continue;
+                    }
+                    pAudio->avAfterPcm[nTrack] = std::move(pAudio->avPcm[nTrack]);
+                    pAudio->astAfterLoops[nTrack] = pAudio->astLoops[nTrack];
+                    ClipLength stLength;
+                    if (!DecodeAudio(stVariantPath, *pAudio, nTrack, s_eLoudnessMode, &stLength))
+                    {
+                        pAudio->avPcm[nTrack] = std::move(pAudio->avAfterPcm[nTrack]);
+                        pAudio->astLoops[nTrack] = pAudio->astAfterLoops[nTrack];
+                        spdlog::warn("MG1/2: Loose Audio : Unsupported variant audio, retaining normal track: {}", stVariantPath.string());
+                        continue;
+                    }
+                    UseCursorPlayback(pAudio->avAfterPcm[nTrack], pAudio->astAfterLoops[nTrack]);
+                    UseCursorPlayback(pAudio->avPcm[nTrack], pAudio->astLoops[nTrack]);
+                    pAudio->abVariantTracks[nTrack] = true;
+                    pAudio->bVariant = true;
+                    bAnyTrack = true;
+                    if (LooseAudioOverrides::sDebugLogging != ConfigKeys::LooseAudioDebugLogging_Disabled)
+                    {
+                        spdlog::info("MG1/2: Loose Audio : Loaded variant {} ({:.6f}s)", stVariantPath.string(), stLength.fFileSeconds);
+                    }
                 }
             }
             if (bAnyTrack)
@@ -190,6 +278,11 @@ void LooseAudioOverrides::Initialize()
                     break;
                 }
             }
+            if (const auto* pVariant = FindVariant(stRelative); HasVariantAudio(stRelative, pVariant))
+            {
+                stCandidates[aHeader] = stRelative;
+                s_stVariantHeaders[std::wstring(pVariant->svAsset)] = aHeader;
+            }
         }
         for (const auto& [aHeader, stPath] : stCandidates)
         {
@@ -253,4 +346,24 @@ void LooseAudioOverrides::Initialize()
         }
         s_bReady.store(true, std::memory_order_release);
     }
+}
+
+bool LooseAudioOverrides::HasVariant(std::wstring_view svAsset)
+{
+    if (!s_bReady.load(std::memory_order_acquire))
+    {
+        return false;
+    }
+    const auto stHeader = s_stVariantHeaders.find(std::wstring(svAsset));
+    return stHeader != s_stVariantHeaders.end() && s_stCandidates.contains(stHeader->second);
+}
+
+bool LooseAudioOverrides::EndVariant(std::wstring_view svAsset)
+{
+    if (!s_bReady.load(std::memory_order_acquire))
+    {
+        return false;
+    }
+    const auto stHeader = s_stVariantHeaders.find(std::wstring(svAsset));
+    return stHeader != s_stVariantHeaders.end() && s_stActive.EndVariant(stHeader->second);
 }

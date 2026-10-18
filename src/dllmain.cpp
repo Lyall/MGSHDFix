@@ -162,6 +162,7 @@
 #include "mg_cigarette_damage.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "loose_audio_overrides.hpp"
+#include "mg2_opening_call_music.hpp"
 #include "screenspace_fixes.hpp"
 #include "windows_preferred_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
@@ -216,6 +217,7 @@ namespace
         MG2_Elevators::Initialize();
         MG2_DoorCards::Initialize();
         LooseAudioOverrides::Initialize();
+        MG2_OpeningCallMusic::Initialize();
         MG_Cigarettes::InitializeMG2();
         MG_VectorFont::InitializeMG2();
         MG_StageSelect::InitializeMG2();

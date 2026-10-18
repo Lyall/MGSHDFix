@@ -1,5 +1,23 @@
 #pragma once
 
+enum MG2ContactSlot : int
+{
+    MG2_CONTACT_SLOT_FIRST = 1,
+    MG2_CONTACT_SLOT_CAMPBELL = 1,
+    MG2_CONTACT_SLOT_LAST = 11,
+};
+
+enum MG2DialogueBlock : int
+{
+    MG2_DIALOGUE_BLOCK_CONTACT_BASE = 2,
+    MG2_DIALOGUE_BLOCK_CAMPBELL = MG2_DIALOGUE_BLOCK_CONTACT_BASE + MG2_CONTACT_SLOT_CAMPBELL,
+};
+
+enum MG2CampbellDialogue : int
+{
+    MG2_CAMPBELL_DIALOGUE_OPENING = 32,
+};
+
 enum MG2StoryFlag : int
 {
     MG2_FLAG_A15_R4_BRIDGE_OF_SORROW_NASTACHA_DEATH = 43,

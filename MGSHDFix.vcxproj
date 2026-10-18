@@ -8,6 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\resources\mg_developer_menu.cpp" />
+    <ClCompile Include="src\features\mg2_opening_call_music.cpp" />
     <ClCompile Include="src\features\mg_inventory_menu.cpp" />
     <ClCompile Include="src\features\mg_stage_select.cpp" />
     <ClCompile Include="src\features\mg2_stage_select.cpp" />
@@ -204,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\resources\mg_developer_menu.hpp" />
+    <ClInclude Include="src\features\mg2_opening_call_music.hpp" />
     <ClInclude Include="src\features\mg_inventory_menu.hpp" />
     <ClInclude Include="src\features\mg_stage_select_data.hpp" />
     <ClInclude Include="src\features\mg_stage_select.hpp" />

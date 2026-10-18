@@ -334,6 +334,7 @@ void MG2_Gamefuncs::HookDllGameFuncs()
     pfnUploadTexture = reinterpret_cast<UploadTexture_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 33 C0 4C 8D 44 24", "MG2: sub_140025F80() : upload texture"));
 
     pfnAVS_GetLocalizedString = reinterpret_cast<AVS_GetLocalizedString_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B FA", "MG2: AVS_GetLocalizedString()"));
+    pfnDrawMessageText = reinterpret_cast<DrawMessageText_t>(Memory::PatternScan(mg2Module, "4C 8B DC 53 57 41 55", "MG2: DrawMessageText()"));
     pfnScriptRun = reinterpret_cast<ScriptRun_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B D9", "MG2: ScriptRun()"));
     uint8_t* pGetObjectSprite = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 00 4C 8B F8", "MG2: TickDoorTrigger()+0x40 : GetObjectSprite() call");
     if (pGetObjectSprite)

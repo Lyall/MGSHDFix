@@ -184,6 +184,10 @@ namespace MG2_Gamefuncs
     using AVS_GetLocalizedString_t = const char* (__fastcall*)(unsigned int nBlock, int nIndex, int* pLength);
     inline AVS_GetLocalizedString_t pfnAVS_GetLocalizedString = nullptr;
 
+    // Message typewriter: pArgs[0] = block, pArgs[1] = index.
+    using DrawMessageText_t = void(__fastcall*)(unsigned int* pArgs, int nMode);
+    inline DrawMessageText_t pfnDrawMessageText = nullptr;
+
     using ScriptRun_t = void(__fastcall*)(int* pScript);
     inline ScriptRun_t pfnScriptRun = nullptr;
     using DrawSprites_t = void(__fastcall*)();
