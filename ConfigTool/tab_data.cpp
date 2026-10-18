@@ -376,6 +376,8 @@ std::nullopt, false, Field::Int, 100, 1, 100},
     }},
     { wxString("Restoration"), {
 
+        { (MG), ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, ConfigKeys::MG1_Portrait_Overlay_Help, ConfigKeys::MG1_Portrait_Overlay_Tooltip, std::nullopt, false, Field::Bool, true },
+
 
         { (MGS2|MGS3), ConfigKeys::Restore_VFX_Section, ConfigKeys::Restore_VFX_Setting, ConfigKeys::Restore_VFX_Help, ConfigKeys::Restore_VFX_Tooltip,
           std::nullopt, false, Field::Bool, true },

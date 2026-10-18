@@ -277,6 +277,8 @@ void MG1_Gamefuncs::HookGameFuncs()
 
 void MG1_Gamefuncs::HookDllGameFuncs()
 {
+    pfnShowMessage = reinterpret_cast<ShowMessage_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 ED", "MG1: ShowMessage()"));
+    pfnBlitImage = reinterpret_cast<BlitImage_t>(Memory::PatternScan(mg1Module, "40 53 56 57 41 54", "MG1: BlitImage()"));
     pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 4C 89 44 24", "MG1: SetFont()"));
     pfnDrawTextSlot = reinterpret_cast<DrawTextSlot_t>(Memory::PatternScan(mg1Module, "40 53 55 56 57 41 55", "MG1: DrawTextSlot()"));
     pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG1: ComposeFrame()"));

@@ -1,5 +1,10 @@
 #pragma once
 
+namespace MG1_LinkVarBuf
+{
+    struct DrawLayer;
+}
+
 // One entry of a stage chara table (chara.h CHARA_TABLE)
 struct CHARA
 {
@@ -87,6 +92,11 @@ namespace MG_Gamefuncs
 
 namespace MG1_Gamefuncs
 {
+    using ShowMessage_t = void(__fastcall*)(int nChunk, int nRecord, int nAutoAdvance, int nReturnScene, int nScriptSlot);
+    inline ShowMessage_t pfnShowMessage = nullptr;
+    using BlitImage_t = void(__fastcall*)(int nLayer, const MG1_LinkVarBuf::DrawLayer* pImage, const int* pSourceRect, int nX, int nY);
+    inline BlitImage_t pfnBlitImage = nullptr;
+
     using SetFont_t = MG_Gamefuncs::SetFont_t;
     inline SetFont_t pfnSetFont = nullptr;
 

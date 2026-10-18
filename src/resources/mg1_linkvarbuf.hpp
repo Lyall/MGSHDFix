@@ -33,6 +33,23 @@ namespace MG1_LinkVarBuf
         int GM_RequestedScene;
     };
 
+    struct DrawLayer
+    {
+        uintptr_t hPixels;
+        int nWidth;
+        int nHeight;
+        int nColour;
+        int nClipLeft;
+        int nClipTop;
+        int nClipRight;
+        int nClipBottom;
+        int nReserved;
+    };
+
+    static_assert(sizeof(DrawLayer) == 0x28);
+
+    inline int32_t* pScriptGlobals = nullptr;
+    inline int32_t* pMessageLength = nullptr;
     inline PlayStats* playStats = nullptr;
     inline RoomPosition* roomPosition = nullptr;
     inline SceneState* sceneState = nullptr;
@@ -63,6 +80,30 @@ namespace MG1_LinkVarBuf
     inline GlobalValue<pTelescopeMode> GM_TelescopeMode;   // 0 off, 1 -> 4 the direction shown on the HUD
     inline GlobalValue<pBossSurvival>  GM_BossSurvival;
     inline GlobalValue<pGuardCount>    GM_GuardCount;
+
+    template <size_t nIndex>
+    struct ScriptGlobalValue
+    {
+        operator int32_t () const
+        {
+            return pScriptGlobals ? pScriptGlobals[nIndex] : 0;
+        }
+
+        ScriptGlobalValue& operator=(const int32_t nValue)
+        {
+            if (pScriptGlobals)
+            {
+                pScriptGlobals[nIndex] = nValue;
+            }
+            return *this;
+        }
+    };
+
+    inline ScriptGlobalValue<150> GM_CurrentDrawLayer;
+    inline ScriptGlobalValue<199> GM_MessagePos;
+    inline ScriptGlobalValue<202> GM_MessageDone; // Waiting at the end of a page or message.
+    inline ScriptGlobalValue<205> GM_MessageActive;
+    inline ScriptGlobalValue<209> GM_MessageInstant;
 
     inline constexpr uintptr_t kPlayStatsOffsetInRecord = 0x188;
 
@@ -248,6 +289,20 @@ namespace MG1_LinkVarBuf
 
     inline void Initialize()
     {
+        //sub_18001B2A0+D12
+        uint8_t* pScriptGlobalsScan = Memory::PatternScan(mg1Module, "48 8D 0D ?? ?? ?? ?? 8B 35", "MG1: sub_18001B2A0()+0xD12 : script globals");
+        if (pScriptGlobalsScan)
+        {
+            pScriptGlobals = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(pScriptGlobalsScan, 3, 7));
+        }
+
+        //ShowMessage+89
+        uint8_t* pMessageLengthScan = Memory::PatternScan(mg1Module, "89 0D ?? ?? ?? ?? 41 3B FE", "MG1: ShowMessage()+0x89 : message length");
+        if (pMessageLengthScan)
+        {
+            pMessageLength = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(pMessageLengthScan, 2, 6));
+        }
+
         uint8_t* pTextFadeScan = Memory::PatternScan(mg1Module, "44 8B 0D ?? ?? ?? ?? 41 81 F9", "MG1: ComposeFrame() : text layer fade");
         if (pTextFadeScan)
         {

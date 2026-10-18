@@ -1,5 +1,17 @@
 #pragma once
 
+enum MG1DialogueChunk : int
+{
+    MG1_DIALOGUE_RADIO = 13,
+    MG1_DIALOGUE_ENDING = 14,
+};
+
+enum MG1SnakeDialogue : int
+{
+    MG1_SNAKE_RADIO_SEND = 1,
+    MG1_SNAKE_FINAL_REPORT = 0,
+};
+
 enum MG1ItemIndex : uint8_t
 {
     MG1_ITEM_INDEX_CIGARETTES = 0,

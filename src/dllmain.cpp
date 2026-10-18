@@ -152,6 +152,7 @@
 #include "mg1_telescope_hud_fix.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_door_cards.hpp"
+#include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
 #include "mg_cigarette_damage.hpp"
 #include "mg2_linkvarbuf.hpp"
@@ -187,6 +188,7 @@ namespace
         MG1_Gamefuncs::HookDllGameFuncs();
         LooseAudioOverrides::Initialize();
         MG1_DoorCards::Initialize();
+        MG1_PortraitOverlay::Initialize();
         MG1_Scorpions::Initialize();
         MG1_TelescopeHudFix::Apply();
         MG_Cigarettes::InitializeMG1();

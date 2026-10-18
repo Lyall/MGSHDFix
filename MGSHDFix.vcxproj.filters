@@ -410,6 +410,9 @@
     <ClCompile Include="src\features\mg_cigarette_damage.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg1_portrait_overlay.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg_vector_font.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -993,6 +996,12 @@
     </ClInclude>
     <ClInclude Include="src\features\mg_cigarette_damage.hpp">
       <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_portrait_overlay.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_portrait_sprites.hpp">
+      <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font.hpp">
       <Filter>Features</Filter>
