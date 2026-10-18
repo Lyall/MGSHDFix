@@ -179,6 +179,11 @@ namespace ConfigKeys
     constexpr const char* MG2_Outdoor_Artwork_Help = "";
     constexpr const char* MG2_Outdoor_Artwork_Tooltip = "Restores the original MSX2 ground tiles, truck details and entrance door artwork as Snake makes his way into the first Zanzibar building.";
 
+    constexpr const char* MG2_Truckyard_Fence_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Truckyard_Fence_Setting = "Restore Bridge of Sorrow Fence";
+    constexpr const char* MG2_Truckyard_Fence_Help = "";
+    constexpr const char* MG2_Truckyard_Fence_Tooltip = "Restores the truckyard fence, blocking access until after the Bridge of Sorrow cutscene has played, as in the original MSX2 version.";
+
     constexpr const char* MG_Vector_Font_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* MG_Vector_Font_Enabled_Setting = "High Resolution Font";
     constexpr const char* MG_Vector_Font_Enabled_Help = "";

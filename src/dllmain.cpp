@@ -152,6 +152,8 @@
 #include "mg1_telescope_hud_fix.hpp"
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
+#include "mg2_truckyard_fence.hpp"
+#include "mg2_sprite_patcher.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_door_cards.hpp"
 #include "mg1_portrait_overlay.hpp"
@@ -208,11 +210,13 @@ namespace
         MG2_Gamefuncs::HookDllGameFuncs();
         MG2_OutdoorPalettes::Initialize();
         MG2_OutdoorTiles::Initialize();
+        MG2_TruckyardFence::Initialize();
         MG2_Elevators::Initialize();
         MG2_DoorCards::Initialize();
         LooseAudioOverrides::Initialize();
         MG_Cigarettes::InitializeMG2();
         MG_VectorFont::InitializeMG2();
+        MG2_SpritePatcher::Initialize(); // Keep last!!!
     }
 
 }

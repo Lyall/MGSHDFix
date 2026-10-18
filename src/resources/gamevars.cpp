@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "gamevars.hpp"
 #include "mg2_outdoor_tiles.hpp"
+#include "mg2_truckyard_fence.hpp"
 #include "mg2_elevators.hpp"
 
 #include "d3d11_text_overlay.hpp"
@@ -340,6 +341,7 @@ void GameVars::OnLevelTransition()
     else if (eGameType & MG)
     {
         MG2_OutdoorTiles::HandleLevelTransition();
+        MG2_TruckyardFence::HandleLevelTransition();
         MG2_Elevators::HandleLevelTransition();
     }
 

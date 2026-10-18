@@ -13,6 +13,12 @@ namespace MG2_LinkVarBuf
     constexpr int nRoomCellSize = 8;
     constexpr int nRoomCellColumns = nRoomWidth / nRoomCellSize;
 
+    constexpr int nRoomCellEntry = 6;
+    constexpr unsigned int nRoomCellMapSize = nRoomCellColumns * (nRoomHeight / nRoomCellSize) * sizeof(uint16_t);
+    constexpr size_t nPaletteSlotCount = 256;
+    constexpr size_t nImageBlobHeaderSize = 8;
+    constexpr size_t nImageBlobHeightOffset = 4;
+
     struct PlayStats
     {
         int GM_PlayTime;
@@ -75,6 +81,7 @@ namespace MG2_LinkVarBuf
     constexpr int nBackgroundPaletteCount = 48;
     inline int* pPaletteEffect = nullptr;
 
+    inline uintptr_t* pAreaMapChunk = nullptr;
     inline uintptr_t* stateSlot = nullptr;
     inline PlayStats* playStats = nullptr;
     inline int32_t* pScriptGlobals = nullptr;
@@ -308,6 +315,13 @@ namespace MG2_LinkVarBuf
         if (pRunningScriptCodeScan)
         {
             pRunningScriptCode = reinterpret_cast<const uintptr_t*>(Memory::GetRipRelativeAddress(pRunningScriptCodeScan, 3, 7));
+        }
+
+        //DrawRoom+32
+        uint8_t* pAreaMapScan = Memory::PatternScan(mg2Module, "48 8B 0D ?? ?? ?? ?? 83 C2 ?? 48 89 44 24", "MG2: DrawRoom()+0x32 : area map chunk");
+        if (pAreaMapScan)
+        {
+            pAreaMapChunk = reinterpret_cast<uintptr_t*>(Memory::GetRipRelativeAddress(pAreaMapScan, 3, 7));
         }
 
         //UpdatePalette+18

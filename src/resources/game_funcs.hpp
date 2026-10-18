@@ -121,6 +121,15 @@ namespace MG1_Gamefuncs
 
 namespace MG2_Gamefuncs
 {
+    using TestFlag_t = int(__fastcall*)(int nFlag);
+    inline TestFlag_t pfnTestFlag = nullptr;
+    using LoadImageBlob_t = void(__fastcall*)(void* pImageSlot, const uint8_t* pBlob);
+    inline LoadImageBlob_t pfnLoadImageBlob = nullptr;
+    using GetChunkEntryData_t = uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
+    using GetChunkEntrySize_t = unsigned int(__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
+
     using IsBossSurvival_t = int(__fastcall*)();
     inline IsBossSurvival_t pfnIsBossSurvival = nullptr;
 

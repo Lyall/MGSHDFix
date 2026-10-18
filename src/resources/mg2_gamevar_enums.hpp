@@ -1,5 +1,16 @@
 #pragma once
 
+enum MG2StoryFlag : int
+{
+    MG2_FLAG_A15_R4_BRIDGE_OF_SORROW_NASTACHA_DEATH = 43,
+};
+
+enum MG2RoomCellFlags : uint16_t
+{
+    MG2_CELL_BLOCK_PLAYER = 0x1000,
+    MG2_CELL_BLOCK_ACTORS = 0x8000,
+};
+
 enum MG2PaletteEffect : int
 {
     MG2_PALETTE_NORMAL = 0,

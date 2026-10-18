@@ -21,6 +21,8 @@
     <ClCompile Include="src\features\mg1_portrait_overlay.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_palettes.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_tiles.cpp" />
+    <ClCompile Include="src\features\mg2_truckyard_fence.cpp" />
+    <ClCompile Include="src\features\mg2_sprite_patcher.cpp" />
     <ClCompile Include="src\features\mg_vector_font.cpp" />
     <ClCompile Include="src\features\mg_vector_font_renderer.cpp" />
     <ClCompile Include="src\features\mgs_smaa.cpp" />
@@ -231,6 +233,11 @@
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles_data.hpp" />
+    <ClInclude Include="src\features\mg2_truckyard_fence.hpp" />
+    <ClInclude Include="src\features\mg2_truckyard_fence_sprites.hpp" />
+    <ClInclude Include="src\features\mg2_sprite_patcher.hpp" />
+    <ClInclude Include="src\features\mg2_sprite_patches.hpp" />
+    <ClInclude Include="src\features\mg2_palette_patches.hpp" />
     <ClInclude Include="src\features\mg_vector_font.hpp" />
     <ClInclude Include="src\features\mg_vector_font_renderer.hpp" />
     <ClInclude Include="src\features\mg_font_bundle.hpp" />
