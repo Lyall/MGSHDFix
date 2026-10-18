@@ -82,6 +82,7 @@ enum MG2ElevatorState : int
 
 enum MG2ScriptId : int
 {
+    MG2_SCRIPT_CIGARETTES = 133,
     MG2_SCRIPT_ELEVATORS = 135,
 };
 

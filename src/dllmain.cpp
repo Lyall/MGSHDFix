@@ -153,6 +153,7 @@
 #include "mg2_elevators.hpp"
 #include "mg2_door_cards.hpp"
 #include "mg_vector_font.hpp"
+#include "mg_cigarette_damage.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "loose_audio_overrides.hpp"
 #include "screenspace_fixes.hpp"
@@ -188,6 +189,7 @@ namespace
         MG1_DoorCards::Initialize();
         MG1_Scorpions::Initialize();
         MG1_TelescopeHudFix::Apply();
+        MG_Cigarettes::InitializeMG1();
         MG_VectorFont::InitializeMG1();
     }
 
@@ -203,6 +205,7 @@ namespace
         MG2_Elevators::Initialize();
         MG2_DoorCards::Initialize();
         LooseAudioOverrides::Initialize();
+        MG_Cigarettes::InitializeMG2();
         MG_VectorFont::InitializeMG2();
     }
 

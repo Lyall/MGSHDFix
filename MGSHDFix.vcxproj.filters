@@ -407,6 +407,9 @@
     <ClCompile Include="src\features\mg1_scorpions.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg_cigarette_damage.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg_vector_font.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -987,6 +990,9 @@
     <ClInclude Include="external\dr_libs\dr_wav.h" />
     <ClInclude Include="src\features\loose_audio_overrides_data.hpp">
       <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg_cigarette_damage.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font.hpp">
       <Filter>Features</Filter>

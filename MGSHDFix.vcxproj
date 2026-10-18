@@ -17,6 +17,7 @@
     <ClCompile Include="src\features\loose_audio_overrides.cpp" />
     <ClCompile Include="src\features\mg2_elevators.cpp" />
     <ClCompile Include="src\features\mg2_door_cards.cpp" />
+    <ClCompile Include="src\features\mg_cigarette_damage.cpp" />
     <ClCompile Include="src\features\mg_vector_font.cpp" />
     <ClCompile Include="src\features\mg_vector_font_renderer.cpp" />
     <ClCompile Include="src\features\mgs_smaa.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="external\dr_libs\dr_wav.h" />
     <ClInclude Include="src\features\mg2_elevators.hpp" />
     <ClInclude Include="src\features\mg2_door_cards.hpp" />
+    <ClInclude Include="src\features\mg_cigarette_damage.hpp" />
     <ClInclude Include="src\features\mg_vector_font.hpp" />
     <ClInclude Include="src\features\mg_vector_font_renderer.hpp" />
     <ClInclude Include="src\features\mg_font_bundle.hpp" />

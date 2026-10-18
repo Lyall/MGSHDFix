@@ -125,6 +125,11 @@ namespace ConfigKeys
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "";
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Tooltip = "Corrects the viewport's dimensions from the MSX2's raw internal aspect ratio (64:53 / 256x212) to the intended CRT aspect ratio of 4:3.";
 
+    constexpr const char* MG_Cigarettes_Section = "Enhancements and Tweaks";
+    constexpr const char* MG_Cigarettes_Setting = "Disable Surgeon General's Warning";
+    constexpr const char* MG_Cigarettes_Help = "";
+    constexpr const char* MG_Cigarettes_Tooltip = "Disables cigarette health drain in Metal Gear 1 and Metal Gear 2, which didn't exist in the original MSX version.";
+
     constexpr const char* MG1_Scorpions_Section = "Bugfixes";
     constexpr const char* MG1_Scorpions_Setting = "Fix Scorpion Pathing (MG1)";
     constexpr const char* MG1_Scorpions_Help = "";

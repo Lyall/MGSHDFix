@@ -279,6 +279,8 @@ std::nullopt, false, Field::Bool, false},
         { (MG|MGS2|MGS3), ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
+        { (MG), ConfigKeys::MG_Cigarettes_Section, ConfigKeys::MG_Cigarettes_Setting, ConfigKeys::MG_Cigarettes_Help, ConfigKeys::MG_Cigarettes_Tooltip, std::nullopt, false, Field::Bool, true },
+
         { (MGS2), ConfigKeys::MGS2BladeAnywhere_Section, ConfigKeys::MGS2BladeAnywhere_Setting, ConfigKeys::MGS2BladeAnywhere_Help, ConfigKeys::MGS2BladeAnywhere_Tooltip,
           std::nullopt, false, Field::Bool, false },
 

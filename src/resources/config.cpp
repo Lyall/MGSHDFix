@@ -100,6 +100,7 @@
 #include "mg2_door_cards.hpp"
 #include "mg2_elevators.hpp"
 #include "mg_vector_font.hpp"
+#include "mg_cigarette_damage.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_ai_ray_vision.hpp"
@@ -1362,6 +1363,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Section, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Setting, MG1_DisplayScaling::bCorrectTo4x3);
     LOG_CONFIG(ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Section, ConfigKeys::MG1_Correct_Aspect_Ratio_Enabled_Setting, MG1_DisplayScaling::bCorrectTo4x3);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG_Cigarettes_Section, ConfigKeys::MG_Cigarettes_Setting, MG_Cigarettes::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG_Cigarettes_Section, ConfigKeys::MG_Cigarettes_Setting, MG_Cigarettes::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
