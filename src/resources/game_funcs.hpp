@@ -78,6 +78,7 @@ namespace MGS2_GameFuncs
 
 namespace MG_Gamefuncs
 {
+    using SetFont_t = void(__fastcall*)(int nFont, uintptr_t hGlyphs, uintptr_t hKanji, int nHeight);
     using DrawText_t = void(__fastcall*)(uint32_t* pFrame, int* pText);
     using ComposeTextLayer_t = void(__fastcall*)(int nDrawText);
     using MeasureTextFont_t = unsigned int(__fastcall*)(char* pszText, int nStart, int nLength, int nFont);
@@ -86,6 +87,9 @@ namespace MG_Gamefuncs
 
 namespace MG1_Gamefuncs
 {
+    using SetFont_t = MG_Gamefuncs::SetFont_t;
+    inline SetFont_t pfnSetFont = nullptr;
+
     using DrawTextSlot_t = MG_Gamefuncs::DrawText_t;
     inline DrawTextSlot_t pfnDrawTextSlot = nullptr;
     using ComposeTextLayer_t = MG_Gamefuncs::ComposeTextLayer_t;
@@ -107,6 +111,9 @@ namespace MG1_Gamefuncs
 
 namespace MG2_Gamefuncs
 {
+    using SetFont_t = MG_Gamefuncs::SetFont_t;
+    inline SetFont_t pfnSetFont = nullptr;
+
     using DrawTextItem_t = MG_Gamefuncs::DrawText_t;
     inline DrawTextItem_t pfnDrawTextItem = nullptr;
 

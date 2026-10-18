@@ -1377,8 +1377,8 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
 
 
-    ConfigHelper::getValue(ini, ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
-    LOG_CONFIG(ConfigKeys::pszMG_Vector_Font_Enabled_Section, ConfigKeys::pszMG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
 
 
 

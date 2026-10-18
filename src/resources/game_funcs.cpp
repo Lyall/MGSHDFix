@@ -277,6 +277,7 @@ void MG1_Gamefuncs::HookGameFuncs()
 
 void MG1_Gamefuncs::HookDllGameFuncs()
 {
+    pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 4C 89 44 24", "MG1: SetFont()"));
     pfnDrawTextSlot = reinterpret_cast<DrawTextSlot_t>(Memory::PatternScan(mg1Module, "40 53 55 56 57 41 55", "MG1: DrawTextSlot()"));
     pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG1: ComposeFrame()"));
     pfnMeasureTextFont = reinterpret_cast<MeasureTextFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 4D 63 F1", "MG1: MeasureTextFont()"));
@@ -292,6 +293,7 @@ void MG2_Gamefuncs::HookDllGameFuncs()
         GameVars::OnLevelTransition();
     });
 
+    pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 4C 89 44 24", "MG2: RegisterFont()"));
     pfnDrawTextItem = reinterpret_cast<DrawTextItem_t>(Memory::PatternScan(mg2Module, "40 53 55 56 57 41 55 48 81 EC", "MG2: DrawTextItem()"));
     pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG2: sub_180024460() : compose text layer"));
     pfnMeasureTextFont = reinterpret_cast<MeasureTextFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 4D 63 F1", "MG2: sub_1800242F0() : measure text"));

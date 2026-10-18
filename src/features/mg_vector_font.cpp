@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mg_vector_font.hpp"
+#include "mg_vector_font_renderer.hpp"
 
 #include "common.hpp"
 #include "d3d11_api.hpp"
@@ -18,6 +19,7 @@ namespace
     {
         const char* pszGame;
         int* pTextFade;
+        MG_Gamefuncs::SetFont_t pfnSetFont;
         MG_Gamefuncs::DrawText_t pfnDrawText;
         MG_Gamefuncs::ComposeTextLayer_t pfnComposeTextLayer;
         MG_Gamefuncs::MeasureTextFont_t pfnMeasureTextFont;
@@ -25,17 +27,30 @@ namespace
     };
 
     constexpr std::array<int, 4> anFontHeights = { 20, 12, 18, 24 };
-    constexpr int nLayerWidth = 512;
-    constexpr int nLayerHeight = 424;
+    constexpr int nLayerWidth = MG_VectorFontRenderer::nLayerWidth;
+    constexpr int nLayerHeight = MG_VectorFontRenderer::nLayerHeight;
     constexpr size_t nLayerPixels = nLayerWidth * nLayerHeight;
     constexpr size_t nMaximumTextBytes = 4096;
     constexpr size_t nMaximumCachedGlyphs = 4096;
 
+    struct Letter
+    {
+        int nCodepoint;
+        int nX;
+        int nAdvance;
+    };
+
     struct GameRenderer
     {
         Settings stSettings {};
+        SafetyHookInline hSetFont;
         SafetyHookInline hDrawText;
         SafetyHookInline hCompose;
+        std::mutex stFontMutex;
+        std::array<std::vector<Letter>, MGFont::nCount> avLetters;
+        uint64_t nFontRevision = 0;
+        uint64_t nWarmedRevision = 0;
+        uint64_t nWarmedGeneration = 0;
     };
 
     std::array<GameRenderer, 2> s_astGames;
@@ -47,38 +62,51 @@ namespace
 
     struct Glyph
     {
-        std::vector<uint8_t> vCoverage;
+        MG_VectorFontRenderer::GlyphLocation stLocation;
+        bool bReady = true;
         int nWidth = 0;
         int nHeight = 0;
         int nX = 0;
         int nY = 0;
     };
 
-    struct Letter
+    struct TextCommand
     {
-        int nCodepoint;
+        uint32_t nColor;
         int nX;
-        int nAdvance;
-    };
+        int nY;
+        int nFont;
+        bool bDraw;
+        std::string sText;
 
-    struct Texture
-    {
-        ComPtr<ID3D11ShaderResourceView> pOriginal;
-        ComPtr<ID3D11Texture2D> pTexture;
-        ComPtr<ID3D11ShaderResourceView> pView;
-        int nScale = 0;
-        bool bReady = false;
+        bool operator==(const TextCommand&) const = default;
     };
 
     std::mutex s_stTextureMutex;
-    std::vector<Texture> s_vTextures;
+    std::atomic<ID3D11ShaderResourceView*> s_pActiveOriginal = nullptr;
+    ComPtr<ID3D11ShaderResourceView> s_pOriginalView;
+    ComPtr<ID3D11ShaderResourceView> s_pReplacementView;
+    MG_VectorFontRenderer::Renderer s_stRenderer;
+    std::vector<MG_VectorFontRenderer::Vertex> s_vVertices;
+    std::vector<MG_VectorFontRenderer::Batch> s_vBatches;
+    ID3D11Device* s_pFailedDevice = nullptr;
     std::unordered_map<uint64_t, Glyph> s_stGlyphs;
-    std::vector<uint32_t> s_vPixels;
     uint32_t* s_pFrame = nullptr;
     int s_nScale = 0;
     int s_nFade = 255;
     thread_local bool s_bComposing = false;
     bool s_bRasterFailed = false;
+    std::vector<uint32_t> s_vBasePixels;
+    std::vector<TextCommand> s_vCommands;
+    std::vector<TextCommand> s_vCachedCommands;
+    GameRenderer* s_pCachedGame = nullptr;
+    int s_nCachedScale = 0;
+    bool s_bCachedRasterFailed = false;
+    uint64_t s_nRevision = 0;
+    uint64_t s_nGlyphGeneration = 0;
+    std::atomic<bool> s_bWarmPending = false;
+
+    void WarmGlyphCache(GameRenderer& stGame);
 
     void __stdcall SetResources_hook(ID3D11DeviceContext* pContext, UINT nStart, UINT nCount, ID3D11ShaderResourceView* const* ppViews)
     {
@@ -87,23 +115,29 @@ namespace
             s_hSetResources.call<void>(pContext, nStart, nCount, ppViews);
             return;
         }
-        std::array<ID3D11ShaderResourceView*, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> apViews {};
-        std::array<ComPtr<ID3D11ShaderResourceView>, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> apKeepAlive;
+        ID3D11ShaderResourceView* pOriginal = s_pActiveOriginal.load(std::memory_order_acquire);
+        if (!pOriginal || std::find(ppViews, ppViews + nCount, pOriginal) == ppViews + nCount)
+        {
+            s_hSetResources.call<void>(pContext, nStart, nCount, ppViews);
+            return;
+        }
+        ComPtr<ID3D11ShaderResourceView> pReplacement;
         {
             std::lock_guard<std::mutex> stLock(s_stTextureMutex);
-            for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+            if (s_pOriginalView.Get() == pOriginal)
             {
-                apViews[nIndex] = ppViews[nIndex];
-                for (const Texture& stTexture : s_vTextures)
-                {
-                    if (stTexture.bReady && stTexture.pOriginal.Get() == ppViews[nIndex])
-                    {
-                        apKeepAlive[nIndex] = stTexture.pView;
-                        apViews[nIndex] = apKeepAlive[nIndex].Get();
-                        break;
-                    }
-                }
+                pReplacement = s_pReplacementView;
             }
+        }
+        if (!pReplacement)
+        {
+            s_hSetResources.call<void>(pContext, nStart, nCount, ppViews);
+            return;
+        }
+        std::array<ID3D11ShaderResourceView*, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> apViews;
+        for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+        {
+            apViews[nIndex] = ppViews[nIndex] == pOriginal ? pReplacement.Get() : ppViews[nIndex];
         }
         s_hSetResources.call<void>(pContext, nStart, nCount, apViews.data());
     }
@@ -130,24 +164,32 @@ namespace
             return false;
         }
         const int nScale = std::clamp(static_cast<int>(std::ceil((std::max)(stDesc.BufferDesc.Width * 0.75f / nLayerWidth, float(stDesc.BufferDesc.Height) / nLayerHeight))), 2, 8);
-        if (nScale != s_nScale)
+        auto* pDevice = g_D3D11Hooks.d3dDevice.Get();
+        if (s_pFailedDevice == pDevice || !g_D3D11Hooks.D3DCompileFunc)
+        {
+            return false;
+        }
+        const bool bNewDevice = !s_stRenderer.IsDevice(pDevice);
+        if (!s_stRenderer.Initialize(pDevice, g_D3D11Hooks.d3dDeviceContext.Get(), g_D3D11Hooks.D3DCompileFunc))
+        {
+            s_pFailedDevice = pDevice;
+            spdlog::error("MG1/MG2: Vector Font : GPU renderer unavailable. Using native text.");
+            return false;
+        }
+        if (nScale != s_nScale || bNewDevice || s_stGlyphs.size() >= nMaximumCachedGlyphs)
         {
             s_nScale = nScale;
             s_stGlyphs.clear();
-            s_vPixels.resize(nLayerPixels * nScale * nScale);
+            s_stRenderer.ResetGlyphs();
+            s_pCachedGame = nullptr;
+            ++s_nGlyphGeneration;
+            s_bWarmPending.store(true, std::memory_order_release);
+        }
+        if (bNewDevice)
+        {
+            spdlog::info("MG1/MG2: Vector Font : GPU renderer initialized.");
         }
         return true;
-    }
-
-    void CopyPixel(size_t nIndex, uint32_t nPixel)
-    {
-        const size_t nX = (nIndex % nLayerWidth) * s_nScale;
-        const size_t nY = (nIndex / nLayerWidth) * s_nScale;
-        const size_t nStride = nLayerWidth * s_nScale;
-        for (int nRow = 0; nRow < s_nScale; nRow++)
-        {
-            std::fill_n(s_vPixels.begin() + (nY + nRow) * nStride + nX, s_nScale, nPixel);
-        }
     }
 
     bool DecodeLetters(char* pszText, int nFont, int nX, std::vector<Letter>& vLetters)
@@ -204,11 +246,8 @@ namespace
         const auto stFound = s_stGlyphs.find(nKey);
         if (stFound != s_stGlyphs.end())
         {
+            s_bRasterFailed |= !stFound->second.bReady;
             return stFound->second;
-        }
-        if (s_stGlyphs.size() >= nMaximumCachedGlyphs)
-        {
-            s_stGlyphs.clear();
         }
         Glyph stGlyph;
         int nAdvance = 0;
@@ -225,60 +264,159 @@ namespace
         stGlyph.nY += static_cast<int>(std::round(nAscent * fScaleY));
         if (pBitmap)
         {
-            stGlyph.vCoverage.assign(pBitmap, pBitmap + size_t(stGlyph.nWidth) * stGlyph.nHeight);
+            if (!s_stRenderer.AddGlyph(pBitmap, stGlyph.nWidth, stGlyph.nHeight, stGlyph.stLocation))
+            {
+                stGlyph.bReady = false;
+            }
             stbtt_FreeBitmap(pBitmap, nullptr);
         }
         else if (stGlyph.nWidth > 0 && stGlyph.nHeight > 0)
         {
-            s_bRasterFailed = true;
+            stGlyph.bReady = false;
         }
+        s_bRasterFailed |= !stGlyph.bReady;
         return s_stGlyphs.emplace(nKey, std::move(stGlyph)).first->second;
     }
 
-    uint32_t Blend(uint32_t nDest, uint32_t nColor, unsigned int nCoverage)
+    const uint8_t* GetFontData(uintptr_t hFont, size_t nSize)
     {
-        const unsigned int nDestAlpha = 255 - (nDest >> 24);
-        const unsigned int nAlpha = nCoverage * 255 + nDestAlpha * (255 - nCoverage);
-        if (nAlpha == 0)
+        auto** ppResource = reinterpret_cast<MGFont::Resource**>(hFont);
+        if (!Memory::IsReadable(ppResource, sizeof(*ppResource)) || !Memory::IsReadable(*ppResource, sizeof(**ppResource)))
         {
-            return nDest;
+            return nullptr;
         }
-        uint32_t nResult = (255 - (nAlpha + 127) / 255) << 24;
-        for (int nShift = 0; nShift <= 16; nShift += 8)
+        const uint8_t* pData = (*ppResource)->pData;
+        return Memory::IsReadable(pData, nSize) ? pData : nullptr;
+    }
+
+    template <size_t nGame>
+    void __fastcall SetFont_hook(int nFont, uintptr_t hGlyphs, uintptr_t hKanji, int nHeight)
+    {
+        GameRenderer& stGame = s_astGames[nGame];
+        stGame.hSetFont.call<void>(nFont, hGlyphs, hKanji, nHeight);
+        if (nFont < 0 || nFont >= MGFont::nCount)
         {
-            const unsigned int nSource = (nColor >> nShift) & 255;
-            const unsigned int nTarget = (nDest >> nShift) & 255;
-            nResult |= ((nSource * nCoverage * 255 + nTarget * nDestAlpha * (255 - nCoverage)) / nAlpha) << nShift;
+            return;
         }
-        return nResult;
+        std::vector<Letter> vLetters;
+        const uint8_t* pGlyphs = GetFontData(hGlyphs, MGFont::nGlyphDataOffset);
+        if (pGlyphs)
+        {
+            for (int nChar = MGFont::nFirstCharacter; nChar < MGFont::nFirstCharacter + MGFont::nCharacterCount; ++nChar)
+            {
+                if (nChar == '|' || (nChar >= 0x80 && static_cast<uint8_t>(nChar + 0x60) > 0x3F))
+                {
+                    continue;
+                }
+                uint32_t nRecord = 0;
+                memcpy(&nRecord, pGlyphs + MGFont::nGlyphTableOffset + (nChar - MGFont::nFirstCharacter) * MGFont::nGlyphRecordSize, sizeof(nRecord));
+                if ((nRecord >> MGFont::nWidthShift) == MGFont::nUnusedGlyph)
+                {
+                    continue;
+                }
+                const char chText = static_cast<char>(nChar);
+                wchar_t wCodepoint = 0;
+                if (MultiByteToWideChar(1252, MB_ERR_INVALID_CHARS, &chText, 1, &wCodepoint, 1) == 1 && stbtt_FindGlyphIndex(&s_stFont, wCodepoint) != 0)
+                {
+                    vLetters.push_back({ wCodepoint, 0, int((nRecord >> MGFont::nWidthShift) & MGFont::nWidthMask) + 1 });
+                }
+            }
+        }
+        const uint8_t* pKanji = nFont == 0 ? GetFontData(hKanji, MGFont::nKanjiDataOffset) : nullptr;
+        if (pKanji)
+        {
+            for (int nCode = MGFont::nKanjiFirstCode; nCode <= 0xFFFF; ++nCode)
+            {
+                const auto nLead = static_cast<uint8_t>(nCode >> 8);
+                if (static_cast<uint8_t>(nLead + 0x60) <= 0x3F)
+                {
+                    continue;
+                }
+                const int nOffset = MGFont::nKanjiTableOffset + (nCode - MGFont::nKanjiFirstCode) * MGFont::nKanjiRecordSize;
+                if (pKanji[nOffset] == 0 && pKanji[nOffset + 1] == 0)
+                {
+                    continue;
+                }
+                const char achText[] = { static_cast<char>(nLead), static_cast<char>(nCode) };
+                wchar_t wCodepoint = 0;
+                if (MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, achText, 2, &wCodepoint, 1) == 1 && stbtt_FindGlyphIndex(&s_stFont, wCodepoint) != 0)
+                {
+                    vLetters.push_back({ wCodepoint, 0, MGFont::nKanjiWidth });
+                }
+            }
+        }
+        {
+            std::lock_guard<std::mutex> stLock(stGame.stFontMutex);
+            stGame.avLetters[nFont] = std::move(vLetters);
+            ++stGame.nFontRevision;
+        }
+        s_bWarmPending.store(true, std::memory_order_release);
+    }
+
+    void WarmGlyphCache(GameRenderer& stGame)
+    {
+        std::lock_guard<std::mutex> stLock(stGame.stFontMutex);
+        if (stGame.nFontRevision == 0 || (stGame.nWarmedRevision == stGame.nFontRevision && stGame.nWarmedGeneration == s_nGlyphGeneration))
+        {
+            return;
+        }
+        const auto stStart = std::chrono::steady_clock::now();
+        const size_t nPreviousCount = s_stGlyphs.size();
+        const bool bPreviousFailure = s_bRasterFailed;
+        bool bComplete = true;
+        for (int nFont = 0; nFont < MGFont::nCount && bComplete; ++nFont)
+        {
+            for (const Letter& stLetter : stGame.avLetters[nFont])
+            {
+                if (s_stGlyphs.size() >= nMaximumCachedGlyphs - 128)
+                {
+                    bComplete = false;
+                    break;
+                }
+                if (!GetGlyph(stLetter, nFont).bReady)
+                {
+                    bComplete = false;
+                    break;
+                }
+            }
+        }
+        s_bRasterFailed = bPreviousFailure;
+        stGame.nWarmedRevision = stGame.nFontRevision;
+        stGame.nWarmedGeneration = s_nGlyphGeneration;
+        const double fMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - stStart).count();
+        spdlog::info("{}: Vector Font : Prewarmed {} glyphs at {}x in {:.1f} ms.", stGame.stSettings.pszGame, s_stGlyphs.size() - nPreviousCount, s_nScale, fMilliseconds);
+        if (!bComplete)
+        {
+            spdlog::warn("{}: Vector Font : Prewarm stopped at the cache limit or an atlas allocation failure.", stGame.stSettings.pszGame);
+        }
     }
 
     void DrawLetter(const Letter& stLetter, int nFont, int nY, uint32_t nColor)
     {
         const Glyph& stGlyph = GetGlyph(stLetter, nFont);
-        if (stGlyph.vCoverage.empty())
+        if (stGlyph.nWidth <= 0 || stGlyph.nHeight <= 0 || s_bRasterFailed)
         {
             return;
         }
-        const int nWidth = nLayerWidth * s_nScale;
-        const int nHeight = nLayerHeight * s_nScale;
-        for (int nRow = 0; nRow < stGlyph.nHeight; nRow++)
+        const float fX = float(stLetter.nX) * s_nScale + stGlyph.nX;
+        const float fY = float(nY) * s_nScale + stGlyph.nY;
+        const float fU = float(stGlyph.stLocation.nX);
+        const float fV = float(stGlyph.stLocation.nY);
+        const float fWidth = float(stGlyph.nWidth);
+        const float fHeight = float(stGlyph.nHeight);
+        if (s_vBatches.empty() || s_vBatches.back().nPage != stGlyph.stLocation.nPage)
         {
-            const int nDestY = nY * s_nScale + stGlyph.nY + nRow;
-            if (nDestY < 0 || nDestY >= nHeight)
-            {
-                continue;
-            }
-            for (int nColumn = 0; nColumn < stGlyph.nWidth; nColumn++)
-            {
-                const int nDestX = stLetter.nX * s_nScale + stGlyph.nX + nColumn;
-                if (nDestX >= 0 && nDestX < nWidth)
-                {
-                    uint32_t& nDest = s_vPixels[size_t(nDestY) * nWidth + nDestX];
-                    nDest = Blend(nDest, nColor, stGlyph.vCoverage[size_t(nRow) * stGlyph.nWidth + nColumn]);
-                }
-            }
+            s_vBatches.push_back({ stGlyph.stLocation.nPage, static_cast<UINT>(s_vVertices.size()), 0 });
         }
+        s_vVertices.insert(s_vVertices.end(), {
+            { fX, fY, fU, fV, nColor },
+            { fX + fWidth, fY, fU + fWidth, fV, nColor },
+            { fX, fY + fHeight, fU, fV + fHeight, nColor },
+            { fX, fY + fHeight, fU, fV + fHeight, nColor },
+            { fX + fWidth, fY, fU + fWidth, fV, nColor },
+            { fX + fWidth, fY + fHeight, fU + fWidth, fV + fHeight, nColor }
+        });
+        s_vBatches.back().nCount += 6;
     }
 
     template <size_t nGame>
@@ -293,30 +431,60 @@ namespace
         if (!s_pFrame)
         {
             s_pFrame = pFrame;
-            for (size_t nIndex = 0; nIndex < nLayerPixels; nIndex++)
-            {
-                CopyPixel(nIndex, pFrame[nIndex]);
-            }
+            s_vBasePixels.assign(pFrame, pFrame + nLayerPixels);
         }
-        const int nX = pText[1];
-        const int nY = pText[2];
-        const int nFont = pText[3];
-        const uint32_t nColor = pText[0];
-        std::vector<Letter> vLetters;
-        const bool bSupported = nFont >= 0 && nFont < 4 && DecodeLetters(reinterpret_cast<char*>(pText + 4), nFont, nX, vLetters);
-        // keep the original font rendering layer in case we have to fall back easily.
-        stGame.hDrawText.call<void>(pFrame, pText);
-        if (!bSupported)
+        const char* pszText = reinterpret_cast<const char*>(pText + 4);
+        const size_t nLength = strnlen(pszText, nMaximumTextBytes);
+        TextCommand stCommand { static_cast<uint32_t>(pText[0]), pText[1], pText[2], pText[3], false, {} };
+        if (nLength == nMaximumTextBytes)
         {
             s_bRasterFailed = true;
         }
-        else if (pText[1] != nX)
+        else
         {
-            for (const Letter& stLetter : vLetters)
+            stCommand.sText.assign(pszText, nLength);
+        }
+        stGame.hDrawText.call<void>(pFrame, pText);
+        stCommand.bDraw = pText[1] != stCommand.nX;
+        s_vCommands.push_back(std::move(stCommand));
+    }
+
+    bool PrepareTextLayer()
+    {
+        if (s_bRasterFailed)
+        {
+            return false;
+        }
+        if (s_pCachedGame == s_pGame && s_nCachedScale == s_nScale && s_vCachedCommands == s_vCommands)
+        {
+            return !s_bCachedRasterFailed;
+        }
+        s_pCachedGame = s_pGame;
+        s_nCachedScale = s_nScale;
+        s_vCachedCommands = s_vCommands;
+        s_bCachedRasterFailed = false;
+        ++s_nRevision;
+        s_vVertices.clear();
+        s_vBatches.clear();
+        std::vector<Letter> vLetters;
+        for (auto& stCommand : s_vCommands)
+        {
+            vLetters.clear();
+            if (stCommand.nFont < 0 || stCommand.nFont >= 4 || !DecodeLetters(stCommand.sText.data(), stCommand.nFont, stCommand.nX, vLetters))
             {
-                DrawLetter(stLetter, nFont, nY, nColor);
+                s_bCachedRasterFailed = true;
+                return false;
+            }
+            if (stCommand.bDraw)
+            {
+                for (const Letter& stLetter : vLetters)
+                {
+                    DrawLetter(stLetter, stCommand.nFont, stCommand.nY, stCommand.nColor);
+                }
             }
         }
+        s_bCachedRasterFailed = s_bRasterFailed;
+        return !s_bCachedRasterFailed;
     }
 
     void UploadReplacement(ID3D11ShaderResourceView* pOriginal)
@@ -335,57 +503,21 @@ namespace
         {
             return;
         }
+        ID3D11ShaderResourceView* pReplacement = s_stRenderer.Render(s_vBasePixels, s_vVertices, s_vBatches, s_nRevision, s_nScale, s_nFade, stDesc.Format);
+        if (!pReplacement)
+        {
+            return;
+        }
         std::lock_guard<std::mutex> stLock(s_stTextureMutex);
-        auto stFound = std::find_if(s_vTextures.begin(), s_vTextures.end(), [pOriginal](const Texture& stTexture) { return stTexture.pOriginal.Get() == pOriginal; });
-        if (stFound == s_vTextures.end())
-        {
-            if (s_vTextures.size() >= 8)
-            {
-                s_vTextures.clear();
-            }
-            s_vTextures.emplace_back();
-            stFound = s_vTextures.end() - 1;
-            stFound->pOriginal = pOriginal;
-        }
-        Texture& stTexture = *stFound;
-        stTexture.bReady = false;
-        if (stTexture.nScale != s_nScale)
-        {
-            stTexture.pView.Reset();
-            stTexture.pTexture.Reset();
-            stTexture.nScale = 0;
-            stDesc.Width *= s_nScale;
-            stDesc.Height *= s_nScale;
-            stDesc.MipLevels = 1;
-            stDesc.ArraySize = 1;
-            stDesc.Usage = D3D11_USAGE_DEFAULT;
-            stDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-            stDesc.CPUAccessFlags = 0;
-            stDesc.MiscFlags = 0;
-            if (FAILED(g_D3D11Hooks.d3dDevice->CreateTexture2D(&stDesc, nullptr, &stTexture.pTexture))
-                || FAILED(g_D3D11Hooks.d3dDevice->CreateShaderResourceView(stTexture.pTexture.Get(), nullptr, &stTexture.pView)))
-            {
-                return;
-            }
-            stTexture.nScale = s_nScale;
-        }
-        for (uint32_t& nPixel : s_vPixels)
-        {
-            uint32_t nColor = 0;
-            for (int nShift = 0; nShift <= 16; nShift += 8)
-            {
-                nColor |= ((((nPixel >> nShift) & 255) * s_nFade) / 255) << nShift;
-            }
-            nPixel = nColor | ((nPixel ^ 0xFF000000u) & 0xFF000000u);
-        }
-        g_D3D11Hooks.d3dDeviceContext->UpdateSubresource(stTexture.pTexture.Get(), 0, nullptr, s_vPixels.data(), nLayerWidth * s_nScale * sizeof(uint32_t), 0);
-        stTexture.bReady = true;
+        s_pOriginalView = pOriginal;
+        s_pReplacementView = pReplacement;
+        s_pActiveOriginal.store(pOriginal, std::memory_order_release);
     }
 
     int64_t __fastcall UploadTexture_hook(void* pTexture, uint32_t* pPixels)
     {
         const int64_t nResult = s_hUpload.call<int64_t>(pTexture, pPixels);
-        if (s_bComposing && s_pFrame == pPixels && !s_bRasterFailed)
+        if (s_bComposing && s_pFrame == pPixels && PrepareTextLayer())
         {
             auto* pHostTexture = static_cast<MGHostTexture*>(pTexture);
             if (pHostTexture->pShaderResourceView)
@@ -401,17 +533,17 @@ namespace
     {
         GameRenderer& stGame = s_astGames[nGame];
         s_pGame = &stGame;
-        {
-            std::lock_guard<std::mutex> stLock(s_stTextureMutex);
-            for (Texture& stTexture : s_vTextures)
-            {
-                stTexture.bReady = false;
-            }
-        }
+        s_pActiveOriginal.store(nullptr, std::memory_order_release);
         s_pFrame = nullptr;
         s_bRasterFailed = false;
+        s_vCommands.clear();
         s_nFade = std::clamp(*stGame.stSettings.pTextFade, 0, 255);
-        s_bComposing = MG_VectorFont::bEnabled && nDrawText != 0 && PrepareRenderer();
+        const bool bRendererReady = MG_VectorFont::bEnabled && PrepareRenderer();
+        if (bRendererReady)
+        {
+            WarmGlyphCache(stGame);
+        }
+        s_bComposing = nDrawText != 0 && bRendererReady;
         stGame.hCompose.call<void>(nDrawText);
         s_bComposing = false;
         s_pFrame = nullptr;
@@ -452,7 +584,7 @@ namespace
             spdlog::error("{}: Vector Font : Unable to parse font file from the unity launcher's files. Aborting setup!", stSettings.pszGame);
             return;
         }
-        if (!stSettings.pfnDrawText || !stSettings.pfnComposeTextLayer || !stSettings.pfnMeasureTextFont || !stSettings.pfnUploadTexture || !stSettings.pTextFade)
+        if (!stSettings.pfnSetFont || !stSettings.pfnDrawText || !stSettings.pfnComposeTextLayer || !stSettings.pfnMeasureTextFont || !stSettings.pfnUploadTexture || !stSettings.pTextFade)
         {
             spdlog::error("{}: Vector Font : Couldn't find text renderer. Aborting setup.", stSettings.pszGame);
         }
@@ -465,12 +597,15 @@ namespace
                 s_hUpload = safetyhook::create_inline(stSettings.pfnUploadTexture, UploadTexture_hook);
                 LOG_HOOK(s_hUpload, "MG1/MG2: Vector Font : sub_140025F80() : upload")
             }
+            stGame.hSetFont = safetyhook::create_inline(stSettings.pfnSetFont, nGame == 0 ? SetFont_hook<0> : SetFont_hook<1>);
+            LOG_HOOK(stGame.hSetFont, std::string(stSettings.pszGame) + ": Vector Font : register font")
             stGame.hDrawText = safetyhook::create_inline(stSettings.pfnDrawText, nGame == 0 ? DrawText_hook<0> : DrawText_hook<1>);
             LOG_HOOK(stGame.hDrawText, std::string(stSettings.pszGame) + ": Vector Font : draw text")
             stGame.hCompose = safetyhook::create_inline(stSettings.pfnComposeTextLayer, nGame == 0 ? Compose_hook<0> : Compose_hook<1>);
             LOG_HOOK(stGame.hCompose, std::string(stSettings.pszGame) + ": Vector Font : compose")
-            if (!stGame.hDrawText || !s_hUpload || !stGame.hCompose)
+            if (!stGame.hSetFont || !stGame.hDrawText || !s_hUpload || !stGame.hCompose)
             {
+                stGame.hSetFont.reset();
                 stGame.hCompose.reset();
                 stGame.hDrawText.reset();
                 if (!s_astGames[0].hCompose && !s_astGames[1].hCompose)
@@ -479,16 +614,37 @@ namespace
                 }
                 spdlog::error("{}: Vector Font : Missing hook! Setup aborted.", stSettings.pszGame);
             }
+            else
+            {
+                spdlog::info("{}: Vector Font : Text hooks initialized.", stSettings.pszGame);
+            }
         }
+    }
+}
+
+void MG_VectorFont::OnPresent()
+{
+    if (!bEnabled || !s_bWarmPending.exchange(false, std::memory_order_acq_rel))
+    {
+        return;
+    }
+    if (!PrepareRenderer())
+    {
+        s_bWarmPending.store(true, std::memory_order_release);
+        return;
+    }
+    for (GameRenderer& stGame : s_astGames)
+    {
+        WarmGlyphCache(stGame);
     }
 }
 
 void MG_VectorFont::InitializeMG1()
 {
-    Initialize(0, { "MG1", MG1_LinkVarBuf::pTextFade, MG1_Gamefuncs::pfnDrawTextSlot, MG1_Gamefuncs::pfnComposeTextLayer, MG1_Gamefuncs::pfnMeasureTextFont, MG1_Gamefuncs::pfnUploadTexture });
+    Initialize(0, { "MG1", MG1_LinkVarBuf::pTextFade, MG1_Gamefuncs::pfnSetFont, MG1_Gamefuncs::pfnDrawTextSlot, MG1_Gamefuncs::pfnComposeTextLayer, MG1_Gamefuncs::pfnMeasureTextFont, MG1_Gamefuncs::pfnUploadTexture });
 }
 
 void MG_VectorFont::InitializeMG2()
 {
-    Initialize(1, { "MG2", MG2_LinkVarBuf::pTextFade, MG2_Gamefuncs::pfnDrawTextItem, MG2_Gamefuncs::pfnComposeTextLayer, MG2_Gamefuncs::pfnMeasureTextFont, MG2_Gamefuncs::pfnUploadTexture });
+    Initialize(1, { "MG2", MG2_LinkVarBuf::pTextFade, MG2_Gamefuncs::pfnSetFont, MG2_Gamefuncs::pfnDrawTextItem, MG2_Gamefuncs::pfnComposeTextLayer, MG2_Gamefuncs::pfnMeasureTextFont, MG2_Gamefuncs::pfnUploadTexture });
 }

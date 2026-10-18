@@ -410,6 +410,9 @@
     <ClCompile Include="src\features\mg_vector_font.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg_vector_font_renderer.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mgs2_area_prefetch.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -986,6 +989,9 @@
       <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg_vector_font_renderer.hpp">
       <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_font_bundle.hpp">

@@ -33,6 +33,7 @@
 #include <random>
 #include <d3dcompiler.h>
 #include <d3d11.h>
+#include <d3d11_1.h>
 #include <dxgi.h>
 #include <wrl/client.h>
 #include <initializer_list>
