@@ -1,5 +1,17 @@
 #pragma once
 
+enum MG2PaletteEffect : int
+{
+    MG2_PALETTE_NORMAL = 0,
+    MG2_PALETTE_FADE_BLACK = 1,
+    MG2_PALETTE_FADE_WHITE = 2,
+    MG2_PALETTE_GRAYSCALE = 3,
+    MG2_PALETTE_LIGHTING = 4,
+    MG2_PALETTE_NIGHT_VISION = 5,
+    MG2_PALETTE_OUTDOOR_DARK = 6,
+    MG2_PALETTE_OUTDOOR_BRIGHT = 7,
+};
+
 enum MG2PortraitFrame : uint8_t
 {
     MG2_PORTRAIT_BIG_BOSS = 0,

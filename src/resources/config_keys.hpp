@@ -169,6 +169,11 @@ namespace ConfigKeys
     constexpr const char* MG1_Portrait_Overlay_Help = "";
     constexpr const char* MG1_Portrait_Overlay_Tooltip = "Restores Snake's original MSX2 eye and mouth animations while he speaks on the transceiver.";
 
+    constexpr const char* MG2_Outdoor_Palettes_Section = "Metal Gear 2";
+    constexpr const char* MG2_Outdoor_Palettes_Setting = "Restore Outdoor Palettes";
+    constexpr const char* MG2_Outdoor_Palettes_Help = "";
+    constexpr const char* MG2_Outdoor_Palettes_Tooltip = "Restores the original MSX2 sunrise color palettes as Snake makes his way into the first Zanzibar building.";
+
     constexpr const char* MG_Vector_Font_Enabled_Section = "Tweaks and Restoration";
     constexpr const char* MG_Vector_Font_Enabled_Setting = "High Resolution Font";
     constexpr const char* MG_Vector_Font_Enabled_Help = "";
