@@ -376,9 +376,13 @@ std::nullopt, false, Field::Int, 100, 1, 100},
     }},
     { wxString("Restoration"), {
 
+        //{ (MG), ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, ConfigKeys::MG1_RestoreOriginalScript_Help, ConfigKeys::MG1_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, false },
+        { (MG), ConfigKeys::MG1_RestoreBossNames_Section, ConfigKeys::MG1_RestoreBossNames_Setting, ConfigKeys::MG1_RestoreBossNames_Help, ConfigKeys::MG1_RestoreBossNames_Tooltip, std::nullopt, false, Field::Bool, false },
         { (MG), ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, ConfigKeys::MG1_Portrait_Overlay_Help, ConfigKeys::MG1_Portrait_Overlay_Tooltip, std::nullopt, false, Field::Bool, true },
 
 
+        { (MG), ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, ConfigKeys::MG2_RestoreOriginalScript_Help, ConfigKeys::MG2_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, ConfigKeys::MG2_RestoreBossNames_Help, ConfigKeys::MG2_RestoreBossNames_Tooltip, std::make_pair(ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting), true, Field::Bool, false },
         { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
 
         { (MG), ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, ConfigKeys::MG2_Outdoor_Artwork_Help, ConfigKeys::MG2_Outdoor_Artwork_Tooltip, std::nullopt, false, Field::Bool, true },

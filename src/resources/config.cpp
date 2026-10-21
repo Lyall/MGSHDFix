@@ -4,6 +4,7 @@
 
 #include "common.hpp"
 #include "config.hpp"
+#include "mg_text_overrides.hpp"
 
 #include "inipp/inipp.h"
 
@@ -1393,6 +1394,18 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
     LOG_CONFIG(ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
 
+
+    //ConfigHelper::getValue(ini, ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, MG_TextOverrides::bMG1RestoreOriginalScript);
+    //LOG_CONFIG(ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, MG_TextOverrides::bMG1RestoreOriginalScript);
+    ConfigHelper::getValue(ini, ConfigKeys::MG1_RestoreBossNames_Section, ConfigKeys::MG1_RestoreBossNames_Setting, MG_TextOverrides::bMG1RestoreBossNames);
+    //MG_TextOverrides::bMG1RestoreBossNames |= MG_TextOverrides::bMG1RestoreOriginalScript;
+    LOG_CONFIG(ConfigKeys::MG1_RestoreBossNames_Section, ConfigKeys::MG1_RestoreBossNames_Setting, MG_TextOverrides::bMG1RestoreBossNames);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, MG_TextOverrides::bMG2RestoreOriginalScript);
+    LOG_CONFIG(ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, MG_TextOverrides::bMG2RestoreOriginalScript);
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
+    MG_TextOverrides::bMG2RestoreBossNames |= MG_TextOverrides::bMG2RestoreOriginalScript;
+    LOG_CONFIG(ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);

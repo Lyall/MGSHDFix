@@ -383,6 +383,12 @@
     <ClCompile Include="src\fixes\caption_replacements.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="src\fixes\mg_text_overrides.cpp">
+      <Filter>Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resources\translation_diffs.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp">
       <Filter>Fixes</Filter>
     </ClCompile>
@@ -429,6 +435,9 @@
       <Filter>Features</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg1_portrait_overlay.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mg2_ending_cast.cpp">
       <Filter>Features</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg2_outdoor_palettes.cpp">
@@ -922,6 +931,21 @@
     <ClInclude Include="src\fixes\caption_replacements.hpp">
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\resources\mg_text_encoding.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mg1_text_strings.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\mg2_text_strings.hpp">
+      <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fixes\mg_text_overrides.hpp">
+      <Filter>Fixes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\translation_diffs.hpp">
+      <Filter>Resources</Filter>
+    </ClInclude>
     <ClInclude Include="src\resources\game_strings.hpp">
       <Filter>APIs\Headers</Filter>
     </ClInclude>
@@ -1033,6 +1057,7 @@
     <ClInclude Include="src\features\loose_audio_overrides.hpp">
       <Filter>Features</Filter>
     </ClInclude>
+    <ClInclude Include="external\nlohmann\single_include\nlohmann\json.hpp" />
     <ClInclude Include="external\dr_libs\dr_flac.h" />
     <ClInclude Include="external\dr_libs\dr_mp3.h" />
     <ClInclude Include="external\dr_libs\dr_wav.h" />
@@ -1047,6 +1072,12 @@
     </ClInclude>
     <ClInclude Include="src\features\mg1_portrait_sprites.hpp">
       <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_ending_cast.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_ending_cast_data.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp">
       <Filter>Features\Headers</Filter>

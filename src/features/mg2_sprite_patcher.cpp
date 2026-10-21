@@ -140,7 +140,7 @@ bool MG2_SpritePatcher::AddPatch(int nImageEntry, uint64_t nOriginalHash, const 
     }
     for (const ImagePatch& stPatch : s_vPatches)
     {
-        if (stPatch.nEntry == nImageEntry || stPatch.nHash == nOriginalHash)
+        if (stPatch.nHash == nOriginalHash)
         {
             if (stPatch.nEntry == nImageEntry && stPatch.nHash == nOriginalHash && stPatch.vBlob.size() == nSize && std::equal(stPatch.vBlob.begin(), stPatch.vBlob.end(), pBlob))
             {

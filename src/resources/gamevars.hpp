@@ -29,7 +29,7 @@ namespace MGFont
     constexpr int nKanjiWidth = 24;
 }
 
-// MG1/MG2 text upload CTexture fields
+// MG1/MG2 CTexture fields
 struct MGHostTexture
 {
     uint8_t anPadding[0x88];

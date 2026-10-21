@@ -164,6 +164,27 @@ namespace ConfigKeys
                                                          "\n"
                                                          "Check that your category allows this.";
 
+    //constexpr const char* MG1_RestoreOriginalScript_Section = "Metal Gear 1";
+    //constexpr const char* MG1_RestoreOriginalScript_Setting = "Official MSX2 (Retranslated)";
+    //constexpr const char* MG1_RestoreOriginalScript_Help = "";
+    //constexpr const char* MG1_RestoreOriginalScript_Tooltip = "Restores the retranslated MSX2 script, including the original boss names.";
+    constexpr const char* MG2_RestoreOriginalScript_Section = "Metal Gear 2";
+    constexpr const char* MG2_RestoreOriginalScript_Setting = "Retranslated MSX Script";
+    constexpr const char* MG2_RestoreOriginalScript_Help = "";
+    constexpr const char* MG2_RestoreOriginalScript_Tooltip = "Restores the retranslated MSX2 script, including the original boss names.";
+
+    constexpr const char* MG1_RestoreBossNames_Section = "Metal Gear 1";
+    constexpr const char* MG1_RestoreBossNames_Setting = "Restore Boss Names";
+    constexpr const char* MG1_RestoreBossNames_Help = "";
+    constexpr const char* MG1_RestoreBossNames_Tooltip = "Restores the original boss names.";
+
+
+    constexpr const char* MG2_RestoreBossNames_Section = "Metal Gear 2";
+    constexpr const char* MG2_RestoreBossNames_Setting = "Restore Boss Names";
+    constexpr const char* MG2_RestoreBossNames_Help = "";
+    constexpr const char* MG2_RestoreBossNames_Tooltip = "Restores the original boss names.";
+
+
     constexpr const char* MG1_Portrait_Overlay_Section = "Metal Gear 1";
     constexpr const char* MG1_Portrait_Overlay_Setting = "Restore Snake Portrait Animation";
     constexpr const char* MG1_Portrait_Overlay_Help = "";

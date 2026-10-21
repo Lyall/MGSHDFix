@@ -7,6 +7,8 @@
 
 namespace MG1_LinkVarBuf
 {
+    inline uintptr_t* pTextChunkHandle = nullptr;
+
     struct PlayStats
     {
         int GM_PlayTime;           // 15 tick/second
@@ -434,6 +436,13 @@ namespace MG1_LinkVarBuf
 
     inline void Initialize()
     {
+        //ShowMessage+29
+        uint8_t* pTextChunk = Memory::PatternScan(mg1Module, "48 8B 0D ?? ?? ?? ?? 33 D2 41 8B ED", "MG1: ShowMessage()+0x29 : text chunk");
+        if (pTextChunk)
+        {
+            pTextChunkHandle = reinterpret_cast<uintptr_t*>(Memory::GetRipRelativeAddress(pTextChunk, 3, 7));
+        }
+
         //sub_18001B2A0+D12
         uint8_t* pScriptGlobalsScan = Memory::PatternScan(mg1Module, "48 8D 0D ?? ?? ?? ?? 8B 35", "MG1: sub_18001B2A0()+0xD12 : script globals");
         if (pScriptGlobalsScan)

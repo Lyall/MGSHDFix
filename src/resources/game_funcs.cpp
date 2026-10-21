@@ -278,6 +278,19 @@ void MG1_Gamefuncs::HookGameFuncs()
 
 void MG1_Gamefuncs::HookDllGameFuncs()
 {
+    //ShowMessage+3E
+    uint8_t* pChunkDataCall = Memory::PatternScan(mg1Module, "E8 ?? ?? ?? ?? 4C 8D 4C 24 ?? 44 8B C3 33 D2 48 8B C8 48 8B F0 E8 ?? ?? ?? ?? 8B 5C 24", "MG1: ShowMessage()+0x3E : GetChunkEntryData()");
+    if (pChunkDataCall)
+    {
+        uint8_t* pChunkData = Memory::ResolveCall(pChunkDataCall);
+        if (*pChunkData == 0xE9)
+        {
+            pChunkData = Memory::ResolveCall(pChunkData);
+        }
+        pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(pChunkData);
+    }
+    pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 4C 98 ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG1: GetChunkEntrySize()"));
+
     if (MG_DeveloperMenu::bEnabled)
     {
         pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg1Module, "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 45 33 ED", "MG1: sub_18001B2A0() : scene tick"));
@@ -426,6 +439,8 @@ void MGS3_Gamefuncs::HookGameFuncs()
 
 void Shared_Gamefuncs::HookFuncs()
 {
+    pfnGetLanguage = reinterpret_cast<GetLanguage_t>(GetProcAddress(engineModule, "BP_COsContext_GetLanguage_MGS"));
+
     uint8_t* GM_GetArea_scan = Memory::PatternScan(baseModule, (eGameType & MGS2) ? "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 0D ?? ?? ?? ?? 4C 8B D0" : "E8 ?? ?? ?? ?? 33 C9 4C 8D 05 ?? ?? ?? ?? 0F 1F 40", "GM_GetArea call site");
     Shared_Gamefuncs::GM_GetArea = reinterpret_cast<Shared_Gamefuncs::GM_GetArea_t*>(Memory::ResolveCall(GM_GetArea_scan));
     spdlog::info("Shared_GameFuncs: GM_GetArea address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)Shared_Gamefuncs::GM_GetArea - (uintptr_t)baseModule);

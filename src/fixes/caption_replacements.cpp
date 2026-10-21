@@ -4,6 +4,8 @@
 #include "logging.hpp"
 
 #include "caption_replacements.hpp"
+#include "translation_diffs.hpp"
+#include "game_funcs.hpp"
 
 #include "game_strings.hpp"
 
@@ -27,8 +29,22 @@ namespace
         Correction,
     };
 
+    struct TranslationCaption
+    {
+        std::optional<std::string> sText;
+        bool bDisabled = false;
+    };
+
+    struct TranslationCaptionTables
+    {
+        TranslationCaption stSource;
+        TranslationCaption stKeyboard;
+        TranslationCaption stStandard;
+    };
+
     struct CaptionEntry
     {
+        std::unique_ptr<std::array<TranslationCaptionTables, 9>> pTranslations;
         CaptionAction action = CaptionAction::None;
         const char* replacement = nullptr; // valid only when action == Correction
         ForcePs2Action forcePs2Action = ForcePs2Action::None;
@@ -42,6 +58,7 @@ namespace
     struct CaptionOverrideTables
     {
         CaptionEntryMap entries;
+        size_t nTranslationLanguageSlot = 0;
     };
 
     CaptionOverrideTables g_MGS2CaptionOverrides;
@@ -240,6 +257,37 @@ namespace
         {
             CaptionEntry const& entry = it->second;
 
+            if (entry.pTranslations)
+            {
+                const auto& astTranslations = *entry.pTranslations;
+                auto FindTranslation = [&](auto pMember) -> const TranslationCaption*
+                {
+                    for (const size_t nIndex : { tables.nTranslationLanguageSlot, size_t(0) })
+                    {
+                        const auto& stEntry = astTranslations[nIndex].*pMember;
+                        if (stEntry.sText || stEntry.bDisabled)
+                        {
+                            return &stEntry;
+                        }
+                    }
+                    return nullptr;
+                };
+                const auto* pSource = FindTranslation(&TranslationCaptionTables::stSource);
+                const auto* pOverride = isMouseAndKeyboard ? FindTranslation(&TranslationCaptionTables::stKeyboard) : nullptr;
+                if (!pOverride)
+                {
+                    pOverride = FindTranslation(&TranslationCaptionTables::stStandard);
+                }
+                if (pOverride)
+                {
+                    return pOverride->bDisabled ? (pSource ? pSource->sText->c_str() : nullptr) : pOverride->sText->c_str();
+                }
+                if (pSource)
+                {
+                    return pSource->sText->c_str();
+                }
+            }
+
             if (CaptionReplacements::bForcePS2)
             {
                 if (entry.forcePs2Action == ForcePs2Action::Correction)
@@ -387,8 +435,31 @@ void CaptionReplacements::InitializeCaptionOverrides()
         spdlog::error("InitializeCaptionOverrides: vanilla tables were never resolved - skipping vanilla load.");
     }
 
+    const int nActiveLanguage = Shared_Gamefuncs::pfnGetLanguage ? Shared_Gamefuncs::pfnGetLanguage() : -1;
+    tables.nTranslationLanguageSlot = nActiveLanguage >= 0 && nActiveLanguage <= 7 ? nActiveLanguage + 1 : 0;
+    size_t nTranslationCount = 0;
+    for (const auto& stEntry : TranslationDiffs::Load((eGameType & MGS2) ? "MGS2" : "MGS3"))
+    {
+        const int nLanguage = stEntry.sLanguage == "-1" ? -1 : stEntry.sLanguage[0] - '0';
+        if (nLanguage != -1 && tables.nTranslationLanguageSlot == 0)
+        {
+            spdlog::error("Translation : Cannot load language-specific captions without GetLanguage().");
+            continue;
+        }
+        auto& stDestination = tables.entries[stEntry.nHash];
+        if (!stDestination.pTranslations)
+        {
+            stDestination.pTranslations = std::make_unique<std::array<TranslationCaptionTables, 9>>();
+        }
+        auto& stTables = (*stDestination.pTranslations)[nLanguage + 1];
+        auto& stCaption = stEntry.nTable == 0 ? stTables.stKeyboard : stEntry.nTable == 1 ? stTables.stStandard : stTables.stSource;
+        ++nTranslationCount;
+        stCaption.bDisabled = stEntry.bDisabled;
+        stCaption.sText = stEntry.bDisabled ? std::nullopt : std::optional<std::string>(stEntry.sText);
+    }
+
     size_t const totalProcessed = forceOriginalLoaded + typoCorrectionsLoaded + forcePs2StringsLoaded + forcePs2CorrectionsLoaded
-        + vanillaResult.mouseKeyboardLoaded + vanillaResult.gamepadLoaded;
+        + vanillaResult.mouseKeyboardLoaded + vanillaResult.gamepadLoaded + nTranslationCount;
 
     std::string overlapPart;
     if (vanillaResult.mouseKeyboardOverlappedWithCustom > 0 && vanillaResult.gamepadOverlappedWithCustom > 0)

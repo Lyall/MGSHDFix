@@ -15,6 +15,9 @@ static_assert(sizeof(CHARA) == 0x10);
 
 namespace Shared_Gamefuncs
 {
+    using GetLanguage_t = int(__fastcall*)();
+    inline GetLanguage_t pfnGetLanguage = nullptr;
+
     void HookFuncs();
     inline bool StartInDebugMode = false;
     inline int  DevMenuHotkey = 0;
@@ -92,6 +95,11 @@ namespace MG_Gamefuncs
 
 namespace MG1_Gamefuncs
 {
+    using GetChunkEntryData_t = const uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
+    using GetChunkEntrySize_t = uint32_t(__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
+
     using SceneTick_t = void(__fastcall*)();
     inline SceneTick_t pfnSceneTick = nullptr;
 

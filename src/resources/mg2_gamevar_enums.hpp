@@ -153,6 +153,7 @@ enum MG2ScriptStateWord : int
 
 enum MG2SpriteSheet : int
 {
+    MG2_SPRITE_SHEET_ENDING_CAST = 16,
     MG2_SPRITE_SHEET_GUARD = 20,
     MG2_SPRITE_SHEET_PORTRAITS = 25,
     MG2_SPRITE_SHEET_DOORS = 35,

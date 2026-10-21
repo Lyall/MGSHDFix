@@ -17,6 +17,8 @@
     <ClCompile Include="src\fixes\mgs2_ntsc_timing_fixes.cpp" />
     <ClCompile Include="src\fixes\screenspace_fixes.cpp" />
     <ClCompile Include="src\fixes\caption_replacements.cpp" />
+    <ClCompile Include="src\fixes\mg_text_overrides.cpp" />
+    <ClCompile Include="src\resources\translation_diffs.cpp" />
     <ClCompile Include="src\features\mg1_display_scaling.cpp" />
     <ClCompile Include="src\features\mg1_door_cards.cpp" />
     <ClCompile Include="src\features\mg1_scorpions.cpp" />
@@ -25,6 +27,7 @@
     <ClCompile Include="src\features\mg2_door_cards.cpp" />
     <ClCompile Include="src\features\mg_cigarette_damage.cpp" />
     <ClCompile Include="src\features\mg1_portrait_overlay.cpp" />
+    <ClCompile Include="src\features\mg2_ending_cast.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_palettes.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_tiles.cpp" />
     <ClCompile Include="src\features\mg2_truckyard_fence.cpp" />
@@ -223,6 +226,11 @@
     <ClInclude Include="src\fixes\mgs2_radar_fixes.hpp" />
     <ClInclude Include="src\resources\game_strings.hpp" />
     <ClInclude Include="src\fixes\caption_replacements.hpp" />
+    <ClInclude Include="src\resources\mg_text_encoding.hpp" />
+    <ClInclude Include="src\resources\mg1_text_strings.hpp" />
+    <ClInclude Include="src\resources\mg2_text_strings.hpp" />
+    <ClInclude Include="src\fixes\mg_text_overrides.hpp" />
+    <ClInclude Include="src\resources\translation_diffs.hpp" />
     <ClInclude Include="src\resources\mg1_linkvarbuf.hpp" />
     <ClInclude Include="src\resources\mg2_linkvarbuf.hpp" />
     <ClInclude Include="src\resources\mg1_gamevar_enums.hpp" />
@@ -233,6 +241,7 @@
     <ClInclude Include="src\features\mg1_scorpions.hpp" />
     <ClInclude Include="src\features\loose_audio_overrides.hpp" />
     <ClInclude Include="src\features\loose_audio_overrides_data.hpp" />
+    <ClInclude Include="external\nlohmann\single_include\nlohmann\json.hpp" />
     <ClInclude Include="external\dr_libs\dr_flac.h" />
     <ClInclude Include="external\dr_libs\dr_mp3.h" />
     <ClInclude Include="external\dr_libs\dr_wav.h" />
@@ -241,6 +250,8 @@
     <ClInclude Include="src\features\mg_cigarette_damage.hpp" />
     <ClInclude Include="src\features\mg1_portrait_overlay.hpp" />
     <ClInclude Include="src\features\mg1_portrait_sprites.hpp" />
+    <ClInclude Include="src\features\mg2_ending_cast.hpp" />
+    <ClInclude Include="src\features\mg2_ending_cast_data.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles_data.hpp" />
@@ -435,7 +446,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.asi</TargetExt>
-    <ExternalIncludePath>$(ProjectDir)external\dr_libs;external\smaa;external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)external\nlohmann\single_include;$(ProjectDir)external\dr_libs;external\smaa;external\SteamworksSDK\public\steam;external\stb;external\inipp;external\spdlog\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);external\zydis\include;external\zydis\dependencies\zycore\include;external\safetyhook\include</ExternalIncludePath>
     <IntDir>Intermediate\$(ProjectName)\$(Platform)\Release\</IntDir>
     <CustomBuildAfterTargets />
     <OutDir>$(SolutionDir)$(Platform)\Release\</OutDir>

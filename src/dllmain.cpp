@@ -145,6 +145,7 @@
 #include "mgs2_bandana_mass.hpp"
 #include "mgs_smaa.hpp"
 #include "caption_replacements.hpp"
+#include "mg_text_overrides.hpp"
 #include "mg1_linkvarbuf.hpp"
 #include "game_funcs.hpp"
 #include "mg1_door_cards.hpp"
@@ -192,6 +193,7 @@ namespace
         }
         MG1_LinkVarBuf::Initialize();
         MG1_Gamefuncs::HookDllGameFuncs();
+        MG_TextOverrides::InitializeMG1();
         LooseAudioOverrides::Initialize();
         MG1_DoorCards::Initialize();
         MG1_PortraitOverlay::Initialize();
@@ -211,6 +213,7 @@ namespace
         }
         MG2_LinkVarBuf::Initialize();
         MG2_Gamefuncs::HookDllGameFuncs();
+        MG_TextOverrides::InitializeMG2();
         MG2_OutdoorPalettes::Initialize();
         MG2_OutdoorTiles::Initialize();
         MG2_TruckyardFence::Initialize();
