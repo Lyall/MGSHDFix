@@ -76,13 +76,199 @@ namespace
     }
 
     // Use loader cursors so the next arrangement starts at frame zero.
-    void UseCursorPlayback(const std::vector<int16_t>& vPcm, LoopPoints& stLoop)
+    void UseCursorPlayback(const std::shared_ptr<const std::vector<int16_t>>& pPcm, LoopPoints& stLoop)
     {
-        if (!stLoop.nEnd && !vPcm.empty())
+        if (!stLoop.nEnd && pPcm && !pPcm->empty())
         {
             stLoop = {};
-            stLoop.nEnd = vPcm.size() / 2;
+            stLoop.nEnd = pPcm->size() / 2;
         }
+    }
+
+    void LogLoadTimings(const std::filesystem::path& stPath, const ClipLength& stLength)
+    {
+        if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
+        {
+            spdlog::info("MG1/2: Loose Audio : {} load timing: loop JSON {:.2f} ms, FLAC open {:.2f} ms, decode {:.2f} ms, convert {:.2f} ms, loudness {:.2f} ms", stPath.filename().string(), stLength.fLoopMilliseconds, stLength.fOpenMilliseconds, stLength.fDecodeMilliseconds, stLength.fConvertMilliseconds, stLength.fLoudnessMilliseconds);
+        }
+    }
+
+    std::unique_ptr<Replacement> PrepareAudio(const Header& aHeader, const std::filesystem::path& stPath)
+    {
+        auto pAudio = std::make_unique<Replacement>();
+        if (!ReadOriginal(ResolveAsset(sExePath, s_stOverloadRoot, stPath), *pAudio) || pAudio->aHeader != aHeader)
+        {
+            spdlog::warn("MG1/2: Loose Audio : Unsupported or changed asset: {}", stPath.string());
+            return nullptr;
+        }
+        bool bAnyTrack = false;
+        for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
+        {
+            const auto stAudioPath = FindReplacementAudio(sExePath, s_stOverloadRoot, stPath, nTrack);
+            if (stAudioPath.empty())
+            {
+                continue;
+            }
+            ClipLength stLength;
+            if (!DecodeAudio(stAudioPath, *pAudio, nTrack, s_eLoudnessMode, &stLength))
+            {
+                spdlog::warn("MG1/2: Loose Audio : Unsupported audio, retaining native track: {}", stAudioPath.string());
+                continue;
+            }
+            LogLoadTimings(stAudioPath, stLength);
+            bAnyTrack = true;
+            if (!stLength.sLoopError.empty())
+            {
+                spdlog::warn("MG1/2: Loose Audio : Ignoring loop JSON for {}: {}; using original duration and loops", stAudioPath.string(), stLength.sLoopError);
+            }
+            if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Disabled)
+            {
+                continue;
+            }
+            const auto& stLoop = pAudio->astLoops[nTrack];
+            if (stLoop.nEnd)
+            {
+                if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
+                {
+                    spdlog::info("MG1/2: Loose Audio : Prepared {} (file: {:.6f}s; custom loop: {:.6f}s -> {:.6f}s; intro plays once)", stAudioPath.string(), stLength.fFileSeconds, double(stLoop.nStart) / 48000, double(stLoop.nEnd) / 48000);
+                }
+                continue;
+            }
+            const double fDifference = stLength.fFileSeconds - stLength.fExpectedSeconds;
+            if (fDifference > 0)
+            {
+                spdlog::info("MG1/2: Loose Audio : Prepared {} (file: {:.6f}s, expected: {:.6f}s; longer by {:.6f}s, trimmed)", stAudioPath.string(), stLength.fFileSeconds, stLength.fExpectedSeconds, fDifference);
+            }
+            else if (fDifference < 0)
+            {
+                spdlog::info("MG1/2: Loose Audio : Prepared {} (file: {:.6f}s, expected: {:.6f}s; shorter by {:.6f}s, padded with silence)", stAudioPath.string(), stLength.fFileSeconds, stLength.fExpectedSeconds, -fDifference);
+            }
+            else if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
+            {
+                spdlog::info("MG1/2: Loose Audio : Prepared {} ({:.6f}s)", stAudioPath.string(), stLength.fExpectedSeconds);
+            }
+        }
+        const auto* pVariant = FindVariant(stPath);
+        if (HasVariantAudio(stPath, pVariant))
+        {
+            for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
+            {
+                const auto stVariantPath = FindReplacementAudio(sExePath, s_stOverloadRoot, stPath, nTrack, pVariant->svVariant);
+                if (stVariantPath.empty())
+                {
+                    continue;
+                }
+                pAudio->avAfterPcm[nTrack] = std::move(pAudio->avPcm[nTrack]);
+                pAudio->astAfterLoops[nTrack] = pAudio->astLoops[nTrack];
+                ClipLength stLength;
+                if (!DecodeAudio(stVariantPath, *pAudio, nTrack, s_eLoudnessMode, &stLength))
+                {
+                    pAudio->avPcm[nTrack] = std::move(pAudio->avAfterPcm[nTrack]);
+                    pAudio->astLoops[nTrack] = pAudio->astAfterLoops[nTrack];
+                    spdlog::warn("MG1/2: Loose Audio : Unsupported variant audio, retaining normal track: {}", stVariantPath.string());
+                    continue;
+                }
+                LogLoadTimings(stVariantPath, stLength);
+                UseCursorPlayback(pAudio->avAfterPcm[nTrack], pAudio->astAfterLoops[nTrack]);
+                UseCursorPlayback(pAudio->avPcm[nTrack], pAudio->astLoops[nTrack]);
+                pAudio->abVariantTracks[nTrack] = true;
+                pAudio->bVariant = true;
+                bAnyTrack = true;
+                if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
+                {
+                    spdlog::info("MG1/2: Loose Audio : Loaded variant {} ({:.6f}s)", stVariantPath.string(), stLength.fFileSeconds);
+                }
+            }
+        }
+        return bAnyTrack ? std::move(pAudio) : nullptr;
+    }
+
+    struct CachedAudio
+    {
+        std::mutex stMutex;
+        std::shared_ptr<const Replacement> pAudio;
+        size_t nBytes = 0;
+        uint64_t nLastUse = 0;
+        bool bFailed = false;
+    };
+    constexpr size_t nCacheBudget = 1024 * 1024 * 1024;
+    std::map<Header, std::unique_ptr<CachedAudio>> s_stCache;
+    std::mutex s_stCacheMutex;
+    size_t s_nCacheBytes = 0;
+    uint64_t s_nCacheUse = 0;
+    std::jthread s_stPreloadThread;
+
+    size_t AudioBytes(const Replacement& stAudio)
+    {
+        size_t nBytes = stAudio.vEncoded.size();
+        for (size_t nTrack = 0; nTrack < stAudio.nTracks; ++nTrack)
+        {
+            if (stAudio.avPcm[nTrack])
+            {
+                nBytes += stAudio.avPcm[nTrack]->size() * sizeof(int16_t);
+            }
+            if (stAudio.avAfterPcm[nTrack])
+            {
+                nBytes += stAudio.avAfterPcm[nTrack]->size() * sizeof(int16_t);
+            }
+        }
+        return nBytes;
+    }
+
+    std::unique_ptr<Replacement> GetPreparedAudio(const Header& aHeader, const std::filesystem::path& stPath, bool bPreload = false)
+    {
+        auto& stEntry = *s_stCache.at(aHeader);
+        std::lock_guard stEntryLock(stEntry.stMutex);
+        {
+            std::lock_guard stLock(s_stCacheMutex);
+            if (stEntry.pAudio)
+            {
+                if (!bPreload)
+                {
+                    stEntry.nLastUse = ++s_nCacheUse;
+                    return std::make_unique<Replacement>(*stEntry.pAudio);
+                }
+                return nullptr;
+            }
+            if (stEntry.bFailed || (bPreload && s_nCacheBytes >= nCacheBudget))
+            {
+                return nullptr;
+            }
+        }
+        auto pAudio = PrepareAudio(aHeader, stPath);
+        std::lock_guard stLock(s_stCacheMutex);
+        if (!pAudio)
+        {
+            stEntry.bFailed = true;
+            return nullptr;
+        }
+        const size_t nBytes = AudioBytes(*pAudio);
+        if (nBytes > nCacheBudget || (bPreload && s_nCacheBytes + nBytes > nCacheBudget))
+        {
+            return bPreload ? nullptr : std::move(pAudio);
+        }
+        while (s_nCacheBytes + nBytes > nCacheBudget)
+        {
+            CachedAudio* pOldest = nullptr;
+            for (const auto& [aKey, pEntry] : s_stCache)
+            {
+                if (pEntry->pAudio && (!pOldest || pEntry->nLastUse < pOldest->nLastUse))
+                {
+                    pOldest = pEntry.get();
+                }
+            }
+            if (!pOldest)
+            {
+                break;
+            }
+            s_nCacheBytes -= pOldest->nBytes;
+            pOldest->pAudio.reset();
+        }
+        stEntry.nBytes = nBytes;
+        stEntry.nLastUse = ++s_nCacheUse;
+        s_nCacheBytes += nBytes;
+        stEntry.pAudio = std::move(pAudio);
+        return bPreload ? nullptr : std::make_unique<Replacement>(*stEntry.pAudio);
     }
 
     void Load_hook(SafetyHookContext& ctx)
@@ -90,8 +276,9 @@ namespace
         const auto* pDriver = reinterpret_cast<const uint8_t*>(ctx.rbx);
         if (!s_bReady.load(std::memory_order_acquire) || Read32(pDriver + nDriverTypeOffset) != nMtaType || *reinterpret_cast<const uintptr_t*>(pDriver + nDriverMovieOffset) != 0)
         {
-            return; // Only replace BGM. (if someone needs mgs2/mgs3's cutscene support, i do have that worked out already, but there's not much of the point atm as they already have better audio mod. poke afevis if you need it implemented the rest of the way)
+            return;
         }
+        const auto stLoadStart = std::chrono::steady_clock::now();
         s_stActive.Replace(nullptr);
         if (!ctx.rax)
         {
@@ -106,98 +293,16 @@ namespace
             {
                 return;
             }
-            const auto& stPath = stCandidate->second;
-            auto pAudio = std::make_unique<Replacement>();
-            if (!ReadOriginal(ResolveAsset(sExePath, s_stOverloadRoot, stPath), *pAudio) || pAudio->aHeader != aHeader)
+            s_stActive.Replace(GetPreparedAudio(aHeader, stCandidate->second));
+            if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
             {
-                spdlog::warn("MG1/2: Loose Audio : Unsupported or changed asset: {}", stPath.string());
-                return;
-            }
-            bool bAnyTrack = false;
-            for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
-            {
-                const auto stAudioPath = FindReplacementAudio(sExePath, s_stOverloadRoot, stPath, nTrack);
-                if (stAudioPath.empty())
-                {
-                    continue;
-                }
-                ClipLength stLength;
-                if (!DecodeAudio(stAudioPath, *pAudio, nTrack, s_eLoudnessMode, &stLength))
-                {
-                    spdlog::warn("MG1/2: Loose Audio : Unsupported audio, retaining native track: {}", stAudioPath.string());
-                    continue;
-                }
-                bAnyTrack = true;
-                if (!stLength.sLoopError.empty())
-                {
-                    spdlog::warn("MG1/2: Loose Audio : Ignoring loop JSON for {}: {}; using original duration and loops", stAudioPath.string(), stLength.sLoopError);
-                }
-                if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Disabled)
-                {
-                    continue;
-                }
-                const auto& stLoop = pAudio->astLoops[nTrack];
-                if (stLoop.nEnd)
-                {
-                    if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
-                    {
-                        spdlog::info("MG1/2: Loose Audio : Loaded on demand {} (file: {:.6f}s; custom loop: {:.6f}s -> {:.6f}s; intro plays once)", stAudioPath.string(), stLength.fFileSeconds, double(stLoop.nStart) / 48000, double(stLoop.nEnd) / 48000);
-                    }
-                    continue;
-                }
-                const double fDifference = stLength.fFileSeconds - stLength.fExpectedSeconds;
-                if (fDifference > 0)
-                {
-                    spdlog::info("MG1/2: Loose Audio : Loaded on demand {} (file: {:.6f}s, expected: {:.6f}s; longer by {:.6f}s, trimmed)", stAudioPath.string(), stLength.fFileSeconds, stLength.fExpectedSeconds, fDifference);
-                }
-                else if (fDifference < 0)
-                {
-                    spdlog::info("MG1/2: Loose Audio : Loaded on demand {} (file: {:.6f}s, expected: {:.6f}s; shorter by {:.6f}s, padded with silence)", stAudioPath.string(), stLength.fFileSeconds, stLength.fExpectedSeconds, -fDifference);
-                }
-                else if (LooseAudioOverrides::sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
-                {
-                    spdlog::info("MG1/2: Loose Audio : Loaded on demand {} ({:.6f}s)", stAudioPath.string(), stLength.fExpectedSeconds);
-                }
-            }
-            const auto* pVariant = FindVariant(stPath);
-            if (HasVariantAudio(stPath, pVariant))
-            {
-                for (size_t nTrack = 0; nTrack < pAudio->nTracks; ++nTrack)
-                {
-                    const auto stVariantPath = FindReplacementAudio(sExePath, s_stOverloadRoot, stPath, nTrack, pVariant->svVariant);
-                    if (stVariantPath.empty())
-                    {
-                        continue;
-                    }
-                    pAudio->avAfterPcm[nTrack] = std::move(pAudio->avPcm[nTrack]);
-                    pAudio->astAfterLoops[nTrack] = pAudio->astLoops[nTrack];
-                    ClipLength stLength;
-                    if (!DecodeAudio(stVariantPath, *pAudio, nTrack, s_eLoudnessMode, &stLength))
-                    {
-                        pAudio->avPcm[nTrack] = std::move(pAudio->avAfterPcm[nTrack]);
-                        pAudio->astLoops[nTrack] = pAudio->astAfterLoops[nTrack];
-                        spdlog::warn("MG1/2: Loose Audio : Unsupported variant audio, retaining normal track: {}", stVariantPath.string());
-                        continue;
-                    }
-                    UseCursorPlayback(pAudio->avAfterPcm[nTrack], pAudio->astAfterLoops[nTrack]);
-                    UseCursorPlayback(pAudio->avPcm[nTrack], pAudio->astLoops[nTrack]);
-                    pAudio->abVariantTracks[nTrack] = true;
-                    pAudio->bVariant = true;
-                    bAnyTrack = true;
-                    if (LooseAudioOverrides::sDebugLogging != ConfigKeys::LooseAudioDebugLogging_Disabled)
-                    {
-                        spdlog::info("MG1/2: Loose Audio : Loaded variant {} ({:.6f}s)", stVariantPath.string(), stLength.fFileSeconds);
-                    }
-                }
-            }
-            if (bAnyTrack)
-            {
-                s_stActive.Replace(std::move(pAudio));
+                const double fMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - stLoadStart).count();
+                spdlog::info("MG1/2: Loose Audio : {} ready in {:.2f} ms", stCandidate->second.filename().string(), fMilliseconds);
             }
         }
         catch (const std::exception& stError)
         {
-            spdlog::error("MG1/2: Loose Audio : On-demand load failed, retaining native audio: {}", stError.what());
+            spdlog::error("MG1/2: Loose Audio : Load failed, retaining native audio: {}", stError.what());
         }
     }
 
@@ -292,6 +397,7 @@ void LooseAudioOverrides::Initialize()
                 continue;
             }
             s_stCandidates.emplace(aHeader, stPath);
+            s_stCache.emplace(aHeader, std::make_unique<CachedAudio>());
         }
     }
     catch (const std::exception& stError)
@@ -311,7 +417,7 @@ void LooseAudioOverrides::Initialize()
 
     if (sDebugLogging == ConfigKeys::LooseAudioDebugLogging_Full)
     {
-        spdlog::info("MG1/2: Loose Audio : Indexed {} assets for on-demand loading.", s_stCandidates.size());
+        spdlog::info("MG1/2: Loose Audio : Indexed {} assets for background preparation.", s_stCandidates.size());
     }
 
     //NewStreamSoundDriver__Init+2F
@@ -345,6 +451,39 @@ void LooseAudioOverrides::Initialize()
             return;
         }
         s_bReady.store(true, std::memory_order_release);
+        s_stPreloadThread = std::jthread([](std::stop_token stStop)
+        {
+            SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
+            std::vector<std::pair<Header, std::filesystem::path>> vPreload(s_stCandidates.begin(), s_stCandidates.end());
+            const auto Priority = [](const auto& stCandidate)
+            {
+                const auto sStem = LowerStem(stCandidate.second);
+                const bool bCurrentGame = sStem.starts_with(eMgSubGame == MgSubGame::MG2 ? L"mg2_" : L"mg1_");
+                return !bCurrentGame ? 2 : sStem == L"mg2_bgm35_opening1" ? 0 : 1;
+            };
+            std::stable_sort(vPreload.begin(), vPreload.end(), [&](const auto& stLeft, const auto& stRight) { return Priority(stLeft) < Priority(stRight); });
+            for (const auto& [aHeader, stPath] : vPreload)
+            {
+                if (stStop.stop_requested())
+                {
+                    return;
+                }
+                if (Priority(std::pair(aHeader, stPath)) == 2)
+                {
+                    continue;
+                }
+                try
+                {
+                    GetPreparedAudio(aHeader, stPath, true);
+                }
+                catch (const std::exception& stError)
+                {
+                    spdlog::warn("MG1/2: Loose Audio : Preload failed for {}: {}", stPath.string(), stError.what());
+                }
+            }
+            std::lock_guard stLock(s_stCacheMutex);
+            spdlog::info("MG1/2: Loose Audio : Background preparation finished ({:.1f} MiB cached).", double(s_nCacheBytes) / (1024 * 1024));
+        });
     }
 }
 
