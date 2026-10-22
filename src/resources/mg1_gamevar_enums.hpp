@@ -12,6 +12,23 @@ enum MG1SnakeDialogue : int
     MG1_SNAKE_FINAL_REPORT = 0,
 };
 
+// Room door record byte 7. Scripted opening bypasses normal card access.
+enum MG1DoorAccess : int
+{
+    MG1_DOOR_ACCESS_NO_CARD = 0,
+    MG1_DOOR_ACCESS_CARD_1 = 1,
+    MG1_DOOR_ACCESS_CARD_8 = 8,
+    MG1_DOOR_ACCESS_LOCKED = 10,
+};
+
+enum MG1DoorStyle : int
+{
+    MG1_DOOR_STYLE_HORIZONTAL_INSET = 0,
+    MG1_DOOR_STYLE_RIGHT_DIAGONAL = 1,
+    MG1_DOOR_STYLE_HORIZONTAL = 2,
+    MG1_DOOR_STYLE_LEFT_DIAGONAL = 3,
+};
+
 enum MG1ItemIndex : uint8_t
 {
     MG1_ITEM_INDEX_CIGARETTES = 0,

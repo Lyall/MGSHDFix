@@ -9,6 +9,12 @@
 namespace MG2_LinkVarBuf
 {
     constexpr int nFixedPointOne = 1 << 16;
+    constexpr int nDoorRecordSize = 15;
+    constexpr int nDoorXOffset = 1;
+    constexpr int nDoorYOffset = 3;
+    constexpr int nDoorAccessOffset = 10;
+    constexpr int nDoorSpriteTypeOffset = 12;
+    constexpr int nRoomObjectRecordSize = 8;
     constexpr int nRoomWidth = 192;
     constexpr int nRoomHeight = 192;
     constexpr int nRoomCellSize = 8;
@@ -18,6 +24,16 @@ namespace MG2_LinkVarBuf
     constexpr size_t nPaletteSlotCount = 256;
     constexpr size_t nImageBlobHeaderSize = 8;
     constexpr size_t nImageBlobHeightOffset = 4;
+    constexpr size_t nAnimationTrackCountOffset = 2;
+    constexpr size_t nAnimationFirstRecordCountOffset = 4;
+    constexpr size_t nAnimationFirstRecordOffset = 6;
+    constexpr size_t nAnimationRecordSize = 10;
+    constexpr size_t nAnimationRecordGlyphOffset = 2;
+    constexpr size_t nAnimationRecordXOffset = 4;
+    constexpr size_t nAnimationRecordYOffset = 6;
+    constexpr size_t nAnimationRecordDurationOffset = 8;
+    constexpr uint16_t nAnimationNoGlyph = 0xFFFF;
+
     struct ObjectPosition
     {
         int anReserved[3];
@@ -40,7 +56,9 @@ namespace MG2_LinkVarBuf
 
     struct EngineState
     {
-        int anReserved[3];
+        int nAnimationState;
+        int nAnimationTicks;
+        int nWeaponAction;
         int nTurnState;
         int anReserved4[2];
         int GM_Facing;
@@ -122,7 +140,11 @@ namespace MG2_LinkVarBuf
         int nLoopsDone;
         int nShown;
         int nDrawOrder;
+        int anReserved[9];
+        int nFirstTrackFrame;
     };
+
+    static_assert(offsetof(Sprite, nFirstTrackFrame) == 0x4C);
 
     struct PaletteColour
     {
@@ -137,6 +159,7 @@ namespace MG2_LinkVarBuf
     inline int* pPaletteEffect = nullptr;
 
     inline uintptr_t* pAreaMapChunk = nullptr;
+    inline uintptr_t* pCompanionList = nullptr;
     inline uintptr_t* stateSlot = nullptr;
     inline PlayStats* playStats = nullptr;
     inline int32_t* pScriptGlobals = nullptr;
@@ -201,6 +224,7 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<1>    GM_Scene;
     inline ScriptGlobalValue<2>    GM_NextScene;
     inline ScriptGlobalValue<8>    GM_GameplayHalt;
+    inline ScriptGlobalValue<15>   GM_IntroPhase;
     inline ScriptGlobalValue<25>   GM_MessageId;
     inline ScriptGlobalValue<26>   GM_MessageSub;
     inline ScriptGlobalValue<27>   GM_MessagePos;
@@ -231,7 +255,7 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<95>   GM_ElevatorCar;
     inline ScriptGlobalValue<96>   GM_ElevatorState;
     inline ScriptGlobalValue<97>   GM_ElevatorTimer;
-
+    
 	/* Car service floors
 	     1: B2/B1/2F
 	     2: 1F/2F/3F/4F
@@ -252,6 +276,7 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<223>  GM_ContactSlot;
     inline ScriptGlobalValue<224>  GM_ReplyIndex;
     inline ScriptGlobalValue<226>  GM_ReplyBlock;
+    inline ScriptGlobalValue<144>  GM_FrameCounter;
     inline ScriptGlobalValue<227>  GM_SnakePortraitFrame;
     inline ScriptGlobalValue<228>  GM_ContactPortraitFrame;
     inline ScriptGlobalValue<231>  GM_SpeakerIsSnake;

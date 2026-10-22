@@ -29,6 +29,19 @@ enum MG2RoomCellFlags : uint16_t
     MG2_CELL_BLOCK_ACTORS = 0x8000,
 };
 
+// Area door record byte 10; script 154 checks normal contact access.
+enum MG2DoorAccess : int
+{
+    MG2_DOOR_ACCESS_NO_CARD = 0,
+    MG2_DOOR_ACCESS_CARD_1 = 1,
+    MG2_DOOR_ACCESS_CARD_9 = 9,
+    MG2_DOOR_ACCESS_LOCKED = 10,
+    MG2_DOOR_ACCESS_ALWAYS_OPEN = 11,
+    MG2_DOOR_ACCESS_CONDITION_12 = 12,
+    MG2_DOOR_ACCESS_CONDITION_13 = 13,
+    MG2_DOOR_ACCESS_SCRIPTED = 14,
+};
+
 enum MG2PaletteEffect : int
 {
     MG2_PALETTE_NORMAL = 0,
@@ -61,8 +74,38 @@ enum MG2PortraitFrame : uint8_t
     MG2_PORTRAIT_NONE = 15,
 };
 
+enum MG2PortraitAnimation : int
+{
+    MG2_PORTRAIT_ANIMATION_STATIC = 0,
+};
+
+enum MG2IntroAnimation : int
+{
+    MG2_INTRO_ANIMATION_MOVIE = 1,
+};
+
+
+enum MG2IntroFrame : int
+{
+    MG2_INTRO_FRAME_RED_PORTRAITS = 188,
+};
+
+enum MG2GuardAnimation : int
+{
+    MG2_GUARD_ANIMATION_WALK_UP = 1,
+    MG2_GUARD_ANIMATION_WALK_DOWN = 3,
+    MG2_GUARD_ANIMATION_SIDEWAYS = 4,
+    MG2_GUARD_ANIMATION_CENSOR_ORB = 5,
+};
+
+enum MG2IntroPhase : int
+{
+    MG2_INTRO_PHASE_STORY = 4,
+};
+
 enum MG2Scene : uint8_t
 {
+    MG2_SCENE_INTRO = 7,
     MG2_SCENE_PAUSE = 10,
     MG2_SCENE_LOAD_AREA = 16,
     MG2_SCENE_GAMEPLAY = 18,
@@ -72,12 +115,14 @@ enum MG2Scene : uint8_t
 
 enum MG2Sound : int
 {
+    MG2_SOUND_LIGHTER = 76,
     MG2_SOUND_ELEVATOR_ARRIVAL = 97,
 };
 
 enum MG2DrawLayer : int
 {
     MG2_LAYER_ROOM = 0,
+    MG2_LAYER_SPRITES = 9,
 };
 
 enum MG2ElevatorCar : int
@@ -156,10 +201,46 @@ enum MG2SpriteSheet : int
     MG2_SPRITE_SHEET_ENDING_CAST = 16,
     MG2_SPRITE_SHEET_GUARD = 20,
     MG2_SPRITE_SHEET_PORTRAITS = 25,
+    MG2_SPRITE_SHEET_INTRO = 34,
     MG2_SPRITE_SHEET_DOORS = 35,
     MG2_SPRITE_SHEET_CIGARETTE_SMOKE = 36,
     MG2_SPRITE_SHEET_SNAKE = 37,
     MG2_SPRITE_SHEET_TRANSCEIVER = 38,
+    MG2_SPRITE_SHEET_ROOM_OBJECTS = 41,
+};
+
+enum MG2PlayerAction : int
+{
+    MG2_PLAYER_ACTION_WEAPON = 2,
+};
+
+enum MG2SnakeMode : int
+{
+    MG2_SNAKE_MODE_LIGHTER = 12,
+};
+
+enum MG2Facing : int
+{
+    MG2_FACING_UP = 0,
+    MG2_FACING_RIGHT = 1,
+    MG2_FACING_DOWN = 2,
+    MG2_FACING_LEFT = 3,
+};
+
+enum MG2SnakeAnimation : int
+{
+    MG2_SNAKE_ANIM_SMOKING_UP = 2,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_UP = 5,
+    MG2_SNAKE_ANIM_SMOKING_LEFT = 12,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_LEFT = 15,
+    MG2_SNAKE_ANIM_SMOKING_DOWN = 22,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_DOWN = 25,
+    MG2_SNAKE_ANIM_SMOKING_RIGHT = 32,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_RIGHT = 35,
+    MG2_SNAKE_ANIM_LIGHTER_UP = 47,
+    MG2_SNAKE_ANIM_LIGHTER_RIGHT = 50,
+    MG2_SNAKE_ANIM_LIGHTER_DOWN = 53,
+    MG2_SNAKE_ANIM_LIGHTER_LEFT = 56,
 };
 
 enum MG2DoorAnimation : int
@@ -195,4 +276,14 @@ enum MG2TransceiverFrame : int
     MG2_TRANSCEIVER_FRAME_BACKGROUND = 5,
     MG2_TRANSCEIVER_FRAME_RECEIVE = 6,
     MG2_TRANSCEIVER_FRAME_SEND = 7,
+};
+
+enum MG2PitfallAnimation : int
+{
+    MG2_PITFALL_ANIMATION_FIRST = 18,
+};
+
+enum MG2RoomObjectKind : int
+{
+    MG2_ROOM_OBJECT_PITFALL = 10,
 };

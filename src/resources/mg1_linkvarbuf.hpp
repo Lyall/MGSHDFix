@@ -12,6 +12,15 @@ namespace MG1_LinkVarBuf
 
     inline uintptr_t* pTextChunkHandle = nullptr;
 
+    constexpr int nDoorRecordSize = 10;
+    constexpr int nDoorStyleOffset = 1;
+    constexpr int nDoorXOffset = 2;
+    constexpr int nDoorYOffset = 3;
+    constexpr int nDoorWidthOffset = 4;
+    constexpr int nDoorHeightOffset = 5;
+    constexpr int nDoorAccessOffset = 7;
+    constexpr int nDoorCenteredOffset = 8;
+
     struct PlayStats
     {
         int GM_PlayTime;           // 15 tick/second
@@ -141,7 +150,7 @@ namespace MG1_LinkVarBuf
 
     inline ScriptGlobalValue<150> GM_CurrentDrawLayer;
     inline ScriptGlobalValue<199> GM_MessagePos;
-    inline ScriptGlobalValue<202> GM_MessageDone; // Waiting at the end of a page or message.
+    inline ScriptGlobalValue<202> GM_MessageDone; // Waiting at the end of a page/message.
     inline ScriptGlobalValue<205> GM_MessageActive;
     inline ScriptGlobalValue<209> GM_MessageInstant;
 
