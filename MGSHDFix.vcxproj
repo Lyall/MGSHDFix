@@ -205,6 +205,7 @@
     <ClCompile Include="src\features\swap_menu_buttons.cpp" />
     <ClCompile Include="src\warnings\windows_multiplane_overlay_warning.cpp" />
     <ClCompile Include="src\fixes\windows_preferred_gpu.cpp" />
+    <ClCompile Include="src\features\mg2_cigarette_idle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\resources\mg_developer_menu.hpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="src\features\mg1_portrait_sprites.hpp" />
     <ClInclude Include="src\features\mg2_ending_cast.hpp" />
     <ClInclude Include="src\features\mg2_ending_cast_data.hpp" />
+    <ClInclude Include="src\fixes\mg2_boss_name_sprites.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles.hpp" />
     <ClInclude Include="src\features\mg2_outdoor_tiles_data.hpp" />
@@ -409,6 +411,8 @@
     <ClInclude Include="src\features\swap_menu_buttons.hpp" />
     <ClInclude Include="src\warnings\windows_multiplane_overlay_warning.hpp" />
     <ClInclude Include="src\fixes\windows_preferred_gpu.hpp" />
+    <ClInclude Include="src\features\mg2_cigarette_idle.hpp" />
+    <ClInclude Include="src\features\mg2_cigarette_animations.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MGSHDFix.ini" />

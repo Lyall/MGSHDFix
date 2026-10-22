@@ -156,6 +156,7 @@
 #include "mg2_truckyard_fence.hpp"
 #include "mg2_sprite_patcher.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_cigarette_idle.hpp"
 #include "mg2_door_cards.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
@@ -218,6 +219,7 @@ namespace
         MG2_OutdoorTiles::Initialize();
         MG2_TruckyardFence::Initialize();
         MG2_Elevators::Initialize();
+        MG2_CigaretteIdle::Initialize();
         MG2_DoorCards::Initialize();
         LooseAudioOverrides::Initialize();
         MG2_OpeningCallMusic::Initialize();

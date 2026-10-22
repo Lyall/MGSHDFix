@@ -539,6 +539,9 @@
     <ClCompile Include="src\fixes\ds3_rumble.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg2_cigarette_idle.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\resources\mg_developer_menu.hpp">
@@ -1079,6 +1082,9 @@
     <ClInclude Include="src\features\mg2_ending_cast_data.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\fixes\mg2_boss_name_sprites.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\features\mg2_outdoor_palettes.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
@@ -1138,6 +1144,12 @@
     </ClInclude>
     <ClInclude Include="src\resources\mg1_linkvarbuf.hpp">
       <Filter>APIs\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_cigarette_idle.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_cigarette_animations.hpp">
+      <Filter>Features\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

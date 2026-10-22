@@ -103,6 +103,7 @@
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_cigarette_idle.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
 #include "mg_developer_menu.hpp"
@@ -1415,6 +1416,8 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);

@@ -383,6 +383,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MG), ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, ConfigKeys::MG2_RestoreOriginalScript_Help, ConfigKeys::MG2_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, ConfigKeys::MG2_RestoreBossNames_Help, ConfigKeys::MG2_RestoreBossNames_Tooltip, std::make_pair(ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting), true, Field::Bool, false },
+        { (MG), ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, ConfigKeys::MG2_Cigarette_Idle_Help, ConfigKeys::MG2_Cigarette_Idle_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
 
         { (MG), ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, ConfigKeys::MG2_Outdoor_Artwork_Help, ConfigKeys::MG2_Outdoor_Artwork_Tooltip, std::nullopt, false, Field::Bool, true },

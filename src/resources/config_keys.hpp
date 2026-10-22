@@ -194,6 +194,10 @@ namespace ConfigKeys
     constexpr const char* MG2_Outdoor_Palettes_Setting = "Restore Outdoor Palettes";
     constexpr const char* MG2_Outdoor_Palettes_Help = "";
     constexpr const char* MG2_Outdoor_Palettes_Tooltip = "Restores the original MSX2 sunrise color palettes as Snake makes his way into the first Zanzibar building.";
+    constexpr const char* MG2_Cigarette_Idle_Section = "Metal Gear 2";
+    constexpr const char* MG2_Cigarette_Idle_Setting = "Restore Cigarette Animations";
+    constexpr const char* MG2_Cigarette_Idle_Help = "";
+    constexpr const char* MG2_Cigarette_Idle_Tooltip = "Restores the original MSX2 cigarette idle animation timings and smoke sprites.";
 
     constexpr const char* MG2_Outdoor_Artwork_Section = "Metal Gear 2";
     constexpr const char* MG2_Outdoor_Artwork_Setting = "Restore Outdoor Artwork";
