@@ -20,6 +20,7 @@ namespace MG_VectorFontRenderer
         float fU;
         float fV;
         uint32_t nColor;
+        float fOpacity = 1.0f;
     };
 
     struct Batch

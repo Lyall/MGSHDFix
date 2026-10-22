@@ -78,6 +78,8 @@ namespace
         int nFont;
         bool bDraw;
         std::string sText;
+        int nNarrationOpacity = -1;
+        bool bOutline = false;
 
         bool operator==(const TextCommand&) const = default;
     };
@@ -105,6 +107,57 @@ namespace
     uint64_t s_nRevision = 0;
     uint64_t s_nGlyphGeneration = 0;
     std::atomic<bool> s_bWarmPending = false;
+
+    SafetyHookInline s_hDraw, s_hDrawIndexed;
+    std::atomic<ID3D11ShaderResourceView*> s_pNarrationView = nullptr;
+    ComPtr<ID3D11BlendState> s_pNarrationBlend;
+
+    struct NarrationBlend
+    {
+        ID3D11DeviceContext* pContext;
+        ComPtr<ID3D11BlendState> pOriginal;
+        float afFactor[4] {};
+        UINT nMask = 0;
+        bool bChanged = false;
+
+        explicit NarrationBlend(ID3D11DeviceContext* pDrawContext) : pContext(pDrawContext)
+        {
+            auto* pNarration = s_pNarrationView.load(std::memory_order_acquire);
+            if (!pNarration)
+            {
+                return;
+            }
+            ComPtr<ID3D11ShaderResourceView> pView;
+            pContext->PSGetShaderResources(0, 1, &pView);
+            if (pView.Get() != pNarration)
+            {
+                return;
+            }
+            pContext->OMGetBlendState(&pOriginal, afFactor, &nMask);
+            pContext->OMSetBlendState(s_pNarrationBlend.Get(), afFactor, nMask);
+            bChanged = true;
+        }
+
+        ~NarrationBlend()
+        {
+            if (bChanged)
+            {
+                pContext->OMSetBlendState(pOriginal.Get(), afFactor, nMask);
+            }
+        }
+    };
+
+    void __stdcall Draw_hook(ID3D11DeviceContext* pContext, UINT nCount, UINT nStart)
+    {
+        NarrationBlend stBlend(pContext);
+        s_hDraw.call<void>(pContext, nCount, nStart);
+    }
+
+    void __stdcall DrawIndexed_hook(ID3D11DeviceContext* pContext, UINT nCount, UINT nStart, INT nBase)
+    {
+        NarrationBlend stBlend(pContext);
+        s_hDrawIndexed.call<void>(pContext, nCount, nStart, nBase);
+    }
 
     void WarmGlyphCache(GameRenderer& stGame);
 
@@ -152,9 +205,16 @@ namespace
         {
             void** ppTable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
             s_hSetResources = safetyhook::create_inline(ppTable[8], SetResources_hook);
+            s_hDraw = safetyhook::create_inline(ppTable[13], Draw_hook);
+            s_hDrawIndexed = safetyhook::create_inline(ppTable[12], DrawIndexed_hook);
             LOG_HOOK(s_hSetResources, "MG1/MG2: Vector Font : ID3D11DeviceContext::PSSetShaderResources()")
-            if (!s_hSetResources)
+            LOG_HOOK(s_hDraw, "MG1/MG2: Vector Font : ID3D11DeviceContext::Draw()")
+            LOG_HOOK(s_hDrawIndexed, "MG1/MG2: Vector Font : ID3D11DeviceContext::DrawIndexed()")
+            if (!s_hSetResources || !s_hDraw || !s_hDrawIndexed)
             {
+                s_hSetResources.reset();
+                s_hDraw.reset();
+                s_hDrawIndexed.reset();
                 return false;
             }
         }
@@ -175,6 +235,23 @@ namespace
             s_pFailedDevice = pDevice;
             spdlog::error("MG1/MG2: Vector Font : GPU renderer unavailable. Using native text.");
             return false;
+        }
+        if (bNewDevice || !s_pNarrationBlend)
+        {
+            D3D11_BLEND_DESC stBlend {};
+            auto& stTarget = stBlend.RenderTarget[0];
+            stTarget.BlendEnable = TRUE;
+            stTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+            stTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+            stTarget.BlendOp = stTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            stTarget.SrcBlendAlpha = D3D11_BLEND_ONE;
+            stTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
+            stTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+            s_pNarrationBlend.Reset();
+            if (FAILED(pDevice->CreateBlendState(&stBlend, &s_pNarrationBlend)))
+            {
+                return false;
+            }
         }
         if (nScale != s_nScale || bNewDevice || s_stGlyphs.size() >= nMaximumCachedGlyphs)
         {
@@ -240,9 +317,9 @@ namespace
         return true;
     }
 
-    const Glyph& GetGlyph(const Letter& stLetter, int nFont)
+    const Glyph& GetGlyph(const Letter& stLetter, int nFont, bool bOutline = false)
     {
-        const uint64_t nKey = uint64_t(stLetter.nCodepoint) | (uint64_t(stLetter.nAdvance) << 32) | (uint64_t(nFont) << 40);
+        const uint64_t nKey = uint64_t(stLetter.nCodepoint) | (uint64_t(stLetter.nAdvance) << 32) | (uint64_t(nFont) << 40) | (uint64_t(bOutline) << 48);
         const auto stFound = s_stGlyphs.find(nKey);
         if (stFound != s_stGlyphs.end())
         {
@@ -264,7 +341,39 @@ namespace
         stGlyph.nY += static_cast<int>(std::round(nAscent * fScaleY));
         if (pBitmap)
         {
-            if (!s_stRenderer.AddGlyph(pBitmap, stGlyph.nWidth, stGlyph.nHeight, stGlyph.stLocation))
+            std::vector<uint8_t> vOutline;
+            const uint8_t* pCoverage = pBitmap;
+            if (bOutline)
+            {
+                const int nRadius = s_nScale;
+                const int nWidth = stGlyph.nWidth + 2 * nRadius;
+                const int nHeight = stGlyph.nHeight + 2 * nRadius;
+                vOutline.resize(static_cast<size_t>(nWidth) * nHeight);
+                for (int nY = 0; nY < stGlyph.nHeight; ++nY)
+                {
+                    for (int nX = 0; nX < stGlyph.nWidth; ++nX)
+                    {
+                        const uint8_t nCoverage = pBitmap[nY * stGlyph.nWidth + nX];
+                        for (int nDY = -nRadius; nDY <= nRadius; ++nDY)
+                        {
+                            for (int nDX = -nRadius; nDX <= nRadius; ++nDX)
+                            {
+                                if (nDX * nDX + nDY * nDY <= nRadius * nRadius)
+                                {
+                                    auto& nPixel = vOutline[(nY + nRadius + nDY) * nWidth + nX + nRadius + nDX];
+                                    nPixel = std::max(nPixel, nCoverage);
+                                }
+                            }
+                        }
+                    }
+                }
+                stGlyph.nX -= nRadius;
+                stGlyph.nY -= nRadius;
+                stGlyph.nWidth = nWidth;
+                stGlyph.nHeight = nHeight;
+                pCoverage = vOutline.data();
+            }
+            if (!s_stRenderer.AddGlyph(pCoverage, stGlyph.nWidth, stGlyph.nHeight, stGlyph.stLocation))
             {
                 stGlyph.bReady = false;
             }
@@ -391,9 +500,9 @@ namespace
         }
     }
 
-    void DrawLetter(const Letter& stLetter, int nFont, int nY, uint32_t nColor)
+    void DrawLetter(const Letter& stLetter, int nFont, int nY, uint32_t nColor, bool bOutline = false, float fOpacity = 1.0f)
     {
-        const Glyph& stGlyph = GetGlyph(stLetter, nFont);
+        const Glyph& stGlyph = GetGlyph(stLetter, nFont, bOutline);
         if (stGlyph.nWidth <= 0 || stGlyph.nHeight <= 0 || s_bRasterFailed)
         {
             return;
@@ -409,12 +518,12 @@ namespace
             s_vBatches.push_back({ stGlyph.stLocation.nPage, static_cast<UINT>(s_vVertices.size()), 0 });
         }
         s_vVertices.insert(s_vVertices.end(), {
-            { fX, fY, fU, fV, nColor },
-            { fX + fWidth, fY, fU + fWidth, fV, nColor },
-            { fX, fY + fHeight, fU, fV + fHeight, nColor },
-            { fX, fY + fHeight, fU, fV + fHeight, nColor },
-            { fX + fWidth, fY, fU + fWidth, fV, nColor },
-            { fX + fWidth, fY + fHeight, fU + fWidth, fV + fHeight, nColor }
+            { fX, fY, fU, fV, nColor, fOpacity },
+            { fX + fWidth, fY, fU + fWidth, fV, nColor, fOpacity },
+            { fX, fY + fHeight, fU, fV + fHeight, nColor, fOpacity },
+            { fX, fY + fHeight, fU, fV + fHeight, nColor, fOpacity },
+            { fX + fWidth, fY, fU + fWidth, fV, nColor, fOpacity },
+            { fX + fWidth, fY + fHeight, fU + fWidth, fV + fHeight, nColor, fOpacity }
         });
         s_vBatches.back().nCount += 6;
     }
@@ -436,6 +545,14 @@ namespace
         const char* pszText = reinterpret_cast<const char*>(pText + 4);
         const size_t nLength = strnlen(pszText, nMaximumTextBytes);
         TextCommand stCommand { static_cast<uint32_t>(pText[0]), pText[1], pText[2], pText[3], false, {} };
+        if constexpr (nGame == 1)
+        {
+            if (MG2_LinkVarBuf::GM_Scene == MG2_SCENE_INTRO && MG2_LinkVarBuf::GM_IntroPhase == MG2_INTRO_PHASE_STORY && stCommand.nFont == 0)
+            {
+                stCommand.nNarrationOpacity = static_cast<int>(stCommand.nColor & 0xFF) * s_nFade / 255;
+                stCommand.bOutline = MG_VectorFont::bOpeningNarrationOutline;
+            }
+        }
         if (nLength == nMaximumTextBytes)
         {
             s_bRasterFailed = true;
@@ -477,9 +594,23 @@ namespace
             }
             if (stCommand.bDraw)
             {
+                if (stCommand.bOutline && stCommand.nNarrationOpacity > 0)
+                {
+                    for (const Letter& stLetter : vLetters)
+                    {
+                        DrawLetter(stLetter, stCommand.nFont, stCommand.nY, 0, true, float(stCommand.nNarrationOpacity) / 255.0f);
+                    }
+                }
                 for (const Letter& stLetter : vLetters)
                 {
-                    DrawLetter(stLetter, stCommand.nFont, stCommand.nY, stCommand.nColor);
+                    if (stCommand.nNarrationOpacity >= 0)
+                    {
+                        DrawLetter(stLetter, stCommand.nFont, stCommand.nY, 0xFFFFFF, false, float(stCommand.nNarrationOpacity) / 255.0f);
+                    }
+                    else
+                    {
+                        DrawLetter(stLetter, stCommand.nFont, stCommand.nY, stCommand.nColor);
+                    }
                 }
             }
         }
@@ -503,7 +634,8 @@ namespace
         {
             return;
         }
-        ID3D11ShaderResourceView* pReplacement = s_stRenderer.Render(s_vBasePixels, s_vVertices, s_vBatches, s_nRevision, s_nScale, s_nFade, stDesc.Format);
+        const bool bNarration = !s_vCommands.empty() && std::all_of(s_vCommands.begin(), s_vCommands.end(), [](const TextCommand& stCommand) { return stCommand.nNarrationOpacity >= 0; });
+        ID3D11ShaderResourceView* pReplacement = s_stRenderer.Render(s_vBasePixels, s_vVertices, s_vBatches, s_nRevision, s_nScale, bNarration ? 255 : s_nFade, stDesc.Format);
         if (!pReplacement)
         {
             return;
@@ -511,6 +643,7 @@ namespace
         std::lock_guard<std::mutex> stLock(s_stTextureMutex);
         s_pOriginalView = pOriginal;
         s_pReplacementView = pReplacement;
+        s_pNarrationView.store(bNarration ? pReplacement : nullptr, std::memory_order_release);
         s_pActiveOriginal.store(pOriginal, std::memory_order_release);
     }
 
@@ -533,6 +666,7 @@ namespace
     {
         GameRenderer& stGame = s_astGames[nGame];
         s_pGame = &stGame;
+        s_pNarrationView.store(nullptr, std::memory_order_release);
         s_pActiveOriginal.store(nullptr, std::memory_order_release);
         s_pFrame = nullptr;
         s_bRasterFailed = false;

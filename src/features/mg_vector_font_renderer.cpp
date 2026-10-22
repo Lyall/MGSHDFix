@@ -32,12 +32,14 @@ struct Input
     float2 position : POSITION;
     float2 uv : TEXCOORD;
     float4 color : COLOR;
+    float opacity : TEXCOORD1;
 };
 struct Pixel
 {
     float4 position : SV_Position;
     float2 uv : TEXCOORD;
     float4 color : COLOR;
+    float opacity : TEXCOORD1;
 };
 Pixel Quad(Input input)
 {
@@ -45,6 +47,7 @@ Pixel Quad(Input input)
     output.position = float4(input.position / size * float2(2, -2) + float2(-1, 1), 0, 1);
     output.uv = input.uv;
     output.color = bgra != 0 ? input.color.bgra : input.color;
+    output.opacity = input.opacity;
     return output;
 }
 Pixel Screen(uint id : SV_VertexID)
@@ -54,11 +57,12 @@ Pixel Screen(uint id : SV_VertexID)
     output.position = float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
     output.uv = uv;
     output.color = 1;
+    output.opacity = 1;
     return output;
 }
 float4 Glyph(Pixel input) : SV_Target
 {
-    float coverage = image.Load(int3(input.uv, 0)).r;
+    float coverage = image.Load(int3(input.uv, 0)).r * input.opacity;
     return float4(input.color.rgb * coverage, coverage);
 }
 float4 Base(Pixel input) : SV_Target
@@ -112,7 +116,8 @@ bool Renderer::Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, 
     const D3D11_INPUT_ELEMENT_DESC astLayout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     D3D11_BUFFER_DESC stConstants {};
     stConstants.ByteWidth = sizeof(Constants);

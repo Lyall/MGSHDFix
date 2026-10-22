@@ -5,6 +5,7 @@
 namespace MG_VectorFont
 {
     inline bool bEnabled = true;
+    inline bool bOpeningNarrationOutline = true;
 
     void OnPresent();
     void InitializeMG1();
