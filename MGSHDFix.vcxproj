@@ -27,6 +27,7 @@
     <ClCompile Include="src\features\mg2_door_cards.cpp" />
     <ClCompile Include="src\features\mg_cigarette_damage.cpp" />
     <ClCompile Include="src\features\mg1_portrait_overlay.cpp" />
+    <ClCompile Include="src\features\mg1_opening.cpp" />
     <ClCompile Include="src\features\mg2_ending_cast.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_palettes.cpp" />
     <ClCompile Include="src\features\mg2_outdoor_tiles.cpp" />
@@ -250,6 +251,8 @@
     <ClInclude Include="src\features\mg2_door_cards.hpp" />
     <ClInclude Include="src\features\mg_cigarette_damage.hpp" />
     <ClInclude Include="src\features\mg1_portrait_overlay.hpp" />
+    <ClInclude Include="src\features\mg1_opening_sprites.hpp" />
+    <ClInclude Include="src\features\mg1_opening.hpp" />
     <ClInclude Include="src\features\mg1_portrait_sprites.hpp" />
     <ClInclude Include="src\features\mg2_ending_cast.hpp" />
     <ClInclude Include="src\features\mg2_ending_cast_data.hpp" />

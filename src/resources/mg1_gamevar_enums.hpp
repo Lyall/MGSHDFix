@@ -85,6 +85,7 @@ enum MG1Scene : uint8_t
 {
     MG1_SCENE_GAMEPLAY = 0x9,
     MG1_SCENE_TITLE_MENU = 0xA,
+    MG1_SCENE_OPENING = 0xB,
     MG1_SCENE_TRANSCEIVER = 0xF,
     MG1_SCENE_MESSAGE_WINDOW = 0x10,
     MG1_SCENE_PAUSE = 0x11,
@@ -97,4 +98,14 @@ enum MG1AlertPhase : uint8_t
     MG1_ALERT_PHASE_NONE = 0,
     MG1_ALERT_PHASE_ALERT = 1,
     MG1_ALERT_PHASE_REINFORCEMENTS = 2,
+};
+
+enum MG1SpriteSheet : int
+{
+    MG1_SPRITE_SHEET_OPENING = 50,
+};
+
+enum MG1DrawLayer : int
+{
+    MG1_LAYER_COMPOSITE = 9,
 };

@@ -7,6 +7,9 @@
 
 namespace MG1_LinkVarBuf
 {
+    constexpr int nFrameBufferWidth = 256;
+    constexpr int nFrameBufferHeight = 256;
+
     inline uintptr_t* pTextChunkHandle = nullptr;
 
     struct PlayStats
@@ -53,6 +56,37 @@ namespace MG1_LinkVarBuf
     };
 
     static_assert(sizeof(DrawLayer) == 0x28);
+
+    struct Sprite
+    {
+        int nFlags;
+        int nReserved;
+        int nX;
+        int nY;
+        int nSheet;
+        int nAnimation;
+        int nPreviousAnimation;
+        int nElapsedTicks;
+        int nLoops;
+        int anTrackFrames[20];
+        int anTrackTicks[20];
+        int nHidden;
+        int nDrawOrder;
+        int nPaletteIndex;
+        int nPaletteTimer;
+        int anTrackX[20];
+        int anTrackY[20];
+        int anTrackWidth[20];
+        int anTrackHeight[20];
+    };
+
+    static_assert(sizeof(Sprite) == 0x214);
+    static_assert(offsetof(Sprite, anTrackFrames) == 0x24);
+    static_assert(offsetof(Sprite, nPaletteIndex) == 0xCC);
+
+    inline DrawLayer* pDrawLayers = nullptr;
+    inline uint32_t* pOutputPalette = nullptr;
+    inline int* pOutputTopRows = nullptr;
 
     inline int32_t* pScriptGlobals = nullptr;
     inline int32_t* pMessageLength = nullptr;
@@ -436,6 +470,25 @@ namespace MG1_LinkVarBuf
 
     inline void Initialize()
     {
+        //BlitImage+20
+        uint8_t* pLayers = Memory::PatternScan(mg1Module, "48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? 48 8B F8", "MG1: BlitImage()+0x20 : draw layers");
+        if (pLayers)
+        {
+            pDrawLayers = reinterpret_cast<DrawLayer*>(Memory::GetRipRelativeAddress(pLayers, 3, 7));
+        }
+        //PresentIndexedFrame+6E
+        uint8_t* pPalette = Memory::PatternScan(mg1Module, "48 8D 15 ?? ?? ?? ?? 66 66 66 0F 1F 84 00", "MG1: PresentIndexedFrame()+0x6E : output palette");
+        if (pPalette)
+        {
+            pOutputPalette = reinterpret_cast<uint32_t*>(Memory::GetRipRelativeAddress(pPalette, 3, 7));
+        }
+        //PresentIndexedFrame+2A
+        uint8_t* pTopRows = Memory::PatternScan(mg1Module, "8B 2D ?? ?? ?? ?? 48 8B F8", "MG1: PresentIndexedFrame()+0x2A : top padding");
+        if (pTopRows)
+        {
+            pOutputTopRows = reinterpret_cast<int*>(Memory::GetRipRelativeAddress(pTopRows, 2, 6));
+        }
+
         //ShowMessage+29
         uint8_t* pTextChunk = Memory::PatternScan(mg1Module, "48 8B 0D ?? ?? ?? ?? 33 D2 41 8B ED", "MG1: ShowMessage()+0x29 : text chunk");
         if (pTextChunk)

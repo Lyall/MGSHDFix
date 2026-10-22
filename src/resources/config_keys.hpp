@@ -177,6 +177,10 @@ namespace ConfigKeys
     constexpr const char* MG1_RestoreBossNames_Setting = "Restore Boss Names";
     constexpr const char* MG1_RestoreBossNames_Help = "";
     constexpr const char* MG1_RestoreBossNames_Tooltip = "Restores the original boss names.";
+    constexpr const char* MG1_Opening_Section = "Metal Gear 1";
+    constexpr const char* MG1_Opening_Setting = "Restore Opening Sprites";
+    constexpr const char* MG1_Opening_Help = "";
+    constexpr const char* MG1_Opening_Tooltip = "Restores a number of missing sprites & palette quirks that were present in the original MSX2 version's opening.";
 
 
     constexpr const char* MG2_RestoreBossNames_Section = "Metal Gear 2";

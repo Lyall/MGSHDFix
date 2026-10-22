@@ -378,6 +378,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         //{ (MG), ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, ConfigKeys::MG1_RestoreOriginalScript_Help, ConfigKeys::MG1_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, false },
         { (MG), ConfigKeys::MG1_RestoreBossNames_Section, ConfigKeys::MG1_RestoreBossNames_Setting, ConfigKeys::MG1_RestoreBossNames_Help, ConfigKeys::MG1_RestoreBossNames_Tooltip, std::nullopt, false, Field::Bool, false },
+        { (MG), ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, ConfigKeys::MG1_Opening_Help, ConfigKeys::MG1_Opening_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, ConfigKeys::MG1_Portrait_Overlay_Help, ConfigKeys::MG1_Portrait_Overlay_Tooltip, std::nullopt, false, Field::Bool, true },
 
 

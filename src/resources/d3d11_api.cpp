@@ -28,6 +28,7 @@
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
 #include "mg_vector_font.hpp"
+#include "mg1_opening.hpp"
 #include "mgs2_crossfade.hpp"
 #include "photo_camera.hpp"
 #include "mgs3_crossfade_capture.hpp"
@@ -417,6 +418,7 @@ namespace
 
         }
 
+        MG1_Opening::OnPresent();
         MG_VectorFont::OnPresent();
 
         //MGS2_EffectSpeedFix.Tick();

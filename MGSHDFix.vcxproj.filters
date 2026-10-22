@@ -437,6 +437,9 @@
     <ClCompile Include="src\features\mg1_portrait_overlay.cpp">
       <Filter>Features</Filter>
     </ClCompile>
+    <ClCompile Include="src\features\mg1_opening.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg2_ending_cast.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -1071,6 +1074,12 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_portrait_overlay.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_opening_sprites.hpp">
+      <Filter>Features</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg1_opening.hpp">
       <Filter>Features</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg1_portrait_sprites.hpp">

@@ -105,6 +105,7 @@
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg1_portrait_overlay.hpp"
+#include "mg1_opening.hpp"
 #include "mg_vector_font.hpp"
 #include "mg_developer_menu.hpp"
 #include "mg_cigarette_damage.hpp"
@@ -1407,6 +1408,8 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
     MG_TextOverrides::bMG2RestoreBossNames |= MG_TextOverrides::bMG2RestoreOriginalScript;
     LOG_CONFIG(ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
+    ConfigHelper::getValue(ini, ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, MG1_Opening::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, MG1_Opening::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);

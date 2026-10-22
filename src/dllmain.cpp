@@ -159,6 +159,7 @@
 #include "mg2_cigarette_idle.hpp"
 #include "mg2_door_cards.hpp"
 #include "mg1_portrait_overlay.hpp"
+#include "mg1_opening.hpp"
 #include "mg_vector_font.hpp"
 #include "mg_stage_select.hpp"
 #include "mg_cigarette_damage.hpp"
@@ -198,6 +199,7 @@ namespace
         LooseAudioOverrides::Initialize();
         MG1_DoorCards::Initialize();
         MG1_PortraitOverlay::Initialize();
+        MG1_Opening::Initialize();
         MG1_Scorpions::Initialize();
         MG1_TelescopeHudFix::Apply();
         MG_Cigarettes::InitializeMG1();
