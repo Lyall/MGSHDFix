@@ -186,7 +186,7 @@ namespace ConfigKeys
 
 
     constexpr const char* MG1_Portrait_Overlay_Section = "Metal Gear 1";
-    constexpr const char* MG1_Portrait_Overlay_Setting = "Restore Snake Portrait Animation";
+    constexpr const char* MG1_Portrait_Overlay_Setting = "Restore Snake Radio Sprites";
     constexpr const char* MG1_Portrait_Overlay_Help = "";
     constexpr const char* MG1_Portrait_Overlay_Tooltip = "Restores Snake's original MSX2 eye and mouth animations while he speaks on the transceiver.";
 
