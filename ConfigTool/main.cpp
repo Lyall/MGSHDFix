@@ -766,7 +766,7 @@ public:
                         "MGSHDFix, licensed under MIT.\n"
                         "     Maintained by Afevis (aka ShizCalev.)\n"
                         "     Originally created by Lyall.\n"
-                        "     Contributors: Emoose, Cipherxof (aka TriggerHappy), Bud11, SpaceCore (aka Jacky720), gibletto, Zenf0."
+                        "     Additional Contributors: Emoose, Cipherxof (aka TriggerHappy), Bud11, SpaceCore (aka Jacky720), gibletto, PinkElephantG, Zenf0."
                     );
                     aboutSizer->Add(aboutText, 0, wxALL, 5);
 
