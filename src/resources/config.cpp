@@ -102,6 +102,7 @@
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
+#include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg1_portrait_overlay.hpp"
@@ -1389,6 +1390,9 @@ void Config::Read()
         InputHandler::GetKeybind(ini, ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, MG_DeveloperMenu::nHotkey);
     }
 
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
     LOG_CONFIG(ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);

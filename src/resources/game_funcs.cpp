@@ -354,6 +354,9 @@ void MG2_Gamefuncs::HookDllGameFuncs()
     {
         pfnGetObjectSprite = reinterpret_cast<GetObjectSprite_t>(Memory::ResolveCall(pGetObjectSprite));
     }
+    pfnDrawSprite = reinterpret_cast<DrawSprite_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 55", "MG2: DrawSprite()"));
+    pfnInitSprite = reinterpret_cast<InitSprite_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B 44 24", "MG2: InitSprite()"));
+    pfnBuildDoors = reinterpret_cast<BuildDoors_t>(Memory::PatternScan(mg2Module, "40 55 53 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05", "MG2: BuildDoors()"));
     pfnDrawSprites = reinterpret_cast<DrawSprites_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? E8", "MG2: DrawSprites()"));
     pfnLayerFillRect = reinterpret_cast<LayerFillRect_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 41 54", "MG2: LayerFillRect()"));
     pfnRequestSound = reinterpret_cast<RequestSound_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 57 48 83 EC ?? 48 63 F9", "MG2: RequestSound()"));

@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="src\features\mg2_doors.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
+    <ClCompile Include="src\features\mg2_room_patches.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\resources\mg_developer_menu.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
@@ -547,6 +553,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg2_doors.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_door_sprites.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_door_fixes.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_room_patches.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\resources\mg_developer_menu.hpp">
       <Filter>Resources</Filter>
     </ClInclude>

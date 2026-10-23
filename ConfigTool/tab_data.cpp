@@ -89,6 +89,8 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
         { (MG), ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, ConfigKeys::MG_Vector_Font_Enabled_Help, ConfigKeys::MG_Vector_Font_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
+        { (MG), ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, ConfigKeys::MG2_Doors_Help, ConfigKeys::MG2_Doors_Tooltip, std::nullopt, false, Field::Bool, true },
+
         { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
 
 

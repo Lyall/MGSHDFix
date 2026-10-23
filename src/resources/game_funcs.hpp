@@ -198,6 +198,12 @@ namespace MG2_Gamefuncs
 
     using ScriptRun_t = void(__fastcall*)(int* pScript);
     inline ScriptRun_t pfnScriptRun = nullptr;
+    using DrawSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nMode);
+    inline DrawSprite_t pfnDrawSprite = nullptr;
+    using InitSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nSheet, int nAnimation, int nTrack, int nAnimating, int nDrawOrder, int nX, int nY);
+    inline InitSprite_t pfnInitSprite = nullptr;
+    using BuildDoors_t = void(__fastcall*)();
+    inline BuildDoors_t pfnBuildDoors = nullptr;
     using DrawSprites_t = void(__fastcall*)();
     inline DrawSprites_t pfnDrawSprites = nullptr;
     using LayerFillRect_t = void(__fastcall*)(int nLayer, const int* pRectangle);

@@ -155,6 +155,8 @@
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
 #include "mg2_sprite_patcher.hpp"
+#include "mg2_room_patches.hpp"
+#include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg2_door_cards.hpp"
@@ -221,6 +223,8 @@ namespace
         FixPlaytime::ApplyMG2();
         g_IntroSkip.InitializeMG2();
         MG_TextOverrides::InitializeMG2();
+        MG2_Doors::Initialize();
+        MG2_RoomPatches::Initialize();
         MG2_OutdoorPalettes::Initialize();
         MG2_OutdoorTiles::Initialize();
         MG2_TruckyardFence::Initialize();

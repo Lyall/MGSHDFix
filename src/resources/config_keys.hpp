@@ -146,6 +146,11 @@ namespace ConfigKeys
 
 
 
+    constexpr const char* MG2_Doors_Section = "Metal Gear 2";
+    constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
+    constexpr const char* MG2_Doors_Help = "";
+    constexpr const char* MG2_Doors_Tooltip = "Restores several doors which were missing their sprite variants present in the MSX2 version (and also restores a few missing doors.)";
+
     constexpr const char* MG2_Elevator_Lamps_Section = "Tweaks and Restoration";
     constexpr const char* MG2_Elevator_Lamps_Setting = "Restore Elevator Floor Lamps (MG2)";
     constexpr const char* MG2_Elevator_Lamps_Help = "";

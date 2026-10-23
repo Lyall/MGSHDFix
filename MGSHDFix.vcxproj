@@ -7,6 +7,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mg2_doors.cpp" />
+    <ClCompile Include="src\features\mg2_room_patches.cpp" />
     <ClCompile Include="src\resources\mg_developer_menu.cpp" />
     <ClCompile Include="src\features\mg2_opening_call_music.cpp" />
     <ClCompile Include="src\features\mg_inventory_menu.cpp" />
@@ -209,6 +211,10 @@
     <ClCompile Include="src\features\mg2_cigarette_idle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg2_doors.hpp" />
+    <ClInclude Include="src\features\mg2_door_sprites.hpp" />
+    <ClInclude Include="src\features\mg2_door_fixes.hpp" />
+    <ClInclude Include="src\features\mg2_room_patches.hpp" />
     <ClInclude Include="src\resources\mg_developer_menu.hpp" />
     <ClInclude Include="src\features\mg2_opening_call_music.hpp" />
     <ClInclude Include="src\features\mg_inventory_menu.hpp" />
