@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "common.hpp"
+#include "gamevars.hpp"
 #include "line_scaling.hpp"
 #include "d3d11_api.hpp"
 
@@ -85,6 +86,12 @@ namespace
 
     void __stdcall HookedDraw(ID3D11DeviceContext* context, UINT VertexCount, UINT StartVertexLocation)
     {
+        if ((eGameType & MG) && !g_GameVars.MGIsSaveLoadVisible())
+        {
+            D3D11_Draw_Hook.call<void>(context, VertexCount, StartVertexLocation);
+            return;
+        }
+
         D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
         context->IAGetPrimitiveTopology(&topology);
 
@@ -125,29 +132,30 @@ namespace
 
 void VectorScalingFix::LoadCompiledShader() const
 {
-    if (!(eGameType & (MGS2 | MGS3)))
+    if (!(eGameType & (MG | MGS2 | MGS3)))
     {
         return;
     }
-    if (!bFixRain && !bFixUI)
+    if (!bFixUI && (!bFixRain || (eGameType & MG)))
     {
         return;
     }
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Attempting to load compiled geometry shader...");
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Attempting to load compiled geometry shader...");
 
     if (geometryShader)
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Geometry shader or compiled shader bytecode already exists.");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Geometry shader or compiled shader bytecode already exists.");
         return;
     }
     if (!compiledShaderBytecode)
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Shader bytecode not compiled.");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Shader bytecode not compiled.");
+        return;
     }
 
     if (!g_D3D11Hooks.d3dDevice)
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device is not initialized.");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device is not initialized.");
         return;
     }
 
@@ -160,7 +168,7 @@ void VectorScalingFix::LoadCompiledShader() const
 
     if (FAILED(result))
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create geometry shader on device");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create geometry shader on device");
         return;
     }
 
@@ -175,32 +183,32 @@ void VectorScalingFix::LoadCompiledShader() const
 
         if (HRESULT cbhr = g_D3D11Hooks.d3dDevice->CreateBuffer(&cbd, nullptr, gsParamsCB.GetAddressOf()); FAILED(cbhr))
         {
-            spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create GS params constant buffer. hr=0x{:08X}", cbhr);
+            spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to create GS params constant buffer. hr=0x{:08X}", cbhr);
             return;
         }
     }
 
     if (!bFixUI)
     {
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: UI Fix is disabled, skipping hooking Draw calls for UI Fix geometry shader...");
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: UI Fix is disabled, skipping hooking Draw calls for UI Fix geometry shader...");
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
         return;
     }
 
     if (!g_D3D11Hooks.d3dDeviceContext)
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device context is not initialized.");
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to hook Draw calls for UI Fix geometry shader.");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: D3D11 device context is not initialized.");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Failed to hook Draw calls for UI Fix geometry shader.");
         return;
     }
 
 
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Hooking Draw calls to apply UI Fix geometry shader...");
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Hooking Draw calls to apply UI Fix geometry shader...");
     void** vtable = *reinterpret_cast<void***>(g_D3D11Hooks.d3dDeviceContext.Get());
     D3D11_Draw_Hook = safetyhook::create_inline(vtable[13], reinterpret_cast<void*>(HookedDraw));
     LOG_HOOK(D3D11_Draw_Hook, "ID3D11DeviceContext::Draw");
 
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Load Shader: Successfully loaded geometry shader on device.");
 }
 
 bool VectorScalingFix::CompileGeometryShader()
@@ -208,13 +216,13 @@ bool VectorScalingFix::CompileGeometryShader()
 
     if (!g_D3D11Hooks.D3DCompileFunc)
     {
-        spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Failed to get address for D3DCompile");
+        spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Failed to get address for D3DCompile");
         return false;
     }
 
     if (iVectorLineScale < 1)
     {
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Invalid line scale! Defaulting to 360");
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Invalid line scale! Defaulting to 360");
         iVectorLineScale = DEFAULT_LINE_SCALE;
     }
     if(iVectorLineScale < DEFAULT_LINE_SCALE*0.5)
@@ -230,12 +238,12 @@ bool VectorScalingFix::CompileGeometryShader()
     }
     else
     {
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Line Scale before: {}", iVectorLineScale);
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Line Scale before: {}", iVectorLineScale);
     }
     iVectorLineScale = round(CustomResolutionAndBorderless::iInternalResY / iVectorLineScale);
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Target Pixel Width = : {}", iVectorLineScale);
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Target Pixel Width = : {}", iVectorLineScale);
     iVectorLineScale = (CustomResolutionAndBorderless::iInternalResY / iVectorLineScale);
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Line Scale after rounding: {}", iVectorLineScale);
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Line Scale after rounding: {}", iVectorLineScale);
     const std::string shaderString = R"(
         cbuffer GSParams : register(b0)
         {
@@ -318,50 +326,55 @@ bool VectorScalingFix::CompileGeometryShader()
     {
         if (errorMsgs)
         {
-            spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compile failed with error: {}",
+            spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compile failed with error: {}",
                 static_cast<const char*>(errorMsgs->GetBufferPointer()));
         }
         else
         {
-            spdlog::error("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compile failed with HRESULT: 0x{:08X}", hr);
+            spdlog::error("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compile failed with HRESULT: 0x{:08X}", hr);
         }
         return false;
     }
 
     compiledShaderBytecode = compiledShader;
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compiled successfully!");
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - CompileGeometryShader: Shader compiled successfully!");
     return true;
 }
 
 void VectorScalingFix::Initialize()
 {
-    if (!(eGameType & (MGS2 | MGS3)))
+    if (!(eGameType & (MG | MGS2 | MGS3)))
     {
         return;
     }
 
-    if (!bFixRain && !bFixUI)
+    if (!bFixUI && (!bFixRain || (eGameType & MG)))
     {
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix: Config disabled. Skipping");
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix: Config disabled. Skipping");
         return;
     }
-    spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Initialize: Initializing vector line fix...");
+    spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Initialize: Initializing vector line fix...");
 
     if (!CompileGeometryShader())
     {
         return;
     }
 
-    if (!bFixRain)
+    if (eGameType & MG)
     {
-        spdlog::info("MGS 2 | MGS 3: Vector Line Fix - Initialize: Rain Fix is disabled, not hooking Rain/Laser/Bullet effects.");
         return;
     }
 
-    if (uint8_t* MGS3_DrawIndexedPrimitive_ScanResult = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? FF 41", "MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive"))
+    if (!bFixRain)
+    {
+        spdlog::info("MG | MGS 2 | MGS 3: Vector Line Fix - Initialize: Rain Fix is disabled, not hooking Rain/Laser/Bullet effects.");
+        return;
+    }
+
+    if (uint8_t* MGS3_DrawIndexedPrimitive_ScanResult = Memory::PatternScan(baseModule, "48 89 5C 24 ?? 57 48 83 EC ?? FF 41", "MG | MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive"))
     {
         MGS3_DrawIndexedPrimitive_Hook = safetyhook::create_inline(reinterpret_cast<void*>(MGS3_DrawIndexedPrimitive_ScanResult), reinterpret_cast<void*>(MGS3_DrawIndexedPrimitive_Hooked));
-        LOG_HOOK(MGS3_DrawIndexedPrimitive_Hook, "MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive")
+        LOG_HOOK(MGS3_DrawIndexedPrimitive_Hook, "MG | MGS 2 | MGS 3: Vector Line Fix - DrawIndexedPrimitive")
 
         g_InputHandler.RegisterHotkey(vkRainShaderToggle, "Rain Shader Toggle", []()
             {

@@ -607,10 +607,7 @@ void afterPresent()
     }
     bInitialized = true;
     spdlog::info("afterPresent() started");
-    if (!(eGameType & MG))
-    {
-        g_VectorScalingFix.LoadCompiledShader();
-    }
+    g_VectorScalingFix.LoadCompiledShader();
     g_MuteWarning.CheckStatus();
     g_SteamAPI.OnSteamInputLoaded();
 

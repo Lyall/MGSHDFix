@@ -116,6 +116,7 @@ class GameVars final
 {
 public:
     void Initialize();
+    [[nodiscard]] bool MGIsSaveLoadVisible() const;
     [[nodiscard]] bool InCutscene() const; // If we're in a full demo cutscene.
     [[nodiscard]] bool InScriptedSequence() const; // If the game is in a scripted sequence (cutscene or pad demo).
     [[nodiscard]] double ActorWaitMultiplier() const;
@@ -222,6 +223,7 @@ public:
 
 private:
 
+    uint8_t** pp_MGWrapperActor = nullptr;
     uint64_t* aimingState = nullptr;
     int* cutsceneFlag = nullptr;
     int* scriptedSequenceFlag = nullptr;
