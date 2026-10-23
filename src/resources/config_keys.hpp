@@ -173,6 +173,11 @@ namespace ConfigKeys
                                                                  "\n"
                                                                  "This adds roughly half a second at the start of calls, so speedrunners will generally want this fix turned off.";
 
+    constexpr const char* MG2_Companion_Follow_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Companion_Follow_Setting = "Correct Companion Follow Speed";
+    constexpr const char* MG2_Companion_Follow_Help = "";
+    constexpr const char* MG2_Companion_Follow_Tooltip = "Fixes following characters (ie Holly, Gustava) being slightly further away than Snake & not updating at the right pacing. (This resulted in Gustava visibly sitting in a puddle during the Marv escort cutscenes.)";
+
     constexpr const char* MG2_Doors_Section = "Metal Gear 2";
     constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
     constexpr const char* MG2_Doors_Help = "";

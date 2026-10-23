@@ -107,6 +107,7 @@
 #include "mg2_portrait_overlay.hpp"
 #include "mg2_pitfalls.hpp"
 #include "mg2_call_sequence.hpp"
+#include "mg2_companion_follow.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
@@ -1410,6 +1411,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);

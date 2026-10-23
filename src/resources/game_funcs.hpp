@@ -151,6 +151,12 @@ namespace MG2_Gamefuncs
     using SceneTick_t = void(__fastcall*)();
     inline SceneTick_t pfnSceneTick = nullptr;
 
+    using CompanionFollow_t = void(__fastcall*)();
+    inline CompanionFollow_t pfnResetCompanionFollow = nullptr;
+    inline CompanionFollow_t pfnUpdateCompanionFollow = nullptr;
+    using GetHandleData_t = void* (__fastcall*)(uintptr_t hData);
+    inline GetHandleData_t pfnGetHandleData = nullptr;
+
     using GetEngineState_t = MG2_LinkVarBuf::EngineState* (__fastcall*)();
     inline GetEngineState_t pfnGetEngineState = nullptr;
     using GetPlayer_t = MG2_LinkVarBuf::ObjectPosition* (__fastcall*)();

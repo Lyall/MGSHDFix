@@ -8,6 +8,7 @@
 #include "game_funcs.hpp"
 
 #include "gamevars.hpp"
+#include "mg2_linkvarbuf.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs3_linkvarbuf.hpp"
 #include "input_handler.hpp"
@@ -333,6 +334,23 @@ void MG2_Gamefuncs::HookDllGameFuncs()
     }
 
     pfnTestFlag = reinterpret_cast<TestFlag_t>(Memory::PatternScan(mg2Module, "8B C1 99 83 E2 ?? 03 C2 8B C8 83 E0 ?? 2B C2", "MG2: TestFlag()"));
+    pfnUpdateCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "40 53 56 57 41 55 41 57 48 83 EC ?? 48 8B 0D", "MG2: UpdateCompanionFollow()"));
+    pfnResetCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? E8 ?? ?? ?? ?? 48 8B F0", "MG2: ResetCompanionFollow()"));
+    if (pfnUpdateCompanionFollow)
+    {
+        auto* pUpdate = reinterpret_cast<uint8_t*>(pfnUpdateCompanionFollow);
+        MG2_LinkVarBuf::pCompanionList = reinterpret_cast<uintptr_t*>(Memory::GetRipRelativeAddress(pUpdate + 0xC, 3, 7));
+        pfnGetHandleData = reinterpret_cast<GetHandleData_t>(Memory::ResolveCall(pUpdate + 0x13));
+        if (!pfnGetPlayer)
+        {
+            pfnGetPlayer = reinterpret_cast<GetPlayer_t>(Memory::ResolveCall(pUpdate + 0x1B));
+        }
+        if (!pfnGetEngineState)
+        {
+            pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pUpdate + 0x23));
+        }
+    }
+
     pfnLoadImageBlob = reinterpret_cast<LoadImageBlob_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 4C 8B C2", "MG2: LoadImageBlob()"));
     pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: GetChunkEntryData()"));
     pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG2: GetChunkEntrySize()"));
