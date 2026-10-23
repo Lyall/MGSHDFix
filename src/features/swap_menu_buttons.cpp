@@ -10,14 +10,44 @@
 
 void SwapMenuButtons::SetMenuButtonInputs()
 {
-    if (!(eGameType & (MGS2 | MGS3)))
+    if (!(eGameType & (MG | MGS2 | MGS3)))
     {
         return;
     }
 
     if (force_menu_buttons == ConfigKeys::MenuButton_Option_Default)
     {
-        spdlog::info("MGS 2 | MGS 3: Swap Menu Buttons: Using default menu button inputs, skipping.");
+        spdlog::info("MG | MGS 2 | MGS 3: Swap Menu Buttons: Using default menu button inputs, skipping.");
+        return;
+    }
+
+    if (eGameType & MG)
+    {
+        //sub_140021BC0
+        auto* pOkAssignment = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? ?? ?? ?? 83 79 ?? 00 75 ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 75", "MG1/2: Swap Menu Buttons : BP_Pad_GetOkAssignment()");
+        //sub_140021B60
+        auto* pCancelAssignment = Memory::PatternScan(baseModule, "48 83 EC ?? 48 8B 05 ?? ?? ?? ?? ?? ?? ?? 83 79 ?? 00 75 ?? B9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 85 C0 74", "MG1/2: Swap Menu Buttons : BP_Pad_GetCancelAssignment()");
+        if (!pOkAssignment || !pCancelAssignment)
+        {
+            spdlog::error("MG1/2: Swap Menu Buttons : Missing button assignment functions. Skipping.");
+            return;
+        }
+
+        constexpr uintptr_t nRegionBranchOffset = 0x12;
+        const bool bEastForOK = force_menu_buttons == ConfigKeys::MenuButton_Option_EastForOK;
+        if (bEastForOK)
+        {
+            constexpr uint8_t nAlwaysBranch = 0xEB;
+            Memory::Write(reinterpret_cast<uintptr_t>(pOkAssignment) + nRegionBranchOffset, nAlwaysBranch);
+            Memory::Write(reinterpret_cast<uintptr_t>(pCancelAssignment) + nRegionBranchOffset, nAlwaysBranch);
+        }
+        else
+        {
+            constexpr uint16_t nSkipBranch = 0x9090;
+            Memory::Write(reinterpret_cast<uintptr_t>(pOkAssignment) + nRegionBranchOffset, nSkipBranch);
+            Memory::Write(reinterpret_cast<uintptr_t>(pCancelAssignment) + nRegionBranchOffset, nSkipBranch);
+        }
+        spdlog::info("MG1/2: Swap Menu Buttons : Initialized ({}).", force_menu_buttons);
         return;
     }
 
