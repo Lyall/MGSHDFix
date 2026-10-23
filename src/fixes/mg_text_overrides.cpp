@@ -70,14 +70,29 @@ namespace
         MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, pszText, nLength, sWide.data(), nWideLength);
         if (nLanguage == static_cast<int>(MGLanguage::Japanese))
         {
-            BOOL bDefault = FALSE;
-            const int nBytes = WideCharToMultiByte(932, WC_NO_BEST_FIT_CHARS, sWide.data(), nWideLength, nullptr, 0, nullptr, &bDefault);
-            if (nBytes <= 0 || bDefault)
+            for (size_t nIndex = 0; nIndex < sWide.size(); ++nIndex)
             {
-                return false;
+                if (bMG2)
+                {
+                    const auto itCharacter = std::ranges::find(astMG2JapaneseCharacters, sWide[nIndex], &MGTextCharacter::nUnicode);
+                    if (itCharacter != std::end(astMG2JapaneseCharacters))
+                    {
+                        sEncoded.push_back(static_cast<char>(itCharacter->nByte));
+                        continue;
+                    }
+                }
+                const int nCharacters = sWide[nIndex] >= 0xD800 && sWide[nIndex] <= 0xDBFF && nIndex + 1 < sWide.size() ? 2 : 1;
+                char achEncoded[4] {};
+                BOOL bDefault = FALSE;
+                const int nBytes = WideCharToMultiByte(932, WC_NO_BEST_FIT_CHARS, sWide.data() + nIndex, nCharacters, achEncoded, sizeof(achEncoded), nullptr, &bDefault);
+                if (nBytes <= 0 || bDefault)
+                {
+                    return false;
+                }
+                sEncoded.append(achEncoded, nBytes);
+                nIndex += nCharacters - 1;
             }
-            sEncoded.resize(nBytes);
-            return WideCharToMultiByte(932, WC_NO_BEST_FIT_CHARS, sWide.data(), nWideLength, sEncoded.data(), nBytes, nullptr, &bDefault) == nBytes && !bDefault;
+            return true;
         }
         const std::span<const MGTextCharacter> stCharacters = bMG2 ? std::span<const MGTextCharacter>(astMG2WesternCharacters) : std::span<const MGTextCharacter>(astMG1WesternCharacters);
         for (wchar_t nCharacter : sWide)

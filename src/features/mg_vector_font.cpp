@@ -8,6 +8,7 @@
 #include "mg1_linkvarbuf.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "mg_font_bundle.hpp"
+#include "mg_text_encoding.hpp"
 
 #define STBTT_STATIC
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -43,6 +44,7 @@ namespace
     struct GameRenderer
     {
         Settings stSettings {};
+        bool bJapanese = false;
         SafetyHookInline hSetFont;
         SafetyHookInline hDrawText;
         SafetyHookInline hCompose;
@@ -59,6 +61,9 @@ namespace
     SafetyHookInline s_hSetResources;
     std::vector<uint8_t> s_vFontData;
     stbtt_fontinfo s_stFont {};
+    std::vector<uint8_t> s_vFallbackFontData;
+    stbtt_fontinfo s_stFallbackFont {};
+    bool s_bFallbackFontReady = false;
 
     struct Glyph
     {
@@ -269,6 +274,50 @@ namespace
         return true;
     }
 
+    const stbtt_fontinfo* GetCharacterFont(int nCodepoint)
+    {
+        if (stbtt_FindGlyphIndex(&s_stFont, nCodepoint))
+        {
+            return &s_stFont;
+        }
+        return s_bFallbackFontReady && stbtt_FindGlyphIndex(&s_stFallbackFont, nCodepoint) ? &s_stFallbackFont : nullptr;
+    }
+
+    wchar_t DecodeCharacter(const GameRenderer& stGame, const char* pszText, int nBytes)
+    {
+        if (nBytes == 2)
+        {
+            wchar_t wCharacter = 0;
+            return MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, pszText, nBytes, &wCharacter, 1) == 1 ? wCharacter : 0;
+        }
+        const auto nByte = static_cast<uint8_t>(*pszText);
+        if (nByte < 0x80)
+        {
+            return nByte;
+        }
+        if (stGame.bJapanese)
+        {
+            if (&stGame == &s_astGames[1])
+            {
+                const auto itCharacter = std::ranges::find(astMG2JapaneseCharacters, nByte, &MGTextCharacter::nByte);
+                if (itCharacter != std::end(astMG2JapaneseCharacters))
+                {
+                    return itCharacter->nUnicode;
+                }
+            }
+            wchar_t wCharacter = 0;
+            return MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, pszText, 1, &wCharacter, 1) == 1 ? wCharacter : 0;
+        }
+        const std::span<const MGTextCharacter> stCharacters = &stGame == &s_astGames[1] ? std::span<const MGTextCharacter>(astMG2WesternCharacters) : std::span<const MGTextCharacter>(astMG1WesternCharacters);
+        const auto itCharacter = std::ranges::find(stCharacters, nByte, &MGTextCharacter::nByte);
+        if (itCharacter == stCharacters.end())
+        {
+            return 0;
+        }
+        // The German opening quote uses the script's half-width kana placeholder.
+        return itCharacter->nUnicode == 0xFF6D ? 0x201E : itCharacter->nUnicode;
+    }
+
     bool DecodeLetters(char* pszText, int nFont, int nX, std::vector<Letter>& vLetters)
     {
         const size_t nLength = strnlen(pszText, nMaximumTextBytes);
@@ -299,9 +348,8 @@ namespace
             {
                 return false;
             }
-            wchar_t awCodepoint[2] {};
-            if (MultiByteToWideChar(bWide ? 932 : 1252, MB_ERR_INVALID_CHARS, pszText + nIndex, nBytes, awCodepoint, 2) != 1
-                || stbtt_FindGlyphIndex(&s_stFont, awCodepoint[0]) == 0)
+            const wchar_t wCodepoint = DecodeCharacter(*s_pGame, pszText + nIndex, nBytes);
+            if (!wCodepoint || !GetCharacterFont(wCodepoint))
             {
                 return false;
             }
@@ -310,7 +358,7 @@ namespace
             {
                 return false;
             }
-            vLetters.push_back({ awCodepoint[0], nX, nAdvance });
+            vLetters.push_back({ wCodepoint, nX, nAdvance });
             nX += nAdvance;
             nIndex += nBytes;
         }
@@ -332,11 +380,30 @@ namespace
         int nAscent = 0;
         int nDescent = 0;
         int nLineGap = 0;
-        stbtt_GetCodepointHMetrics(&s_stFont, stLetter.nCodepoint, &nAdvance, &nBearing);
+        const stbtt_fontinfo* pFont = GetCharacterFont(stLetter.nCodepoint);
+        if (!pFont)
+        {
+            stGlyph.bReady = false;
+            s_bRasterFailed = true;
+            return s_stGlyphs.emplace(nKey, std::move(stGlyph)).first->second;
+        }
+        stbtt_GetCodepointHMetrics(pFont, stLetter.nCodepoint, &nAdvance, &nBearing);
         stbtt_GetFontVMetrics(&s_stFont, &nAscent, &nDescent, &nLineGap);
         const float fScaleY = stbtt_ScaleForPixelHeight(&s_stFont, float(anFontHeights[nFont] * s_nScale));
-        const float fScaleX = nAdvance > 0 ? float(stLetter.nAdvance * s_nScale) / nAdvance : fScaleY;
-        unsigned char* pBitmap = stbtt_GetCodepointBitmap(&s_stFont, fScaleX, fScaleY, stLetter.nCodepoint,
+        float fGlyphScaleY = fScaleY;
+        if (pFont != &s_stFont)
+        {
+            int nRodinTop = 0;
+            int nFallbackTop = 0;
+            stbtt_GetCodepointBox(&s_stFont, 'x', nullptr, nullptr, nullptr, &nRodinTop);
+            stbtt_GetCodepointBox(pFont, 'x', nullptr, nullptr, nullptr, &nFallbackTop);
+            if (nRodinTop > 0 && nFallbackTop > 0)
+            {
+                fGlyphScaleY *= float(nRodinTop) / nFallbackTop;
+            }
+        }
+        const float fScaleX = nAdvance > 0 ? float(stLetter.nAdvance * s_nScale) / nAdvance : fGlyphScaleY;
+        unsigned char* pBitmap = stbtt_GetCodepointBitmap(pFont, fScaleX, fGlyphScaleY, stLetter.nCodepoint,
             &stGlyph.nWidth, &stGlyph.nHeight, &stGlyph.nX, &stGlyph.nY);
         stGlyph.nY += static_cast<int>(std::round(nAscent * fScaleY));
         if (pBitmap)
@@ -407,6 +474,7 @@ namespace
         {
             return;
         }
+        stGame.bJapanese = Shared_Gamefuncs::pfnGetLanguage() == static_cast<int>(MGLanguage::Japanese);
         std::vector<Letter> vLetters;
         const uint8_t* pGlyphs = GetFontData(hGlyphs, MGFont::nGlyphDataOffset);
         if (pGlyphs)
@@ -424,8 +492,8 @@ namespace
                     continue;
                 }
                 const char chText = static_cast<char>(nChar);
-                wchar_t wCodepoint = 0;
-                if (MultiByteToWideChar(1252, MB_ERR_INVALID_CHARS, &chText, 1, &wCodepoint, 1) == 1 && stbtt_FindGlyphIndex(&s_stFont, wCodepoint) != 0)
+                const wchar_t wCodepoint = DecodeCharacter(stGame, &chText, 1);
+                if (wCodepoint && GetCharacterFont(wCodepoint))
                 {
                     vLetters.push_back({ wCodepoint, 0, int((nRecord >> MGFont::nWidthShift) & MGFont::nWidthMask) + 1 });
                 }
@@ -448,7 +516,7 @@ namespace
                 }
                 const char achText[] = { static_cast<char>(nLead), static_cast<char>(nCode) };
                 wchar_t wCodepoint = 0;
-                if (MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, achText, 2, &wCodepoint, 1) == 1 && stbtt_FindGlyphIndex(&s_stFont, wCodepoint) != 0)
+                if (MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, achText, 2, &wCodepoint, 1) == 1 && GetCharacterFont(wCodepoint))
                 {
                     vLetters.push_back({ wCodepoint, 0, MGFont::nKanjiWidth });
                 }
@@ -684,6 +752,34 @@ namespace
         s_pGame = nullptr;
     }
 
+    void LoadFallbackFont()
+    {
+        wchar_t awWindowsPath[MAX_PATH] {};
+        const UINT nLength = GetWindowsDirectoryW(awWindowsPath, MAX_PATH);
+        if (!nLength || nLength >= MAX_PATH)
+        {
+            return;
+        }
+        const auto stPath = std::filesystem::path(awWindowsPath) / L"Fonts" / L"arial.ttf";
+        std::ifstream stFile(stPath, std::ios::binary | std::ios::ate);
+        if (!stFile)
+        {
+            return;
+        }
+        const auto nSize = stFile.tellg();
+        if (nSize <= 0 || static_cast<uint64_t>(nSize) > MG_FontData::nMaximumBytes)
+        {
+            return;
+        }
+        s_vFallbackFontData.resize(static_cast<size_t>(nSize));
+        stFile.seekg(0);
+        s_bFallbackFontReady = stFile.read(reinterpret_cast<char*>(s_vFallbackFontData.data()), nSize) && stbtt_InitFont(&s_stFallbackFont, s_vFallbackFontData.data(), 0);
+        if (s_bFallbackFontReady)
+        {
+            spdlog::info("MG1/MG2: Vector Font : Arial fallback initialized.");
+        }
+    }
+
     bool LoadFont()
     {
         const auto stPath = sExePath / "launcher_Data/StreamingAssets/aa/StandaloneWindows64/defaultlocalgroup_assets_launcher/fonts/mg-rodinpron-m.otf.bundle";
@@ -703,7 +799,16 @@ namespace
         {
             return false;
         }
-        return stbtt_InitFont(&s_stFont, s_vFontData.data(), 0) != 0;
+        if (!stbtt_InitFont(&s_stFont, s_vFontData.data(), 0))
+        {
+            return false;
+        }
+        LoadFallbackFont();
+        if (!s_bFallbackFontReady)
+        {
+            spdlog::warn("MG1/MG2: Vector Font : Arial fallback unavailable.");
+        }
+        return true;
     }
 
     void Initialize(size_t nGame, const Settings& stSettings)
@@ -718,7 +823,7 @@ namespace
             spdlog::error("{}: Vector Font : Unable to parse font file from the unity launcher's files. Aborting setup!", stSettings.pszGame);
             return;
         }
-        if (!stSettings.pfnSetFont || !stSettings.pfnDrawText || !stSettings.pfnComposeTextLayer || !stSettings.pfnMeasureTextFont || !stSettings.pfnUploadTexture || !stSettings.pTextFade)
+        if (!Shared_Gamefuncs::pfnGetLanguage || !stSettings.pfnSetFont || !stSettings.pfnDrawText || !stSettings.pfnComposeTextLayer || !stSettings.pfnMeasureTextFont || !stSettings.pfnUploadTexture || !stSettings.pTextFade)
         {
             spdlog::error("{}: Vector Font : Couldn't find text renderer. Aborting setup.", stSettings.pszGame);
         }
