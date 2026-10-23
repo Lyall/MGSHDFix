@@ -168,7 +168,22 @@ namespace MG2_LinkVarBuf
     constexpr int nScriptSlotCount = 20;
     constexpr int nScriptCount = 164;
     inline uintptr_t* pSpriteLists = nullptr;
+    inline uintptr_t* pWeaponEffectCounts = nullptr;
+    constexpr int nPlayerWeaponEffectTypes = 9;
     inline int* pTextFade = nullptr;
+
+    [[nodiscard]] inline bool HasPlayerWeaponEffects()
+    {
+        const auto* pCounts = reinterpret_cast<const int*>(*reinterpret_cast<const uintptr_t*>(*pWeaponEffectCounts));
+        for (int nType = 0; nType < nPlayerWeaponEffectTypes; ++nType)
+        {
+            if (pCounts[nType] != 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     template <typename T, uintptr_t Offset>
@@ -237,6 +252,7 @@ namespace MG2_LinkVarBuf
     inline ScriptGlobalValue<50>   GM_RoomY;
     inline ScriptGlobalValue<51>   GM_Area;
     inline ScriptGlobalValue<52>   GM_Room;
+    inline ScriptGlobalValue<54>   GM_Wind;
     inline ScriptGlobalValue<55>   GM_RoomLighting;
     inline ScriptGlobalValue<56>   GM_AlertRequest;
     inline ScriptGlobalValue<57>   GM_AlertMode;
@@ -467,6 +483,9 @@ namespace MG2_LinkVarBuf
         playStats = reinterpret_cast<PlayStats*>(Memory::GetRelativeOffset(Memory::PatternScan(mg2Module, "F2 0F 10 0D", "MG2: playStats (GM_PlayTime)") + 11));
 
         pScriptGlobals = reinterpret_cast<int32_t*>(Memory::GetRelativeOffset(Memory::PatternScan(mg2Module, "4C 8D 25 ?? ?? ?? ?? 8D 42", "MG2: pScriptGlobals (GM_Scene)") + 3));
+
+        auto* pWeaponCounts = Memory::PatternScan(mg2Module, "48 8B 0D ?? ?? ?? ?? 48 8B D8 E8 ?? ?? ?? ?? 83 BB ?? ?? ?? ?? 00", "MG2: pWeaponEffectCounts");
+        pWeaponEffectCounts = pWeaponCounts ? reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(pWeaponCounts + 3)) : nullptr;
 
         pSpriteLists = reinterpret_cast<uintptr_t*>(Memory::GetRelativeOffset(Memory::PatternScan(mg2Module, "48 8D 05 ?? ?? ?? ?? 48 63 DA", "MG2: pSpriteLists (GetSprite)") + 3));
 

@@ -203,10 +203,19 @@ namespace ConfigKeys
     constexpr const char* MG2_Outdoor_Palettes_Setting = "Restore Outdoor Palettes";
     constexpr const char* MG2_Outdoor_Palettes_Help = "";
     constexpr const char* MG2_Outdoor_Palettes_Tooltip = "Restores the original MSX2 sunrise color palettes as Snake makes his way into the first Zanzibar building.";
+    constexpr const char* MG2_Wind_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Wind_Setting = "Restore Wind Behavior";
+    constexpr const char* MG2_Wind_Help = "";
+    constexpr const char* MG2_Wind_Tooltip = "Restores the original MSX2 wind behavior, including fixed-wind rooms and the hang-glider roof's wind change.\n"
+                                          "\n"
+                                          "Speedrunner Notes: MC requires cigarettes to be equipped on the roof, then changes the wind at the next 128-tick boundary (up to 8.53 seconds). With this enabled, the first roof visit starts a 255-tick countdown (17 seconds), regardless of the equipped item. The wind phase persists across room changes.\n"
+                                          "\n"
+                                          "Elsewhere, variable wind changes every 240 ticks (16 seconds), instead of MC's 2048 ticks (136.53 seconds). Times use MC's 15 gameplay ticks per second.";
+
     constexpr const char* MG2_Cigarette_Idle_Section = "Metal Gear 2";
     constexpr const char* MG2_Cigarette_Idle_Setting = "Restore Cigarette Animations";
     constexpr const char* MG2_Cigarette_Idle_Help = "";
-    constexpr const char* MG2_Cigarette_Idle_Tooltip = "Restores the original MSX2 cigarette idle animation timings and smoke sprites.";
+    constexpr const char* MG2_Cigarette_Idle_Tooltip = "Restores the original MSX2 cigarette animation and smoke placement.";
 
     constexpr const char* MG2_Outdoor_Artwork_Section = "Metal Gear 2";
     constexpr const char* MG2_Outdoor_Artwork_Setting = "Restore Outdoor Artwork";

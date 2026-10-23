@@ -312,14 +312,15 @@ void MG1_Gamefuncs::HookDllGameFuncs()
 
 void MG2_Gamefuncs::HookDllGameFuncs()
 {
+    uint8_t* pGetEngineState = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? BA ?? ?? ?? ?? 8B 80", "MG2: BuildDoors()+0x27 : GetEngineState() call");
+    if (pGetEngineState)
+    {
+        pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pGetEngineState));
+    }
+
     if (MG_DeveloperMenu::bEnabled)
     {
         pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 89 5C 24", "MG2: sub_180025A90() : scene tick"));
-        uint8_t* pGetEngineState = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? BA ?? ?? ?? ?? 8B 80", "MG2: BuildDoors()+0x27 : GetEngineState() call");
-        if (pGetEngineState)
-        {
-            pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pGetEngineState));
-        }
         uint8_t* pGetPlayer = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 48 8B D8 E8 ?? ?? ?? ?? 48 8B CB", "MG2: TickDoorTrigger()+0x2D : GetPlayer() call");
         if (pGetPlayer)
         {
@@ -348,6 +349,7 @@ void MG2_Gamefuncs::HookDllGameFuncs()
 
     pfnAVS_GetLocalizedString = reinterpret_cast<AVS_GetLocalizedString_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B FA", "MG2: AVS_GetLocalizedString()"));
     pfnDrawMessageText = reinterpret_cast<DrawMessageText_t>(Memory::PatternScan(mg2Module, "4C 8B DC 53 57 41 55", "MG2: DrawMessageText()"));
+    pfnRandom = reinterpret_cast<Random_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B D9 FF 15", "MG2: Random()"));
     pfnScriptRun = reinterpret_cast<ScriptRun_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B D9", "MG2: ScriptRun()"));
     uint8_t* pGetObjectSprite = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 00 4C 8B F8", "MG2: TickDoorTrigger()+0x40 : GetObjectSprite() call");
     if (pGetObjectSprite)

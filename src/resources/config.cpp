@@ -1423,6 +1423,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+    LOG_CONFIG(ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
 

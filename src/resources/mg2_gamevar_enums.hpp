@@ -171,6 +171,7 @@ enum MG2ScriptId : int
 {
     MG2_SCRIPT_CIGARETTES = 133,
     MG2_SCRIPT_ELEVATORS = 135,
+    MG2_SCRIPT_GAMEPLAY = 136,
 };
 
 enum MG2AlertMode : uint8_t

@@ -144,6 +144,9 @@ namespace MG2_LinkVarBuf
 
 namespace MG2_Gamefuncs
 {
+    using Random_t = unsigned int(__fastcall*)(unsigned int nLimit);
+    inline Random_t pfnRandom = nullptr;
+
     using SceneTick_t = void(__fastcall*)();
     inline SceneTick_t pfnSceneTick = nullptr;
 

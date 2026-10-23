@@ -4,6 +4,7 @@
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
 #include "mg2_doors.hpp"
+#include "mg2_cigarette_idle.hpp"
 #include "mg2_elevators.hpp"
 
 #include "d3d11_text_overlay.hpp"
@@ -378,6 +379,7 @@ void GameVars::OnLevelTransition()
     {
         MG2_OutdoorTiles::HandleLevelTransition();
         MG2_TruckyardFence::HandleLevelTransition();
+        MG2_CigaretteIdle::HandleLevelTransition();
         MG2_Doors::HandleLevelTransition();
         MG2_Elevators::HandleLevelTransition();
     }
