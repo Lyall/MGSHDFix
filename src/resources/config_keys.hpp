@@ -178,13 +178,13 @@ namespace ConfigKeys
     constexpr const char* MG2_Doors_Help = "";
     constexpr const char* MG2_Doors_Tooltip = "Restores several doors which were missing their sprite variants present in the MSX2 version (and also restores a few missing doors.)";
 
-    constexpr const char* MG2_Elevator_Lamps_Section = "Tweaks and Restoration";
-    constexpr const char* MG2_Elevator_Lamps_Setting = "Restore Elevator Floor Lamps (MG2)";
+    constexpr const char* MG2_Elevator_Lamps_Section = "Metal Gear 2";
+    constexpr const char* MG2_Elevator_Lamps_Setting = "Restore Elevator Floor Lamps";
     constexpr const char* MG2_Elevator_Lamps_Help = "";
-    constexpr const char* MG2_Elevator_Lamps_Tooltip = "Restores the floor indicators above the Zanzibar Building 1's elevator doors.";
+    constexpr const char* MG2_Elevator_Lamps_Tooltip = "Restores the floor indicators above Zanzibar Building 1's elevator doors and the unlit indicators on the B3 lifts.";
 
-    constexpr const char* MG2_Elevator_Timings_Section = "Tweaks and Restoration";
-    constexpr const char* MG2_Elevator_Timings_Setting = "Restore Elevator Timings (MG2)";
+    constexpr const char* MG2_Elevator_Timings_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Elevator_Timings_Setting = "Restore Elevator Timings";
     constexpr const char* MG2_Elevator_Timings_Help = "";
     constexpr const char* MG2_Elevator_Timings_Tooltip = "Restores idle elevators moving between floors on their own, distance-based call waits, travel times between floors, and door timings from the original MSX2 version.\n"
                                                          "\n"

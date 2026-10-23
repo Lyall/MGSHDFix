@@ -1111,6 +1111,9 @@
     <ClInclude Include="src\features\mg2_elevators.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\features\mg2_elevator_sprites.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\features\mg2_door_cards.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>

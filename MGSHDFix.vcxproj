@@ -267,6 +267,7 @@
     <ClInclude Include="external\dr_libs\dr_mp3.h" />
     <ClInclude Include="external\dr_libs\dr_wav.h" />
     <ClInclude Include="src\features\mg2_elevators.hpp" />
+    <ClInclude Include="src\features\mg2_elevator_sprites.hpp" />
     <ClInclude Include="src\features\mg2_door_cards.hpp" />
     <ClInclude Include="src\features\mg_cigarette_damage.hpp" />
     <ClInclude Include="src\features\mg1_portrait_overlay.hpp" />

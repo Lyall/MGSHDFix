@@ -91,7 +91,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
         { (MG), ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, ConfigKeys::MG2_Doors_Help, ConfigKeys::MG2_Doors_Tooltip, std::nullopt, false, Field::Bool, true },
 
-        { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
 
 
 
@@ -376,7 +375,6 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_SkipEnding_Section, ConfigKeys::MGS2_SkipEnding_Setting, ConfigKeys::MGS2_SkipEnding_Help, ConfigKeys::MGS2_SkipEnding_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-        { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
 
     }},
     { wxString("Restoration"), {
@@ -393,7 +391,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MG), ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, ConfigKeys::MG2_Sauna_Guard_Enabled_Help, ConfigKeys::MG2_Sauna_Guard_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Item_Sprites_Enabled_Section, ConfigKeys::MG2_Item_Sprites_Enabled_Setting, ConfigKeys::MG2_Item_Sprites_Enabled_Help, ConfigKeys::MG2_Item_Sprites_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, ConfigKeys::MG2_Portrait_Overlay_Enabled_Help, ConfigKeys::MG2_Portrait_Overlay_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, ConfigKeys::MG2_Pitfalls_Help, ConfigKeys::MG2_Pitfalls_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, ConfigKeys::MG2_Call_Sequence_Enabled_Help, ConfigKeys::MG2_Call_Sequence_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, ConfigKeys::MG2_Cigarette_Idle_Help, ConfigKeys::MG2_Cigarette_Idle_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },

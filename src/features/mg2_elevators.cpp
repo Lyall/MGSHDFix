@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mg2_elevators.hpp"
+#include "mg2_elevator_sprites.hpp"
 
 #include "common.hpp"
 #include "mg2_linkvarbuf.hpp"
@@ -47,6 +48,7 @@ namespace
     std::array<ElevatorCar, std::size(astRoutes)> s_astCars {};
     bool s_bInitialized = false;
     bool s_bLampRoom = false;
+    const MG2_ElevatorSprites::UnlitLamp* s_pUnlitLamp = nullptr;
     uint32_t s_nRandom = 1;
     int s_nWaitingCar = -1;
     int s_nCallStartStop = 0;
@@ -303,12 +305,36 @@ namespace
         MG2_Gamefuncs::pfnLayerFillRect(MG2_LAYER_ROOM, anLight);
     }
 
+    void DrawPixelRow(std::span<const uint8_t> anPixels, int nLeft, int nTop)
+    {
+        const int nWidth = static_cast<int>(anPixels.size());
+        for (int nX = 0; nX < nWidth;)
+        {
+            const int nColour = anPixels[nX];
+            const int nStart = nX++;
+            while (nX < nWidth && anPixels[nX] == nColour)
+            {
+                nX++;
+            }
+            const int anRectangle[] = { nLeft + nStart, nTop, nX - nStart, 1 };
+            MG2_Gamefuncs::pfnSetDrawColor(MG2_LAYER_ROOM, nColour);
+            MG2_Gamefuncs::pfnLayerFillRect(MG2_LAYER_ROOM, anRectangle);
+        }
+    }
+
     void __fastcall DrawSprites_hook()
     {
-        if (s_bInitialized && s_bLampRoom && GM_Scene == MG2_SCENE_GAMEPLAY && GM_InsideElevator == 0)
+        if (GM_Scene == MG2_SCENE_GAMEPLAY && GM_InsideElevator == 0)
         {
-            DrawLamp(MG2_ELEVATOR_CAR_1);
-            DrawLamp(MG2_ELEVATOR_CAR_2);
+            if (s_bInitialized && s_bLampRoom)
+            {
+                DrawLamp(MG2_ELEVATOR_CAR_1);
+                DrawLamp(MG2_ELEVATOR_CAR_2);
+            }
+            if (s_pUnlitLamp)
+            {
+                DrawPixelRow(MG2_ElevatorSprites::anUnlitLampPixels, s_pUnlitLamp->nX, s_pUnlitLamp->nY);
+            }
         }
         s_hDrawSprites.call<void>();
     }
@@ -316,6 +342,15 @@ namespace
 
 void MG2_Elevators::HandleLevelTransition()
 {
+    s_pUnlitLamp = nullptr;
+    for (const auto& stLamp : MG2_ElevatorSprites::astUnlitLamps)
+    {
+        if (IsRoom(stLamp.nArea, stLamp.nRoom))
+        {
+            s_pUnlitLamp = &stLamp;
+            break;
+        }
+    }
     s_bLampRoom = MG2_LinkVarBuf::IsAnyRoom({
         { 1, 11 },
         { 2, 4 },
@@ -332,7 +367,7 @@ void MG2_Elevators::Initialize()
     {
         return;
     }
-    if (!MG2_LinkVarBuf::pLoadedScripts || !MG2_LinkVarBuf::pRunningScriptCode || !MG2_LinkVarBuf::pScriptGlobals || !MG2_Gamefuncs::pfnScriptRun || (bRestoreTimings && !MG2_Gamefuncs::pfnRequestSound) || (bRestoreLamps && (!MG2_Gamefuncs::pfnDrawSprites || !MG2_Gamefuncs::pfnSetDrawColor || !MG2_Gamefuncs::pfnLayerFillRect)))
+    if (!MG2_LinkVarBuf::pScriptGlobals || !MG2_LinkVarBuf::pLoadedScripts || !MG2_LinkVarBuf::pRunningScriptCode || !MG2_Gamefuncs::pfnScriptRun || (bRestoreTimings && !MG2_Gamefuncs::pfnRequestSound) || (bRestoreLamps && (!MG2_Gamefuncs::pfnDrawSprites || !MG2_Gamefuncs::pfnSetDrawColor || !MG2_Gamefuncs::pfnLayerFillRect)))
     {
         spdlog::error("MG2: Elevators : Missing script or drawing functions. Skipping.");
     }
