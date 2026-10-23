@@ -190,7 +190,8 @@ namespace
     {
         if (s_bSmokeSuppressed || HasPlayerWeaponEffects())
         {
-            ctx.rax = 1;
+            constexpr uintptr_t nZeroFlag = 0x40;
+            ctx.rflags &= ~nZeroFlag;
         }
     }
 
@@ -265,8 +266,8 @@ void MG2_CigaretteIdle::Initialize()
     auto* pSetSpriteTime = Memory::PatternScan(mg2Module, "8B 5C 24 ?? 48 8B CD 8D 53", "MG2: Cigarette Idle : SetSpriteTime()+0x44 : restore animation timing");
     //sub_180019E20+4E5
     auto* pSmoke = Memory::PatternScan(mg2Module, "83 F8 ?? 0F 85 ?? ?? ?? ?? 48 8D 15", "MG2: Cigarette Idle : sub_180019E20()+0x4E5 : emit smoke after the raised pose");
-    //sub_18000C0A0+13A
-    auto* pSmokeEnd = Memory::PatternScan(mg2Module, "85 C0 74 ?? 48 8B CF E8 ?? ?? ?? ?? 8B 4D", "MG2: Cigarette Idle : sub_18000C0A0()+0x13A : cancel smoke while weapons are active");
+    //sub_18000C0A0+11E
+    auto* pSmokeEnd = Memory::PatternScan(mg2Module, "44 8B F0 75 ?? 83 BD ?? ?? ?? ?? ?? 75 ?? 83 7D ?? 00 75", "MG2: Cigarette Idle : sub_18000C0A0()+0x11E : cancel smoke while weapons are active");
     //DrawSprite+479
     auto* pSmokeAdvance = Memory::PatternScan(mg2Module, "0F BA E2 ?? 72 ?? 83 3D ?? ?? ?? ?? 00", "MG2: Cigarette Idle : DrawSprite()+0x479 : hold smoke until visible");
     if (!pSetSpriteTime || !pSmoke || !pSmokeEnd || !pSmokeAdvance || !MG2_Gamefuncs::pfnGetEngineState || !pWeaponEffectCounts || !pScriptGlobals)
@@ -280,7 +281,7 @@ void MG2_CigaretteIdle::Initialize()
         s_hSmoke = safetyhook::create_mid(pSmoke, Smoke_hook);
         LOG_HOOK(s_hSmoke, "MG2: Cigarette Idle : sub_180019E20()+0x4E5")
         s_hSmokeEnd = safetyhook::create_mid(pSmokeEnd, SmokeEnd_hook);
-        LOG_HOOK(s_hSmokeEnd, "MG2: Cigarette Idle : sub_18000C0A0()+0x13A")
+        LOG_HOOK(s_hSmokeEnd, "MG2: Cigarette Idle : sub_18000C0A0()+0x11E")
         s_hSmokeAdvance = safetyhook::create_mid(pSmokeAdvance, SmokeAdvance_hook);
         LOG_HOOK(s_hSmokeAdvance, "MG2: Cigarette Idle : DrawSprite()+0x479")
         if (!s_hSetSpriteTime || !s_hSmoke || !s_hSmokeEnd || !s_hSmokeAdvance)
