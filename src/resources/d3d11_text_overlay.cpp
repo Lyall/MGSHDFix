@@ -868,7 +868,7 @@ namespace
             else if (eMgSubGame == MgSubGame::MG2 && MG2_LinkVarBuf::playStats && MG2_LinkVarBuf::pScriptGlobals)
             {
                 const int nScene = MG2_LinkVarBuf::GM_Scene;
-                text = GetMGStatOverlay(*MG2_LinkVarBuf::playStats, MG2_LinkVarBuf::GM_Area, MG2_LinkVarBuf::GM_Room, nScene == MG2_SCENE_GAMEPLAY, nScene < MG2_SCENE_PAUSE || nScene > MG2_SCENE_RESULTS, nScene == MG2_SCENE_PAUSE);
+                text = GetMGStatOverlay(*MG2_LinkVarBuf::playStats, MG2_LinkVarBuf::GM_Area, MG2_LinkVarBuf::GM_Room, nScene == MG2_SCENE_GAMEPLAY, (nScene < MG2_SCENE_PAUSE && nScene != MG2_SCENE_LOADING) || nScene > MG2_SCENE_RESULTS, nScene == MG2_SCENE_PAUSE);
             }
             else
             {

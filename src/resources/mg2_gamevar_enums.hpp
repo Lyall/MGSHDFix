@@ -105,6 +105,7 @@ enum MG2IntroPhase : int
 
 enum MG2Scene : uint8_t
 {
+    MG2_SCENE_LOADING = 6,
     MG2_SCENE_INTRO = 7,
     MG2_SCENE_PAUSE = 10,
     MG2_SCENE_LOAD_AREA = 16,
