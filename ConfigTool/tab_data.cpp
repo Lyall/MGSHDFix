@@ -347,6 +347,9 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2 | MGS3), ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, ConfigKeys::ShowPressureLevels_Help, ConfigKeys::ShowPressureLevels_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
+        { (MG), ConfigKeys::PauseMGTimer_Section, ConfigKeys::PauseMGTimer_Setting, ConfigKeys::PauseMGTimer_Help, ConfigKeys::PauseMGTimer_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
         { (MGS2 | MGS3), ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, ConfigKeys::FixIGTLoadingPause_Help, ConfigKeys::FixIGTLoadingPause_Tooltip,
           std::nullopt, false, Field::Bool, true },
 

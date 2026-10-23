@@ -1087,6 +1087,11 @@ namespace ConfigKeys
                                                       "Needs a DualShock 3 through DsHidMini, and the stats overlay switched on.";
 
 
+    constexpr const char* PauseMGTimer_Section = "Speedrunner Settings";
+    constexpr const char* PauseMGTimer_Setting = "Make Pause Stop IGT";
+    constexpr const char* PauseMGTimer_Help = "";
+    constexpr const char* PauseMGTimer_Tooltip = "Stops the in-game timer while the pause menu & save/load data screens are open.";
+
     constexpr const char* FixIGTLoadingPause_Section = "Speedrunner Settings";
     constexpr const char* FixIGTLoadingPause_Setting = "Fix In-Game Timer Loading Pause";
     constexpr const char* FixIGTLoadingPause_Help = "";

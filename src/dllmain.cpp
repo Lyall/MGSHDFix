@@ -195,6 +195,7 @@ namespace
         }
         MG1_LinkVarBuf::Initialize();
         MG1_Gamefuncs::HookDllGameFuncs();
+        FixPlaytime::ApplyMG1();
         g_IntroSkip.InitializeMG1();
         MG_TextOverrides::InitializeMG1();
         LooseAudioOverrides::Initialize();
@@ -217,6 +218,7 @@ namespace
         }
         MG2_LinkVarBuf::Initialize();
         MG2_Gamefuncs::HookDllGameFuncs();
+        FixPlaytime::ApplyMG2();
         g_IntroSkip.InitializeMG2();
         MG_TextOverrides::InitializeMG2();
         MG2_OutdoorPalettes::Initialize();

@@ -1451,6 +1451,9 @@ void Config::Read()
         InputHandler::GetKeybind(ini, ConfigKeys::DevMenuHotkey_Section, ConfigKeys::DevMenuHotkey_Setting, Shared_Gamefuncs::DevMenuHotkey);
     }
 
+    ConfigHelper::getValue(ini, ConfigKeys::PauseMGTimer_Section, ConfigKeys::PauseMGTimer_Setting, FixPlaytime::bPauseMGTimer);
+    LOG_CONFIG(ConfigKeys::PauseMGTimer_Section, ConfigKeys::PauseMGTimer_Setting, FixPlaytime::bPauseMGTimer);
+
     ConfigHelper::getValue(ini, ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);
     LOG_CONFIG(ConfigKeys::FixIGTLoadingPause_Section, ConfigKeys::FixIGTLoadingPause_Setting, FixPlaytime::bEnabled);
 
