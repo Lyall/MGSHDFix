@@ -157,6 +157,7 @@
 #include "mg2_sprite_patcher.hpp"
 #include "mg2_room_patches.hpp"
 #include "mg2_sauna_guard.hpp"
+#include "mg2_item_sprites.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
@@ -225,6 +226,7 @@ namespace
         g_IntroSkip.InitializeMG2();
         MG_TextOverrides::InitializeMG2();
         MG2_SaunaGuard::Initialize();
+        MG2_ItemSprites::Initialize();
         MG2_Doors::Initialize();
         MG2_RoomPatches::Initialize();
         MG2_OutdoorPalettes::Initialize();
