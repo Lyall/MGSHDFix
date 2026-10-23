@@ -146,6 +146,11 @@ namespace ConfigKeys
 
 
 
+    constexpr const char* MG2_Sauna_Guard_Enabled_Section = "Metal Gear 2";
+    constexpr const char* MG2_Sauna_Guard_Enabled_Setting = "Decensor Sauna Guard";
+    constexpr const char* MG2_Sauna_Guard_Enabled_Help = "";
+    constexpr const char* MG2_Sauna_Guard_Enabled_Tooltip = "Restores the sauna guard's original MSX2 sprites, which have been censored since the 2004 Java ME version of the game.";
+
     constexpr const char* MG2_Doors_Section = "Metal Gear 2";
     constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
     constexpr const char* MG2_Doors_Help = "";

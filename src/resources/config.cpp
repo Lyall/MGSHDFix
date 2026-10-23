@@ -102,6 +102,7 @@
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
+#include "mg2_sauna_guard.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
@@ -1390,6 +1391,9 @@ void Config::Read()
         InputHandler::GetKeybind(ini, ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, MG_DeveloperMenu::nHotkey);
     }
 
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, MG2_SaunaGuard::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, MG2_SaunaGuard::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
