@@ -105,6 +105,7 @@
 #include "mg2_sauna_guard.hpp"
 #include "mg2_item_sprites.hpp"
 #include "mg2_portrait_overlay.hpp"
+#include "mg2_pitfalls.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
@@ -1402,6 +1403,9 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
