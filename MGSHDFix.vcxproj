@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mg2_portrait_overlay.cpp" />
     <ClCompile Include="src\features\mg2_item_sprites.cpp" />
     <ClCompile Include="src\features\mg2_sauna_guard.cpp" />
     <ClCompile Include="src\features\mg2_doors.cpp" />
@@ -213,6 +214,9 @@
     <ClCompile Include="src\features\mg2_cigarette_idle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg2_original_sprites.hpp" />
+    <ClInclude Include="src\features\mg2_portrait_sprites.hpp" />
+    <ClInclude Include="src\features\mg2_portrait_overlay.hpp" />
     <ClInclude Include="src\features\mg2_item_sprites.hpp" />
     <ClInclude Include="src\features\mg2_sauna_guard.hpp" />
     <ClInclude Include="src\features\mg2_doors.hpp" />

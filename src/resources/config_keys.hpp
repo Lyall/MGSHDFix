@@ -156,6 +156,11 @@ namespace ConfigKeys
     constexpr const char* MG2_Item_Sprites_Enabled_Help = "";
     constexpr const char* MG2_Item_Sprites_Enabled_Tooltip = "Restores the original MSX2 medical and cigarette sprites.";
 
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Section = "Metal Gear 2";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Setting = "Restore Original Character Sprites";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Help = "";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Tooltip = "Restores the original MSX2 character sprites, including blinking, glancing around, and mouth movements.";
+
     constexpr const char* MG2_Doors_Section = "Metal Gear 2";
     constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
     constexpr const char* MG2_Doors_Help = "";

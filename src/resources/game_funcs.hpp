@@ -140,6 +140,7 @@ namespace MG2_LinkVarBuf
     struct EngineState;
     struct ObjectPosition;
     struct Sprite;
+    struct DrawLayer;
 }
 
 namespace MG2_Gamefuncs
@@ -207,6 +208,8 @@ namespace MG2_Gamefuncs
     inline InitSprite_t pfnInitSprite = nullptr;
     using BuildDoors_t = void(__fastcall*)();
     inline BuildDoors_t pfnBuildDoors = nullptr;
+    using GetLayerImage_t = MG2_LinkVarBuf::DrawLayer*(__fastcall*)(int nLayer);
+    inline GetLayerImage_t pfnGetLayerImage = nullptr;
     using DrawSprites_t = void(__fastcall*)();
     inline DrawSprites_t pfnDrawSprites = nullptr;
     using LayerFillRect_t = void(__fastcall*)(int nLayer, const int* pRectangle);

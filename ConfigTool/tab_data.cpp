@@ -392,6 +392,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MG), ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, ConfigKeys::MG2_Wind_Help, ConfigKeys::MG2_Wind_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, ConfigKeys::MG2_Sauna_Guard_Enabled_Help, ConfigKeys::MG2_Sauna_Guard_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Item_Sprites_Enabled_Section, ConfigKeys::MG2_Item_Sprites_Enabled_Setting, ConfigKeys::MG2_Item_Sprites_Enabled_Help, ConfigKeys::MG2_Item_Sprites_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, ConfigKeys::MG2_Portrait_Overlay_Enabled_Help, ConfigKeys::MG2_Portrait_Overlay_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, ConfigKeys::MG2_Cigarette_Idle_Help, ConfigKeys::MG2_Cigarette_Idle_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
 

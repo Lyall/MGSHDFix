@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="src\features\mg2_portrait_overlay.cpp">
+      <Filter>Features</Filter>
+    </ClCompile>
     <ClCompile Include="src\features\mg2_item_sprites.cpp">
       <Filter>Features</Filter>
     </ClCompile>
@@ -559,6 +562,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg2_original_sprites.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_portrait_sprites.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\features\mg2_portrait_overlay.hpp">
+      <Filter>Features\Headers</Filter>
+    </ClInclude>
     <ClInclude Include="src\features\mg2_item_sprites.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
