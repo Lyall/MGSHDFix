@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mg2_call_sequence.cpp" />
     <ClCompile Include="src\features\mg2_pitfalls.cpp" />
     <ClCompile Include="src\features\mg2_portrait_overlay.cpp" />
     <ClCompile Include="src\features\mg2_item_sprites.cpp" />
@@ -215,6 +216,7 @@
     <ClCompile Include="src\features\mg2_cigarette_idle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg2_call_sequence.hpp" />
     <ClInclude Include="src\features\mg2_pitfall_sprites.hpp" />
     <ClInclude Include="src\features\mg2_pitfalls.hpp" />
     <ClInclude Include="src\features\mg2_original_sprites.hpp" />

@@ -166,6 +166,13 @@ namespace ConfigKeys
     constexpr const char* MG2_Pitfalls_Help = "";
     constexpr const char* MG2_Pitfalls_Tooltip = "Restores the original MSX2 pitfall sprites and two missing pitfalls.";
 
+    constexpr const char* MG2_Call_Sequence_Enabled_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Call_Sequence_Enabled_Setting = "Fix Outgoing Call Delay";
+    constexpr const char* MG2_Call_Sequence_Enabled_Help = "";
+    constexpr const char* MG2_Call_Sequence_Enabled_Tooltip = "Makes Snake's first message complete before the outgoing call connects, as it did in the original MSX2 version.\n"
+                                                                 "\n"
+                                                                 "This adds roughly half a second at the start of calls, so speedrunners will generally want this fix turned off.";
+
     constexpr const char* MG2_Doors_Section = "Metal Gear 2";
     constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
     constexpr const char* MG2_Doors_Help = "";

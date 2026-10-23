@@ -160,6 +160,7 @@
 #include "mg2_item_sprites.hpp"
 #include "mg2_portrait_overlay.hpp"
 #include "mg2_pitfalls.hpp"
+#include "mg2_call_sequence.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_cigarette_idle.hpp"
@@ -231,6 +232,7 @@ namespace
         MG2_ItemSprites::Initialize();
         MG2_PortraitOverlay::Initialize();
         MG2_Pitfalls::Initialize();
+        MG2_CallSequence::Initialize();
         MG2_Doors::Initialize();
         MG2_RoomPatches::Initialize();
         MG2_OutdoorPalettes::Initialize();
