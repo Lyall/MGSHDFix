@@ -244,6 +244,13 @@ namespace ConfigKeys
                                           "\n"
                                           "Elsewhere, variable wind changes every 240 ticks (16 seconds), instead of MC's 2048 ticks (136.53 seconds). Times use MC's 15 gameplay ticks per second.";
 
+    constexpr const char* MG2_Bridge_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Bridge_Setting = "Restore Bridge of Sorrow Cutscene";
+    constexpr const char* MG2_Bridge_Help = "";
+    constexpr const char* MG2_Bridge_Tooltip = "Restores the cutscene's original sprites, timings, character blinking during the radio call, and palette effects. (Graphics Tab -> Reduce Photosensitive Effects also applies here.)\n"
+	"\n"
+	"Speedrunner Note: This does affect timings slightly.";
+
     constexpr const char* MG2_Lighter_Section = "Metal Gear 2";
     constexpr const char* MG2_Lighter_Setting = "Restore Lighter Flame";
     constexpr const char* MG2_Lighter_Help = "";
@@ -577,7 +584,7 @@ namespace ConfigKeys
     constexpr const char* MGS2_RestorePhotosensitiveEffects_Section = EnableSMAA_Section;
     constexpr const char* MGS2_RestorePhotosensitiveEffects_Setting = "Reduce Photosensitive Effects";
     constexpr const char* MGS2_RestorePhotosensitiveEffects_Help = "";
-    constexpr const char* MGS2_RestorePhotosensitiveEffects_Tooltip = "Enable this setting to reduce photosensitive effects (such as detonation effects during the Tanker sinking.)";
+    constexpr const char* MGS2_RestorePhotosensitiveEffects_Tooltip = "Reduces photosensitive effects, including the restored MG2 bridge scene's background flashes and the MGS2 Tanker sinking effects.";
 
     constexpr const char* CPUCoreLimit_Section = "System Specific Fixes";
     constexpr const char* CPUCoreLimit_Setting = "Limit Game to 2 CPU Cores";

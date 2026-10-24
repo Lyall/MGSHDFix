@@ -110,14 +110,17 @@ enum MG2Scene : uint8_t
     MG2_SCENE_PAUSE = 10,
     MG2_SCENE_LOAD_AREA = 16,
     MG2_SCENE_GAMEPLAY = 18,
+    MG2_SCENE_FACE_TO_FACE = 19,
     MG2_SCENE_TRANSCEIVER = 20,
     MG2_SCENE_RESULTS = 25,
 };
 
 enum MG2Sound : int
 {
+    MG2_SOUND_BRIDGE_EXPLOSION = 68,
     MG2_SOUND_LIGHTER = 76,
     MG2_SOUND_ELEVATOR_ARRIVAL = 97,
+    MG2_SOUND_METAL_GEAR_REVEAL = 117,
 };
 
 enum MG2DrawLayer : int
@@ -171,6 +174,7 @@ enum MG2ElevatorState : int
 enum MG2ScriptId : int
 {
     MG2_SCRIPT_REST_STOP = 14,
+    MG2_SCRIPT_BRIDGE = 15,
     MG2_SCRIPT_CIGARETTES = 133,
     MG2_SCRIPT_ELEVATORS = 135,
     MG2_SCRIPT_GAMEPLAY = 136,
@@ -186,6 +190,7 @@ enum MG2AlertMode : uint8_t
 // ScriptCommand command bytes (don't confuse with VM opcodes - they're seperate)
 enum MG2ScriptCommand : uint8_t
 {
+    MG2_COMMAND_YIELD = 0x00,
     MG2_COMMAND_MESSAGE_TEXT = 0x06,
     MG2_COMMAND_SCENE = 0x33,
     MG2_COMMAND_SPRITE_SET = 0x66,
@@ -207,9 +212,11 @@ enum MG2CompanionAnimation : int
 enum MG2SpriteSheet : int
 {
     MG2_SPRITE_SHEET_ENDING_CAST = 16,
+    MG2_SPRITE_SHEET_BRIDGE_GUARDS = 18,
     MG2_SPRITE_SHEET_GUARD = 20,
     MG2_SPRITE_SHEET_PORTRAITS = 25,
     MG2_SPRITE_SHEET_GUSTAVA = 29,
+    MG2_SPRITE_SHEET_MADNAR = 30,
     MG2_SPRITE_SHEET_INTRO = 34,
     MG2_SPRITE_SHEET_DOORS = 35,
     MG2_SPRITE_SHEET_CIGARETTE_SMOKE = 36,
@@ -261,6 +268,7 @@ enum MG2DoorAnimation : int
 enum MG2SpriteList : int
 {
     MG2_SPRITE_LIST_TRANSCEIVER = 2,
+    MG2_SPRITE_LIST_ROOM = 3,
 };
 
 // Sprite-list slots assigned by transceiver scripts 111 and 114.

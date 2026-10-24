@@ -6,6 +6,7 @@
 #include "mg2_doors.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
 
 #include "d3d11_text_overlay.hpp"
 #include "depth_of_field.hpp"
@@ -382,6 +383,7 @@ void GameVars::OnLevelTransition()
         MG2_CigaretteIdle::HandleLevelTransition();
         MG2_Doors::HandleLevelTransition();
         MG2_Elevators::HandleLevelTransition();
+        MG2_Bridge::HandleLevelTransition();
     }
 
 }

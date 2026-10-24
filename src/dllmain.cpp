@@ -164,6 +164,7 @@
 #include "mg2_companion_follow.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
 #include "mg2_lighter.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg2_door_cards.hpp"
@@ -242,6 +243,7 @@ namespace
         MG2_OutdoorTiles::Initialize();
         MG2_TruckyardFence::Initialize();
         MG2_Elevators::Initialize();
+        MG2_Bridge::Initialize();
         MG2_Lighter::Initialize();
         MG2_CigaretteIdle::Initialize();
         MG2_DoorCards::Initialize();

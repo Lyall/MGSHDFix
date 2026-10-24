@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mg2_portrait_overlay.hpp"
+#include "mg2_bridge.hpp"
 
 #include "common.hpp"
 #include "mg2_linkvarbuf.hpp"
@@ -522,14 +523,15 @@ namespace
     void DrawPortrait(uint32_t* pFrame, int nTick, const MG2_LinkVarBuf::Sprite& stSprite, int nOffsetX, Character eCharacter, bool bSmoking, bool bEyesClosed, bool bTalking, int nRevealMilliseconds)
     {
         const auto& astParts = s_aastImages[eCharacter];
-        const EyeState eEyes = GetEyeState(nTick, eCharacter);
+        const int nDyingEyes = eCharacter == NATASHA_MARKOVA ? MG2_Bridge::GetDyingEyeState() : -1;
+        const EyeState eEyes = nDyingEyes >= 0 ? static_cast<EyeState>(nDyingEyes) : GetEyeState(nTick, eCharacter);
         const bool bMouthOpen = IsMouthOpen(nTick, bTalking);
 
         const int nX = stSprite.nX + nOffsetX;
         const int nY = stSprite.nY + nOffsetY;
         Blit(pFrame, astParts[PART_NEUTRAL], nX, nY);
 
-        if (bEyesClosed || eEyes == EYES_BLINK)
+        if ((bEyesClosed && nDyingEyes < 0) || eEyes == EYES_BLINK)
         {
             Blit(pFrame, astParts[PART_BLINK], nX, nY);
         }

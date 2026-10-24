@@ -209,7 +209,7 @@ std::nullopt, false, Field::Bool, false},
 
 
 
-        { (MGS2), ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Help, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Tooltip,
+        { (MG | MGS2), ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Help, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
 
@@ -395,6 +395,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MG), ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, ConfigKeys::MG2_Pitfalls_Help, ConfigKeys::MG2_Pitfalls_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, ConfigKeys::MG2_Call_Sequence_Enabled_Help, ConfigKeys::MG2_Call_Sequence_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, ConfigKeys::MG2_Bridge_Help, ConfigKeys::MG2_Bridge_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, ConfigKeys::MG2_Companion_Follow_Help, ConfigKeys::MG2_Companion_Follow_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, ConfigKeys::MG2_Lighter_Help, ConfigKeys::MG2_Lighter_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, ConfigKeys::MG2_Cigarette_Idle_Help, ConfigKeys::MG2_Cigarette_Idle_Tooltip, std::nullopt, false, Field::Bool, true },

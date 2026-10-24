@@ -110,6 +110,7 @@
 #include "mg2_companion_follow.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
 #include "mg2_lighter.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg1_portrait_overlay.hpp"
@@ -1450,6 +1451,11 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
     LOG_CONFIG(ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
+    LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
