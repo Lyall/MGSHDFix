@@ -167,6 +167,8 @@ constexpr CaptionOverride kMGS2CaptionTypoFixes[] =
     { 0xfea1ba42, "\343\203\232\343\203\263\343\202\277\343\202\274\343\203\237\343\203\263|\n\343\203\231\343\203\263\343\202\276\343\202\270\343\202\242\343\202\274\343\203\224\343\203\263\347\263\273\346\212\227\344\270\215\345\256\211\350\226\254\356\200\200\343\200\202|\n\346\212\227\344\270\215\345\256\211\344\275\234\347\224\250\344\273\245\345\244\226\343\201\253\347\255\213\345\274\233\347\267\251\344\275\234\347\224\250\356\200\200\343\200\201|\n\350\207\252\345\276\213\347\245\236\347\265\214\350\252\277\347\257\200\344\275\234\347\224\250\347\255\211\343\202\202\343\201\202\343\202\213\356\200\200\343\200\202|\n#\356\200\201{\356\202\212\356\200\200\343\200\201\346\261\272\345\256\232\356\200\200}#\343\201\247\344\275\277\347\224\250\356\200\200\343\200\202" },
     { 0x4d9c3b1d, "\343\203\232\343\203\263\343\202\277\343\202\274\343\203\237\343\203\263|\n\343\203\231\343\203\263\343\202\276\343\202\270\343\202\242\343\202\274\343\203\224\343\203\263\347\263\273\346\212\227\344\270\215\345\256\211\350\226\254\356\200\200\343\200\202|\n\347\213\231\346\222\203\351\212\203\343\202\222\346\247\213\343\201\210\343\201\237\346\231\202\343\201\256\346\211\213\343\201\266\343\202\214\343\202\222|\n\344\270\200\345\256\232\346\231\202\351\226\223\346\255\242\343\202\201\343\202\213\356\200\200\343\200\202\343\202\246\356\200\200\343\202\243\343\203\263\343\203\211\343\202\246\343\201\247|\n\351\201\270\343\202\223\343\201\247#\356\200\201{\356\202\212\356\200\200\343\200\201\346\261\272\345\256\232\356\200\200}#\343\201\247\346\234\215\347\224\250\356\200\200\343\200\202" },
     { 0x842c1881, "Cardboard Box 5\nCardboard box to transport\ngame software. The eye design\nis \"eye-catching.\"\nEquip to wear." },
+
+
 };
 
 constexpr CaptionOverride kMGS3CaptionTypoFixes[] =
@@ -188,6 +190,57 @@ constexpr CaptionOverride kMGS3CaptionTypoFixes[] =
     { 0x9c8e98fc, "Shagohod bedeutet ..." },
     { 0x91dd8cd9, "\302\241Es m\303\255o!" },
     { 0x062690cd, "\302\277\302\241Qu\303\251 ha sido ese\nruido!?" },
+
+
+    { 0xd2591180, "Both of them are at the bottom of\nthe harbor. Looks like your new\nhosts have a Harrier II.\n" },
+    { 0x3385f4a0, "Cet Harrier II est \303\251quip\303\251 de bombes\n\303\240 dispersion. Chaque bombe est remplie\nde petites bombes.\n" },
+    { 0xc67366a3, "Der Harrier II auf dem Dach war mit\nSprengstoff best\303\274ckt.\n" },
+    { 0xc355fc26, "Der Harrier II ist an beiden Tragfl\303\244chen\nmit Luft-Boden-Raketenmagazinen\nausger\303\274stet.\n" },
+    { 0xcd8cd8a1, "Der Harrier II ist eine verbesserte Version\ndes ersten, praktisch senkrechtstartenden\nKampfflugzeugs der Welt.\n" },
+    { 0x91e53868, "Der Harrier II ist mit\nAMRAAM-Mittelstrecken-Luft-Luft-Raketen\nbest\303\274ckt.\n" },
+    { 0x0a9e44cd, "des Harrier II erheblich gr\303\266\303\237er\nals die seines Vorg\303\244ngers.\n" },
+    { 0xa681346f, "Die Raketen des Harrier II sind\nnicht gelenkt.\n" },
+    { 0xb2518929, "El Harrier II es una versi\303\263n mejorada\ndel primer caza V/STOL del mundo.\n" },
+    { 0x57c5417f, "El Harrier II est\303\241 equipado con cohetes de\naire-tierra en ambas alas.\n" },
+    { 0x6e9d79eb, "El Harrier II est\303\241 equipado con misiles de\nmedio alcance aire-aire AMRAAM.\n" },
+    { 0x67082fb7, "El Harrier II tiene bombas racimos.\nCada bomba tiene peque\303\261as bombas.\nEs un arma de munici\303\263n combinada.\n" },
+    { 0x30e81738, "Explosives were planted on\nthe Harrier II stationed on\nthe roof.\n" },
+    { 0x2dbb07f4, "Ils sont tous les deux au fond du port.\nIl semblerait que tes nouveaux h\303\264tes\nposs\303\250dent un Harrier-II.\n" },
+    { 0x475da381, "Ja, ein AV-8B Harrier II,\nf\303\274r die Marinen entwickelt.\n" },
+    { 0xffa19fff, "L'Harrier II pu\303\262 trasportare carichi molto\nmaggiori rispetto al modello precedente,\n" },
+    { 0xcdb64207, "L'Harrier II \303\250 una versione potenziata\ndel primo caccia V/STOL al mondo.\n" },
+    { 0x68d1ad80, "Le Harrier II a une charge utile nettement\nplus \303\251lev\303\251e que son pr\303\251d\303\251cesseur,\n" },
+    { 0xd48db9af, "Le Harrier II est une version am\303\251lior\303\251e du\npremier avion de combat V/STOL pratique\ndu monde.\n" },
+    { 0x173d83e4, "Liegen beide im Hafenbecken. Wie es\nscheint, haben Deine neuen Gastgeber\neine Harrier II.\n" },
+    { 0x89ce99cf, "Los dos est\303\241n al final del puerto.\nParece que tus nuevos anfitriones\ntienen un Harrier II.\n" },
+    { 0x96166420, "Los explosivos estaban colocados\nen el Harrier II que hay en el tejado.\n" },
+    { 0x41830f51, "Oui, ils ont un AV-8B Harrier-II\ncon\303\247u pour les marines.\n" },
+    { 0x502e7f79, "Raiden, eso que ves ah\303\255\nes un Harrier II.\n" },
+    { 0xe90b5235, "Raiden, l'engin qui est l\303\240-bas est\nun Harrier II.\n" },
+    { 0xe0bd3f04, "Raiden, quello che vedi l\303\240 \303\250 un Harrier II.\n" },
+    { 0x7857294a, "Raiden, that's a Harrier II\nyou see over there.\n" },
+    { 0x9fdba48b, "Raiden, was Du dort siehst,\nist ein Harrier II.\n" },
+    { 0xfc125461, "Sono tutti e due sul fondo del porto.\nSembra che i tuoi nuovi ospiti abbiano\nun Harrier-II.\n" },
+    { 0x17719562, "S\303\254, un AV-8B Harrier-II progettato per i\nMarines.\n" },
+    { 0x7dac0c14, "S\303\255, un AV-8B Harrier II dise\303\261ada\npor los marines.\n" },
+    { 0x392f431a, "That Harrier II is equipped with cluster\nbombs. Each bomb is full of bomblets\n-- a combined munitions weapon.\n" },
+    { 0x579ffabc, "The Harrier II comes equipped\nwith air-to-surface rocket pods\non both wings.\n" },
+    { 0x599ca63e, "The Harrier II is an upgraded\nversion of the world's first\npractical V/STOL fighter plane.\n" },
+    { 0x40258d3c, "The Harrier II rockets\nare not guided.\n" },
+    { 0xcf2b718f, "The Harrier II's equipped with\nAMRAAM mid-range air-to-air\nmissiles.\n" },
+    { 0xbe864c33, "The payload capacity of\nthe Harrier II is considerably\nlarger than#\357\274\215\n" },
+    { 0x953b8118, "Y adem\303\241s el Harrier II puede\nllevar m\303\241s munici\303\263n\n" },
+    { 0x3a4f241e, "Yes, an AV-8B Harrier II\ndesigned for the Marines.\n" },
+    { 0xbe952be9, "\342\200\246\342\200\2462\346\251\237\345\205\261#T{}\343\200\201\343\203\236\343\203\263\343\203\217#T{}\343\203\203\345\244\225\343\203\263\346\271\276\343\201\253\346\262\210\343\202\223\343\201\240#T{}\343\200\202\n\345\245\264\347\255\211\343\201\257\343\203\217\343\203\252\343\202\242\343\203\274II\343\202\222\346\211\200\346\214\201\343\201\227\343\201\246\343\201\204\343\202\213\343\202\210\343\201\206\343\201\240#T{}\343\200\202\n" },
+    { 0x266fe6b2, "\343\201\202\343\201\202#T{}\343\200\202\n\346\265\267\345\205\265\351\232\212\345\220\221\343\201\221\343\201\256AV-8B\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\240#T{}\343\200\202\n" },
+    { 0xdcfdd889, "\343\201\235\343\201\256\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\257\344\270\255\350\267\235\351\233\242\347\251\272\345\257\276\347\251\272\343\203\237\343\202\265\343\202\244\343\203\253#T{}\343\200\201\n\343\202\242\343\203\240\343\203\251\343\203\274\343\203\240\343\202\222\350\243\205\345\202\231\343\201\227\343\201\246\343\201\204\343\202\213#T{}\343\200\202\n" },
+    { 0x82d716c6, "\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\257\343\202\257\343\203\251\343\202\271\345\244\225\343\203\274\347\210\206\345\274\276\343\202\222\n\350\243\205\345\202\231\343\201\227\343\201\246\343\201\204\343\202\213#T{}\343\200\202\345\244\232\346\225\260\343\201\256\345\260\217\345\236\213\347\210\206\345\274\276\343\202\222\n\345\206\205\350\224\265\343\201\227\343\201\237\343\201\204\343\202\217\343\202\206\343\202\213\350\246\252\345\255\220\347\210\206\345\274\276\343\201\240#T{}\343\200\202\n" },
+    { 0xf0ba8a11, "\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\257\343\203\217\343\203\252\343\202\242\343\203\274\343\201\253\346\257\224\343\201\271\343\201\246\343\202\250\343\203\263\343\202\270\343\203\263\n\345\220\271\345\207\272\343\201\227\345\217\243\343\201\256\346\224\271\350\211\257\347\255\211\343\201\247\343\203\232\343\202\244\343\203\255\343\203\274\343\203\211\343\201\214\n\343\201\213\343\201\252\343\202\212\346\213\241\345\244\247\343\201\227\343\201\246\343\202\213\343\202\223\343\201\240#T{}\343\200\202\n" },
+    { 0x468f56f9, "\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\257\344\270\226\347\225\214\345\210\235\343\201\256\345\256\237\347\224\250V\357\274\217STOL\n\346\224\273\346\222\203\346\251\237\343\203\217\343\203\252\343\202\242\343\203\274\343\201\256\347\231\272\345\261\225\345\236\213\343\201\240#T{}\343\200\202\n" },
+    { 0x4cb11f03, "\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\257\344\270\241\347\277\274\343\201\253\345\257\276\345\234\260\346\224\273\346\222\203\347\224\250\343\201\256\n\343\203\255\343\202\261#T{}\343\203\203\343\203\210\345\274\276\343\203\235#T{}\343\203\203\343\203\211\343\202\202\350\243\205\345\202\231\343\201\227\343\201\246\343\201\204\343\202\213#T{}\343\200\202\n" },
+    { 0xc623a602, "\351\233\267\351\233\273#T{}\343\200\201\343\201\235\343\201\223\343\201\253\343\201\202\343\202\213\343\201\256\343\201\214\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\240#T{}\343\200\202\n" },
+    { 0x59c03d4e, "\351\247\220\346\251\237\343\201\227\343\201\246\343\201\204\343\201\237\343\203\217\343\203\252\343\202\242\343\203\274II\343\201\253\n\344\273\225\346\216\233\343\201\221\343\201\246\343\201\202#T{}\343\201\243\343\201\237#T{}\343\200\202\n" },
+
 
 };
 
