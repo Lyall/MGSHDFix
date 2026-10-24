@@ -470,7 +470,7 @@ Open MGSHDFix.sln in Visual Studio (2026) and build.
 ## Credits
 Maintained by [@ShizCalev/Afevis](https://github.com/shizcalev) (taking over the project in early 2025).<br />
 Originally made by [@Lyall](https://codeberg.org/Lyall).<br />
-With more amazing features and fixes contributed by [@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), [@SpaceCore](https://github.com/Jacky720), [@gibletto](https://github.com/gibletto) and [Zenf0](https://next.nexusmods.com/profile/zenf0)<br />
+With more amazing features and fixes contributed by [@emoose](https://github.com/emoose), [@cipherxof](https://github.com/cipherxof), [@Bud11](https://github.com/bud11), [@SpaceCore](https://github.com/Jacky720), [@gibletto](https://github.com/gibletto), [PinkElephantG](https://x.com/pink_elephant_g) and [Zenf0](https://next.nexusmods.com/profile/zenf0)<br />
 
 #### Used Libraries & Software:
 [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading. <br />
