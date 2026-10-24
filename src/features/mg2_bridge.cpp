@@ -429,6 +429,11 @@ int MG2_Bridge::GetDyingEyeState()
     return (MG2_BridgeData::anDyingEyePattern[nIndex >> 2] >> (6 - 2 * (nIndex & 3))) & 3;
 }
 
+bool MG2_Bridge::IsDyingDialogueFinished()
+{
+    return IsDyingCall() && s_nForcedEyes == 1;
+}
+
 void MG2_Bridge::HandleLevelTransition()
 {
     const bool bRoom = IsRoom(15, 4);

@@ -525,7 +525,8 @@ namespace
         const auto& astParts = s_aastImages[eCharacter];
         const int nDyingEyes = eCharacter == NATASHA_MARKOVA ? MG2_Bridge::GetDyingEyeState() : -1;
         const EyeState eEyes = nDyingEyes >= 0 ? static_cast<EyeState>(nDyingEyes) : GetEyeState(nTick, eCharacter);
-        const bool bMouthOpen = IsMouthOpen(nTick, bTalking);
+        const bool bFinished = eCharacter == NATASHA_MARKOVA && MG2_Bridge::IsDyingDialogueFinished();
+        const bool bMouthOpen = !bFinished && IsMouthOpen(nTick, bTalking);
 
         const int nX = stSprite.nX + nOffsetX;
         const int nY = stSprite.nY + nOffsetY;

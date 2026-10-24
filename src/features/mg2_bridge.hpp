@@ -7,5 +7,6 @@ namespace MG2_Bridge
     void Initialize();
     void CaptureDyingMessage(const char* pText, int nLength);
     int GetDyingEyeState();
+    bool IsDyingDialogueFinished();
     void HandleLevelTransition();
 }
