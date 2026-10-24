@@ -110,6 +110,7 @@
 #include "mg2_companion_follow.hpp"
 #include "mg2_doors.hpp"
 #include "mg2_elevators.hpp"
+#include "mg2_lighter.hpp"
 #include "mg2_cigarette_idle.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg1_opening.hpp"
@@ -1449,6 +1450,9 @@ void Config::Read()
     LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
     LOG_CONFIG(ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);

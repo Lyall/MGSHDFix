@@ -244,6 +244,11 @@ namespace ConfigKeys
                                           "\n"
                                           "Elsewhere, variable wind changes every 240 ticks (16 seconds), instead of MC's 2048 ticks (136.53 seconds). Times use MC's 15 gameplay ticks per second.";
 
+    constexpr const char* MG2_Lighter_Section = "Metal Gear 2";
+    constexpr const char* MG2_Lighter_Setting = "Restore Lighter Flame";
+    constexpr const char* MG2_Lighter_Help = "";
+    constexpr const char* MG2_Lighter_Tooltip = "Restores the lighter's flame animation when fired without the spraycan equipped.";
+
     constexpr const char* MG2_Cigarette_Idle_Section = "Metal Gear 2";
     constexpr const char* MG2_Cigarette_Idle_Setting = "Restore Cigarette Animations";
     constexpr const char* MG2_Cigarette_Idle_Help = "";
