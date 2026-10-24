@@ -32,6 +32,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 > [!NOTE]
 (More features and fixes are added frequently and may be missing from this list.)
 
+
 #### Shared Engine Features:
 - Custom resolution/ultrawide support.
 - Experimental 16:9 HUD option that resizes HUD/movies (MGS2/MGS3).
@@ -63,6 +64,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
  - All games support loading a dif.json translation file from the game's /translations folder.
  - (A companion string editor app to assist in translation development is being finalized.)
 
+<br />
+
 #### MG / MG2 Specific Features
 - Custom Developer Menu (stage select, item / equipment modification).
 - Option to crop overscan borders on the top/bottom of the screen.
@@ -82,6 +85,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
   - We're looking for translators for the game's other languages! Contact us on Discord or Github if interested!
 
 
+<br />
 
 #### MGS2 Specific Features:
 - Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
@@ -105,12 +109,17 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to force all NPCs to always use their highest quality polygon/LOD model.
 - Option to use the High Frequency blade anywhere.
 
+<br />
+
 
 #### MGS3 Specific Features:
 - Option to force grass to render at all distances.
 - Mouse sensitivity adjustment.
 
 <br />
+
+<br />
+
 
 
 ## Bug Fixes
@@ -143,6 +152,10 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - Fixes MGS2 & MGS3's blind rendering (lines on Codec portraits / nightvision / thermal goggles) not scaling with resolution.
 - Rewrites some game functions to speed up processing. ♥
 
+
+<br />
+
+
 #### MG1 / MG2 Specific Bug Fixes:
 - MG1: Readds multiple missing sprites in the game's opening sequence.
 - MG1: Fixes TELESCOPE MODE not properly hiding the rest of the game's UI.
@@ -166,6 +179,9 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - MG2: Restored Bridge of Sorrow cutscene timings, positoning, photosensitive effects, and radio call portrait timings.
 - MG2: Fixes Evasion music using the standard Alert song. (Requires [MG1 / MG2 Restored Audio mod](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15).)
 - MG2: Restored a missing song variant before Campbell's initial radar explanation. (Requires [MG1 / MG2 Restored Audio mod](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15).)
+
+
+<br />
 
 
 #### MGS2 Specific Bug Fixes:
@@ -244,7 +260,9 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - Restored the screen after-image / blur effect after firing the stinger. [2011 HDC]
 - Fixed dogtag / items that are dropped from guards having a wider than intended arc - which would sometimes cause the dogtags/item to fall off ledges. [2023 MC]
 
-	
+<br />
+
+
 #### MGS3 Specific Bug Fixes:
 - Restores the PlayStation 2's original cutscene camera/viewport height, fixing the 2011 HD Collection bug that cropped roughly the bottom 10% of the image in all cutscenes. (Notably, this issue was officially fixed in both the 3DS remake and Delta.)
 - Fixes water reflections (MGS3). See [PR #71](https://github.com/ShizCalev/MGSHDFix/pull/71) for a breakdown of the issue.
