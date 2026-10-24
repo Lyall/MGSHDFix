@@ -404,65 +404,65 @@
     <ClCompile Include="src\features\mg1_door_cards.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg1_scorpions.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg1_scorpions.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg1_guard_spawning.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg1_guard_spawning.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg2_door_cards.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_sauna_guard.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_sauna_guard.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_item_sprites.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_item_sprites.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_call_sequence.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_call_sequence.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_opening_call_music.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_opening_call_music.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_elevators.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_elevators.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_room_patches.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\resources\mg2_room_patches.cpp">
+      <Filter>Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_pitfalls.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_pitfalls.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_doors.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_doors.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_companion_follow.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_companion_follow.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_bridge.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_bridge.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_cigarette_idle.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_cigarette_idle.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_ending_cast.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_ending_cast.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_lighter.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_lighter.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_outdoor_palettes.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_outdoor_palettes.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_outdoor_tiles.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_outdoor_tiles.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_truckyard_fence.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_truckyard_fence.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_sprite_patcher.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\resources\mg2_sprite_patcher.cpp">
+      <Filter>Resources</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mg_cigarette_damage.cpp">
       <Filter>Features</Filter>
@@ -488,14 +488,14 @@
     <ClCompile Include="src\features\mg2_stage_select.cpp">
       <Filter>Features</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg1_opening.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg1_opening.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg1_portrait_overlay.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg1_portrait_overlay.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="src\features\mg2_portrait_overlay.cpp">
-      <Filter>Features</Filter>
+    <ClCompile Include="src\fixes\mg2_portrait_overlay.cpp">
+      <Filter>Fixes</Filter>
     </ClCompile>
     <ClCompile Include="src\features\mgs2_area_prefetch.cpp">
       <Filter>Features</Filter>
@@ -1076,11 +1076,11 @@
     <ClInclude Include="src\features\mg1_door_cards.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_scorpions.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg1_scorpions.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_guard_spawning.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg1_guard_spawning.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\loose_audio_overrides.hpp">
       <Filter>Features</Filter>
@@ -1091,86 +1091,86 @@
     <ClInclude Include="src\features\mg2_door_cards.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_sauna_guard.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_sauna_guard.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_item_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_item_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_call_sequence.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_call_sequence.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_opening_call_music.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_opening_call_music.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_elevators.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_elevators.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_elevator_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_elevator_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_room_patches.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\resources\mg2_room_patches.hpp">
+      <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_pitfall_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_pitfall_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_pitfalls.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_pitfalls.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_doors.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_doors.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_door_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_door_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_door_fixes.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_door_fixes.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_companion_follow.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_companion_follow.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_bridge.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_bridge.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_bridge_data.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_bridge_data.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_cigarette_idle.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_cigarette_idle.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_ending_cast.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_ending_cast.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_lighter.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_lighter.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_cigarette_animations.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_cigarette_animations.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_ending_cast_data.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_ending_cast_data.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mg2_boss_name_sprites.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_outdoor_palettes.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_outdoor_palettes.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_outdoor_tiles.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_outdoor_tiles.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_outdoor_tiles_data.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_outdoor_tiles_data.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_truckyard_fence.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_truckyard_fence.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_truckyard_fence_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_truckyard_fence_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_sprite_patcher.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\resources\mg2_sprite_patcher.hpp">
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_cigarette_damage.hpp">
       <Filter>Features\Headers</Filter>
@@ -1196,32 +1196,32 @@
     <ClInclude Include="src\features\mg_font_bundle.hpp">
       <Filter>Features</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_opening.hpp">
-      <Filter>Features</Filter>
+    <ClInclude Include="src\fixes\mg1_opening.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_opening_sprites.hpp">
-      <Filter>Features</Filter>
+    <ClInclude Include="src\fixes\mg1_opening_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_portrait_overlay.hpp">
-      <Filter>Features</Filter>
+    <ClInclude Include="src\fixes\mg1_portrait_overlay.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg1_portrait_sprites.hpp">
-      <Filter>Features</Filter>
+    <ClInclude Include="src\fixes\mg1_portrait_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_portrait_overlay.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_portrait_overlay.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_portrait_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_portrait_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_original_sprites.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\fixes\mg2_original_sprites.hpp">
+      <Filter>Fixes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_sprite_patches.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\resources\mg2_sprite_patches.hpp">
+      <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="src\features\mg2_palette_patches.hpp">
-      <Filter>Features\Headers</Filter>
+    <ClInclude Include="src\resources\mg2_palette_patches.hpp">
+      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_area_prefetch.hpp">
       <Filter>Features\Headers</Filter>
