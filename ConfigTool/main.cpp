@@ -766,7 +766,7 @@ public:
                         "MGSHDFix, licensed under MIT.\n"
                         "     Maintained by Afevis (aka ShizCalev.)\n"
                         "     Originally created by Lyall.\n"
-                        "     Contributors: Emoose, Cipherxof (aka TriggerHappy), Bud11, SpaceCore (aka Jacky720), gibletto, Zenf0."
+                        "     Additional Contributors: Emoose, Cipherxof (aka TriggerHappy), Bud11, SpaceCore (aka Jacky720), gibletto, PinkElephantG, Zenf0."
                     );
                     aboutSizer->Add(aboutText, 0, wxALL, 5);
 
@@ -1169,21 +1169,17 @@ public:
 
         mainSizer->Add(m_tabs, 1, wxEXPAND | wxALL, 5);
 
-        // Bugfix Compilation status
-        if (iTargetGame == TARGET_GAME_MGS2 || iTargetGame == TARGET_GAME_MGS3)
+        // Companion mod status
+        if (iTargetGame == TARGET_GAME_MG1 || iTargetGame == TARGET_GAME_MGS2 || iTargetGame == TARGET_GAME_MGS3)
         {
-            const std::filesystem::path exePath = Helper::FindASILocation(sFixName).parent_path();
-
-            const char* asiName = (iTargetGame == TARGET_GAME_MGS2)
-                ? "MGS2-Community-Bugfix-Compilation.asi"
-                : "MGS3-Community-Bugfix-Compilation.asi";
-
-            const char* compilationName = (iTargetGame == TARGET_GAME_MGS2)
-                ? "MGS2 Community Bugfix Compilation"
-                : "MGS3 Community Bugfix Compilation";
-
-            const bool bugfixInstalled = std::filesystem::exists(
-                exePath / "plugins" / asiName);
+            const std::filesystem::path stGamePath = Helper::FindASILocation(sFixName).parent_path();
+            const char* pszModName = (iTargetGame == TARGET_GAME_MG1)
+                ? "MG1/MG2 Restored Audio Mod"
+                : iTargetGame == TARGET_GAME_MGS2 ? "MGS2 Community Bugfix Compilation" : "MGS3 Community Bugfix Compilation";
+            const std::filesystem::path stModPath = (iTargetGame == TARGET_GAME_MG1)
+                ? stGamePath / "us" / "bgm_2" / "mg2_bgm29_startmusen.before_radar.track0.flac"
+                : stGamePath / "plugins" / (iTargetGame == TARGET_GAME_MGS2 ? "MGS2-Community-Bugfix-Compilation.asi" : "MGS3-Community-Bugfix-Compilation.asi");
+            const bool bModInstalled = std::filesystem::is_regular_file(stModPath);
 
             auto* statusPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
             statusPanel->SetBackgroundColour(m_tabs->GetPage(0)->GetBackgroundColour());
@@ -1191,19 +1187,19 @@ public:
             auto* statusSizer = new wxBoxSizer(wxHORIZONTAL);
 
             auto* icon = new wxStaticText(statusPanel, wxID_ANY,
-                                          bugfixInstalled ? L"\u2714" : L"\u2718");
-            icon->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+                                          bModInstalled ? L"\u2714" : L"\u2718");
+            icon->SetForegroundColour(bModInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
             wxFont iconFont = icon->GetFont();
             iconFont.SetPointSize(iconFont.GetPointSize() + 2);
             icon->SetFont(iconFont);
 
             auto* label = new wxStaticText(statusPanel, wxID_ANY,
-                                           wxString::Format("%s: ", compilationName));
-            label->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+                                           wxString::Format("%s: ", pszModName));
+            label->SetForegroundColour(bModInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
 
             auto* statusLabel = new wxStaticText(statusPanel, wxID_ANY,
-                                                 bugfixInstalled ? "Installed" : "Not Installed");
-            statusLabel->SetForegroundColour(bugfixInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
+                                                 bModInstalled ? "Installed" : "Not Installed");
+            statusLabel->SetForegroundColour(bModInstalled ? wxColour(0, 128, 0) : wxColour(192, 0, 0));
             statusLabel->SetFont(statusLabel->GetFont().Bold());
 
             statusSizer->AddStretchSpacer();
@@ -1211,7 +1207,16 @@ public:
             statusSizer->Add(label, 0, wxALIGN_CENTER_VERTICAL);
             statusSizer->Add(statusLabel, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 8);
 
-            if (!bugfixInstalled)
+            if (!bModInstalled && (iTargetGame == TARGET_GAME_MG1))
+            {
+                auto* pNexusButton = new wxButton(statusPanel, wxID_ANY, "Nexus Page");
+                pNexusButton->Bind(wxEVT_BUTTON, [](wxCommandEvent&)
+                {
+                    wxLaunchDefaultBrowser("https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15");
+                });
+                statusSizer->Add(pNexusButton, 0, wxALIGN_CENTER_VERTICAL);
+            }
+            else if (!bModInstalled)
             {
                 const char* nexusUrl = (iTargetGame == TARGET_GAME_MGS2)
                     ? "https://www.nexusmods.com/metalgearsolid2mc/mods/52"

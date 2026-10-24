@@ -26,6 +26,32 @@ namespace
     {
         float3 color = backBuffer.Sample(smpl, uv).rgb;
 
+        color = ApplyColorCorrection(color);
+
+        return float4(color, 1.0);
+    }
+    )";
+
+    ComPtr<ID3D11Texture2D> s_pBackBuffer;
+    ComPtr<ID3D11RenderTargetView> s_pRenderTargetView;
+
+    ComPtr<ID3DBlob>                 vsBlob;
+    ComPtr<ID3DBlob>                 psBlob;
+    ComPtr<ID3D11VertexShader>       vs;
+    ComPtr<ID3D11PixelShader>        ps;
+    ComPtr<ID3D11SamplerState>       smpl;
+    ComPtr<ID3D11Texture2D>          tempTex;
+    ComPtr<ID3D11ShaderResourceView> tempSRV;
+    ComPtr<ID3D11RasterizerState>    rs;
+    ComPtr<ID3D11DepthStencilState>  dss;
+    D3D11_TEXTURE2D_DESC             tempDesc = {};
+}
+
+const char* ColorCorrection::GetShaderSource()
+{
+    return R"(
+    float3 ApplyColorCorrection(float3 color)
+    {
         static const float3 coefLuma = float3(0.212656, 0.715158, 0.072186);
 
         // Vibrance
@@ -46,20 +72,15 @@ namespace
         luma  = lerp(luma, s, kContrast);               // blend by contrast
         color = luma + chroma;
 
-        return float4(color, 1.0);
+        return color;
     }
     )";
+}
 
-    ComPtr<ID3DBlob>                 vsBlob;
-    ComPtr<ID3DBlob>                 psBlob;
-    ComPtr<ID3D11VertexShader>       vs;
-    ComPtr<ID3D11PixelShader>        ps;
-    ComPtr<ID3D11SamplerState>       smpl;
-    ComPtr<ID3D11Texture2D>          tempTex;
-    ComPtr<ID3D11ShaderResourceView> tempSRV;
-    ComPtr<ID3D11RasterizerState>    rs;
-    ComPtr<ID3D11DepthStencilState>  dss;
-    D3D11_TEXTURE2D_DESC             tempDesc = {};
+void ColorCorrection::ResetRenderTarget()
+{
+    s_pRenderTargetView.Reset();
+    s_pBackBuffer.Reset();
 }
 
 void ColorCorrection::Setup()
@@ -86,7 +107,8 @@ void ColorCorrection::Setup()
 
     ComPtr<ID3DBlob> err;
 
-    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    const std::string strShader = std::string(GetShaderSource()) + kShader;
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(strShader.data(), strShader.size(), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("Gamma Correction: VS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
@@ -95,7 +117,7 @@ void ColorCorrection::Setup()
 
     err.Reset();
 
-    hr = g_D3D11Hooks.D3DCompileFunc(kShader, strlen(kShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    hr = g_D3D11Hooks.D3DCompileFunc(strShader.data(), strShader.size(), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("Gamma Correction: PS compile failed: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "unknown");
@@ -170,13 +192,25 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
 
     ComPtr<ID3D11Texture2D> backbuf;
-    swap->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backbuf.GetAddressOf());
+    if (FAILED(swap->GetBuffer(0, IID_PPV_ARGS(backbuf.GetAddressOf()))))
+    {
+        return;
+    }
+    if (s_pBackBuffer.Get() != backbuf.Get())
+    {
+        ResetRenderTarget();
+        if (FAILED(dev->CreateRenderTargetView(backbuf.Get(), nullptr, s_pRenderTargetView.GetAddressOf())))
+        {
+            return;
+        }
+        s_pBackBuffer = backbuf;
+    }
 
     D3D11_TEXTURE2D_DESC bbDesc;
     backbuf->GetDesc(&bbDesc);
 
     // Recreate the read-copy if the backbuffer dimensions changed
-    if (!tempTex || tempDesc.Width != bbDesc.Width || tempDesc.Height != bbDesc.Height)
+    if (!tempTex || tempDesc.Width != bbDesc.Width || tempDesc.Height != bbDesc.Height || tempDesc.Format != bbDesc.Format)
     {
         tempTex.Reset();
         tempSRV.Reset();
@@ -186,15 +220,15 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
         td.Usage = D3D11_USAGE_DEFAULT;
         td.CPUAccessFlags = 0;
         td.MiscFlags = 0;
-        dev->CreateTexture2D(&td, nullptr, tempTex.GetAddressOf());
-        dev->CreateShaderResourceView(tempTex.Get(), nullptr, tempSRV.GetAddressOf());
+        if (FAILED(dev->CreateTexture2D(&td, nullptr, tempTex.GetAddressOf())) || FAILED(dev->CreateShaderResourceView(tempTex.Get(), nullptr, tempSRV.GetAddressOf())))
+        {
+            tempTex.Reset();
+            return;
+        }
         tempDesc = bbDesc;
     }
 
     ctx->CopyResource(tempTex.Get(), backbuf.Get());
-
-    ComPtr<ID3D11RenderTargetView> rtv;
-    dev->CreateRenderTargetView(backbuf.Get(), nullptr, rtv.GetAddressOf());
 
     D3D11_VIEWPORT vp = { 0.f, 0.f, (float)bbDesc.Width, (float)bbDesc.Height, 0.f, 1.f };
 
@@ -239,7 +273,7 @@ void ColorCorrection::Draw(IDXGISwapChain* swap)
     ctx->RSSetViewports(1, &vp);
     ctx->OMSetDepthStencilState(dss.Get(), 0);
     ctx->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
-    ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
+    ctx->OMSetRenderTargets(1, s_pRenderTargetView.GetAddressOf(), nullptr);
 
     ctx->Draw(3, 0);
 

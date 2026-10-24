@@ -1,6 +1,12 @@
 #include "stdafx.h"
 #include "common.hpp"
 #include "gamevars.hpp"
+#include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
+#include "mg2_doors.hpp"
+#include "mg2_truckyard_fence.hpp"
+#include "mg2_outdoor_tiles.hpp"
+#include "mg2_cigarette_idle.hpp"
 
 #include "d3d11_text_overlay.hpp"
 #include "depth_of_field.hpp"
@@ -198,10 +204,45 @@ void GameVars::Initialize()
         }
     }
 
+    if (eGameType & MG)
+    {
+        //sub_1400D6F80
+        auto* pSaveLoad = Memory::PatternScan(baseModule, "48 8B 05 ?? ?? ?? ?? 48 8B 90 ?? ?? ?? ?? 48 8B CA", "MG1/2: GameVars : save/load menu state");
+        if (pSaveLoad)
+        {
+            pp_MGWrapperActor = reinterpret_cast<uint8_t**>(Memory::GetRelativeOffset(pSaveLoad + 3));
+            spdlog::info("MG1/2: GameVars : Initialized save/load menu state.");
+        }
+        else
+        {
+            spdlog::error("MG1/2: GameVars : Save/load menu state unavailable.");
+        }
+    }
+
     if (eGameType & (MG|MGS2|MGS3))
     {
         Shared_Gamefuncs::HookFuncs();
     }
+}
+
+bool GameVars::MGIsSaveLoadVisible() const
+{
+    const auto* pActor = pp_MGWrapperActor ? *pp_MGWrapperActor : nullptr;
+    constexpr size_t nSaveLoadActiveOffset = 0xC8;
+    if (!pActor || *reinterpret_cast<const int*>(pActor + nSaveLoadActiveOffset) == 0)
+    {
+        return false;
+    }
+    constexpr size_t nDisplayHandleOffset = 0x90;
+    constexpr size_t nActorHandleOffset = 0x28;
+    constexpr size_t nDisplayBrightnessOffset = 0x1908;
+    const auto hDisplay = *reinterpret_cast<const uintptr_t*>(pActor + nDisplayHandleOffset);
+    if (!hDisplay)
+    {
+        return false;
+    }
+    const auto* pDisplay = reinterpret_cast<const uint8_t*>(hDisplay * 16);
+    return *reinterpret_cast<const uintptr_t*>(pDisplay + nActorHandleOffset) == hDisplay && *reinterpret_cast<const float*>(pDisplay + nDisplayBrightnessOffset) <= 0.0f;
 }
 
 bool GameVars::InCutscene() const //does not count pad demos or FMVs, only full cutscenes.
@@ -306,12 +347,14 @@ bool GameVars::MGS3IsHoldingFirstPerson() const
 
 void GameVars::OnLevelTransition()
 {
+
+
     g_StatPersistence.SaveStats();
     
-    KeepAimingAfterFiring::HandleLevelTransition();
 
     if (eGameType & MGS2)
     {
+        KeepAimingAfterFiring::HandleLevelTransition();
         MGS2_First_Person_View::HandleLevelTransition();
         MGS2_ThirdPersonFreecam::HandleLevelTransition();
         MGS2Sunglasses::CheckOnTransition();
@@ -330,8 +373,19 @@ void GameVars::OnLevelTransition()
     }
     else if (eGameType & MGS3)
     {
+        KeepAimingAfterFiring::HandleLevelTransition();
         D3D11TextOverlay::HandleLevelTransition();
     }
+    else if (eGameType & MG)
+    {
+        MG2_Elevators::HandleLevelTransition();
+        MG2_Bridge::HandleLevelTransition();
+        MG2_Doors::HandleLevelTransition();
+        MG2_TruckyardFence::HandleLevelTransition();
+        MG2_OutdoorTiles::HandleLevelTransition();
+        MG2_CigaretteIdle::HandleLevelTransition();
+    }
+
 }
 
 

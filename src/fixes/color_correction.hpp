@@ -2,6 +2,8 @@
 
 namespace ColorCorrection
 {
+    const char* GetShaderSource();
+    void ResetRenderTarget();
     void Setup();
     void Init();
     void Draw(IDXGISwapChain* swap);

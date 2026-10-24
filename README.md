@@ -47,8 +47,8 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to continue aiming your gun after firing it while in first-person/while holding lock-on.
 - Toggleable wireframe modes.
 - Option to force highest level polygon models during gameplay & cutscenes (improving visual quality.)
+- Optio to skip intro logos.
 - Adjustable anisotropic filtering (MGS2/MGS3).
-- Skip intro logos (MGS2/MGS3).
 - Option to disable 2011 HD Collection gameplay camera angle/positioning changes.
 - Option to adjust scale and opacity of cutscene captions.
 - Option to disable Steam Achievement unlocking. (For speedrunners.)
@@ -57,11 +57,31 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option (MGSHDFix Internal tab) to start MGS2 & MGS3 in their developer menu level select screens.
 - Speedrunner In-Game Timer / statistics overlay
 - Option to restore PS2 memory card strings / messages / captions.
+- Option to restore several flashing effects (ie explosion flashes) which were censored in the Master Collection for photosensitivity reasons.
+- Translation file loading support!
+ - This allows replacement of all .SDT & .GCX text for all languages without having to directly modify any game files.
+ - All games support loading a dif.json translation file from the game's /translations folder.
+ - (A companion string editor app to assist in translation development is being finalized.)
 
 #### MG / MG2 Specific Features
+- Custom Developer Menu (stage select, item / equipment modification).
 - Option to crop overscan borders on the top/bottom of the screen.
 - Option to correct the game to a 4:3 aspect ratio. (The game was using the MSX2's raw output aspect ratio of 64:53.)
 - `.flac`, `.wav`, `.mp3`, and `.ogg` audio replacement support. (See [audio_replacements](features/audio_replacements.md) for setup info.)
+- Option to replace all of the game's low resolution text with proper vector .ttf text.
+  - We're able to add support for Latin & non-Japanese fonts too! If you need support added for your language/translation mod, please contact us!
+- Option to make doors automatically check your inventory for keycards (same behavior as MGS1 & MGS2's keycards work.)
+- Option to restore the original MSX2 boss names.
+- Option to fix In-Game Timer not pausing during the pause screen & save/load data menus.
+- MG2: Option to restore the original character sprites (along with their face animations.)
+- MG2: Option to revert the censored Sauna guard.
+- MG2: Option to revert changes to medical symbols, and the intro movie's cigarette packaging.
+- MG2: Option to enable a retranslated version of the original MSX2 script.
+  - (The PS2/MC script has multiple plotpoints & pop-culture references that were lost in the localization process, and several characters were arbitrarily renamed.)
+  - Currently English only.
+  - We're looking for translators for the game's other languages! Contact us on Discord or Github if interested!
+
+
 
 #### MGS2 Specific Features:
 - Option to enable Bluepoint's cancelled Subsistence style Third Person view camera.
@@ -84,7 +104,6 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Option to make punches count as non-lethal damage against Vamp instead of doing lethal damage.
 - Option to force all NPCs to always use their highest quality polygon/LOD model.
 - Option to use the High Frequency blade anywhere.
-- Option to restore several flashing effects (ie explosion flashes) which were censored in the Master Collection for photosensitivity reasons.
 
 
 #### MGS3 Specific Features:
@@ -123,6 +142,30 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - Fixes MGS2 & MGS3's audio reverb being nearly inaudible; volume is now boosted and user-adjustable.
 - Fixes MGS2 & MGS3's blind rendering (lines on Codec portraits / nightvision / thermal goggles) not scaling with resolution.
 - Rewrites some game functions to speed up processing. ♥
+
+#### MG1 / MG2 Specific Bug Fixes:
+- MG1: Readds multiple missing sprites in the game's opening sequence.
+- MG1: Fixes TELESCOPE MODE not properly hiding the rest of the game's UI.
+- MG1: Fixes scorpion pathfinding getting stuck in the bottom right corner of the screen.
+- MG1: Fixes guards always skipping one of their valid alert spawnpoints in every room.
+- MG1: Fixes multiple music tracks which do not properly loop. (Requires MG1 / MG2 Restored Audio mod.)
+- MG2: Fixes outbound transciever calls showing the person who you're calling before you've said the "This is Snake, come in" message.
+- MG2: Fixes several missing doors.
+- MG2: Fixes numerous doors that were mispositioned (either floating, or outright incorrectly placed.)
+- MG2: Fixes several missing pitfall traps.
+- MG2: Fixes some pitfalls using incorrect base tiles/sprites.
+- MG2: Fixes the infiltration point / Zanzibar building 1's exterior sunrise/brightness palette change not being implemented.
+- MG2: Fixes numerous sprites/tiles being the wrong variant, color, ect.
+- MG2: Fixes missing lighter flame sprites when attacking.
+- MG2: Fixes missing gate in the Bridge of Sorrow truckyard.
+- MG2: Fixes companions not following at the correct distance (this could be seen in-game as Gustava/Nastacha sitting in a puddle of water during the Dr. Madnar escort.)
+- MG2: Restored the correct elevator timings & idle floor-wandering behavior.
+- MG2: Restored elevator floor indicator lamps.
+- MG2: Restored the correct cigarette smoke idle animation timings, sprites, and wind behavior.
+- MG2: Fixes multiple doors which were using an incorrect variant of their sprites.
+- MG2: Restored Bridge of Sorrow cutscene timings, positoning, photosensitive effects, and radio call portrait timings.
+- MG2: Fixes Evasion music using the standard Alert song. (Requires MG1 / MG2 Restored Audio mod.)
+- MG2: Restored a missing song variant before Campbell's initial radar explanation. (Requires MG1 / MG2 Restored Audio mod.)
 
 
 #### MGS2 Specific Bug Fixes:

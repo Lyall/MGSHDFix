@@ -6,6 +6,37 @@
 #include "game_stages.hpp"
 #include "mgs2_status_flags.hpp"
 
+namespace MGFont
+{
+    struct Resource
+    {
+        const uint8_t* pData;
+    };
+
+    constexpr int nCount = 4;
+    constexpr int nFirstCharacter = 32;
+    constexpr int nCharacterCount = 224;
+    constexpr int nGlyphTableOffset = 8;
+    constexpr int nGlyphRecordSize = 4;
+    constexpr int nGlyphDataOffset = 0x388;
+    constexpr int nWidthShift = 20;
+    constexpr int nWidthMask = 0x3F;
+    constexpr int nUnusedGlyph = 0xFFF;
+    constexpr int nKanjiFirstCode = 0x8000;
+    constexpr int nKanjiTableOffset = 4;
+    constexpr int nKanjiRecordSize = 2;
+    constexpr int nKanjiDataOffset = 0x10004;
+    constexpr int nKanjiWidth = 24;
+}
+
+// MG1/MG2 CTexture fields
+struct MGHostTexture
+{
+    uint8_t anPadding[0x88];
+    ID3D11ShaderResourceView* pShaderResourceView;
+};
+static_assert(offsetof(MGHostTexture, pShaderResourceView) == 0x88);
+
 struct alignas(16) FVECTOR { float x, y, z, w; };
 
 struct alignas(16) FMATRIX { float m[4][4]; };
@@ -85,6 +116,7 @@ class GameVars final
 {
 public:
     void Initialize();
+    [[nodiscard]] bool MGIsSaveLoadVisible() const;
     [[nodiscard]] bool InCutscene() const; // If we're in a full demo cutscene.
     [[nodiscard]] bool InScriptedSequence() const; // If the game is in a scripted sequence (cutscene or pad demo).
     [[nodiscard]] double ActorWaitMultiplier() const;
@@ -187,9 +219,11 @@ public:
     [[nodiscard]] bool IsMouseInputActive() const { return p_KeyboardMouseInputActive != nullptr && *p_KeyboardMouseInputActive != 0 && p_MouseMovementActive != nullptr && *p_MouseMovementActive != 0; }
 
 
-private:
     static void OnLevelTransition();
 
+private:
+
+    uint8_t** pp_MGWrapperActor = nullptr;
     uint64_t* aimingState = nullptr;
     int* cutsceneFlag = nullptr;
     int* scriptedSequenceFlag = nullptr;

@@ -1,5 +1,34 @@
 #pragma once
 
+enum MG1DialogueChunk : int
+{
+    MG1_DIALOGUE_RADIO = 13,
+    MG1_DIALOGUE_ENDING = 14,
+};
+
+enum MG1SnakeDialogue : int
+{
+    MG1_SNAKE_RADIO_SEND = 1,
+    MG1_SNAKE_FINAL_REPORT = 0,
+};
+
+// Room door record byte 7. Scripted opening bypasses normal card access.
+enum MG1DoorAccess : int
+{
+    MG1_DOOR_ACCESS_NO_CARD = 0,
+    MG1_DOOR_ACCESS_CARD_1 = 1,
+    MG1_DOOR_ACCESS_CARD_8 = 8,
+    MG1_DOOR_ACCESS_LOCKED = 10,
+};
+
+enum MG1DoorStyle : int
+{
+    MG1_DOOR_STYLE_HORIZONTAL_INSET = 0,
+    MG1_DOOR_STYLE_RIGHT_DIAGONAL = 1,
+    MG1_DOOR_STYLE_HORIZONTAL = 2,
+    MG1_DOOR_STYLE_LEFT_DIAGONAL = 3,
+};
+
 enum MG1ItemIndex : uint8_t
 {
     MG1_ITEM_INDEX_CIGARETTES = 0,
@@ -73,8 +102,10 @@ enum MG1Scene : uint8_t
 {
     MG1_SCENE_GAMEPLAY = 0x9,
     MG1_SCENE_TITLE_MENU = 0xA,
+    MG1_SCENE_OPENING = 0xB,
     MG1_SCENE_TRANSCEIVER = 0xF,
     MG1_SCENE_MESSAGE_WINDOW = 0x10,
+    MG1_SCENE_PAUSE = 0x11,
     MG1_SCENE_ENDING = 0x15,
     MG1_SCENE_RESULTS = 0x16,
 };
@@ -84,4 +115,14 @@ enum MG1AlertPhase : uint8_t
     MG1_ALERT_PHASE_NONE = 0,
     MG1_ALERT_PHASE_ALERT = 1,
     MG1_ALERT_PHASE_REINFORCEMENTS = 2,
+};
+
+enum MG1SpriteSheet : int
+{
+    MG1_SPRITE_SHEET_OPENING = 50,
+};
+
+enum MG1DrawLayer : int
+{
+    MG1_LAYER_COMPOSITE = 9,
 };

@@ -1,5 +1,15 @@
 #pragma once
 
+namespace MG1_LinkVarBuf
+{
+    struct DrawLayer;
+}
+
+namespace MG2_LinkVarBuf
+{
+    struct DrawLayer;
+}
+
 // One entry of a stage chara table (chara.h CHARA_TABLE)
 struct CHARA
 {
@@ -10,6 +20,9 @@ static_assert(sizeof(CHARA) == 0x10);
 
 namespace Shared_Gamefuncs
 {
+    using GetLanguage_t = int(__fastcall*)();
+    inline GetLanguage_t pfnGetLanguage = nullptr;
+
     void HookFuncs();
     inline bool StartInDebugMode = false;
     inline int  DevMenuHotkey = 0;
@@ -76,8 +89,47 @@ namespace MGS2_GameFuncs
 
 
 
+namespace MG_Gamefuncs
+{
+    using SetFont_t = void(__fastcall*)(int nFont, uintptr_t hGlyphs, uintptr_t hKanji, int nHeight);
+    using DrawText_t = void(__fastcall*)(uint32_t* pFrame, int* pText);
+    using ComposeTextLayer_t = void(__fastcall*)(int nDrawText);
+    using MeasureTextFont_t = unsigned int(__fastcall*)(char* pszText, int nStart, int nLength, int nFont);
+    using UploadTexture_t = int64_t(__fastcall*)(void* pTexture, uint32_t* pPixels);
+}
+
 namespace MG1_Gamefuncs
 {
+    using GetChunkEntryData_t = const uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
+    using GetChunkEntrySize_t = uint32_t(__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
+
+    using SceneTick_t = void(__fastcall*)();
+    inline SceneTick_t pfnSceneTick = nullptr;
+
+    using ShowMessage_t = void(__fastcall*)(int nChunk, int nRecord, int nAutoAdvance, int nReturnScene, int nScriptSlot);
+    inline ShowMessage_t pfnShowMessage = nullptr;
+    using BlitImage_t = void(__fastcall*)(int nLayer, const MG1_LinkVarBuf::DrawLayer* pImage, const int* pSourceRect, int nX, int nY);
+    inline BlitImage_t pfnBlitImage = nullptr;
+
+    using GotoStage_t = void(__fastcall*)(int nStage, int nRoom);
+    inline GotoStage_t pfnGotoStage = nullptr;
+    using SwitchScene_t = void(__fastcall*)();
+    inline SwitchScene_t pfnSwitchScene = nullptr;
+
+    using SetFont_t = MG_Gamefuncs::SetFont_t;
+    inline SetFont_t pfnSetFont = nullptr;
+
+    using DrawTextSlot_t = MG_Gamefuncs::DrawText_t;
+    inline DrawTextSlot_t pfnDrawTextSlot = nullptr;
+    using ComposeTextLayer_t = MG_Gamefuncs::ComposeTextLayer_t;
+    inline ComposeTextLayer_t pfnComposeTextLayer = nullptr;
+    using MeasureTextFont_t = MG_Gamefuncs::MeasureTextFont_t;
+    inline MeasureTextFont_t pfnMeasureTextFont = nullptr;
+    using UploadTexture_t = MG_Gamefuncs::UploadTexture_t;
+    inline UploadTexture_t pfnUploadTexture = nullptr;
+
     using TestFlag_t = int(__fastcall*)(int flag);
     inline TestFlag_t TestFlag = nullptr;   // equiv of gcl varbuf
 
@@ -88,10 +140,94 @@ namespace MG1_Gamefuncs
 
 
 
+namespace MG2_LinkVarBuf
+{
+    struct EngineState;
+    struct ObjectPosition;
+    struct Sprite;
+}
+
 namespace MG2_Gamefuncs
 {
+    using Random_t = unsigned int(__fastcall*)(unsigned int nLimit);
+    inline Random_t pfnRandom = nullptr;
+
+    using TestFlag_t = int(__fastcall*)(int nFlag);
+    inline TestFlag_t pfnTestFlag = nullptr;
+
+    using SceneTick_t = void(__fastcall*)();
+    inline SceneTick_t pfnSceneTick = nullptr;
+
+    using CompanionFollow_t = void(__fastcall*)();
+    inline CompanionFollow_t pfnResetCompanionFollow = nullptr;
+    inline CompanionFollow_t pfnUpdateCompanionFollow = nullptr;
+    using GetHandleData_t = void* (__fastcall*)(uintptr_t hData);
+    inline GetHandleData_t pfnGetHandleData = nullptr;
+
+    using GetEngineState_t = MG2_LinkVarBuf::EngineState* (__fastcall*)();
+    inline GetEngineState_t pfnGetEngineState = nullptr;
+    using GetPlayer_t = MG2_LinkVarBuf::ObjectPosition* (__fastcall*)();
+    inline GetPlayer_t pfnGetPlayer = nullptr;
+    using GetObjectSprite_t = MG2_LinkVarBuf::Sprite* (__fastcall*)(void* pObject);
+    inline GetObjectSprite_t pfnGetObjectSprite = nullptr;
+    using PrepareRoomEntry_t = void(__fastcall*)(void* pPlayer, MG2_LinkVarBuf::EngineState* pState, MG2_LinkVarBuf::Sprite* pSprite, int nEntrance, int nKeepSnakeRoom, unsigned int nEntryMode);
+    inline PrepareRoomEntry_t pfnPrepareRoomEntry = nullptr;
+    using RequestScene_t = void(__fastcall*)(int nScene);
+    inline RequestScene_t pfnRequestScene = nullptr;
+    using RunSceneTransition_t = void(__fastcall*)();
+    inline RunSceneTransition_t pfnRunSceneTransition = nullptr;
+    using IsBossSurvival_t = int(__fastcall*)();
+    inline IsBossSurvival_t pfnIsBossSurvival = nullptr;
+    using IsGameplayActive_t = int(__fastcall*)();
+    inline IsGameplayActive_t pfnIsGameplayActive = nullptr;
+
+    using LoadImageBlob_t = void(__fastcall*)(void* pImageSlot, const uint8_t* pBlob);
+    inline LoadImageBlob_t pfnLoadImageBlob = nullptr;
+
+    using SetFont_t = MG_Gamefuncs::SetFont_t;
+    inline SetFont_t pfnSetFont = nullptr;
+
+    using DrawTextItem_t = MG_Gamefuncs::DrawText_t;
+    inline DrawTextItem_t pfnDrawTextItem = nullptr;
+
+    using ComposeTextLayer_t = MG_Gamefuncs::ComposeTextLayer_t;
+    inline ComposeTextLayer_t pfnComposeTextLayer = nullptr;
+
+    using MeasureTextFont_t = MG_Gamefuncs::MeasureTextFont_t;
+    inline MeasureTextFont_t pfnMeasureTextFont = nullptr;
+
+    using UploadTexture_t = MG_Gamefuncs::UploadTexture_t;
+    inline UploadTexture_t pfnUploadTexture = nullptr;
+
     using AVS_GetLocalizedString_t = const char* (__fastcall*)(unsigned int nBlock, int nIndex, int* pLength);
     inline AVS_GetLocalizedString_t pfnAVS_GetLocalizedString = nullptr;
+
+    // Message typewriter: pArgs[0] = block, pArgs[1] = index.
+    using DrawMessageText_t = void(__fastcall*)(unsigned int* pArgs, int nMode);
+    inline DrawMessageText_t pfnDrawMessageText = nullptr;
+
+    using ScriptRun_t = void(__fastcall*)(int* pScript);
+    inline ScriptRun_t pfnScriptRun = nullptr;
+    using DrawSprites_t = void(__fastcall*)();
+    inline DrawSprites_t pfnDrawSprites = nullptr;
+    using DrawSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nMode);
+    inline DrawSprite_t pfnDrawSprite = nullptr;
+    using InitSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nSheet, int nAnimation, int nTrack, int nAnimating, int nDrawOrder, int nX, int nY);
+    inline InitSprite_t pfnInitSprite = nullptr;
+    using BuildDoors_t = void(__fastcall*)();
+    inline BuildDoors_t pfnBuildDoors = nullptr;
+    using GetChunkEntryData_t = uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
+    using GetChunkEntrySize_t = unsigned int(__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
+    using GetLayerImage_t = MG2_LinkVarBuf::DrawLayer*(__fastcall*)(int nLayer);
+    inline GetLayerImage_t pfnGetLayerImage = nullptr;
+    using LayerFillRect_t = void(__fastcall*)(int nLayer, const int* pRectangle);
+    inline LayerFillRect_t pfnLayerFillRect = nullptr;
+    using SetDrawColor_t = void(__fastcall*)(int nLayer, int nColour);
+    inline SetDrawColor_t pfnSetDrawColor = nullptr;
+    using RequestSound_t = void(__fastcall*)(int nSound);
+    inline RequestSound_t pfnRequestSound = nullptr;
 
     using ScriptCommand_t = int(__fastcall*)(int* pScript, uint8_t nCommand, int* pArgs, char* pStrings, int nCount);
     inline ScriptCommand_t pfnScriptCommand = nullptr;

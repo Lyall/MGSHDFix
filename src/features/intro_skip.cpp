@@ -36,6 +36,48 @@ void IntroSkip::Initialize() const
 
 }
 
+namespace
+{
+
+    void SkipBootLogos(uint8_t* pFirstLogo, const char* szLabel)
+    {
+        constexpr uint8_t anOriginal[] = { 0xFF, 0xC2 };
+        constexpr uint8_t anSkip[] = { 0xB2, 0x04 };
+        if (!pFirstLogo)
+        {
+            spdlog::error("{}: Skip Intro Logos : Missing boot logo sequence. Skipping.", szLabel);
+            return;
+        }
+        if (memcmp(pFirstLogo, anOriginal, sizeof(anOriginal)) != 0)
+        {
+            spdlog::error("{}: Skip Intro Logos : Unexpected boot logo bytes. Skipping.", szLabel);
+            return;
+        }
+        Memory::PatchBytes(reinterpret_cast<uintptr_t>(pFirstLogo), reinterpret_cast<const char*>(anSkip), sizeof(anSkip));
+        spdlog::info("{}: Skip Intro Logos : Boot logos patched.", szLabel);
+    }
+}
+
+void IntroSkip::InitializeMG1() const
+{
+    if (!isEnabled)
+    {
+        return;
+    }
+    //TickSplash+39
+    SkipBootLogos(Memory::PatternScan(mg1Module, "FF C2 89 15 ?? ?? ?? ?? 83 FA", "MG1: Skip Intro Logos : TickSplash()+0x39 : first logo index"), "MG1");
+}
+
+void IntroSkip::InitializeMG2() const
+{
+    if (!isEnabled)
+    {
+        return;
+    }
+    //TickSplash+39
+    SkipBootLogos(Memory::PatternScan(mg2Module, "FF C2 89 15 ?? ?? ?? ?? 83 FA ?? 75", "MG2: Skip Intro Logos : TickSplash()+0x39 : first logo index"), "MG2");
+}
+
 /*
 void IntroSkip::Initialize() const
 {

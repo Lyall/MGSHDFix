@@ -33,12 +33,14 @@
 #include <random>
 #include <d3dcompiler.h>
 #include <d3d11.h>
+#include <d3d11_1.h>
 #include <dxgi.h>
 #include <wrl/client.h>
 #include <initializer_list>
 #include <functional>
 #include <optional>
 #include <array>
+#include <span>
 #include <atomic>
 #include <unordered_set>
 #include <unordered_map>
@@ -77,3 +79,5 @@
 #include <hidpi.h>
 #include <timeapi.h>
 #include <smmintrin.h>
+
+#include <nlohmann/json.hpp>

@@ -1,5 +1,6 @@
 // ReSharper disable CppClangTidyReadabilityUseConcisePreprocessorDirectives
 #include "stdafx.h"
+#include "mg_developer_menu.hpp"
 
 #include "common.hpp"
 #include "logging.hpp"
@@ -7,6 +8,7 @@
 #include "game_funcs.hpp"
 
 #include "gamevars.hpp"
+#include "mg2_linkvarbuf.hpp"
 #include "mgs2_linkvarbuf.hpp"
 #include "mgs3_linkvarbuf.hpp"
 #include "input_handler.hpp"
@@ -277,13 +279,118 @@ void MG1_Gamefuncs::HookGameFuncs()
 
 void MG1_Gamefuncs::HookDllGameFuncs()
 {
+    //ShowMessage+3E
+    uint8_t* pChunkDataCall = Memory::PatternScan(mg1Module, "E8 ?? ?? ?? ?? 4C 8D 4C 24 ?? 44 8B C3 33 D2 48 8B C8 48 8B F0 E8 ?? ?? ?? ?? 8B 5C 24", "MG1: ShowMessage()+0x3E : GetChunkEntryData()");
+    if (pChunkDataCall)
+    {
+        uint8_t* pChunkData = Memory::ResolveCall(pChunkDataCall);
+        if (*pChunkData == 0xE9)
+        {
+            pChunkData = Memory::ResolveCall(pChunkData);
+        }
+        pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(pChunkData);
+    }
+    pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 4C 98 ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG1: GetChunkEntrySize()"));
+
+    pfnShowMessage = reinterpret_cast<ShowMessage_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 ED", "MG1: ShowMessage()"));
+    pfnBlitImage = reinterpret_cast<BlitImage_t>(Memory::PatternScan(mg1Module, "40 53 56 57 41 54", "MG1: BlitImage()"));
+
+    if (MG_DeveloperMenu::bEnabled)
+    {
+        pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg1Module, "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 45 33 ED", "MG1: sub_18001B2A0() : scene tick"));
+        pfnGotoStage = reinterpret_cast<GotoStage_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 8B D9 83 F9", "MG1: GotoStage()"));
+        pfnSwitchScene = reinterpret_cast<SwitchScene_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00", "MG1: SwitchScene()"));
+    }
+
+    pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 4C 89 44 24", "MG1: SetFont()"));
+    pfnDrawTextSlot = reinterpret_cast<DrawTextSlot_t>(Memory::PatternScan(mg1Module, "40 53 55 56 57 41 55", "MG1: DrawTextSlot()"));
+    pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG1: ComposeFrame()"));
+    pfnMeasureTextFont = reinterpret_cast<MeasureTextFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 4D 63 F1", "MG1: MeasureTextFont()"));
+    pfnUploadTexture = reinterpret_cast<UploadTexture_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 33 C0 4C 8D 44 24", "MG1: sub_140025F80() : upload texture"));
+
     TestFlag = reinterpret_cast<TestFlag_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 48 63 D9 E8 ?? ?? ?? ?? 4C 8B C3", "MG1: TestFlag()"));
 }
 
 
 void MG2_Gamefuncs::HookDllGameFuncs()
 {
+    uint8_t* pGetEngineState = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? BA ?? ?? ?? ?? 8B 80", "MG2: BuildDoors()+0x27 : GetEngineState() call");
+    if (pGetEngineState)
+    {
+        pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pGetEngineState));
+    }
+
+    MAKE_HOOK_MID(mg2Module, "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 20", "MG2: Level Transition : GotoRoom()+0xB6", {
+        GameVars::OnLevelTransition();
+    });
+
+    if (MG_DeveloperMenu::bEnabled)
+    {
+        pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 89 5C 24", "MG2: sub_180025A90() : scene tick"));
+        uint8_t* pGetPlayer = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 48 8B D8 E8 ?? ?? ?? ?? 48 8B CB", "MG2: TickDoorTrigger()+0x2D : GetPlayer() call");
+        if (pGetPlayer)
+        {
+            pfnGetPlayer = reinterpret_cast<GetPlayer_t>(Memory::ResolveCall(pGetPlayer));
+        }
+        pfnPrepareRoomEntry = reinterpret_cast<PrepareRoomEntry_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 45 33 F6", "MG2: sub_18001B6E0() : prepare room entry"));
+        pfnRequestScene = reinterpret_cast<RequestScene_t>(Memory::PatternScan(mg2Module, "83 3D ?? ?? ?? ?? 00 74 ?? 83 F9", "MG2: RequestScene()"));
+        pfnRunSceneTransition = reinterpret_cast<RunSceneTransition_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 83 3D ?? ?? ?? ?? 00 0F 84", "MG2: RunSceneTransition()"));
+        pfnIsGameplayActive = reinterpret_cast<IsGameplayActive_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 83 3D ?? ?? ?? ?? 00 75", "MG2: IsGameplayActive()"));
+    }
+
+    //TestFlag
+    pfnTestFlag = reinterpret_cast<TestFlag_t>(Memory::PatternScan(mg2Module, "8B C1 99 83 E2 ?? 03 C2 8B C8 83 E0 ?? 2B C2", "MG2: TestFlag()"));
+    pfnIsBossSurvival = reinterpret_cast<IsBossSurvival_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: IsBossSurvival()"));
+
+    pfnUpdateCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "40 53 56 57 41 55 41 57 48 83 EC ?? 48 8B 0D", "MG2: UpdateCompanionFollow()"));
+    pfnResetCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? E8 ?? ?? ?? ?? 48 8B F0", "MG2: ResetCompanionFollow()"));
+    if (pfnUpdateCompanionFollow)
+    {
+        auto* pUpdate = reinterpret_cast<uint8_t*>(pfnUpdateCompanionFollow);
+        MG2_LinkVarBuf::pCompanionList = reinterpret_cast<uintptr_t*>(Memory::GetRipRelativeAddress(pUpdate + 0xC, 3, 7));
+        pfnGetHandleData = reinterpret_cast<GetHandleData_t>(Memory::ResolveCall(pUpdate + 0x13));
+        if (!pfnGetPlayer)
+        {
+            pfnGetPlayer = reinterpret_cast<GetPlayer_t>(Memory::ResolveCall(pUpdate + 0x1B));
+        }
+        if (!pfnGetEngineState)
+        {
+            pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pUpdate + 0x23));
+        }
+    }
+
+    pfnLoadImageBlob = reinterpret_cast<LoadImageBlob_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 4C 8B C2", "MG2: LoadImageBlob()"));
+
+    pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 4C 89 44 24", "MG2: RegisterFont()"));
+    pfnDrawTextItem = reinterpret_cast<DrawTextItem_t>(Memory::PatternScan(mg2Module, "40 53 55 56 57 41 55 48 81 EC", "MG2: DrawTextItem()"));
+    pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG2: sub_180024460() : compose text layer"));
+    pfnMeasureTextFont = reinterpret_cast<MeasureTextFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 4D 63 F1", "MG2: sub_1800242F0() : measure text"));
+    pfnUploadTexture = reinterpret_cast<UploadTexture_t>(Memory::PatternScan(baseModule, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 33 C0 4C 8D 44 24", "MG2: sub_140025F80() : upload texture"));
+
     pfnAVS_GetLocalizedString = reinterpret_cast<AVS_GetLocalizedString_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B FA", "MG2: AVS_GetLocalizedString()"));
+    pfnDrawMessageText = reinterpret_cast<DrawMessageText_t>(Memory::PatternScan(mg2Module, "4C 8B DC 53 57 41 55", "MG2: DrawMessageText()"));
+    pfnRandom = reinterpret_cast<Random_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B D9 FF 15", "MG2: Random()"));
+    pfnScriptRun = reinterpret_cast<ScriptRun_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B D9", "MG2: ScriptRun()"));
+    uint8_t* pGetObjectSprite = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 83 BD ?? ?? ?? ?? 00 4C 8B F8", "MG2: TickDoorTrigger()+0x40 : GetObjectSprite() call");
+    if (pGetObjectSprite)
+    {
+        pfnGetObjectSprite = reinterpret_cast<GetObjectSprite_t>(Memory::ResolveCall(pGetObjectSprite));
+    }
+    pfnDrawSprite = reinterpret_cast<DrawSprite_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 55", "MG2: DrawSprite()"));
+    pfnInitSprite = reinterpret_cast<InitSprite_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B 44 24", "MG2: InitSprite()"));
+    pfnBuildDoors = reinterpret_cast<BuildDoors_t>(Memory::PatternScan(mg2Module, "40 55 53 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05", "MG2: BuildDoors()"));
+    pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: GetChunkEntryData()"));
+    pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG2: GetChunkEntrySize()"));
+    pfnDrawSprites = reinterpret_cast<DrawSprites_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? E8", "MG2: DrawSprites()"));
+    pfnGetLayerImage = reinterpret_cast<GetLayerImage_t>(Memory::PatternScan(mg2Module, "48 63 C1 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? C3", "MG2: GetLayerImage()"));
+    pfnLayerFillRect = reinterpret_cast<LayerFillRect_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 41 54", "MG2: LayerFillRect()"));
+    pfnRequestSound = reinterpret_cast<RequestSound_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 57 48 83 EC ?? 48 63 F9", "MG2: RequestSound()"));
+    uint8_t* pSetDrawColor = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 8B 74 24", "MG2: DrawRadar()+0x34B : SetDrawColor() call");
+    if (pSetDrawColor)
+    {
+        pfnSetDrawColor = reinterpret_cast<SetDrawColor_t>(Memory::ResolveCall(pSetDrawColor));
+    }
+
     pfnScriptCommand = reinterpret_cast<ScriptCommand_t>(Memory::PatternScan(mg2Module, "40 55 53 56", "MG2: ScriptCommand()"));
 
     HasItem = reinterpret_cast<HasItem_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B D9 83 F9 ?? 48 8B 0D ?? ?? ?? ?? 7D ?? E8 ?? ?? ?? ?? 8B CB", "MG2: HasItem()"));
@@ -360,6 +467,8 @@ void MGS3_Gamefuncs::HookGameFuncs()
 
 void Shared_Gamefuncs::HookFuncs()
 {
+    pfnGetLanguage = reinterpret_cast<GetLanguage_t>(GetProcAddress(engineModule, "BP_COsContext_GetLanguage_MGS"));
+
     uint8_t* GM_GetArea_scan = Memory::PatternScan(baseModule, (eGameType & MGS2) ? "E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 4C 8D 0D ?? ?? ?? ?? 4C 8B D0" : "E8 ?? ?? ?? ?? 33 C9 4C 8D 05 ?? ?? ?? ?? 0F 1F 40", "GM_GetArea call site");
     Shared_Gamefuncs::GM_GetArea = reinterpret_cast<Shared_Gamefuncs::GM_GetArea_t*>(Memory::ResolveCall(GM_GetArea_scan));
     spdlog::info("Shared_GameFuncs: GM_GetArea address is {:s}+{:X}", sExeName.c_str(), (uintptr_t)Shared_Gamefuncs::GM_GetArea - (uintptr_t)baseModule);

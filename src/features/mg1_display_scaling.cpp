@@ -4,6 +4,8 @@
 #include "mg1_display_scaling.hpp"
 #include "d3d11_api.hpp"
 #include "common.hpp"
+#include "gamevars.hpp"
+#include "color_correction.hpp"
 #include "custom_resolution_and_borderless.hpp"
 #include "input_handler.hpp"
 
@@ -13,6 +15,7 @@ namespace
 {
 
     bool bEnabled = true;
+    bool s_bLoadingSpinnerDrawn = false;
 
     //4:3 = scaleX = 1.10416667f x 1.0f;
     //4:3 fullscreened = 1.25f x 1.13207547f
@@ -30,7 +33,7 @@ namespace
         float Display_PosY;
         float BufferWidth;
         float BufferHeight;
-        float pad0;
+        float fApplyColorCorrection;
         float pad1;
     }
 
@@ -68,7 +71,12 @@ namespace
 
         const float2 sampleUV = SumUV.rg + pivot.rg;
         const bool   inBounds = all(sampleUV == saturate(sampleUV));
-        return inBounds ? BackBufferTex.Sample(BackBufferSmp, sampleUV) : float4(0, 0, 0, 1);
+        float4 color = inBounds ? BackBufferTex.Sample(BackBufferSmp, sampleUV) : float4(0, 0, 0, 1);
+        if (fApplyColorCorrection != 0.0)
+        {
+            color = float4(ApplyColorCorrection(color.rgb), 1.0);
+        }
+        return color;
     }
     )";
 
@@ -84,6 +92,9 @@ namespace
     ComPtr<ID3D11Texture2D>          copyTex;
     ComPtr<ID3D11ShaderResourceView> copySRV;
 
+    ComPtr<ID3D11Texture2D> s_pBackBuffer;
+    ComPtr<ID3D11RenderTargetView> s_pRenderTargetView;
+    DXGI_FORMAT s_eCopyFormat = DXGI_FORMAT_UNKNOWN;
     bool bShaderLoaded = false;
     UINT copyWidth     = 0;
     UINT copyHeight    = 0;
@@ -96,14 +107,17 @@ namespace
         float posY;
         float bufferWidth;
         float bufferHeight;
-        float pad0;
+        float fApplyColorCorrection;
         float pad1;
     };
 
-    void UpdateCB(ID3D11DeviceContext* ctx, float w, float h)
+    bool UpdateCB(ID3D11DeviceContext* ctx, float w, float h)
     {
         D3D11_MAPPED_SUBRESOURCE m;
-        ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m);
+        if (FAILED(ctx->Map(cb.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &m)))
+        {
+            return false;
+        }
         auto* d        = static_cast<CBLayout*>(m.pData);
         d->scaleX      = scaleX;
         d->scaleY      = scaleY;
@@ -111,13 +125,15 @@ namespace
         d->posY        = posY;
         d->bufferWidth  = w;
         d->bufferHeight = h;
-        d->pad0 = d->pad1 = 0.f;
+        d->fApplyColorCorrection = ColorCorrection::bShaderLoaded ? 1.f : 0.f;
+        d->pad1 = 0.f;
         ctx->Unmap(cb.Get(), 0);
+        return true;
     }
 
     bool EnsureCopyTex(ID3D11Device* dev, UINT w, UINT h, DXGI_FORMAT fmt)
     {
-        if (copyTex && w == copyWidth && h == copyHeight)
+        if (copyTex && w == copyWidth && h == copyHeight && fmt == s_eCopyFormat)
             return true;
 
         copyTex.Reset();
@@ -151,6 +167,7 @@ namespace
             return false;
         }
 
+        s_eCopyFormat = fmt;
         copyWidth  = w;
         copyHeight = h;
         return true;
@@ -177,7 +194,8 @@ void MG1_DisplayScaling::Setup()
 
     ComPtr<ID3DBlob> err;
 
-    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(kDisplayModShader, strlen(kDisplayModShader), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    const std::string strShader = std::string(ColorCorrection::GetShaderSource()) + kDisplayModShader;
+    HRESULT hr = g_D3D11Hooks.D3DCompileFunc(strShader.data(), strShader.size(), nullptr, nullptr, nullptr, "VS", "vs_5_0", 0, 0, vsBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("MG1_DisplayScaling: Failed to compile vertex shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
@@ -186,7 +204,7 @@ void MG1_DisplayScaling::Setup()
 
     err.Reset();
 
-    hr = g_D3D11Hooks.D3DCompileFunc(kDisplayModShader, strlen(kDisplayModShader), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
+    hr = g_D3D11Hooks.D3DCompileFunc(strShader.data(), strShader.size(), nullptr, nullptr, nullptr, "PS", "ps_5_0", 0, 0, psBlob.ReleaseAndGetAddressOf(), err.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         spdlog::error("MG1_DisplayScaling: Failed to compile pixel shader: {}", err ? static_cast<const char*>(err->GetBufferPointer()) : "Unknown error");
@@ -324,31 +342,67 @@ void MG1_DisplayScaling::Init()
                                       */
 }
 
-void MG1_DisplayScaling::Draw(IDXGISwapChain* swap)
+void MG1_DisplayScaling::OnLoadingSpinnerDraw()
+{
+    s_bLoadingSpinnerDrawn = true;
+}
+
+void MG1_DisplayScaling::ResetRenderTarget()
+{
+    s_pRenderTargetView.Reset();
+    s_pBackBuffer.Reset();
+}
+
+bool MG1_DisplayScaling::Draw(IDXGISwapChain* swap)
 {
     if (!bShaderLoaded)
-        return;
+    {
+        return false;
+    }
+
+    if (s_bLoadingSpinnerDrawn)
+    {
+        s_bLoadingSpinnerDrawn = false;
+        return false;
+    }
+
+    if (g_GameVars.MGIsSaveLoadVisible())
+    {
+        return false;
+    }
 
     auto* ctx = g_D3D11Hooks.d3dDeviceContext.Get();
     auto* dev = g_D3D11Hooks.d3dDevice.Get();
 
     ComPtr<ID3D11Texture2D> backbuf;
-    swap->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backbuf.GetAddressOf());
+    if (FAILED(swap->GetBuffer(0, IID_PPV_ARGS(backbuf.GetAddressOf()))))
+    {
+        return false;
+    }
+    if (s_pBackBuffer.Get() != backbuf.Get())
+    {
+        ResetRenderTarget();
+        if (FAILED(dev->CreateRenderTargetView(backbuf.Get(), nullptr, s_pRenderTargetView.GetAddressOf())))
+        {
+            return false;
+        }
+        s_pBackBuffer = backbuf;
+    }
 
     D3D11_TEXTURE2D_DESC bbDesc;
     backbuf->GetDesc(&bbDesc);
 
     if (!EnsureCopyTex(dev, bbDesc.Width, bbDesc.Height, bbDesc.Format))
-        return;
+        return false;
 
     ctx->CopyResource(copyTex.Get(), backbuf.Get());
 
-    ComPtr<ID3D11RenderTargetView> rtv;
-    dev->CreateRenderTargetView(backbuf.Get(), nullptr, rtv.GetAddressOf());
-
     D3D11_VIEWPORT vp = { 0, 0, (float)bbDesc.Width, (float)bbDesc.Height, 0.f, 1.f };
 
-    UpdateCB(ctx, (float)bbDesc.Width, (float)bbDesc.Height);
+    if (!UpdateCB(ctx, (float)bbDesc.Width, (float)bbDesc.Height))
+    {
+        return false;
+    }
 
     // Save state
     ID3D11RenderTargetView*   oldRTV[8]  = {};
@@ -395,7 +449,7 @@ void MG1_DisplayScaling::Draw(IDXGISwapChain* swap)
     ctx->RSSetViewports(1, &vp);
     ctx->OMSetDepthStencilState(dss.Get(), 0);
     ctx->OMSetBlendState(blendOpaque.Get(), nullptr, 0xFFFFFFFF);
-    ctx->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
+    ctx->OMSetRenderTargets(1, s_pRenderTargetView.GetAddressOf(), nullptr);
 
     ctx->Draw(3, 0);
 
@@ -427,4 +481,5 @@ void MG1_DisplayScaling::Draw(IDXGISwapChain* swap)
     if (oldSmp[0])  oldSmp[0]->Release();
     if (oldIL)      oldIL->Release();
     if (oldVB[0])   oldVB[0]->Release();
+    return true;
 }

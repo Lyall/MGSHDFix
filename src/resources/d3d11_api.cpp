@@ -27,6 +27,8 @@
 #include "mgs2_gas_haze.hpp"
 #include "d3d11_text_overlay.hpp"
 #include "mg1_display_scaling.hpp"
+#include "mg_vector_font.hpp"
+#include "mg1_opening.hpp"
 #include "mgs2_crossfade.hpp"
 #include "photo_camera.hpp"
 #include "mgs3_crossfade_capture.hpp"
@@ -416,6 +418,11 @@ namespace
 
         }
 
+        MG1_Opening::OnPresent();
+        MG_VectorFont::OnPresent();
+
+        bool bColorCorrectionApplied = false;
+
         //MGS2_EffectSpeedFix.Tick();
         g_InputHandler.Update();
 
@@ -463,10 +470,10 @@ namespace
         }
         else if (eGameType & MG)
         {
-            MG1_DisplayScaling::Draw(pSwapChain);
+            bColorCorrectionApplied = MG1_DisplayScaling::Draw(pSwapChain) && ColorCorrection::bShaderLoaded;
         }
 
-        if (!((eGameType & MGS3) && SMAA_AA::bDrewThisFrame && SMAA_AA::bApplyGammaCurve))
+        if (!bColorCorrectionApplied && !((eGameType & MGS3) && SMAA_AA::bDrewThisFrame && SMAA_AA::bApplyGammaCurve))
         {
             ColorCorrection::Draw(pSwapChain);
         }
@@ -486,6 +493,8 @@ namespace
 
     HRESULT __stdcall HookedResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
     {
+        MG1_DisplayScaling::ResetRenderTarget();
+        ColorCorrection::ResetRenderTarget();
         HRESULT result = ResizeBuffersHook.call<HRESULT>(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 
         if (SUCCEEDED(result))

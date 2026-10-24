@@ -2,6 +2,7 @@
 
 namespace D3D11TextOverlay
 {
+    float GetTextWidth(const char* pszText);
     void Setup();
     void Init();
     void Tick();

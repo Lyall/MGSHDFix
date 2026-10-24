@@ -1,5 +1,59 @@
 #pragma once
 
+enum MG2ContactSlot : int
+{
+    MG2_CONTACT_SLOT_FIRST = 1,
+    MG2_CONTACT_SLOT_CAMPBELL = 1,
+    MG2_CONTACT_SLOT_LAST = 11,
+};
+
+enum MG2DialogueBlock : int
+{
+    MG2_DIALOGUE_BLOCK_CONTACT_BASE = 2,
+    MG2_DIALOGUE_BLOCK_CAMPBELL = MG2_DIALOGUE_BLOCK_CONTACT_BASE + MG2_CONTACT_SLOT_CAMPBELL,
+};
+
+enum MG2CampbellDialogue : int
+{
+    MG2_CAMPBELL_DIALOGUE_OPENING = 32,
+};
+
+enum MG2StoryFlag : int
+{
+    MG2_FLAG_A15_R4_BRIDGE_OF_SORROW_NASTACHA_DEATH = 43,
+};
+
+enum MG2RoomCellFlags : uint16_t
+{
+    MG2_CELL_BLOCK_PLAYER = 0x1000,
+    MG2_CELL_BLOCK_ACTORS = 0x8000,
+};
+
+// Area door record byte 10; script 154 checks normal contact access.
+enum MG2DoorAccess : int
+{
+    MG2_DOOR_ACCESS_NO_CARD = 0,
+    MG2_DOOR_ACCESS_CARD_1 = 1,
+    MG2_DOOR_ACCESS_CARD_9 = 9,
+    MG2_DOOR_ACCESS_LOCKED = 10,
+    MG2_DOOR_ACCESS_ALWAYS_OPEN = 11,
+    MG2_DOOR_ACCESS_CONDITION_12 = 12,
+    MG2_DOOR_ACCESS_CONDITION_13 = 13,
+    MG2_DOOR_ACCESS_SCRIPTED = 14,
+};
+
+enum MG2PaletteEffect : int
+{
+    MG2_PALETTE_NORMAL = 0,
+    MG2_PALETTE_FADE_BLACK = 1,
+    MG2_PALETTE_FADE_WHITE = 2,
+    MG2_PALETTE_GRAYSCALE = 3,
+    MG2_PALETTE_LIGHTING = 4,
+    MG2_PALETTE_NIGHT_VISION = 5,
+    MG2_PALETTE_OUTDOOR_DARK = 6,
+    MG2_PALETTE_OUTDOOR_BRIGHT = 7,
+};
+
 enum MG2PortraitFrame : uint8_t
 {
     MG2_PORTRAIT_BIG_BOSS = 0,
@@ -20,11 +74,110 @@ enum MG2PortraitFrame : uint8_t
     MG2_PORTRAIT_NONE = 15,
 };
 
+enum MG2PortraitAnimation : int
+{
+    MG2_PORTRAIT_ANIMATION_STATIC = 0,
+};
+
+enum MG2IntroAnimation : int
+{
+    MG2_INTRO_ANIMATION_MOVIE = 1,
+};
+
+
+enum MG2IntroFrame : int
+{
+    MG2_INTRO_FRAME_RED_PORTRAITS = 188,
+};
+
+enum MG2GuardAnimation : int
+{
+    MG2_GUARD_ANIMATION_WALK_UP = 1,
+    MG2_GUARD_ANIMATION_WALK_DOWN = 3,
+    MG2_GUARD_ANIMATION_SIDEWAYS = 4,
+    MG2_GUARD_ANIMATION_CENSOR_ORB = 5,
+};
+
+enum MG2IntroPhase : int
+{
+    MG2_INTRO_PHASE_STORY = 4,
+};
+
 enum MG2Scene : uint8_t
 {
+    MG2_SCENE_LOADING = 6,
+    MG2_SCENE_INTRO = 7,
+    MG2_SCENE_PAUSE = 10,
+    MG2_SCENE_LOAD_AREA = 16,
     MG2_SCENE_GAMEPLAY = 18,
+    MG2_SCENE_FACE_TO_FACE = 19,
     MG2_SCENE_TRANSCEIVER = 20,
     MG2_SCENE_RESULTS = 25,
+};
+
+enum MG2Sound : int
+{
+    MG2_SOUND_BRIDGE_EXPLOSION = 68,
+    MG2_SOUND_LIGHTER = 76,
+    MG2_SOUND_ELEVATOR_ARRIVAL = 97,
+    MG2_SOUND_METAL_GEAR_REVEAL = 117,
+};
+
+enum MG2DrawLayer : int
+{
+    MG2_LAYER_ROOM = 0,
+    MG2_LAYER_SPRITES = 9,
+};
+
+enum MG2ElevatorCar : int
+{
+    MG2_ELEVATOR_CAR_1 = 0,
+    MG2_ELEVATOR_CAR_2 = 1,
+    MG2_ELEVATOR_CAR_3 = 2,
+    MG2_ELEVATOR_CAR_4 = 3,
+    MG2_ELEVATOR_CAR_5 = 4,
+    MG2_ELEVATOR_CAR_6 = 5,
+    MG2_ELEVATOR_CAR_7 = 6,
+    MG2_ELEVATOR_CAR_8 = 7,
+    MG2_ELEVATOR_CAR_9 = 8,
+    MG2_ELEVATOR_CAR_10 = 9,
+};
+
+// Floor labels use the displayed floor number + 2; basements occupy 0 -> 2.
+enum MG2ElevatorFloor : int
+{
+    MG2_ELEVATOR_FLOOR_B3 = 0,
+    MG2_ELEVATOR_FLOOR_B2 = 1,
+    MG2_ELEVATOR_FLOOR_B1 = 2,
+    MG2_ELEVATOR_FLOOR_1F = 3,
+    MG2_ELEVATOR_FLOOR_2F = 4,
+    MG2_ELEVATOR_FLOOR_3F = 5,
+    MG2_ELEVATOR_FLOOR_4F = 6,
+    MG2_ELEVATOR_FLOOR_10F = 12,
+    MG2_ELEVATOR_FLOOR_19F = 21,
+    MG2_ELEVATOR_FLOOR_20F = 22,
+    MG2_ELEVATOR_FLOOR_30F = 32,
+};
+
+enum MG2ElevatorState : int
+{
+    MG2_ELEVATOR_IDLE = 0,
+    MG2_ELEVATOR_CALLED = 1,
+    MG2_ELEVATOR_OPENING = 2,
+    MG2_ELEVATOR_OPEN = 3,
+    MG2_ELEVATOR_CLOSING = 4,
+    MG2_ELEVATOR_DEPARTING = 5,
+    MG2_ELEVATOR_MOVING = 6,
+    MG2_ELEVATOR_ARRIVING = 7,
+};
+
+enum MG2ScriptId : int
+{
+    MG2_SCRIPT_REST_STOP = 14,
+    MG2_SCRIPT_BRIDGE = 15,
+    MG2_SCRIPT_CIGARETTES = 133,
+    MG2_SCRIPT_ELEVATORS = 135,
+    MG2_SCRIPT_GAMEPLAY = 136,
 };
 
 enum MG2AlertMode : uint8_t
@@ -37,6 +190,7 @@ enum MG2AlertMode : uint8_t
 // ScriptCommand command bytes (don't confuse with VM opcodes - they're seperate)
 enum MG2ScriptCommand : uint8_t
 {
+    MG2_COMMAND_YIELD = 0x00,
     MG2_COMMAND_MESSAGE_TEXT = 0x06,
     MG2_COMMAND_SCENE = 0x33,
     MG2_COMMAND_SPRITE_SET = 0x66,
@@ -45,20 +199,76 @@ enum MG2ScriptCommand : uint8_t
 // Word indices in the ScriptRun interpreter state.
 enum MG2ScriptStateWord : int
 {
+    MG2_SCRIPT_SLOT = 2,
     MG2_SCRIPT_PROG_COUNT = 4,
     MG2_SCRIPT_INSTRUCTION_PROG_COUNT = 7,
 };
 
+enum MG2CompanionAnimation : int
+{
+    MG2_COMPANION_ANIMATION_SEATED = 8,
+};
+
 enum MG2SpriteSheet : int
 {
+    MG2_SPRITE_SHEET_ENDING_CAST = 16,
+    MG2_SPRITE_SHEET_BRIDGE_GUARDS = 18,
     MG2_SPRITE_SHEET_GUARD = 20,
     MG2_SPRITE_SHEET_PORTRAITS = 25,
+    MG2_SPRITE_SHEET_GUSTAVA = 29,
+    MG2_SPRITE_SHEET_MADNAR = 30,
+    MG2_SPRITE_SHEET_INTRO = 34,
+    MG2_SPRITE_SHEET_DOORS = 35,
+    MG2_SPRITE_SHEET_CIGARETTE_SMOKE = 36,
+    MG2_SPRITE_SHEET_SNAKE = 37,
     MG2_SPRITE_SHEET_TRANSCEIVER = 38,
+    MG2_SPRITE_SHEET_ROOM_OBJECTS = 41,
+};
+
+enum MG2PlayerAction : int
+{
+    MG2_PLAYER_ACTION_WEAPON = 2,
+};
+
+enum MG2SnakeMode : int
+{
+    MG2_SNAKE_MODE_LIGHTER = 12,
+};
+
+enum MG2Facing : int
+{
+    MG2_FACING_UP = 0,
+    MG2_FACING_RIGHT = 1,
+    MG2_FACING_DOWN = 2,
+    MG2_FACING_LEFT = 3,
+};
+
+enum MG2SnakeAnimation : int
+{
+    MG2_SNAKE_ANIM_SMOKING_UP = 2,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_UP = 5,
+    MG2_SNAKE_ANIM_SMOKING_LEFT = 12,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_LEFT = 15,
+    MG2_SNAKE_ANIM_SMOKING_DOWN = 22,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_DOWN = 25,
+    MG2_SNAKE_ANIM_SMOKING_RIGHT = 32,
+    MG2_SNAKE_ANIM_SMOKING_ARMED_RIGHT = 35,
+    MG2_SNAKE_ANIM_LIGHTER_UP = 47,
+    MG2_SNAKE_ANIM_LIGHTER_RIGHT = 50,
+    MG2_SNAKE_ANIM_LIGHTER_DOWN = 53,
+    MG2_SNAKE_ANIM_LIGHTER_LEFT = 56,
+};
+
+enum MG2DoorAnimation : int
+{
+    MG2_DOOR_ANIM_OUTDOOR_OPEN = 22,
+    MG2_DOOR_ANIM_OUTDOOR_CLOSE = 23,
 };
 
 enum MG2SpriteList : int
 {
     MG2_SPRITE_LIST_TRANSCEIVER = 2,
+    MG2_SPRITE_LIST_ROOM = 3,
 };
 
 // Sprite-list slots assigned by transceiver scripts 111 and 114.
@@ -83,4 +293,14 @@ enum MG2TransceiverFrame : int
     MG2_TRANSCEIVER_FRAME_BACKGROUND = 5,
     MG2_TRANSCEIVER_FRAME_RECEIVE = 6,
     MG2_TRANSCEIVER_FRAME_SEND = 7,
+};
+
+enum MG2PitfallAnimation : int
+{
+    MG2_PITFALL_ANIMATION_FIRST = 18,
+};
+
+enum MG2RoomObjectKind : int
+{
+    MG2_ROOM_OBJECT_PITFALL = 10,
 };

@@ -32,3 +32,6 @@
 [submodule "external/dr_libs"]
 	path = external/dr_libs
 	url = https://github.com/mackron/dr_libs.git
+[submodule "external/nlohmann"]
+	path = external/nlohmann
+	url = https://github.com/nlohmann/json.git
