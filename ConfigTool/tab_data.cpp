@@ -74,6 +74,7 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
 
         { (MG), ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, ConfigKeys::MG1_Scorpions_Help, ConfigKeys::MG1_Scorpions_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG1_Guard_Spawning_Section, ConfigKeys::MG1_Guard_Spawning_Setting, ConfigKeys::MG1_Guard_Spawning_Help, ConfigKeys::MG1_Guard_Spawning_Tooltip, std::nullopt, false, Field::Bool, true },
 
         { (MG), ConfigKeys::LooseAudioOverrides_Section, ConfigKeys::LooseAudioOverrides_Setting, ConfigKeys::LooseAudioOverrides_Help, ConfigKeys::LooseAudioOverrides_Tooltip,
             std::nullopt, false, Field::Bool, true },

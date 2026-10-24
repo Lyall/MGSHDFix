@@ -135,6 +135,11 @@ namespace ConfigKeys
     constexpr const char* MG1_Scorpions_Help = "";
     constexpr const char* MG1_Scorpions_Tooltip = "Fixes a off-by-one typo with scorpion pathfinding which resulted in them always getting stuck in the lower-right hand corner of the screen.";
 
+    constexpr const char* MG1_Guard_Spawning_Section = "Metal Gear 1 - (Affects Speedruns)";
+    constexpr const char* MG1_Guard_Spawning_Setting = "Fix Guard Spawning";
+    constexpr const char* MG1_Guard_Spawning_Help = "";
+    constexpr const char* MG1_Guard_Spawning_Tooltip = "Fixes guards always having one of their spawnpoints being excluded from the list of valid spawns due to a off-by-one typo.";
+
 
 
     constexpr const char* MG_Door_Cards_Enabled_Section = "Tweaks and Restoration";

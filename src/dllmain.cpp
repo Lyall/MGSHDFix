@@ -150,6 +150,7 @@
 #include "game_funcs.hpp"
 #include "mg1_door_cards.hpp"
 #include "mg1_scorpions.hpp"
+#include "mg1_guard_spawning.hpp"
 #include "mg1_telescope_hud_fix.hpp"
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
@@ -213,6 +214,7 @@ namespace
         MG1_PortraitOverlay::Initialize();
         MG1_Opening::Initialize();
         MG1_Scorpions::Initialize();
+        MG1_GuardSpawning::Initialize();
         MG1_TelescopeHudFix::Apply();
         MG_Cigarettes::InitializeMG1();
         MG_VectorFont::InitializeMG1();

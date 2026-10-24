@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\features\mg1_guard_spawning.cpp" />
     <ClCompile Include="src\features\mg2_bridge.cpp" />
     <ClCompile Include="src\features\mg2_lighter.cpp" />
     <ClCompile Include="src\features\mg2_companion_follow.cpp" />
@@ -219,6 +220,7 @@
     <ClCompile Include="src\features\mg2_cigarette_idle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\features\mg1_guard_spawning.hpp" />
     <ClInclude Include="src\features\mg2_bridge.hpp" />
     <ClInclude Include="src\features\mg2_bridge_data.hpp" />
     <ClInclude Include="src\features\mg2_lighter.hpp" />
