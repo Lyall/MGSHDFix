@@ -13,10 +13,17 @@ namespace
     constexpr int nPortraitY = 48;
     constexpr int anTalkingFrames[] = { 1, 2, 0, 2, 0, 2, 0, 2 };
 
+    constexpr uint8_t anSourceColours[] = { 27, 51, 60, 75, 80, 109, 121 };
+    constexpr int anColourSamples[] = { 2, 71, 1, 31, 17, 63, 0 };
+    std::array<uint8_t, std::size(anSourceColours)> s_anColours{};
+    uint8_t s_aanFrames[3][MG1_PortraitSprites::nWidth * MG1_PortraitSprites::nHeight]{};
+
     SafetyHookMid s_hShowMessage;
     SafetyHookMid s_hPrintCharacter;
     SafetyHookMid s_hDrawPortrait;
     bool s_bInitialized = false;
+    bool s_bPaletteReady = false;
+    uint64_t s_nPaletteGeneration = 0;
     bool s_bSnakeSpeaking = false;
     size_t s_nPhase = 0;
     int s_nFrame = 0;
@@ -42,9 +49,64 @@ namespace
         s_nPhase = (s_nPhase + 1) % std::size(anTalkingFrames);
     }
 
+    bool UpdatePalette()
+    {
+        if (s_bPaletteReady && s_nPaletteGeneration == nSpriteLoadGeneration)
+        {
+            return true;
+        }
+        const int nLayer = GM_CurrentDrawLayer;
+        if (nLayer < 0 || nLayer > MG1_LAYER_COMPOSITE)
+        {
+            return false;
+        }
+        const DrawLayer& stLayer = pDrawLayers[nLayer];
+        if (!stLayer.hPixels || stLayer.nWidth < nPortraitX + MG1_PortraitSprites::nWidth || stLayer.nHeight < nPortraitY + MG1_PortraitSprites::nHeight)
+        {
+            return false;
+        }
+        const auto* pPixels = *reinterpret_cast<const uint8_t* const*>(stLayer.hPixels);
+        if (!pPixels)
+        {
+            return false;
+        }
+
+        std::array<uint8_t, std::size(anSourceColours)> anColours{};
+        for (size_t nColour = 0; nColour < anColours.size(); ++nColour)
+        {
+            const int nSample = anColourSamples[nColour];
+            const int nX = nPortraitX + nSample % MG1_PortraitSprites::nWidth;
+            const int nY = nPortraitY + nSample / MG1_PortraitSprites::nWidth;
+            anColours[nColour] = pPixels[nY * stLayer.nWidth + nX];
+            if (!anColours[nColour])
+            {
+                return false;
+            }
+        }
+        if (anColours != s_anColours)
+        {
+            uint8_t anRemap[256]{};
+            for (size_t nColour = 0; nColour < anColours.size(); ++nColour)
+            {
+                anRemap[anSourceColours[nColour]] = anColours[nColour];
+            }
+            for (size_t nFrame = 0; nFrame < std::size(s_aanFrames); ++nFrame)
+            {
+                for (size_t nPixel = 0; nPixel < std::size(s_aanFrames[nFrame]); ++nPixel)
+                {
+                    s_aanFrames[nFrame][nPixel] = anRemap[MG1_PortraitSprites::aanFrames[nFrame][nPixel]];
+                }
+            }
+            s_anColours = anColours;
+        }
+        s_nPaletteGeneration = nSpriteLoadGeneration;
+        s_bPaletteReady = true;
+        return true;
+    }
+
     void DrawPortrait(SafetyHookContext&)
     {
-        if (!s_bInitialized)
+        if (!s_bInitialized || !UpdatePalette())
         {
             return;
         }
@@ -53,7 +115,7 @@ namespace
         {
             s_nFrame = 0;
         }
-        const uint8_t* pPixels = MG1_PortraitSprites::aanFrames[s_nFrame];
+        const uint8_t* pPixels = s_aanFrames[s_nFrame];
         const DrawLayer stImage = { reinterpret_cast<uintptr_t>(&pPixels), MG1_PortraitSprites::nWidth, MG1_PortraitSprites::nHeight };
         const int anSourceRect[] = { 0, 0, MG1_PortraitSprites::nWidth, MG1_PortraitSprites::nHeight };
         MG1_Gamefuncs::pfnBlitImage(GM_CurrentDrawLayer, &stImage, anSourceRect, nPortraitX, nPortraitY);
@@ -67,11 +129,12 @@ void MG1_PortraitOverlay::Initialize()
         return;
     }
 
+    const bool bReloadTracking = InitializeSpriteReloadTracking();
     //MessageNextLine+187
     uint8_t* pPrintCharacter = Memory::PatternScan(mg1Module, "83 3D ?? ?? ?? ?? 00 8B 05", "MG1: Snake Portrait : MessageNextLine()+0x187 : printed character");
     //DrawTransceiver+165
     uint8_t* pDrawPortrait = Memory::PatternScan(mg1Module, "B8 ?? ?? ?? ?? F7 2D ?? ?? ?? ?? 8B CA C1 F9 ?? 8B D1", "MG1: Snake Portrait : DrawTransceiver()+0x165 : after Snake portrait");
-    if (!pPrintCharacter || !pDrawPortrait || !pScriptGlobals || !pMessageLength || !MG1_Gamefuncs::pfnShowMessage || !MG1_Gamefuncs::pfnBlitImage)
+    if (!bReloadTracking || !pPrintCharacter || !pDrawPortrait || !pScriptGlobals || !pMessageLength || !pDrawLayers || !MG1_Gamefuncs::pfnShowMessage || !MG1_Gamefuncs::pfnBlitImage)
     {
         spdlog::error("MG1: Snake Portrait : Missing message or drawing addresses. Skipping.");
     }

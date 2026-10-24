@@ -48,6 +48,9 @@ namespace
     int s_nY = 0;
     int s_nWidth = 0;
     int s_nHeight = 0;
+    std::array<std::array<uint8_t, 128>, 2> s_aanColours{};
+    std::array<bool, 2> s_abColoursReady{};
+    uint64_t s_nColourGeneration = 0;
     std::array<uint8_t, 32 * 64> s_anRegion;
     std::vector<uint32_t> s_vGlitchPixels;
     uint32_t* s_pUploadPixels = nullptr;
@@ -57,6 +60,42 @@ namespace
     bool IsOpening(const Sprite* pSprite)
     {
         return s_bInitialized && sceneState->GM_CurrentScene == MG1_SCENE_OPENING && pSprite->nSheet == MG1_SPRITE_SHEET_OPENING;
+    }
+
+    bool UpdateOpeningColours(const DrawLayer* pImage, int nPaletteIndex)
+    {
+        if (s_nColourGeneration != nSpriteLoadGeneration)
+        {
+            s_abColoursReady.fill(false);
+            s_nColourGeneration = nSpriteLoadGeneration;
+        }
+        if (s_abColoursReady[nPaletteIndex])
+        {
+            return true;
+        }
+        auto& anColours = s_aanColours[nPaletteIndex];
+        if (!pImage || !pImage->hPixels || pImage->nWidth != 208 || pImage->nHeight != 86)
+        {
+            return false;
+        }
+        const auto* pPixels = *reinterpret_cast<const uint8_t* const*>(pImage->hPixels);
+        if (!pPixels)
+        {
+            return false;
+        }
+        constexpr int anSamples[] = { 252, 215, 398, 7 };
+        constexpr uint8_t aanColours[2][4] = { { 47, 93, 109, 121 }, { 64, 47, 64, 121 } };
+        for (int nIndex = 0; nIndex < 4; nIndex++)
+        {
+            const uint8_t nColour = pPixels[anSamples[nIndex]];
+            if (!nColour)
+            {
+                return false;
+            }
+            anColours[aanColours[nPaletteIndex][nIndex]] = nColour;
+        }
+        s_abColoursReady[nPaletteIndex] = true;
+        return true;
     }
 
     void DrawSprite(SafetyHookContext& ctx)
@@ -86,6 +125,12 @@ namespace
         {
             return;
         }
+
+        if (!UpdateOpeningColours(reinterpret_cast<const DrawLayer*>(ctx.r10), pSprite->nPaletteIndex))
+        {
+            return;
+        }
+        const auto& anColours = s_aanColours[pSprite->nPaletteIndex];
         const int nMode = *reinterpret_cast<int*>(ctx.rbp - 0x29);
         const int nLayer = nMode == 0 ? MG1_LAYER_COMPOSITE : static_cast<int>(GM_CurrentDrawLayer);
         if (nLayer < 0 || nLayer > MG1_LAYER_COMPOSITE)
@@ -133,7 +178,7 @@ namespace
                 const uint8_t nColour = pGlitchPixels[nY * MG1_OpeningSprites::nWidth + pGlitch->nSourceX + nX];
                 if (nColour && nXOut >= 0 && nXOut < nWidth && nYOut >= 0 && nYOut < nHeight)
                 {
-                    s_anRegion[nYOut * nWidth + nXOut] = nColour;
+                    s_anRegion[nYOut * nWidth + nXOut] = anColours[nColour];
                 }
             }
         }
@@ -310,13 +355,14 @@ void MG1_Opening::Initialize()
     {
         return;
     }
+    const bool bReloadTracking = InitializeSpriteReloadTracking();
     //sub_180017720+36A
     uint8_t* pDraw = Memory::PatternScan(mg1Module, "83 7D ?? 00 41 0F B6 44 31", "MG1: Opening : DrawSprite()+0x36A : opening artwork");
     //sub_180017720+4CD
     uint8_t* pDuration = Memory::PatternScan(mg1Module, "44 3B F1 7C ?? 41 FF C3 45 3B DA", "MG1: Opening : DrawSprite()+0x4CD : idle_swimming");
     //PresentIndexedFrame+95
     uint8_t* pPresent = Memory::PatternScan(mg1Module, "48 8B 05 ?? ?? ?? ?? 48 8D 8F", "MG1: Opening : PresentIndexedFrame()+0x95 : upload");
-    if (!pDraw || !pDuration || !pPresent || !pDrawLayers || !pOutputPalette || !pOutputTopRows || !sceneState || !pScriptGlobals || !MG1_Gamefuncs::pfnUploadTexture || !g_D3D11Hooks.d3dDeviceContext)
+    if (!bReloadTracking || !pDraw || !pDuration || !pPresent || !pDrawLayers || !pOutputPalette || !pOutputTopRows || !sceneState || !pScriptGlobals || !MG1_Gamefuncs::pfnUploadTexture || !g_D3D11Hooks.d3dDeviceContext)
     {
         spdlog::error("MG1: Opening : Missing animation or drawing addresses. Skipping.");
     }

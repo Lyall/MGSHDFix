@@ -293,11 +293,12 @@ void MG1_Gamefuncs::HookDllGameFuncs()
     pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 4C 98 ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG1: GetChunkEntrySize()"));
 
     pfnShowMessage = reinterpret_cast<ShowMessage_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 ED", "MG1: ShowMessage()"));
+    pfnPrepareImageSet = reinterpret_cast<PrepareImageSet_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 48 63 C1", "MG1: PrepareImageSet()"));
     pfnBlitImage = reinterpret_cast<BlitImage_t>(Memory::PatternScan(mg1Module, "40 53 56 57 41 54", "MG1: BlitImage()"));
 
     if (MG_DeveloperMenu::bEnabled)
     {
-        pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg1Module, "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 45 33 ED", "MG1: sub_18001B2A0() : scene tick"));
+        pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg1Module, "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 45 33 ED", "MG1: TickGameScene() : scene tick"));
         pfnGotoStage = reinterpret_cast<GotoStage_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 8B D9 83 F9", "MG1: GotoStage()"));
         pfnSwitchScene = reinterpret_cast<SwitchScene_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00", "MG1: SwitchScene()"));
     }

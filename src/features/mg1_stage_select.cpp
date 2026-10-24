@@ -43,6 +43,6 @@ void MG_StageSelect::InitializeMG1()
     else
     {
         s_hSceneTick = safetyhook::create_inline(MG1_Gamefuncs::pfnSceneTick, SceneTick_hook);
-        LOG_HOOK(s_hSceneTick, "MG1: Stage Select : sub_18001B2A0()")
+        LOG_HOOK(s_hSceneTick, "MG1: Stage Select : TickGameScene()")
     }
 }

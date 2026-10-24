@@ -112,6 +112,8 @@ namespace MG1_Gamefuncs
     inline ShowMessage_t pfnShowMessage = nullptr;
     using BlitImage_t = void(__fastcall*)(int nLayer, const MG1_LinkVarBuf::DrawLayer* pImage, const int* pSourceRect, int nX, int nY);
     inline BlitImage_t pfnBlitImage = nullptr;
+    using PrepareImageSet_t = void (__fastcall*)(int);
+    inline PrepareImageSet_t pfnPrepareImageSet = nullptr;
 
     using GotoStage_t = void(__fastcall*)(int nStage, int nRoom);
     inline GotoStage_t pfnGotoStage = nullptr;

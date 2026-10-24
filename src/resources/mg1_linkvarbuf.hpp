@@ -10,6 +10,27 @@ namespace MG1_LinkVarBuf
     constexpr int nFrameBufferWidth = 256;
     constexpr int nFrameBufferHeight = 256;
 
+    inline uint64_t nSpriteLoadGeneration = 0;
+
+    inline bool InitializeSpriteReloadTracking()
+    {
+        static SafetyHookMid s_hPrepareImages;
+        if (s_hPrepareImages)
+        {
+            return true;
+        }
+        if (!MG1_Gamefuncs::pfnPrepareImageSet)
+        {
+            return false;
+        }
+        s_hPrepareImages = safetyhook::create_mid(reinterpret_cast<void*>(MG1_Gamefuncs::pfnPrepareImageSet), [](SafetyHookContext&)
+        {
+            ++nSpriteLoadGeneration;
+        });
+        LOG_HOOK(s_hPrepareImages, "MG1: Sprite Reload : PrepareImageSet()")
+        return static_cast<bool>(s_hPrepareImages);
+    }
+
     inline uintptr_t* pTextChunkHandle = nullptr;
 
     constexpr int nDoorRecordSize = 10;
@@ -505,8 +526,8 @@ namespace MG1_LinkVarBuf
             pTextChunkHandle = reinterpret_cast<uintptr_t*>(Memory::GetRipRelativeAddress(pTextChunk, 3, 7));
         }
 
-        //sub_18001B2A0+D12
-        uint8_t* pScriptGlobalsScan = Memory::PatternScan(mg1Module, "48 8D 0D ?? ?? ?? ?? 8B 35", "MG1: sub_18001B2A0()+0xD12 : script globals");
+        //TickGameScene+D12
+        uint8_t* pScriptGlobalsScan = Memory::PatternScan(mg1Module, "48 8D 0D ?? ?? ?? ?? 8B 35", "MG1: TickGameScene()+0xD12 : script globals");
         if (pScriptGlobalsScan)
         {
             pScriptGlobals = reinterpret_cast<int32_t*>(Memory::GetRipRelativeAddress(pScriptGlobalsScan, 3, 7));
