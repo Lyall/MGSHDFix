@@ -202,17 +202,12 @@ std::nullopt, false, Field::Bool, false},
         { (MG), ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, ConfigKeys::MG_Vector_Font_Enabled_Help, ConfigKeys::MG_Vector_Font_Enabled_Tooltip,
           std::nullopt, false, Field::Bool, true },
 
-                  { (MG), ConfigKeys::MG2_Narration_Outline_Section, "",
-          "", "",
-          std::nullopt, false, Field::Spacer },
-
-
-        { (MG), ConfigKeys::MG2_Narration_Outline_Section, ConfigKeys::MG2_Narration_Outline_Setting, ConfigKeys::MG2_Narration_Outline_Help, ConfigKeys::MG2_Narration_Outline_Tooltip, std::make_pair(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting), false, Field::Bool, true },
-
 
         { (MG | MGS2), ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Help, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
+
+        { (MG), ConfigKeys::MG2_Narration_Outline_Section, ConfigKeys::MG2_Narration_Outline_Setting, ConfigKeys::MG2_Narration_Outline_Help, ConfigKeys::MG2_Narration_Outline_Tooltip, std::make_pair(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting), false, Field::Bool, true },
 
 
         { (MGS2), ConfigKeys::LOD_MGS2_NPC_Section, ConfigKeys::LOD_MGS2_NPC_Setting, ConfigKeys::LOD_MGS2_NPC_Help, ConfigKeys::LOD_MGS2_NPC_Tooltip,

@@ -58,7 +58,7 @@ This is a fix that adds custom resolutions, ultrawide support and much more to t
 - Speedrunner In-Game Timer / statistics overlay
 - Option to restore PS2 memory card strings / messages / captions.
 - Option to restore several flashing effects (ie explosion flashes) which were censored in the Master Collection for photosensitivity reasons.
-- Translation file loading support!
+##### Translation file loading support!
  - This allows replacement of all .SDT & .GCX text for all languages without having to directly modify any game files.
  - All games support loading a dif.json translation file from the game's /translations folder.
  - (A companion string editor app to assist in translation development is being finalized.)
@@ -148,7 +148,7 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - MG1: Fixes TELESCOPE MODE not properly hiding the rest of the game's UI.
 - MG1: Fixes scorpion pathfinding getting stuck in the bottom right corner of the screen.
 - MG1: Fixes guards always skipping one of their valid alert spawnpoints in every room.
-- MG1: Fixes multiple music tracks which do not properly loop. (Requires MG1 / MG2 Restored Audio mod.)
+- MG1: Fixes multiple music tracks which do not properly loop. (Requires [MG1 / MG2 Restored Audio mod](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15).)
 - MG2: Fixes outbound transciever calls showing the person who you're calling before you've said the "This is Snake, come in" message.
 - MG2: Fixes several missing doors.
 - MG2: Fixes numerous doors that were mispositioned (either floating, or outright incorrectly placed.)
@@ -164,8 +164,8 @@ There's definitely a lot of fixes that we've made over the years that are missin
 - MG2: Restored the correct cigarette smoke idle animation timings, sprites, and wind behavior.
 - MG2: Fixes multiple doors which were using an incorrect variant of their sprites.
 - MG2: Restored Bridge of Sorrow cutscene timings, positoning, photosensitive effects, and radio call portrait timings.
-- MG2: Fixes Evasion music using the standard Alert song. (Requires MG1 / MG2 Restored Audio mod.)
-- MG2: Restored a missing song variant before Campbell's initial radar explanation. (Requires MG1 / MG2 Restored Audio mod.)
+- MG2: Fixes Evasion music using the standard Alert song. (Requires [MG1 / MG2 Restored Audio mod](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15).)
+- MG2: Restored a missing song variant before Campbell's initial radar explanation. (Requires [MG1 / MG2 Restored Audio mod](https://www.nexusmods.com/metalgearandmetalgear2mc/mods/15).)
 
 
 #### MGS2 Specific Bug Fixes:

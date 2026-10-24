@@ -648,13 +648,13 @@
       <Filter>Utility\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\version.h">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\gpu_check.hpp">
       <Filter>Utility\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\RegStateHelpers.hpp">
-      <Filter>Utility</Filter>
+      <Filter>Utility\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\steam_achievements.hpp">
       <Filter>APIs\Headers</Filter>
@@ -663,7 +663,7 @@
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\config.hpp">
-      <Filter>Config</Filter>
+      <Filter>Config\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_sunglasses.hpp">
       <Filter>Features\Headers</Filter>
@@ -699,7 +699,7 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\config_keys.hpp">
-      <Filter>Config</Filter>
+      <Filter>Config\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\cpu_core_limit.hpp">
       <Filter>Fixes\Headers</Filter>
@@ -975,7 +975,7 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\translation_diffs.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\game_strings.hpp">
       <Filter>APIs\Headers</Filter>
@@ -1083,10 +1083,10 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\loose_audio_overrides.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\loose_audio_overrides_data.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg2_door_cards.hpp">
       <Filter>Features\Headers</Filter>
@@ -1110,7 +1110,7 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\mg2_room_patches.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mg2_pitfall_sprites.hpp">
       <Filter>Fixes\Headers</Filter>
@@ -1170,31 +1170,31 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\mg2_sprite_patcher.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_cigarette_damage.hpp">
       <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_vector_font_renderer.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\mg_developer_menu.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_inventory_menu.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_stage_select.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_stage_select_data.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mg_font_bundle.hpp">
-      <Filter>Features</Filter>
+      <Filter>Features\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\fixes\mg1_opening.hpp">
       <Filter>Fixes\Headers</Filter>
@@ -1218,10 +1218,10 @@
       <Filter>Fixes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\mg2_sprite_patches.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\resources\mg2_palette_patches.hpp">
-      <Filter>Resources</Filter>
+      <Filter>Resources\Headers</Filter>
     </ClInclude>
     <ClInclude Include="src\features\mgs2_area_prefetch.hpp">
       <Filter>Features\Headers</Filter>
@@ -1283,6 +1283,9 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{9e661797-fd7d-422f-845a-a1101bcd6f30}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Headers">
+      <UniqueIdentifier>{3c9838bb-9169-4953-80d7-64b8205b74a7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Utility">
       <UniqueIdentifier>{e7e651f5-92ec-4540-86a7-9622adfc5a53}</UniqueIdentifier>
     </Filter>
@@ -1315,6 +1318,9 @@
     </Filter>
     <Filter Include="Config">
       <UniqueIdentifier>{cd1768eb-087f-41c0-a320-8702dca4749f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config\Headers">
+      <UniqueIdentifier>{9959dd1d-b69b-4955-a9c0-e4395dbf4bc8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{69e22145-5e0d-43e7-9e9f-34e7016229ad}</UniqueIdentifier>
