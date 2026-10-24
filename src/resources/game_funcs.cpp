@@ -292,6 +292,9 @@ void MG1_Gamefuncs::HookDllGameFuncs()
     }
     pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 4C 98 ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG1: GetChunkEntrySize()"));
 
+    pfnShowMessage = reinterpret_cast<ShowMessage_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 ED", "MG1: ShowMessage()"));
+    pfnBlitImage = reinterpret_cast<BlitImage_t>(Memory::PatternScan(mg1Module, "40 53 56 57 41 54", "MG1: BlitImage()"));
+
     if (MG_DeveloperMenu::bEnabled)
     {
         pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg1Module, "41 55 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 45 33 ED", "MG1: sub_18001B2A0() : scene tick"));
@@ -299,8 +302,6 @@ void MG1_Gamefuncs::HookDllGameFuncs()
         pfnSwitchScene = reinterpret_cast<SwitchScene_t>(Memory::PatternScan(mg1Module, "40 53 48 83 EC ?? 83 3D ?? ?? ?? ?? 00", "MG1: SwitchScene()"));
     }
 
-    pfnShowMessage = reinterpret_cast<ShowMessage_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 45 33 ED", "MG1: ShowMessage()"));
-    pfnBlitImage = reinterpret_cast<BlitImage_t>(Memory::PatternScan(mg1Module, "40 53 56 57 41 54", "MG1: BlitImage()"));
     pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 4C 89 44 24", "MG1: SetFont()"));
     pfnDrawTextSlot = reinterpret_cast<DrawTextSlot_t>(Memory::PatternScan(mg1Module, "40 53 55 56 57 41 55", "MG1: DrawTextSlot()"));
     pfnComposeTextLayer = reinterpret_cast<ComposeTextLayer_t>(Memory::PatternScan(mg1Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 8B F1", "MG1: ComposeFrame()"));
@@ -319,6 +320,10 @@ void MG2_Gamefuncs::HookDllGameFuncs()
         pfnGetEngineState = reinterpret_cast<GetEngineState_t>(Memory::ResolveCall(pGetEngineState));
     }
 
+    MAKE_HOOK_MID(mg2Module, "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 20", "MG2: Level Transition : GotoRoom()+0xB6", {
+        GameVars::OnLevelTransition();
+    });
+
     if (MG_DeveloperMenu::bEnabled)
     {
         pfnSceneTick = reinterpret_cast<SceneTick_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 8B 05 ?? ?? ?? ?? 48 89 5C 24", "MG2: sub_180025A90() : scene tick"));
@@ -333,7 +338,10 @@ void MG2_Gamefuncs::HookDllGameFuncs()
         pfnIsGameplayActive = reinterpret_cast<IsGameplayActive_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 83 3D ?? ?? ?? ?? 00 75", "MG2: IsGameplayActive()"));
     }
 
+    //TestFlag
     pfnTestFlag = reinterpret_cast<TestFlag_t>(Memory::PatternScan(mg2Module, "8B C1 99 83 E2 ?? 03 C2 8B C8 83 E0 ?? 2B C2", "MG2: TestFlag()"));
+    pfnIsBossSurvival = reinterpret_cast<IsBossSurvival_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: IsBossSurvival()"));
+
     pfnUpdateCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "40 53 56 57 41 55 41 57 48 83 EC ?? 48 8B 0D", "MG2: UpdateCompanionFollow()"));
     pfnResetCompanionFollow = reinterpret_cast<CompanionFollow_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? E8 ?? ?? ?? ?? 48 8B F0", "MG2: ResetCompanionFollow()"));
     if (pfnUpdateCompanionFollow)
@@ -352,12 +360,6 @@ void MG2_Gamefuncs::HookDllGameFuncs()
     }
 
     pfnLoadImageBlob = reinterpret_cast<LoadImageBlob_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 4C 8B C2", "MG2: LoadImageBlob()"));
-    pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: GetChunkEntryData()"));
-    pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG2: GetChunkEntrySize()"));
-    pfnIsBossSurvival = reinterpret_cast<IsBossSurvival_t>(Memory::PatternScan(mg2Module, "48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: IsBossSurvival()"));
-    MAKE_HOOK_MID(mg2Module, "C7 05 ?? ?? ?? ?? 01 00 00 00 48 8B 5C 24 ?? 48 8B 6C 24 ?? 48 8B 74 24 ?? 48 83 C4 20", "MG2: Level Transition : GotoRoom()+0xB6", {
-        GameVars::OnLevelTransition();
-    });
 
     pfnSetFont = reinterpret_cast<SetFont_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 4C 89 44 24", "MG2: RegisterFont()"));
     pfnDrawTextItem = reinterpret_cast<DrawTextItem_t>(Memory::PatternScan(mg2Module, "40 53 55 56 57 41 55 48 81 EC", "MG2: DrawTextItem()"));
@@ -377,8 +379,10 @@ void MG2_Gamefuncs::HookDllGameFuncs()
     pfnDrawSprite = reinterpret_cast<DrawSprite_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 55", "MG2: DrawSprite()"));
     pfnInitSprite = reinterpret_cast<InitSprite_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 8B 44 24", "MG2: InitSprite()"));
     pfnBuildDoors = reinterpret_cast<BuildDoors_t>(Memory::PatternScan(mg2Module, "40 55 53 41 56 48 8D 6C 24 ?? 48 81 EC ?? ?? ?? ?? 48 8B 05", "MG2: BuildDoors()"));
-    pfnGetLayerImage = reinterpret_cast<GetLayerImage_t>(Memory::PatternScan(mg2Module, "48 63 C1 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? C3", "MG2: GetLayerImage()"));
+    pfnGetChunkEntryData = reinterpret_cast<GetChunkEntryData_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? 48 83 C4", "MG2: GetChunkEntryData()"));
+    pfnGetChunkEntrySize = reinterpret_cast<GetChunkEntrySize_t>(Memory::PatternScan(mg2Module, "40 53 48 83 EC ?? 48 63 DA E8 ?? ?? ?? ?? 48 63 8C 98 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? 33 D2", "MG2: GetChunkEntrySize()"));
     pfnDrawSprites = reinterpret_cast<DrawSprites_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 83 EC ?? 48 8B 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? ?? ?? ?? E8", "MG2: DrawSprites()"));
+    pfnGetLayerImage = reinterpret_cast<GetLayerImage_t>(Memory::PatternScan(mg2Module, "48 63 C1 ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? ?? ?? ?? ?? C3", "MG2: GetLayerImage()"));
     pfnLayerFillRect = reinterpret_cast<LayerFillRect_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 41 54", "MG2: LayerFillRect()"));
     pfnRequestSound = reinterpret_cast<RequestSound_t>(Memory::PatternScan(mg2Module, "48 89 5C 24 ?? 57 48 83 EC ?? 48 63 F9", "MG2: RequestSound()"));
     uint8_t* pSetDrawColor = Memory::PatternScan(mg2Module, "E8 ?? ?? ?? ?? 8B 74 24", "MG2: DrawRadar()+0x34B : SetDrawColor() call");

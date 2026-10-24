@@ -73,8 +73,8 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
 
 
-        { (MG), ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, ConfigKeys::MG1_Scorpions_Help, ConfigKeys::MG1_Scorpions_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG1_Guard_Spawning_Section, ConfigKeys::MG1_Guard_Spawning_Setting, ConfigKeys::MG1_Guard_Spawning_Help, ConfigKeys::MG1_Guard_Spawning_Tooltip, std::nullopt, false, Field::Bool, true },
+
+
 
         { (MG), ConfigKeys::LooseAudioOverrides_Section, ConfigKeys::LooseAudioOverrides_Setting, ConfigKeys::LooseAudioOverrides_Help, ConfigKeys::LooseAudioOverrides_Tooltip,
             std::nullopt, false, Field::Bool, true },
@@ -82,19 +82,6 @@ const std::vector<std::pair<wxString, std::vector<Field>>> kTabs = {
 
         { (MG), ConfigKeys::LooseAudioOverrides_Section, ConfigKeys::LooseAudioLoudness_Setting, "", ConfigKeys::LooseAudioLoudness_Tooltip, std::nullopt,
             false, Field::Choice, 0, 0, 0, ConfigKeys::LooseAudioLoudness_Limiter, {ConfigKeys::LooseAudioLoudness_Off, ConfigKeys::LooseAudioLoudness_Gain, ConfigKeys::LooseAudioLoudness_Limiter} },
-
-
-        { (MG), ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, ConfigKeys::MG_Door_Cards_Enabled_Help, ConfigKeys::MG_Door_Cards_Enabled_Tooltip, std::nullopt, false, Field::Bool, false },
-
-
-        { (MG), ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, ConfigKeys::MG_Vector_Font_Enabled_Help, ConfigKeys::MG_Vector_Font_Enabled_Tooltip,
-          std::nullopt, false, Field::Bool, true },
-
-        { (MG), ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, ConfigKeys::MG2_Doors_Help, ConfigKeys::MG2_Doors_Tooltip, std::nullopt, false, Field::Bool, true },
-
-
-
-
 
 
 
@@ -210,6 +197,19 @@ std::nullopt, false, Field::Bool, false},
 
 
 
+
+
+        { (MG), ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, ConfigKeys::MG_Vector_Font_Enabled_Help, ConfigKeys::MG_Vector_Font_Enabled_Tooltip,
+          std::nullopt, false, Field::Bool, true },
+
+                  { (MG), ConfigKeys::MG2_Narration_Outline_Section, "",
+          "", "",
+          std::nullopt, false, Field::Spacer },
+
+
+        { (MG), ConfigKeys::MG2_Narration_Outline_Section, ConfigKeys::MG2_Narration_Outline_Setting, ConfigKeys::MG2_Narration_Outline_Help, ConfigKeys::MG2_Narration_Outline_Tooltip, std::make_pair(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting), false, Field::Bool, true },
+
+
         { (MG | MGS2), ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Help, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
@@ -274,14 +274,12 @@ std::nullopt, false, Field::Bool, false},
         { (MGS2 | MGS3), ConfigKeys::LauncherJumpStart_Section, ConfigKeys::LauncherJumpStart_Setting, ConfigKeys::LauncherJumpStart_Help, ConfigKeys::LauncherJumpStart_Tooltip,
           std::make_pair(ConfigKeys::SkipLauncher_Section, ConfigKeys::SkipLauncher_Setting), true, Field::Bool, false},
 
-        { (MGS2 | MGS3), ConfigKeys::SkipIntroLogos_Section, ConfigKeys::SkipIntroLogos_Setting, ConfigKeys::SkipIntroLogos_Help, ConfigKeys::SkipIntroLogos_Tooltip,
+        { (MG | MGS2 | MGS3), ConfigKeys::SkipIntroLogos_Section, ConfigKeys::SkipIntroLogos_Setting, ConfigKeys::SkipIntroLogos_Help, ConfigKeys::SkipIntroLogos_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
 
         { (MG|MGS2|MGS3), ConfigKeys::EnablePauseOnFocusLoss_Section, ConfigKeys::EnablePauseOnFocusLoss_Setting, ConfigKeys::EnablePauseOnFocusLoss_Help, ConfigKeys::EnablePauseOnFocusLoss_Tooltip,
           std::nullopt, false, Field::Bool, false },
-
-        { (MG), ConfigKeys::MG_Cigarettes_Section, ConfigKeys::MG_Cigarettes_Setting, ConfigKeys::MG_Cigarettes_Help, ConfigKeys::MG_Cigarettes_Tooltip, std::nullopt, false, Field::Bool, true },
 
         { (MGS2), ConfigKeys::MGS2BladeAnywhere_Section, ConfigKeys::MGS2BladeAnywhere_Setting, ConfigKeys::MGS2BladeAnywhere_Help, ConfigKeys::MGS2BladeAnywhere_Tooltip,
           std::nullopt, false, Field::Bool, false },
@@ -376,35 +374,55 @@ std::nullopt, false, Field::Int, 100, 1, 100},
         { (MGS2), ConfigKeys::MGS2_SkipEnding_Section, ConfigKeys::MGS2_SkipEnding_Setting, ConfigKeys::MGS2_SkipEnding_Help, ConfigKeys::MGS2_SkipEnding_Tooltip,
           std::nullopt, false, Field::Bool, false },
 
-
     }},
-    { wxString("Restoration"), {
+    { wxString("Restoration && More"), {
+
+
+                { (MG), ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, ConfigKeys::MG_Door_Cards_Enabled_Help, ConfigKeys::MG_Door_Cards_Enabled_Tooltip, std::nullopt, false, Field::Bool, false },
+
+
+        { (MG), ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, ConfigKeys::MG_Developer_Menu_Help, ConfigKeys::MG_Developer_Menu_Tooltip, std::nullopt, false, Field::Bool, false },
+        { (MG), ConfigKeys::MG_Developer_Menu_Section, "", "", "",
+        std::nullopt, false, Field::Spacer },
+
+        { (MG), ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, ConfigKeys::MG_Developer_Menu_Hotkey_Help, ConfigKeys::MG_Developer_Menu_Hotkey_Tooltip, std::make_pair(ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
+
+
 
         //{ (MG), ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, ConfigKeys::MG1_RestoreOriginalScript_Help, ConfigKeys::MG1_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, false },
         { (MG), ConfigKeys::MG1_RestoreBossNames_Section, ConfigKeys::MG1_RestoreBossNames_Setting, ConfigKeys::MG1_RestoreBossNames_Help, ConfigKeys::MG1_RestoreBossNames_Tooltip, std::nullopt, false, Field::Bool, false },
         { (MG), ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, ConfigKeys::MG1_Opening_Help, ConfigKeys::MG1_Opening_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, ConfigKeys::MG1_Portrait_Overlay_Help, ConfigKeys::MG1_Portrait_Overlay_Tooltip, std::nullopt, false, Field::Bool, true },
 
+        { (MG), ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, ConfigKeys::MG1_Scorpions_Help, ConfigKeys::MG1_Scorpions_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG1_Guard_Spawning_Section, ConfigKeys::MG1_Guard_Spawning_Setting, ConfigKeys::MG1_Guard_Spawning_Help, ConfigKeys::MG1_Guard_Spawning_Tooltip, std::nullopt, false, Field::Bool, true },
 
-        { (MG), ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, ConfigKeys::MG2_RestoreOriginalScript_Help, ConfigKeys::MG2_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, ConfigKeys::MG2_RestoreBossNames_Help, ConfigKeys::MG2_RestoreBossNames_Tooltip, std::make_pair(ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting), true, Field::Bool, false },
-        { (MG), ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, ConfigKeys::MG2_Wind_Help, ConfigKeys::MG2_Wind_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, ConfigKeys::MG2_Portrait_Overlay_Enabled_Help, ConfigKeys::MG2_Portrait_Overlay_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, ConfigKeys::MG2_Outdoor_Artwork_Help, ConfigKeys::MG2_Outdoor_Artwork_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, ConfigKeys::MG2_Doors_Help, ConfigKeys::MG2_Doors_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, ConfigKeys::MG2_Sauna_Guard_Enabled_Help, ConfigKeys::MG2_Sauna_Guard_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Item_Sprites_Enabled_Section, ConfigKeys::MG2_Item_Sprites_Enabled_Setting, ConfigKeys::MG2_Item_Sprites_Enabled_Help, ConfigKeys::MG2_Item_Sprites_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, ConfigKeys::MG2_Portrait_Overlay_Enabled_Help, ConfigKeys::MG2_Portrait_Overlay_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, ConfigKeys::MG2_Elevator_Lamps_Help, ConfigKeys::MG2_Elevator_Lamps_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, ConfigKeys::MG2_Pitfalls_Help, ConfigKeys::MG2_Pitfalls_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, ConfigKeys::MG2_Call_Sequence_Enabled_Help, ConfigKeys::MG2_Call_Sequence_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, ConfigKeys::MG2_Bridge_Help, ConfigKeys::MG2_Bridge_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, ConfigKeys::MG2_Companion_Follow_Help, ConfigKeys::MG2_Companion_Follow_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, ConfigKeys::MG2_Lighter_Help, ConfigKeys::MG2_Lighter_Tooltip, std::nullopt, false, Field::Bool, true },
         { (MG), ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, ConfigKeys::MG2_Cigarette_Idle_Help, ConfigKeys::MG2_Cigarette_Idle_Tooltip, std::nullopt, false, Field::Bool, true },
-        { (MG), ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, ConfigKeys::MG2_Outdoor_Palettes_Help, ConfigKeys::MG2_Outdoor_Palettes_Tooltip, std::nullopt, false, Field::Bool, true },
 
-        { (MG), ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, ConfigKeys::MG2_Outdoor_Artwork_Help, ConfigKeys::MG2_Outdoor_Artwork_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_RestoreOriginalScript_Section, ConfigKeys::MG2_RestoreOriginalScript_Setting, ConfigKeys::MG2_RestoreOriginalScript_Help, ConfigKeys::MG2_RestoreOriginalScript_Tooltip, std::nullopt, false, Field::Bool, true },
 
         { (MG), ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, ConfigKeys::MG2_Truckyard_Fence_Help, ConfigKeys::MG2_Truckyard_Fence_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, ConfigKeys::MG2_Companion_Follow_Help, ConfigKeys::MG2_Companion_Follow_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, ConfigKeys::MG2_Bridge_Help, ConfigKeys::MG2_Bridge_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, ConfigKeys::MG2_Pitfalls_Help, ConfigKeys::MG2_Pitfalls_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, ConfigKeys::MG2_Wind_Help, ConfigKeys::MG2_Wind_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, ConfigKeys::MG2_Elevator_Timings_Help, ConfigKeys::MG2_Elevator_Timings_Tooltip, std::nullopt, false, Field::Bool, true },
+        { (MG), ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, ConfigKeys::MG2_Call_Sequence_Enabled_Help, ConfigKeys::MG2_Call_Sequence_Enabled_Tooltip, std::nullopt, false, Field::Bool, true },
+
+        { (MG), ConfigKeys::MG_Cigarettes_Section, ConfigKeys::MG_Cigarettes_Setting, ConfigKeys::MG_Cigarettes_Help, ConfigKeys::MG_Cigarettes_Tooltip, std::nullopt, false, Field::Bool, true },
+
+    } },
+
+    { wxString("Restoration"), {
 
         { (MGS2|MGS3), ConfigKeys::Restore_VFX_Section, ConfigKeys::Restore_VFX_Setting, ConfigKeys::Restore_VFX_Help, ConfigKeys::Restore_VFX_Tooltip,
           std::nullopt, false, Field::Bool, true },
@@ -705,8 +723,7 @@ std::nullopt, false, Field::Int, 100, 1, 100},
 
         { (MG), ConfigKeys::LooseAudioDebugLogging_Section, ConfigKeys::LooseAudioDebugLogging_Setting, ConfigKeys::LooseAudioDebugLogging_Help, ConfigKeys::LooseAudioDebugLogging_Tooltip, std::nullopt, false, Field::Choice, 0, 0, 0, ConfigKeys::LooseAudioDebugLogging_Disabled, {ConfigKeys::LooseAudioDebugLogging_Disabled, ConfigKeys::LooseAudioDebugLogging_Trims, ConfigKeys::LooseAudioDebugLogging_Full} },
 
-        { (MG), ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, ConfigKeys::MG_Developer_Menu_Help, ConfigKeys::MG_Developer_Menu_Tooltip, std::nullopt, false, Field::Bool, false },
-        { (MG), ConfigKeys::MG_Developer_Menu_Hotkey_Section, ConfigKeys::MG_Developer_Menu_Hotkey_Setting, ConfigKeys::MG_Developer_Menu_Hotkey_Help, ConfigKeys::MG_Developer_Menu_Hotkey_Tooltip, std::make_pair(ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting), false, Field::Hotkey, 0, 0, 0, "F8" },
+
 
         { (MGS2|MGS3), ConfigKeys::Debugging_Start_In_Dev_Menu_Section, ConfigKeys::Debugging_Start_In_Dev_Menu_Setting, ConfigKeys::Debugging_Start_In_Dev_Menu_Help, ConfigKeys::Debugging_Start_In_Dev_Menu_Tooltip,
           std::nullopt, false, Field::Bool, false },

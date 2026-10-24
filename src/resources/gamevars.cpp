@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "common.hpp"
 #include "gamevars.hpp"
-#include "mg2_outdoor_tiles.hpp"
-#include "mg2_truckyard_fence.hpp"
-#include "mg2_doors.hpp"
-#include "mg2_cigarette_idle.hpp"
 #include "mg2_elevators.hpp"
 #include "mg2_bridge.hpp"
+#include "mg2_doors.hpp"
+#include "mg2_truckyard_fence.hpp"
+#include "mg2_outdoor_tiles.hpp"
+#include "mg2_cigarette_idle.hpp"
 
 #include "d3d11_text_overlay.hpp"
 #include "depth_of_field.hpp"
@@ -378,12 +378,12 @@ void GameVars::OnLevelTransition()
     }
     else if (eGameType & MG)
     {
-        MG2_OutdoorTiles::HandleLevelTransition();
-        MG2_TruckyardFence::HandleLevelTransition();
-        MG2_CigaretteIdle::HandleLevelTransition();
-        MG2_Doors::HandleLevelTransition();
         MG2_Elevators::HandleLevelTransition();
         MG2_Bridge::HandleLevelTransition();
+        MG2_Doors::HandleLevelTransition();
+        MG2_TruckyardFence::HandleLevelTransition();
+        MG2_OutdoorTiles::HandleLevelTransition();
+        MG2_CigaretteIdle::HandleLevelTransition();
     }
 
 }

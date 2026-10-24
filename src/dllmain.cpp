@@ -152,31 +152,31 @@
 #include "mg1_scorpions.hpp"
 #include "mg1_guard_spawning.hpp"
 #include "mg1_telescope_hud_fix.hpp"
+#include "mg2_door_cards.hpp"
+#include "mg2_sauna_guard.hpp"
+#include "mg2_item_sprites.hpp"
+#include "mg2_call_sequence.hpp"
+#include "mg2_opening_call_music.hpp"
+#include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
+#include "mg2_room_patches.hpp"
+#include "mg2_pitfalls.hpp"
+#include "mg2_doors.hpp"
+#include "mg2_companion_follow.hpp"
+#include "mg2_cigarette_idle.hpp"
+#include "mg2_lighter.hpp"
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
 #include "mg2_sprite_patcher.hpp"
-#include "mg2_room_patches.hpp"
-#include "mg2_sauna_guard.hpp"
-#include "mg2_item_sprites.hpp"
-#include "mg2_portrait_overlay.hpp"
-#include "mg2_pitfalls.hpp"
-#include "mg2_call_sequence.hpp"
-#include "mg2_companion_follow.hpp"
-#include "mg2_doors.hpp"
-#include "mg2_elevators.hpp"
-#include "mg2_bridge.hpp"
-#include "mg2_lighter.hpp"
-#include "mg2_cigarette_idle.hpp"
-#include "mg2_door_cards.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg1_opening.hpp"
+#include "mg2_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
-#include "mg_stage_select.hpp"
 #include "mg_cigarette_damage.hpp"
+#include "mg_stage_select.hpp"
 #include "mg2_linkvarbuf.hpp"
 #include "loose_audio_overrides.hpp"
-#include "mg2_opening_call_music.hpp"
 #include "screenspace_fixes.hpp"
 #include "windows_preferred_gpu.hpp"
 //#include "texture_buffer_size.hpp" //disabled for now, the vanilla limit was increased to 128MB/texture in 2.0.0, so there's no much need until 8k gaming is standard & there's a need for a 16k texture pack lol.
@@ -233,28 +233,30 @@ namespace
         FixPlaytime::ApplyMG2();
         g_IntroSkip.InitializeMG2();
         MG_TextOverrides::InitializeMG2();
+        LooseAudioOverrides::Initialize();
+        MG2_DoorCards::Initialize();
         MG2_SaunaGuard::Initialize();
         MG2_ItemSprites::Initialize();
-        MG2_PortraitOverlay::Initialize();
-        MG2_Pitfalls::Initialize();
-        MG2_CallSequence::Initialize();
+        MG2_Elevators::Initialize();
         MG2_CompanionFollow::Initialize();
-        MG2_Doors::Initialize();
-        MG2_RoomPatches::Initialize();
+        MG2_Bridge::Initialize();
+        MG2_CigaretteIdle::Initialize();
+        MG2_Lighter::Initialize();
         MG2_OutdoorPalettes::Initialize();
         MG2_OutdoorTiles::Initialize();
         MG2_TruckyardFence::Initialize();
-        MG2_Elevators::Initialize();
-        MG2_Bridge::Initialize();
-        MG2_Lighter::Initialize();
-        MG2_CigaretteIdle::Initialize();
-        MG2_DoorCards::Initialize();
-        LooseAudioOverrides::Initialize();
+        MG2_Pitfalls::Initialize();
+        MG2_Doors::Initialize();
+        MG2_RoomPatches::Initialize();
+        MG2_CallSequence::Initialize();
         MG2_OpeningCallMusic::Initialize();
+        MG2_PortraitOverlay::Initialize();
         MG_Cigarettes::InitializeMG2();
         MG_VectorFont::InitializeMG2();
         MG_StageSelect::InitializeMG2();
-        MG2_SpritePatcher::Initialize(); // Keep last!!!
+        
+		
+		MG2_SpritePatcher::Initialize(); // Keep last!!!
     }
 
 }

@@ -5,6 +5,11 @@ namespace MG1_LinkVarBuf
     struct DrawLayer;
 }
 
+namespace MG2_LinkVarBuf
+{
+    struct DrawLayer;
+}
+
 // One entry of a stage chara table (chara.h CHARA_TABLE)
 struct CHARA
 {
@@ -140,13 +145,15 @@ namespace MG2_LinkVarBuf
     struct EngineState;
     struct ObjectPosition;
     struct Sprite;
-    struct DrawLayer;
 }
 
 namespace MG2_Gamefuncs
 {
     using Random_t = unsigned int(__fastcall*)(unsigned int nLimit);
     inline Random_t pfnRandom = nullptr;
+
+    using TestFlag_t = int(__fastcall*)(int nFlag);
+    inline TestFlag_t pfnTestFlag = nullptr;
 
     using SceneTick_t = void(__fastcall*)();
     inline SceneTick_t pfnSceneTick = nullptr;
@@ -169,20 +176,13 @@ namespace MG2_Gamefuncs
     inline RequestScene_t pfnRequestScene = nullptr;
     using RunSceneTransition_t = void(__fastcall*)();
     inline RunSceneTransition_t pfnRunSceneTransition = nullptr;
+    using IsBossSurvival_t = int(__fastcall*)();
+    inline IsBossSurvival_t pfnIsBossSurvival = nullptr;
     using IsGameplayActive_t = int(__fastcall*)();
     inline IsGameplayActive_t pfnIsGameplayActive = nullptr;
 
-    using TestFlag_t = int(__fastcall*)(int nFlag);
-    inline TestFlag_t pfnTestFlag = nullptr;
     using LoadImageBlob_t = void(__fastcall*)(void* pImageSlot, const uint8_t* pBlob);
     inline LoadImageBlob_t pfnLoadImageBlob = nullptr;
-    using GetChunkEntryData_t = uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
-    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
-    using GetChunkEntrySize_t = unsigned int(__fastcall*)(uintptr_t hChunk, int nEntry);
-    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
-
-    using IsBossSurvival_t = int(__fastcall*)();
-    inline IsBossSurvival_t pfnIsBossSurvival = nullptr;
 
     using SetFont_t = MG_Gamefuncs::SetFont_t;
     inline SetFont_t pfnSetFont = nullptr;
@@ -208,16 +208,20 @@ namespace MG2_Gamefuncs
 
     using ScriptRun_t = void(__fastcall*)(int* pScript);
     inline ScriptRun_t pfnScriptRun = nullptr;
+    using DrawSprites_t = void(__fastcall*)();
+    inline DrawSprites_t pfnDrawSprites = nullptr;
     using DrawSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nMode);
     inline DrawSprite_t pfnDrawSprite = nullptr;
     using InitSprite_t = void(__fastcall*)(MG2_LinkVarBuf::Sprite* pSprite, int nSheet, int nAnimation, int nTrack, int nAnimating, int nDrawOrder, int nX, int nY);
     inline InitSprite_t pfnInitSprite = nullptr;
     using BuildDoors_t = void(__fastcall*)();
     inline BuildDoors_t pfnBuildDoors = nullptr;
+    using GetChunkEntryData_t = uint8_t* (__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntryData_t pfnGetChunkEntryData = nullptr;
+    using GetChunkEntrySize_t = unsigned int(__fastcall*)(uintptr_t hChunk, int nEntry);
+    inline GetChunkEntrySize_t pfnGetChunkEntrySize = nullptr;
     using GetLayerImage_t = MG2_LinkVarBuf::DrawLayer*(__fastcall*)(int nLayer);
     inline GetLayerImage_t pfnGetLayerImage = nullptr;
-    using DrawSprites_t = void(__fastcall*)();
-    inline DrawSprites_t pfnDrawSprites = nullptr;
     using LayerFillRect_t = void(__fastcall*)(int nLayer, const int* pRectangle);
     inline LayerFillRect_t pfnLayerFillRect = nullptr;
     using SetDrawColor_t = void(__fastcall*)(int nLayer, int nColour);

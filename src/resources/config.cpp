@@ -100,25 +100,26 @@
 #include "mg1_scorpions.hpp"
 #include "mg1_guard_spawning.hpp"
 #include "mg2_door_cards.hpp"
+#include "mg2_sauna_guard.hpp"
+#include "mg2_item_sprites.hpp"
+#include "mg2_call_sequence.hpp"
+#include "mg2_elevators.hpp"
+#include "mg2_bridge.hpp"
+#include "mg2_pitfalls.hpp"
+#include "mg2_doors.hpp"
+#include "mg2_companion_follow.hpp"
+#include "mg2_cigarette_idle.hpp"
+#include "mg2_lighter.hpp"
 #include "mg2_outdoor_palettes.hpp"
 #include "mg2_outdoor_tiles.hpp"
 #include "mg2_truckyard_fence.hpp"
-#include "mg2_sauna_guard.hpp"
-#include "mg2_item_sprites.hpp"
-#include "mg2_portrait_overlay.hpp"
-#include "mg2_pitfalls.hpp"
-#include "mg2_call_sequence.hpp"
-#include "mg2_companion_follow.hpp"
-#include "mg2_doors.hpp"
-#include "mg2_elevators.hpp"
-#include "mg2_bridge.hpp"
-#include "mg2_lighter.hpp"
-#include "mg2_cigarette_idle.hpp"
+#include "mg2_sprite_patcher.hpp"
 #include "mg1_portrait_overlay.hpp"
 #include "mg1_opening.hpp"
+#include "mg2_portrait_overlay.hpp"
 #include "mg_vector_font.hpp"
-#include "mg_developer_menu.hpp"
 #include "mg_cigarette_damage.hpp"
+#include "mg_developer_menu.hpp"
 #include "mgs2_codec_background.hpp"
 #include "mgs2_contrast_fix.hpp"
 #include "mgs2_ai_ray_vision.hpp"
@@ -1008,6 +1009,7 @@ void Config::Read()
         }
 
 
+
         ConfigHelper::getValue(ini, ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
         LOG_CONFIG(ConfigKeys::ShowPressureLevels_Section, ConfigKeys::ShowPressureLevels_Setting, D3D11TextOverlay::bShowPressureLevels);
 
@@ -1387,12 +1389,43 @@ void Config::Read()
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Scorpions_Section, ConfigKeys::MG1_Scorpions_Setting, MG1_Scorpions::bEnabled);
+
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Guard_Spawning_Section, ConfigKeys::MG1_Guard_Spawning_Setting, MG1_GuardSpawning::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Guard_Spawning_Section, ConfigKeys::MG1_Guard_Spawning_Setting, MG1_GuardSpawning::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
     MG2_DoorCards::bEnabled = MG1_DoorCards::bEnabled;
     LOG_CONFIG(ConfigKeys::MG_Door_Cards_Enabled_Section, ConfigKeys::MG_Door_Cards_Enabled_Setting, MG1_DoorCards::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
+    LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, MG_DeveloperMenu::bEnabled);
     LOG_CONFIG(ConfigKeys::MG_Developer_Menu_Section, ConfigKeys::MG_Developer_Menu_Setting, MG_DeveloperMenu::bEnabled);
@@ -1402,33 +1435,23 @@ void Config::Read()
     }
 
 
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
+    LOG_CONFIG(ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+    LOG_CONFIG(ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
+    LOG_CONFIG(ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
+
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, MG2_SaunaGuard::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Sauna_Guard_Enabled_Section, ConfigKeys::MG2_Sauna_Guard_Enabled_Setting, MG2_SaunaGuard::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG2_Item_Sprites_Enabled_Section, ConfigKeys::MG2_Item_Sprites_Enabled_Setting, MG2_ItemSprites::bEnabled);
     LOG_CONFIG(ConfigKeys::MG2_Item_Sprites_Enabled_Section, ConfigKeys::MG2_Item_Sprites_Enabled_Setting, MG2_ItemSprites::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Pitfalls_Section, ConfigKeys::MG2_Pitfalls_Setting, MG2_Pitfalls::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Call_Sequence_Enabled_Section, ConfigKeys::MG2_Call_Sequence_Enabled_Setting, MG2_CallSequence::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Companion_Follow_Section, ConfigKeys::MG2_Companion_Follow_Setting, MG2_CompanionFollow::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Doors_Section, ConfigKeys::MG2_Doors_Setting, MG2_Doors::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
-    LOG_CONFIG(ConfigKeys::MG2_Elevator_Lamps_Section, ConfigKeys::MG2_Elevator_Lamps_Setting, MG2_Elevators::bRestoreLamps);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
-    LOG_CONFIG(ConfigKeys::MG2_Elevator_Timings_Section, ConfigKeys::MG2_Elevator_Timings_Setting, MG2_Elevators::bRestoreTimings);
-
 
     //ConfigHelper::getValue(ini, ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, MG_TextOverrides::bMG1RestoreOriginalScript);
     //LOG_CONFIG(ConfigKeys::MG1_RestoreOriginalScript_Section, ConfigKeys::MG1_RestoreOriginalScript_Setting, MG_TextOverrides::bMG1RestoreOriginalScript);
@@ -1441,36 +1464,21 @@ void Config::Read()
     ConfigHelper::getValue(ini, ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
     MG_TextOverrides::bMG2RestoreBossNames |= MG_TextOverrides::bMG2RestoreOriginalScript;
     LOG_CONFIG(ConfigKeys::MG2_RestoreBossNames_Section, ConfigKeys::MG2_RestoreBossNames_Setting, MG_TextOverrides::bMG2RestoreBossNames);
+
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, MG1_Opening::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Opening_Section, ConfigKeys::MG1_Opening_Setting, MG1_Opening::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);
     LOG_CONFIG(ConfigKeys::MG1_Portrait_Overlay_Section, ConfigKeys::MG1_Portrait_Overlay_Setting, MG1_PortraitOverlay::bEnabled);
 
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Outdoor_Palettes_Section, ConfigKeys::MG2_Outdoor_Palettes_Setting, MG2_OutdoorPalettes::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Outdoor_Artwork_Section, ConfigKeys::MG2_Outdoor_Artwork_Setting, MG2_OutdoorTiles::bEnabled);
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
-    LOG_CONFIG(ConfigKeys::MG2_Wind_Section, ConfigKeys::MG2_Wind_Setting, MG2_CigaretteIdle::bRestoreWind);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
-    LOG_CONFIG(ConfigKeys::MGS2_RestorePhotosensitiveEffects_Section, ConfigKeys::MGS2_RestorePhotosensitiveEffects_Setting, MG2_Bridge::bReducePhotosensitiveEffects);
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Bridge_Section, ConfigKeys::MG2_Bridge_Setting, MG2_Bridge::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Lighter_Section, ConfigKeys::MG2_Lighter_Setting, MG2_Lighter::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Cigarette_Idle_Section, ConfigKeys::MG2_Cigarette_Idle_Setting, MG2_CigaretteIdle::bEnabled);
-
-    ConfigHelper::getValue(ini, ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);
-    LOG_CONFIG(ConfigKeys::MG2_Truckyard_Fence_Section, ConfigKeys::MG2_Truckyard_Fence_Setting, MG2_TruckyardFence::bEnabled);
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
+    LOG_CONFIG(ConfigKeys::MG2_Portrait_Overlay_Enabled_Section, ConfigKeys::MG2_Portrait_Overlay_Enabled_Setting, MG2_PortraitOverlay::bEnabled);
 
     ConfigHelper::getValue(ini, ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
     LOG_CONFIG(ConfigKeys::MG_Vector_Font_Enabled_Section, ConfigKeys::MG_Vector_Font_Enabled_Setting, MG_VectorFont::bEnabled);
+
+    ConfigHelper::getValue(ini, ConfigKeys::MG2_Narration_Outline_Section, ConfigKeys::MG2_Narration_Outline_Setting, MG_VectorFont::bOpeningNarrationOutline);
+    LOG_CONFIG(ConfigKeys::MG2_Narration_Outline_Section, ConfigKeys::MG2_Narration_Outline_Setting, MG_VectorFont::bOpeningNarrationOutline);
 
 
 

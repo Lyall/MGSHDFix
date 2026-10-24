@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -125,13 +125,14 @@ namespace ConfigKeys
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Help = "";
     constexpr const char* MG1_Correct_Aspect_Ratio_Enabled_Tooltip = "Corrects the viewport's dimensions from the MSX2's raw internal aspect ratio (64:53 / 256x212) to the intended CRT aspect ratio of 4:3.";
 
-    constexpr const char* MG_Cigarettes_Section = "Enhancements and Tweaks";
-    constexpr const char* MG_Cigarettes_Setting = "Disable Surgeon General's Warning";
+
+    constexpr const char* MG_Cigarettes_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG_Cigarettes_Setting = "Disable Cigarette Health Loss";
     constexpr const char* MG_Cigarettes_Help = "";
     constexpr const char* MG_Cigarettes_Tooltip = "Disables cigarette health drain in Metal Gear 1 and Metal Gear 2, which didn't exist in the original MSX version.";
 
-    constexpr const char* MG1_Scorpions_Section = "Bugfixes";
-    constexpr const char* MG1_Scorpions_Setting = "Fix Scorpion Pathing (MG1)";
+    constexpr const char* MG1_Scorpions_Section = "Metal Gear 1 - (Affects Speedruns)";
+    constexpr const char* MG1_Scorpions_Setting = "Fix Scorpion Pathing";
     constexpr const char* MG1_Scorpions_Help = "";
     constexpr const char* MG1_Scorpions_Tooltip = "Fixes a off-by-one typo with scorpion pathfinding which resulted in them always getting stuck in the lower-right hand corner of the screen.";
 
@@ -140,9 +141,7 @@ namespace ConfigKeys
     constexpr const char* MG1_Guard_Spawning_Help = "";
     constexpr const char* MG1_Guard_Spawning_Tooltip = "Fixes guards always having one of their spawnpoints being excluded from the list of valid spawns due to a off-by-one typo.";
 
-
-
-    constexpr const char* MG_Door_Cards_Enabled_Section = "Tweaks and Restoration";
+    constexpr const char* MG_Door_Cards_Enabled_Section = "Both Games";
     constexpr const char* MG_Door_Cards_Enabled_Setting = "Doors Check Inventory for Keycards";
     constexpr const char* MG_Door_Cards_Enabled_Help = "(Suggested ON)";
     constexpr const char* MG_Door_Cards_Enabled_Tooltip = "Makes doors automatically open up based on the keycards in your inventory (the same way keycards work in MGS1/MGS2), instead of only for the card you have equipped.\n"
@@ -150,6 +149,25 @@ namespace ConfigKeys
         "This is obviously significantly faster (and safer in gas areas) than doing manual inventory management, so check if your speedrunning category's rules allow it.";
 
 
+    constexpr const char* MG_Developer_Menu_Section = "Both Games";
+    constexpr const char* MG_Developer_Menu_Setting = "Developer Menu";
+    constexpr const char* MG_Developer_Menu_Help = "";
+    constexpr const char* MG_Developer_Menu_Tooltip = "Opens the developer menu during normal gameplay, including stage select.\n"
+                                                         "\n"
+                                                         "Gameplay pauses while the menu is open. Inventory and story progress are kept, so some events still depend on your current progress.\n"
+                                                         "\n"
+                                                         "Extreme sequence breaking may cause crashing. (ie: Jumping to Bridge of Sorrow without Gustava already following you.)";
+    constexpr const char* MG_Developer_Menu_Hotkey_Section = "Both Games";
+    constexpr const char* MG_Developer_Menu_Hotkey_Setting = "Open Developer Menu";
+    constexpr const char* MG_Developer_Menu_Hotkey_Help = "";
+    constexpr const char* MG_Developer_Menu_Hotkey_Tooltip = "Opens the developer menu. Use Up/Down to select a page, Enter to open it and Escape to go back.";
+
+    constexpr const char* MG2_Call_Sequence_Enabled_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Call_Sequence_Enabled_Setting = "Fix Outgoing Call Timing";
+    constexpr const char* MG2_Call_Sequence_Enabled_Help = "";
+    constexpr const char* MG2_Call_Sequence_Enabled_Tooltip = "Fixes outbound calls showing their reciepient before Snake has sent his initial \"This is Snake\" message."
+                                                                 "\n"
+                                                                 "This adds roughly half a second at the start of calls, so speedrunners will generally want this fix turned off.";
 
     constexpr const char* MG2_Sauna_Guard_Enabled_Section = "Metal Gear 2";
     constexpr const char* MG2_Sauna_Guard_Enabled_Setting = "Decensor Sauna Guard";
@@ -161,27 +179,47 @@ namespace ConfigKeys
     constexpr const char* MG2_Item_Sprites_Enabled_Help = "";
     constexpr const char* MG2_Item_Sprites_Enabled_Tooltip = "Restores the original MSX2 medical and cigarette sprites.";
 
-    constexpr const char* MG2_Portrait_Overlay_Enabled_Section = "Metal Gear 2";
-    constexpr const char* MG2_Portrait_Overlay_Enabled_Setting = "Restore Original Character Sprites";
-    constexpr const char* MG2_Portrait_Overlay_Enabled_Help = "";
-    constexpr const char* MG2_Portrait_Overlay_Enabled_Tooltip = "Restores the original MSX2 character sprites, including blinking, glancing around, and mouth movements.";
+    constexpr const char* MG2_Truckyard_Fence_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Truckyard_Fence_Setting = "Restore Bridge of Sorrow Fence";
+    constexpr const char* MG2_Truckyard_Fence_Help = "";
+    constexpr const char* MG2_Truckyard_Fence_Tooltip = "Restores the truckyard fence, blocking access until after the Bridge of Sorrow cutscene has played, as in the original MSX2 version.";
 
-    constexpr const char* MG2_Pitfalls_Section = "Metal Gear 2 - (Affects Speedruns)";
-    constexpr const char* MG2_Pitfalls_Setting = "Restore Original Pitfalls";
-    constexpr const char* MG2_Pitfalls_Help = "";
-    constexpr const char* MG2_Pitfalls_Tooltip = "Restores the original MSX2 pitfall sprites and two missing pitfalls.";
+    constexpr const char* MG2_Outdoor_Artwork_Section = "Metal Gear 2";
+    constexpr const char* MG2_Outdoor_Artwork_Setting = "Restore Outdoor Artwork";
+    constexpr const char* MG2_Outdoor_Artwork_Help = "";
+    constexpr const char* MG2_Outdoor_Artwork_Tooltip = "Restores the original MSX2 ground tiles, truck details and entrance door artwork as Snake makes his way into the first Zanzibar building.";
 
-    constexpr const char* MG2_Call_Sequence_Enabled_Section = "Metal Gear 2 - (Affects Speedruns)";
-    constexpr const char* MG2_Call_Sequence_Enabled_Setting = "Fix Outgoing Call Delay";
-    constexpr const char* MG2_Call_Sequence_Enabled_Help = "";
-    constexpr const char* MG2_Call_Sequence_Enabled_Tooltip = "Makes Snake's first message complete before the outgoing call connects, as it did in the original MSX2 version.\n"
-                                                                 "\n"
-                                                                 "This adds roughly half a second at the start of calls, so speedrunners will generally want this fix turned off.";
+    constexpr const char* MG2_Outdoor_Palettes_Section = "Metal Gear 2";
+    constexpr const char* MG2_Outdoor_Palettes_Setting = "Restore Outdoor Palettes";
+    constexpr const char* MG2_Outdoor_Palettes_Help = "";
+    constexpr const char* MG2_Outdoor_Palettes_Tooltip = "Restores the original MSX2 sunrise color palettes as Snake makes his way into the first Zanzibar building.";
+
+    constexpr const char* MG2_Lighter_Section = "Metal Gear 2";
+    constexpr const char* MG2_Lighter_Setting = "Restore Lighter Flame";
+    constexpr const char* MG2_Lighter_Help = "";
+    constexpr const char* MG2_Lighter_Tooltip = "Restores the lighter's flame animation when fired without the spraycan equipped.";
+
+    constexpr const char* MG2_Cigarette_Idle_Section = "Metal Gear 2";
+    constexpr const char* MG2_Cigarette_Idle_Setting = "Restore Cigarette Idle Animations";
+    constexpr const char* MG2_Cigarette_Idle_Help = "";
+    constexpr const char* MG2_Cigarette_Idle_Tooltip = "Restores the original MSX2 cigarette idle animation and smoke sprites.";
+
+    constexpr const char* MG2_Bridge_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Bridge_Setting = "Restore Bridge of Sorrow Cutscene";
+    constexpr const char* MG2_Bridge_Help = "";
+    constexpr const char* MG2_Bridge_Tooltip = "Restores the cutscene's original sprites, timings, character blinking during the radio call, and palette effects. (Graphics Tab -> Reduce Photosensitive Effects also applies here.)\n"
+	"\n"
+	"Speedrunner Note: This does affect timings slightly.";
 
     constexpr const char* MG2_Companion_Follow_Section = "Metal Gear 2 - (Affects Speedruns)";
     constexpr const char* MG2_Companion_Follow_Setting = "Correct Companion Follow Speed";
     constexpr const char* MG2_Companion_Follow_Help = "";
     constexpr const char* MG2_Companion_Follow_Tooltip = "Fixes following characters (ie Holly, Gustava) being slightly further away than Snake & not updating at the right pacing. (This resulted in Gustava visibly sitting in a puddle during the Marv escort cutscenes.)";
+
+    constexpr const char* MG2_Pitfalls_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Pitfalls_Setting = "Restore Original Pitfalls";
+    constexpr const char* MG2_Pitfalls_Help = "";
+    constexpr const char* MG2_Pitfalls_Tooltip = "Restores the original MSX2 pitfall sprites and two missing pitfalls.";
 
     constexpr const char* MG2_Doors_Section = "Metal Gear 2";
     constexpr const char* MG2_Doors_Setting = "Restore Door Sprites";
@@ -192,6 +230,15 @@ namespace ConfigKeys
     constexpr const char* MG2_Elevator_Lamps_Setting = "Restore Elevator Floor Lamps";
     constexpr const char* MG2_Elevator_Lamps_Help = "";
     constexpr const char* MG2_Elevator_Lamps_Tooltip = "Restores the floor indicators above Zanzibar Building 1's elevator doors and the unlit indicators on the B3 lifts.";
+
+    constexpr const char* MG2_Wind_Section = "Metal Gear 2 - (Affects Speedruns)";
+    constexpr const char* MG2_Wind_Setting = "Restore Wind Behavior";
+    constexpr const char* MG2_Wind_Help = "";
+    constexpr const char* MG2_Wind_Tooltip = "Restores the original MSX2 wind behavior, including fixed-wind rooms and the hang-glider roof's wind requirements/speed. Also fixes wind direction not persisting across room transitions.\n"
+                                          "\n"
+                                          "Speedrunner Notes: MC checks if cigarettes are equipped while on the roof, and THEN it changes the wind at the next 128-tick boundary (up to 8.53 seconds). With this enabled, a 255-tick countdown (17 seconds) starts as soon as you arrive at the roof, regardless of the equipped item.\n"
+                                          "\n"
+                                          "Elsewhere, variable wind changes every 240 ticks (16 seconds), instead of MC's 2048 ticks (136.53 seconds). Times use MC's 15 gameplay ticks per second.";
 
     constexpr const char* MG2_Elevator_Timings_Section = "Metal Gear 2 - (Affects Speedruns)";
     constexpr const char* MG2_Elevator_Timings_Setting = "Restore Elevator Timings";
@@ -206,91 +253,64 @@ namespace ConfigKeys
                                                          "\n"
                                                          "Check that your category allows this.";
 
+
+
     //constexpr const char* MG1_RestoreOriginalScript_Section = "Metal Gear 1";
     //constexpr const char* MG1_RestoreOriginalScript_Setting = "Official MSX2 (Retranslated)";
     //constexpr const char* MG1_RestoreOriginalScript_Help = "";
-    //constexpr const char* MG1_RestoreOriginalScript_Tooltip = "Restores the retranslated MSX2 script, including the original boss names.";
-    constexpr const char* MG2_RestoreOriginalScript_Section = "Metal Gear 2";
+    //constexpr const char* MG1_RestoreOriginalScript_Tooltip = "";
+    constexpr const char* MG2_RestoreOriginalScript_Section = "Metal Gear 2 - (Affects Speedruns)";
     constexpr const char* MG2_RestoreOriginalScript_Setting = "Retranslated MSX Script";
     constexpr const char* MG2_RestoreOriginalScript_Help = "";
-    constexpr const char* MG2_RestoreOriginalScript_Tooltip = "Restores the retranslated MSX2 script, including the original boss names.";
+    constexpr const char* MG2_RestoreOriginalScript_Tooltip = "The PS2/MC script has multiple plotpoints & pop-culture references that were lost in the localization process, and several characters were arbitrarily renamed.\n"
+        "\n"
+        "This option restores the script to be closer to the original MSX2 script, including renamed characters, and bosses.\n"
+        "\n"
+        "English retranslation is by Afevis.\n"
+        "We're looking for translators for other languages! Contact us on Discord or Github if interested!\n"
+		"\n"
+		"Speedrunner Note: This changes the number of pages in transciever calls.";
 
     constexpr const char* MG1_RestoreBossNames_Section = "Metal Gear 1";
     constexpr const char* MG1_RestoreBossNames_Setting = "Restore Boss Names";
     constexpr const char* MG1_RestoreBossNames_Help = "";
-    constexpr const char* MG1_RestoreBossNames_Tooltip = "Restores the original boss names.";
+    constexpr const char* MG1_RestoreBossNames_Tooltip = "Restores the original boss names.\n"
+															"\n"
+															"(Shotmaker -> Shoot Gunner, Bloody Brad -> Arnold, Dirty Duck -> Coward Duck)";
+
+
     constexpr const char* MG1_Opening_Section = "Metal Gear 1";
     constexpr const char* MG1_Opening_Setting = "Restore Opening Sprites";
     constexpr const char* MG1_Opening_Help = "";
     constexpr const char* MG1_Opening_Tooltip = "Restores a number of missing sprites & palette quirks that were present in the original MSX2 version's opening.";
-
-
-    constexpr const char* MG2_RestoreBossNames_Section = "Metal Gear 2";
-    constexpr const char* MG2_RestoreBossNames_Setting = "Restore Boss Names";
-    constexpr const char* MG2_RestoreBossNames_Help = "";
-    constexpr const char* MG2_RestoreBossNames_Tooltip = "Restores the original boss names.";
-
 
     constexpr const char* MG1_Portrait_Overlay_Section = "Metal Gear 1";
     constexpr const char* MG1_Portrait_Overlay_Setting = "Restore Snake Radio Sprites";
     constexpr const char* MG1_Portrait_Overlay_Help = "";
     constexpr const char* MG1_Portrait_Overlay_Tooltip = "Restores Snake's original MSX2 eye and mouth animations while he speaks on the transceiver.";
 
-    constexpr const char* MG2_Outdoor_Palettes_Section = "Metal Gear 2";
-    constexpr const char* MG2_Outdoor_Palettes_Setting = "Restore Outdoor Palettes";
-    constexpr const char* MG2_Outdoor_Palettes_Help = "";
-    constexpr const char* MG2_Outdoor_Palettes_Tooltip = "Restores the original MSX2 sunrise color palettes as Snake makes his way into the first Zanzibar building.";
-    constexpr const char* MG2_Wind_Section = "Metal Gear 2 - (Affects Speedruns)";
-    constexpr const char* MG2_Wind_Setting = "Restore Wind Behavior";
-    constexpr const char* MG2_Wind_Help = "";
-    constexpr const char* MG2_Wind_Tooltip = "Restores the original MSX2 wind behavior, including fixed-wind rooms and the hang-glider roof's wind change.\n"
-                                          "\n"
-                                          "Speedrunner Notes: MC requires cigarettes to be equipped on the roof, then changes the wind at the next 128-tick boundary (up to 8.53 seconds). With this enabled, the first roof visit starts a 255-tick countdown (17 seconds), regardless of the equipped item. The wind phase persists across room changes.\n"
-                                          "\n"
-                                          "Elsewhere, variable wind changes every 240 ticks (16 seconds), instead of MC's 2048 ticks (136.53 seconds). Times use MC's 15 gameplay ticks per second.";
+    constexpr const char* MG2_RestoreBossNames_Section = "Metal Gear 2";
+    constexpr const char* MG2_RestoreBossNames_Setting = "Restore Boss Names";
+    constexpr const char* MG2_RestoreBossNames_Help = "";
+    constexpr const char* MG2_RestoreBossNames_Tooltip = "Restores the original boss names.\n"
+															"\n"
+															"(Night Fright -> Night Sight, Black Ninja -> Black Color, The Four Horsemen -> Ultrabox)";
 
-    constexpr const char* MG2_Bridge_Section = "Metal Gear 2 - (Affects Speedruns)";
-    constexpr const char* MG2_Bridge_Setting = "Restore Bridge of Sorrow Cutscene";
-    constexpr const char* MG2_Bridge_Help = "";
-    constexpr const char* MG2_Bridge_Tooltip = "Restores the cutscene's original sprites, timings, character blinking during the radio call, and palette effects. (Graphics Tab -> Reduce Photosensitive Effects also applies here.)\n"
-	"\n"
-	"Speedrunner Note: This does affect timings slightly.";
 
-    constexpr const char* MG2_Lighter_Section = "Metal Gear 2";
-    constexpr const char* MG2_Lighter_Setting = "Restore Lighter Flame";
-    constexpr const char* MG2_Lighter_Help = "";
-    constexpr const char* MG2_Lighter_Tooltip = "Restores the lighter's flame animation when fired without the spraycan equipped.";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Section = "Metal Gear 2";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Setting = "Restore Original Character Sprites";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Help = "";
+    constexpr const char* MG2_Portrait_Overlay_Enabled_Tooltip = "Restores the original MSX2 character sprites, including blinking, glancing around, and mouth movements.";
 
-    constexpr const char* MG2_Cigarette_Idle_Section = "Metal Gear 2";
-    constexpr const char* MG2_Cigarette_Idle_Setting = "Restore Cigarette Animations";
-    constexpr const char* MG2_Cigarette_Idle_Help = "";
-    constexpr const char* MG2_Cigarette_Idle_Tooltip = "Restores the original MSX2 cigarette animation and smoke placement.";
-
-    constexpr const char* MG2_Outdoor_Artwork_Section = "Metal Gear 2";
-    constexpr const char* MG2_Outdoor_Artwork_Setting = "Restore Outdoor Artwork";
-    constexpr const char* MG2_Outdoor_Artwork_Help = "";
-    constexpr const char* MG2_Outdoor_Artwork_Tooltip = "Restores the original MSX2 ground tiles, truck details and entrance door artwork as Snake makes his way into the first Zanzibar building.";
-
-    constexpr const char* MG2_Truckyard_Fence_Section = "Metal Gear 2 - (Affects Speedruns)";
-    constexpr const char* MG2_Truckyard_Fence_Setting = "Restore Bridge of Sorrow Fence";
-    constexpr const char* MG2_Truckyard_Fence_Help = "";
-    constexpr const char* MG2_Truckyard_Fence_Tooltip = "Restores the truckyard fence, blocking access until after the Bridge of Sorrow cutscene has played, as in the original MSX2 version.";
-
-    constexpr const char* MG_Developer_Menu_Section = "Debugging";
-    constexpr const char* MG_Developer_Menu_Setting = "Developer Menu";
-    constexpr const char* MG_Developer_Menu_Help = "";
-    constexpr const char* MG_Developer_Menu_Tooltip = "Opens the developer menu during normal gameplay, including stage select.\n"
-                                                         "\n"
-                                                         "Gameplay pauses while the menu is open. Inventory and story progress are kept, so some events still depend on your current progress.";
-    constexpr const char* MG_Developer_Menu_Hotkey_Section = "Hotkeys";
-    constexpr const char* MG_Developer_Menu_Hotkey_Setting = "Open Developer Menu";
-    constexpr const char* MG_Developer_Menu_Hotkey_Help = "";
-    constexpr const char* MG_Developer_Menu_Hotkey_Tooltip = "Opens the developer menu. Use Up/Down to select a page, Enter to open it and Escape to go back.";
-
-    constexpr const char* MG_Vector_Font_Enabled_Section = "Tweaks and Restoration";
+    constexpr const char* MG_Vector_Font_Enabled_Section = "Enhancements and Tweaks";
     constexpr const char* MG_Vector_Font_Enabled_Setting = "High Resolution Font";
     constexpr const char* MG_Vector_Font_Enabled_Help = "";
     constexpr const char* MG_Vector_Font_Enabled_Tooltip = "Replaces all of the game's low-resolution font glyphs with the higher resolution font file that's included in the launcher.";
+
+    constexpr const char* MG2_Narration_Outline_Section = "Enhancements and Tweaks";
+    constexpr const char* MG2_Narration_Outline_Setting = "Opening Narration Outline (MG2)";
+    constexpr const char* MG2_Narration_Outline_Help = "";
+    constexpr const char* MG2_Narration_Outline_Tooltip = "Adds a black outline to Metal Gear 2's opening narration. Requires High Resolution Font.";
 
     constexpr const char* Caption_Scale_Section = "Caption Settings";
     constexpr const char* Caption_Scale_Setting = "Caption Size (%)";
